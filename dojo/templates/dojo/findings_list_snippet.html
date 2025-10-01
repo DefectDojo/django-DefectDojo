@@ -339,6 +339,15 @@
                                     <th class="nowrap centered severity-sort" scope="col">
                                         {% trans "Priority" %}
                                     </th>
+                                    <th scope="col">
+                                        {% trans "Known Exploited" %}
+                                    </th>
+                                    <th scope="col">
+                                        {% trans "Used in Ransomware" %}
+                                    </th>
+                                    <th scope="col">
+                                        {% trans "Date Added to KEV" %}
+                                    </th>
                                     <th class="nowrap" scope="col">
                                         {% if filter_name == 'Closed' %}
                                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
@@ -611,7 +620,7 @@
                                                 {% if finding.notes.all %}
                                                     <i class="glyphicon glyphicon-comment has-popover dojo-sup"
                                                     data-trigger="hover"
-                                                    data-content="{{ finding.notes.all.0 }}"
+                                                    data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0.date }}: {{ finding.notes.all.0 }}"
                                                     data-placement="left"
                                                     data-container="body"
                                                     data-original-title="Most Recent Note ({{ finding.notes.count }} total)"
@@ -656,6 +665,15 @@
                                         data-content="{{ finding.priority }}">
                                                     {{ finding|priority_display_status }}
                                                 </span>
+                                            </td>
+                                            <td class="nowrap text-right">
+                                            {{ finding.known_exploited|yesno|capfirst }}
+                                            </td>
+                                            <td class="nowrap text-right">
+                                                {{ finding.ransomware_used|yesno|capfirst }}
+                                            </td>
+                                            <td class="nowrap text-right">
+                                                {{ finding.kev_date|date }}
                                             </td>
                                             {% if filter_name == 'Closed' %}
                                             <td class="nowrap" data-order="{{ finding.mitigated|date:"U" }}">
@@ -805,6 +823,14 @@
                     { "data": "epss_score", "type": "num", "render": percentSort },
                     { "data": "epss_percentile", "type": "num", "render": percentSort },
                     { "data": "priority", "type": "num"},
+                    { "data": "known_exploited", },
+                    { "data": "used_ransomware", },
+                    { "data": "kev_date", render: function(data, type, row, meta) {
+                        if(type === 'sort') {
+                            return data && Date.parse(data)
+                        }
+                        return data;
+                    }},
                     { "data": "found_date", render: function (data, type, row, meta) {
                         if(type === 'sort') {
                             var api = new $.fn.dataTable.Api(meta.settings);

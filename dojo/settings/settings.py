@@ -1,7 +1,7 @@
 
 from split_settings.tools import include, optional
 
-# See https://documentation.defectdojo.com/getting_started/configuration/ for options
+# See https://docs.defectdojo.com/en/open_source/installation/configuration/ for options
 # how to tune the configuration to your needs.
 
 include(

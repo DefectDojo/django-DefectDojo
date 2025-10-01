@@ -1,0 +1,102 @@
+{
+	"results": [
+		{
+			"id": "sha256:02f8d1e213aaef1e4534bd5183b17b4dc60c1be32025113b7ea20de4cb14a36e",
+			"name": "somename:v8.11",
+			"distro": "Debian GNU/Linux 12 (bookworm)",
+			"distroRelease": "bookworm",
+			"collections": [
+				"All collections",
+				"Group (RBAC)"
+			],
+			"packages": [
+				{
+					"type": "os",
+					"name": "bash",
+					"version": "5.2.15-2",
+					"licenses": [
+						"GPL-3+"
+					]
+				},
+				{
+					"type": "python",
+					"name": "inflect",
+					"version": "7.3.1",
+					"path": "/usr/local/lib/python3.13/site-packages/setuptools/_vendor/inflect-7.3.1.dist-info"
+				}
+			],
+			"compliances": [
+				{
+					"id": 404,
+					"title": "(CIS_Docker_v1.5.0 - 4.6) Add HEALTHCHECK instruction to the container image",
+					"severity": "medium",
+					"description": "One of the important security triads is availability. Adding HEALTHCHECK instruction to your\ncontainer image ensures that the docker engine periodically checks the running container\ninstances against that instruction to ensure that the instances are still working",
+					"layerTime": "1970-01-01T00:00:00Z",
+					"category": "Docker"
+				}
+			],
+			"complianceDistribution": {
+				"critical": 0,
+				"high": 0,
+				"medium": 1,
+				"low": 0,
+				"total": 1
+			},
+			"complianceScanPassed": true,
+			"vulnerabilities": [
+				{
+					"id": "CVE-2025-6297",
+					"status": "open",
+					"severity": "low",
+					"packageName": "dpkg",
+					"packageVersion": "1.21.22",
+					"link": "https://security-tracker.debian.org/tracker/CVE-2025-6297",
+					"impactedVersions": [
+						"\u003c=1.21.22"
+					],
+					"discoveredDate": "2025-07-08T09:50:42Z",
+					"layerTime": "2025-02-26T09:50:35Z",
+					"layerInstruction": "COPY extra/instantclient-basic-linux.x64-19.16.0.0.0dbru.zip /tmp/instantclient-basic-linux.x64-19.16.0.0.0dbru.zip # buildkit"
+				},
+				{
+					"id": "CVE-2025-1390",
+					"status": "fixed in 1:2.66-4+deb12u1",
+					"description": "The PAM module pam_cap.so of libcap configuration supports group names starting with “@”, during actual parsing, configurations not starting with “@” are incorrectly recognized as group names. This may result in nonintended users being granted an inherited capability set, potentially leading to security risks. Attackers can exploit this vulnerability to achieve local privilege escalation on systems where /etc/security/capability.conf is used to configure user inherited privileges by constructing specific usernames.",
+					"severity": "low",
+					"packageName": "libcap2",
+					"packageVersion": "1:2.66-4",
+					"link": "https://security-tracker.debian.org/tracker/CVE-2025-1390",
+					"riskFactors": [
+						"Has fix",
+						"Recent vulnerability"
+					],
+					"impactedVersions": [
+						"\u003c1:2.66-4+deb12u1"
+					],
+					"publishedDate": "2025-02-18T03:15:10Z",
+					"discoveredDate": "2025-07-08T09:50:42Z",
+					"fixDate": "2025-05-17T14:08:50Z",
+					"layerTime": "2025-02-26T09:50:35Z",
+					"layerInstruction": "COPY extra/instantclient-basic-linux.x64-19.16.0.0.0dbru.zip /tmp/instantclient-basic-linux.x64-19.16.0.0.0dbru.zip # buildkit"
+				}
+			],
+			"vulnerabilityDistribution": {
+				"critical": 0,
+				"high": 1,
+				"medium": 0,
+				"low": 2,
+				"total": 3
+			},
+			"vulnerabilityScanPassed": true,
+			"history": [
+				{
+					"created": "2025-01-01T21:11:11Z",
+					"instruction": "bashstring -i -F"
+				}
+			],
+			"scanTime": "2025-01-01T02:12:23.309542313Z",
+			"scanID": "686cea70f70e81f2b73eb5c3"
+		}
+	],
+	"consoleURL": "https://canadaconsoleforthearts.gov.ca"
+}

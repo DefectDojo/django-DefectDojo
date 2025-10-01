@@ -1,8 +1,7 @@
 import logging
-from warnings import warn
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.core.serializers import deserialize, serialize
+from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
@@ -20,6 +19,7 @@ from dojo.models import (
     System_Settings
 )
 from dojo.notifications.helper import create_notification
+from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -210,7 +210,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 unsaved_finding.date = self.scan_date.date()
             if self.service is not None:
                 unsaved_finding.service = self.service
-            unsaved_finding.save(dedupe_option=False)
+
+            # Force parsers to use unsaved_tags (stored in below after saving)
+            unsaved_finding.tags = None
+            # postprocessing will be done on next save.
+            unsaved_finding.save_no_options()
             finding = unsaved_finding
             # Determine how the finding should be grouped
             self.process_finding_groups(
@@ -221,9 +225,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             self.process_request_response_pairs(finding)
             # Process any endpoints on the endpoint, or added on the form
             self.process_endpoints(finding, self.endpoints_to_add)
-            # Process any tags
-            if finding.unsaved_tags:
-                finding.tags = finding.unsaved_tags
+            # Parsers must use unsaved_tags to store tags, so we can clean them
+            finding.tags = clean_tags(finding.unsaved_tags)
             # Process any files
             self.process_files(finding)
             # Process vulnerability IDs
@@ -352,21 +355,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         return old_findings
 
-    def parse_findings(
-        self,
-        scan: TemporaryUploadedFile,
-        parser: Parser,
-    ) -> list[Finding]:
-        """
-        Determine how to parse the findings based on the presence of the
-        `get_tests` function on the parser object
-        """
-        # Attempt any preprocessing before generating findings
-        scan = self.process_scan_file(scan)
-        if hasattr(parser, "get_tests"):
-            return self.parse_findings_dynamic_test_type(scan, parser)
-        return self.parse_findings_static_test_type(scan, parser)
-
     def parse_findings_static_test_type(
         self,
         scan: TemporaryUploadedFile,
@@ -396,75 +384,4 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         into a single test, and then renames the test is applicable
         """
         logger.debug("IMPORT_SCAN parser v2: Create Test and parse findings")
-        tests = self.parse_dynamic_test_type_tests(scan, parser)
-        parsed_findings = []
-        # Make sure we have at least one test returned
-        if len(tests) == 0:
-            logger.info(f"No tests found in import for {self.scan_type}")
-            self.test = None
-            return parsed_findings
-        # for now we only consider the first test in the list and artificially aggregate all findings of all tests
-        # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
-        # when there is more than 1 test
-        #
-        # we also aggregate the label of the Test_type to show the user the original self.scan_type
-        # only if they are different. This is to support meta format like SARIF
-        # so a report that have the label 'CodeScanner' will be changed to 'CodeScanner Scan (SARIF)'
-        test_type_name = self.scan_type
-        # Determine if we should use a custom test type name
-        if tests[0].type:
-            test_type_name = f"{tests[0].type} Scan"
-            if test_type_name != self.scan_type:
-                test_type_name = f"{test_type_name} ({self.scan_type})"
-        # Create a new test if it has not already been created
-        if not self.test:
-            self.test = self.create_test(test_type_name)
-        # This part change the name of the Test
-        # we get it from the data of the parser
-        test_raw = tests[0]
-        if test_raw.name:
-            self.test.name = test_raw.name
-        if test_raw.description:
-            self.test.description = test_raw.description
-        self.test.save()
-        logger.debug("IMPORT_SCAN parser v2: Parse findings (aggregate)")
-        # Aggregate all the findings and return them with the newly created test
-        return self.parse_dynamic_test_type_findings_from_tests(tests)
-
-    def async_process_findings(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> list[Finding]:
-        """
-        Processes findings in chunks within N number of processes. The
-        ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
-        findings will be processed in a given worker/process/thread
-        """
-        warn("This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.", stacklevel=2)
-        chunk_list = self.chunk_findings(parsed_findings)
-        results_list = []
-        new_findings = []
-        # First kick off all the workers
-        for findings_list in chunk_list:
-            result = self.process_findings(
-                findings_list,
-                sync=False,
-                **kwargs,
-            )
-            # Since I dont want to wait until the task is done right now, save the id
-            # So I can check on the task later
-            results_list += [result]
-        # After all tasks have been started, time to pull the results
-        logger.info("IMPORT_SCAN: Collecting Findings")
-        for results in results_list:
-            serial_new_findings = results
-            new_findings += [
-                    next(deserialize("json", decode_datetime(finding))).object
-                    for finding in serial_new_findings
-                ]
-        logger.info("IMPORT_SCAN: All Findings Collected")
-        # Indicate that the test is not complete yet as endpoints will still be rolling in.
-        self.test.percent_complete = 50
-        self.test.save()
-        return new_findings
+        return super().parse_findings_dynamic_test_type(scan, parser)

@@ -313,7 +313,6 @@ helm install \
   --set celery.worker.replicas=3 \
   --set redis.replicas=3 \
   --set django.ingress.secretName="minikube-tls" \
-  --set database=postgresql \
   --set postgresql.enabled=true \
   --set postgresql.replication.enabled=true \
   --set postgresql.replication.slaveReplicas=3 \
@@ -434,11 +433,9 @@ auth:
 Before installing the DefectDojo Helm chart, it's important to customize the `values.yaml` file. Key areas to modify include specifying the PostgreSQL connection details & the extraEnv block:
 
 ```yaml
-database: postgresql # refer to the following configuration
-
 postgresql:
   enabled: false # Disable the creation of the database in the cluster
-  postgresServer: "127.0.0.1" # Required to skip certains tests not useful on external instances
+  postgresServer: "127.0.0.1" # Required to skip certain tests not useful on external instances
   auth:
     username: defectdojo # your database user
     database: defectdojo # your database name

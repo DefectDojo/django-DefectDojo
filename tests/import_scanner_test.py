@@ -1,4 +1,3 @@
-# ruff: noqa: F821
 import logging
 import os
 import re

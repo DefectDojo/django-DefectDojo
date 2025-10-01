@@ -29,6 +29,7 @@ class KrakenDAuditParser:
                     mitigation=message,
                     static_finding=True,
                     dynamic_finding=False,
+                    fix_available=True,
                 )
                 findings.append(finding)
         return findings

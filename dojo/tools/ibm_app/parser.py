@@ -83,7 +83,7 @@ class IbmAppParser:
                     dupe_key = hashlib.md5(
                         str(issue_description + name + severity).encode(
                             "utf-8",
-                        ),
+                        ), usedforsecurity=False,
                     ).hexdigest()
                     # check if finding is a duplicate
                     if dupe_key in dupes:

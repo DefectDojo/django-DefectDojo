@@ -1,10 +1,6 @@
 {{- if .Values.django.ingress.enabled -}}
 {{- $fullName := include "defectdojo.fullname" . -}}
-{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 apiVersion: networking.k8s.io/v1
-{{- else -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -23,7 +19,6 @@ metadata:
   {{- toYaml . | nindent 4 }}
 {{- end }}
   {{- if .Values.gke.useGKEIngress }}
-    kubernetes.io/ingress.class: gce
     {{- if .Values.gke.useManagedCertificate }}
     kubernetes.io/ingress.allow-http: "false"
     networking.gke.io/managed-certificates: {{ $fullName }}-django
@@ -31,11 +26,9 @@ metadata:
   {{- end }}
 {{- end }}
 spec:
-{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
   {{- if .Values.django.ingress.ingressClassName }}
   ingressClassName: {{ .Values.django.ingress.ingressClassName }}
   {{- end }}
-{{- end }}
 {{- if .Values.django.ingress.activateTLS }}
   tls:
   - hosts:
@@ -48,7 +41,6 @@ spec:
   - host: {{ .Values.host }}
     http:
       paths:
-        {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
         - pathType: Prefix
           {{- if .Values.django.ingress.path }}
           path: {{ .Values.django.ingress.path }}
@@ -60,14 +52,4 @@ spec:
               name: {{ $fullName }}-django
               port:
                 name: http
-        {{- else }}
-        {{- if .Values.django.ingress.path }}
-        - path: {{ .Values.django.ingress.path }}
-        {{- else }}
-        - path: /
-        {{- end }}
-          backend:
-            serviceName: {{ $fullName }}-django
-            servicePort: http
-        {{- end }}
 {{- end }}

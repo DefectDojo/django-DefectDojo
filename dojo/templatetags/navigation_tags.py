@@ -12,6 +12,9 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def query_string_as_hidden(context):
+    if "request" not in context:
+        return ""
+
     request = context["request"]
     query_string = request.META["QUERY_STRING"]
     inputs = ""

@@ -123,7 +123,7 @@ class KiuwanParser:
                         + finding.description
                         + "|"
                         + str(finding.cwe)
-                    ).encode("utf-8"),
+                    ).encode("utf-8"), usedforsecurity=False,
                 ).hexdigest()
 
                 if key not in dupes:

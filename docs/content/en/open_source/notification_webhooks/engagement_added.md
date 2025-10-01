@@ -34,6 +34,14 @@ X-DefectDojo-Event: engagement_added
     },
     "url_api": "http://localhost:8080/api/v2/engagements/7/",
     "url_ui": "http://localhost:8080/engagement/7",
-    "user": null
+    "user": {
+        "id": 1,
+        "email": "admin@defectdojo.local",
+        "first_name": "Admin",
+        "last_name": "User",
+        "username": "admin",
+        "url_api": "http://localhost:8080/api/v2/users/1/",
+        "url_ui": "http://localhost:8080/user/1"
+    }
 }
 ```

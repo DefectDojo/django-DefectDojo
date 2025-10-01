@@ -108,6 +108,7 @@
                     <th>{% trans "Dates" %}</th>
                     <th>{% trans "Updated" %}</th>
                     {% if test.percent_complete > 0 %}<th>{% trans "Progress" %}</th>{% endif %}
+                    <th>{% trans "Fix Available" %}</th>
                     <th>{% trans "Version" %}</th>
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.test_import_set.all %}
                         <th>
@@ -161,6 +162,7 @@
                             </div>
                         </td>
                     {% endif %}
+                    <td>{{ fix_available_count }}</td>
                     <td>{{ test.version }}</td>
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.total_reimport_count %}
                         <td class="text-right">{{ test.total_reimport_count }}</td>
@@ -1221,7 +1223,7 @@
                                         {% if finding.notes.all %}
                                             <i class="glyphicon glyphicon-comment has-popover dojo-sup"
                                             data-trigger="hover"
-                                            data-content="{{ finding.notes.all.0 }}"
+                                            data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0.date }}: {{ finding.notes.all.0 }}"
                                             data-placement="left"
                                             data-container="body"
                                             data-original-title="Most Recent Note ({{ finding.notes.count }} total)"

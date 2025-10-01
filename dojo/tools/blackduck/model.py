@@ -1,29 +1,23 @@
-from collections import namedtuple
+from typing import NamedTuple
 
-# this class can be updated to use @dataclass in Python 3.7
-# note that all types are strings except for 'locations' which is a set of
-# strings
-BlackduckFinding = namedtuple(
-    "BlackduckFinding",
-    [
-        "vuln_id",
-        "description",
-        "security_risk",
-        "impact",
-        "component_name",
-        "component_version",
-        "vuln_source",
-        "url",
-        "channel_version_origin_id",
-        "component_origin_id",
-        "published_date",
-        "updated_date",
-        "base_score",
-        "exploitability",
-        "remediation_status",
-        "remediation_target_date",
-        "remediation_actual_date",
-        "remediation_comment",
-        "locations",
-    ],
-)
+
+class BlackduckFinding(NamedTuple):
+    vuln_id: str
+    description: str
+    security_risk: str
+    impact: str
+    component_name: str
+    component_version: str
+    vuln_source: str
+    url: str
+    channel_version_origin_id: str
+    component_origin_id: str
+    published_date: str
+    updated_date: str
+    base_score: str
+    exploitability: str
+    remediation_status: str
+    remediation_target_date: str
+    remediation_actual_date: str
+    remediation_comment: str
+    locations: str

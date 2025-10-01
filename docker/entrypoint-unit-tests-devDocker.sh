@@ -81,7 +81,7 @@ python3 manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" |
 }
 
 # you can select a single file to "test" unit tests
-# python3 manage.py test unittests.tools.test_npm_audit_scan_parser.TestNpmAuditParser --keepdb -v 3
+# python3 manage.py test unittests.test_importers_performance.TestDojoImporterPerformance --keepdb -v 3 &> /app/dev2.log
 
 # or even a single method
 # python3 manage.py test unittests.tools.test_npm_audit_scan_parser.TestNpmAuditParser.test_npm_audit_parser_many_vuln_npm7 --keepdb -v 3

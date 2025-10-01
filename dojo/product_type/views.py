@@ -1,9 +1,11 @@
 import logging
+from functools import partial
 
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Count, Q
+from django.db.models import Count, IntegerField, OuterRef, Subquery, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
@@ -28,7 +30,7 @@ from dojo.forms import (
     Edit_Product_Type_MemberForm,
     Product_TypeForm,
 )
-from dojo.models import Product_Type, Product_Type_Group, Product_Type_Member, Role, Product, Engagement
+from dojo.models import Finding, Product, Product_Type, Product_Type_Group, Product_Type_Member, Role, Product, Engagement
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import (
     get_authorized_global_groups_for_product_type,
@@ -38,6 +40,7 @@ from dojo.product_type.queries import (
     get_authorized_product_types,
 )
 from dojo.product_type.utils import add_technical_contact_whit_member
+from dojo.query_utils import build_count_subquery
 from dojo.utils import (
     add_breadcrumb,
     async_delete,
@@ -112,26 +115,28 @@ def product_type(request):
 
 
 def prefetch_for_product_type(prod_types):
-    prefetch_prod_types = prod_types
-
-    if isinstance(prefetch_prod_types, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        # Define the common field path once to avoid repetition
-        finding_path = "prod_type__engagement__test__finding"
-        
-        # Combine all annotations in a single call for better performance
-       
-        prefetch_prod_types = prefetch_prod_types.annotate(
-            active_findings_count=Count(
-                f"{finding_path}__id", 
-                filter=Q(**{f"{finding_path}__active": True}),
-                distinct=True
-            ),
-            prod_count=Count("prod_type", distinct=True)
-        )
-    else:
+    # old code can arrive here with prods being a list because the query was already executed
+    if not isinstance(prod_types, QuerySet):
         logger.debug("unable to prefetch because query was already executed")
+        return prod_types
 
-    return prefetch_prod_types
+    prod_subquery = Subquery(
+        Product.objects.filter(prod_type_id=OuterRef("pk"))
+        .values("prod_type_id")
+        .annotate(c=Count("*"))
+        .values("c")[:1],
+        output_field=IntegerField(),
+        )
+    base_findings = Finding.objects.filter(test__engagement__product__prod_type_id=OuterRef("pk"))
+    count_subquery = partial(build_count_subquery, group_field="test__engagement__product__prod_type_id")
+
+    return prod_types.annotate(
+        prod_count=Coalesce(prod_subquery, Value(0)),
+        active_findings_count=Coalesce(count_subquery(base_findings.filter(active=True)), Value(0)),
+        active_verified_findings_count=Coalesce(
+            count_subquery(base_findings.filter(active=True, verified=True)), Value(0),
+        ),
+    )
 
 
 @user_has_global_permission(Permissions.Product_Type_Add)

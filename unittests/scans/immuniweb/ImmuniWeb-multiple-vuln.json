@@ -1,0 +1,255 @@
+{
+    "domains": [
+        {
+            "id": "897984654",
+            "section": "domains",
+            "tab": "domains",
+            "dt": "2021-10-30 23:59:36",
+            "discovered": "2021-10-30 23:59:36",
+            "name": "some-company.com",
+            "link": "https://some-company.com",
+            "type": "Domain",
+            "group": "New",
+            "tag": "",
+            "parent": 0,
+            "lastupdatedt": "2025-02-10 12:52:25",
+            "domain_expiration": "",
+            "dns_configuration": {
+                "A": [
+                    "127.0.0.1"
+                ],
+                "AAAA": [
+                    "2001:1600:4:1e:f816:3fff:feff:ea44"
+                ],
+                "NS": [
+                    "dns.some-company.com",
+                    "ns1.region.net",
+                    "ns2.region.net"
+                ],
+                "SOA": [
+                    "dns.some-company.com root.some-company.com"
+                ],
+                "CNAME": "No issues found",
+                "DKIM": "DKIM record is missing.",
+                "DMARC": "DMARC record is missing.",
+                "SPF": "SPF record is missing."
+            },
+            "domain_registrar": "Unknown",
+            "stats": {
+                "subdomains": 1,
+                "websites": 1,
+                "network": 1,
+                "repositories": 0,
+                "incidents": 2
+            },
+            "remediations": [
+                "To prevent spam, email forgery and phishing, configure DKIM, DMARC, SPF DNS records for the domain if it is used to send or receive emails. Additional information is available <a target=\"_blank\" href=\"https://www.exim.org/exim-html-current/doc/html/spec_html/ch-dkim_spf_srs_and_dmarc.html\">here</a>."
+            ]
+        }
+    ],
+    "webapps": [
+        {
+            "id": "5498677",
+            "section": "webapps",
+            "tab": "webapps",
+            "dt": "2020-11-05 10:46:23",
+            "discovered": "2020-11-05 10:46:23",
+            "name": "aai.some-company.com",
+            "type": "Web",
+            "group": "Unreachable",
+            "tag": "",
+            "link": "aai.some-company.com",
+            "sld": "some-company.com",
+            "ip": "",
+            "fingerprinted_software": [],
+            "availability": {
+                "code": 5,
+                "text": "Closed ports"
+            },
+            "status": {
+                "code": 5,
+                "text": "Closed ports"
+            },
+            "domain_expiration": "",
+            "http_code": "",
+            "lastupdatedt": "2025-02-10 10:30:29",
+            "last_scan": "2025-02-10 10:30:29",
+            "remediations": [
+                "SSL/TLS encryption has not been detected when accessing your web application. SSL/TLS encryption is needed to protect the data transmitted between a user’s browser and a web server. It encrypts the data, preventing unauthorized access, helps to verify the identity of websites to protect against impersonation, and ensures data integrity so that it isn’t tampered with during transmission. Enable SSL/TLS encryption on your web application to ensure secure and private communication between your users and your application. This will protect sensitive data, build trust with your visitors, and help comply with security regulations.",
+                "Deploy a Web Application Firewall (WAF) to protect your website against common web attacks and malicious bots."
+            ]
+        }
+    ],
+    "mobileapps": [
+        {
+            "id": "6768",
+            "section": "mobileapps",
+            "tab": "mobileapps",
+            "dt": "2024-02-16 06:01:11",
+            "discovered": "2024-02-16 06:01:11",
+            "name": "appy",
+            "type": "iOS",
+            "group": "Unreachable",
+            "tag": "",
+            "link": "https://apps.apple.com/en/app/some-company/id1508498434g3?l=it",
+            "data": {
+                "vulns_summary": false,
+                "scores": false,
+                "url": "https://apps.apple.com/en/app/some-company/id1508498434g3?l=it",
+                "appid": "1508498434g3",
+                "app_id": "1508498434g3",
+                "app_version": "",
+                "sca": [],
+                "rawdata": false
+            },
+            "communications": [],
+            "lastupdatedt": "2025-02-10 09:19:25",
+            "last_scan": "2025-02-10 09:19:25",
+            "remediations": []
+        }
+    ],
+    "cloud": [
+        {
+            "id": "1684534",
+            "section": "cloud",
+            "tab": "cloud",
+            "dt": "2024-07-02 15:23:10",
+            "discovered": "2024-07-02 15:23:10",
+            "name": "https://some.site.com",
+            "type": "SaaS",
+            "group": "Unreachable",
+            "tag": "",
+            "link": "https://some.site.com",
+            "ip": "3.3.3.3",
+            "data": {
+                "cloud": "saas",
+                "type": "LiveAgent",
+                "status": "",
+                "total_objects": "",
+                "protocol": ""
+            },
+            "lastupdatedt": "2025-02-09 17:07:28",
+            "last_scan": "2025-02-09 17:07:28",
+            "remediations": []
+        }
+    ],
+    "network": [
+        {
+            "id": "2458948438",
+            "section": "network",
+            "tab": "network",
+            "dt": "2024-05-25 16:17:41",
+            "discovered": "2024-05-25 16:17:41",
+            "name": "52.52.52.52",
+            "type": "Host",
+            "group": "",
+            "tag": "",
+            "link": "52.52.52.52",
+            "ip": "52.52.52.52",
+            "data": {
+                "black_list": false
+            },
+            "vulns": "",
+            "software": {
+                "nginx": "nginx"
+            },
+            "ports": {
+                "80": {
+                    "proto": "HTTP",
+                    "banner": "HTTP/1.1 412 Precondition Failed\r\nServer: nginx\r\nDate: Sun, 29 Sep 2024 14:23:55 GMT\r\nContent-Type: text/html\r\nContent-Length: 166\r\nConnection: keep-alive\r\n\r\n",
+                    "extrainfo": "",
+                    "classification": "Web Applications",
+                    "product": "nginx"
+                },
+                "443": {
+                    "proto": "HTTPS",
+                    "banner": "",
+                    "extrainfo": "",
+                    "classification": "Web Applications",
+                    "product": "",
+                    "ssl": {
+                        "ssl_port": 443,
+                        "ip": "52.52.52.52",
+                        "valid_to": null,
+                        "compliance_pci_dss": false,
+                        "compliance_nist": false,
+                        "compliance_hipaa": false,
+                        "cert_trusted": false,
+                        "ssl_supported_protocols": [],
+                        "dh_parameter_weak": false
+                    }
+                }
+            },
+            "lastupdatedt": "2024-10-04 14:20:17",
+            "last_scan": "2024-10-04 14:20:17",
+            "remediations": []
+        }
+    ],
+    "repositories": [
+        {
+            "id": "165465138",
+            "section": "repositories",
+            "tab": "repositories",
+            "dt": "2021-02-03 18:38:04",
+            "discovered": "2021-02-03 18:38:04",
+            "name": "https://52.52.52.52/.git/",
+            "type": "Source Code",
+            "group": "",
+            "tag": "",
+            "link": "",
+            "data": {
+                "size": 0,
+                "author": "",
+                "source": "",
+                "domain": "",
+                "link": "",
+                "sample": ""
+            },
+            "lastupdatedt": "2023-03-16 16:43:19",
+            "last_scan": "2023-03-16 16:43:19",
+            "examples": [],
+            "remediations": [
+                "Local Git code repository is publicly accessible at https://52.52.52.52/.git/. An attacker can exploit the exposed source code and other confidential data available there to compromise your systems or facilitate other attacks. Unless the repository is designed to be accessible from the Internet, urgently disable public access to it. Otherwise, consider implementing a strong authentication and GEO-IP filtering."
+            ]
+        }
+    ],
+    "incidents": [
+        {
+            "id": "13949496",
+            "section": "incidents",
+            "tab": "incidents",
+            "dt": "2022-09-27 05:41:00",
+            "discovered": "2022-09-27 05:41:00",
+            "name": "Stolen Credentials",
+            "type": "Data Leak",
+            "group": "Inactive",
+            "tag": "Legacy",
+            "link": "",
+            "data": {
+                "count": 187,
+                "domain": "some-company.com",
+                "record_count": {
+                    "company.com": 1,
+                    "some-company.com": 183,
+                    "test-co.com": 1,
+                    "testing-co.com": 1,
+                    "quick-test.com": 1
+                },
+                "leakdt": "2022-05-01"
+            },
+            "lastupdatedt": "2024-10-03 19:36:08",
+            "last_scan": "2024-10-03 19:36:08",
+            "examples": [
+                {
+                    "login": "xxxx.yyyyy@domain.ch",
+                    "password": "mypasword1234"
+                }
+            ],
+            "examples_type": "LOGINS",
+            "leak_name": "1.5 GB Corp Mails EU",
+            "remediations": [
+                "Accounts of your employees are present in a stolen <a href=\"#\" onclick=\"$('#details_dialog #details_tabs').tabs({active: 0}); setTimeout(function () { $('#details_dialog #details_tabs2').tabs({active: 15}); }, 100); return false;\">set of data</a> available for sale on the Dark Web. Investigate how those accounts were compromised and consider changing the passwords on all accounts of the implicated users. You may also set a canary on your IDS to notify you as soon as someone tries to login to any of your systems with the compromised pair of credentials, thereby evidencing a password spraying attack."
+            ]
+        }
+    ]
+}

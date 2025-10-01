@@ -15,6 +15,8 @@ class SemgrepParser:
         - description: Custom description made from elements outputted by Semgrep Scanner.
         - file_path: Set to filepath from Semgrep Scanner.
         - line: Set to line from Semgrep Scanner.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
         - vuln_id_from_tool: Set to Vuln Id from Semgrep Scanner.
         - nb_occurences: Initially set to 1 then updated.
         - unique_id_from_tool: Set to corresponding field from scanner if it is present in the output.
@@ -27,6 +29,8 @@ class SemgrepParser:
             "description",
             "file_path",
             "line",
+            "static_finding",
+            "dynamic_finding",
             "vuln_id_from_tool",
             "nb_occurences",
             "unique_id_from_tool",

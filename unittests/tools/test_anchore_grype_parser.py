@@ -6,14 +6,14 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestAnchoreGrypeParser(DojoTestCase):
 
     def test_parser_has_no_findings(self):
-        with open(get_unit_tests_scans_path("anchore_grype") / "no_vuln.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("anchore_grype") / "no_vuln.json").open(encoding="utf-8") as testfile:
             parser = AnchoreGrypeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parser_has_many_findings(self):
         found = False
-        with open(get_unit_tests_scans_path("anchore_grype") / "many_vulns.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("anchore_grype") / "many_vulns.json").open(encoding="utf-8") as testfile:
             parser = AnchoreGrypeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1509, len(findings))
@@ -33,9 +33,9 @@ class TestAnchoreGrypeParser(DojoTestCase):
                     break
             self.assertTrue(found)
 
-    def test_grype_parser_with_one_criticle_vuln_has_one_findings(self):
+    def test_grype_parser_with_one_critical_vuln_has_one_findings(self):
         found = False
-        with open(get_unit_tests_scans_path("anchore_grype") / "many_vulns2.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("anchore_grype") / "many_vulns2.json").open(encoding="utf-8") as testfile:
             parser = AnchoreGrypeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1567, len(findings))
@@ -56,7 +56,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
 
     def test_grype_parser_with_many_vulns3(self):
         found = False
-        with open(get_unit_tests_scans_path("anchore_grype") / "many_vulns3.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("anchore_grype") / "many_vulns3.json").open(encoding="utf-8") as testfile:
             parser = AnchoreGrypeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(327, len(findings))
@@ -77,7 +77,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
 
     def test_grype_parser_with_new_matcher_list(self):
         found = False
-        with open(get_unit_tests_scans_path("anchore_grype") / "many_vulns4.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("anchore_grype") / "many_vulns4.json").open(encoding="utf-8") as testfile:
             parser = AnchoreGrypeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(9, len(findings))
@@ -97,7 +97,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
             self.assertTrue(found)
 
     def test_check_all_fields(self):
-        with open(get_unit_tests_scans_path("anchore_grype") / "check_all_fields.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("anchore_grype") / "check_all_fields.json").open(encoding="utf-8") as testfile:
             parser = AnchoreGrypeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(5, len(findings))
@@ -113,7 +113,6 @@ class TestAnchoreGrypeParser(DojoTestCase):
             self.assertEqual(2, len(vulnerability_ids))
             self.assertEqual("CVE-2004-0971", vulnerability_ids[0])
             self.assertEqual("CVE-2004-0971", vulnerability_ids[1])
-            self.assertEqual(1352, finding.cwe)
             self.assertIsNone(finding.cvssv3)
             self.assertIsNone(finding.cvssv3_score)
             self.assertEqual("Info", finding.severity)
@@ -148,7 +147,6 @@ class TestAnchoreGrypeParser(DojoTestCase):
             vulnerability_ids = finding.unsaved_vulnerability_ids
             self.assertEqual(1, len(vulnerability_ids))
             self.assertEqual("CVE-2021-32626", vulnerability_ids[0])
-            self.assertEqual(1352, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
             self.assertEqual("High", finding.severity)
             mitigation = """Upgrade to version:
@@ -183,7 +181,6 @@ class TestAnchoreGrypeParser(DojoTestCase):
             self.assertEqual(2, len(vulnerability_ids))
             self.assertEqual("CVE-2021-33574", vulnerability_ids[0])
             self.assertEqual("CVE-2021-33574", vulnerability_ids[1])
-            self.assertEqual(1352, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
             self.assertEqual("Critical", finding.severity)
             self.assertIsNone(finding.mitigation)
@@ -214,7 +211,6 @@ class TestAnchoreGrypeParser(DojoTestCase):
             self.assertEqual(2, len(vulnerability_ids))
             self.assertEqual("CVE-2021-33574", vulnerability_ids[0])
             self.assertEqual("CVE-2021-33574", vulnerability_ids[1])
-            self.assertEqual(1352, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
             self.assertEqual("Critical", finding.severity)
             self.assertIsNone(finding.mitigation)
@@ -246,7 +242,6 @@ class TestAnchoreGrypeParser(DojoTestCase):
             self.assertEqual(2, len(vulnerability_ids))
             self.assertEqual("GHSA-v6rh-hp5x-86rv", vulnerability_ids[0])
             self.assertEqual("CVE-2021-44420", vulnerability_ids[1])
-            self.assertEqual(1352, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L", finding.cvssv3)
             self.assertEqual("High", finding.severity)
             mitigation = "Upgrade to version: 3.2.10"
@@ -266,13 +261,67 @@ class TestAnchoreGrypeParser(DojoTestCase):
             self.assertEqual(2, finding.nb_occurences)
 
     def test_grype_issue_9618(self):
-        with open(get_unit_tests_scans_path("anchore_grype") / "issue_9618.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("anchore_grype") / "issue_9618.json").open(encoding="utf-8") as testfile:
             parser = AnchoreGrypeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(35, len(findings))
 
     def test_grype_issue_9942(self):
-        with open(get_unit_tests_scans_path("anchore_grype") / "issue_9942.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("anchore_grype") / "issue_9942.json").open(encoding="utf-8") as testfile:
             parser = AnchoreGrypeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+
+    def test_grype_epss_values(self):
+        with (get_unit_tests_scans_path("anchore_grype") / "many_vulns_with_epss_values.json").open(encoding="utf-8") as testfile:
+            parser = AnchoreGrypeParser()
+            findings = parser.get_findings(testfile, Test())
+
+            # Hardcoded expected values
+            expected = [
+                ("CVE-2022-28391", 0.0719, 0.91123),
+                ("CVE-2021-28831", 0.00878, 0.74313),
+                ("CVE-2022-48174", 0.00451, 0.62761),
+                ("CVE-2021-42380", 0.00277, 0.50908),
+                ("CVE-2021-42381", 0.00197, 0.42221),
+                ("CVE-2021-42382", 0.00197, 0.42221),
+                ("CVE-2021-42386", 0.00183, 0.40722),
+                ("CVE-2021-42385", 0.0018, 0.40314),
+                ("CVE-2021-42378", 0.00145, 0.35906),
+                ("CVE-2021-42379", 0.00145, 0.35906),
+                ("CVE-2021-42384", 0.00145, 0.35906),
+                ("CVE-2021-42374", 0.00077, 0.23977),
+                ("CVE-2021-42376", 0.00028, 0.06078),
+                ("CVE-2024-58251", 0.0002, 0.0361),
+                ("CVE-2025-46394", 0.00017, 0.02652),
+            ]
+            self.assertEqual(len(expected), len(findings))
+
+            for (cve, epss_score, epss_percentile), finding in zip(expected, findings, strict=True):
+                self.assertEqual(cve, finding.vuln_id_from_tool)
+                self.assertIsNotNone(finding.epss_score)
+                self.assertAlmostEqual(epss_score, finding.epss_score, places=5)
+                self.assertIsNotNone(finding.epss_percentile)
+                self.assertAlmostEqual(epss_percentile, finding.epss_percentile, places=5)
+
+    def test_grype_epss_problem(self):
+        """
+        This test is to check that the parser is able to handle the case where the epss score is not found in the vulnerability itself
+        and must be found in the (first) related vulnerability.
+        """
+        with (get_unit_tests_scans_path("anchore_grype") / "anchore_grype_epss_problem.json").open(encoding="utf-8") as testfile:
+            parser = AnchoreGrypeParser()
+            findings = parser.get_findings(testfile, Test())
+
+            # Hardcoded expected values
+            expected = [
+                ("GHSA-4374-p667-p6c8", 0.00163, 0.37957),
+            ]
+            self.assertEqual(len(expected), len(findings))
+
+            for (cve, epss_score, epss_percentile), finding in zip(expected, findings, strict=True):
+                self.assertEqual(cve, finding.vuln_id_from_tool)
+                self.assertIsNotNone(finding.epss_score)
+                self.assertAlmostEqual(epss_score, finding.epss_score, places=5)
+                self.assertIsNotNone(finding.epss_percentile)
+                self.assertAlmostEqual(epss_percentile, finding.epss_percentile, places=5)

@@ -1,3 +1,2 @@
 # Overrides for production environment
-# baseurl = "https://documentation.defectdojo.com/"
 baseurl = "https://docs.defectdojo.com"

@@ -188,7 +188,7 @@
             "recommendation": "Update to version 0.6.1 or later.",
             "references": "",
             "access": "public",
-            "severity": "high",
+            "severity": "moderate",
             "cwe": "CWE-400",
             "metadata": {
                 "module_type": "Network.Library",
@@ -317,7 +317,7 @@
             "recommendation": "Update to version 0.5.2 or later.",
             "references": "",
             "access": "public",
-            "severity": "high",
+            "severity": "moderate",
             "cwe": "CWE-400",
             "metadata": {
                 "module_type": "Multi.Library",
@@ -359,7 +359,7 @@
             "recommendation": "* Version 2.x.x: Update to version 2.11.2 or later.\n* Version 3.x.x: Update to version 3.6.4 or later.\n* Version 4.x.x: Update to version 4.5.7 or later.\n* Version 5.x.x: Update to version 5.2.1 or later.\n* Version 6.x.x: Update to version 6.4.2 or later. ( Note that versions 6.1.6, 6.2.5, and 6.3.3 are also patched. )\n* Version 7.x.x: Update to version 7.1.2 or later. ( Note that version 7.0.2 is also patched. )",
             "references": "[Node Postgres: Code Execution Vulnerability Announcement](https://node-postgres.com/announcements#2017-08-12-code-execution-vulnerability)",
             "access": "public",
-            "severity": "high",
+            "severity": "moderate",
             "cwe": "CWE-94",
             "metadata": {
                 "module_type": "Network.Library",

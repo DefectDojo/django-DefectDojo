@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+import time
 from datetime import datetime
 
 import six
@@ -26,6 +27,7 @@ from dojo.transfer_findings.serializers import TransferFindingBasicSerializer
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.risk_acceptance.risk_pending import search_finding_correlated, add_finding_correlated
 from dojo.authorization.authorization import user_has_permission
+import dojo.authorization.helper as authorization_helper
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
 from dojo.finding.helper import (
@@ -119,6 +121,10 @@ from dojo.models import (
     Component,
     GeneralSettings,
 )
+from dojo.product_announcements import (
+    LargeScanSizeProductAnnouncement,
+    ScanTypeProductAnnouncement,
+)
 from dojo.tools.factory import (
     get_choices_sorted,
     requires_file,
@@ -126,6 +132,7 @@ from dojo.tools.factory import (
 )
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import is_scan_file_too_large
+from dojo.validators import ImporterFileExtensionValidator, tag_validator
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -232,10 +239,15 @@ class TagListSerializerField(serializers.ListField):
                 self.fail("not_a_str")
             # Run the children validation
             self.child.run_validation(s)
+            # Split the tags up in any way we need to
             substrings = re.findall(r'(?:"[^"]*"|[^",]+)', s)
+            # Validate the tag to ensure it doesn't contain invalid characters
+            for sub in substrings:
+                tag_validator(sub, exception_class=RestFrameworkValidationError)
             data_safe.extend(substrings)
 
-        return tagulous.utils.render_tags(data_safe)
+        logger.debug(f"result after rendering tags: {data_safe}")
+        return data_safe
 
     def to_representation(self, value):
         if not isinstance(value, list):
@@ -250,44 +262,6 @@ class TagListSerializerField(serializers.ListField):
                 msg = f"unable to convert {type(value).__name__} into list of tags"
                 raise ValueError(msg)
         return value
-
-
-class TaggitSerializer(serializers.Serializer):
-    def create(self, validated_data):
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
-
-        tag_object = super().create(validated_data)
-
-        return self._save_tags(tag_object, to_be_tagged)
-
-    def update(self, instance, validated_data):
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
-
-        tag_object = super().update(
-            instance, validated_data,
-        )
-
-        return self._save_tags(tag_object, to_be_tagged)
-
-    def _save_tags(self, tag_object, tags):
-        for key in list(tags.keys()):
-            tag_values = tags.get(key)
-            # tag_object.tags = ", ".join(tag_values)
-            tag_object.tags = tag_values
-        tag_object.save()
-
-        return tag_object
-
-    def _pop_tags(self, validated_data):
-        to_be_tagged = {}
-
-        for key in list(self.fields.keys()):
-            field = self.fields[key]
-            if isinstance(field, TagListSerializerField):
-                if key in validated_data:
-                    to_be_tagged[key] = validated_data.pop(key)
-
-        return (to_be_tagged, validated_data)
 
 
 class RequestResponseDict(collections.UserList):
@@ -647,6 +621,13 @@ class UserContactInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserContactInfo
         fields = "__all__"
+
+    def validate(self, data):
+        user = data.get("user", None) or self.instance.user
+        if data.get("force_password_reset", False) and not user.has_usable_password():
+            msg = "Password resets are not allowed for users authorized through SSO."
+            raise ValidationError(msg)
+        return super().validate(data)
 
 
 class UserStubSerializer(serializers.ModelSerializer):
@@ -1092,7 +1073,7 @@ class ProductTypeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
+class EngagementSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1130,20 +1111,16 @@ class EngagementToFilesSerializer(serializers.Serializer):
     def to_representation(self, data):
         engagement = data.get("engagement_id")
         files = data.get("files")
-        new_files = []
-        for file in files:
-            new_files.append(
-                {
-                    "id": file.id,
-                    "file": "{site_url}/{file_access_url}".format(
-                        site_url=settings.SITE_URL,
-                        file_access_url=file.get_accessible_url(
-                            engagement, engagement.id,
-                        ),
+        new_files = [{
+                "id": file.id,
+                "file": "{site_url}/{file_access_url}".format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(
+                        engagement, engagement.id,
                     ),
-                    "title": file.title,
-                },
-            )
+                ),
+                "title": file.title,
+            } for file in files]
         return {"engagement_id": engagement.id, "files": new_files}
 
 
@@ -1153,7 +1130,7 @@ class EngagementCheckListSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class AppAnalysisSerializer(TaggitSerializer, serializers.ModelSerializer):
+class AppAnalysisSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1248,7 +1225,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
             raise
 
 
-class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
+class EndpointSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1442,7 +1419,7 @@ class FindingGroupSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "test", "jira_issue")
 
 
-class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     test_type_name = serializers.ReadOnlyField()
     finding_groups = FindingGroupSerializer(
@@ -1461,7 +1438,7 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
         return super().build_relational_field(field_name, relation_info)
 
 
-class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestCreateSerializer(serializers.ModelSerializer):
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(),
     )
@@ -1478,7 +1455,7 @@ class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("inherited_tags",)
 
 
-class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
+class TestTypeSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1502,15 +1479,11 @@ class TestToFilesSerializer(serializers.Serializer):
     def to_representation(self, data):
         test = data.get("test_id")
         files = data.get("files")
-        new_files = []
-        for file in files:
-            new_files.append(
-                {
-                    "id": file.id,
-                    "file": f"{settings.SITE_URL}/{file.get_accessible_url(test, test.id)}",
-                    "title": file.title,
-                },
-            )
+        new_files = [{
+                "id": file.id,
+                "file": f"{settings.SITE_URL}/{file.get_accessible_url(test, test.id)}",
+                "title": file.title,
+            } for file in files]
         return {"test_id": test.id, "files": new_files}
 
 
@@ -1532,8 +1505,6 @@ class TestImportSerializer(serializers.ModelSerializer):
 
 
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
-    recommendation = serializers.SerializerMethodField()
-    decision = serializers.SerializerMethodField()
     path = serializers.SerializerMethodField()
 
     def create(self, validated_data):
@@ -1560,14 +1531,6 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         for finding in findings_to_remove:
             ra_helper.remove_finding_from_risk_acceptance(user, instance, finding)
         return instance
-
-    @extend_schema_field(serializers.CharField())
-    def get_recommendation(self, obj):
-        return Risk_Acceptance.TREATMENT_TRANSLATIONS.get(obj.recommendation)
-
-    @extend_schema_field(serializers.CharField())
-    def get_decision(self, obj):
-        return Risk_Acceptance.TREATMENT_TRANSLATIONS.get(obj.decision)
 
     @extend_schema_field(serializers.CharField())
     def get_path(self, obj):
@@ -1720,7 +1683,8 @@ class VulnerabilityIdSerializer(serializers.ModelSerializer):
         model = Vulnerability_Id
         fields = ["vulnerability_id"]
 
-class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
+
+class FindingSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(
@@ -1747,6 +1711,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     reporter = serializers.PrimaryKeyRelatedField(
         required=False, queryset=User.objects.all(),
     )
+    permissions = serializers.SerializerMethodField(read_only=True, allow_null=True)
 
     class Meta:
         model = Finding
@@ -1754,6 +1719,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             "cve",
             "inherited_tags",
         )
+    
+    @extend_schema_field(serializers.ListField())
+    def get_permissions(self, obj):
+        return authorization_helper.get_permissions(obj)
 
     @extend_schema_field(serializers.DateTimeField())
     def get_jira_creation(self, obj):
@@ -1792,44 +1761,32 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
-        # remove tags from validated data and store them seperately
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
-
-        # pop push_to_jira so it won't get send to the model as a field
-        # TODO: JIRA can we remove this is_push_all_issues, already checked in
-        # apiv2 viewset?
-        push_to_jira = validated_data.pop(
-            "push_to_jira",
-        ) or jira_helper.is_push_all_issues(instance)
+        # push_all_issues already checked in api views.py
+        push_to_jira = validated_data.pop("push_to_jira")
 
         # Save vulnerability ids and pop them
-        if "vulnerability_id_set" in validated_data:
-            vulnerability_id_set = validated_data.pop("vulnerability_id_set")
-            vulnerability_ids = []
-            if vulnerability_id_set:
-                for vulnerability_id in vulnerability_id_set:
-                    vulnerability_ids.append(
-                        vulnerability_id["vulnerability_id"],
-                    )
-            save_vulnerability_ids(instance, vulnerability_ids)
+        parsed_vulnerability_ids = []
+        if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
+            logger.debug("VULNERABILITY_ID_SET: %s", vulnerability_ids)
+            parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
+            logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
+            validated_data["cve"] = parsed_vulnerability_ids[0]
 
-        instance = super(TaggitSerializer, self).update(
-            instance, validated_data,
-        )
         # Save the reporter on the finding
         if reporter_id := validated_data.get("reporter"):
             instance.reporter = reporter_id
 
-        # If we need to push to JIRA, an extra save call is needed.
-        # Also if we need to update the mitigation date of the finding.
-        # TODO: try to combine create and save, but for now I'm just fixing a
-        # bug and don't want to change to much
-        if push_to_jira:
-            instance.save(push_to_jira=push_to_jira)
+        instance = super().update(
+            instance, validated_data,
+        )
 
-        # not sure why we are returning a tag_object, but don't want to change
-        # too much now as we're just fixing a bug
-        return self._save_tags(instance, to_be_tagged)
+        if parsed_vulnerability_ids:
+            save_vulnerability_ids(instance, parsed_vulnerability_ids)
+
+        if push_to_jira:
+            jira_helper.push_to_jira(instance)
+
+        return instance
 
     def validate(self, data):
         if self.context["request"].method == "PATCH":
@@ -1905,7 +1862,7 @@ class FindingUpdateSerializer(serializers.ModelSerializer):
         model = Finding
         fields = ('risk_status',)
 
-class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
+class FindingCreateSerializer(serializers.ModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True, allow_null=True, required=False, many=True,
     )
@@ -1937,8 +1894,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def create(self, validated_data):
-        # Pop off of some fields that should not be sent to the model at this time
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
+        logger.debug(f"Creating finding with validated data: {validated_data}")
         push_to_jira = validated_data.pop("push_to_jira", False)
         notes = validated_data.pop("notes", None)
         found_by = validated_data.pop("found_by", None)
@@ -1946,13 +1902,16 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # Process the vulnerability IDs specially
         parsed_vulnerability_ids = []
         if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
-            for vulnerability_id in vulnerability_ids:
-                parsed_vulnerability_ids.append(vulnerability_id["vulnerability_id"])
+            logger.debug("VULNERABILITY_ID_SET: %s", vulnerability_ids)
+            parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
+            logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
             validated_data["cve"] = parsed_vulnerability_ids[0]
-        # Create a findings in memory so that we have access to unsaved_vulnerability_ids
-        new_finding = Finding(**validated_data)
-        new_finding.unsaved_vulnerability_ids = parsed_vulnerability_ids
-        new_finding.save()
+
+        new_finding = super().create(
+            validated_data)
+
+        logger.debug(f"New finding CVE: {new_finding.cve}")
+
         # Deal with all of the many to many things
         if notes:
             new_finding.notes.set(notes)
@@ -1962,18 +1921,14 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
-        # TODO: JIRA can we remove this is_push_all_issues, already checked in
-        # apiv2 viewset?
-        push_to_jira = push_to_jira or jira_helper.is_push_all_issues(
-            new_finding,
-        )
-        # If we need to push to JIRA, an extra save call is needed.
-        # TODO: try to combine create and save, but for now I'm just fixing a
-        # bug and don't want to change to much
-        if push_to_jira or new_finding:
-            new_finding.save(push_to_jira=push_to_jira)
-        # This final call will save the finding again and return it
-        return self._save_tags(new_finding, to_be_tagged)
+            # can we avoid this extra save? the cve has already been set above in validated_data. but there are no tests for this
+            # on finding update nothing is done # with vulnerability_ids?
+            # new_finding.save()
+
+        if push_to_jira:
+            jira_helper.push_to_jira(new_finding)
+
+        return new_finding
 
     def validate(self, data):
         if "reporter" not in data:
@@ -2019,7 +1974,7 @@ class VulnerabilityIdTemplateSerializer(serializers.ModelSerializer):
         fields = ["vulnerability_id"]
 
 
-class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
+class FindingTemplateSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     vulnerability_ids = VulnerabilityIdTemplateSerializer(
         source="vulnerability_id_template_set", many=True, required=False,
@@ -2030,7 +1985,6 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("cve",)
 
     def create(self, validated_data):
-        to_be_tagged, validated_data = self._pop_tags(validated_data)
 
         # Save vulnerability ids and pop them
         if "vulnerability_id_template_set" in validated_data:
@@ -2040,21 +1994,18 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             vulnerability_id_set = None
 
-        new_finding_template = super(TaggitSerializer, self).create(
+        new_finding_template = super().create(
             validated_data,
         )
 
         if vulnerability_id_set:
-            vulnerability_ids = []
-            for vulnerability_id in vulnerability_id_set:
-                vulnerability_ids.append(vulnerability_id["vulnerability_id"])
+            vulnerability_ids = [vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set]
             validated_data["cve"] = vulnerability_ids[0]
             save_vulnerability_ids_template(
                 new_finding_template, vulnerability_ids,
             )
             new_finding_template.save()
 
-        self._save_tags(new_finding_template, to_be_tagged)
         return new_finding_template
 
     def update(self, instance, validated_data):
@@ -2065,13 +2016,10 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             )
             vulnerability_ids = []
             if vulnerability_id_set:
-                for vulnerability_id in vulnerability_id_set:
-                    vulnerability_ids.append(
-                        vulnerability_id["vulnerability_id"],
-                    )
+                vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set)
             save_vulnerability_ids_template(instance, vulnerability_ids)
 
-        return super(TaggitSerializer, self).update(instance, validated_data)
+        return super().update(instance, validated_data)
 
 
 class CredentialSerializer(serializers.ModelSerializer):
@@ -2115,7 +2063,7 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         return value
 
 
-class EngagementByProductResponseSerializer(TaggitSerializer, serializers.ModelSerializer):
+class EngagementByProductResponseSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=255)
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
@@ -2143,7 +2091,7 @@ class EngagementByProductResponseSerializer(TaggitSerializer, serializers.ModelS
                   "prod_type")
 
 
-class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     # findings_list = serializers.SerializerMethodField()
 
@@ -2173,7 +2121,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     # TODO: maybe extend_schema_field is needed here?
     # def get_findings_list(self, obj) -> list[int]:
-    #     return obj.open_findings_list
+    #     return obj.open_findings_list()
 
 
 class CommonImportScanSerializer(serializers.Serializer):
@@ -2201,16 +2149,14 @@ class CommonImportScanSerializer(serializers.Serializer):
         default=None,
         help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
     )
-    file = serializers.FileField(allow_empty_file=True, required=False)
-    product_type_name = serializers.CharField(
+    file = serializers.FileField(
+        allow_empty_file=True,
         required=False,
-        validators=[validators.valid_chars_validator])
-    product_name = serializers.CharField(
-        required=False,
-        validators=[validators.valid_chars_validator])
-    engagement_name = serializers.CharField(
-        required=False,
-        validators=[validators.valid_chars_validator])
+        validators=[ImporterFileExtensionValidator()],
+    )
+    product_type_name = serializers.CharField(required=False)
+    product_name = serializers.CharField(required=False)
+    engagement_name = serializers.CharField(required=False)
     engagement_end_date = serializers.DateField(
         required=False,
         help_text="End Date for Engagement. Default is current time + 365 days. Required format year-month-day",
@@ -2267,6 +2213,7 @@ class CommonImportScanSerializer(serializers.Serializer):
     product_id = serializers.IntegerField(read_only=True)
     product_type_id = serializers.IntegerField(read_only=True)
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
+    pro = serializers.ListField(read_only=True, required=False)
     apply_tags_to_findings = serializers.BooleanField(
         help_text="If set to True, the tags will be applied to the findings",
         required=False,
@@ -2298,6 +2245,7 @@ class CommonImportScanSerializer(serializers.Serializer):
         Raises exceptions in the event of an error
         """
         try:
+            start_time = time.perf_counter()
             importer = self.get_importer(**context)
             context["test"], _, _, _, _, _, _ = importer.process_scan(
                 context.pop("scan", None),
@@ -2310,6 +2258,9 @@ class CommonImportScanSerializer(serializers.Serializer):
                 data["product_id"] = test.engagement.product.id
                 data["product_type_id"] = test.engagement.product.prod_type.id
                 data["statistics"] = {"after": test.statistics}
+            duration = time.perf_counter() - start_time
+            LargeScanSizeProductAnnouncement(response_data=data, duration=duration)
+            ScanTypeProductAnnouncement(response_data=data, scan_type=context.get("scan_type"))
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -2414,14 +2365,17 @@ class ImportScanSerializer(CommonImportScanSerializer):
     close_old_findings = serializers.BooleanField(
         required=False,
         default=False,
-        help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
-        "If service has been set, only the findings for this service will be closed.",
+        help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
+                    "If service has been set, only the findings for this service will be closed. "
+                    "This only affects findings within the same engagement.",
     )
     close_old_findings_product_scope = serializers.BooleanField(
         required=False,
         default=False,
-        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
-        "By default, it is false meaning that only old findings of the same type in the engagement are in scope.",
+        help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
+                    "If service has been set, only the findings for this service will be closed. "
+                    "This only affects findings within the same product."
+                    "By default, it is false meaning that only old findings of the same type in the engagement are in scope.",
     )
     version = serializers.CharField(
         required=False, help_text="Version that was scanned.",
@@ -2499,7 +2453,7 @@ class ImportScanSerializer(CommonImportScanSerializer):
             add_finding_correlated(test.finding_set.all(), queryset)
 
 
-class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
+class ReImportScanSerializer(CommonImportScanSerializer):
 
     help_do_not_reactivate = "Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs."
     do_not_reactivate = serializers.BooleanField(
@@ -2517,14 +2471,14 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
     close_old_findings = serializers.BooleanField(
         required=False,
         default=True,
-        help_text="Select if old findings no longer present in the report get closed as mitigated when importing.",
+        help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
+                    "If service has been set, only the findings for this service will be closed. "
+                    "This only affects findings within the same test.",
     )
     close_old_findings_product_scope = serializers.BooleanField(
         required=False,
         default=False,
-        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
-        "By default, it is false meaning that only old findings of the same type in the engagement are in scope. "
-        "Note that this only applies on the first call to reimport-scan.",
+        help_text="This has no effect on reimport",
     )
     version = serializers.CharField(
         required=False,
@@ -2589,6 +2543,7 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
         """
         statistics_before, statistics_delta = None, None
         try:
+            start_time = time.perf_counter()
             if test := context.get("test"):
                 statistics_before = test.statistics
                 context["test"], _, _, _, _, _, test_import = self.get_reimporter(
@@ -2623,6 +2578,9 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
                 if statistics_delta:
                     data["statistics"]["delta"] = statistics_delta
                 data["statistics"]["after"] = test.statistics
+            duration = time.perf_counter() - start_time
+            LargeScanSizeProductAnnouncement(response_data=data, duration=duration)
+            ScanTypeProductAnnouncement(response_data=data, scan_type=context.get("scan_type"))
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -2805,20 +2763,16 @@ class FindingToFilesSerializer(serializers.Serializer):
     def to_representation(self, data):
         finding = data.get("finding_id")
         files = data.get("files")
-        new_files = []
-        for file in files:
-            new_files.append(
-                {
-                    "id": file.id,
-                    "file": "{site_url}/{file_access_url}".format(
-                        site_url=settings.SITE_URL,
-                        file_access_url=file.get_accessible_url(
-                            finding, finding.id,
-                        ),
+        new_files = [{
+                "id": file.id,
+                "file": "{site_url}/{file_access_url}".format(
+                    site_url=settings.SITE_URL,
+                    file_access_url=file.get_accessible_url(
+                        finding, finding.id,
                     ),
-                    "title": file.title,
-                },
-            )
+                ),
+                "title": file.title,
+            } for file in files]
         return {"finding_id": finding.id, "files": new_files}
 
     
@@ -2908,7 +2862,7 @@ class TagSerializer(serializers.Serializer):
     tags = TagListSerializerField(required=True)
 
 
-class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
+class SystemSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = System_Settings
         fields = "__all__"

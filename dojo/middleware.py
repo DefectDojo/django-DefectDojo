@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 from contextlib import suppress
 from threading import local
 from urllib.parse import quote
@@ -11,6 +12,8 @@ from django.db import models
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.functional import SimpleLazyObject
+
+from dojo.product_announcements import LongRunningRequestProductAnnouncement
 
 logger = logging.getLogger(__name__)
 
@@ -80,9 +83,11 @@ class DojoSytemSettingsMiddleware:
 
     def __call__(self, request):
         self.load()
-        response = self.get_response(request)
-        self.cleanup()
-        return response
+        try:
+            return self.get_response(request)
+        finally:
+            # ensure cleanup happens even if an exception occurs
+            self.cleanup()
 
     def process_exception(self, request, exception):
         self.cleanup()
@@ -91,7 +96,6 @@ class DojoSytemSettingsMiddleware:
     def get_system_settings(cls):
         if hasattr(cls._thread_local, "system_settings"):
             return cls._thread_local.system_settings
-
         return None
 
     @classmethod
@@ -101,6 +105,8 @@ class DojoSytemSettingsMiddleware:
 
     @classmethod
     def load(cls):
+        # cleanup any existing settings first to ensure fresh state
+        cls.cleanup()
         from dojo.models import System_Settings
         system_settings = System_Settings.objects.get(no_cache=True)
         cls._thread_local.system_settings = system_settings
@@ -184,3 +190,24 @@ class AuditlogMiddleware(_AuditlogMiddleware):
 
         with context:
             return self.get_response(request)
+
+
+class LongRunningRequestAlertMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.ignored_paths = [
+            re.compile(r"^/api/v2/.*"),
+            re.compile(r"^/product/(?P<product_id>\d+)/import_scan_results$"),
+            re.compile(r"^/engagement/(?P<engagement_id>\d+)/import_scan_results$"),
+            re.compile(r"^/test/(?P<test_id>\d+)/re_import_scan_results"),
+            re.compile(r"^/alerts/count"),
+        ]
+
+    def __call__(self, request):
+        start_time = time.perf_counter()
+        response = self.get_response(request)
+        duration = time.perf_counter() - start_time
+        if not any(pattern.match(request.path_info) for pattern in self.ignored_paths):
+            LongRunningRequestProductAnnouncement(request=request, duration=duration)
+
+        return response

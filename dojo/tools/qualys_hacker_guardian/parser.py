@@ -1,5 +1,6 @@
 import csv
 import io
+import sys
 
 from dateutil import parser as date_parser
 
@@ -9,6 +10,50 @@ from dojo.models import Endpoint, Finding
 class QualysHackerGuardianParser:
 
     """Parser for Qualys HackerGuardian"""
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Qualys Hacker Guardian Parser.
+
+        Fields:
+        - title: Set to Vuln Title from Qualys Hacker Guardian Scanner
+        - severity: Set to severity from Qualys Hacker Guardian Scanner translated into DefectDojo formant.
+        - description: Custom description made from: category, threat, and result.
+        - date: Set to date from Qualys Hacker Guardian Scanner.
+        - impact: Set to impact from Qualys Hacker Guardian Scanner.
+        - mitigation: Set to solution from Qualys Hacker Guardian Scanner
+        - unique_id_from_tool: Set to QID from Qualys Hacker Guardian Scanner.
+        - dynamic_finding: Set to true.
+        - active: Set to true.
+        - nb_occurences: Set to 1 and added to when necessary.
+        """
+        return [
+            "title",
+            "severity",
+            "description",
+            "date",
+            "impact",
+            "mitigation",
+            "unique_id_from_tool",
+            "dynamic_finding",
+            "active",
+            "nb_occurences",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Qualys Hacker Guardian Parser.
+
+        Fields:
+        - title: Set to Vuln Title from Qualys Hacker Guardian Scanner
+        - severity: Set to severity from Qualys Hacker Guardian Scanner translated into DefectDojo formant.
+        - description: Custom description made from: Category, Threat, and Result from Qualys Hacker Guardian scanner.
+        """
+        return [
+            "title",
+            "severity",
+            "description",
+        ]
 
     # Severity mapping taken from
     # https://qualysguard.qg2.apps.qualys.com/portal-help/en/malware/knowledgebase/severity_levels.htm
@@ -44,6 +89,7 @@ class QualysHackerGuardianParser:
         content = filename.read()
         if isinstance(content, bytes):
             content = content.decode("utf-8")
+        csv.field_size_limit(int(sys.maxsize / 10))
         reader = csv.DictReader(io.StringIO(content), delimiter=",", quotechar='"')
         dupes = {}
         for row in reader:

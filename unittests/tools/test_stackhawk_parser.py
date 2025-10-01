@@ -9,25 +9,25 @@ class TestStackHawkParser(DojoTestCase):
     __test_datetime = datetime.datetime(2022, 2, 16, 23, 7, 19, 575000, datetime.UTC)
 
     def test_invalid_json_format(self):
-        with open(get_unit_tests_scans_path("stackhawk") / "invalid.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("stackhawk") / "invalid.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             with self.assertRaises(ValueError):
                 parser.get_findings(testfile, Test())
 
     def test_parser_ensures_data_is_for_stackhawk_before_parsing(self):
-        with open(get_unit_tests_scans_path("stackhawk") / "oddly_familiar_json_that_isnt_us.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("stackhawk") / "oddly_familiar_json_that_isnt_us.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             with self.assertRaises(ValueError):
                 parser.get_findings(testfile, Test())
 
     def test_stackhawk_parser_with_no_vuln_has_no_findings(self):
-        with open(get_unit_tests_scans_path("stackhawk") / "stackhawk_zero_vul.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("stackhawk") / "stackhawk_zero_vul.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_stackhawk_parser_with_one_high_vuln_has_one_findings(self):
-        with open(get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vul.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vul.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             findings = parser.get_findings(testfile, Test())
             self.__assertAllEndpointsAreClean(findings)
@@ -50,7 +50,7 @@ class TestStackHawkParser(DojoTestCase):
             )
 
     def test_stackhawk_parser_with_many_vuln_has_many_findings_and_removes_duplicates(self):
-        with open(get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             findings = parser.get_findings(testfile, Test())
             self.__assertAllEndpointsAreClean(findings)
@@ -141,7 +141,7 @@ class TestStackHawkParser(DojoTestCase):
             )
 
     def test_that_a_scan_import_updates_the_test_description(self):
-        with open(get_unit_tests_scans_path("stackhawk") / "stackhawk_zero_vul.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("stackhawk") / "stackhawk_zero_vul.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             test = Test()
             parser.get_findings(testfile, test)
@@ -155,7 +155,7 @@ class TestStackHawkParser(DojoTestCase):
             )
 
     def test_that_a_scan_with_all_false_positive_endpoints_on_a_finding_marks_as_false_positive(self):
-        with open(get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vuln_all_endpoints_false_positive.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vuln_all_endpoints_false_positive.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             findings = parser.get_findings(testfile, Test())
             self.__assertAllEndpointsAreClean(findings)
@@ -175,7 +175,7 @@ class TestStackHawkParser(DojoTestCase):
             )
 
     def test_that_a_scan_with_all_risk_accepted_endpoints_on_a_finding_marks_as_risk_accepted(self):
-        with open(get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vuln_all_endpoints_risk_accepted.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vuln_all_endpoints_risk_accepted.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             findings = parser.get_findings(testfile, Test())
             self.__assertAllEndpointsAreClean(findings)
@@ -195,7 +195,7 @@ class TestStackHawkParser(DojoTestCase):
             )
 
     def test_that_a_scan_with_endpoints_in_differing_statuses_does_not_mark_as_risk_accepted_or_false_positive(self):
-        with open(get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vuln_all_endpoints_have_different_status.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vuln_all_endpoints_have_different_status.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             findings = parser.get_findings(testfile, Test())
             self.__assertAllEndpointsAreClean(findings)

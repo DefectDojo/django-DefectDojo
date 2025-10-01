@@ -1,3 +1,5 @@
+import datetime
+
 from dojo.models import Test
 from dojo.tools.wiz.parser import WizParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -5,7 +7,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestWizParser(DojoTestCase):
     def test_no_findings(self):
-        with open(get_unit_tests_scans_path("wiz") / "no_findings.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("wiz") / "no_findings.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -14,7 +16,7 @@ class TestWizParser(DojoTestCase):
             self.assertEqual(0, len(findings))
 
     def test_one_findings(self):
-        with open(get_unit_tests_scans_path("wiz") / "one_finding.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("wiz") / "one_finding.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -26,7 +28,7 @@ class TestWizParser(DojoTestCase):
             self.assertEqual("Informational", finding.severity)
 
     def test_multiple_findings(self):
-        with open(get_unit_tests_scans_path("wiz") / "multiple_findings.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("wiz") / "multiple_findings.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -65,7 +67,7 @@ class TestWizParser(DojoTestCase):
             self.assertEqual("Informational", finding.severity)
 
     def test_sca_format(self):
-        with open(get_unit_tests_scans_path("wiz") / "sca_format.csv", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("wiz") / "sca_format.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(5, len(findings))
@@ -119,3 +121,40 @@ class TestWizParser(DojoTestCase):
             self.assertIn("CVE-2024-36891", finding.unsaved_vulnerability_ids)
             self.assertNotIn("**Location Path**:", finding.description)
             self.assertNotIn("**Location Path**:", finding.mitigation)
+
+    def test_resolved_findings(self):
+        with (get_unit_tests_scans_path("wiz") / "resolved_findings.csv").open(encoding="utf-8") as testfile:
+            parser = WizParser()
+            findings = parser.get_findings(testfile, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(3, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("AKS role/cluster role assigned permissions that contain wildcards ISO_DATE", finding.title)
+                self.assertEqual(True, finding.is_mitigated)
+                self.assertEqual(datetime.date(2023, 1, 25), finding.date.date())
+                self.assertEqual(datetime.date(1999, 1, 25), finding.mitigated.date())
+                self.assertEqual(datetime.date(2023, 1, 25), finding.date.date())
+                self.assertEqual("0029ee49-c676-432f-8690-12f2862ec708", finding.unique_id_from_tool)
+
+            with self.subTest(i=1):
+                finding = findings[1]
+                self.assertEqual("AKS cluster contains a pod running containers with added capabilities SPECIAL_DATE", finding.title)
+                self.assertEqual(True, finding.is_mitigated)
+                self.assertEqual(datetime.date(2024, 1, 24), finding.date.date())
+                self.assertEqual(datetime.date(2025, 4, 3), finding.mitigated.date())
+                self.assertEqual("02fd8a0d-16fa-4da0-aa49-a99694365d41", finding.unique_id_from_tool)
+                self.maxDiff = None
+                self.assertIn("Resolution: CONTROL_DISABLED", finding.mitigation)
+
+            with self.subTest(i=2):
+                finding = findings[2]
+                self.assertEqual("AKS cluster contains a pod running containers with added capabilities UNKNOWN_DATE_FORMAT", finding.title)
+                self.assertEqual(True, finding.is_mitigated)
+                self.assertEqual(datetime.date(2024, 1, 24), finding.date.date())
+                self.assertEqual(None, finding.mitigated)
+                self.assertEqual("02fd8a0d-16fa-4da0-aa49-a99694365d41", finding.unique_id_from_tool)
+                self.maxDiff = None
+                self.assertIn("Resolution: ISSUE_FIXED", finding.mitigation)

@@ -386,15 +386,12 @@ details about the deduplication process : switch
 
 ### Deduplication - APIv2 parameters
 
-- `close_old_findings` : if true, findings that are not
-    duplicates and that were in the previous scan of the same type
-    (example ZAP) for the same engagement (or product in case of
-    \"close_old_findings_product_scope\") and that are not present in the new
-    scan are closed (Inactive, Verified, Mitigated). 
-- `close_old_findings_product_scope` : if true, close_old_findings applies
-    to all findings of the same type in the product. Note that
-    \"Deduplication on engagement\" is no longer used to determine the
-    scope of close_old_findings.
+| Parameter | Import behaviour | Reimport Behaviour |
+|-----------|------------------|-------------------|
+| `close_old_findings` | if `true`, findings that are not duplicates and that were in the previous scan of the same type (example ZAP) for the same **engagement** (or product in case of `close_old_findings_product_scope`) and that are not present in the new scan are closed (`Inactive`, `Verified`, `Mitigated`). | if `true`, findings that that are in the same **test** and that are not present in the new scan are closed (`Inactive`, `Verified`, `Mitigated`) |
+| `close_old_findings_product_scope` | if true, `close_old_findings` applies to all findings of the same type in the whole **product**. Note that "Deduplication on engagement" is no longer used to determine the scope of `close_old_findings` | has no effect | 
+
+The `close_old_findings` feature will respect the value of the `service` field to only close findings with an identical `service` value.
 
 ### Deduplication / Similar findings
 

@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestJfrogJFrogXrayParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln(self):
-        testfile = open(get_unit_tests_scans_path("jfrogxray") / "one_vuln.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("jfrogxray") / "one_vuln.json").open(encoding="utf-8")
         parser = JFrogXrayParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -17,16 +17,17 @@ class TestJfrogJFrogXrayParser(DojoTestCase):
         self.assertEqual(1, len(item.unsaved_vulnerability_ids))
         self.assertEqual("CVE-2018-14600", item.unsaved_vulnerability_ids[0])
         self.assertEqual(787, item.cwe)
+        self.assertEqual(True, item.fix_available)
 
     def test_parse_file_with_many_vulns(self):
-        testfile = open(get_unit_tests_scans_path("jfrogxray") / "many_vulns.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("jfrogxray") / "many_vulns.json").open(encoding="utf-8")
         parser = JFrogXrayParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
 
     def test_parse_file_with_many_vulns2(self):
-        testfile = open(get_unit_tests_scans_path("jfrogxray") / "many_vulns2.json", encoding="utf-8")
+        testfile = (get_unit_tests_scans_path("jfrogxray") / "many_vulns2.json").open(encoding="utf-8")
         parser = JFrogXrayParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

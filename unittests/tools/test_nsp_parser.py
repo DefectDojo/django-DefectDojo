@@ -6,13 +6,13 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestNspParser(DojoTestCase):
     def test_parse_none(self):
         parser = NspParser()
-        with open(get_unit_tests_scans_path("nsp") / "none.json", encoding="utf-8") as test_file:
+        with (get_unit_tests_scans_path("nsp") / "none.json").open(encoding="utf-8") as test_file:
             findings = parser.get_findings(test_file, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_ok(self):
         parser = NspParser()
-        with open(get_unit_tests_scans_path("nsp") / "scan.json", encoding="utf-8") as test_file:
+        with (get_unit_tests_scans_path("nsp") / "scan.json").open(encoding="utf-8") as test_file:
             findings = parser.get_findings(test_file, Test())
         self.assertEqual(9, len(findings))
 

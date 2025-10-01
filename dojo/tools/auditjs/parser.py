@@ -1,11 +1,13 @@
 import json
+import logging
 import re
 from json.decoder import JSONDecodeError
 
-import cvss.parser
-from cvss import CVSS2, CVSS3
-
+# import cvss.parser
 from dojo.models import Finding
+from dojo.utils import parse_cvss_data
+
+logger = logging.getLogger(__name__)
 
 
 class AuditJSParser:
@@ -69,7 +71,13 @@ class AuditJSParser:
                     ) = (
                         cvss_score
                     ) = (
-                        cvss_vector
+                        cvssv3
+                    ) = (
+                        cvssv4
+                    ) = (
+                        cvssv3_score
+                    ) = (
+                        cvssv4_score
                     ) = vulnerability_id = cwe = references = severity = None
                     # Check mandatory
                     if (
@@ -85,37 +93,20 @@ class AuditJSParser:
                         if cwe_find:
                             cwe = int(cwe_find[0][4:])
                     else:
-                        msg = (
-                            "Missing mandatory attributes (id, title, description). Please check your report or ask "
-                            "community."
-                        )
+                        msg = "Missing mandatory attributes (id, title, description). Please check your report or ask community."
                         raise ValueError(msg)
                     if "cvssScore" in vulnerability:
                         cvss_score = vulnerability["cvssScore"]
-                    if "cvssVector" in vulnerability:
-                        cvss_vectors = cvss.parser.parse_cvss_from_text(
-                            vulnerability["cvssVector"],
-                        )
-                        if len(cvss_vectors) > 0 and isinstance(
-                            cvss_vectors[0], CVSS3,
-                        ):
-                            # Only set finding vector if it's version 3
-                            cvss_vector = cvss_vectors[0].clean_vector()
-                            severity = cvss_vectors[0].severities()[0]
-                        elif len(cvss_vectors) > 0 and isinstance(
-                            cvss_vectors[0], CVSS2,
-                        ):
-                            # Otherwise add it to description
-                            description = (
-                                description
-                                + "\nCVSS V2 Vector:"
-                                + cvss_vectors[0].clean_vector()
-                            )
-                            severity = cvss_vectors[0].severities()[0]
+                    cvss_data = parse_cvss_data(vulnerability.get("cvssVector"))
+                    if cvss_data:
+                        severity = cvss_data["severity"]
+                        cvssv3 = cvss_data["cvssv3"]
+                        cvssv4 = cvss_data["cvssv4"]
+                        # The score in the report can be different from what the cvss library calulates
+                        if cvss_data["major_version"] == 2:
+                            description += "\nCVSS V2 Vector:" + cvss_data["cvssv2"] + " (Score: " + str(cvss_score) + ")"
                     else:
-                        # If there is no vector, calculate severity based on
-                        # score and CVSS V3 (AuditJS does not always include
-                        # it)
+                        # If there is no vector, calculate severity based on CVSS score
                         severity = self.get_severity(cvss_score)
                     if "cve" in vulnerability:
                         vulnerability_id = vulnerability["cve"]
@@ -126,10 +117,12 @@ class AuditJSParser:
                         title=title,
                         test=test,
                         cwe=cwe,
-                        cvssv3=cvss_vector,
-                        cvssv3_score=cvss_score,
                         description=description,
                         severity=severity,
+                        cvssv3=cvssv3,
+                        cvssv3_score=cvssv3_score,
+                        cvssv4=cvssv4,
+                        cvssv4_score=cvssv4_score,
                         references=references,
                         file_path=file_path,
                         component_name=component_name,
@@ -138,6 +131,9 @@ class AuditJSParser:
                         dynamic_finding=False,
                         unique_id_from_tool=unique_id_from_tool,
                     )
+                    logger.debug("Finding fields:")
+                    for field, value in finding.__dict__.items():
+                        logger.debug("  %s: %r", field, value)
                     if vulnerability_id:
                         finding.unsaved_vulnerability_ids = [vulnerability_id]
 

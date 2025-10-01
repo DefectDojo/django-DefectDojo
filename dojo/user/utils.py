@@ -67,13 +67,6 @@ def get_configuration_permissions_fields():
     else:
         github_permissions = []
 
-    if get_system_setting("enable_google_sheets"):
-        google_sheet_permissions = [
-            Permission_Helper(name="google sheet", app="dojo", change=True),
-        ]
-    else:
-        google_sheet_permissions = []
-
     if get_system_setting("enable_jira"):
         jira_permissions = [
             Permission_Helper(name="jira instance", app="dojo", view=True, add=True, change=True, delete=True),
@@ -95,7 +88,6 @@ def get_configuration_permissions_fields():
         Permission_Helper(name="development environment", app="dojo", add=True, change=True, delete=True),
         Permission_Helper(name="finding template", app="dojo", view=True, add=True, change=True, delete=True),
         *github_permissions,
-        *google_sheet_permissions,
         Permission_Helper(name="group", app="auth", view=True, add=True),
         *jira_permissions,
         Permission_Helper(name="language type", app="dojo", view=True, add=True, change=True, delete=True),

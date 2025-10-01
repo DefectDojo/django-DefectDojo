@@ -1,10 +1,9 @@
 ---
-title: "Exporting"
+title: "Export Findings"
 description: "DefectDojo has the ability to export findings."
 draft: false
 weight: 12
 ---
-
 
 ## Export Findings
 

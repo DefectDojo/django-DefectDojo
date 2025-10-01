@@ -2,7 +2,7 @@
 title: "☑️ New User Checklist"
 description: "Get Started With DefectDojo"
 draft: "false"
-weight: 2
+weight: 3
 chapter: true
 ---
 
@@ -22,6 +22,6 @@ All of these features can be automated, and because DefectDojo can handle over 1
 
 ### Other guides
 
-- Does your organization use Jira? Learn how to use our [Jira integration](/en/share_your_findings/jira_integration/connect_to_jira) to create Jira tickets from the data you ingest.
+- Does your organization use Jira? Learn how to use our [Jira integration](/en/share_your_findings/jira_guide/) to create Jira tickets from the data you ingest.
 - Are you expecting to share DefectDojo with many users in your organization? Check out our guides to [user management](/en/customize_dojo/user_management/about_perms_and_roles/) and set up role-based access control (RBAC).
 - Ready to dive into automation? Learn how to use the [DefectDojo API](/en/connecting_your_tools/import_scan_files/api_pipeline_modelling) to automatically import new data, and build a robust CI / CD pipeline.

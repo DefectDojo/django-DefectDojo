@@ -99,6 +99,7 @@ RUN export PYCURL_SSL_LIBRARY=openssl && \
 COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
+  docker/entrypoint-celery-worker-dev.sh \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-first-boot.sh \
   docker/entrypoint-uwsgi.sh \
@@ -162,8 +163,8 @@ ENV \
   # DD_CELERY_WORKER_PREFETCH_MULTIPLIER="128" \
   DD_INITIALIZE=true \
   DD_UWSGI_MODE="socket" \
-  DD_UWSGI_NUM_OF_PROCESSES="2" \
-  DD_UWSGI_NUM_OF_THREADS="2"
+  DD_UWSGI_NUM_OF_PROCESSES="4" \
+  DD_UWSGI_NUM_OF_THREADS="4"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
 FROM django AS django-unittests

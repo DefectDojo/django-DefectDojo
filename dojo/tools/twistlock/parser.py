@@ -6,6 +6,7 @@ import logging
 import textwrap
 import dateutil
 import base64
+from datetime import datetime
 
 from dojo.models import Finding
 from django.conf import settings
@@ -27,7 +28,7 @@ class TwistlockCSVParser:
             data_package_name = row.get("Packages", "")
         else:
             data_package_name = row.get("Source Package", "")
-        row.get("Id", "")
+
         data_severity = row.get("Severity", "")
         data_cvss = row.get("CVSS", "")
         data_description = row.get("Description", "")
@@ -58,6 +59,47 @@ class TwistlockCSVParser:
         data_unique_id = row.get("Custom Id", "")
         data_ami_id = row.get("Ami Id", "")
         data_labels = row.get("Labels", "")
+
+        # Build container/image metadata for impact field (Item 3)
+        impact_parts = []
+
+        # Registry and repository information which can change between scans, so we add it to the impact field as the description field is sometimes used for hash code calculation
+        registry = row.get("Registry", "")
+        repository = row.get("Repository", "")
+        tag = row.get("Tag", "")
+        image_id = row.get("Id", "")
+        distro = row.get("Distro", "")
+
+        if registry:
+            impact_parts.append(f"Registry: {registry}")
+        if repository:
+            impact_parts.append(f"Repository: {repository}")
+        if tag:
+            impact_parts.append(f"Tag: {tag}")
+        if image_id:
+            impact_parts.append(f"Image ID: {image_id}")
+        if distro:
+            impact_parts.append(f"Distribution: {distro}")
+
+        # Host and container information
+        hosts = row.get("Hosts", "")
+        containers = row.get("Containers", "")
+        clusters = row.get("Clusters", "")
+        binaries = row.get("Binaries", "")
+        custom_labels = row.get("Custom Labels", "")
+
+        if hosts:
+            impact_parts.append(f"Hosts: {hosts}")
+        if containers:
+            impact_parts.append(f"Containers: {containers}")
+        if clusters:
+            impact_parts.append(f"Clusters: {clusters}")
+        if binaries:
+            impact_parts.append(f"Binaries: {binaries}")
+        if custom_labels:
+            impact_parts.append(f"Custom Labels: {custom_labels}")
+
+        impact_text = "\n".join(impact_parts) if impact_parts else data_severity
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -121,13 +163,9 @@ class TwistlockCSVParser:
                 placeholder="...",
             ),
             component_version=data_package_version,
-            false_p=False,
-            duplicate=False,
-            out_of_scope=False,
-            mitigated=None,
             severity_justification=f"(CVSS v3 base score: {data_cvss})",
             cvssv3_score=float(data_cvss) if data_cvss else None,
-            impact=data_severity,
+            impact=impact_text,
             vuln_id_from_tool=data_vulnerability_id,
             unique_id_from_tool=data_unique_id,
             publish_date=(
@@ -357,32 +395,71 @@ class TwistlockJsonParser:
     def get_items(self, tree, test):
         items = {}
         if "results" in tree:
+            # Extract image metadata for impact field (Item 3)
+            result = tree["results"][0]
+            image_metadata = self.build_image_metadata(result)
+
             vulnerabilityTree = tree["results"][0].get("vulnerabilities", [])
             packageTree = tree["results"][0].get("packages", [])
 
             for node in vulnerabilityTree:
-                item = get_item(node, test, packageTree)
+                item = get_item(node, test, packageTree, image_metadata)
                 unique_key = node["id"] + str(
                     node["packageName"]
                     + str(node["packageVersion"])
                     + str(node["severity"]),
                 )
                 items[unique_key] = item
+
+            # Parse compliance findings
+            if settings.ENABLE_COMPLIANCE_FINDINGS_TWISTLOCK:
+                complianceTree = result.get("compliances", [])
+                for node in complianceTree:
+                    item = get_compliance_item(node, test, image_metadata)
+                    # Create unique key for compliance findings - prefer ID if available
+                    if node.get("id"):
+                        unique_key = f"compliance_{node['id']}"
+                    else:
+                        # Fallback to hash of title + description
+                        unique_key = "compliance_" + hashlib.md5(
+                            (node.get("title", "") + node.get("description", "")).encode("utf-8"),
+                            usedforsecurity=False,
+                        ).hexdigest()
+                    items[unique_key] = item
         return list(items.values())
+    
+    def build_image_metadata(self, result):
+        """Build image metadata string for impact field"""
+        metadata_parts = []
+
+        image_id = result.get("id", "")
+        distro = result.get("distro", "")
+
+        if image_id:
+            metadata_parts.append(f"Image ID: {image_id}")
+        if distro:
+            metadata_parts.append(f"Distribution: {distro}")
+
+        return "\n".join(metadata_parts)
 
 
-def get_item(vulnerability, test, packageTree):
+def get_item(vulnerability, test, packageTree, image_metadata):
     severity = (
         convert_severity(vulnerability["severity"])
         if "severity" in vulnerability
         else "Info"
     )
-    vector = vulnerability.get("vector", "CVSS vector not provided. ")
-    status = vulnerability.get(
-        "status", "There seems to be no fix yet. Please check description field."
-    )
-    cvss = vulnerability.get("cvss", "No CVSS score yet.")
+    cvssv3 = vulnerability.get("vector")
+    status = vulnerability.get("status", "There seems to be no fix yet. Please check description field.")
+    cvssv3_score = vulnerability.get("cvss")
     riskFactors = vulnerability.get("riskFactors", "No risk factors.")
+
+    # Build impact field combining severity and image metadata which can change between scans, so we add it to the impact field as the description field is sometimes used for hash code calculation
+    impact_parts = [severity]
+    if image_metadata:
+        impact_parts.append(image_metadata)
+    impact_text = "\n".join(impact_parts)
+    
     for package in packageTree:
         if (
             package["name"] == vulnerability["packageName"]
@@ -390,6 +467,7 @@ def get_item(vulnerability, test, packageTree):
         ):
             vulnerability["type"] = package["type"]
             break
+
     description = (
         vulnerability.get("description", "")
         + "<p> Vulnerable Package: "
@@ -409,11 +487,11 @@ def get_item(vulnerability, test, packageTree):
 
     # create the finding object
     finding = Finding(
-        title=vulnerability["id"]
+        title=vulnerability.get("id", "Unknown Vulnerability")
         + ": "
-        + vulnerability["packageName"]
+        + vulnerability.get("packageName", "Unknown Package")
         + " - "
-        + vulnerability["packageVersion"],
+        + str(vulnerability.get("packageVersion", "")),
         test=test,
         severity=severity,
         description=description,
@@ -421,13 +499,10 @@ def get_item(vulnerability, test, packageTree):
         references=vulnerability.get("link"),
         component_name=vulnerability["packageName"],
         component_version=vulnerability["packageVersion"],
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False,
-        mitigated=None,
-        severity_justification=f"{vector} (CVSS v3 base score: {cvss})\n\n{riskFactors}",
-        cvssv3_score=float(cvss) if cvss != "No CVSS score yet." else None,
-        impact=severity,
+        severity_justification=f"Vector: {cvssv3} (CVSS v3 base score: {cvssv3_score})\n\n{riskFactors}",
+        cvssv3=cvssv3,
+        cvssv3_score=cvssv3_score,
+        impact=impact_text,
         vuln_id_from_tool=vulnerability["id"],
         publish_date=(
             dateutil.parser.parse(vulnerability.get("publishedDate"))
@@ -444,6 +519,61 @@ def get_item(vulnerability, test, packageTree):
     ]
     finding.unsaved_vulnerability_ids = [vulnerability["id"]]
     finding.description = finding.description.strip()
+
+    return finding
+
+
+def get_compliance_item(compliance, test, image_metadata=""):
+    """Create a Finding object for compliance issues"""
+    severity = (
+        convert_severity(compliance["severity"])
+        if "severity" in compliance
+        else "Info"
+    )
+
+    title = compliance.get("title", "Unknown Compliance Issue")
+    description = compliance.get("description", "No description specified")
+    compliance_id = compliance.get("id", "")
+    category = compliance.get("category", "")
+    layer_time = compliance.get("layerTime", "")
+
+    # Build comprehensive description
+    desc_parts = [f"**Compliance Issue:** {title}\n\n"]
+
+    if compliance_id:
+        desc_parts.append(f"**Compliance ID:** {compliance_id}\n\n")
+
+    if category:
+        desc_parts.append(f"**Category:** {category}\n\n")
+
+    desc_parts.append(f"**Description:** {description}\n\n")
+
+    # Build impact field combining severity and image metadata
+    impact_parts = [severity]
+    if image_metadata:
+        impact_parts.append(image_metadata)
+    if layer_time:
+        desc_parts.append(f"Layer Time: {layer_time}")
+    impact_text = "\n".join(impact_parts)
+
+    # create the finding object for compliance
+    finding = Finding(
+        title=f"Compliance: {title}",
+        test=test,
+        severity=severity,
+        description="".join(desc_parts),
+        mitigation="Review and address the compliance issue as described in the description.",
+        severity_justification=f"Compliance severity: {severity}",
+        impact=impact_text,
+        vuln_id_from_tool=str(compliance_id) if compliance_id else None,
+    )
+    finding.description = finding.description.strip()
+
+    # Add compliance-specific tags
+    tags = ["compliance"]
+    if category:
+        tags.append(category.lower())
+    finding.unsaved_tags = tags
 
     return finding
 

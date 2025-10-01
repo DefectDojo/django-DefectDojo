@@ -3,6 +3,7 @@ import json
 import logging
 
 from dojo.models import Finding
+from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
 
@@ -140,9 +141,8 @@ def get_item(item_node, tree, test):
             and len(item_node["via"]) > 1):
         # we have a multiple CWE vuln which we will capture in the
         # vulnerability_ids and references
-        for vuln in item_node["via"][1:]:  # have to decide if str or object
-            if isinstance(vuln, dict):
-                references.append(vuln["url"])
+        # have to decide if str or object
+        references.extend(vuln["url"] for vuln in item_node["via"][1:] if isinstance(vuln, dict))
 
     dojo_finding = Finding(
         title=title,
@@ -167,7 +167,10 @@ def get_item(item_node, tree, test):
         dojo_finding.cwe = cwe
 
     if (cvssv3 is not None) and (len(cvssv3) > 0):
-        dojo_finding.cvssv3 = cvssv3
+        cvss_data = parse_cvss_data(cvssv3)
+        if cvss_data:
+            dojo_finding.cvssv3 = cvss_data.get("cvssv3")
+            dojo_finding.cvssv3_score = cvss_data.get("cvssv3_score")
 
     return dojo_finding
 

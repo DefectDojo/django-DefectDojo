@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 from pathlib import Path
 
 from auditlog.models import LogEntry
@@ -20,16 +21,24 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import LogEntryFilter
 from dojo.forms import ManageFileFormSet
 from dojo.models import Endpoint, Engagement, FileUpload, Finding, Product, Test
+from dojo.product_announcements import ErrorPageProductAnnouncement
 from dojo.utils import Product_Tab, generate_file_response, get_page_items
 
 logger = logging.getLogger(__name__)
 
 
 def custom_error_view(request, exception=None):
+    ErrorPageProductAnnouncement(request=request)
     return render(request, "500.html", {}, status=500)
 
 
+def custom_unauthorized_view(request, exception=None):
+    ErrorPageProductAnnouncement(request=request)
+    return render(request, "403.html", {}, status=400)
+
+
 def custom_bad_request_view(request, exception=None):
+    ErrorPageProductAnnouncement(request=request)
     return render(request, "400.html", {}, status=400)
 
 
@@ -149,7 +158,8 @@ def manage_files(request, oid, obj_type):
 
             for o in files_formset.deleted_objects:
                 logger.debug("removing file: %s", o.file.name)
-                (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
+                with suppress(FileNotFoundError):
+                    (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
 
             for o in files_formset.new_objects:
                 logger.debug("adding file: %s", o.file.name)
@@ -160,7 +170,8 @@ def manage_files(request, oid, obj_type):
                                                      finding__isnull=True)
             for o in orphan_files:
                 logger.debug("purging orphan file: %s", o.file.name)
-                (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
+                with suppress(FileNotFoundError):
+                    (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
                 o.delete()
 
             messages.add_message(
@@ -190,9 +201,7 @@ def manage_files(request, oid, obj_type):
 @login_required
 def protected_serve(request, path, document_root=None, *, show_indexes=False):
     """Serve the file only after verifying the user is supposed to see the file."""
-    file = FileUpload.objects.get(file=path)
-    if not file:
-        raise Http404
+    file = get_object_or_404(FileUpload, file=path)
     object_set = list(file.engagement_set.all()) + list(file.test_set.all()) + list(file.finding_set.all())
     # Determine if there is an object to query permission checks from
     if len(object_set) == 0:

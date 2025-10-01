@@ -19,6 +19,7 @@ class BrakemanParser:
         - file_path: Set to file from Brakeman Scanner.
         - line: Set to line from Brakeman Scanner.
         - date: Set to end_date from Brakeman Scanner.
+        - static_finding: Set to true.
         """
         return [
             "title",
@@ -27,6 +28,7 @@ class BrakemanParser:
             "file_path",
             "line",
             "date",
+            "static_finding",
         ]
 
     def get_dedupe_fields(self) -> list[str]:
@@ -40,6 +42,7 @@ class BrakemanParser:
         - description: Made by joining filename, line number, issue confidence, code, user input, and render path provided by Brakeman Scanner.
 
         NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+        NOTE: cwe is not provided by parser.
         """
         return [
             "title",

@@ -1,0 +1,15 @@
+{
+  "evaluatedTag": "test/testimage:testtag",
+  "policyId": "9e104ade-7b57-4cdc-93fb-4949bf3b36b6",
+  "imageDigest": "sha256:8htz0bf942cfcd6hg8cf6435afd318b65d23e4c1a80044304c6e3ed20",
+  "evaluations": [
+    {
+      "evaluationTime": "2022-09-20T08:25:52Z",
+      "status": "pass",
+      "finalAction": "go",
+      "finalActionReason": "policy_evaluation",
+      "numberOfFindings": 0,
+      "details": []
+    }
+  ]
+}

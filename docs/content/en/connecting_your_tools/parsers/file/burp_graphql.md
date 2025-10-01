@@ -1,8 +1,8 @@
 ---
-title: "Burp GraphQL"
+title: "Burp Suite DAST GraphQL"
 toc_hide: true
 ---
-Import the JSON data returned from the BurpSuite Enterprise GraphQL API. Append all the
+Import the JSON data returned from the BurpSuite DAST GraphQL API. Append all the
 issues returned to a list and save it as the value for the key "Issues". There is no need
 to filter duplicates, the parser will automatically combine issues with the same name.
 
@@ -106,3 +106,12 @@ Example GraphQL query to get issue details:
 
 ### Sample Scan Data
 Sample Burp GraphQL scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/burp_graphql).
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+
+- title
+- cwe
+- line
+- file path
+- description

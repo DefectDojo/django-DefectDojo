@@ -766,7 +766,7 @@ class TestNotificationWebhooks(DojoTestCase):
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": "Event engagement_added has occurred.",
-                "title": "Engagement created for &quot;notif prod&quot;: notif eng",
+                "title": 'Engagement created for "notif prod": notif eng',
                 "user": None,
                 "url_api": f"http://localhost:8080/api/v2/engagements/{eng.pk}/",
                 "url_ui": f"http://localhost:8080/engagement/{eng.pk}",
@@ -933,3 +933,83 @@ class TestNotificationWebhooks(DojoTestCase):
                     "url_ui": "http://localhost:8080/finding/236",
                 }],
             })
+
+        with self.subTest("scan_added problematic titles"):
+            BaseImporter(
+                environment=Development_Environment.objects.get_or_create(name="Development")[0],
+                scan_type="ZAP Scan",
+            ).notify_scan_added(
+                test,
+                updated_count=4,
+                new_findings=[
+                    Finding.objects.create(test=test, title="Colon: New Finding", severity="Critical"),
+                ],
+                findings_mitigated=[
+                    Finding.objects.create(test=test, title="[Brackets] Mitigated Finding", severity="Medium"),
+                ],
+                findings_reactivated=[
+                    Finding.objects.create(test=test, title='"Quotation1" Reactivated Finding', severity="Low"),
+                ],
+                findings_untouched=[
+                    Finding.objects.create(test=test, title="'Quotation2' Untouched Finding", severity="Info"),
+                ],
+            )
+            self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added")
+            self.maxDiff = None
+            self.assertEqual(mock.call_args.kwargs["json"]["findings"], {
+                "new": [{
+                    "id": 237,
+                    "title": "Colon: New Finding",
+                    "severity": "Critical",
+                    "url_api": "http://localhost:8080/api/v2/findings/237/",
+                    "url_ui": "http://localhost:8080/finding/237",
+                }],
+                "mitigated": [{
+                    "id": 238,
+                    "title": '[Brackets] Mitigated Finding',
+                    "severity": "Medium",
+                    "url_api": "http://localhost:8080/api/v2/findings/238/",
+                    "url_ui": "http://localhost:8080/finding/238",
+                }],
+                "reactivated": [{
+                    "id": 239,
+                    "title": '"Quotation1" Reactivated Finding',
+                    "severity": "Low",
+                    "url_api": "http://localhost:8080/api/v2/findings/239/",
+                    "url_ui": "http://localhost:8080/finding/239",
+                }],
+                "untouched": [{
+                    "id": 240,
+                    "title": "'Quotation2' Untouched Finding",
+                    "severity": "Info",
+                    "url_api": "http://localhost:8080/api/v2/findings/240/",
+                    "url_ui": "http://localhost:8080/finding/240",
+                }],
+            })
+
+    @patch("requests.request", **{"return_value.status_code": 200})
+    def test_ping_with_owner_assigned(self, mock):
+        """
+        We only need to test one event because the user is serialized in the base sub template. This allows to]
+        assert that if the test passes for one event, it will pass for all events.
+        """
+        manager = WebhookNotificationManger()
+        manager._test_webhooks_notification(Notification_Webhooks.objects.filter(owner__isnull=False).first())
+        self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "ping")
+        self.maxDiff = None
+        self.assertEqual(
+            mock.call_args.kwargs["json"],
+            {
+                "description": "Test webhook notification",
+                "title": "",
+                "user": {
+                    "id": 6,
+                    "username": "user5",
+                    "first_name": "User",
+                    "last_name": "Five",
+                    "email": "user5@email.com",
+                    "url_api": "http://localhost:8080/api/v2/users/6/",
+                    "url_ui": "http://localhost:8080/user/6",
+                },
+            },
+        )

@@ -1,5 +1,5 @@
 ---
-title: "External Tools: Universal Importer & DefectDojo-CLI"
+title: "External Tools: Universal Importer & DefectDojo-CLI (Pro)"
 description: "Import files to DefectDojo from the command line"
 draft: false
 weight: 2
@@ -201,7 +201,7 @@ defectdojo-cli import \
 #### Options
 
 `--active, -a` 
-* Dictates whether findings should be active on import. (default: true) `[$DD_CLI_ACTIVE]`
+* Dictates whether Findings should be forced to Active or Inactive on import.  A value of True forces Findings to Active, while a value of False forces all Findings to Inactive.  If no value is set, Active status will instead rely on the incoming report file. (default: unset) `[$DD_CLI_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 * The ID of the API Scan Configuration object to use when importing or reimporting. (default: 0) `[$DD_CLI_API_SCAN_CONFIGURATION]`
@@ -215,6 +215,12 @@ defectdojo-cli import \
 
 `--auto-create-context, --acc`
 * If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_CLI_AUTO_CREATE_CONTEXT]`
+
+`--close-old-findings, --cof`
+* If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the Findings for this Service will be closed. [$DD_CLI_CLOSE_OLD_FINDINGS]
+
+`--close-old-findings-product-scope, --cofps`
+* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_CLI_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_CLI_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -250,7 +256,7 @@ defectdojo-cli import \
 * The version of the test. `[$DD_CLI_TEST_VERSION]`
 
 `--verified, -v`
-* Dictates whether findings should be verified on import. (default: false) `[$DD_CLI_VERIFIED]`
+* Dictates whether Findings should be set to Verified on import. A value of True forces Findings to Verified. If no value is set, Verified status will instead rely on the incoming report file. `[$DD_CLI_VERIFIED]`
 
 **Settings:**
 
@@ -320,7 +326,7 @@ example, x  Shows an example of required and optional flags for reimport operati
 #### Options
 
 `--active, -a`                                    
-* Dictates whether findings should be active on import. (default: true) `[$DD_CLI_ACTIVE]`
+* Dictates whether Findings should be forced to Active or Inactive on import.  A value of True forces Findings to Active, while a value of False forces all Findings to Inactive.  If no value is set, Active status will instead rely on the incoming report file. `[$DD_CLI_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 
@@ -334,6 +340,12 @@ example, x  Shows an example of required and optional flags for reimport operati
 
 `--auto-create-context, --acc`                 
 * If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_CLI_AUTO_CREATE_CONTEXT]`
+
+`--close-old-findings, --cof`
+* If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the findings for this Service will be closed.[$DD_CLI_CLOSE_OLD_FINDINGS]
+
+`--close-old-findings-product-scope, --cofps`
+* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_CLI_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`          
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_CLI_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -369,7 +381,7 @@ example, x  Shows an example of required and optional flags for reimport operati
 * The version of the test. `[$DD_CLI_TEST_VERSION]`
 
 `--verified, -v`                                   
-* Dictates whether findings should be set to Verified on import. (default: false) `[$DD_CLI_VERIFIED]`
+* Dictates whether Findings should be set to Verified on import. A value of True forces Findings to Verified.  If no value is set, Verified status will instead rely on the incoming report file. `[$DD_CLI_VERIFIED]`
 
 **Settings:**
 
@@ -623,11 +635,11 @@ Use the import command to import new findings into DefectDojo.
 #### Usage
 
 ```
-defectdojo-cli [global options] import <required flags> [optional flags]
-	or: defectdojo-cli [global options] import  --config ./config-file-path
-	or: defectdojo-cli import [-h | --help]
-	or: defectdojo-cli import example [subcommand options]
-	or: defectdojo-cli import example [-h | --help]
+universal-importer [global options] import <required flags> [optional flags]
+	or: universal-importer [global options] import  --config ./config-file-path
+	or: universal-importer import [-h | --help]
+	or: universal-importer import example [subcommand options]
+	or: universal-importer import example [-h | --help]
 
 >> The API token must be set in the environment variable `DD_IMPORTER_DOJO_API_TOKEN`.
 ```
@@ -657,13 +669,13 @@ You can use `deduplication-on-engagement` to restrict deduplication for imported
 **Import Basic syntax:**
 
 ```
-defectdojo-cli import [options]
+universal-importer import [options]
 ```
 
 #### **Import Example:**
 
 ```
-defectdojo-cli import \
+universal-importer import \
 --defectdojo-url "https://YOUR_INSTANCE.cloud.defectdojo.com/" \
 --scan-type "burp scan" \
 --report-path "./examples/burp_findings.xml" \
@@ -687,7 +699,7 @@ defectdojo-cli import \
 #### Options
 
 `--active, -a` 
-* Dictates whether findings should be active on import. (default: true) `[$DD_IMPORTER_ACTIVE]`
+* Dictates whether Findings should be forced to Active or Inactive on import.  A value of True forces Findings to Active, while a value of False forces all Findings to Inactive.  If no value is set, Active status will instead rely on the incoming report file. `[$DD_IMPORTER_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 * The ID of the API Scan Configuration object to use when importing or reimporting. (default: 0) `[$DD_IMPORTER_API_SCAN_CONFIGURATION]`
@@ -701,6 +713,12 @@ defectdojo-cli import \
 
 `--auto-create-context, --acc`
 * If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_IMPORTER_AUTO_CREATE_CONTEXT]`
+
+`--close-old-findings, --cof`
+* If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the findings for this Service will be closed. [$DD_IMPORTER_CLOSE_OLD_FINDINGS]
+
+`--close-old-findings-product-scope, --cofps`
+* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_IMPORTER_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_IMPORTER_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -736,7 +754,7 @@ defectdojo-cli import \
 * The version of the test. `[$DD_IMPORTER_TEST_VERSION]`
 
 `--verified, -v`
-* Dictates whether findings should be verified on import. (default: false) `[$DD_IMPORTER_VERIFIED]`
+* Dictates whether Findings should be set to Verified on import. A value of True forces Findings to Verified.  If no value is set, Verified status will instead rely on the incoming report file. `[$DD_IMPORTER_VERIFIED]`
 
 **Settings:**
 
@@ -772,11 +790,11 @@ You can use `deduplication-on-engagement` to restrict deduplication for imported
 #### Usage
 
 ```
-defectdojo-cli [global options] reimport <required flags> [optional flags]
-   or: defectdojo-cli [global options] reimport  --config ./config-file-path
-   or: defectdojo-cli reimport [-h | --help]
-   or: defectdojo-cli reimport example [subcommand options]
-   or: defectdojo-cli reimport example [-h | --help]
+universal-importer [global options] reimport <required flags> [optional flags]
+   or: universal-importer [global options] reimport  --config ./config-file-path
+   or: universal-importer reimport [-h | --help]
+   or: universal-importer reimport example [subcommand options]
+   or: universal-importer reimport example [-h | --help]
 
 >> The API token must be set in the environment variable `DD_IMPORTER_DOJO_API_TOKEN`.
 ```
@@ -784,7 +802,7 @@ defectdojo-cli [global options] reimport <required flags> [optional flags]
 #### **Reimport Example:**
 
 ```
-defectdojo-cli reimport \
+universal-importer reimport \
 --defectdojo-url "https://YOUR_INSTANCE.cloud.defectdojo.com/" \
 --scan-type "Nancy Scan" \
 --report-path "./examples/nancy_findings.json" \
@@ -806,7 +824,7 @@ example, x  Shows an example of required and optional flags for reimport operati
 #### Options
 
 `--active, -a`                                    
-* Dictates whether findings should be active on import. (default: true) `[$DD_IMPORTER_ACTIVE]`
+* Dictates whether Findings should be forced to Active or Inactive on import.  A value of True forces Findings to Active, while a value of False forces all Findings to Inactive.  If no value is set, Active status will instead rely on the incoming report file. `[$DD_IMPORTER_ACTIVE]`
 
 `--api-scan-configuration value, --asc value`
 * The ID of the API Scan Configuration object to use when importing or reimporting. (default: 0) `[$DD_IMPORTER_API_SCAN_CONFIGURATION]`
@@ -819,6 +837,12 @@ example, x  Shows an example of required and optional flags for reimport operati
 
 `--auto-create-context, --acc`                 
 * If set to true, the importer automatically creates Engagements, Products, and Product_Types (default: false) `[$DD_IMPORTER_AUTO_CREATE_CONTEXT]`
+
+`--close-old-findings, --cof`
+* If True, old Findings no longer present in the report will be Closed as Mitigated when importing. If Service has been set, only the Findings for this Service will be closed. [$DD_IMPORTER_CLOSE_OLD_FINDINGS]
+
+`--close-old-findings-product-scope, --cofps`
+* Select if --close-old-findings applies to **all** Findings of the same type in the Product. By default, this is set to false, meaning that only old Findings of the same type in the Engagement are in scope (and will be closed by Close Old Findings). [$DD_IMPORTER_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE]
 
 `--deduplication-on-engagement, --doe`          
 * If set to true, the importer restricts deduplication for imported findings to the newly created Engagement. (default: false) `[$DD_IMPORTER_DEDUPLICATION_ON_ENGAGEMENT]`
@@ -854,7 +878,7 @@ example, x  Shows an example of required and optional flags for reimport operati
 * The version of the test. `[$DD_IMPORTER_TEST_VERSION]`
 
 `--verified, -v`                                   
-* Dictates whether findings should be set to Verified on import. (default: false) `[$DD_IMPORTER_VERIFIED]`
+* Dictates whether Findings should be set to Verified on import. A value of True forces Findings to Verified. If no value is set, Verified status will instead rely on the incoming report file. (default: unset) `[$DD_IMPORTER_VERIFIED]`
 
 **Settings:**
 
@@ -873,9 +897,9 @@ Interactive mode allows you to configure import and reimport process, step-by-st
 #### Usage
 
 ```
-defectdojo-cli interactive
-	or: defectdojo-cli interactive  [--skip-intro] [--no-full-screen] [--log-path]
-	or: defectdojo-cli interactive [-h | --help]
+universal-importer interactive
+	or: universal-importer interactive  [--skip-intro] [--no-full-screen] [--log-path]
+	or: universal-importer interactive [-h | --help]
 ```
 
 #### Options

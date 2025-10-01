@@ -1,7 +1,6 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from pytz import timezone
 
 import dojo.jira_link.helper as jira_helper
 from dojo.models import Finding
@@ -9,7 +8,6 @@ from dojo.utils import get_system_setting
 
 logger = logging.getLogger(__name__)
 
-locale = timezone(get_system_setting("time_zone"))
 
 """
 Author: Aaron Weaver

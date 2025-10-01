@@ -1,0 +1,238 @@
+{
+  "results": [
+    {
+      "type": "sast",
+      "label": "sast",
+      "id": "0qB0NWis13+GAUmerweOUDyZzmk=",
+      "similarityId": "-1781066682",
+      "status": "RECURRENT",
+      "state": "NOT_EXPLOITABLE",
+      "severity": "CRITICAL",
+      "created": "2025-04-11T10:20:15Z",
+      "firstFoundAt": "2024-07-22T14:05:10Z",
+      "foundAt": "2025-04-11T10:20:15Z",
+      "firstScanId": "7083ee4e-2eff-4e2f-9d98-1aae8023169f",
+      "description": "The application's  method executes an SQL query with executeUpdate, at line 63 of /src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java. The application constructs this SQL query by embedding an untrusted string into the query without proper sanitization. The concatenated string is submitted to the database, where it is parsed and executed accordingly.\n\nAn attacker would be able to inject arbitrary syntax and data into the SQL query, by crafting a malicious payload and providing it via the input query; this input is then read by the  method at line 53 of /src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java. This input then flows through the code, into a query and to the database server - without sanitization.\r\n\r\nThis may enable an SQL Injection attack.\n\n",
+      "descriptionHTML": "\u003cp\u003eThe application‘s  method executes an SQL query with executeUpdate, at line 63 of /src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java. The application constructs this SQL query by embedding an untrusted string into the query without proper sanitization. The concatenated string is submitted to the database, where it is parsed and executed accordingly.\u003c/p\u003e\n\n\u003cp\u003eAn attacker would be able to inject arbitrary syntax and data into the SQL query, by crafting a malicious payload and providing it via the input query; this input is then read by the  method at line 53 of /src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java. This input then flows through the code, into a query and to the database server - without sanitization.\u003c/p\u003e\n\n\u003cp\u003eThis may enable an SQL Injection attack.\u003c/p\u003e\n",
+      "data": {
+        "queryId": 14517067005933136034,
+        "queryName": "SQL_Injection",
+        "group": "Java_Critical_Risk",
+        "resultHash": "0qB0NWis13+GAUmerweOUDyZzmk=",
+        "languageName": "Java",
+        "nodes": [
+          {
+            "id": "0BQetI+3nx066RIjhL4RXixfgGs=",
+            "line": 53,
+            "name": "query",
+            "column": 54,
+            "length": 5,
+            "nodeID": 79013,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson3.completed.query",
+            "methodLine": 53
+          },
+          {
+            "id": "ZZtfb86lLjmfYOKSTKP04NigAnI=",
+            "line": 54,
+            "name": "query",
+            "column": 28,
+            "length": 5,
+            "nodeID": 79011,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson3.completed.query",
+            "methodLine": 53
+          },
+          {
+            "id": "34zDkUrPrO+2mIQJIxZOImmdHOE=",
+            "line": 57,
+            "name": "query",
+            "column": 49,
+            "length": 5,
+            "nodeID": 79379,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson3.injectableQuery.query",
+            "methodLine": 57
+          },
+          {
+            "id": "Wv2DomzUnGITGzTxS9xYSIr4pL4=",
+            "line": 63,
+            "name": "query",
+            "column": 33,
+            "length": 5,
+            "nodeID": 79113,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson3.injectableQuery.query",
+            "methodLine": 57
+          },
+          {
+            "id": "Wk8aYr9/jNUfhXn42U+ia7A0YVU=",
+            "line": 63,
+            "name": "executeUpdate",
+            "column": 32,
+            "length": 1,
+            "nodeID": 79109,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/introduction/SqlInjectionLesson3.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson3.injectableQuery.statement.executeUpdate",
+            "methodLine": 57
+          }
+        ]
+      },
+      "comments": {},
+      "vulnerabilityDetails": {
+        "cweId": 89,
+        "cvss": {},
+        "compliances": [
+          "ASD STIG 6.1",
+          "Base Preset",
+          "OWASP Mobile Top 10 2016",
+          "SANS top 25",
+          "PCI DSS v4.0",
+          "OWASP Mobile Top 10 2024",
+          "OWASP Top 10 2013",
+          "ASA Mobile Premium",
+          "ASA Premium",
+          "OWASP Top 10 API",
+          "PCI DSS v3.2.1",
+          "FISMA 2014",
+          "OWASP Top 10 2017",
+          "MOIS(KISA) Secure Coding 2021",
+          "OWASP ASVS",
+          "OWASP Top 10 2021",
+          "Top Tier",
+          "CWE top 25",
+          "NIST SP 800-53"
+        ]
+      }
+    },
+    {
+      "type": "sast",
+      "label": "sast",
+      "id": "4/tlPdgnp5kS5PNqjnoXQagLbQE=",
+      "similarityId": "2067045827",
+      "status": "RECURRENT",
+      "state": "NOT_EXPLOITABLE",
+      "severity": "CRITICAL",
+      "created": "2025-04-11T10:20:15Z",
+      "firstFoundAt": "2024-07-22T14:05:10Z",
+      "foundAt": "2025-04-11T10:20:15Z",
+      "firstScanId": "7083ee4e-2eff-4e2f-9d98-1aae8023169f",
+      "description": "The application's  method executes an SQL query with executeQuery, at line 74 of /src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java. The application constructs this SQL query by embedding an untrusted string into the query without proper sanitization. The concatenated string is submitted to the database, where it is parsed and executed accordingly.\n\nAn attacker would be able to inject arbitrary syntax and data into the SQL query, by crafting a malicious payload and providing it via the input userId; this input is then read by the  method at line 56 of /src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java. This input then flows through the code, into a query and to the database server - without sanitization.\r\n\r\nThis may enable an SQL Injection attack.\n\n",
+      "descriptionHTML": "\u003cp\u003eThe application‘s  method executes an SQL query with executeQuery, at line 74 of /src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java. The application constructs this SQL query by embedding an untrusted string into the query without proper sanitization. The concatenated string is submitted to the database, where it is parsed and executed accordingly.\u003c/p\u003e\n\n\u003cp\u003eAn attacker would be able to inject arbitrary syntax and data into the SQL query, by crafting a malicious payload and providing it via the input userId; this input is then read by the  method at line 56 of /src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java. This input then flows through the code, into a query and to the database server - without sanitization.\u003c/p\u003e\n\n\u003cp\u003eThis may enable an SQL Injection attack.\u003c/p\u003e\n",
+      "data": {
+        "queryId": 14517067005933136034,
+        "queryName": "SQL_Injection",
+        "group": "Java_Critical_Risk",
+        "resultHash": "4/tlPdgnp5kS5PNqjnoXQagLbQE=",
+        "languageName": "Java",
+        "nodes": [
+          {
+            "id": "h9+K/VCYy1hzaOuJGXAg7Q/2EGE=",
+            "line": 56,
+            "name": "userId",
+            "column": 75,
+            "length": 6,
+            "nodeID": 76692,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.advanced.SqlInjectionLesson6a.completed.userId",
+            "methodLine": 56
+          },
+          {
+            "id": "QV2emb87v+UWl0+V/EIowjpHYuY=",
+            "line": 57,
+            "name": "userId",
+            "column": 28,
+            "length": 6,
+            "nodeID": 76690,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.advanced.SqlInjectionLesson6a.completed.userId",
+            "methodLine": 56
+          },
+          {
+            "id": "8E8sNxUhnzn4/CcQ2zMi0zOfr/4=",
+            "line": 62,
+            "name": "accountName",
+            "column": 46,
+            "length": 11,
+            "nodeID": 77202,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.advanced.SqlInjectionLesson6a.injectableQuery.accountName",
+            "methodLine": 62
+          },
+          {
+            "id": "3a/7HgY2k0OJlt2CDKR+aVmb0vM=",
+            "line": 66,
+            "name": "accountName",
+            "column": 63,
+            "length": 11,
+            "nodeID": 76766,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.advanced.SqlInjectionLesson6a.injectableQuery.accountName",
+            "methodLine": 62
+          },
+          {
+            "id": "z5XE8sZNwVqn0L+7hHnlfBT5gZg=",
+            "line": 66,
+            "name": "query",
+            "column": 7,
+            "length": 5,
+            "nodeID": 76768,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.advanced.SqlInjectionLesson6a.injectableQuery.query",
+            "methodLine": 62
+          },
+          {
+            "id": "wFKklmrWDUKyZ973GslHu6IJ3l8=",
+            "line": 74,
+            "name": "query",
+            "column": 52,
+            "length": 5,
+            "nodeID": 76826,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.advanced.SqlInjectionLesson6a.injectableQuery.query",
+            "methodLine": 62
+          },
+          {
+            "id": "qRZ9lc8euTZVkXlHbHwO6kpHsoA=",
+            "line": 74,
+            "name": "executeQuery",
+            "column": 51,
+            "length": 1,
+            "nodeID": 76822,
+            "fileName": "/src/main/java/org/owasp/webgoat/lessons/sqlinjection/advanced/SqlInjectionLesson6a.java",
+            "fullName": "org.owasp.webgoat.lessons.sqlinjection.advanced.SqlInjectionLesson6a.injectableQuery.statement.executeQuery",
+            "methodLine": 62
+          }
+        ]
+      },
+      "comments": {},
+      "vulnerabilityDetails": {
+        "cweId": 89,
+        "cvss": {},
+        "compliances": [
+          "ASD STIG 6.1",
+          "Base Preset",
+          "OWASP Mobile Top 10 2016",
+          "SANS top 25",
+          "PCI DSS v4.0",
+          "OWASP Mobile Top 10 2024",
+          "OWASP Top 10 2013",
+          "ASA Mobile Premium",
+          "ASA Premium",
+          "OWASP Top 10 API",
+          "PCI DSS v3.2.1",
+          "FISMA 2014",
+          "OWASP Top 10 2017",
+          "MOIS(KISA) Secure Coding 2021",
+          "OWASP ASVS",
+          "OWASP Top 10 2021",
+          "Top Tier",
+          "CWE top 25",
+          "NIST SP 800-53"
+        ]
+      }
+    }
+  ],
+  "totalCount": 75,
+  "scanID": "d121274d-3cb6-4bae-b02a-3eede9eac3d9"
+}

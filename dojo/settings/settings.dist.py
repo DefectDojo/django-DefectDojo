@@ -55,6 +55,7 @@ env = environ.FileAwareEnv(
     DD_SESSION_COOKIE_SECURE=(bool, False),
     DD_SESSION_COOKIE_DOMAIN=(str, "localhost"),
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
+    DD_SESSION_EXPIRE_WARNING=(int, 300),  # warning 5 mins before expiration
     DD_SESSION_COOKIE_AGE=(int, 3600),  # 1 hour
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_CSRF_TRUSTED_ORIGINS=(list, []),
@@ -99,6 +100,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_CRON_SCHEDULE=(str, "* * * * *"),
     DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY=(str, "* * * * *"),
+    DD_CELERY_LOG_LEVEL=(str, "INFO"),
     DD_CELERY_CRON_SCHEDULE_DUPE_DELETE=(int, 1),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
@@ -168,6 +170,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER=(str, ""),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS=(bool, True),
     DD_SOCIAL_AUTH_AZURE_DEVOPS_PERMISSION_AUTO_IMPORT=(bool, False),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_ASSIGN_MODE=(str, "AZURE_DEVOPS_PERMISSIONS"),
     DD_SOCIAL_AUTH_AZURE_DEVOPS_TOKEN=(str, ""),
     DD_SOCIAL_AUTH_AZURE_DEVOPS_ORGANIZATION_URL=(str, ""),
     DD_SOCIAL_AUTH_AZURE_DEVOPS_MAIN_SECURITY_GROUP=(str, ""),
@@ -262,6 +265,7 @@ env = environ.FileAwareEnv(
     DD_MAX_REQRESP_FROM_API=(int, -1),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
+    DD_JIRA_DESCRIPTION_MAX_LENGTH=(int, 32767),
     # When interacting with jira tickets that attached finding groups, we should no be opening any findings
     # on the DefectDojo side because jira has no way of knowing if a finding really should be reopened or not
     DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN=(bool, False),
@@ -311,12 +315,6 @@ env = environ.FileAwareEnv(
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
     # when enabled SonarQube API parser will download the security hotspots
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
-    # when enabled, finding importing will occur asynchronously, default False
-    # This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.
-    DD_ASYNC_FINDING_IMPORT=(bool, False),
-    # The number of findings to be processed per celeryworker
-    # This experimental feature has been deprecated as of DefectDojo 2.44.0 (March release). Please exercise caution if using this feature with an older version of DefectDojo, as results may be inconsistent.
-    DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE=(int, 100),
     # When enabled, deleting objects will be occur from the bottom up. In the example of deleting an engagement
     # The objects will be deleted as follows Endpoints -> Findings -> Tests -> Engagement
     DD_ASYNC_OBJECT_DELETE=(bool, False),
@@ -328,6 +326,9 @@ env = environ.FileAwareEnv(
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, [".txt", ".pdf", ".json", ".xml", ".csv", ".yml", ".png", ".jpeg",
                                  ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip", ".fpr"]),
+    # List of acceptable file types that can be (re)imported
+    DD_FILE_IMPORT_TYPES=(list, [".xml", ".csv", ".nessus", ".json", ".jsonl", ".html", ".js", ".zip",
+                                 ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl"]),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
@@ -344,6 +345,8 @@ env = environ.FileAwareEnv(
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ""),
     # Dictates whether cloud banner is created or not
     DD_CREATE_CLOUD_BANNER=(bool, True),
+    # Compliance Twistlock
+    DD_ENABLE_COMPLIANCE_FINDINGS_TWISTLOCK=(bool, True),
     # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Procuts, ...)
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
@@ -921,6 +924,7 @@ AZUREAD_TENANT_OAUTH2_GROUPS_FILTER = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_
 AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS")
 
 AZURE_DEVOPS_PERMISSION_AUTO_IMPORT = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_PERMISSION_AUTO_IMPORT")
+SOCIAL_AUTH_AZURE_DEVOPS_ASSIGN_MODE = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_ASSIGN_MODE")
 AZURE_DEVOPS_ORGANIZATION_URL = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_ORGANIZATION_URL")
 AZURE_DEVOPS_TOKEN = (
     get_secret(env("DD_SECRET_AZURE_DEVOPS_TOKEN"))["token"]
@@ -1003,14 +1007,10 @@ DOCUMENTATION_URL = env("DD_DOCUMENTATION_URL")
 # this will include 'verified' findings as well as non-verified.
 SLA_NOTIFY_ACTIVE = env("DD_SLA_NOTIFY_ACTIVE")
 SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env("DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY")
-# Based on the 2 above, but only with a JIRA link
-SLA_NOTIFY_WITH_JIRA_ONLY = env("DD_SLA_NOTIFY_WITH_JIRA_ONLY")
-# in days, notify between dayofbreach minus this number until dayofbreach
-SLA_NOTIFY_PRE_BREACH = env("DD_SLA_NOTIFY_PRE_BREACH")
-# in days, skip notifications for findings that go past dayofbreach plus this number
-SLA_NOTIFY_POST_BREACH = env("DD_SLA_NOTIFY_POST_BREACH")
-# Use business days to calculate SLA's and age of a finding instead of calendar days
-SLA_BUSINESS_DAYS = env("DD_SLA_BUSINESS_DAYS")
+SLA_NOTIFY_WITH_JIRA_ONLY = env("DD_SLA_NOTIFY_WITH_JIRA_ONLY")  # Based on the 2 above, but only with a JIRA link
+SLA_NOTIFY_PRE_BREACH = env("DD_SLA_NOTIFY_PRE_BREACH")  # in days, notify between dayofbreach minus this number until dayofbreach
+SLA_NOTIFY_POST_BREACH = env("DD_SLA_NOTIFY_POST_BREACH")  # in days, skip notifications for findings that go past dayofbreach plus this number
+SLA_BUSINESS_DAYS = env("DD_SLA_BUSINESS_DAYS") # Use business days to calculate SLA's and age of a finding instead of calendar days
 SLA_FREEZE_DAYS = env("DD_SLA_FREEZE_DAYS")
 
 
@@ -1159,6 +1159,7 @@ THROTTLE_ANON = env("DD_THROTTLE_ANON")
 THROTTLE_USER = env("DD_THROTTLE_USER")
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = env("DD_SESSION_EXPIRE_AT_BROWSER_CLOSE")
+SESSION_EXPIRE_WARNING = env("DD_SESSION_EXPIRE_WARNING")
 SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
 
 # ------------------------------------------------------------------------------
@@ -1236,8 +1237,8 @@ if API_TOKENS_ENABLED:
     REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] += ("rest_framework.authentication.TokenAuthentication",)
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Defect Dojo API v2",
-    "DESCRIPTION": "Defect Dojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.",
+    "TITLE": "DefectDojo API v2",
+    "DESCRIPTION": "DefectDojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.",
     "VERSION": __version__,
     "SCHEMA_PATH_PREFIX": "/api/v2",
     # OTHER SETTINGS
@@ -1277,6 +1278,7 @@ TEMPLATES = [
                 "dojo.context_processors.bind_system_settings",
                 "dojo.context_processors.bind_alert_count",
                 "dojo.context_processors.bind_announcement",
+                "dojo.context_processors.session_expiry_notification",
             ],
         },
     },
@@ -1335,6 +1337,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.AuditlogMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
+    "dojo.middleware.LongRunningRequestAlertMiddleware",
 ]
 
 # CORS
@@ -1625,6 +1628,7 @@ CELERY_EXPIRING_FINDINGEXCLUSION = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION")
 CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST = env("DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST")
 CELERY_CRON_CHECK_PRIORIZATION = env("DD_CELERY_CRON_CHECK_PRIORIZATION")
 REGEX_VALIDATION_NAME = env("DD_REGEX_VALIDATION_NAME")
+CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
@@ -1767,6 +1771,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Aqua Scan": ["severity", "vulnerability_ids", "component_name", "component_version"],
     "Bandit Scan": ["file_path", "line", "vuln_id_from_tool"],
     "Burp Enterprise Scan": ["title", "severity", "cwe"],
+    "Burp Suite DAST": ["title", "severity", "cwe"],
     "Burp Scan": ["title", "severity", "vuln_id_from_tool"],
     "CargoAudit Scan": ["vulnerability_ids", "severity", "component_name", "component_version", "vuln_id_from_tool"],
     "Checkmarx Scan": ["cwe", "severity", "file_path"],
@@ -1862,6 +1867,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "KrakenD Audit Scan": ["description", "mitigation", "severity"],
     "Red Hat Satellite": ["description", "severity"],
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
+    "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
+    "Cycognito Scan": ["title", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1932,6 +1939,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Threagile risks report": True,
     "HCL AppScan on Cloud SAST XML": True,
     "AWS Inspector2 Scan": True,
+    "Cyberwatch scan (Galeax)": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1949,6 +1957,8 @@ HASH_CODE_FIELDS_ALWAYS = ["service"]
 # legacy one with multiple conditions (default mode)
 DEDUPE_ALGO_LEGACY = "legacy"
 # based on dojo_finding.unique_id_from_tool only (for checkmarx detailed, or sonarQube detailed for example)
+# When using the `unique_id_from_tool` or `vuln_id_from_tool` fields for dedupication, it's important that these are uqniue for the finding and constant over time across subsequent scans.
+# If this is not the case, the values can still be useful to set on the finding model without using them for deduplication.
 DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL = "unique_id_from_tool"
 # based on dojo_finding.hash_code only
 DEDUPE_ALGO_HASH_CODE = "hash_code"
@@ -1988,9 +1998,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AWS Prowler Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Prowler V3": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "AWS Security Finding Format (ASFF) Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    "Burp REST API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Bandit Scan": DEDUPE_ALGO_HASH_CODE,
+    "Burp REST API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Burp Enterprise Scan": DEDUPE_ALGO_HASH_CODE,
+    "Burp Suite DAST Scan": DEDUPE_ALGO_HASH_CODE,
     "Burp Scan": DEDUPE_ALGO_HASH_CODE,
     "CargoAudit Scan": DEDUPE_ALGO_HASH_CODE,
     "Checkmarx Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
@@ -2097,6 +2108,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "MobSF Scorecard Scan": DEDUPE_ALGO_HASH_CODE,
     "OSV Scan": DEDUPE_ALGO_HASH_CODE,
     "Nosey Parker Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    # The bearer fingerprint is not unique across multiple scans, so it shouldn't be used for deduplication (https://github.com/DefectDojo/django-DefectDojo/pull/12346#issuecomment-2841561634)
     "Bearer CLI": DEDUPE_ALGO_HASH_CODE,
     "Wiz Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Deepfence Threatmapper Report": DEDUPE_ALGO_HASH_CODE,
@@ -2113,6 +2125,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "PTART Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
+    "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -2153,6 +2166,7 @@ if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
         JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
+JIRA_DESCRIPTION_MAX_LENGTH = env("DD_JIRA_DESCRIPTION_MAX_LENGTH")
 JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN = env("DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN")
 
 # ------------------------------------------------------------------------------
@@ -2239,7 +2253,7 @@ LOGGING = {
         },
         "celery": {
             "handlers": [rf"{LOGGING_HANDLER}"],
-            "level": str(LOG_LEVEL),
+            "level": str(CELERY_LOG_LEVEL),
             "propagate": False,
             # workaround some celery logging known issue
             "worker_hijack_root_logger": False,
@@ -2324,10 +2338,6 @@ DUPLICATE_CLUSTER_CASCADE_DELETE = env("DD_DUPLICATE_CLUSTER_CASCADE_DELETE")
 # Deside if SonarQube API parser should download the security hotspots
 SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
 
-# when enabled, finding importing will occur asynchronously, default False
-ASYNC_FINDING_IMPORT = env("DD_ASYNC_FINDING_IMPORT")
-# The number of findings to be processed per celeryworker
-ASYNC_FINDING_IMPORT_CHUNK_SIZE = env("DD_ASYNC_FINDING_IMPORT_CHUNK_SIZE")
 # When enabled, deleting objects will be occur from the bottom up. In the example of deleting an engagement
 # The objects will be deleted as follows Endpoints -> Findings -> Tests -> Engagement
 ASYNC_OBJECT_DELETE = env("DD_ASYNC_OBJECT_DELETE")
@@ -2342,13 +2352,18 @@ DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
 SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
 
 VULNERABILITY_URLS = {
+    "ALAS": "https://alas.aws.amazon.com/AL2/&&.html",  # e.g. https://alas.aws.amazon.com/alas2.html
     "ALBA-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALBA-2019:3411
+    "ALEA-": "https://errata.almalinux.org/8/&&.html",  # e.g. https://errata.almalinux.org/8/ALEA-2022-1998.html
+    "ALINUX2-SA-": "https://mirrors.aliyun.com/alinux/cve/",  # e.g. https://mirrors.aliyun.com/alinux/cve/alinux2-sa-20250007.xml
+    "ALINUX3-SA-": "https://mirrors.aliyun.com/alinux/3/cve/",  # e.g. https://mirrors.aliyun.com/alinux/3/cve/alinux3-sa-20250059.xml
     "ALSA-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALSA-2024:0827
     "ASA-": "https://security.archlinux.org/",  # e.g. https://security.archlinux.org/ASA-202003-8
     "AVD": "https://avd.aquasec.com/misconfig/",  # e.g. https://avd.aquasec.com/misconfig/avd-ksv-01010
     "BAM-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BAM-25498
     "BSERV-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BSERV-19020
     "C-": env("DD_CUSTOM_TAG_PARSER").get("url_controls_cloud", "https://hub.armosec.io/docs/"),  # e.g. https://hub.armosec.io/docs/c-0085
+    "CISCO-SA-": "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/",  # e.g. https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-umbrella-tunnel-gJw5thgE
     "CAPEC": "https://capec.mitre.org/data/definitions/&&.html",  # e.g. https://capec.mitre.org/data/definitions/157.html
     "CGA-": "https://images.chainguard.dev/security/",  # e.g. https://images.chainguard.dev/security/CGA-24pq-h5fw-43v3
     "CONFSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/CONFSERVER-93361
@@ -2357,16 +2372,25 @@ VULNERABILITY_URLS = {
     "DLA-": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/DLA-3917-1
     "DSA-": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/DSA-5791-1
     "DTSA-": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/DTSA-41-1
+    "ELA-": "https://www.freexian.com/lts/extended/updates/",  # e.g. https://www.freexian.com/lts/extended/updates/ela-1387-1-erlang
     "ELBA-": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELBA-2024-7457.html
     "ELSA-": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELSA-2024-12714.html
+    "EUVD-": "https://euvd.enisa.europa.eu/vulnerability/",  # e.g. https://euvd.enisa.europa.eu/vulnerability/EUVD-2025-17599
     "FEDORA-": "https://bodhi.fedoraproject.org/updates/",  # e.g. https://bodhi.fedoraproject.org/updates/FEDORA-EPEL-2024-06aa7dc422
     "FG-IR-": "https://www.fortiguard.com/psirt/",  # e.g. https://www.fortiguard.com/psirt/FG-IR-24-373
     "GHSA-": "https://github.com/advisories/",  # e.g. https://github.com/advisories/GHSA-58vj-cv5w-v4v6
     "GLSA": "https://security.gentoo.org/",  # e.g. https://security.gentoo.org/glsa/202409-32
+    "GO-": "https://pkg.go.dev/vuln/",  # e.g. https://pkg.go.dev/vuln/GO-2025-3703
+    "GSD-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/gsd-2021-34715
     "JSDSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/JSDSERVER-14872
+    "JVNDB-": "https://jvndb.jvn.jp/en/contents/",  # e.g. https://jvndb.jvn.jp/en/contents/2025/JVNDB-2025-004079.html
+    "KB": "https://support.hcl-software.com/csm?id=kb_article&sysparm_article=",  # e.g. https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0108401
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
+    "LEN-": "https://support.lenovo.com/cl/de/product_security/",  # e.g. https://support.lenovo.com/cl/de/product_security/LEN-94953
     "MGAA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGAA-2013-0054.html
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
+    "NCSC-": "https://advisories.ncsc.nl/advisory?id=",  # e.g. https://advisories.ncsc.nl/advisory?id=NCSC-2025-0191
+    "NTAP-": "https://security.netapp.com/advisory/",  # e.g. https://security.netapp.com/advisory/ntap-20250328-0007
     "OPENSUSE-SU-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/openSUSE-SU-2025:14898-1
     "OSV-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/OSV-2024-1330
     "PAN-SA-": "https://security.paloaltonetworks.com/",  # e.g. https://security.paloaltonetworks.com/PAN-SA-2024-0010
@@ -2380,19 +2404,26 @@ VULNERABILITY_URLS = {
     "RLSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RLSA-2024:7001
     "RUSTSEC-": "https://rustsec.org/advisories/",  # e.g. https://rustsec.org/advisories/RUSTSEC-2024-0432
     "RXSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
+    "SCA-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/sca-2020-0002
     "SNYK-": "https://snyk.io/vuln/",  # e.g. https://security.snyk.io/vuln/SNYK-JS-SOLANAWEB3JS-8453984
-    "SSA:": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2024-157-01
+    "SOPHOS-SA-": "https://www.sophos.com/en-us/security-advisories/",  # e.g. https://www.sophos.com/en-us/security-advisories/sophos-sa-20250411-taegis-agent-lpe
+    "SSA:": "https://vulners.com/slackware/",  # e.g. https://www.tenable.com/plugins/nessus/240171 --> https://vulners.com/slackware/SSA-2025-169-02
     "SSA-": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2025-074-01
     "SP-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SP-CAAANR7
     "SUSE-SU-": "https://www.suse.com/support/update/announcement/",  # e.g. https://www.suse.com/support/update/announcement/2024/suse-su-20244196-1
     "SVD-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SVD-2025-0103
     "TEMP-": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/TEMP-0841856-B18BAF
+    "TS-": """https://tailscale.com/security-bulletins#""",  # e.g. https://tailscale.com/security-bulletins or https://tailscale.com/security-bulletins#ts-2022-001-1243
     "TYPO3-": "https://typo3.org/security/advisory/",  # e.g. https://typo3.org/security/advisory/typo3-core-sa-2025-010
     "USN-": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
+    "VAR-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/var-201801-0152
     "VNS": "https://vulners.com/",
+    "WID-SEC-W-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/wid-sec-w-2025-1468
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
+# List of acceptable file types that can be (re)imported
+FILE_IMPORT_TYPES = env("DD_FILE_IMPORT_TYPES")
 # Fixes error
 # AttributeError: Problem installing fixture '/app/dojo/fixtures/defect_dojo_sample_data.json': 'Settings' object has no attribute 'AUDITLOG_DISABLE_ON_RAW_SAVE'
 AUDITLOG_DISABLE_ON_RAW_SAVE = False
@@ -2400,6 +2431,7 @@ AUDITLOG_DISABLE_ON_RAW_SAVE = False
 ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
 # Dictates whether cloud banner is created or not
 CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
+ENABLE_COMPLIANCE_FINDINGS_TWISTLOCK = env("DD_ENABLE_COMPLIANCE_FINDINGS_TWISTLOCK")
 
 # ------------------------------------------------------------------------------
 # Auditlog

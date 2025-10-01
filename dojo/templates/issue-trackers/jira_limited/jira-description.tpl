@@ -10,3 +10,8 @@
 *Product/Engagement/Test:* [{{ finding.test.engagement.product.name }}|{{ product_url|full_url }}] / [{{ finding.test.engagement.name }}|{{ engagement_url|full_url }}] / [{{ finding.test }}|{{ test_url|full_url }}]
 
 *Reporter:* [{{ finding.reporter|full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]
+
+{% if finding_text %}
+*Finding Text*:
+{{ finding_text|safe }}
+{% endif %}

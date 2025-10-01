@@ -3198,7 +3198,7 @@ msgid ""
 msgstr ""
 
 #: dojo/templates/dojo/forgot_username.html
-msgid "Retreive my username"
+msgid "Retrieve my username"
 msgstr ""
 
 #: dojo/templates/dojo/forgot_username_done.html

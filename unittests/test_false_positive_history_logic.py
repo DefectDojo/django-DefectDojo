@@ -1717,7 +1717,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         if not product and not engagement and not test:
             self.log_all_products()
 
-    def copy_and_reset_finding(find_idself, find_id):
+    def copy_and_reset_finding(self, find_id):
         org = Finding.objects.get(id=find_id)
         new = _copy_model_util(org)
         new.duplicate = False

@@ -50,7 +50,7 @@ def check_object_permission(
 ):
     if request.method == "GET":
         return user_has_permission(request.user, obj, get_permission)
-    if request.method == "PUT" or request.method == "PATCH":
+    if request.method in {"PUT", "PATCH"}:
         return user_has_permission(request.user, obj, put_permission)
     if request.method == "DELETE":
         return user_has_permission(request.user, obj, delete_permission)

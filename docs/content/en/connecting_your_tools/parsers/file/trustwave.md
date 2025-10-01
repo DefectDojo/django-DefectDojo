@@ -39,3 +39,12 @@ Sample Trustwave scans can be found in the [unit tests folder](https://github.co
 
 ### Link To Tool
 [Trustwave](https://www.trustwave.com/en-us/) provides vulnerability scanning services through their SecureConnect platform.
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+
+- title
+- cwe
+- line
+- file path
+- description

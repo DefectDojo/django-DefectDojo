@@ -159,7 +159,7 @@
                                         {% if prod|has_object_permission:"Benchmark_Edit" %}
                                           {% if system_settings.enable_benchmark and benchmark_type %}
                                             <li role="separator" class="divider"></li>
-                                            {% for bt in benchmark_type %}
+                                            {% for bt in benchmark_types %}
                                               <li role="presentation">
                                                 <a rel="noopener noreferrer" title="{{ bt.name }}" href="{% url 'view_product_benchmark' prod.id bt.id %}">
                                                   <span class="fa-solid fa-list-ul"></span> {{ bt.name }} {{ bt.version }}

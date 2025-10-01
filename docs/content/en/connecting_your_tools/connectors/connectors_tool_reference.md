@@ -133,19 +133,19 @@ This connector uses the Probely REST API to fetch data.
 You can find an API key under the User \> API Keys menu in Probely.  
 See [Probely documentation](https://help.probely.com/en/articles/8592281-how-to-generate-an-api-key) for more info.
 
-## **SemGrep**
+## **Semgrep**
 
-This connector uses the SemGrep REST API to fetch data. 
+This connector uses the Semgrep REST API to fetch data.
 
 #### Connector Mappings
 
-Enter https://semgrep.dev/api/v1/in the **Location** field.
+Enter `https://semgrep.dev/api/v1/` in the **Location** field.
 
 1. Enter a valid API key in the **Secret** field. You can find this on the Tokens page:   
 ​  
 "Settings" in the left navbar \> Tokens \> Create new token ([https://semgrep.dev/orgs/\-/settings/tokens](https://semgrep.dev/orgs/-/settings/tokens))
 
-See [SemGrep documentation](https://semgrep.dev/docs/semgrep-cloud-platform/semgrep-api/#tag__badge-list) for more info.
+See [Semgrep documentation](https://semgrep.dev/docs/semgrep-cloud-platform/semgrep-api/#tag__badge-list) for more info.
 
 ## SonarQube
 
@@ -187,6 +187,11 @@ On\-premise Tenable Connectors are not available at this time.
 
 See [Tenable's API Documentation](https://docs.tenable.com/vulnerability-management/Content/Settings/my-account/GenerateAPIKey.htm) for more info.
 
+## Wiz
 
+Using the Wiz connector requires you to create a service account: see the [Wiz documentation](https://docs.wiz.io/wiz-docs/docs/service-accounts-settings#add-a-service-account) for more info.  You will need a Wiz account to access the documentation.
 
+#### **Connector Mappings**
 
+1. Enter your Wiz Client ID in the Client ID field.
+2. Enter the Wiz Client Secret in the Secret field.

@@ -11,7 +11,7 @@
             </p>
             <p>
               {% blocktranslate trimmed with engagement_name=engagement.name engagement_product=engagement.product prod_url=product_url|full_url eng_url=engagement_url|full_url%}
-                The engagement "{{ engagement_name }}" has been created in the product "{{ engagement_product }}". It can be viewed here: <a href="{{prod_url}}">{{product}}</a> / <a href="{{eng_url}}">{{ engagement_name }}</a>
+                The engagement "{{ engagement_name }}" has been created in the product "{{ engagement_product }}". It can be viewed here: <a href="{{prod_url}}">{{ engagement_product }}</a> / <a href="{{eng_url}}">{{ engagement_name }}</a>
               {% endblocktranslate %}
             </p>
             <br/>

@@ -1,5 +1,6 @@
 import base64
 
+import dateutil
 from django.core.files.base import ContentFile
 
 from dojo.models import Endpoint, FileUpload, Finding
@@ -14,6 +15,10 @@ class GenericJSONParser:
             name=data.get("name", self.ID),
             parser_type=data.get("type", self.ID),
             version=data.get("version"),
+            description=data.get("description"),
+            dynamic_tool=data.get("dynamic_tool"),
+            static_tool=data.get("static_tool"),
+            soc=data.get("soc"),
         )
         test_internal.findings = []
         for item in data.get("findings", []):
@@ -39,6 +44,13 @@ class GenericJSONParser:
                 del item["vulnerability_ids"]
             # check for required keys
             required = {"title", "severity", "description"}
+
+            if "date" in item:
+                item["date"] = dateutil.parser.parse(item["date"]).date()
+
+            if "mitigated" in item:
+                item["mitigated"] = dateutil.parser.parse(item["mitigated"])
+
             missing = sorted(required.difference(item))
             if missing:
                 msg = f"Required fields are missing: {missing}"

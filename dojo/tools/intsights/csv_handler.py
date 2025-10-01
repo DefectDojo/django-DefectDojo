@@ -81,9 +81,7 @@ class IntSightsCSVParser:
                 alert.pop("Remediation")
                 alert.pop("Closed Reason")
                 alert.pop("Rating")
-                for key in required_keys:
-                    if not alert[key]:
-                        invalid_alerts.append(alert)
+                invalid_alerts.extend(alert for key in required_keys if not alert[key])
 
                 if alert not in invalid_alerts:
                     alerts.append(alert)

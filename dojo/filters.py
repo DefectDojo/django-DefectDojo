@@ -5,7 +5,6 @@ import warnings
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 
-import pytz
 import six
 import tagulous
 from auditlog.models import LogEntry
@@ -15,8 +14,9 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, JSONField, Q
 from django.forms import HiddenInput
-from django.utils import timezone
+from django.utils.timezone import now, tzinfo
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -79,6 +79,7 @@ from dojo.models import (
     Development_Environment,
     Dojo_Group,
     Dojo_User,
+    DojoMeta,
     Endpoint,
     Endpoint_Status,
     Engagement,
@@ -97,6 +98,7 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Test_Type,
     TextQuestion,
+    User,
     Vulnerability_Id,
     GeneralSettings
 )
@@ -108,8 +110,6 @@ from dojo.user.queries import get_authorized_users
 from dojo.utils import get_system_setting, is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
-
-local_tz = pytz.timezone(get_system_setting("time_zone"))
 
 BOOLEAN_CHOICES = (("false", "No"), ("true", "Yes"))
 EARLIEST_FINDING = None
@@ -134,10 +134,6 @@ def vulnerability_id_filter(queryset, name, value):
         .filter(vulnerability_id=value) \
         .values_list("finding_id", flat=True)
     return queryset.filter(id__in=ids)
-
-
-def now():
-    return local_tz.localize(datetime.today())
 
 
 class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
@@ -248,9 +244,8 @@ class FindingStatusFilter(ChoiceFilter):
     def filter(self, qs, value):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
-            start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time()),
-            )
+            start_date = datetime.combine(
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
         try:
@@ -358,7 +353,7 @@ class FindingSLAFilter(ChoiceFilter):
 
     def sla_satisfied(self, qs, name):
         # return findings that have an sla expiration date after today or no sla expiration date
-        return qs.filter(Q(sla_expiration_date__isnull=True) | Q(sla_expiration_date__gt=timezone.now().date()))
+        return qs.filter(Q(sla_expiration_date__isnull=True) | Q(sla_expiration_date__gt=now().date()))
 
     def sla_violated(self, qs, name):
         # return active findings that have an sla expiration date before today
@@ -371,7 +366,7 @@ class FindingSLAFilter(ChoiceFilter):
                 risk_accepted=False,
                 is_mitigated=False,
                 mitigated=None,
-            ) & Q(sla_expiration_date__lt=timezone.now().date()),
+            ) & Q(sla_expiration_date__lt=now().date()),
         )
     
     def sla_left_seven_days(self, qs, name):
@@ -596,6 +591,12 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
         "epss_score_range",
         "epss_percentile",
         "epss_percentile_range",
+        "known_exploited",
+        "ransomware_used",
+        "kev_date",
+        "kev_before",
+        "kev_after",
+        "fix_available",
     ])
 
     if similar:
@@ -979,17 +980,15 @@ class MetricsDateRangeFilter(ChoiceFilter):
     def any(self, qs, name):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
-            start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time()),
-            )
+            start_date = datetime.combine(
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
             return qs.all()
         return None
 
     def current_month(self, qs, name):
-        self.start_date = local_tz.localize(
-            datetime(now().year, now().month, 1, 0, 0, 0))
+        self.start_date = datetime(now().year, now().month, 1, 0, 0, 0).replace(tzinfo=tzinfo())
         self.end_date = now()
         return qs.filter(**{
             f"{name}__year": self.start_date.year,
@@ -997,8 +996,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         })
 
     def current_year(self, qs, name):
-        self.start_date = local_tz.localize(
-            datetime(now().year, 1, 1, 0, 0, 0))
+        self.start_date = datetime(now().year, 1, 1, 0, 0, 0).replace(tzinfo=tzinfo())
         self.end_date = now()
         return qs.filter(**{
             f"{name}__year": now().year,
@@ -1048,9 +1046,8 @@ class MetricsDateRangeFilter(ChoiceFilter):
             return qs
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
-            start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time()),
-            )
+            start_date = datetime.combine(
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
         try:
@@ -1554,6 +1551,22 @@ class ProductFilterWithoutObjectLookups(ProductFilterHelper):
         ]
 
 
+class ApiDojoMetaFilter(DojoFilter):
+    name_case_insensitive = CharFilter(field_name="name", lookup_expr="iexact")
+    value_case_insensitive = CharFilter(field_name="value", lookup_expr="iexact")
+
+    class Meta:
+        model = DojoMeta
+        fields = [
+            "id",
+            "product",
+            "endpoint",
+            "finding",
+            "name",
+            "value",
+        ]
+
+
 class ApiProductFilter(DojoFilter):
     # BooleanFilter
     external_audience = BooleanFilter(field_name="external_audience")
@@ -1651,6 +1664,7 @@ class ApiFindingFilter(DojoFilter):
     under_review = BooleanFilter(field_name="under_review")
     verified = BooleanFilter(field_name="verified")
     has_jira = BooleanFilter(field_name="jira_issue", lookup_expr="isnull", exclude=True)
+    fix_available = BooleanFilter(field_name="fix_available")
     # CharFilter
     component_version = CharFilter(lookup_expr="icontains")
     component_name = CharFilter(lookup_expr="icontains")
@@ -1853,6 +1867,7 @@ class FindingFilterHelper(FilterSet):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
+    fix_available = ReportBooleanFilter()
     mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
     mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On", method="filter_mitigated_on")
     mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
@@ -1872,6 +1887,9 @@ class FindingFilterHelper(FilterSet):
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
     endpoints = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
+    test__engagement__product__lifecycle = MultipleChoiceFilter(
+        choices=Product.LIFECYCLE_CHOICES,
+        label="Product lifecycle")
     priority = FindingPriorityFilter(label="Priority")
 
     has_component = BooleanFilter(
@@ -1931,6 +1949,9 @@ class FindingFilterHelper(FilterSet):
             "is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound "
             'input empty will filter only on the upper bound -- filtering on "less than or equal").'
         ))
+    kev_date = DateFilter(field_name="kev_date", lookup_expr="exact", label="Added to KEV On")
+    kev_before = DateFilter(field_name="kev_date", lookup_expr="lt", label="Added to KEV Before")
+    kev_after = DateFilter(field_name="kev_date", lookup_expr="gt", label="Added to KEV After")
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1938,6 +1959,7 @@ class FindingFilterHelper(FilterSet):
             ("numerical_severity", "numerical_severity"),
             ("date", "date"),
             ("mitigated", "mitigated"),
+            ("fix_available", "fix_available"),
             ("risk_acceptance__created__date",
              "risk_acceptance__created__date"),
             ("last_reviewed", "last_reviewed"),
@@ -1947,16 +1969,23 @@ class FindingFilterHelper(FilterSet):
             ("service", "service"),
             ("epss_score", "epss_score"),
             ("epss_percentile", "epss_percentile"),
+            ("known_exploited", "known_exploited"),
+            ("ransomware_used", "ransomware_used"),
+            ("kev_date", "kev_date"),
         ),
         field_labels={
             "numerical_severity": "Severity",
             "date": "Date",
             "risk_acceptance__created__date": "Acceptance Date",
             "mitigated": "Mitigated Date",
+            "fix_available": "Fix Available",
             "title": "Finding Name",
             "test__engagement__product__name": "Product Name",
             "epss_score": "EPSS Score",
             "epss_percentile": "EPSS Percentile",
+            "known_exploited": "Known Exploited",
+            "ransomware_used": "Ransomware Used",
+            "kev_date": "Date added to KEV",
         },
     )
 
@@ -1968,6 +1997,9 @@ class FindingFilterHelper(FilterSet):
         self.form.fields["on"].widget = date_input_widget
         self.form.fields["before"].widget = date_input_widget
         self.form.fields["after"].widget = date_input_widget
+        self.form.fields["kev_date"].widget = date_input_widget
+        self.form.fields["kev_before"].widget = date_input_widget
+        self.form.fields["kev_after"].widget = date_input_widget
         self.form.fields["mitigated_on"].widget = date_input_widget
         self.form.fields["mitigated_before"].widget = date_input_widget
         self.form.fields["mitigated_after"].widget = date_input_widget
@@ -2103,9 +2135,6 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
-    test__engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES,
-        label="Product lifecycle")
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
         label="Product")
@@ -2148,6 +2177,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         self.set_related_object_fields(*args, **kwargs)
 
     def set_related_object_fields(self, *args: list, **kwargs: dict):
+        finding_group_query = Finding_Group.objects.all()
         if self.pid is not None:
             del self.form.fields["test__engagement__product"]
             del self.form.fields["test__engagement__product__prod_type"]
@@ -2156,6 +2186,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
                 product_id=self.pid,
             ).all()
             self.form.fields["test"].queryset = get_authorized_tests(Permissions.Test_View, product=self.pid).prefetch_related("test_type")
+            finding_group_query = Finding_Group.objects.filter(test__engagement__product_id=self.pid)
         else:
             self.form.fields[
                 "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View, self.user)
@@ -2165,8 +2196,42 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         if self.form.fields.get("test__engagement__product"):
             self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View, self.user)
         if self.form.fields.get("finding_group", None):
-            self.form.fields["finding_group"].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View)
+            self.form.fields["finding_group"].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View, queryset=finding_group_query)
         self.form.fields["reviewers"].queryset = self.form.fields["reporter"].queryset
+
+
+class FindingGroupsFilter(FilterSet):
+    name = CharFilter(lookup_expr="icontains", label="Name")
+    severity = ChoiceFilter(
+        choices=[
+            ("Low", "Low"),
+            ("Medium", "Medium"),
+            ("High", "High"),
+            ("Critical", "Critical"),
+        ],
+        label="Min Severity",
+    )
+    engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")
+    product = ModelMultipleChoiceFilter(queryset=Product.objects.none(), label="Product")
+
+    class Meta:
+        model = Finding
+        fields = ["name", "severity", "engagement", "product"]
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        self.pid = kwargs.pop("pid", None)
+        super().__init__(*args, **kwargs)
+        self.set_related_object_fields()
+
+    def set_related_object_fields(self):
+        if self.pid is not None:
+            self.form.fields["engagement"].queryset = Engagement.objects.filter(product_id=self.pid)
+            if "product" in self.form.fields:
+                del self.form.fields["product"]
+        else:
+            self.form.fields["product"].queryset = get_authorized_products(Permissions.Product_View)
+            self.form.fields["engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
 
 class AcceptedFindingFilter(FindingFilter):
@@ -3154,7 +3219,7 @@ class ApiTestFilter(DojoFilter):
         model = Test
         fields = ["id", "title", "test_type", "target_start",
                      "target_end", "notes", "percent_complete",
-                     "actual_time", "engagement", "version",
+                     "engagement", "version",
                      "branch_tag", "build_id", "commit_hash",
                      "api_scan_configuration", "scan_type"]
 
@@ -3238,6 +3303,7 @@ class ReportFindingFilterHelper(FilterSet):
         fields=(
             ("title", "title"),
             ("date", "date"),
+            ("fix_available", "fix_available"),
             ("numerical_severity", "numerical_severity"),
             ("epss_score", "epss_score"),
             ("epss_percentile", "epss_percentile"),
@@ -3743,6 +3809,44 @@ class QuestionTypeFilter(ChoiceFilter):
         except (ValueError, TypeError):
             value = None
         return self.options[value][1](self, qs, self.options[value][0])
+
+
+class ApiUserFilter(filters.FilterSet):
+    last_login = filters.DateFromToRangeFilter()
+    date_joined = filters.DateFromToRangeFilter()
+    is_active = filters.BooleanFilter()
+    is_superuser = filters.BooleanFilter()
+    username = filters.CharFilter(lookup_expr="icontains")
+    first_name = filters.CharFilter(lookup_expr="icontains")
+    last_name = filters.CharFilter(lookup_expr="icontains")
+    email = filters.CharFilter(lookup_expr="icontains")
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "is_active",
+            "is_superuser",
+            "last_login",
+            "date_joined",
+        ]
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ("username", "username"),
+            ("last_name", "last_name"),
+            ("first_name", "first_name"),
+            ("email", "email"),
+            ("is_active", "is_active"),
+            ("is_superuser", "is_superuser"),
+            ("date_joined", "date_joined"),
+            ("last_login", "last_login"),
+        ),
+    )
 
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):

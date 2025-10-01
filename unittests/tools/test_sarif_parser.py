@@ -15,10 +15,9 @@ class TestSarifParser(DojoTestCase):
         self.assertEqual(False, finding.dynamic_finding)  # by specification
 
     def test_example_report(self):
-        with open(
-            get_unit_tests_scans_path("sarif") / "DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif",
-            encoding="utf-8",
-        )as testfile:
+        with (
+            get_unit_tests_scans_path("sarif") / "DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif"
+        ).open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(510, len(findings))
@@ -27,7 +26,7 @@ class TestSarifParser(DojoTestCase):
 
     def test_suppression_report(self):
         """Test report file having different suppression definitions"""
-        with open(get_unit_tests_scans_path("sarif") / "suppression_test.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "suppression_test.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -39,7 +38,7 @@ class TestSarifParser(DojoTestCase):
                     self.assertEqual(True, finding.active)
 
     def test_example2_report(self):
-        with open(get_unit_tests_scans_path("sarif") / "appendix_k.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "appendix_k.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -67,13 +66,13 @@ add_core(ptr, offset, val);
                 self.common_checks(finding)
 
     def test_example_k1_report(self):
-        with open(get_unit_tests_scans_path("sarif") / "appendix_k1.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "appendix_k1.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_example_k2_report(self):
-        with open(get_unit_tests_scans_path("sarif") / "appendix_k2.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "appendix_k2.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -88,7 +87,7 @@ add_core(ptr, offset, val);
                 self.common_checks(finding)
 
     def test_example_k3_report(self):
-        with open(get_unit_tests_scans_path("sarif") / "appendix_k3.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "appendix_k3.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -98,7 +97,7 @@ add_core(ptr, offset, val);
                 self.common_checks(finding)
 
     def test_example_k4_report_mitigation(self):
-        with open(get_unit_tests_scans_path("sarif") / "appendix_k4.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "appendix_k4.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -115,7 +114,7 @@ add_core(ptr, offset, val);
 
     def test_example_report_ms(self):
         """Report file come from Microsoft SARIF sdk on GitHub"""
-        with open(get_unit_tests_scans_path("sarif") / "SuppressionTestCurrent.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "SuppressionTestCurrent.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
@@ -125,7 +124,7 @@ add_core(ptr, offset, val);
                 self.common_checks(finding)
 
     def test_example_report_semgrep(self):
-        with open(get_unit_tests_scans_path("sarif") / "semgrepowasp-benchmark-sample.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "semgrepowasp-benchmark-sample.sarif").open(encoding="utf-8") as testfile:
             test = Test()
             parser = SarifParser()
             findings = parser.get_findings(testfile, test)
@@ -139,7 +138,7 @@ add_core(ptr, offset, val);
                 self.common_checks(finding)
 
     def test_example_report_scanlift_dependency_check(self):
-        with open(get_unit_tests_scans_path("sarif") / "dependency_check.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "dependency_check.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(13, len(findings))
@@ -162,7 +161,7 @@ add_core(ptr, offset, val);
                 self.common_checks(finding)
 
     def test_example_report_scanlift_bash(self):
-        with open(get_unit_tests_scans_path("sarif") / "bash-report.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "bash-report.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(27, len(findings))
@@ -191,7 +190,7 @@ add_core(ptr, offset, val);
                 self.common_checks(finding)
 
     def test_example_report_taint_python(self):
-        with open(get_unit_tests_scans_path("sarif") / "taint-python-report.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "taint-python-report.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(11, len(findings))
@@ -233,7 +232,7 @@ add_core(ptr, offset, val);
 
     def test_njsscan(self):
         """Generated with opensecurity/njsscan (https://github.com/ajinabraham/njsscan)"""
-        with open(get_unit_tests_scans_path("sarif") / "njsscan.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "njsscan.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -260,7 +259,7 @@ add_core(ptr, offset, val);
 
     def test_dockle(self):
         """Generated with goodwithtech/dockle (https://github.com/goodwithtech/dockle)"""
-        with open(get_unit_tests_scans_path("sarif") / "dockle_0_3_15.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "dockle_0_3_15.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
@@ -308,7 +307,7 @@ add_core(ptr, offset, val);
                 )
 
     def test_mobsfscan(self):
-        with open(get_unit_tests_scans_path("sarif") / "mobsfscan.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "mobsfscan.json").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(18, len(findings))
@@ -316,7 +315,7 @@ add_core(ptr, offset, val);
                 self.common_checks(finding)
 
     def test_gitleaks(self):
-        with open(get_unit_tests_scans_path("sarif") / "gitleaks_7.5.0.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "gitleaks_7.5.0.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(8, len(findings))
@@ -366,7 +365,7 @@ add_core(ptr, offset, val);
             self.assertEqual(37, finding.line)
 
     def test_flawfinder(self):
-        with open(get_unit_tests_scans_path("sarif") / "flawfinder.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "flawfinder.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(53, len(findings))
@@ -442,7 +441,7 @@ add_core(ptr, offset, val);
                 self.assertEqual("https://cwe.mitre.org/data/definitions/120.html", finding.references)
 
     def test_flawfinder_interfacev2(self):
-        with open(get_unit_tests_scans_path("sarif") / "flawfinder.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "flawfinder.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             tests = parser.get_tests(parser.get_scan_types()[0], testfile)
             self.assertEqual(1, len(tests))
@@ -511,7 +510,7 @@ add_core(ptr, offset, val);
                 self.assertEqual("https://cwe.mitre.org/data/definitions/120.html", finding.references)
 
     def test_appendix_k1_double_interfacev2(self):
-        with open(get_unit_tests_scans_path("sarif") / "appendix_k1_double.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "appendix_k1_double.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             tests = parser.get_tests(parser.get_scan_types()[0], testfile)
             self.assertEqual(2, len(tests))
@@ -527,7 +526,7 @@ add_core(ptr, offset, val);
                 self.assertEqual(0, len(findings))
 
     def test_codeql_snippet_report(self):
-        with open(get_unit_tests_scans_path("sarif") / "codeQL-output.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "codeQL-output.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(72, len(findings))
@@ -553,7 +552,7 @@ add_core(ptr, offset, val);
                 self.common_checks(finding)
 
     def test_severity_cvss_from_grype(self):
-        with open(get_unit_tests_scans_path("sarif") / "cxf-3.4.6.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "cxf-3.4.6.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(22, len(findings))
@@ -582,14 +581,14 @@ add_core(ptr, offset, val);
         )
 
     def test_tags_from_result_properties(self):
-        with open(get_unit_tests_scans_path("sarif") / "taint-python-report.sarif", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "taint-python-report.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             item = findings[0]
             self.assertEqual(["Scan"], item.tags)
 
     def test_severity_in_properties(self):
-        with open(get_unit_tests_scans_path("sarif") / "issue_10191.json", encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("sarif") / "issue_10191.json").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(77, len(findings))

@@ -2,12 +2,8 @@ import csv
 from pathlib import Path
 
 from django.core.management.base import BaseCommand
-from pytz import timezone
 
 from dojo.models import Finding
-from dojo.utils import get_system_setting
-
-locale = timezone(get_system_setting("time_zone"))
 
 """
 Author: Aaron Weaver

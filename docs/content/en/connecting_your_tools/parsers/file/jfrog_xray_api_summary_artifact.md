@@ -11,3 +11,12 @@ Sample JFrog Xray API Summary Artifact Scans can be found [here](https://github.
 
 ### Link To Tool
 See JFrog Documentation: https://jfrog.com/help/r/jfrog-rest-apis/summary
+
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+
+- title
+- cwe
+- line
+- file path
+- description

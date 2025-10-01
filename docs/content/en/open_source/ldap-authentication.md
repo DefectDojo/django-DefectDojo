@@ -1,5 +1,5 @@
 ---
-title: "Authentication via LDAP"
+title: "Authentication via LDAP (Open-Source)"
 description: "Authenticate users using LDAP"
 draft: false
 weight: 4

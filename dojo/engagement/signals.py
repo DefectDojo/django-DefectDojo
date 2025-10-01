@@ -1,3 +1,5 @@
+import contextlib
+
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -6,7 +8,8 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.models import Engagement
+from dojo.file_uploads.helper import delete_related_files
+from dojo.models import Engagement, Product
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
 
@@ -38,26 +41,29 @@ def engagement_pre_save(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=Engagement)
 def engagement_post_delete(sender, instance, using, origin, **kwargs):
-    if instance == origin:
-        if settings.ENABLE_AUDITLOG:
-            le = LogEntry.objects.get(
-                action=LogEntry.Action.DELETE,
-                content_type=ContentType.objects.get(app_label="dojo", model="engagement"),
-                object_id=instance.id,
-            )
-            description = _('The engagement "%(name)s" was deleted by %(user)s') % {
-                                "name": instance.name, "user": le.actor}
-        else:
+    # Catch instances in async delete where a single object is deleted more than once
+    with contextlib.suppress(sender.DoesNotExist, Product.DoesNotExist):
+        if instance == origin:
             description = _('The engagement "%(name)s" was deleted') % {"name": instance.name}
-        create_notification(event="engagement_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
-                            title=_("Deletion of %(name)s") % {"name": instance.name},
-                            description=description,
-                            product=instance.product,
-                            url=reverse("view_product", args=(instance.product.id, )),
-                            recipients=[instance.lead],
-                            icon="exclamation-triangle")
+            if settings.ENABLE_AUDITLOG:
+                if le := LogEntry.objects.filter(
+                    action=LogEntry.Action.DELETE,
+                    content_type=ContentType.objects.get(app_label="dojo", model="engagement"),
+                    object_id=instance.id,
+                ).order_by("-id").first():
+                    description = _('The engagement "%(name)s" was deleted by %(user)s') % {
+                                    "name": instance.name, "user": le.actor}
+            create_notification(event="engagement_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
+                                title=_("Deletion of %(name)s") % {"name": instance.name},
+                                description=description,
+                                product=instance.product,
+                                url=reverse("view_product", args=(instance.product.id, )),
+                                recipients=[instance.lead],
+                                icon="exclamation-triangle")
 
 
 @receiver(pre_delete, sender=Engagement)
 def engagement_pre_delete(sender, instance, **kwargs):
-    delete_related_notes(instance)
+    with contextlib.suppress(sender.DoesNotExist):
+        delete_related_notes(instance)
+        delete_related_files(instance)

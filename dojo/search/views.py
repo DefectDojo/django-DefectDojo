@@ -15,8 +15,7 @@ from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.endpoint.views import prefetch_for_endpoints
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
-from dojo.finding.queries import get_authorized_findings, get_authorized_vulnerability_ids
-from dojo.finding.views import prefetch_for_findings
+from dojo.finding.queries import get_authorized_findings, get_authorized_vulnerability_ids, prefetch_for_findings
 from dojo.forms import SimpleSearchForm
 from dojo.models import Engagement, Finding, Finding_Template, Languages, Product, Test
 from dojo.product.queries import get_authorized_app_analysis, get_authorized_products
@@ -442,11 +441,9 @@ def vulnerability_id_fix(keyword):
     # - https://github.com/DefectDojo/django-DefectDojo/issues/1092
     # - https://github.com/DefectDojo/django-DefectDojo/issues/2081
 
-    vulnerability_ids = []
     keyword_parts = keyword.split(",")
-    for keyword_part in keyword_parts:
-        if bool(vulnerability_id_pattern.match(keyword_part)):
-            vulnerability_ids.append("'" + keyword_part + "'")
+    vulnerability_ids = [f"'{keyword_part}'" for keyword_part in keyword_parts
+                            if bool(vulnerability_id_pattern.match(keyword_part))]
 
     if vulnerability_ids:
         return " ".join(vulnerability_ids)

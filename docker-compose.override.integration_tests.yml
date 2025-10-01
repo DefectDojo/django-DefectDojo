@@ -38,6 +38,7 @@ services:
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/test_defectdojo}
   celeryworker:
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-celery-worker-dev.sh']
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/test_defectdojo}
   initializer:

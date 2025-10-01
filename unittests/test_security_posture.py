@@ -4,7 +4,8 @@ from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from rest_framework import status
-from unittest.mock import patch 
+from unittest.mock import patch
+from dojo.utils import calculate_severity_priority
 
 from dojo.models import (
     Product, 
@@ -114,8 +115,10 @@ class SecurityPostureAPITest(TestCase):
             }
         )
 
-    def test_get_security_posture_with_engagement_id(self):
+    @patch('dojo.utils.calculate_severity_priority')
+    def test_get_security_posture_with_engagement_id(self, mock_calculate_severity_priority):
         """Test get security posture with valid engagement_id"""
+        mock_calculate_severity_priority.return_value = "Very-Critica"
         response = self.client.get(
             self.url,
             {'engagement_id': self.engagement.id},
@@ -129,10 +132,10 @@ class SecurityPostureAPITest(TestCase):
         self.assertEqual(data['engagement_name'], self.engagement.name)
         self.assertEqual(data['engagement_id'], self.engagement.id)
         self.assertEqual(data['severity_product'], self.product.business_criticality)
-        self.assertIn('active_findings', data)
-        self.assertIn('active_critical_findings', data)
-        self.assertIn('active_high_findings', data)
-        self.assertIn('active_medium_findings', data)
+        self.assertIn('very_critical', data['counter_findings_by_priority'])
+        self.assertIn('critical', data['counter_findings_by_priority'])
+        self.assertIn('high', data['counter_findings_by_priority'])
+        self.assertIn('medium_low', data['counter_findings_by_priority'])
 
 
     def test_get_security_posture_with_engagement_name(self):
@@ -177,8 +180,10 @@ class SecurityPostureAPITest(TestCase):
         
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_get_security_posture_findings_count(self):
+    @patch('dojo.utils.calculate_severity_priority')
+    def test_get_security_posture_findings_count(self, mock_calculate_severity_priority):
         """Test that findings counts are correct"""
+        mock_calculate_severity_priority.return_value = "Very-Critica"
         response = self.client.get(
             self.url,
             {'engagement_id': self.engagement.id},
@@ -188,8 +193,9 @@ class SecurityPostureAPITest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()['data']
         
-        self.assertEqual(data['active_findings'], 9)
-        self.assertEqual(data['active_critical_findings'], 1)
-        self.assertEqual(data['active_high_findings'], 7)
-        self.assertEqual(data['active_medium_findings'], 1)
+        self.assertEqual(data['counter_findings_by_priority']['very_critical'], 0)
+        self.assertEqual(data['counter_findings_by_priority']['critical'], 0)
+        self.assertEqual(data['counter_findings_by_priority']['high'], 0)
+        self.assertEqual(data['counter_findings_by_priority']['medium_low'], 0)
+        self.assertEqual(data['counter_findings_by_priority']['unknown'], 9)
 

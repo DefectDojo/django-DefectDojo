@@ -3,6 +3,7 @@ import json
 from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
+from dojo.tools.snyk_code.parser import SnykCodeParser
 
 
 class SnykParser:
@@ -19,7 +20,12 @@ class SnykParser:
         - mitigation: Made from combining data about the cvssScore.
         - component_name: Set to vulnerability packageName from Snyk Parser.
         - component_version: Set to vulnerability version from Snyk Parser.
+        - false_p: Set to false.
+        - duplicate: Set to false.
+        - out_of_scope: Set to false.
         - impact: Set to value of severity.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
         - file_path: Made by Snyk parser while removing versions.
         - vuln_id_from_tool: Set to vulnerability id from Snyk Scanner.
         - cvssv3: Set to cvssv3 from Scanner if present.
@@ -34,8 +40,13 @@ class SnykParser:
             "description",
             "mitigation",
             "component_name"
-            "component_version"
-            "impact"
+            "component_version",
+            "false_p",
+            "duplicate",
+            "out_of_scope",
+            "impact",
+            "static_finding",
+            "dynamic_finding",
             "file_path",
             "vuln_id_from_tool",
             "cvssv3",
@@ -68,7 +79,7 @@ class SnykParser:
         return scan_type  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
-        return "Snyk output file (snyk test --json > snyk.json) can be imported in JSON format."
+        return "Snyk output file (snyk test --json > snyk.json) can be imported in JSON format. SARIF format is automatically delegated to the Snyk Code parser."
 
     def get_findings(self, json_output, test):
         reportTree = self.parse_json(json_output)
@@ -97,8 +108,7 @@ class SnykParser:
         return tree
 
     def get_items(self, tree, test):
-        items = {}
-        iterator = 0
+        items = []
         if "vulnerabilities" in tree:
             target_file = tree.get("displayTargetFile", None)
             upgrades = tree.get("remediation", {}).get("upgrade", None)
@@ -107,17 +117,17 @@ class SnykParser:
                 item = self.get_item(
                     node, test, target_file=target_file, upgrades=upgrades,
                 )
-                items[iterator] = item
-                iterator += 1
-        elif "runs" in tree and tree["runs"][0].get("results"):
-            results = tree["runs"][0]["results"]
-            for node in results:
-                item = self.get_code_item(
-                    node, test,
-                )
-                items[iterator] = item
-                iterator += 1
-        return list(items.values())
+                items.append(item)
+            return items
+        if "runs" in tree and tree["runs"][0].get("results"):
+            # Delegate SARIF handling to Snyk Code parser
+            snyk_code_parser = SnykCodeParser()
+            import io
+            json_output = io.StringIO(json.dumps(tree))
+            findings = snyk_code_parser.get_findings(json_output, test)
+            items.extend(findings)
+            return findings
+        return []
 
     def get_item(self, vulnerability, test, target_file=None, upgrades=None):
         # vulnerable and unaffected versions can be in string format for a single vulnerable version,
@@ -270,46 +280,3 @@ class SnykParser:
                     finding.mitigation += f"\nUpgrade from {current_pack_version} to {upgraded_pack} to fix this issue, as well as updating the following:\n - "
                     finding.mitigation += "\n - ".join(tertiary_upgrade_list)
         return finding
-
-    def get_code_item(self, vulnerability, test):
-        ruleId = vulnerability["ruleId"]
-        ruleIndex = vulnerability["ruleIndex"]
-        message = vulnerability["message"]["text"]
-        score = vulnerability["properties"]["priorityScore"]
-        locations_uri = vulnerability["locations"][0]["physicalLocation"]["artifactLocation"]["uri"]
-        locations_uriBaseId = vulnerability["locations"][0]["physicalLocation"]["artifactLocation"]["uriBaseId"]
-        locations_startLine = vulnerability["locations"][0]["physicalLocation"]["region"]["startLine"]
-        locations_endLine = vulnerability["locations"][0]["physicalLocation"]["region"]["endLine"]
-        locations_startColumn = vulnerability["locations"][0]["physicalLocation"]["region"]["startColumn"]
-        locations_endColumn = vulnerability["locations"][0]["physicalLocation"]["region"]["endColumn"]
-        isAutofixable = vulnerability["properties"]["isAutofixable"]
-        if score <= 399:
-            severity = "Low"
-        elif score <= 699:
-            severity = "Medium"
-        elif score <= 899:
-            severity = "High"
-        else:
-            severity = "Critical"
-        # create the finding object
-        return Finding(
-            title=ruleId + "_" + locations_uri,
-            test=test,
-            severity=severity,
-            description="**ruleId**: " + str(ruleId) + "\n"
-            + "**ruleIndex**: " + str(ruleIndex) + "\n"
-            + "**message**: " + str(message) + "\n"
-            + "**score**: " + str(score) + "\n"
-            + "**uri**: " + locations_uri + "\n"
-            + "**uriBaseId**: " + locations_uriBaseId + "\n"
-            + "**startLine**: " + str(locations_startLine) + "\n"
-            + "**endLine**: " + str(locations_endLine) + "\n"
-            + "**startColumn**: " + str(locations_startColumn) + "\n"
-            + "**endColumn**: " + str(locations_endColumn) + "\n"
-            + "**isAutofixable**: " + str(isAutofixable) + "\n",
-            false_p=False,
-            duplicate=False,
-            out_of_scope=False,
-            static_finding=True,
-            dynamic_finding=False,
-        )

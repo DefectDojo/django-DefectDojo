@@ -6,8 +6,11 @@ from contextlib import suppress
 from datetime import datetime
 from typing import ClassVar
 
+import cvss.parser
+from cvss.cvss3 import CVSS3
 from dateutil import parser as date_parser
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.utils import timezone
 
 from dojo.models import Finding, Test
 
@@ -49,6 +52,19 @@ class HackerOneVulnerabilityDisclosureProgram:
                     severity = "Info"
             except Exception:
                 severity = "Info"
+
+            # Try to grab CVSS fields
+            if cvssv3_score := content.get("relationships", {}).get("severity", {}).get("data", {}).get("attributes", {}).get("score"):
+                description += f"CVSS: {cvssv3_score}\n"
+
+            cvssv3_vector = None
+            if cvss_vector_string := content.get("relationships", {}).get("severity", {}).get("data", {}).get("attributes", {}).get("cvss_vector_string"):
+                vectors = cvss.parser.parse_cvss_from_text(cvss_vector_string)
+                if len(vectors) > 0 and type(vectors[0]) is CVSS3:
+                    cvssv3_vector = vectors[0].clean_vector()
+                    if cvssv3_score is None:
+                        cvssv3_score = vectors[0].scores()[0]
+
             # Build the references of the Dojo finding
             ref_link = "https://hackerone.com/reports/{}".format(
                 content.get("id"),
@@ -56,7 +72,19 @@ class HackerOneVulnerabilityDisclosureProgram:
             references += f"[{ref_link}]({ref_link})"
 
             # Set active state of the Dojo finding
-            active = content["attributes"]["state"] in {"triaged", "new"}
+            active = True
+            if "main_state" in content["attributes"]:
+                active = content["attributes"]["main_state"] != "closed"
+            else:
+                # If there is no main_state, we assume keep the old logic
+                active = content["attributes"]["state"] in {"triaged", "new"}
+
+            is_mitigated = False
+            mitigated = None
+            if not active:
+                is_mitigated = not active
+                if is_mitigated:
+                    mitigated = date_parser.parse(content["attributes"]["closed_at"]) if content["attributes"].get("closed_at") else timezone.now()
 
             # Set CWE of the Dojo finding
             try:
@@ -67,7 +95,7 @@ class HackerOneVulnerabilityDisclosureProgram:
                 cwe = 0
 
             dupe_key = hashlib.md5(
-                str(references + title).encode("utf-8"),
+                str(references + title).encode("utf-8"), usedforsecurity=False,
             ).hexdigest()
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
@@ -84,6 +112,8 @@ class HackerOneVulnerabilityDisclosureProgram:
                     date=date,
                     test=test,
                     active=active,
+                    is_mitigated=is_mitigated,
+                    mitigated=mitigated,
                     description=description,
                     severity=severity,
                     mitigation="See description",
@@ -91,8 +121,15 @@ class HackerOneVulnerabilityDisclosureProgram:
                     references=references,
                     cwe=cwe,
                     dynamic_finding=False,
+                    cvssv3=cvssv3_vector,
+                    cvssv3_score=cvssv3_score,
                 )
                 finding.unsaved_endpoints = []
+
+                # Add vulnerability IDs if they are present
+                if (cve_ids := content["attributes"].get("cve_ids")) is not None and len(cve_ids) > 0:
+                    finding.unsaved_vulnerability_ids = cve_ids
+
                 dupes[dupe_key] = finding
         return list(dupes.values())
 
@@ -117,14 +154,29 @@ class HackerOneVulnerabilityDisclosureProgram:
             )
             description += f"Triaged: {triaged_date}\n"
 
-        # Try to grab CVSS
-        if cvss := content.get("relationships", {}).get("severity", {}).get("data", {}).get("attributes", {}).get("score"):
-            description += f"CVSS: {cvss}\n"
-
         # Build rest of description meat
         description += "##Report: \n{}\n".format(
             content["attributes"]["vulnerability_information"],
         )
+
+        structured_scope_fields_to_label: dict[str, str] = {
+                "asset_identifier": "Asset Identifier",
+                "asset_type": "Asset Type",
+                "confidentiality_requirement": "Confidentiality Requirement",
+                "integrity_requirement": "Integrity Requirement",
+                "availability_requirement": "Availability Requirement",
+                "max_severity": "Max Severity",
+                "instruction": "Instruction",
+                "eligible_for_bounty": "Eligible for Bounty",
+                "eligible_for_submission": "Eligible for Submission",
+                "reference": "Reference",
+        }
+
+        if structured_scope_attributes := content.get("relationships", {}).get("structured_scope", {}).get("data", {}).get("attributes", {}):
+            description += "\n##Structured Scope:\n"
+            for field, label in structured_scope_fields_to_label.items():
+                if (value := structured_scope_attributes.get(field)) is not None:
+                    description += f"**{label}**: {value}\n"
 
         # Try to grab weakness if it's there
         if weakness_title := content.get("relationships", {}).get("weakness", {}).get("data", {}).get("attributes", {}).get("name"):

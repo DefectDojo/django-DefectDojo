@@ -2,7 +2,7 @@
 title: "Request a DefectDojo Pro Trial"
 description: "How to request and work with a trial of DefectDojo Cloud"
 draft: "false"
-weight: 4
+weight: 6
 pro-feature: true
 ---
 

@@ -8,9 +8,6 @@
 {% load get_endpoint_status %}
 {% block add_styles %}
     {{ block.super }}
-  .tooltip-inner {
-    max-width: 650px;
-  }
 {% endblock %}
 {% block add_css_before %}
     {{ block.super }}
@@ -330,16 +327,11 @@
                         <td>
                             <span class="label severity severity-{{ finding.severity }}">
                                 {% if finding.severity %}
-                                    {% if finding.cvssv3 %}
-                                        <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
-                                            data-content="{{ finding.cvssv3 }}">
-                                    {% endif %}
                                     {{ finding.severity_display }}
-                                    {% if finding.cvssv3_score %}
-                                        ({{ finding.cvssv3_score }})
-                                    {% endif %}
-                                    {% if finding.cvssv3 %}
-                                        </i>
+                                    {% if system_settings.enable_cvss4_display and finding.cvssv4_score or system_settings.enable_cvss3_display and finding.cvssv3_score %}
+                                        <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" data-html="true" title="" href="#"
+                                            data-content="{% if system_settings.enable_cvss4_display and finding.cvssv4 %}{{ finding.cvssv4 }} ({{ finding.cvssv4_score }}){% endif %}{% if system_settings.enable_cvss4_display and finding.cvssv4 and system_settings.enable_cvss3_display and finding.cvssv3 %}<br/>{% endif %}{% if system_settings.enable_cvss3_display and finding.cvssv3 %}{{ finding.cvssv3 }} ({{ finding.cvssv3_score }}){% endif %}">
+                                        ({% if system_settings.enable_cvss4_display and finding.cvssv4_score %}{{ finding.cvssv4_score }}{% if system_settings.enable_cvss3_display and finding.cvssv3_score %}, {% endif %}{% endif %}{% if system_settings.enable_cvss3_display and finding.cvssv3_score %}{{ finding.cvssv3_score }}{% endif %})</i>
                                     {% endif %}
                                 {% else %}
                                     Unknown
@@ -839,7 +831,7 @@
                     </div>
                 {% endif %}
             </span>
-        </div>  
+        </div>
     {% endif %}
     {% comment %} Add a form to (ab)use to submit any actions related to similar/duplicates as POST requests {% endcomment %}
     <form method="post" style="display: none" id="related_action">
@@ -1253,15 +1245,13 @@
 {% block postscript %}
     {{ block.super }}
     <script src="{% static "clipboard/dist/clipboard.min.js" %}"></script>
-    <script src="{% static "typeit/dist/index.umd.js" %}"></script>
-    <script src="{% static 'prismjs/prism.js' %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="module" src="{% static "dojo/js/settings.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript" nonce="{{request.csp_nonce}}">
-        var firstID = {{findings_list.0}};
-        var currentID = {{finding.id}};
-        var lastID = {{findings_list_lastElement}};
+        var firstID = {% if findings_list.0 %}{{findings_list.0}}{% else %}null{% endif %};
+        var currentID = {% if finding.id %}{{finding.id}}{% else %}null{% endif %};
+        var lastID = {% if findings_list_lastElement %}{{findings_list_lastElement}}{% else %}null{% endif %};
 
         if(currentID != firstID)
         {
@@ -1301,6 +1291,32 @@
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })
+            
+            // Configure tooltips for CVSS vectors - try multiple approaches
+            $(document).on('shown.bs.tooltip shown.bs.popover', function() {
+                $('.tooltip-inner, .popover-content').css({
+                    'max-width': '1200px !important',
+                    'white-space': 'nowrap !important',
+                    'word-wrap': 'normal !important'
+                });
+                $('.tooltip, .popover').css({
+                    'max-width': '1200px !important'
+                });
+            });
+            
+            // Force tooltip configuration
+            $('.has-popover').each(function() {
+                $(this).on('mouseenter', function() {
+                    setTimeout(function() {
+                        $('.tooltip-inner, .popover-content').css({
+                            'max-width': '1200px',
+                            'white-space': 'nowrap',
+                            'word-wrap': 'normal',
+                            'overflow': 'visible'
+                        });
+                    }, 10);
+                });
+            });
         });
 
         // keyboard shortcuts

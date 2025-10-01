@@ -49,8 +49,7 @@ class SonarQubeApiUpdaterFromSource:
             )
 
             if (
-                current_status != "OPEN"
-                and current_finding_status != current_status
+                current_status not in {"OPEN", current_finding_status}
             ):
                 logger.info(
                     f"Original SonarQube issue '{sonarqube_issue}' has changed. Updating DefectDojo finding '{finding}'...",

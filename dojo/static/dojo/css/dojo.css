@@ -86,6 +86,20 @@ a {
 }
 
 
+.panel-heading .dropdown-toggle:focus {
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+}
+
+#base-content .clearfix .pagination .dropdown-toggle:focus {
+    outline: 5px auto #599fd0;
+    outline-offset: -3px;
+}
+.table-responsive .dropdown-toggle:focus {
+    outline: 5px auto -webkit-focus-ring-color;
+    text-decoration: none;
+}
+
 /*
 .btn-primary.active.focus, .btn-primary.active:focus, .btn-primary.active:hover, .btn-primary:active.focus, .btn-primary:active:focus, .btn-primary:active:hover, .open > .dropdown-toggle.btn-primary.focus, .open > .dropdown-toggle.btn-primary:focus, .open > .dropdown-toggle.btn-primary:hover {
     background-color: transparent!important;
@@ -1442,6 +1456,10 @@ div.dt-buttons {
     margin: 10px!important;
 }
 
+div.dt-search {
+    display: inline-block!important;
+}
+
 table#product_types .btn-success{
 	background-color: #546474;
 	border-color: #546474;
@@ -1942,6 +1960,29 @@ justify-content: center;
 height: 100%;
 }
 
+/* Keep the color of the legend in forced color mode */
+.legend td {
+    forced-color-adjust: none;
+}
+    
+.legend .legendLabel {
+    padding-left: 4px;   
+    forced-color-adjust: auto;
+}
+    
+.fa-caret-down,
+.caret {
+        forced-color-adjust: none;
+}    
+    
+/* Keep arrows icons in forced color mode  */
+@media (forced-colors: active) {
+    .fa-caret-down,
+    .caret {
+        color: ButtonText;
+    }
+ }
+    
 #feedback-container {
     margin-top: 30px;
     padding-top: 15px;

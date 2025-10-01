@@ -41,6 +41,7 @@ pip-delete-this-directory.txt
 .ruff_cache
 nosetests.xml
 coverage.xml
+selenium_page_source.html
 
 # Translations
 *.mo
@@ -153,3 +154,4 @@ docs/.devcontainer/devcontainer.json
 docs/.devcontainer/Dockerfile
 docs/LICENSE
 docs/.hugo_build.lock
+.cursor-rules

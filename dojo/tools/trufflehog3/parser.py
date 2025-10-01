@@ -65,7 +65,7 @@ class TruffleHog3Parser:
         for string in json_data["stringsFound"]:
             strings_found += string + "\n"
 
-        dupe_key = hashlib.md5((file + reason).encode("utf-8")).hexdigest()
+        dupe_key = hashlib.md5((file + reason).encode("utf-8"), usedforsecurity=False).hexdigest()
         description += (
             "\n**Strings Found:**\n```\n" + strings_found + "\n```\n"
         )
@@ -139,7 +139,7 @@ class TruffleHog3Parser:
             description = description[:-1]
 
         dupe_key = hashlib.md5(
-            (title + secret + severity + str(line)).encode("utf-8"),
+            (title + secret + severity + str(line)).encode("utf-8"), usedforsecurity=False,
         ).hexdigest()
 
         if dupe_key in dupes:

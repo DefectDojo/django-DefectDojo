@@ -41,5 +41,9 @@ To generate the report, see
 Version: \>= 1.1.0.
 Recommend version for both format \>= 3.1.2
 
+### Default Deduplication Hashcode Fields
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
 
-
+- cwe
+- severity
+- file path

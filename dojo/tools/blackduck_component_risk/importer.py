@@ -26,9 +26,8 @@ class BlackduckCRImporter:
         :param report: Path to zip file
         :return: ( {component_id:details} , {component_id:[vulns]}, {component_id:[source]} )
         """
-        if not issubclass(type(report), Path):
-            report = Path(report.temporary_file_path())
-        if zipfile.is_zipfile(str(report)):
+        if zipfile.is_zipfile(report):
+            report.seek(0)  # rewind after the check
             return self._process_zipfile(report)
         msg = f"File {report} not a zip!"
         raise ValueError(msg)
@@ -43,7 +42,7 @@ class BlackduckCRImporter:
         components = {}
         source = {}
         try:
-            with zipfile.ZipFile(str(report)) as zipf:
+            with zipfile.ZipFile(report) as zipf:
                 c_file = False
                 s_file = False
                 for full_file_name in zipf.namelist():
@@ -62,14 +61,13 @@ class BlackduckCRImporter:
                     elif "source" in file_name:
                         with io.TextIOWrapper(zipf.open(full_file_name), encoding="utf-8") as f:
                             source = self.__get_source(f)
-                # Raise exception to error-out if the zip is missing either of
-                # these files.
-                if not (c_file and s_file):
-                    msg = "Zip file missing needed files!"
-                    raise Exception(msg)
-
         except Exception:
             logger.exception("Could not process zip file")
+            # Raise exception to error-out if the zip is missing either of
+            # these files.
+            if not (c_file and s_file):
+                msg = "Zip file missing needed files!"
+                raise Exception(msg)
 
         return components, security_issues, source
 

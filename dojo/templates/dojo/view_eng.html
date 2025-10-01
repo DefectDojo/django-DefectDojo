@@ -248,7 +248,7 @@
                                         <th>Date</th>
                                         <th>Lead</th>
                                         <th>Total Findings</th>
-                                        <th>Active (Verified)</th>
+                                        <th>Active (Verified / Fixable)</th>
                                         <th>Mitigated</th>
                                         <th>Duplicates</th>
                                         <th>Notes</th>
@@ -336,7 +336,8 @@
                                             <td><a rel="noopener noreferrer" href="{% url 'view_test' test.id %}">{{ test.count_findings_test_all }}</a></td>
                                             <td>
                                                 <a rel="noopener noreferrer" href="{% url 'view_test' test.id %}?active=true">{{ test.count_findings_test_active }}</a>&nbsp;
-                                                (<a rel="noopener noreferrer" href="{% url 'view_test' test.id %}?active=true&verified=true">{{ test.count_findings_test_active_verified }}</a>)
+                                                (<a rel="noopener noreferrer" href="{% url 'view_test' test.id %}?active=true&verified=true">{{ test.count_findings_test_active_verified }}</a>
+                                                / <a rel="noopener noreferrer" href="{% url 'view_test' test.id %}?active=true&fix_available=true">{{ test.count_findings_test_active_fix_available }}</a>)
                                             </td>
                                             <td><a rel="noopener noreferrer" href="{% url 'view_test' test.id %}?is_mitigated=1">{{ test.count_findings_test_mitigated }}</a></td>
                                             <td><a rel="noopener noreferrer" href="{% url 'view_test' test.id %}?duplicate=1">{{ test.count_findings_test_dups }}</a></td>
@@ -439,7 +440,7 @@
                                                         Never
                                                     {% endif %}
                                                 </td>
-                                                <td>{{ risk_acceptance.accepted_findings_count }}</td>
+                                                <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.accepted_findings_count }}</a></td>
                                                 {% if risk_acceptance.filename %}
                                                     <td><a rel="noopener noreferrer" href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">Yes</a>
                                                         &nbsp;<i style="position:absolute;" class="fa has-popover fa-info-circle" title="Uploaded proof" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
@@ -719,7 +720,7 @@
         <div class="col-md-4">
             <div class="panel panel-default-secondary">
                 <div class="panel-heading">
-                    <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw" aria-hidden="true"></span> 
+                    <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw" aria-hidden="true"></span>
                         {% if eng.name %}
                             {{ eng.name }}
                         {% else %}
@@ -751,6 +752,15 @@
                                     </em>
                                 </td>
                             </tr>
+                            {% if "ENABLE_SECURITY_POSTURE"|general_settings_get_value:"False"%}
+                            <tr>
+                                <td style="width: 150px;"><strong>Security Posture</strong></td>
+                                   <td>
+                                        <a href="security_posture/?engagement_id={{eng.id}}" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Details security posture">
+                                        <span style="background-color: #b50500;" class="pass_fail Pass">View Details</span></a>
+                                    </td>
+                            </tr>
+                            {% endif %}
                             <tr>
                                 <td><strong>Dates</strong></td>
                                 <td><a rel="noopener noreferrer" target="#" data-toggle="tooltip" data-placement="bottom" title="{{ eng.target_start|date:"l, jS F Y" }} - {{ eng.target_end|date:"l, jS F Y" }}">
@@ -1042,25 +1052,25 @@
             $(document).on('keypress', null, 'e', function () {
                 window.location.assign('{% url 'edit_engagement' eng.id %}');
             });
-        
+
             $(document).on('keypress', null, 'a', function () {
                 window.location.assign('{% url 'add_tests' eng.id %}');
             });
-        
+
             $(document).on('keypress', null, 'i', function () {
                 window.location.assign('{% url 'import_scan_results' eng.id %}');
             });
-        
+
             $("a[data-toggle='collapse']").on('click', function () {
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             });
-        
+
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
             $('.table-responsive').css( "overflow", "inherit" );
             });
-        
+
             $('.table-responsive').on('hide.bs.dropdown', function () {
                 $('.table-responsive').css( "overflow", "auto" );
             })
@@ -1069,15 +1079,15 @@
                 var terms = '';
                 if ($.cookie('highlight')) {
                     terms = $.cookie('highlight').split(' ');
-                    
+
                     for (var i = 0; i < terms.length; i++) {
                         $('body').highlight(terms[i]);
                     }
                 }
-                
+
                 $('input#simple_search').val(terms);
             }
-        
+
             $('#shareQuestionnaireModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget) // Button that triggered the modal
             var path = button.data('whatever') // Extract info from data-* attributes
@@ -1090,8 +1100,8 @@
             modal.find('p#questionnaireURL').text('Questionnaire URL: ' + host + path)
             })
         });
-        
+
         {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
-        
+
     </script>
 {% endblock %}

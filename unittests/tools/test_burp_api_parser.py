@@ -7,7 +7,7 @@ class TestParser(DojoTestCase):
 
     def test_example_report(self):
         testfile = get_unit_tests_scans_path("burp_api") / "example.json"
-        with open(testfile, encoding="utf-8") as f:
+        with testfile.open(encoding="utf-8") as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
             for finding in findings:
@@ -25,7 +25,7 @@ class TestParser(DojoTestCase):
 
     def test_validate_more(self):
         testfile = get_unit_tests_scans_path("burp_api") / "many_vulns.json"
-        with open(testfile, encoding="utf-8") as f:
+        with testfile.open(encoding="utf-8") as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
             for finding in findings:
@@ -62,7 +62,7 @@ class TestParser(DojoTestCase):
 
     def test_fix_issue_9128(self):
         testfile = get_unit_tests_scans_path("burp_api") / "fix_issue_9128.json"
-        with open(testfile, encoding="utf-8") as f:
+        with testfile.open(encoding="utf-8") as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
             for finding in findings:

@@ -6,6 +6,7 @@
   "dependencyDashboardApproval": false,
   "baseBranches": ["dev"],
   "rebaseWhen": "conflicted",
+  "separateMinorPatch": true,
   "ignorePaths": ["requirements.txt", "requirements-lint.txt", "components/package.json", "components/package-lock.json", "dojo/components/yarn.lock", "dojo/components/package.json", "Dockerfile**"],
   "ignoreDeps": [],
   "packageRules": [{

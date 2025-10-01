@@ -8,7 +8,7 @@ weight: 1
 
 DefectDojo's Rules Engine allows you to build custom workflows and bulk actions to handle Findings and other objects.  Rules Engine allows you to build automated actions that are triggered when an object matches a Rule.
 
-Rules Engine can only be accessed through the [Beta UI](/en/about_defectdojo/ui_pro_vs_os/).
+Rules Engine can only be accessed through the [Pro UI](/en/about_defectdojo/ui_pro_vs_os/).
 
 Currently, Rules can only be created for Findings, however more object types will be supported in the future.
 
@@ -28,7 +28,7 @@ Each Rule can apply one or more of these changes to a Finding when it is trigger
 Rules are automatically triggered when a Finding meets specific Filter conditions. For more information on Filters that can be used to create Rule Actions, see the [Filter Index](/en/working_with_findings/organizing_engagements_tests/filter_index/) page.
 
 ## Creating a New Rule
-Start this process from the New Rule page.  In the [Beta UI](/en/about_defectdojo/ui_pro_vs_os/), under **Manage Category**, Expand the **Rules Engine** dropdown and click **+ New Rule**.
+Start this process from the New Rule page.  In the [Pro UI](/en/about_defectdojo/ui_pro_vs_os/), under **Manage Category**, Expand the **Rules Engine** dropdown and click **+ New Rule**.
 
 ![image](images/rules_engine_1.png)
 
@@ -38,7 +38,7 @@ Enter a Label as the identifier for the new rule, and click Next.
 ![image](images/rules_engine_2.png)
 
 ### Step 2: Set trigger conditions with a Filter
-You will see an All Findings table.  Using the All Findings Table, set the Filter conditions to filter the set of Findings that you want your rule to apply to.  For more information on applying Filters to a table, see [our guide to the Beta UI](/en/about_defectdojo/ui_pro_vs_os/#navigational-changes).
+You will see an All Findings table.  Using the All Findings Table, set the Filter conditions to filter the set of Findings that you want your rule to apply to.  For more information on applying Filters to a table, see [our guide to the Pro UI](/en/about_defectdojo/ui_pro_vs_os/#navigational-changes).
 
 The table will preview the list of existing Findings that you have filtered.
 

@@ -18,6 +18,8 @@ By creating and marking Duplicates in this way, DefectDojo ensures that all the 
 
 By default, these Tests would need to be nested under the same Product for Deduplication to be applied. If you wish, you can further limit the Deduplication scope to a single Engagement.
 
+![Deduplication on product and engagement level](images/deduplication.png)
+
 Duplicate Findings are set as Inactive by default. This does not mean the Duplicate Finding itself is Inactive. Rather, this is so that your team only has a single active Finding to work on and remediate, with the implication being that once the original Finding is Mitigated, the Duplicates will also be Mitigated.
 
 ## Deduplication vs Reimport

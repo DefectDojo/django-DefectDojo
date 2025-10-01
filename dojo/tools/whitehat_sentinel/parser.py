@@ -181,15 +181,8 @@ class WhiteHatSentinelParser:
             attack_vectors: The list of Attack Vector dictionaries
         Returns: A list of Defect Dojo Endpoints
         """
-        endpoints_list = []
-
         # This should be in the Endpoint class should it not?
-        for attack_vector in attack_vectors:
-            endpoints_list.append(
-                Endpoint.from_uri(attack_vector["request"]["url"]),
-            )
-
-        return endpoints_list
+        return [Endpoint.from_uri(attack_vector["request"]["url"]) for attack_vector in attack_vectors]
 
     def _convert_whitehat_sentinel_vulns_to_dojo_finding(
         self, whitehat_sentinel_vulns: [dict], test: str,
@@ -234,7 +227,7 @@ class WhiteHatSentinelParser:
             is_mitigated = not active
 
             dupe_key = hashlib.md5(
-                whitehat_vuln["id"].encode("utf-8"),
+                whitehat_vuln["id"].encode("utf-8"), usedforsecurity=False,
             ).hexdigest()
 
             if dupe_key in dupes:
