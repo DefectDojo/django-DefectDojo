@@ -99,12 +99,6 @@ def get_security_posture(engagement: Engagement, engagement_name: str):
         logger.debug(f"Finding {finding.id} has priority {priority}")
         data["counter_findings_by_priority"][str(priority).lower().replace("-", "_")] += 1 
         data["counter_findings_by_severity"][str(finding.severity).lower()] += 1 
-    data["adoption_devsecops"] = adoption_devsecops_include(tags)
-    active_finding = engagement.get_all_finding_active
-    data["active_findings"] = active_finding.distinct().count() 
-    data["active_critical_findings"] = active_finding.filter(severity="Critical").count()
-    data["active_high_findings"] = active_finding.filter(severity="High").count()
-    data["active_medium_findings"] = active_finding.filter(severity="Medium").count()
     events = active_finding.filter(
         active=True,
         is_mitigated=False,
