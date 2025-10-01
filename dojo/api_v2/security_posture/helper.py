@@ -42,9 +42,9 @@ def is_in_hacking_continuous(test, data):
     return False
 
 
-def adoption_devsecops_exclude(tags):
+def adoption_devsecops_include(tags):
     tags = list(set(tags))
-    return [tag for tag in tags if tag not in GeneralSettings.get_value("DEVSECOPS_ADOPTION_EXCLUDE_TAGS", ["transferred", "duplicated"])]
+    return [tag for tag in tags if tag in GeneralSettings.get_value("DEVSECOPS_ADOPTION_INCLUDE_TAGS", ["engine_iac", "engine_container"])]
 
 
 def get_security_posture(engagement: Engagement, engagement_name: str):
@@ -71,7 +71,7 @@ def get_security_posture(engagement: Engagement, engagement_name: str):
             data["is_in_hacking_continuos"] = True
         tags.extend(test.tags.all().values_list("name", flat=True))
 
-    data["adoption_devsecops"] = adoption_devsecops_exclude(tags)
+    data["adoption_devsecops"] = adoption_devsecops_include(tags)
     active_finding = engagement.get_all_finding_active.only(
         "id",
         "severity",
