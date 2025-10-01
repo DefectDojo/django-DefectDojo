@@ -23,21 +23,19 @@
     const iframe = document.querySelector("iframe");
     iframe.onload = () => {
       iframe.contentWindow.postMessage(
-        { action: "all_findings" },
+        { action: " {{ actions }} " },
         "{{url}}",
         [channel.port2]
       );
       setTimeout(() => {
         channel.port1.start();
         channel.port1.onmessage = (event) => {
-          if (event.data.action === "all_findings") {
+          if (event.data.action === "{{ actions }}") {
             setTimeout(() => {
               iframe.contentWindow.postMessage({
-                action: "all_findings",
+                action: "{{ actions }}",
                 data: {
-                  csrf_token: "{{ csrf_token }}",
-                  sessionid: "{{ sessionid }}",
-                  product_id: "{{ product_id }}",
+                  parameters: "{{ parameters }}"
                 },
               });
             }, 100);
