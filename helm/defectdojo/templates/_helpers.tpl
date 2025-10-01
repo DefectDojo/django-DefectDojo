@@ -213,10 +213,10 @@ from a given context.
     2: the key under the context with security context (e.g., "foo.bar")
 */}}
 {{- define "helpers.securityContext" -}}
-{{- $securityContext := dict -}}
 {{- $values := merge dict (index . 0) -}}
-{{- $defaultSecurityContextKey := merge dict (index . 1) -}}
-{{- $securityContextKey := merge dict (index . 2) -}}
+{{- $defaultSecurityContextKey := index . 1 -}}
+{{- $securityContextKey := index . 2 -}}
+{{- $securityContext := dict -}}
 {{- with $values }}
   {{- $securityContext = (merge
     $securityContext
