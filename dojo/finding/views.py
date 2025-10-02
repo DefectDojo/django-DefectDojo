@@ -538,7 +538,9 @@ class ViewFinding(View):
         finding_filter_class = SimilarFindingFilterWithoutObjectLookups if filter_string_matching else SimilarFindingFilter
         similar_findings_filter = finding_filter_class(
             request.GET,
-            queryset=get_authorized_findings(Permissions.Finding_View),
+            queryset=get_authorized_findings(Permissions.Finding_View)
+            .filter(test__engagement__product=finding.test.engagement.product)
+            .exclude(id=finding.id),
             user=request.user,
             finding=finding,
         )
@@ -2970,7 +2972,10 @@ def get_missing_mandatory_notetypes(finding):
 def mark_finding_duplicate(request, original_id, duplicate_id):
 
     original = get_object_or_404(Finding, id=original_id)
-    duplicate = get_object_or_404(Finding, id=duplicate_id)
+    duplicate = get_object_or_404(
+        Finding.objects.filter(test__engagement__product=original.test.engagement.product),
+        id=duplicate_id,
+    )
 
     if original.test.engagement != duplicate.test.engagement:
         if (original.test.engagement.deduplication_on_engagement
@@ -3055,7 +3060,10 @@ def reset_finding_duplicate_status(request, duplicate_id):
 
 def set_finding_as_original_internal(user, finding_id, new_original_id):
     finding = get_object_or_404(Finding, id=finding_id)
-    new_original = get_object_or_404(Finding, id=new_original_id)
+    new_original = get_object_or_404(
+        Finding.objects.filter(test__engagement__product=finding.test.engagement.product),
+        id=new_original_id,
+    )
 
     if finding.test.engagement != new_original.test.engagement:
         if (finding.test.engagement.deduplication_on_engagement
