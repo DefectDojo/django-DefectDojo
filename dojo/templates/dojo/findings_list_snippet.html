@@ -13,15 +13,17 @@
                         {% blocktrans %}{{ filter_name }} Findings{% endblocktrans %}
                         <div class="dropdown pull-right">
                             &nbsp;
-                            <button class="btn btn-primary dropdown-toggle"
-                                    type="button"
-                                    id="downloadMenu"
-                                    data-toggle="dropdown"
-                                    aria-expanded="true"
-                                    aria-label="dropdown-menu">
-                                <span class="fa-solid fa-download"></span>
-                                <span class="caret"></span>
-                            </button>
+                            {% if download_button|default:"True" == "True" %}
+                                <button class="btn btn-primary dropdown-toggle"
+                                        type="button"
+                                        id="downloadMenu"
+                                        data-toggle="dropdown"
+                                        aria-expanded="true"
+                                        aria-label="dropdown-menu">
+                                    <span class="fa-solid fa-download"></span>
+                                    <span class="caret"></span>
+                                </button>
+                            {% endif %}
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="downloadMenu">
                                 <li role="presentation">
                                     <a rel="noopener noreferrer" id="report" href="{% url 'quick_report' %}?url={{ request.get_full_path }}">
