@@ -103,7 +103,7 @@
             {% if findings %}
                 <div role="tabpanel" class="table-responsive tab-pane {% if activetab == 'findings' %}active{% endif %}" id="tabs-1">
                     {% comment %} include inherits the current context so findings, filtered and other variables {% endcomment %}
-                    {% include "dojo/findings_list_snippet.html" with form_id="custom_search_filter" %}
+                    {% include "dojo/findings_list_snippet.html" with form_id="custom_search_filter" download_button="False" %}
                 </div>
             {% endif %}
             {% if vulnerability_ids %}
