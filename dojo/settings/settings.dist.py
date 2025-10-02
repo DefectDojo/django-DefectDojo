@@ -328,6 +328,8 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+    # Dictates if v3 org/asset relabeling (+url routing) will be enabled
+    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
 )
 
 
@@ -774,6 +776,8 @@ SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
 # DEFECTDOJO SPECIFIC
 # ------------------------------------------------------------------------------
 
+ENABLE_V3_ORGANIZATION_ASSET_RELABEL = env("DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL")
+
 # Credential Key
 CREDENTIAL_AES_256_KEY = env("DD_CREDENTIAL_AES_256_KEY")
 DB_KEY = env("DD_CREDENTIAL_AES_256_KEY")
@@ -866,6 +870,7 @@ TEMPLATES = [
                 "dojo.context_processors.bind_alert_count",
                 "dojo.context_processors.bind_announcement",
                 "dojo.context_processors.session_expiry_notification",
+                "dojo.context_processors.labels",
             ],
         },
     },
