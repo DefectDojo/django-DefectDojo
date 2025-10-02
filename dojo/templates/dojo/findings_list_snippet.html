@@ -392,7 +392,7 @@
                                     {% if show_product_column and product_tab is None %}
                                         <th class="nowrap" scope="col">
                                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
-                                            {% dojo_sort request 'Product' 'test__engagement__product__name' %}
+                                            {% dojo_sort request labels.ASSET_LABEL 'test__engagement__product__name' %}
                                         </th>
                                     {% endif %}
                                     <th scope="col">
