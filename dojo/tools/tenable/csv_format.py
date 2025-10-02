@@ -146,7 +146,7 @@ class TenableCSVParser:
             
             unique_id_from_tool = truncate(row.get("id")) # Ajout
             vuln_id_from_tool = truncate(row.get("definition.cve")) # Ajout   
-            fix_available: True
+            fix_available = True
        
             
             if dupe_key not in dupes:
