@@ -134,11 +134,18 @@ class TenableCSVParser:
                 description,
             )
 
+            exploit_info = str(row.get("definition.exploitability_ease", "")).strip().lower()
+            known_exploited = "true" if exploit_info == "available" else "no"
+            
+            unique_id_from_tool = row.get("id")
+            vuln_id_from_tool = row.get("definition.cve")            
+            
             if dupe_key not in dupes:
                 find = Finding(
                     title=title, test=test, description=description, severity=severity,
                     mitigation=mitigation, impact=impact, references=references,
-                    severity_justification=severity_justification,
+                    severity_justification=severity_justification, known_exploited=known_exploited,
+                    unique_id_from_tool=unique_id_from_tool, vuln_id_from_tool=vuln_id_from_tool,
                 )
 
                 cvss_vector = row.get("definition.cvss3.base_vector", row.get("CVSS V3 Vector", ""))
