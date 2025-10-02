@@ -135,7 +135,7 @@ class TenableCSVParser:
             )
 
             exploit_info = str(row.get("definition.exploitability_ease", "")).strip().lower()
-            known_exploited = "TRUE" if exploit_info == "available" else "FALSE"
+            known_exploited = "True" if exploit_info == "available" else "False"
             
             unique_id_from_tool = row.get("id")
             vuln_id_from_tool = row.get("definition.cve")            
