@@ -1676,6 +1676,8 @@ class VulnerabilityIdSerializer(serializers.ModelSerializer):
 
 
 class FindingSerializer(serializers.ModelSerializer):
+    mitigated = serializers.DateTimeField(required=False)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(
@@ -1853,6 +1855,8 @@ class FindingSerializer(serializers.ModelSerializer):
 
 
 class FindingCreateSerializer(serializers.ModelSerializer):
+    mitigated = serializers.DateTimeField(required=False)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True, allow_null=True, required=False, many=True,
     )
