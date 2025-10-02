@@ -222,7 +222,7 @@ class SarifParser:
                 if cve_try(result["ruleId"]):
                     finding.unsaved_vulnerability_ids = [cve_try(result["ruleId"])]
                 elif rule is not None and "name" in rule:
-                    finding.unsaved_vulnerability_ids = [rule["name"]]
+                    finding.unsaved_vulnerability_ids = str(rule["name"]).split(',')
 
             # some time the rule id is here but the tool doesn't define it
             if rule is not None:
