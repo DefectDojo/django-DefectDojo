@@ -318,14 +318,14 @@
                                     {% endif %}
                                     <th></th>
                                     <th class="nowrap centered severity-sort" scope="col">
-                                        {% trans "Severity" %}
+                                        {% dojo_sort request 'Severity' 'numerical_severity' %}
                                     </th>
                                     <th class="nowrap" scope="col">
                                         {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                         {% dojo_sort request 'Name' 'title' %}
                                     </th>
                                     <th scope="col">
-                                        {% trans "CWE" %}
+                                        {% dojo_sort request 'CWE' 'cwe' %}
                                     </th>
                                     <th scope="col">
                                         {% trans "Vulnerability Id" %}
@@ -355,11 +355,11 @@
                                         {% endif %}
                                     </th>
                                     <th class="nowrap" scope="col">
-                                        {% trans "Age" %}
+                                        {% dojo_sort request 'Age' 'date' %}
                                     </th>
                                     {% if system_settings.enable_finding_sla %}
                                         <th scope="col">
-                                            {% trans "SLA" %}
+                                            {% dojo_sort request 'SLA' 'sla_expiration_date' %}
                                         </th>
                                     {% endif %}
                                     <th scope="col">
@@ -396,10 +396,10 @@
                                         </th>
                                     {% endif %}
                                     <th scope="col">
-                                        {% trans "Service" %}
+                                        {% dojo_sort request 'Service' 'service' %}
                                     </th>
-                                    <th scope="col"> 
-                                        {% trans "Planned Remediation" %}
+                                    <th scope="col">
+                                        {% dojo_sort request 'Planned Remediation' 'planned_remediation_date' %}
                                     </th>
                                     {% if filter_name != 'Closed' %}
                                         <th scope="col">
@@ -800,7 +800,7 @@
                         return data;
                     }},
                     { "data": "finding_age" },
-                {% if system_settings.enable_finding_sla %}                
+                {% if system_settings.enable_finding_sla %}
                     { "data": "finding_sla", "type": "num", render: function (data, type, row, meta) {
                         if(type === 'sort') {
                             var api = new $.fn.dataTable.Api(meta.settings);
