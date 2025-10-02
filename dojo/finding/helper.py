@@ -131,8 +131,10 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
 
     # people may try to remove mitigated/mitigated_by by accident
     if new_state_finding.is_mitigated:
-        new_state_finding.mitigated = new_state_finding.mitigated or now
-        new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
+        # If fields are editable and provided, keep them; otherwise ensure they're set
+        if not can_edit_mitigated_data(user):
+            new_state_finding.mitigated = new_state_finding.mitigated or now
+            new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
 
     if is_new_finding or "active" in changed_fields:
         # finding is being (re)activated
@@ -185,7 +187,7 @@ def filter_findings_by_existence(findings):
 
 
 def can_edit_mitigated_data(user):
-    return settings.EDITABLE_MITIGATED_DATA and user.is_superuser
+    return settings.EDITABLE_MITIGATED_DATA and user and getattr(user, "is_superuser", False)
 
 
 def create_finding_group(finds, finding_group_name):

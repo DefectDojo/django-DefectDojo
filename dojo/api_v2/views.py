@@ -933,7 +933,7 @@ class FindingViewSet(
                     finding=finding,
                     user=request.user,
                     is_mitigated=finding_close.validated_data["is_mitigated"],
-                    mitigated=(finding_close.validated_data.get("mitigated") if settings.EDITABLE_MITIGATED_DATA else timezone.now()),
+                    mitigated=(finding_close.validated_data.get("mitigated") if finding_helper.can_edit_mitigated_data(request.user) else timezone.now()),
                     mitigated_by=finding_close.validated_data.get("mitigated_by") or (request.user if not finding_helper.can_edit_mitigated_data(request.user) else None),
                     false_p=finding_close.validated_data.get("false_p", False),
                     out_of_scope=finding_close.validated_data.get("out_of_scope", False),

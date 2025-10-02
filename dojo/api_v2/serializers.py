@@ -1772,6 +1772,18 @@ class FindingSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, data):
+        # Enforce mitigated metadata editability (single validate method)
+        attempting_to_set_mitigated = any(field in data for field in ["mitigated", "mitigated_by"])
+        user = getattr(self.context.get("request", None), "user", None)
+        if attempting_to_set_mitigated and not finding_helper.can_edit_mitigated_data(user):
+            errors = {}
+            if "mitigated" in data:
+                errors["mitigated"] = ["Editing mitigated timestamp is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if "mitigated_by" in data:
+                errors["mitigated_by"] = ["Editing mitigated_by is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if errors:
+                raise serializers.ValidationError(errors)
+
         if self.context["request"].method == "PATCH":
             is_active = data.get("active", self.instance.active)
             is_verified = data.get("verified", self.instance.verified)
@@ -1909,6 +1921,18 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         return new_finding
 
     def validate(self, data):
+        # Ensure mitigated fields are only set when editable is enabled
+        attempting_to_set_mitigated = any(field in data for field in ["mitigated", "mitigated_by"])
+        user = getattr(getattr(self.context, "request", None), "user", None)
+        if attempting_to_set_mitigated and not finding_helper.can_edit_mitigated_data(user):
+            errors = {}
+            if "mitigated" in data:
+                errors["mitigated"] = ["Editing mitigated timestamp is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if "mitigated_by" in data:
+                errors["mitigated_by"] = ["Editing mitigated_by is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if errors:
+                raise serializers.ValidationError(errors)
+
         if "reporter" not in data:
             request = self.context["request"]
             data["reporter"] = request.user
