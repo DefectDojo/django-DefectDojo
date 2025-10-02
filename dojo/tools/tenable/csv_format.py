@@ -78,6 +78,7 @@ class TenableCSVParser:
         if ";" in first_line:
             return ";"
         return ","
+         
 
     def get_findings(self, filename: str, test: Test):
         content = filename.read()
@@ -133,19 +134,27 @@ class TenableCSVParser:
                 str(row.get("port", row.get("Port", "No port"))),
                 description,
             )
-
-            exploit_info = str(row.get("definition.exploitability_ease", "")).strip().lower()
-            known_exploited = "True" if exploit_info == "available" else "False"
             
-            unique_id_from_tool = row.get("id")
-            vuln_id_from_tool = row.get("definition.cve")            
+            # Pour empecher de depasser la limite de caracteres            
+            def truncate(value, limit=500):
+                if value is None:
+                    return ""
+                return value[:limit]
+        
+            exploit_info = truncate(str(row.get("definition.exploitability_ease", "")).strip().lower()) # Ajout
+            known_exploited = "True" if exploit_info == "available" else "False" # Ajout
+            
+            unique_id_from_tool = truncate(row.get("id")) # Ajout
+            vuln_id_from_tool = truncate(row.get("definition.cve")) # Ajout   
+            fix_available: True
+       
             
             if dupe_key not in dupes:
                 find = Finding(
                     title=title, test=test, description=description, severity=severity,
                     mitigation=mitigation, impact=impact, references=references,
                     severity_justification=severity_justification, known_exploited=known_exploited,
-                    unique_id_from_tool=unique_id_from_tool, vuln_id_from_tool=vuln_id_from_tool,
+                    unique_id_from_tool=unique_id_from_tool, vuln_id_from_tool=vuln_id_from_tool, fix_available=fix_available,
                 )
 
                 cvss_vector = row.get("definition.cvss3.base_vector", row.get("CVSS V3 Vector", ""))

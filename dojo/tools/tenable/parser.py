@@ -69,6 +69,10 @@ class TenableParser:
             "component_name",
             "component_version",
             "cwe",
+            "known_exploited", # AJout
+            "unique_id_from_tool", # Ajout
+            "vuln_id_from_to",
+            "fix_available",
         ]
 
     def get_dedupe_fields(self) -> list[str]:
