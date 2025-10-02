@@ -1780,6 +1780,11 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                     extra_tags="alert-success")
             else:
                 logger.error(replace_form.errors)
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    "Proof uploaded Failed.",
+                    extra_tags="alert-danger")
 
         if "add_findings" in request.POST:
             add_findings_form = AddFindingsRiskAcceptanceForm(
