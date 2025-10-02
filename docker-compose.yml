@@ -120,7 +120,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   postgres:
-    image: postgres:18.0-alpine@sha256:9636ae7feacd8d630303eede7f95cd0f472d514e7864422c6aa8ea07b2171df8
+    image: postgres:18.0-alpine@sha256:fadc2b63607986d054ccb7302ca6fedc7bb9b6586d03f2110ae3fbc1ce806693
     environment:
       POSTGRES_DB: ${DD_DATABASE_NAME:-defectdojo}
       POSTGRES_USER: ${DD_DATABASE_USER:-defectdojo}
