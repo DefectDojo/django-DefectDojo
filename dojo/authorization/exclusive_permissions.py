@@ -10,6 +10,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import (
     user_has_global_permission,
     get_product_type_member,
+    get_product_member,
     role_has_permission)
 from dojo.models import (
     Dojo_User,
@@ -133,8 +134,10 @@ def user_has_permission_or_404(
 
 def get_members(user, obj):
     product = get_product(obj)
-    product_type = product.prod_type
-    members = get_product_type_member(user, product_type)
+    members = get_product_member(user, product)
+    if members is None:
+        product_type = product.prod_type
+        members = get_product_type_member(user, product_type)
     return members
 
 
