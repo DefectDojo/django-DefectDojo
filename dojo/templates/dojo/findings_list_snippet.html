@@ -359,7 +359,7 @@
                                     </th>
                                     {% if system_settings.enable_finding_sla %}
                                         <th scope="col">
-                                            {% dojo_sort request 'SLA' 'sla_expiration_date' %}
+                                            {% dojo_sort request 'SLA' 'sla_age_days' %}
                                         </th>
                                     {% endif %}
                                     <th scope="col">
@@ -867,6 +867,25 @@
             var fileDated = 'Findings_List_' + date;
             var columns = datatables_columns;
 
+            // Determine columns that should be server-sorted via dojo_sort (disable client sorting for these)
+            var serverSortDataKeys = new Set([
+                'severity',
+                'finding',
+                'cwe',
+                'found_date',
+                'finding_age',
+                'finding_sla',
+                'product',
+                'service',
+                'planned_remediation_date'
+            ]);
+            var serverSortTargets = [];
+            for (var i = 0; i < columns.length; i++) {
+                if (serverSortDataKeys.has(columns[i]["data"])) {
+                    serverSortTargets.push(i);
+                }
+            }
+
             // Filter the list of items to display based on what is shown.
             var disallowed_entries = new Set(["checkbox", "action"]);
             var data_column_list = [];
@@ -899,8 +918,13 @@
                     },
                     colReorder: true,
                     "columns": columns,
+                    ordering: true,
                     order: [],
                     columnDefs: [
+                        {
+                            orderable: false,
+                            targets: serverSortTargets
+                        },
                         {
                             "orderable": false,
                             "targets": [0, 1]

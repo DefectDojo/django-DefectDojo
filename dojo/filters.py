@@ -1777,7 +1777,7 @@ class FindingFilterHelper(FilterSet):
             ("test__engagement__product__name",
              "test__engagement__product__name"),
             ("service", "service"),
-            ("sla_expiration_date", "sla_expiration_date"),
+            ("sla_age_days", "sla_age_days"),
             ("epss_score", "epss_score"),
             ("epss_percentile", "epss_percentile"),
             ("known_exploited", "known_exploited"),
@@ -1797,7 +1797,7 @@ class FindingFilterHelper(FilterSet):
             "known_exploited": "Known Exploited",
             "ransomware_used": "Ransomware Used",
             "kev_date": "Date added to KEV",
-            "sla_expiration_Date": "SLA Expiration date",
+            "sla_age_days": "SLA age (days)",
             "planned_remediation_date": "Planned Remediation",
         },
     )
