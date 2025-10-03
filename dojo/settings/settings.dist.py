@@ -1366,6 +1366,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
     "Cycognito Scan": ["title", "severity"],
     "OpenVAS Parser v2": ["title", "severity", "vuln_id_from_tool", "endpoints"],
+    "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1625,6 +1626,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
     "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
+    "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
