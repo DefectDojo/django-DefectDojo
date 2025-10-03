@@ -13,6 +13,7 @@ from dojo.labels import get_labels
 from dojo.models import Product
 from dojo.notifications.helper import create_notification
 from dojo.pghistory_models import DojoEvents
+from dojo.utils import get_current_user
 
 labels = get_labels()
 
@@ -61,9 +62,14 @@ def product_post_delete(sender, instance, **kwargs):
                 ).order_by("-id").first():
                     user = le.actor
 
+            if not user:
+                current_user = get_current_user()
+                user = current_user
+
             # Update description with user if found
             if user:
-                description = labels.ASSET_DELETE_WITH_NAME_WITH_USER_SUCCESS_MESSAGE % {"name": instance.name, "user": le.actor}
+                description = labels.ASSET_DELETE_WITH_NAME_WITH_USER_SUCCESS_MESSAGE % {"name": instance.name, "user": user}
+
         create_notification(event="product_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
                             title=_("Deletion of %(name)s") % {"name": instance.name},
                             description=description,
