@@ -18,6 +18,8 @@ import crum
 import cvss
 import hyperlink
 import vobject
+from PIL import Image
+from django.core.exceptions import ValidationError
 from asteval import Interpreter
 from azure.devops.connection import Connection
 from auditlog.models import LogEntry
@@ -2943,3 +2945,30 @@ def parse_cvss_data(cvss_vector_string: str) -> dict:
         }
     logger.debug("No valid CVSS3 or CVSS4 vector found in %s", cvss_vector_string)
     return {}
+
+
+def validate_type_file(file, allowed_exts):
+        if not file:
+            return file
+
+        max_size = 10 * 1024 * 1024
+        if file.size > max_size:
+            raise ValidationError("The file exceeds the maximum allowed size (10MB).")
+
+        ext = os.path.splitext(file.name)[1].lower()
+        if ext not in allowed_exts:
+            raise ValidationError("File extension not allowed.")
+
+        allowed_types = ['image/jpg', 'image/png', 'application/pdf']
+        if file.content_type not in allowed_types:
+            logger.error("Type of content not allowed")
+
+        if ext in ['.jpg', '.png']:
+            try:
+                img = Image.open(file)
+                img.verify()
+                file.seek(0)
+            except Exception:
+                raise ValidationError("Server error")
+
+        return file

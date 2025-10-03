@@ -22,7 +22,8 @@ from dojo.transfer_findings.notification import Notification as TransferFindingN
 from dojo.transfer_findings.queries import (
     get_expired_transfer_finding_to_handle,
     get_almost_expired_transfer_finding_to_handle,
-    sla_expiration_transfer_finding
+    sla_expiration_transfer_finding,
+    search_finding_related,
 )
 from dojo.transfer_findings.notification import Notification as NotificationTransferFinding
 from dojo.user.queries import get_user
@@ -229,6 +230,12 @@ def add_finding_related(
     system_user = get_user(settings.SYSTEM_USER)
     for transferfinding_finding in transfer_finding_findings:
         if (transferfinding_finding.findings == origin_finding):
+            finding_correlated  = search_finding_related(
+                transfer_finding.destination_engagement,
+                origin_finding
+            )
+            if finding_correlated:
+                finding_related = finding_correlated
             if finding_related is None:
                 # Create a new finding related
                 origin_tags = list(origin_finding.tags.all().values_list("name", flat=True))

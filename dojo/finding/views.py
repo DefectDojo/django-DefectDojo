@@ -3169,6 +3169,7 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
 
     original = get_object_or_404(Finding, id=original_id)
     duplicate = get_object_or_404(Finding, id=duplicate_id)
+    user_has_permission_or_403(request.user, duplicate, Permissions.Finding_Edit)
 
     if original.test.engagement != duplicate.test.engagement:
         if (original.test.engagement.deduplication_on_engagement
@@ -3311,6 +3312,8 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
 @user_is_authorized(Finding, Permissions.Finding_Edit, "finding_id")
 @require_POST
 def set_finding_as_original(request, finding_id, new_original_id):
+    new_original = get_object_or_404(Finding, id=new_original_id)
+    user_has_permission_or_403(request.user, new_original, Permissions.Finding_Edit)
     success = set_finding_as_original_internal(
         request.user, finding_id, new_original_id,
     )
@@ -3578,7 +3581,7 @@ def all_findings_v2(request: HttpRequest, product_id) -> HttpResponse:
     base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
     base_params += f"&product={product_id}" if product_id else ""
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
-    return render(request, 'dojo/all_findings_v2.html', {
+    return render(request, 'dojo/generic_view.html', {
         'name': page_name,
         'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list{base_params}",  
         'user': user,
@@ -3592,7 +3595,7 @@ def finding_list_v2(request: HttpRequest) -> HttpResponse:
     cookie_sessionid = request.COOKIES.get('sessionid', '')
     base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
-    return render(request, 'dojo/all_findings_v2.html', {
+    return render(request, 'dojo/generic_view.html', {
         'name': page_name,
         'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list{base_params}",
         'user': user,

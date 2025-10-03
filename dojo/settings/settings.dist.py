@@ -345,6 +345,8 @@ env = environ.FileAwareEnv(
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ""),
     # Dictates whether cloud banner is created or not
     DD_CREATE_CLOUD_BANNER=(bool, True),
+    # Compliance Twistlock
+    DD_ENABLE_COMPLIANCE_FINDINGS_TWISTLOCK=(bool, True),
     # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Procuts, ...)
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
@@ -2429,6 +2431,7 @@ AUDITLOG_DISABLE_ON_RAW_SAVE = False
 ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
 # Dictates whether cloud banner is created or not
 CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
+ENABLE_COMPLIANCE_FINDINGS_TWISTLOCK = env("DD_ENABLE_COMPLIANCE_FINDINGS_TWISTLOCK")
 
 # ------------------------------------------------------------------------------
 # Auditlog

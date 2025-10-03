@@ -54,3 +54,4 @@ class SecurityPosture(
         else:
             return http_response.bad_request(
                 message="Invalid serializer", data=serializer.errors)
+

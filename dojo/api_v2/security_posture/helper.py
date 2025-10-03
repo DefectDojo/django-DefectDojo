@@ -4,6 +4,7 @@ from dojo.models import GeneralSettings
 from dojo.api_v2.utils import http_response
 from dojo.api_v2.security_posture.serializers import EngagementSecuritypostureSerializer
 from dojo.models import Engagement
+from dojo.utils import calculate_severity_priority
 logger = logging.getLogger(__name__)
 
 def calculate_posture(result):
@@ -41,9 +42,9 @@ def is_in_hacking_continuous(test, data):
     return False
 
 
-def adoption_devsecops_exclude(tags):
+def adoption_devsecops_include(tags):
     tags = list(set(tags))
-    return [tag for tag in tags if tag not in GeneralSettings.get_value("DEVSECOPS_ADOPTION_EXCLUDE_TAGS", ["transferred", "duplicated"])]
+    return [tag for tag in tags if tag in GeneralSettings.get_value("DEVSECOPS_ADOPTION_INCLUDE_TAGS", ["engine_iac", "engine_container"])]
 
 
 def get_security_posture(engagement: Engagement, engagement_name: str):
@@ -70,12 +71,34 @@ def get_security_posture(engagement: Engagement, engagement_name: str):
             data["is_in_hacking_continuos"] = True
         tags.extend(test.tags.all().values_list("name", flat=True))
 
-    data["adoption_devsecops"] = adoption_devsecops_exclude(tags)
-    active_finding = engagement.get_all_finding_active
-    data["active_findings"] = active_finding.distinct().count() 
-    data["active_critical_findings"] = active_finding.filter(severity="Critical").count()
-    data["active_high_findings"] = active_finding.filter(severity="High").count()
-    data["active_medium_findings"] = active_finding.filter(severity="Medium").count()
+    data["adoption_devsecops"] = adoption_devsecops_include(tags)
+    active_finding = engagement.get_all_finding_active.only(
+        "id",
+        "severity",
+        "priority",
+        "tags"
+    )
+    data["counter_active_findings"] = active_finding.distinct().count() 
+    data["counter_findings_by_priority"] = {
+        "very_critical": 0,
+        "critical": 0,
+        "high": 0,
+        "medium_low": 0,
+        "unknown": 0,
+    }
+    data["counter_findings_by_severity"] = {
+        "critical": 0,
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "info": 0,
+        "unknown": 0,
+    }
+    for finding in active_finding.iterator():
+        priority = calculate_severity_priority(finding.tags, finding.priority)  
+        logger.debug(f"Finding {finding.id} has priority {priority}")
+        data["counter_findings_by_priority"][str(priority).lower().replace("-", "_")] += 1 
+        data["counter_findings_by_severity"][str(finding.severity).lower()] += 1 
     events = active_finding.filter(
         active=True,
         is_mitigated=False,

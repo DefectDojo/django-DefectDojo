@@ -3,6 +3,7 @@ from dojo.models import Product, TransferFinding, SLA_Configuration
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from dojo.authorization.authorization import user_has_global_permission, user_has_permission 
+from dojo.models import Engagement, Finding
 from dojo.api_v2.api_error import ApiError
 import logging
 logger = logging.getLogger(__name__)
@@ -47,3 +48,11 @@ def sla_expiration_transfer_finding(sla_settings_name):
     if expiration_delta_days:
         return expiration_delta_days[0]
     raise ValueError("(TransferFinding) configuration not defined in database")
+
+
+def search_finding_related(destination_engagement: Engagement, origin_finding: Finding):
+    return Finding.objects.filter(test__engagement=destination_engagement,
+                                  test__tags__name__in=["transferred"],
+                                  title=origin_finding.title,
+                                  cwe=origin_finding.cwe,
+                                  vuln_id_from_tool=origin_finding.vuln_id_from_tool).first()

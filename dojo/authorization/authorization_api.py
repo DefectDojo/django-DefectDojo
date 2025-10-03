@@ -1,10 +1,9 @@
-from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
+from dojo.authorization.roles_permissions import Roles, get_roles_with_permissions
 from dojo.authorization.exclusive_permissions import get_members
-from dojo.authorization.authorization import NoAuthorizationImplementedError
 
 
 def get_global_role(user):
-    if hasattr(user, 'global_role'):
+    if hasattr(user, "global_role"):
         if user.global_role:
             if user.global_role.role:
                 if user.global_role.role.name in Roles.get_roles():
@@ -21,6 +20,8 @@ def user_has_permission(user, obj):
         members = get_members(user, obj)
         if members:
             role = members.role.name
+        else:
+            return []
     roles = get_roles_with_permissions()
     permissions = roles.get(Roles[role])
     return permissions

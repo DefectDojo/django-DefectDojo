@@ -121,7 +121,8 @@ from dojo.utils import (
     is_finding_groups_enabled,
     is_scan_file_too_large,
     sla_expiration_risk_acceptance,
-    user_is_contacts
+    user_is_contacts,
+    validate_type_file
 )
 from dojo.validators import ImporterFileExtensionValidator, tag_validator
 from dojo.widgets import TableCheckboxWidget
@@ -981,23 +982,6 @@ class UploadThreatForm(forms.Form):
                     )
                 raise ValidationError(msg)
 
-    def clean(self):
-        if (file := self.cleaned_data.get("file", None)) is not None:
-            ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
-            valid_extensions = [".jpg", ".png", ".pdf"]
-            if ext.lower() not in valid_extensions:
-                if accepted_extensions := f"{', '.join(valid_extensions)}":
-                    msg = (
-                        "Unsupported extension. Supported extensions are as "
-                        f"follows: {accepted_extensions}"
-                    )
-                else:
-                    msg = (
-                        "File uploads are prohibited due to the list of acceptable "
-                        "file extensions being empty"
-                    )
-                raise ValidationError(msg)
-
 
 class MergeFindings(forms.ModelForm):
     FINDING_ACTION = (("", "Select an Action"), ("inactive", "Inactive"), ("delete", "Delete"))
@@ -1091,6 +1075,11 @@ class EditRiskAcceptanceForm(forms.ModelForm):
     class Meta:
         model = Risk_Acceptance
         exclude = ["accepted_findings", "notes"]
+    
+    def clean_path(self):
+        file = self.cleaned_data.get("path")
+        validate_type_file(file, [".jpg", ".png", ".pdf"])
+        return file
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1194,6 +1183,11 @@ class RiskPendingForm(forms.ModelForm):
         else:
             raise ValidationError("Accepted_by key no found")
         return data
+    
+    def clean_path(self):
+        file = self.cleaned_data.get("path")
+        validate_type_file(file, [".jpg", ".png", ".pdf"])
+        return file
 
 
 class RiskAcceptanceForm(EditRiskAcceptanceForm):
@@ -1308,7 +1302,11 @@ class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
     class Meta:
         model = Risk_Acceptance
         fields = ["path"]
-
+    
+    def clean_path(self):
+        file = self.cleaned_data.get("path")
+        validate_type_file(file, [".jpg", ".png", ".pdf"])
+        return file
 
 class AddFindingsRiskAcceptanceForm(forms.ModelForm):
 
