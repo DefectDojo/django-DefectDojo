@@ -4,7 +4,6 @@ from datetime import UTC, datetime
 from dateutil import parser as date_parser
 
 from dojo.models import Endpoint, Finding
-
 from dojo.utils import parse_cvss_data
 
 
