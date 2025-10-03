@@ -35,6 +35,7 @@ from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.http import FileResponse, HttpResponseRedirect
+from django.shortcuts import redirect as django_redirect
 from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -50,6 +51,7 @@ from dojo.github import (
     reopen_external_issue_github,
     update_external_issue_github,
 )
+from dojo.labels import get_labels
 from dojo.models import (
     NOTIFICATION_CHOICES,
     Benchmark_Type,
@@ -74,6 +76,8 @@ from dojo.notifications.helper import create_notification
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 WEEKDAY_FRIDAY = 4  # date.weekday() starts with 0
+
+labels = get_labels()
 
 """
 Helper functions for DefectDojo
@@ -1949,7 +1953,7 @@ def sla_compute_and_notify(*args, **kwargs):
                         findings_list.append(n.finding)
 
                     # producing a "combined" SLA breach notification
-                    title_combined = f"SLA alert ({kind}): product type '{prodtype}', product '{prod}'"
+                    title_combined = f"SLA alert ({kind}): " + labels.ORG_WITH_NAME_LABEL % {"name": prodtype} + ", " + labels.ASSET_WITH_NAME_LABEL % {"name": prod}
                     product = comb_notif_kind[0].finding.test.engagement.product
                     create_notification(
                         event="sla_breach_combined",
@@ -2746,3 +2750,10 @@ def truncate_timezone_aware(dt):
         truncated = timezone.make_aware(truncated)
 
     return truncated
+
+
+def redirect_view(to: str):
+    """"View" that redirects to the view named in 'to.'"""
+    def _redirect(request, **kwargs):
+        return django_redirect(to, **kwargs)
+    return _redirect

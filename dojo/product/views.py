@@ -70,6 +70,7 @@ from dojo.forms import (
     ProductNotificationsForm,
     SLA_Configuration,
 )
+from dojo.labels import get_labels
 from dojo.models import (
     App_Analysis,
     Benchmark_Product_Summary,
@@ -133,6 +134,8 @@ from dojo.utils import (
 
 logger = logging.getLogger(__name__)
 
+labels = get_labels()
+
 
 def product(request):
     prods = get_authorized_products(Permissions.Product_View)
@@ -159,7 +162,7 @@ def product(request):
     # Get benchmark types for the template
     benchmark_types = Benchmark_Type.objects.filter(enabled=True).order_by("name")
 
-    add_breadcrumb(title=_("Product List"), top_level=not len(request.GET), request=request)
+    add_breadcrumb(title=str(labels.ASSET_READ_LIST_LABEL), top_level=not len(request.GET), request=request)
 
     return render(request, "dojo/product.html", {
         "prod_list": prod_list,
@@ -305,7 +308,7 @@ def view_product(request, pid):
 
     total = critical + high + medium + low + info
 
-    product_tab = Product_Tab(prod, title=_("Product"), tab="overview")
+    product_tab = Product_Tab(prod, title=str(labels.ASSET_LABEL), tab="overview")
     return render(request, "dojo/view_product_details.html", {
         "prod": prod,
         "product_tab": product_tab,
@@ -338,7 +341,7 @@ def view_product(request, pid):
 @user_is_authorized(Product, Permissions.Component_View, "pid")
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
-    product_tab = Product_Tab(prod, title=_("Product"), tab="components")
+    product_tab = Product_Tab(prod, title=str(labels.ASSET_LABEL), tab="components")
     separator = ", "
 
     # Get components ordered by component_name and concat component versions to the same row
@@ -718,7 +721,7 @@ def view_product_metrics(request, pid):
     open_vulnerabilities = [["CWE-" + str(f.get("cwe")), f.get("count")] for f in open_vulnerabilities]
     all_vulnerabilities = [["CWE-" + str(f.get("cwe")), f.get("count")] for f in all_vulnerabilities]
 
-    product_tab = Product_Tab(prod, title=_("Product"), tab="metrics")
+    product_tab = Product_Tab(prod, title=str(labels.ASSET_LABEL), tab="metrics")
 
     return render(request, "dojo/product_metrics.html", {
         "prod": prod,
@@ -920,7 +923,7 @@ def new_product(request, ptid=None):
             product = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 _("Product added successfully."),
+                                 labels.ASSET_CREATE_SUCCESS_MESSAGE,
                                  extra_tags="alert-success")
             success, jira_project_form = jira_helper.process_jira_project_form(request, product=product)
             error = not success
@@ -967,7 +970,7 @@ def new_product(request, ptid=None):
 
         gform = GITHUB_Product_Form() if get_system_setting("enable_github") else None
 
-    add_breadcrumb(title=_("New Product"), top_level=False, request=request)
+    add_breadcrumb(title=str(labels.ASSET_CREATE_LABEL), top_level=False, request=request)
     return render(request, "dojo/new_product.html",
                   {"form": form,
                    "jform": jira_project_form,
@@ -997,13 +1000,13 @@ def edit_product(request, pid):
         if form.is_valid():
             initial_sla_config = Product.objects.get(pk=form.instance.id).sla_configuration
             form.save()
-            msg = "Product updated successfully."
+            msg = labels.ASSET_UPDATE_SUCCESS_MESSAGE
             # check if the SLA config was changed, append additional context to message
             if initial_sla_config != form.instance.sla_configuration:
-                msg += " All SLA expiration dates for findings within this product will be recalculated asynchronously for the newly assigned SLA configuration."
+                msg += " " + labels.ASSET_UPDATE_SLA_CHANGED_MESSAGE
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 _(msg),
+                                 msg,
                                  extra_tags="alert-success")
 
             success, jform = jira_helper.process_jira_project_form(request, instance=jira_project, product=product)
@@ -1040,7 +1043,7 @@ def edit_product(request, pid):
         else:
             gform = None
 
-    product_tab = Product_Tab(product, title=_("Edit Product"), tab="settings")
+    product_tab = Product_Tab(product, title=str(labels.ASSET_UPDATE_LABEL), tab="settings")
     return render(request,
                   "dojo/edit_product.html",
                   {"form": form,
@@ -1064,9 +1067,9 @@ def delete_product(request, pid):
                 if get_setting("ASYNC_OBJECT_DELETE"):
                     async_del = async_delete()
                     async_del.delete(product)
-                    message = _("Product and relationships will be removed in the background.")
+                    message = labels.ASSET_DELETE_SUCCESS_ASYNC_MESSAGE
                 else:
-                    message = _("Product and relationships removed.")
+                    message = labels.ASSET_DELETE_SUCCESS_MESSAGE
                     product.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -1086,11 +1089,12 @@ def delete_product(request, pid):
         collector.collect([product])
         rels = collector.nested()
 
-    product_tab = Product_Tab(product, title=_("Product"), tab="settings")
+    product_tab = Product_Tab(product, title=str(labels.ASSET_LABEL), tab="settings")
 
     logger.debug("delete_product: GET RENDER")
 
     return render(request, "dojo/delete_product.html", {
+        "label_delete_with_name": labels.ASSET_DELETE_WITH_NAME_LABEL % {"name": product},
         "product": product,
         "form": form,
         "product_tab": product_tab,
@@ -1699,6 +1703,7 @@ def edit_notifications(request, pid):
 def add_product_member(request, pid):
     product = get_object_or_404(Product, pk=pid)
     memberform = Add_Product_MemberForm(initial={"product": product.id})
+    page_name = str(labels.ASSET_USERS_MEMBER_ADD_LABEL)
     if request.method == "POST":
         memberform = Add_Product_MemberForm(request.POST, initial={"product": product.id})
         if memberform.is_valid():
@@ -1720,11 +1725,12 @@ def add_product_member(request, pid):
                             product_member.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     _("Product members added successfully."),
+                                     labels.ASSET_USERS_MEMBER_ADD_SUCCESS_MESSAGE,
                                      extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("view_product", args=(pid,)))
-    product_tab = Product_Tab(product, title=_("Add Product Member"), tab="settings")
+    product_tab = Product_Tab(product, title=page_name, tab="settings")
     return render(request, "dojo/new_product_member.html", {
+        "name": page_name,
         "product": product,
         "form": memberform,
         "product_tab": product_tab,
@@ -1735,6 +1741,7 @@ def add_product_member(request, pid):
 def edit_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
     memberform = Edit_Product_MemberForm(instance=member)
+    page_name = str(labels.ASSET_USERS_MEMBER_UPDATE_LABEL)
     if request.method == "POST":
         memberform = Edit_Product_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
@@ -1748,13 +1755,14 @@ def edit_product_member(request, memberid):
                 memberform.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     _("Product member updated successfully."),
+                                     labels.ASSET_USERS_MEMBER_UPDATE_SUCCESS_MESSAGE,
                                      extra_tags="alert-success")
                 if is_title_in_breadcrumbs("View User"):
                     return HttpResponseRedirect(reverse("view_user", args=(member.user.id,)))
                 return HttpResponseRedirect(reverse("view_product", args=(member.product.id,)))
-    product_tab = Product_Tab(member.product, title=_("Edit Product Member"), tab="settings")
+    product_tab = Product_Tab(member.product, title=page_name, tab="settings")
     return render(request, "dojo/edit_product_member.html", {
+        "name": page_name,
         "memberid": memberid,
         "form": memberform,
         "product_tab": product_tab,
@@ -1765,6 +1773,7 @@ def edit_product_member(request, memberid):
 def delete_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
     memberform = Delete_Product_MemberForm(instance=member)
+    page_name = str(labels.ASSET_USERS_MEMBER_DELETE_LABEL)
     if request.method == "POST":
         memberform = Delete_Product_MemberForm(request.POST, instance=member)
         member = memberform.instance
@@ -1772,15 +1781,16 @@ def delete_product_member(request, memberid):
         member.delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             _("Product member deleted successfully."),
+                             labels.ASSET_USERS_MEMBER_DELETE_SUCCESS_MESSAGE,
                              extra_tags="alert-success")
         if is_title_in_breadcrumbs("View User"):
             return HttpResponseRedirect(reverse("view_user", args=(member.user.id,)))
         if user == request.user:
             return HttpResponseRedirect(reverse("product"))
         return HttpResponseRedirect(reverse("view_product", args=(member.product.id,)))
-    product_tab = Product_Tab(member.product, title=_("Delete Product Member"), tab="settings")
+    product_tab = Product_Tab(member.product, title=page_name, tab="settings")
     return render(request, "dojo/delete_product_member.html", {
+        "name": page_name,
         "memberid": memberid,
         "form": memberform,
         "product_tab": product_tab,
@@ -1923,6 +1933,7 @@ def edit_product_group(request, groupid):
     logger.error(groupid)
     group = get_object_or_404(Product_Group, pk=groupid)
     groupform = Edit_Product_Group_Form(instance=group)
+    page_name = str(labels.ASSET_GROUPS_UPDATE_LABEL)
 
     if request.method == "POST":
         groupform = Edit_Product_Group_Form(request.POST, instance=group)
@@ -1937,14 +1948,15 @@ def edit_product_group(request, groupid):
                 groupform.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     _("Product group updated successfully."),
+                                     labels.ASSET_GROUPS_UPDATE_SUCCESS_MESSAGE,
                                      extra_tags="alert-success")
                 if is_title_in_breadcrumbs("View Group"):
                     return HttpResponseRedirect(reverse("view_group", args=(group.group.id,)))
                 return HttpResponseRedirect(reverse("view_product", args=(group.product.id,)))
 
-    product_tab = Product_Tab(group.product, title=_("Edit Product Group"), tab="settings")
+    product_tab = Product_Tab(group.product, title=page_name, tab="settings")
     return render(request, "dojo/edit_product_group.html", {
+        "name": page_name,
         "groupid": groupid,
         "form": groupform,
         "product_tab": product_tab,
@@ -1955,6 +1967,7 @@ def edit_product_group(request, groupid):
 def delete_product_group(request, groupid):
     group = get_object_or_404(Product_Group, pk=groupid)
     groupform = Delete_Product_GroupForm(instance=group)
+    page_name = str(labels.ASSET_GROUPS_DELETE_LABEL)
 
     if request.method == "POST":
         groupform = Delete_Product_GroupForm(request.POST, instance=group)
@@ -1962,7 +1975,7 @@ def delete_product_group(request, groupid):
         group.delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             _("Product group deleted successfully."),
+                             labels.ASSET_GROUPS_DELETE_SUCCESS_MESSAGE,
                              extra_tags="alert-success")
         if is_title_in_breadcrumbs("View Group"):
             return HttpResponseRedirect(reverse("view_group", args=(group.group.id,)))
@@ -1970,8 +1983,9 @@ def delete_product_group(request, groupid):
         #  page
         return HttpResponseRedirect(reverse("view_product", args=(group.product.id,)))
 
-    product_tab = Product_Tab(group.product, title=_("Delete Product Group"), tab="settings")
+    product_tab = Product_Tab(group.product, title=page_name, tab="settings")
     return render(request, "dojo/delete_product_group.html", {
+        "name": page_name,
         "groupid": groupid,
         "form": groupform,
         "product_tab": product_tab,
@@ -1982,6 +1996,7 @@ def delete_product_group(request, groupid):
 def add_product_group(request, pid):
     product = get_object_or_404(Product, pk=pid)
     group_form = Add_Product_GroupForm(initial={"product": product.id})
+    page_name = str(labels.ASSET_GROUPS_ADD_LABEL)
 
     if request.method == "POST":
         group_form = Add_Product_GroupForm(request.POST, initial={"product": product.id})
@@ -2004,11 +2019,12 @@ def add_product_group(request, pid):
                             product_group.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     _("Product groups added successfully."),
+                                     labels.ASSET_GROUPS_ADD_SUCCESS_MESSAGE,
                                      extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("view_product", args=(pid,)))
-    product_tab = Product_Tab(product, title=_("Edit Product Group"), tab="settings")
+    product_tab = Product_Tab(product, title=page_name, tab="settings")
     return render(request, "dojo/new_product_group.html", {
+        "name": page_name,
         "product": product,
         "form": group_form,
         "product_tab": product_tab,

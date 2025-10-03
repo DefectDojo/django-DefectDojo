@@ -15,6 +15,7 @@ from email.utils import getaddresses
 from pathlib import Path
 
 import environ
+import pghistory
 from celery.schedules import crontab
 from netaddr import IPNetwork, IPSet
 
@@ -90,6 +91,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
+    DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
     DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 100),
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
@@ -263,6 +265,10 @@ env = environ.FileAwareEnv(
     DD_TRACK_IMPORT_HISTORY=(bool, True),
     # Delete Auditlogs older than x month; -1 to keep all logs
     DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
+    # Batch size for flushing audit logs per task run
+    DD_AUDITLOG_FLUSH_BATCH_SIZE=(int, 1000),
+    # Maximum number of batches to process per task run
+    DD_AUDITLOG_FLUSH_MAX_BATCHES=(int, 100),
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
@@ -316,6 +322,8 @@ env = environ.FileAwareEnv(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    # Audit logging system: "django-auditlog" (default) or "django-pghistory"
+    DD_AUDITLOG_TYPE=(str, "django-pghistory"),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
@@ -328,6 +336,8 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+    # Dictates if v3 org/asset relabeling (+url routing) will be enabled
+    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
 )
 
 
@@ -400,6 +410,9 @@ DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
 MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
 
 TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
+# Tag bulk add batch size (used by dojo.tag_utils.bulk_add_tag_to_instances)
+TAG_BULK_ADD_BATCH_SIZE = env("DD_TAG_BULK_ADD_BATCH_SIZE")
+
 
 # ------------------------------------------------------------------------------
 # DATABASE
@@ -774,6 +787,8 @@ SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
 # DEFECTDOJO SPECIFIC
 # ------------------------------------------------------------------------------
 
+ENABLE_V3_ORGANIZATION_ASSET_RELABEL = env("DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL")
+
 # Credential Key
 CREDENTIAL_AES_256_KEY = env("DD_CREDENTIAL_AES_256_KEY")
 DB_KEY = env("DD_CREDENTIAL_AES_256_KEY")
@@ -866,6 +881,7 @@ TEMPLATES = [
                 "dojo.context_processors.bind_alert_count",
                 "dojo.context_processors.bind_announcement",
                 "dojo.context_processors.session_expiry_notification",
+                "dojo.context_processors.labels",
             ],
         },
     },
@@ -885,7 +901,6 @@ INSTALLED_APPS = (
     "polymorphic",  # provides admin templates
     "django.contrib.admin",
     "django.contrib.humanize",
-    "auditlog",
     "dojo",
     "watson",
     "imagekit",
@@ -900,6 +915,9 @@ INSTALLED_APPS = (
     "tagulous",
     "fontawesomefree",
     "django_filters",
+    "auditlog",
+    "pgtrigger",
+    "pghistory",
 )
 
 # ------------------------------------------------------------------------------
@@ -1361,6 +1379,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
     "Cycognito Scan": ["title", "severity"],
     "OpenVAS Parser v2": ["title", "severity", "vuln_id_from_tool", "endpoints"],
+    "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1620,6 +1639,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
     "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
+    "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1909,8 +1929,11 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
 ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
+AUDITLOG_TYPE = env("DD_AUDITLOG_TYPE")
 AUDITLOG_TWO_STEP_MIGRATION = False
 AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
+AUDITLOG_FLUSH_BATCH_SIZE = env("DD_AUDITLOG_FLUSH_BATCH_SIZE")
+AUDITLOG_FLUSH_MAX_BATCHES = env("DD_AUDITLOG_FLUSH_MAX_BATCHES")
 
 USE_FIRST_SEEN = env("DD_USE_FIRST_SEEN")
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
@@ -1995,3 +2018,28 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
         "debug_toolbar.panels.profiling.ProfilingPanel",
         # 'cachalot.panels.CachalotPanel',
     ]
+
+#########################################################################################################
+# Auditlog configuration                                                                                #
+#########################################################################################################
+
+if ENABLE_AUDITLOG:
+    middleware_list = list(MIDDLEWARE)
+    crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
+
+    if AUDITLOG_TYPE == "django-auditlog":
+        # Insert AuditlogMiddleware before CurrentRequestUserMiddleware
+        middleware_list.insert(crum_index, "dojo.middleware.AuditlogMiddleware")
+    elif AUDITLOG_TYPE == "django-pghistory":
+        # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
+        middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
+
+    MIDDLEWARE = middleware_list
+
+PGHISTORY_FOREIGN_KEY_FIELD = pghistory.ForeignKey(db_index=False)
+PGHISTORY_CONTEXT_FIELD = pghistory.ContextForeignKey(db_index=True)
+PGHISTORY_OBJ_FIELD = pghistory.ObjForeignKey(db_index=True)
+
+#########################################################################################################
+# End of Auditlog configuration                                                                          #
+#########################################################################################################
