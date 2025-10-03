@@ -2,12 +2,18 @@ name: Integration tests
 
 on:
   workflow_call:
+    inputs:
+        auditlog_type:
+          type: string
+          default: "django-auditlog"
 
 jobs:
   integration_tests:
     # run tests with docker compose
     name: User Interface Tests
     runs-on: ubuntu-latest
+    env:
+      AUDITLOG_TYPE: ${{ inputs.auditlog_type }}
     strategy:
       matrix:
         test-case: [
