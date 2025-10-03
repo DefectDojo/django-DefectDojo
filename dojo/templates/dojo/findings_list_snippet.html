@@ -57,6 +57,8 @@
                 <div class="clearfix">{% include "dojo/paging_snippet.html" with page=findings page_size=True %}</div>
                 {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                     <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
+                        {{ bulk_edit_form.media.css }}
+                        {{ bulk_edit_form.media.js }}
                         {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                             <button class="btn btn-info btn-sm btn-primary dropdown-toggle"
                                     type="button"
@@ -242,18 +244,8 @@
                                             <br />
                                         {% endif %}
                                         <label style="display: block">{% trans "Notes" %}</label>
-                                        {% comment %}
-                                            Quick hack to make bulk edit work without refactoring the whole bulk edit form
-                                            {{ bulk_edit_form.media.css }}
-                                            {{ bulk_edit_form.media.js }}
-                                        {% endcomment %}
                                         {{ bulk_edit_form.notes }}
                                         <label style="display: block">{% trans "Tags" %}</label>
-                                        {% comment %}
-                                            Quick hack to make bulk edit work without refactoring the whole bulk edit form
-                                            {{ bulk_edit_form.media.css }}
-                                            {{ bulk_edit_form.media.js }}
-                                        {% endcomment %}
                                         {{ bulk_edit_form.tags }}
                                         {% if bulk_edit_form.disclaimer %}
                                             <div style="background-color:#DADCE2; border:1px #003333; padding:.3em; margin:.1em; ">
