@@ -70,7 +70,8 @@ def product_type_post_delete(sender, instance, **kwargs):
 
             # Update description with user if found
             if user:
-                description = labels.ORG_DELETE_WITH_NAME_SUCCESS_MESSAGE % {"name": instance.name}
+                description = labels.ORG_DELETE_WITH_NAME_WITH_USER_SUCCESS_MESSAGE % {"name": instance.name, "user": user}
+
         create_notification(event="product_type_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
                             title=_("Deletion of %(name)s") % {"name": instance.name},
                             description=description,
