@@ -91,6 +91,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
+    DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
     DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 100),
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
@@ -335,6 +336,8 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+    # Dictates if v3 org/asset relabeling (+url routing) will be enabled
+    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
 )
 
 
@@ -407,6 +410,9 @@ DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
 MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
 
 TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
+# Tag bulk add batch size (used by dojo.tag_utils.bulk_add_tag_to_instances)
+TAG_BULK_ADD_BATCH_SIZE = env("DD_TAG_BULK_ADD_BATCH_SIZE")
+
 
 # ------------------------------------------------------------------------------
 # DATABASE
@@ -781,6 +787,8 @@ SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
 # DEFECTDOJO SPECIFIC
 # ------------------------------------------------------------------------------
 
+ENABLE_V3_ORGANIZATION_ASSET_RELABEL = env("DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL")
+
 # Credential Key
 CREDENTIAL_AES_256_KEY = env("DD_CREDENTIAL_AES_256_KEY")
 DB_KEY = env("DD_CREDENTIAL_AES_256_KEY")
@@ -873,6 +881,7 @@ TEMPLATES = [
                 "dojo.context_processors.bind_alert_count",
                 "dojo.context_processors.bind_announcement",
                 "dojo.context_processors.session_expiry_notification",
+                "dojo.context_processors.labels",
             ],
         },
     },
@@ -1370,6 +1379,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
     "Cycognito Scan": ["title", "severity"],
     "OpenVAS Parser v2": ["title", "severity", "vuln_id_from_tool", "endpoints"],
+    "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1629,6 +1639,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
     "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
+    "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

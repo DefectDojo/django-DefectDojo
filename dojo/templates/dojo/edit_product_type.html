@@ -16,13 +16,13 @@
 {% endblock %}
 {% block content %}
     {{ block.super }}
-    <h3>{% blocktrans with name=pt.name %}Edit Product Type {{ name }}{% endblocktrans %}</h3>
+    <h3>{{ label_edit_with_name }}</h3>
     <form class="form-horizontal" action="{% url 'edit_product_type' pt.id %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=pt_form %}
         {{ delete_pt_form }}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-                <input aria-label="{% trans "Edit product type" %}" class="btn btn-primary" name="edit_product_type" type="submit" value="{% trans "Submit" %}"/>
+                <input aria-label="{{ labels.ORG_UPDATE_LABEL }}" class="btn btn-primary" name="edit_product_type" type="submit" value="{% trans "Submit" %}"/>
             </div>
         </div>
     </form>

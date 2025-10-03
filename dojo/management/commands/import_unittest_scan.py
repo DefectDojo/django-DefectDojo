@@ -66,6 +66,15 @@ class Command(BaseCommand):
             default=False,
             help="Mark findings as verified (default: False)",
         )
+        parser.add_argument(
+            "--tags",
+            action="append",
+            default=[],
+            help=(
+                "Tag(s) to apply to the imported Test (repeat --tags to add multiple). "
+                "Example: --tags perf --tags jfrog"
+            ),
+        )
 
     def get_test_admin(self):
         return User.objects.get(username="admin")
@@ -138,7 +147,7 @@ class Command(BaseCommand):
             raise CommandError(msg)
 
     def import_unittest_scan(self, scan_file, product_name, engagement_name, product_type_name,
-                           minimum_severity, active, verified):
+                           minimum_severity, active, verified, tags):
         """
         Import a specific unittest scan file.
 
@@ -173,12 +182,17 @@ class Command(BaseCommand):
                 "version": "1.0.1",
                 "active": active,
                 "verified": verified,
+                "apply_tags_to_findings": True,
+                "apply_tags_to_endpoints": True,
                 "auto_create_context": True,
                 "product_type_name": product_type_name,
                 "product_name": product_name,
                 "engagement_name": engagement_name,
                 "close_old_findings": False,
             }
+
+            if tags:
+                payload["tags"] = tags
 
             result = self.import_scan(payload)
 
@@ -195,6 +209,7 @@ class Command(BaseCommand):
         minimum_severity = options["minimum_severity"]
         active = options["active"]
         verified = options["verified"]
+        tags = options["tags"]
 
         start_time = time.time()
 
@@ -207,6 +222,7 @@ class Command(BaseCommand):
                 minimum_severity=minimum_severity,
                 active=active,
                 verified=verified,
+                tags=tags,
             )
 
             end_time = time.time()
