@@ -10,9 +10,12 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from dojo.labels import get_labels
 from dojo.models import Product_Type
 from dojo.notifications.helper import create_notification
 from dojo.pghistory_models import DojoEvents
+
+labels = get_labels()
 
 
 @receiver(post_save, sender=Product_Type)
@@ -30,7 +33,7 @@ def product_type_post_save(sender, instance, created, **kwargs):
 def product_type_post_delete(sender, instance, **kwargs):
     # Catch instances in async delete where a single object is deleted more than once
     with contextlib.suppress(sender.DoesNotExist):
-        description = _('The product type "%(name)s" was deleted') % {"name": instance.name}
+        description = labels.ORG_DELETE_WITH_NAME_SUCCESS_MESSAGE % {"name": instance.name}
         user = None
 
         if settings.ENABLE_AUDITLOG:
@@ -67,8 +70,7 @@ def product_type_post_delete(sender, instance, **kwargs):
 
             # Update description with user if found
             if user:
-                description = _('The product type "%(name)s" was deleted by %(user)s') % {
-                                "name": instance.name, "user": user}
+                description = labels.ORG_DELETE_WITH_NAME_SUCCESS_MESSAGE % {"name": instance.name}
         create_notification(event="product_type_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
                             title=_("Deletion of %(name)s") % {"name": instance.name},
                             description=description,

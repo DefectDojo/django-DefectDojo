@@ -1,4 +1,7 @@
+from dojo.labels import get_labels
 from dojo.utils import get_system_setting
+
+labels = get_labels()
 
 
 class Permission_Helper:
@@ -23,6 +26,8 @@ class Permission_Helper:
             return "Configuration Permissions"
         if self.name == "sla configuration":
             return "SLA Configurations"
+        if self.name == "product type":
+            return str(labels.ORG_PLURAL_LABEL)
         return self.name.title() + "s"
 
     def view_codename(self):
