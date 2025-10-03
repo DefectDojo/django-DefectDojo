@@ -22,6 +22,7 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import UserFilter
 from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
+from dojo.labels import get_labels
 from dojo.metrics.utils import (
     endpoint_queries,
     finding_queries,
@@ -49,6 +50,9 @@ from dojo.utils import (
 logger = logging.getLogger(__name__)
 
 
+labels = get_labels()
+
+
 """
 Greg, Jay
 status: in production
@@ -58,7 +62,7 @@ generic metrics method
 
 def critical_product_metrics(request, mtype):
     template = "dojo/metrics.html"
-    page_name = _("Critical Product Metrics")
+    page_name = str(labels.ASSET_METRICS_CRITICAL_LABEL)
     critical_products = get_authorized_product_types(Permissions.Product_Type_View)
     critical_products = critical_products.filter(critical_product=True)
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
@@ -94,10 +98,10 @@ def metrics(request, mtype):
 
     filters = {}
     if view == "Finding":
-        page_name = _("Product Type Metrics by Findings")
+        page_name = str(labels.ORG_METRICS_BY_FINDINGS_LABEL)
         filters = finding_queries(prod_type, request)
     elif view == "Endpoint":
-        page_name = _("Product Type Metrics by Affected Endpoints")
+        page_name = str(labels.ORG_METRICS_BY_ENDPOINTS_LABEL)
         filters = endpoint_queries(prod_type, request)
 
     all_findings = findings_queryset(queryset_check(filters["all"]))
@@ -425,7 +429,7 @@ def product_type_counts(request):
             for o in overall_in_pt:
                 aip[o["numerical_severity"]] = o["numerical_severity__count"]
         else:
-            messages.add_message(request, messages.ERROR, _("Please choose month and year and the Product Type."),
+            messages.add_message(request, messages.ERROR, labels.ORG_METRICS_TYPE_COUNTS_ERROR_MESSAGE,
                                  extra_tags="alert-danger")
 
     add_breadcrumb(title=_("Bi-Weekly Metrics"), top_level=True, request=request)
@@ -630,8 +634,7 @@ def product_tag_counts(request):
             for o in overall_in_pt:
                 aip[o["numerical_severity"]] = o["numerical_severity__count"]
         else:
-            messages.add_message(request, messages.ERROR, _("Please choose month and year and the Product Tag."),
-                                 extra_tags="alert-danger")
+            messages.add_message(request, messages.ERROR, labels.ASSET_METRICS_TAG_COUNTS_ERROR_MESSAGE, extra_tags="alert-danger")
 
     add_breadcrumb(title=_("Bi-Weekly Metrics"), top_level=True, request=request)
 
