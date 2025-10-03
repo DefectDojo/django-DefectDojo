@@ -3500,6 +3500,81 @@ class LogEntryFilter(DojoFilter):
         }
 
 
+class PgHistoryFilter(DojoFilter):
+
+    """
+    Filter for django-pghistory audit entries.
+
+    This filter works with pghistory event tables that have:
+    - pgh_created_at: timestamp of the event
+    - pgh_label: event type (insert/update/delete)
+    - user: user ID from context
+    - url: URL from context
+    - remote_addr: IP address from context
+    """
+
+    # Filter by event creation time (equivalent to auditlog timestamp)
+    pgh_created_at = DateRangeFilter(field_name="pgh_created_at", label="Timestamp")
+
+    # Filter by event type/label
+    pgh_label = ChoiceFilter(
+        field_name="pgh_label",
+        label="Event Type",
+        choices=[
+            ("", "All"),
+            ("insert", "Insert"),
+            ("update", "Update"),
+            ("delete", "Delete"),
+            ("initial_import", "Initial Import"),
+        ],
+    )
+
+    # Filter by user (from context)
+    user = ModelChoiceFilter(
+        field_name="user",
+        queryset=Dojo_User.objects.none(),
+        label="User",
+        empty_label="All Users",
+    )
+
+    # Filter by IP address (from context)
+    remote_addr = CharFilter(
+        field_name="remote_addr",
+        lookup_expr="icontains",
+        label="IP Address Contains",
+    )
+
+    # Filter by changes/diff field (JSON field containing what changed)
+    pgh_diff = CharFilter(
+        method="filter_pgh_diff_contains",
+        label="Changes Contains",
+        help_text="Search for field names or values in the changes (optimized for JSONB, but can be slow)",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form.fields["user"].queryset = get_authorized_users(Permissions.Product_View)
+
+    def filter_pgh_diff_contains(self, queryset, name, value):
+        """
+        Custom filter for pgh_diff that uses efficient JSONB operations.
+        Searches both keys and values in the JSONB field.
+        """
+        if not value:
+            return queryset
+
+        # Search in both keys and values using JSONB operators
+        return queryset.filter(
+            Q(pgh_diff__has_key=value) |  # Search in keys: {"severity": [...]}
+            Q(pgh_diff__has_any_keys=[value]) |  # Alternative key search
+            Q(pgh_diff__contains=f'"{value}"'),  # Search in values: ["severity", "other"]
+        )
+
+    class Meta:
+        fields = ["pgh_created_at", "pgh_label", "user", "url", "remote_addr", "pgh_diff"]
+        exclude = []
+
+
 class ProductTypeFilter(DojoFilter):
     name = CharFilter(lookup_expr="icontains")
 

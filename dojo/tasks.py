@@ -1,9 +1,7 @@
 import logging
-from datetime import date, timedelta
+from datetime import timedelta
 
-from auditlog.models import LogEntry
 from celery.utils.log import get_task_logger
-from dateutil.relativedelta import relativedelta
 from django.apps import apps
 from django.conf import settings
 from django.core.management import call_command
@@ -11,6 +9,7 @@ from django.db.models import Count, Prefetch
 from django.urls import reverse
 from django.utils import timezone
 
+from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
 from dojo.decorators import dojo_async_task
 from dojo.finding.helper import fix_loop_duplicates
@@ -95,22 +94,7 @@ def cleanup_alerts(*args, **kwargs):
 
 @app.task(bind=True)
 def flush_auditlog(*args, **kwargs):
-    retention_period = settings.AUDITLOG_FLUSH_RETENTION_PERIOD
-
-    if retention_period < 0:
-        logger.info("Flushing auditlog is disabled")
-        return
-
-    logger.info("Running Cleanup Task for Logentries with %d Months retention", retention_period)
-    retention_date = date.today() - relativedelta(months=retention_period)
-    subset = LogEntry.objects.filter(timestamp__date__lt=retention_date)
-    event_count = subset.count()
-    logger.debug("Initially received %d Logentries", event_count)
-    if event_count > 0:
-        subset._raw_delete(subset.db)
-        logger.debug("Total number of audit log entries deleted: %s", event_count)
-    else:
-        logger.debug("No outdated Logentries found")
+    run_flush_auditlog()
 
 
 @app.task(bind=True)
