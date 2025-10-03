@@ -10,6 +10,11 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Sept 2025: v2.50
 
+### Sept 22, 2025: v2.50.4
+
+* **(Pro UI)** Changes Engagement Deduplication form label and help text
+* **(Pro UI)** Adds toggle for MCP (for superusers only)
+
 ### Sept 15, 2025: v2.50.3
 
 * **(Pro UI)** Added support for [CVSSv4.0](https://www.first.org/cvss/v4-0/) vector strings.
