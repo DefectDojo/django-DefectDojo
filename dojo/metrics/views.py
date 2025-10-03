@@ -3,7 +3,7 @@ import collections
 import logging
 import operator
 from calendar import monthrange
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -779,7 +779,7 @@ def view_engineer(request, eid):
                 f.test.engagement.product.name,
                 f.severity,
                 f.title,
-                (date.today() - f.date).days,
+                (timezone.now().date() - f.date).days,
                 "Accepted" if f.risk_accepted else "Active",
                 f.reporter,
             ]
@@ -853,7 +853,7 @@ def view_engineer(request, eid):
 
 def _age_buckets(qs):
     """Return aged high/critical finding counts in one SQL round-trip."""
-    today = date.today()
+    today = timezone.now().date()
     return qs.aggregate(
         lt=Count("id", filter=Q(date__gte=today - timedelta(days=30))),
         ls=Count("id", filter=Q(date__lte=today - timedelta(days=30), date__gt=today - timedelta(days=60))),
