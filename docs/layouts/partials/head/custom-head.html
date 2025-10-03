@@ -1,6 +1,6 @@
 <!-- Custom head -->
 {{ if site.Params.add_ons.docSearch -}} 
     {{ $options := (dict "targetPath" "/css/main.min.css" "outputStyle" "compressed") }}
-    {{ $style := resources.Get "scss/app.scss" | resources.ToCSS $options }}
+    {{ $style := resources.Get "scss/app.scss" | css.Sass $options }}
     <link rel="stylesheet" href="{{ $style.Permalink }}">
 {{ end -}}

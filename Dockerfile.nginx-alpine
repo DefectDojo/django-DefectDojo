@@ -5,7 +5,7 @@
 # Dockerfile.django-alpine to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.11.11-alpine3.20@sha256:6e18772230b36e78251ed179a2a2a2b3cc94726f02e1fddccdcfbe05b17bdc96 AS base
+FROM python:3.11.13-alpine3.22@sha256:8d8c6d3808243160605925c2a7ab2dc5c72d0e75651699b0639143613e0855b8 AS base
 
 FROM base AS build
 WORKDIR /app
@@ -34,6 +34,7 @@ RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 
 FROM build AS collectstatic
+ARG COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC=false
 RUN apk add nodejs npm
 RUN npm install -g yarn --force
 
@@ -52,9 +53,9 @@ RUN \
   yarn
 COPY manage.py ./
 COPY dojo/ ./dojo/
-RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
+RUN env DD_SECRET_KEY='.' DD_DJANGO_DEBUG_TOOLBAR_ENABLED=${COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC} python3 manage.py collectstatic --noinput --verbosity=2 && true
 
-FROM nginx:1.28.0-alpine3.21@sha256:d83c0138ea82c9f05c4378a5001e0c71256b647603c10c186bd7697a4db722d3
+FROM nginx:1.29.1-alpine3.22@sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/

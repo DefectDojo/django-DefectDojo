@@ -46,7 +46,7 @@ class TestsslParser:
                 continue
             # convert severity
             severity = row["severity"].lower().capitalize()
-            if severity == "Warn" or severity == "Fatal":
+            if severity in {"Warn", "Fatal"}:
                 severity = "Info"
             # detect CVEs
             cves = row["cve"].split(" ")

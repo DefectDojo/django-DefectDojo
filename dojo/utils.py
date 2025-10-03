@@ -15,13 +15,14 @@ from pathlib import Path
 
 import bleach
 import crum
+import cvss
 import hyperlink
 import vobject
 from asteval import Interpreter
 from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cvss import CVSS2, CVSS3, CVSS4, CVSSError
+from cvss import CVSS2, CVSS3, CVSS4
 from dateutil.parser import parse
 from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
@@ -1597,8 +1598,14 @@ def calculate_grade(product, *args, **kwargs):
         aeval = Interpreter()
         aeval(system_settings.product_grade)
         grade_product = f"grade_product({critical}, {high}, {medium}, {low})"
-        product.prod_numeric_grade = aeval(grade_product)
-        super(Product, product).save()
+        prod_numeric_grade = aeval(grade_product)
+        if prod_numeric_grade != product.prod_numeric_grade:
+            logger.debug("Updating product %s grade from %s to %s", product.id, product.prod_numeric_grade, prod_numeric_grade)
+            product.prod_numeric_grade = prod_numeric_grade
+            super(Product, product).save()
+        else:
+            # Use %s to safely handle None grades without formatter errors
+            logger.debug("Product %s grade %s is up to date", product.id, prod_numeric_grade)
 
 
 def get_celery_worker_status():
@@ -2464,7 +2471,8 @@ def get_open_findings_burndown(product):
     findings = Finding.objects.filter(test__engagement__product=product, duplicate=False)
     f_list = list(findings)
 
-    curr_date = datetime.combine(datetime.now(), datetime.min.time())
+    curr_date = datetime.combine(timezone.now().date(), datetime.min.time())
+    curr_date = timezone.make_aware(curr_date)
     start_date = curr_date - timedelta(days=90)
 
     critical_count = 0
@@ -2660,49 +2668,11 @@ def generate_file_response_from_file_path(
     return response
 
 
-# TEMPORARY: Local implementation until the upstream PR is merged & released: https://github.com/RedHatProductSecurity/cvss/pull/75
-def parse_cvss_from_text(text):
-    """
-    Parses CVSS2, CVSS3, and CVSS4 vectors from arbitrary text and returns a list of CVSS objects.
-
-    Parses text for substrings that look similar to CVSS vector
-    and feeds these matches to CVSS constructor.
-
-    Args:
-        text (str): arbitrary text
-
-    Returns:
-        A list of CVSS objects.
-
-    """
-    # Looks for substrings that resemble CVSS2, CVSS3, or CVSS4 vectors.
-    # CVSS3 and CVSS4 vectors start with a 'CVSS:x.x/' prefix and are matched by the optional non-capturing group.
-    # CVSS2 vectors do not include a prefix and are matched by raw vector pattern only.
-    # Minimum total match length is 26 characters to reduce false positives.
-    matches = re.compile(r"(?:CVSS:[3-4]\.\d/)?[A-Za-z:/]{26,}").findall(text)
-
-    cvsss = set()
-    for match in matches:
-        try:
-            if match.startswith("CVSS:4."):
-                cvss = CVSS4(match)
-            elif match.startswith("CVSS:3."):
-                cvss = CVSS3(match)
-            else:
-                cvss = CVSS2(match)
-
-            cvsss.add(cvss)
-        except (CVSSError, KeyError):
-            pass
-
-    return list(cvsss)
-
-
 def parse_cvss_data(cvss_vector_string: str) -> dict:
     if not cvss_vector_string:
         return {}
 
-    vectors = parse_cvss_from_text(cvss_vector_string)
+    vectors = cvss.parser.parse_cvss_from_text(cvss_vector_string)
     if len(vectors) > 0:
         vector = vectors[0]
         # For CVSS2, environmental score is at index 2
@@ -2740,3 +2710,21 @@ def parse_cvss_data(cvss_vector_string: str) -> dict:
         }
     logger.debug("No valid CVSS3 or CVSS4 vector found in %s", cvss_vector_string)
     return {}
+
+
+def truncate_timezone_aware(dt):
+    """
+    Truncate datetime to date and make it timezone-aware.
+    This replaces the django_filters._truncate function which creates naive datetimes.
+    """
+    if dt is None:
+        return None
+
+    # Get the date part and create a new datetime at midnight
+    truncated = datetime.combine(dt.date(), datetime.min.time())
+
+    # Make it timezone-aware if it isn't already
+    if timezone.is_naive(truncated):
+        truncated = timezone.make_aware(truncated)
+
+    return truncated

@@ -241,7 +241,7 @@ def parse_finding(host, tree):
 
         # Vuln_status
         status = vuln_details.findtext("VULN_STATUS")
-        if status == "Active" or status == "Re-Opened" or status == "New":
+        if status in {"Active", "Re-Opened", "New"}:
             temp["active"] = True
             temp["mitigated"] = False
             temp["mitigation_date"] = None

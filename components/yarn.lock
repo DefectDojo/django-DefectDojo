@@ -212,10 +212,17 @@ datatables.net-colreorder@^2.1.1:
     datatables.net "^2"
     jquery ">=1.7"
 
-datatables.net@2.3.2, datatables.net@^2, datatables.net@^2.3.1:
+datatables.net@2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.3.2.tgz#6821f6288e6ad3cb6879c33e0e7e11d4091d330b"
   integrity sha512-31TzwIQM0+pr2ZOEOEH6dsHd/WSAl5GDDGPezOHPI3mM2NK4lcDyOoG8xXeWmSbVfbi852LNK5C84fpp4Q+qxg==
+  dependencies:
+    jquery ">=1.7"
+
+datatables.net@^2, datatables.net@^2.3.3:
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.3.3.tgz#fe4f96bdbc4cf47c8d11162a7af525ca6a3683d2"
+  integrity sha512-SWL3za6nheY6gdoiLgCc++tYmxbwrmv2bjrEiII9rXBWXXSbOZct6pjR3FueMVRM5jmt7pQcXiGovfuFDnutQg==
   dependencies:
     jquery ">=1.7"
 

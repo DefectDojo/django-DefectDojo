@@ -286,8 +286,6 @@ class BaseImporter(ImporterOptions):
         if not self.commit_hash.isspace():
             self.test.commit_hash = self.commit_hash
 
-        return
-
     def update_timestamps(self):
         """
         Update the target end dates for tests as imports are occurring:

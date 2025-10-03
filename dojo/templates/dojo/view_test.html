@@ -108,6 +108,7 @@
                     <th>{% trans "Dates" %}</th>
                     <th>{% trans "Updated" %}</th>
                     {% if test.percent_complete > 0 %}<th>{% trans "Progress" %}</th>{% endif %}
+                    <th>{% trans "Fix Available" %}</th>
                     <th>{% trans "Version" %}</th>
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.test_import_set.all %}
                         <th>
@@ -158,6 +159,7 @@
                             </div>
                         </td>
                     {% endif %}
+                    <td>{{ fix_available_count }}</td>
                     <td>{{ test.version }}</td>
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.total_reimport_count %}
                         <td class="text-right">{{ test.total_reimport_count }}</td>

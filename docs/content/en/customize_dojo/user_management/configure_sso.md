@@ -564,6 +564,7 @@ You can also optionally set the following variables:
     DD_SOCIAL_AUTH_OIDC_AUTHORIZATION_URL=(str, ''),
     DD_SOCIAL_AUTH_OIDC_USERINFO_URL=(str, ''),
     DD_SOCIAL_AUTH_OIDC_JWKS_URI=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT=(str, "Login with OIDC"),
     {{< /highlight >}}
 
 Once these variables have been set, restart DefectDojo. Log In With OIDC should now be added to the DefectDojo login page.

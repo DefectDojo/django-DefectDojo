@@ -114,7 +114,7 @@ class GitlabSastParser:
             line = location["end_line"]
 
         severity = vuln.get("severity")
-        if severity is None or severity == "Undefined" or severity == "Unknown":
+        if severity is None or severity in {"Undefined", "Unknown"}:
             # Severity can be "Undefined" or "Unknown" in SAST report
             # In that case we set it as Info and specify the initial severity in the title
             title = f"[{severity} severity] {title}"

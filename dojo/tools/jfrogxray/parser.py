@@ -76,6 +76,7 @@ def get_item(vulnerability, test):
     cvssv3 = None
     cvss_v3 = "No CVSS v3 score."
     mitigation = None
+    fix_available = False
     extra_desc = ""
     # Some entries have no CVE entries, despite they exist. Example
     # CVE-2017-1000502.
@@ -95,6 +96,7 @@ def get_item(vulnerability, test):
         mitigation += "\n".join(
             vulnerability["component_versions"]["fixed_versions"],
         )
+        fix_available = True
 
     if "vulnerable_versions" in vulnerability["component_versions"]:
         extra_desc = "\n**Versions that are vulnerable:**\n"
@@ -160,6 +162,7 @@ def get_item(vulnerability, test):
         static_finding=True,
         dynamic_finding=False,
         cvssv3=cvssv3,
+        fix_available=fix_available,
     )
     if vulnerability_ids:
         finding.unsaved_vulnerability_ids = vulnerability_ids

@@ -41,7 +41,7 @@ class TestTwistlockParser(DojoTestCase):
                 # Verify compliance finding has image metadata in impact field
                 self.assertIn("Image ID:", finding.impact)
                 self.assertIn("Distribution:", finding.impact)
-                self.assertTrue("\n" in finding.impact)
+                self.assertIn("\n", finding.impact)
             else:
                 # Verify vulnerability finding exists and has correct properties
                 self.assertIsNotNone(finding)
@@ -52,7 +52,7 @@ class TestTwistlockParser(DojoTestCase):
                 self.assertIn("Image ID:", finding.impact)
                 self.assertIn("Distribution:", finding.impact)
                 self.assertIn("Debian GNU/Linux 9", finding.impact)
-                self.assertTrue("\n" in finding.impact)
+                self.assertIn("\n", finding.impact)
 
     def test_parse_csv_with_timestamps_and_metadata(self):
         testfile = (
@@ -69,8 +69,8 @@ class TestTwistlockParser(DojoTestCase):
         # Verify timestamp parsing (Item 4)
         self.assertIsNotNone(finding.date)
         # Should use Published date (2020-09-04) or Discovered date (2020-09-29)
-        self.assertTrue(finding.date.year == 2020)
-        self.assertTrue(finding.date.month in {9, 1, 11, 12})  # Various months from the test data
+        self.assertEqual(finding.date.year, 2020)
+        self.assertIn(finding.date.month, {9, 1, 11, 12})  # Various months from the test data
 
         # Verify metadata in impact field (Item 3) - now separated by newlines
         self.assertIn("Registry:", finding.impact)

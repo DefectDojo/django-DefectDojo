@@ -29,6 +29,7 @@ env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
+    DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
@@ -120,6 +121,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_OIDC_AUTHORIZATION_URL=(str, ""),
     DD_SOCIAL_AUTH_OIDC_USERINFO_URL=(str, ""),
     DD_SOCIAL_AUTH_OIDC_JWKS_URI=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT=(str, "Login with OIDC"),
     DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AUTH0_KEY=(str, ""),
     DD_SOCIAL_AUTH_AUTH0_SECRET=(str, ""),
@@ -286,6 +288,9 @@ env = environ.FileAwareEnv(
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, [".txt", ".pdf", ".json", ".xml", ".csv", ".yml", ".png", ".jpeg",
                                  ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip", ".fpr"]),
+    # List of acceptable file types that can be (re)imported
+    DD_FILE_IMPORT_TYPES=(list, [".xml", ".csv", ".nessus", ".json", ".jsonl", ".html", ".js", ".zip",
+                                 ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl"]),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
@@ -353,6 +358,7 @@ if Path(root("dojo/settings/.env.prod")).is_file() or "DD_ENV_PATH" in os.enviro
 
 # False if not in os.environ
 DEBUG = env("DD_DEBUG")
+DJANGO_DEBUG_TOOLBAR_ENABLED = env("DD_DJANGO_DEBUG_TOOLBAR_ENABLED")
 TEMPLATE_DEBUG = env("DD_TEMPLATE_DEBUG")
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -615,6 +621,8 @@ if value := env("DD_SOCIAL_AUTH_OIDC_USERINFO_URL"):
     SOCIAL_AUTH_OIDC_USERINFO_URL = value
 if value := env("DD_SOCIAL_AUTH_OIDC_JWKS_URI"):
     SOCIAL_AUTH_OIDC_JWKS_URI = value
+if value := env("DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT"):
+    SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT = value
 
 AUTH0_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED")
 SOCIAL_AUTH_AUTH0_KEY = env("DD_SOCIAL_AUTH_AUTH0_KEY")
@@ -1847,9 +1855,11 @@ VULNERABILITY_URLS = {
     "MGAA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGAA-2013-0054.html
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
     "NCSC-": "https://advisories.ncsc.nl/advisory?id=",  # e.g. https://advisories.ncsc.nl/advisory?id=NCSC-2025-0191
+    "NN-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/NN-2021:2-01
     "NTAP-": "https://security.netapp.com/advisory/",  # e.g. https://security.netapp.com/advisory/ntap-20250328-0007
     "OPENSUSE-SU-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/openSUSE-SU-2025:14898-1
     "OSV-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/OSV-2024-1330
+    "OXAS-ADV-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/OXAS-ADV-2023-0001
     "PAN-SA-": "https://security.paloaltonetworks.com/",  # e.g. https://security.paloaltonetworks.com/PAN-SA-2024-0010
     "PFPT-SA-": "https://www.proofpoint.com/us/security/security-advisories/",  # e.g. https://www.proofpoint.com/us/security/security-advisories/pfpt-sa-0002
     "PMASA-": "https://www.phpmyadmin.net/security/",  # e.g. https://www.phpmyadmin.net/security/PMASA-2025-1
@@ -1861,9 +1871,10 @@ VULNERABILITY_URLS = {
     "RLSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RLSA-2024:7001
     "RUSTSEC-": "https://rustsec.org/advisories/",  # e.g. https://rustsec.org/advisories/RUSTSEC-2024-0432
     "RXSA-": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
+    "SCA-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/sca-2020-0002
     "SNYK-": "https://snyk.io/vuln/",  # e.g. https://security.snyk.io/vuln/SNYK-JS-SOLANAWEB3JS-8453984
     "SOPHOS-SA-": "https://www.sophos.com/en-us/security-advisories/",  # e.g. https://www.sophos.com/en-us/security-advisories/sophos-sa-20250411-taegis-agent-lpe
-    "SSA:": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2024-157-01
+    "SSA:": "https://vulners.com/slackware/",  # e.g. https://www.tenable.com/plugins/nessus/240171 --> https://vulners.com/slackware/SSA-2025-169-02
     "SSA-": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2025-074-01
     "SP-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SP-CAAANR7
     "SUSE-SU-": "https://www.suse.com/support/update/announcement/",  # e.g. https://www.suse.com/support/update/announcement/2024/suse-su-20244196-1
@@ -1872,10 +1883,14 @@ VULNERABILITY_URLS = {
     "TS-": """https://tailscale.com/security-bulletins#""",  # e.g. https://tailscale.com/security-bulletins or https://tailscale.com/security-bulletins#ts-2022-001-1243
     "TYPO3-": "https://typo3.org/security/advisory/",  # e.g. https://typo3.org/security/advisory/typo3-core-sa-2025-010
     "USN-": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
+    "VAR-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/var-201801-0152
     "VNS": "https://vulners.com/",
+    "WID-SEC-W-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/wid-sec-w-2025-1468
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
+# List of acceptable file types that can be (re)imported
+FILE_IMPORT_TYPES = env("DD_FILE_IMPORT_TYPES")
 # Fixes error
 # AttributeError: Problem installing fixture '/app/dojo/fixtures/defect_dojo_sample_data.json': 'Settings' object has no attribute 'AUDITLOG_DISABLE_ON_RAW_SAVE'
 AUDITLOG_DISABLE_ON_RAW_SAVE = False
@@ -1933,3 +1948,45 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 warnings.filterwarnings("ignore", "The FORMS_URLFIELD_ASSUME_HTTPS transitional setting is deprecated.")
 FORMS_URLFIELD_ASSUME_HTTPS = True
 # Inspired by https://adamj.eu/tech/2023/12/07/django-fix-urlfield-assume-scheme-warnings/
+
+if DEBUG:
+    # adding DEBUG logging for all of Django.
+    LOGGING["loggers"]["root"] = {
+                "handlers": ["console"],
+                "level": "DEBUG",
+           }
+
+if DJANGO_DEBUG_TOOLBAR_ENABLED:
+
+    INSTALLED_APPS += (
+    "debug_toolbar",
+    )
+
+    MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE]
+
+    def show_toolbar(request):
+        return True
+
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": show_toolbar,
+        "INTERCEPT_REDIRECTS": False,
+        "SHOW_COLLAPSED": True,
+    }
+
+    DEBUG_TOOLBAR_PANELS = [
+        # 'ddt_request_history.panels.request_history.RequestHistoryPanel',  # Here it is
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        "debug_toolbar.panels.sql.SQLPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        # 'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        # 'debug_toolbar.panels.logging.LoggingPanel',
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+        "debug_toolbar.panels.profiling.ProfilingPanel",
+        # 'cachalot.panels.CachalotPanel',
+    ]

@@ -62,8 +62,10 @@ class WpscanParser:
             if report_date:
                 finding.date = report_date
             # if there is a fixed version fill mitigation
+            finding.fix_available = False
             if vul.get("fixed_in"):
                 finding.mitigation = "fixed in : " + vul["fixed_in"]
+                finding.fix_available = True
             # manage CVE
             if "cve" in vul["references"]:
                 finding.unsaved_vulnerability_ids = []

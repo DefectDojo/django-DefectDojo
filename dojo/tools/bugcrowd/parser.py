@@ -213,7 +213,7 @@ class BugCrowdParser:
                     ret["impact"] = item
                 elif first == "Steps to reproduce":
                     ret["steps_to_reproduce"] = item
-                elif first == "How to fix" or first == "Fix":
+                elif first in {"How to fix", "Fix"}:
                     ret["mitigation"] = item
                 elif first == "PoC code":
                     ret["poc"] = item

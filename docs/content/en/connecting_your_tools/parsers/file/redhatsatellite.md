@@ -12,3 +12,6 @@ By default, DefectDojo identifies duplicate Findings using these [hashcode field
 
 - description
 - severity
+
+### Field fix_availabe
+The field 'fix_available' is set to true if the fix is installable. 

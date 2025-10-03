@@ -135,8 +135,8 @@ ENV \
   DD_INITIALIZE=true \
   DD_UWSGI_MODE="socket" \
   DD_UWSGI_ENDPOINT="0.0.0.0:3031" \
-  DD_UWSGI_NUM_OF_PROCESSES="2" \
-  DD_UWSGI_NUM_OF_THREADS="2"
+  DD_UWSGI_NUM_OF_PROCESSES="4" \
+  DD_UWSGI_NUM_OF_THREADS="4"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
 FROM django AS django-unittests

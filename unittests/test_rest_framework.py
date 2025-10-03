@@ -1373,24 +1373,24 @@ class FindingsTest(BaseClass.BaseClassTest):
         self.maxDiff = None
         with self.subTest(i=0):
             self.assertEqual(None, Finding.objects.get(id=2).cvssv3)
-            result = self.client.patch(self.url + "2/", data={"cvssv4": "CVSS:4.0/AV:A/AC:H/AT:N/PR:H/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N/S:P/AU:Y/R:U/V:C/RE:M/U:Green/MAV:A/MAC:H/MAT:P/MPR:L/MUI:P/MVC:L/MVI:L/MVA:L/MSC:L/MSI:H/MSA:H/CR:M/IR:M/AR:M/E:A", "cvssv4_score": 3})
+            result = self.client.patch(self.url + "2/", data={"cvssv4": "CVSS:4.0/AV:A/AC:H/AT:N/PR:H/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N/E:A/CR:M/IR:M/AR:M/MAV:A/MAC:H/MAT:P/MPR:L/MUI:P/MVC:L/MVI:L/MVA:L/MSC:L/MSI:H/MSA:H/S:P/AU:Y/R:U/V:C/RE:M/U:Green", "cvssv4_score": 3})
             self.assertEqual(result.status_code, status.HTTP_200_OK)
             finding = Finding.objects.get(id=2)
             # valid so vector must be set and score calculated overrides the provided score
-            self.assertEqual("CVSS:4.0/AV:A/AC:H/AT:N/PR:H/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N/S:P/AU:Y/R:U/V:C/RE:M/U:Green/MAV:A/MAC:H/MAT:P/MPR:L/MUI:P/MVC:L/MVI:L/MVA:L/MSC:L/MSI:H/MSA:H/CR:M/IR:M/AR:M/E:A", finding.cvssv4)
+            self.assertEqual("CVSS:4.0/AV:A/AC:H/AT:N/PR:H/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N/E:A/CR:M/IR:M/AR:M/MAV:A/MAC:H/MAT:P/MPR:L/MUI:P/MVC:L/MVI:L/MVA:L/MSC:L/MSI:H/MSA:H/S:P/AU:Y/R:U/V:C/RE:M/U:Green", finding.cvssv4)
             self.assertEqual(2.3, finding.cvssv4_score)
 
         with self.subTest(i=1):
-            result = self.client.patch(self.url + "5/", data={"cvssv4": "CVSS:4.0/AV:A/AC:H/AT:N/PR:H/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N/S:P/AU:Y/R:U/V:C/RE:M/U:Green/MAV:A/MAC:H/MAT:P/MPR:L/MUI:P/MVC:L/MVI:L/MVA:L/MSC:L/MSI:H/MSA:H/CR:M/IR:M/AR:M/E:A"})
+            result = self.client.patch(self.url + "5/", data={"cvssv4": "CVSS:4.0/AV:A/AC:H/AT:N/PR:H/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N/E:A/CR:M/IR:M/AR:M/MAV:A/MAC:H/MAT:P/MPR:L/MUI:P/MVC:L/MVI:L/MVA:L/MSC:L/MSI:H/MSA:H/S:P/AU:Y/R:U/V:C/RE:M/U:Green"})
             self.assertEqual(result.status_code, status.HTTP_200_OK)
             finding = Finding.objects.get(id=5)
             # valid so vector must be set and score calculated
-            self.assertEqual("CVSS:4.0/AV:A/AC:H/AT:N/PR:H/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N/S:P/AU:Y/R:U/V:C/RE:M/U:Green/MAV:A/MAC:H/MAT:P/MPR:L/MUI:P/MVC:L/MVI:L/MVA:L/MSC:L/MSI:H/MSA:H/CR:M/IR:M/AR:M/E:A", finding.cvssv4)
+            self.assertEqual("CVSS:4.0/AV:A/AC:H/AT:N/PR:H/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N/E:A/CR:M/IR:M/AR:M/MAV:A/MAC:H/MAT:P/MPR:L/MUI:P/MVC:L/MVI:L/MVA:L/MSC:L/MSI:H/MSA:H/S:P/AU:Y/R:U/V:C/RE:M/U:Green", finding.cvssv4)
             self.assertEqual(2.3, finding.cvssv4_score)
 
         with self.subTest(i=2):
             # extra slash makes it invalid
-            result = self.client.patch(self.url + "3/", data={"cvssv4": "CVSS:4.0/AV:A/AC:H/AT:N/PR:H/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N/S:P/AU:Y/R:U/V:C/RE:M/U:Green/MAV:A/MAC:H/MAT:P/MPR:L/MUI:P/MVC:L/MVI:L/MVA:L/MSC:L/MSI:H/MSA:H/CR:M/IR:M/AR:M/E:A/", "cvssv4_score": 3})
+            result = self.client.patch(self.url + "3/", data={"cvssv4": "CVSS:4.0/AV:A/AC:H/AT:N/PR:H/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N/E:A/CR:M/IR:M/AR:M/MAV:A/MAC:H/MAT:P/MPR:L/MUI:P/MVC:L/MVI:L/MVA:L/MSC:L/MSI:H/MSA:H/S:P/AU:Y/R:U/V:C/RE:M/U:Green/", "cvssv4_score": 3})
             self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST)
             finding = Finding.objects.get(id=3)
             self.assertEqual(result.json()["cvssv4"], ["No valid CVSS4 vectors found by cvss.parse_cvss_from_text()"])

@@ -614,6 +614,13 @@ class UserContactInfoSerializer(serializers.ModelSerializer):
         model = UserContactInfo
         fields = "__all__"
 
+    def validate(self, data):
+        user = data.get("user", None) or self.instance.user
+        if data.get("force_password_reset", False) and not user.has_usable_password():
+            msg = "Password resets are not allowed for users authorized through SSO."
+            raise ValidationError(msg)
+        return super().validate(data)
+
 
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:

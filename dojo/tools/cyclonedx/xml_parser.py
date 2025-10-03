@@ -249,7 +249,7 @@ class CycloneDXXMLParser:
                 "b:ratings/b:rating", namespaces=ns,
             ):
                 method = rating.findtext("b:method", namespaces=ns)
-                if method == "CVSSv3" or method == "CVSSv31":
+                if method in {"CVSSv3", "CVSSv31"}:
                     raw_vector = rating.findtext("b:vector", namespaces=ns)
                     severity = rating.findtext("b:severity", namespaces=ns)
                     cvssv3 = Cyclonedxhelper()._get_cvssv3(raw_vector)
@@ -275,11 +275,7 @@ class CycloneDXXMLParser:
             if analysis and len(analysis) == 1:
                 state = analysis[0].findtext("b:state", namespaces=ns)
                 if state:
-                    if (
-                        state == "resolved"
-                        or state == "resolved_with_pedigree"
-                        or state == "not_affected"
-                    ):
+                    if state in {"resolved", "resolved_with_pedigree", "not_affected"}:
                         finding.is_mitigated = True
                         finding.active = False
                     elif state == "false_positive":

@@ -24,6 +24,8 @@ jobs:
         os: [alpine, debian]
         platform: ["${{ inputs.platform }}"]
         exclude:
+            - docker-image: nginx
+              os: debian
             - docker-image: integration-tests
               os: alpine
             - docker-image: integration-tests
@@ -38,7 +40,7 @@ jobs:
           echo $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
 

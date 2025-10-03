@@ -360,10 +360,7 @@ class SarifParser:
                 fullDescription = get_message_from_multiformatMessageString(
                     rule["fullDescription"], rule,
                 )
-                if (
-                    fullDescription != message
-                    and fullDescription != shortDescription
-                ):
+                if fullDescription not in {message, shortDescription}:
                     description += f"**{_('Rule full description')}:** {fullDescription}\n"
 
         if len(result.get("codeFlows", [])) > 0:

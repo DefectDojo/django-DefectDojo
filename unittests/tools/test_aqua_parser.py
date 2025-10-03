@@ -23,6 +23,7 @@ class TestAquaParser(DojoTestCase):
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
             self.assertEqual("musl libc through 1.1.23 has an x87 floating-point stack adjustment imbalance, related to the math/i386/ directory. In some cases, use of this library could introduce out-of-bounds writes that are not present in an application's source code.", finding.description)
             self.assertEqual("1.1.20-r5", finding.mitigation)
+            self.assertEqual(True, finding.fix_available)
             self.assertEqual("\nhttps://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-14697", finding.references)
             self.assertEqual("musl", finding.component_name)
             self.assertEqual("1.1.20-r4", finding.component_version)
@@ -55,6 +56,7 @@ Aqua severity (high) used for classification.
             self.assertEqual("Medium", finding.severity)
             self.assertEqual("CURL before 7.68.0 lacks proper input validation, which allows users to create a `FILE:` URL that can make the client access a remote file using SMB (Windows-only issue).", finding.description)
             self.assertEqual("Upgrade to curl 7.68.0", finding.mitigation)
+            self.assertEqual(True, finding.fix_available)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2019-15601", finding.unsaved_vulnerability_ids[0])
 

@@ -81,6 +81,26 @@ class GenericCSVParser:
                 if len(cvss_objects) > 0:
                     finding.cvssv3 = cvss_objects[0].clean_vector()
 
+            if "CVSSV4" in row:
+                cvss4_objects = cvss_parser.parse_cvss_from_text(row["CVSSV4"])
+                if len(cvss4_objects) > 0:
+                    finding.cvssv4 = cvss4_objects[0].clean_vector()
+
+            if "CVSSV4_score" in row:
+                finding.cvssv4_score = float(row["CVSSV4_score"])
+
+            if "kev_date" in row:
+                finding.kev_date = parse(row["kev_date"])
+
+            if "known_exploited" in row:
+                finding.known_exploited = bool(row["known_exploited"])
+
+            if "ransomware_used" in row:
+                finding.ransomware_used = bool(row["ransomware_used"])
+
+            if "fix_available" in row:
+                finding.fix_available = bool(row["fix_available"])
+
             # manage endpoints
             if "Url" in row:
                 finding.unsaved_endpoints = [

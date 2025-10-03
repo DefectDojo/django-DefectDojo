@@ -280,7 +280,7 @@ def edit_engagement(request, eid):
             new_status = form.cleaned_data.get("status")
             engagement.product = form.cleaned_data.get("product")
             engagement = form.save(commit=False)
-            if (new_status == "Cancelled" or new_status == "Completed"):
+            if (new_status in {"Cancelled", "Completed"}):
                 engagement.active = False
             else:
                 engagement.active = True
@@ -608,6 +608,9 @@ def prefetch_for_view_tests(tests):
         count_findings_test_active_verified=Coalesce(
             count_subquery(base_findings.filter(active=True, verified=True)), Value(0),
         ),
+        count_findings_test_active_fix_available=Coalesce(
+            count_subquery(base_findings.filter(active=True, fix_available=True)), Value(0),
+        ),
         count_findings_test_mitigated=Coalesce(count_subquery(base_findings.filter(is_mitigated=True)), Value(0)),
         count_findings_test_dups=Coalesce(count_subquery(base_findings.filter(duplicate=True)), Value(0)),
         total_reimport_count=Coalesce(
@@ -878,13 +881,11 @@ class ImportScanResultsView(View):
         level are bubbled up to the user first before we process too much
         """
         form_validation_list = []
-        if context.get("form") is not None:
-            form_validation_list.append(context.get("form").is_valid())
-        if context.get("jform") is not None:
-            form_validation_list.append(context.get("jform").is_valid())
-        if context.get("cred_form") is not None:
-            form_validation_list.append(context.get("cred_form").is_valid())
-        return all(form_validation_list)
+        for form_name in ["form", "jform", "cred_form"]:
+            if (form := context.get(form_name)) is not None:
+                if errors := form.errors:
+                    form_validation_list.append(errors)
+        return form_validation_list
 
     def create_engagement(
         self,
@@ -1055,9 +1056,14 @@ class ImportScanResultsView(View):
     ) -> HttpResponseRedirect:
         """Redirect the user to a place that indicates a failed import"""
         ErrorPageProductAnnouncement(request=request)
+        if obj := context.get("engagement"):
+            url = "import_scan_results"
+        else:
+            obj = context.get("product")
+            url = "import_scan_results_prod"
         return HttpResponseRedirect(reverse(
-            "import_scan_results",
-            args=(context.get("engagement", context.get("product")).id, ),
+            url,
+            args=(obj.id, ),
         ))
 
     def get(
@@ -1091,7 +1097,9 @@ class ImportScanResultsView(View):
         )
         request._start_time = time.perf_counter()
         # ensure all three forms are valid first before moving forward
-        if not self.validate_forms(context):
+        if form_errors := self.validate_forms(context):
+            for form_error in form_errors:
+                add_error_message_to_response(form_error)
             return self.failure_redirect(request, context)
         # Process the jira form if it is present
         if form_error := self.process_jira_form(request, context.get("jform"), context):
@@ -1544,6 +1552,10 @@ def engagement_ics(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     start_date = datetime.combine(eng.target_start, datetime.min.time())
     end_date = datetime.combine(eng.target_end, datetime.max.time())
+    if timezone.is_naive(start_date):
+        start_date = timezone.make_aware(start_date)
+    if timezone.is_naive(end_date):
+        end_date = timezone.make_aware(end_date)
     uid = f"dojo_eng_{eng.id}_{eng.product.id}"
     cal = get_cal_event(
         start_date,

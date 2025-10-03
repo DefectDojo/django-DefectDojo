@@ -102,10 +102,12 @@ def get_severity_justification(vulnerability):
 def process_component(component):
     mitigation = ""
     impact = "**Impact paths**\n\n- "
+    fix_available = False
     fixed_versions = component.get("fixed_versions")
     if fixed_versions:
         mitigation = "**Versions containing a fix:**\n\n- "
         mitigation += "\n- ".join(fixed_versions)
+        fix_available = True
     if "impact_paths" in component:
         refs = []
         impact_paths_l1 = component["impact_paths"]
@@ -117,7 +119,7 @@ def process_component(component):
                     refs.append(item["full_path"])
         if refs:
             impact += "\n- ".join(sorted(set(refs)))  # deduplication
-    return mitigation, impact
+    return mitigation, impact, fix_available
 
 
 def get_cve(vulnerability):
@@ -158,7 +160,7 @@ def get_item_set(vulnerability):
 
     for component_name_with_version, component in vulnerability.get("components", {}).items():
         component_name, component_version = get_component_name_version(component_name_with_version)
-        mitigation, impact = process_component(component)
+        mitigation, impact, fix_available = process_component(component)
 
         title = clean_title(vulnerability["summary"])
         # create the finding object
@@ -176,6 +178,7 @@ def get_item_set(vulnerability):
             dynamic_finding=False,
             cvssv3=cvssv3,
             vuln_id_from_tool=vuln_id_from_tool,
+            fix_available=fix_available,
         )
         if vulnerability_ids:
             finding.unsaved_vulnerability_ids = vulnerability_ids

@@ -8,6 +8,46 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
+## Sept 2025: v2.50
+
+### Sept 15, 2025: v2.50.3
+
+* **(Pro UI)** Added support for [CVSSv4.0](https://www.first.org/cvss/v4-0/) vector strings.
+
+### Sept 15, 2025: v2.50.2
+
+* **(Pro UI)** Added Any/All status filtering.  Filtering by status allows you to apply either AND (inner join) logic, or OR (outer join) logic to the filter.
+* **(Pro UI)** Added Contact Support form for On-Premise installs.
+
+### Sept 9, 2025: v2.50.1
+
+* **(Tools)** Removed CSV limit for Qualys HackerGuardian
+* **(SSO)** Removed Force Password Reset for users created via SSO
+
+### Sept 2, 2025: v2.50.0
+
+* **(Pro UI)** "Date During" filter has been added to the UI, allowing users to filter by a range of dates
+* **(Pro UI)** Vulnerability ID column can now be sorted, however the sorting only considers the **first** vulnerability ID.
+* **(Pro UI)** Request/Response pairs can now be added / updated / deleted via the Edit Finding form.
+
+## August 2025: v2.49
+
+The Pro UI has been significantly reorganized, with changes to page organization.
+![image](images/pro_ui_249.png)
+
+### August 25: 2.49.3
+
+[Integrations](/en/share_your_findings/integrations/) has been added to DefectDojo Pro, adding an Jira-style integrations for Azure DevOps, GitHub and GitLab boards.
+
+* **(API)** Basic Auth Login has been removed from the swagger form.  Only cookieAuth and tokenAuth are accepted.
+* **(API)** When MFA is enabled, an MFA code will be required to use the `/api-token-auth` endpoint.
+* **(Connectors)** "Location" has been renamed to "Location URL" in Connectors setup form.
+* **(Universal Parser)** Fixed an issue where a False value in an Active key still created an Active Finding.
+* **(Pro UI)** Unique ID from Tool has been added to the Findings list and Finding view
+* **(Pro UI)** Test Status added to Test View.
+* **(Pro UI)** Added additional Import/Reimport success messages to confirm successful test creation.
+
+
 ## July 2025: v2.48
 
 ### July 21/22/28, 2025: v2.48.3 / v2.48.4 / v2.48.5
@@ -37,7 +77,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## June 2025: v2.47
 
-### July 1, 2025: v2.47.4
+#### July 1, 2025: v2.47.4
 
 - **(Pro UI)** Products, Engagements, Tests, Findings and Endpoints can be edited directly from their respective tables via a modal.
 - **(Pro UI)** Calendar view now supports additional query parameters for filtering Tests or Engagements.
@@ -45,7 +85,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ![image](images/pro_ics_export.png)
 
-### June 23, 2025: v2.47.3
+#### June 23, 2025: v2.47.3
 
 - **(Pro UI)** Finding Templates can now be added in the Pro UI, from **Findings > Finding Templates** on the sidebar.
 - **(Pro UI)** A better error message is displayed when Jira Instance deletion is unsuccessful.
@@ -53,7 +93,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ![image](images/pro_product_type_modal.png)
 
-### June 16, 2025: v2.47.2
+#### June 16, 2025: v2.47.2
 
 - **(Pro UI)** Endpoint Metadata can now be uploaded to Products.  You can now import a .csv list of all endpoints associated with a Product, from **View Product > Endpoints > Import Endpoint Metadata**
 
@@ -69,7 +109,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ![image](images/pro_login.png)
 
-### June 9, 2025: v2.47.1
+#### June 9, 2025: v2.47.1
 
 - **(Pro UI)** Vulnerable Endpoints table has now been added to Finding pages.
 
@@ -78,7 +118,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 - **(Pro UI)** "Original Finding" link has been added to Finding Metadata table for Duplicate Findings.
 - **(Pro UI)** CI/CD Metadata has been added to Engagement view.
 
-### June 2, 2025: v2.47.0
+#### June 2, 2025: v2.47.0
 
 - **(Pro UI)** Finding review can now be set through the Pro UI.  You can now Request Review or clear a Finding review from Finding tables, or from the Finding View.
 

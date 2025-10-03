@@ -283,8 +283,8 @@ django:
         cpu: 2000m
         memory: 512Mi
     appSettings:
-      processes: 2
-      threads: 2
+      processes: 4
+      threads: 4
       # maxFd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
     enableDebug: false  # this also requires DD_DEBUG to be set to True
     certificates:
@@ -405,6 +405,9 @@ initializer:
   staticName: false
 
 postgresql:
+  # To use an external PostgreSQL instance (like CloudSQL), set enabled to false, set items in auth part for authentication,
+  # and uncomment the line below:
+  # postgresServer: "127.0.0.1"
   enabled: true
   auth:
     username: defectdojo
@@ -444,10 +447,6 @@ postgresql:
     chmod:
       enabled: false
 
-  # To use an external PostgreSQL instance, set enabled to false and uncomment
-  # the line below:
-  # postgresServer: "127.0.0.1"
-
 # Google CloudSQL support in GKE via gce-proxy
 cloudsql:
   # To use CloudSQL in GKE set 'enable: true'
@@ -457,7 +456,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.37.8
+    tag: 1.37.9
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""

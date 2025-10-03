@@ -2650,6 +2650,7 @@ def finding_bulk_update_all(request, pid=None):
                         find.false_p = form.cleaned_data["false_p"]
                         find.out_of_scope = form.cleaned_data["out_of_scope"]
                         find.is_mitigated = form.cleaned_data["is_mitigated"]
+                        find.under_review = form.cleaned_data["under_review"]
                         find.last_reviewed = timezone.now()
                         find.last_reviewed_by = request.user
 
@@ -3327,10 +3328,7 @@ def calculate_possible_related_actions_for_similar_finding(
             },
         )
 
-        if (
-            similar_finding.duplicate_finding == finding
-            or similar_finding.duplicate_finding == finding.duplicate_finding
-        ):
+        if similar_finding.duplicate_finding in {finding, finding.duplicate_finding}:
             # duplicate inside the same cluster
             actions.append(
                 {

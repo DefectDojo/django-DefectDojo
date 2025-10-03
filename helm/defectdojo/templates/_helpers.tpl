@@ -47,13 +47,13 @@ Create the name of the service account to use
 */}}
 {{- define "postgresql.hostname" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- if eq .Values.postgresql.architecture "replication" -}}
-{{- printf "%s-%s-%s" .Release.Name "postgresql" .Values.postgresql.primary.name | trunc 63 | trimSuffix "-" -}}
+{{-  if eq .Values.postgresql.architecture "replication" -}}
+{{-   printf "%s-%s-%s" .Release.Name "postgresql" .Values.postgresql.primary.name | trunc 63 | trimSuffix "-" -}}
+{{-  else -}}
+{{-   printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
+{{-  end -}}
 {{- else -}}
-{{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- else -}}
-{{- printf "%s" .Values.postgresql.postgresServer -}}
+{{-  printf "%s" ( .Values.postgresql.postgresServer | default "127.0.0.1" ) -}}
 {{- end -}}
 {{- end -}}
 {{- define "redis.hostname" -}}

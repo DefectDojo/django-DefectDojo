@@ -147,7 +147,10 @@ class AquaParser:
         resource_name = resource.get("name", resource.get("path"))
         resource_version = resource.get("version", "No version")
         vulnerability_id = vuln.get("name", "No CVE")
-        fix_version = vuln.get("fix_version", "None")
+        fix_available = False
+        fix_version = vuln.get("fix_version", None)
+        if fix_version is not None:
+            fix_available = True
         description = vuln.get("description", "No description.") + "\n"
         if resource.get("path"):
             description += "**Path:** " + resource.get("path") + "\n"
@@ -222,6 +225,7 @@ class AquaParser:
             component_name=resource.get("name"),
             component_version=resource.get("version"),
             impact=severity,
+            fix_available=fix_available,
         )
 
         cvss_data = parse_cvss_data(cvssv3)
@@ -244,7 +248,10 @@ class AquaParser:
         severity = self.severity_of(float(item["score"]))
         description = item.get("description")
         solution = item.get("solution")
-        fix_version = item.get("fix_version")
+        fix_available = False
+        fix_version = item.get("fix_version", None)
+        if fix_version is not None:
+            fix_available = True
         if solution:
             mitigation = solution
         elif fix_version:
@@ -260,6 +267,7 @@ class AquaParser:
             severity=severity,
             impact=severity,
             mitigation=mitigation,
+            fix_available=fix_available,
         )
         finding.unsaved_vulnerability_ids = [vulnerability_id]
         return finding

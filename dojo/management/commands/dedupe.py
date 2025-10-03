@@ -1,5 +1,4 @@
 import logging
-import zoneinfo
 
 from django.core.management.base import BaseCommand
 
@@ -11,8 +10,6 @@ from dojo.utils import (
     get_system_setting,
     mass_model_updater,
 )
-
-locale = zoneinfo.ZoneInfo(get_system_setting("time_zone"))
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

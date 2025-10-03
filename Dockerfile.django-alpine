@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.11.11-alpine3.21@sha256:9af3561825050da182afc74b106388af570b99c500a69c8216263aa245a2001b AS base
+FROM python:3.11.13-alpine3.22@sha256:8d8c6d3808243160605925c2a7ab2dc5c72d0e75651699b0639143613e0855b8 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -132,8 +132,8 @@ ENV \
   DD_INITIALIZE=true \
   DD_UWSGI_MODE="socket" \
   DD_UWSGI_ENDPOINT="0.0.0.0:3031" \
-  DD_UWSGI_NUM_OF_PROCESSES="2" \
-  DD_UWSGI_NUM_OF_THREADS="2"
+  DD_UWSGI_NUM_OF_PROCESSES="4" \
+  DD_UWSGI_NUM_OF_THREADS="4"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
 FROM django AS django-unittests

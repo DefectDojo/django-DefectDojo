@@ -1,0 +1,95 @@
+{
+  "findings": [
+    {
+      "id": 1234567,
+      "ref": "refs/pull/1234/merge",
+      "first_seen_scan_id": 1234,
+      "syntactic_id": "440eeface888e78afceac3dc7d4cc2cf",
+      "match_based_id": "0f8c79a6f7e0ff2f908ff5bc366ae1548465069bae8892088051e1c3b4b12c6b8df37d5bcbb181eb868aa79f81f239d14bf2336d552786ab8ccdc7279adf07a6_1",
+      "external_ticket": {
+        "external_slug": "OPS-158",
+        "url": "string",
+        "id": 0,
+        "linked_issue_ids": [
+          0
+        ]
+      },
+      "review_comments": [
+        {
+          "external_discussion_id": "af04762b69acfb74c8f9",
+          "external_note_id": 123523
+        }
+      ],
+      "repository": {
+        "name": "semgrep",
+        "url": "https://github.com/semgrep/semgrep"
+      },
+      "line_of_code_url": "https://github.com/semgrep/semgrep/blob/39f95450a7d4d70e54c9edbd109bed8210a36889/src/core_cli/Core_CLI.ml#L1",
+      "triage_state": "untriaged",
+      "state": "unresolved",
+      "status": "open",
+      "severity": "medium",
+      "confidence": "medium",
+      "categories": [
+        "security"
+      ],
+      "created_at": "2020-11-18T23:28:12.391807Z",
+      "relevant_since": "2020-11-18T23:28:12.391807Z",
+      "rule_name": "typescript.react.security.audit.react-no-refs.react-no-refs",
+      "rule_message": "`ref` usage found. refs give direct DOM access and may create a possibility for XSS, which could cause\nsensitive information such as user cookies to be retrieved by an attacker. Instead, avoid direct DOM\nmanipulation or use DOMPurify to sanitize HTML before writing it into the page.\n",
+      "location": {
+        "file_path": "frontend/src/corpComponents/Code.tsx",
+        "line": 120,
+        "column": 8,
+        "end_line": 124,
+        "end_column": 16
+      },
+      "sourcing_policy": {
+        "id": 120,
+        "name": "Default Policy",
+        "slug": "default-policy"
+      },
+      "triaged_at": "2020-11-19T23:28:12.391807Z",
+      "triage_comment": "This finding is from the test repo",
+      "triage_reason": "acceptable_risk",
+      "state_updated_at": "2020-11-19T23:28:12.391807Z",
+      "rule": {
+        "name": "html.security.plaintext-http-link.plaintext-http-link",
+        "message": "This link points to a plaintext HTTP URL. Prefer an encrypted HTTPS URL if possible.",
+        "confidence": "high",
+        "category": "security",
+        "subcategories": [
+          "vuln"
+        ],
+        "vulnerability_classes": [
+          "Mishandled Sensitive Information"
+        ],
+        "cwe_names": [
+          "CWE-319: Cleartext Transmission of Sensitive Information"
+        ],
+        "owasp_names": [
+          "A03:2017 - Sensitive Data Exposure",
+          "A02:2021 - Cryptographic Failures"
+        ]
+      },
+      "assistant": {
+        "autofix": {
+          "fix_code": "cookie.setHttpOnly(true);\nresponse.addCookie(cookie);",
+          "explanation": ""
+        },
+        "guidance": {
+          "summary": "Use a template rendering engine such as EJS instead of string concatenation.",
+          "instructions": "1. Check if your project has any template engines installed such as EJS, Pug, or Mustache.\n    If not, install EJS, with a command such as `$ npm install ejs`.\n2. Create an EJS template: `const template = '<h2><%= user.id %></h2>'`\n3. <... example trimmed in API docs ...>"
+        },
+        "autotriage": {
+          "verdict": "false_positive",
+          "reason": "The matched code is used for a non-security related feature."
+        },
+        "component": {
+          "tag": "user data",
+          "risk": "high"
+        }
+      }
+    }
+  ]
+}

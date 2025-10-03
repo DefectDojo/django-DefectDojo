@@ -16,16 +16,16 @@
     "@docsearch/js": "3.9.0",
     "@thulite/doks-core": "1.8.0",
     "@thulite/images": "3.3.0",
-    "@thulite/inline-svg": "1.2.0",
-    "@thulite/seo": "2.4.1",
+    "@thulite/inline-svg": "1.2.1",
+    "@thulite/seo": "2.4.2",
     "@tabler/icons": "3.34.1",
     "thulite": "2.5.0"
   },
   "devDependencies": {
     "prettier": "3.6.2",
-    "vite": "7.0.6"
+    "vite": "7.1.5"
   },
   "engines": {
-    "node": "22.18.0"
+    "node": "22.19.0"
   }
 }

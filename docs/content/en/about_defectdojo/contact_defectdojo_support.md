@@ -16,7 +16,7 @@ For Open-Source users, the quickest way to get help is through the [OWASP Slack 
 
 To report a bug, issues can be raised on our [GitHub](https://github.com/DefectDojo/django-DefectDojo).
 
-See our [Community Site](https://defectdojo.com/community) for more information.
+See our [Community Site](https://defectdojo.com/open-source) for more information.
 
 ## DefectDojo Pro Support
 

@@ -21,6 +21,7 @@ class TestMendParser(DojoTestCase):
             self.assertEqual("CVE-2019-9658", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
             self.assertEqual(5.3, finding.cvssv3_score)
+            self.assertEqual(True, finding.fix_available)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         with (get_unit_tests_scans_path("mend") / "okhttp_many_vuln.json").open(encoding="utf-8") as testfile:
@@ -44,6 +45,7 @@ class TestMendParser(DojoTestCase):
             finding = list(findings)[0]
             self.assertEqual("**Locations Found**: D:\\MendRepo\\test-product\\test-project\\test-project-subcomponent\\path\\to\\the\\Java\\commons-codec-1.6_donotuse.jar", finding.steps_to_reproduce)
             self.assertEqual("WS-2019-0379 | commons-codec-1.6.jar", finding.title)
+            self.assertEqual(True, finding.fix_available)
 
     def test_parse_file_with_no_vuln_has_no_findings_platform(self):
         with (get_unit_tests_scans_path("mend") / "mend-sca-platform-api3-no-findings.json").open(encoding="utf-8") as testfile:

@@ -2,7 +2,6 @@ import collections
 import decimal
 import logging
 import warnings
-import zoneinfo
 from datetime import datetime, timedelta
 
 import six
@@ -14,7 +13,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, JSONField, Q
 from django.forms import HiddenInput
-from django.utils import timezone
+from django.utils.timezone import now, tzinfo
 from django.utils.translation import gettext_lazy as _
 from django_filters import (
     BooleanFilter,
@@ -31,7 +30,7 @@ from django_filters import (
     RangeFilter,
 )
 from django_filters import rest_framework as filters
-from django_filters.filters import ChoiceFilter, _truncate
+from django_filters.filters import ChoiceFilter
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from polymorphic.base import ManagerInheritanceWarning
@@ -93,11 +92,9 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests
 from dojo.user.queries import get_authorized_users
-from dojo.utils import get_system_setting, is_finding_groups_enabled
+from dojo.utils import get_system_setting, is_finding_groups_enabled, truncate_timezone_aware
 
 logger = logging.getLogger(__name__)
-
-local_tz = zoneinfo.ZoneInfo(get_system_setting("time_zone"))
 
 BOOLEAN_CHOICES = (("false", "No"), ("true", "Yes"))
 EARLIEST_FINDING = None
@@ -122,10 +119,6 @@ def vulnerability_id_filter(queryset, name, value):
         .filter(vulnerability_id=value) \
         .values_list("finding_id", flat=True)
     return queryset.filter(id__in=ids)
-
-
-def now():
-    return datetime.today().replace(tzinfo=local_tz)
 
 
 class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):
@@ -200,9 +193,9 @@ class FindingStatusFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = datetime.combine(
-                earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
-            self.start_date = _truncate(start_date - timedelta(days=1))
-            self.end_date = _truncate(now() + timedelta(days=1))
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
+            self.start_date = truncate_timezone_aware(start_date - timedelta(days=1))
+            self.end_date = truncate_timezone_aware(now() + timedelta(days=1))
         try:
             value = int(value)
         except (ValueError, TypeError):
@@ -216,7 +209,7 @@ class FindingSLAFilter(ChoiceFilter):
 
     def sla_satisfied(self, qs, name):
         # return findings that have an sla expiration date after today or no sla expiration date
-        return qs.filter(Q(sla_expiration_date__isnull=True) | Q(sla_expiration_date__gt=timezone.now().date()))
+        return qs.filter(Q(sla_expiration_date__isnull=True) | Q(sla_expiration_date__gt=now().date()))
 
     def sla_violated(self, qs, name):
         # return active findings that have an sla expiration date before today
@@ -229,7 +222,7 @@ class FindingSLAFilter(ChoiceFilter):
                 risk_accepted=False,
                 is_mitigated=False,
                 mitigated=None,
-            ) & Q(sla_expiration_date__lt=timezone.now().date()),
+            ) & Q(sla_expiration_date__lt=now().date()),
         )
 
     options = {
@@ -661,16 +654,16 @@ class DateRangeFilter(ChoiceFilter):
             f"{name}__day": now().day,
         })),
         2: (_("Past 7 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=7)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=7)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         3: (_("Past 30 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=30)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=30)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         4: (_("Past 90 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=90)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=90)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         5: (_("Current month"), lambda qs, name: qs.filter(**{
             f"{name}__year": now().year,
@@ -680,8 +673,8 @@ class DateRangeFilter(ChoiceFilter):
             f"{name}__year": now().year,
         })),
         7: (_("Past year"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=365)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=365)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
     }
 
@@ -707,43 +700,43 @@ class DateRangeOmniFilter(ChoiceFilter):
             f"{name}__day": now().day,
         })),
         2: (_("Next 7 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() + timedelta(days=1)),
-            f"{name}__lt": _truncate(now() + timedelta(days=7)),
+            f"{name}__gte": truncate_timezone_aware(now() + timedelta(days=1)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=7)),
         })),
         3: (_("Next 30 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() + timedelta(days=1)),
-            f"{name}__lt": _truncate(now() + timedelta(days=30)),
+            f"{name}__gte": truncate_timezone_aware(now() + timedelta(days=1)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=30)),
         })),
         4: (_("Next 90 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() + timedelta(days=1)),
-            f"{name}__lt": _truncate(now() + timedelta(days=90)),
+            f"{name}__gte": truncate_timezone_aware(now() + timedelta(days=1)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=90)),
         })),
         5: (_("Past 7 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=7)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=7)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         6: (_("Past 30 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=30)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=30)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         7: (_("Past 90 days"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=90)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=90)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         8: (_("Current month"), lambda qs, name: qs.filter(**{
             f"{name}__year": now().year,
             f"{name}__month": now().month,
         })),
         9: (_("Past year"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() - timedelta(days=365)),
-            f"{name}__lt": _truncate(now() + timedelta(days=1)),
+            f"{name}__gte": truncate_timezone_aware(now() - timedelta(days=365)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=1)),
         })),
         10: (_("Current year"), lambda qs, name: qs.filter(**{
             f"{name}__year": now().year,
         })),
         11: (_("Next year"), lambda qs, name: qs.filter(**{
-            f"{name}__gte": _truncate(now() + timedelta(days=1)),
-            f"{name}__lt": _truncate(now() + timedelta(days=365)),
+            f"{name}__gte": truncate_timezone_aware(now() + timedelta(days=1)),
+            f"{name}__lt": truncate_timezone_aware(now() + timedelta(days=365)),
         })),
     }
 
@@ -824,14 +817,14 @@ class MetricsDateRangeFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = datetime.combine(
-                earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
-            self.start_date = _truncate(start_date - timedelta(days=1))
-            self.end_date = _truncate(now() + timedelta(days=1))
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
+            self.start_date = truncate_timezone_aware(start_date - timedelta(days=1))
+            self.end_date = truncate_timezone_aware(now() + timedelta(days=1))
             return qs.all()
         return None
 
     def current_month(self, qs, name):
-        self.start_date = datetime(now().year, now().month, 1, 0, 0, 0).replace(tzinfo=local_tz)
+        self.start_date = datetime(now().year, now().month, 1, 0, 0, 0).replace(tzinfo=tzinfo())
         self.end_date = now()
         return qs.filter(**{
             f"{name}__year": self.start_date.year,
@@ -839,15 +832,15 @@ class MetricsDateRangeFilter(ChoiceFilter):
         })
 
     def current_year(self, qs, name):
-        self.start_date = datetime(now().year, 1, 1, 0, 0, 0).replace(tzinfo=local_tz)
+        self.start_date = datetime(now().year, 1, 1, 0, 0, 0).replace(tzinfo=tzinfo())
         self.end_date = now()
         return qs.filter(**{
             f"{name}__year": now().year,
         })
 
     def past_x_days(self, qs, name, days):
-        self.start_date = _truncate(now() - timedelta(days=days))
-        self.end_date = _truncate(now() + timedelta(days=1))
+        self.start_date = truncate_timezone_aware(now() - timedelta(days=days))
+        self.end_date = truncate_timezone_aware(now() + timedelta(days=1))
         return qs.filter(**{
             f"{name}__gte": self.start_date,
             f"{name}__lt": self.end_date,
@@ -890,9 +883,9 @@ class MetricsDateRangeFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = datetime.combine(
-                earliest_finding.date, datetime.min.time()).replace(tzinfo=local_tz)
-            self.start_date = _truncate(start_date - timedelta(days=1))
-            self.end_date = _truncate(now() + timedelta(days=1))
+                earliest_finding.date, datetime.min.time()).replace(tzinfo=tzinfo())
+            self.start_date = truncate_timezone_aware(start_date - timedelta(days=1))
+            self.end_date = truncate_timezone_aware(now() + timedelta(days=1))
         try:
             value = int(value)
         except (ValueError, TypeError):
@@ -1702,6 +1695,9 @@ class FindingFilterHelper(FilterSet):
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
     endpoints = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
+    test__engagement__product__lifecycle = MultipleChoiceFilter(
+        choices=Product.LIFECYCLE_CHOICES,
+        label="Product lifecycle")
 
     has_component = BooleanFilter(
         field_name="component_name",
@@ -1947,9 +1943,6 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
-    test__engagement__product__lifecycle = MultipleChoiceFilter(
-        choices=Product.LIFECYCLE_CHOICES,
-        label="Product lifecycle")
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
         label="Product")
@@ -2014,6 +2007,40 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
             self.form.fields["finding_group"].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View, queryset=finding_group_query)
         self.form.fields["reporter"].queryset = get_authorized_users(Permissions.Finding_View)
         self.form.fields["reviewers"].queryset = self.form.fields["reporter"].queryset
+
+
+class FindingGroupsFilter(FilterSet):
+    name = CharFilter(lookup_expr="icontains", label="Name")
+    severity = ChoiceFilter(
+        choices=[
+            ("Low", "Low"),
+            ("Medium", "Medium"),
+            ("High", "High"),
+            ("Critical", "Critical"),
+        ],
+        label="Min Severity",
+    )
+    engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")
+    product = ModelMultipleChoiceFilter(queryset=Product.objects.none(), label="Product")
+
+    class Meta:
+        model = Finding
+        fields = ["name", "severity", "engagement", "product"]
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        self.pid = kwargs.pop("pid", None)
+        super().__init__(*args, **kwargs)
+        self.set_related_object_fields()
+
+    def set_related_object_fields(self):
+        if self.pid is not None:
+            self.form.fields["engagement"].queryset = Engagement.objects.filter(product_id=self.pid)
+            if "product" in self.form.fields:
+                del self.form.fields["product"]
+        else:
+            self.form.fields["product"].queryset = get_authorized_products(Permissions.Product_View)
+            self.form.fields["engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
 
 class AcceptedFindingFilter(FindingFilter):

@@ -120,7 +120,7 @@ class BurpSuiteDASTParser:
                             value += stripped_text + "\n"
                     elif stripped_text.isspace():
                         value = list(elem.itertext())[0]
-                    elif elem.tag == "div" or elem.tag == "span":
+                    elif elem.tag in {"div", "span"}:
                         value = elem.text_content().strip().replace("\n", "") + "\n"
                     else:
                         continue

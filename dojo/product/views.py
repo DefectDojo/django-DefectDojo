@@ -640,7 +640,7 @@ def view_product_metrics(request, pid):
                 open_close_weekly[unix_timestamp] = {"closed": 0, "open": 1, "accepted": 0}
                 open_close_weekly[unix_timestamp]["week"] = html_date
 
-            if view == "Finding" or view == "Endpoint":
+            if view in {"Finding", "Endpoint"}:
                 severity = finding.get("severity")
 
             finding_age = calculate_finding_age(finding)
@@ -859,6 +859,9 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
     finding_open_verified_subquery = build_count_subquery(
         Finding.objects.filter(test__engagement=OuterRef("pk"), active=True, verified=True), group_field="test__engagement_id",
     )
+    finding_open_fix_available_subquery = build_count_subquery(
+        Finding.objects.filter(test__engagement=OuterRef("pk"), active=True, fix_available=True), group_field="test__engagement_id",
+    )
     finding_close_subquery = build_count_subquery(
         Finding.objects.filter(test__engagement=OuterRef("pk"), is_mitigated=True), group_field="test__engagement_id",
     )
@@ -874,6 +877,7 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
         count_findings_all=Coalesce(finding_subquery, Value(0)),
         count_findings_open=Coalesce(finding_open_subquery, Value(0)),
         count_findings_open_verified=Coalesce(finding_open_verified_subquery, Value(0)),
+        count_findings_fix_available=Coalesce(finding_open_fix_available_subquery, Value(0)),
         count_findings_close=Coalesce(finding_close_subquery, Value(0)),
         count_findings_duplicate=Coalesce(finding_duplicate_subquery, Value(0)),
         count_findings_accepted=Coalesce(finding_accepted_subquery, Value(0)),

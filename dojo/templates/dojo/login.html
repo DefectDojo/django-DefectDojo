@@ -49,7 +49,7 @@
             <div class="form-group">
                 {% if OIDC_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
-                        <a href="{% url 'social:begin' 'oidc' %}?next={{ request.GET.next }}" style="color: rgb(255, 255, 255)" class="btn btn-success" type="button">{% trans "Login with OIDC" %}</a>
+                        <a href="{% url 'social:begin' 'oidc' %}?next={{ request.GET.next }}" style="color: rgb(255, 255, 255)" class="btn btn-success" type="button">{{ SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT }}</a>
                     </div>
                 {% endif %}
 
