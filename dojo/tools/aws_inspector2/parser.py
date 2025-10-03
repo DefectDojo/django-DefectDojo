@@ -105,11 +105,8 @@ class AWSInspector2Parser:
         if cvss_vector := cvss_details.get("scoringVector"):
             if cvss_data := parse_cvss_data(cvss_vector):
                 finding.cvssv2 = cvss_data.get("cvssv2")
-                finding.cvssv2_score = cvss_data.get("cvssv2_score")
                 finding.cvssv3 = cvss_data.get("cvssv3")
-                finding.cvssv3_score = cvss_data.get("cvssv3_score")
                 finding.cvssv4 = cvss_data.get("cvssv4")
-                finding.cvssv4_score = cvss_data.get("cvssv4_score")
 
         return finding
 
