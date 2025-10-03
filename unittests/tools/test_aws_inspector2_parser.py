@@ -28,6 +28,8 @@ class TestAWSInspector2Parser(TestCase):
             self.assertEqual(1, len(findings))
             self.assertEqual("CVE-2021-3744 - linux", findings[0].title)
             self.assertEqual("Medium", findings[0].severity)
+            self.assertEqual("CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H", findings[0].cvssv3)
+            self.assertEqual(5.5, findings[0].cvssv3_score)
 
     def test_aws_inspector2_parser_with_many_vuln_has_many_findings(self):
         with (get_unit_tests_scans_path("aws_inspector2") / "aws_inspector2_many_vul.json").open(encoding="utf-8") as testfile:
@@ -41,6 +43,8 @@ class TestAWSInspector2Parser(TestCase):
             self.assertEqual(True, findings[0].is_mitigated)
             # 2024-06-14T04:03:53.051000+02:00
             self.assertEqual(datetime(2024, 6, 14, 4, 3, 53, 51000, tzinfo=tzoffset(None, 7200)), findings[0].mitigated)
+            self.assertEqual("CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H", findings[0].cvssv3)
+            self.assertEqual(5.5, findings[0].cvssv3_score)
 
     def test_aws_inspector2_parser_empty_with_error(self):
         with self.assertRaises(TypeError) as context, \
