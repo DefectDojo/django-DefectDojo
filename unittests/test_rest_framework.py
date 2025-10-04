@@ -4,6 +4,7 @@ import logging
 import pathlib
 import re
 from collections import OrderedDict
+from datetime import timedelta
 from enum import Enum
 from json import dumps
 from pathlib import Path
@@ -14,6 +15,7 @@ from unittest.mock import ANY, MagicMock, PropertyMock, call, patch
 from django.contrib.auth.models import Permission
 from django.test import tag as test_tag
 from django.urls import reverse
+from django.utils import timezone
 from drf_spectacular.drainage import GENERATOR_STATS
 from drf_spectacular.settings import spectacular_settings
 from drf_spectacular.validation import validate_schema
@@ -917,6 +919,102 @@ class FindingCloseAPITest(DojoAPITestCase):
             response = self.client.post(self._close_url(finding.id), payload, format="json")
             self.assertEqual(200, response.status_code, response.content[:1000])
             self.assertTrue(add_comment_mock.called)
+
+
+class FindingCreateUpdateMitigatedFieldsAPITest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        testuser = User.objects.get(username="admin")
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.admin = testuser
+        self.base_url = "/api/v2/findings/"
+
+    def _minimal_create_payload(self, title: str):
+        return {
+            "test": 3,
+            "found_by": [],
+            "title": title,
+            "date": "2020-05-20",
+            "cwe": 1,
+            "severity": "High",
+            "description": "TEST finding",
+            "mitigation": "MITIGATION",
+            "impact": "HIGH",
+            "references": "",
+            "active": False,
+            "verified": False,
+            "false_p": False,
+            "duplicate": False,
+            "out_of_scope": False,
+            "under_review": False,
+            "under_defect_review": False,
+            "numerical_severity": "S0",
+        }
+
+    def test_create_rejects_mitigated_fields_by_default(self):
+        payload = self._minimal_create_payload("API create with mitigated disallowed")
+        past = (timezone.now() - timedelta(days=7)).replace(microsecond=0)
+        payload.update({
+            "is_mitigated": True,
+            "mitigated": past.isoformat(),
+            "mitigated_by": self.admin.id,
+        })
+
+        response = self.client.post(self.base_url, payload, format="json")
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("mitigated", response.data)
+        self.assertIn("mitigated_by", response.data)
+
+    def test_update_rejects_mitigated_fields_by_default(self):
+        finding_id = 7
+        past = (timezone.now() - timedelta(days=7)).replace(microsecond=0)
+        payload = {
+            "is_mitigated": True,
+            "mitigated": past.isoformat(),
+            "mitigated_by": self.admin.id,
+        }
+        response = self.client.patch(f"{self.base_url}{finding_id}/", payload, format="json")
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("mitigated", response.data)
+        self.assertIn("mitigated_by", response.data)
+
+    def test_create_sets_mitigated_fields_when_permitted(self):
+        with patch("dojo.finding.helper.can_edit_mitigated_data", return_value=True):
+            payload = self._minimal_create_payload("API create with mitigated allowed")
+            past = (timezone.now() - timedelta(days=7)).replace(microsecond=0)
+            payload.update({
+                "is_mitigated": True,
+                "mitigated": past.isoformat(),
+                "mitigated_by": self.admin.id,
+            })
+
+            response = self.client.post(self.base_url, payload, format="json")
+            self.assertEqual(201, response.status_code, response.content[:1000])
+
+            created_id = response.data.get("id")
+            self.assertIsNotNone(created_id)
+            created = Finding.objects.get(id=created_id)
+            self.assertEqual(created.mitigated.replace(microsecond=0, tzinfo=created.mitigated.tzinfo), past)
+            self.assertEqual(created.mitigated_by, self.admin)
+
+    def test_update_sets_mitigated_fields_when_permitted(self):
+        finding_id = 7
+        with patch("dojo.finding.helper.can_edit_mitigated_data", return_value=True):
+            past = (timezone.now() - timedelta(days=7)).replace(microsecond=0)
+            payload = {
+                "is_mitigated": True,
+                "mitigated": past.isoformat(),
+                "mitigated_by": self.admin.id,
+            }
+            response = self.client.patch(f"{self.base_url}{finding_id}/", payload, format="json")
+            self.assertEqual(200, response.status_code, response.content[:1000])
+
+            updated = Finding.objects.get(id=finding_id)
+            self.assertEqual(updated.mitigated.replace(microsecond=0, tzinfo=updated.mitigated.tzinfo), past)
+            self.assertEqual(updated.mitigated_by, self.admin)
 
 
 class EndpointStatusTest(BaseClass.BaseClassTest):
