@@ -1676,6 +1676,8 @@ class VulnerabilityIdSerializer(serializers.ModelSerializer):
 
 
 class FindingSerializer(serializers.ModelSerializer):
+    mitigated = serializers.DateTimeField(required=False, allow_null=True)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(
@@ -1772,6 +1774,21 @@ class FindingSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, data):
+        # Enforce mitigated metadata editability (only when non-null values are provided)
+        attempting_to_set_mitigated = any(
+            (field in data) and (data.get(field) is not None)
+            for field in ["mitigated", "mitigated_by"]
+        )
+        user = getattr(self.context.get("request", None), "user", None)
+        if attempting_to_set_mitigated and not finding_helper.can_edit_mitigated_data(user):
+            errors = {}
+            if ("mitigated" in data) and (data.get("mitigated") is not None):
+                errors["mitigated"] = ["Editing mitigated timestamp is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if ("mitigated_by" in data) and (data.get("mitigated_by") is not None):
+                errors["mitigated_by"] = ["Editing mitigated_by is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if errors:
+                raise serializers.ValidationError(errors)
+
         if self.context["request"].method == "PATCH":
             is_active = data.get("active", self.instance.active)
             is_verified = data.get("verified", self.instance.verified)
@@ -1841,6 +1858,8 @@ class FindingSerializer(serializers.ModelSerializer):
 
 
 class FindingCreateSerializer(serializers.ModelSerializer):
+    mitigated = serializers.DateTimeField(required=False, allow_null=True)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True, allow_null=True, required=False, many=True,
     )
@@ -1909,6 +1928,21 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         return new_finding
 
     def validate(self, data):
+        # Ensure mitigated fields are only set when editable is enabled (ignore nulls)
+        attempting_to_set_mitigated = any(
+            (field in data) and (data.get(field) is not None)
+            for field in ["mitigated", "mitigated_by"]
+        )
+        user = getattr(getattr(self.context, "request", None), "user", None)
+        if attempting_to_set_mitigated and not finding_helper.can_edit_mitigated_data(user):
+            errors = {}
+            if ("mitigated" in data) and (data.get("mitigated") is not None):
+                errors["mitigated"] = ["Editing mitigated timestamp is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if ("mitigated_by" in data) and (data.get("mitigated_by") is not None):
+                errors["mitigated_by"] = ["Editing mitigated_by is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if errors:
+                raise serializers.ValidationError(errors)
+
         if "reporter" not in data:
             request = self.context["request"]
             data["reporter"] = request.user

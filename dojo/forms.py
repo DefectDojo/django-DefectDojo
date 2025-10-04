@@ -1917,14 +1917,14 @@ class CloseFindingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop("missing_note_types")
+        # must pop custom kwargs before calling parent __init__ to avoid unexpected kwarg errors
+        self.can_edit_mitigated_data = kwargs.pop("can_edit_mitigated_data") if "can_edit_mitigated_data" in kwargs \
+            else False
         super().__init__(*args, **kwargs)
         if len(queryset) == 0:
             self.fields["note_type"].widget = forms.HiddenInput()
         else:
             self.fields["note_type"] = forms.ModelChoiceField(queryset=queryset, label="Note Type", required=True)
-
-        self.can_edit_mitigated_data = kwargs.pop("can_edit_mitigated_data") if "can_edit_mitigated_data" in kwargs \
-            else False
 
         if self.can_edit_mitigated_data:
             self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)
