@@ -530,6 +530,8 @@ class ImportScanForm(forms.Form):
     active_verified_choices = [("not_specified", "Not specified (default)"),
                                ("force_to_true", "Force to True"),
                                ("force_to_false", "Force to False")]
+    test_title = forms.CharField(max_length=255, required=False, label="Test Title",
+                                 help_text="Optional title for the Test to be created. If empty, the scan type is used.")
     scan_date = forms.DateTimeField(
         required=False,
         label="Scan Completion Date",
