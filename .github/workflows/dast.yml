@@ -3,6 +3,8 @@ name: DAST
 on:
   push:
     branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
   workflow_dispatch: {}
 
 permissions:
@@ -22,36 +24,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Debug TARGET_URL
-        run: echo "TARGET_URL=${{ env.TARGET_URL }}"
 
       - name: Run ZAP Baseline
-        uses: zaproxy/action-baseline@v0.13.0
-        continue-on-error: true
-        with:
-          target: ${{ env.TARGET_URL }}
-          cmd_options: "-a -t ${{ env.TARGET_URL }} -x zap_report.xml"
-          allow_issue_writing: false
-          fail_action: false
+        run: |
+          docker run --rm -v $(pwd):/zap/wrk/:rw \
+            -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+            -t ${{ env.TARGET_URL }} \
+            -j zap_report.json \
+            -r zap_report.html
+
 
       - name: Upload ZAP report artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap_baseline_report
-          path: zap_report.xml
+          path: |
+            zap_report.json
+            zap_report.html
           if-no-files-found: ignore
 
-      - name: Upload to DefectDojo
+
+      - name: Upload to DefectDojo (reimport → import)
         if: ${{ env.DD_URL != '' && env.DD_API_KEY != '' && env.DD_ENGAGEMENT_ID != '' }}
         run: |
           set -e
-          test -f zap_report.xml || { echo "ZAP XML report not found, skip Dojo upload"; exit 0; }
+          test -f zap_report.json || { echo "ZAP JSON report not found, skip Dojo upload"; exit 0; }
+
           curl -sS -X POST "$DD_URL/api/v2/reimport-scan/" \
             -H "Authorization: Token $DD_API_KEY" \
             -F "engagement=$DD_ENGAGEMENT_ID" \
             -F "scan_type=ZAP Scan" \
-            -F "file=@zap_report.xml" \
+            -F "file=@zap_report.json" \
             -F "test_title=ZAP Baseline" \
             -F "build_id=$GITHUB_RUN_NUMBER" \
             -F "commit_hash=$GITHUB_SHA" \
@@ -61,7 +65,7 @@ jobs:
             -H "Authorization: Token $DD_API_KEY" \
             -F "engagement=$DD_ENGAGEMENT_ID" \
             -F "scan_type=ZAP Scan" \
-            -F "file=@zap_report.xml" \
+            -F "file=@zap_report.json" \
             -F "test_title=ZAP Baseline" \
             -F "build_id=$GITHUB_RUN_NUMBER" \
             -F "commit_hash=$GITHUB_SHA" \
