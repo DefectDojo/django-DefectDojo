@@ -323,7 +323,7 @@ env = environ.FileAwareEnv(
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
     # Audit logging system: "django-auditlog" (default) or "django-pghistory"
-    DD_AUDITLOG_TYPE=(str, "django-pghistory"),
+    DD_AUDITLOG_TYPE=(str, "django-auditlog"),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
