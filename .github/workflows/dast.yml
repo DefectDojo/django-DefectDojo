@@ -33,17 +33,15 @@ jobs:
             -j zap_report.json \
             -r zap_report.html
 
-
-      - name: Upload ZAP report artifact
+      - name: Upload ZAP report artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap_baseline_report
+          name: zap_reports
           path: |
             zap_report.json
             zap_report.html
           if-no-files-found: ignore
-
 
       - name: Upload to DefectDojo (reimport → import)
         if: ${{ env.DD_URL != '' && env.DD_API_KEY != '' && env.DD_ENGAGEMENT_ID != '' }}
