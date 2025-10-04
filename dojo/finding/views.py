@@ -14,8 +14,8 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
-from django.db.models import QuerySet
-from django.db.models.functions import Length
+from django.db.models import F, QuerySet
+from django.db.models.functions import Coalesce, ExtractDay, Length, TruncDate
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -274,7 +274,13 @@ class BaseListFindings:
         )
 
     def get_filtered_findings(self):
-        findings = get_authorized_findings(Permissions.Finding_View).order_by(self.get_order_by())
+        findings = get_authorized_findings(Permissions.Finding_View)
+        # Annotate computed SLA age in days: sla_expiration_date - (sla_start_date or date)
+        findings = findings.annotate(
+            sla_age_days=ExtractDay(
+                F("sla_expiration_date") - Coalesce(F("sla_start_date"), TruncDate("created")),
+            ),
+        ).order_by(self.get_order_by())
         findings = self.filter_findings_by_object(findings)
         return self.filter_findings_by_filter_name(findings)
 
