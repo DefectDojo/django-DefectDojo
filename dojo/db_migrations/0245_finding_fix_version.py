@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0242_file_upload_cleanup'),
+        ('dojo', '0244_pghistory_indices'),
     ]
 
     operations = [
