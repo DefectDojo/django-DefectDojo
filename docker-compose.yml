@@ -119,8 +119,6 @@ services:
         - type: bind
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
-        - defectdojo_redis:/redis-data:ro
-        - defectdojo_valkey:/valkey-data
   postgres:
     image: postgres:18.0-alpine@sha256:70b32afe0c274b4d93098fd724fcdaab3aba47270a4f1e63cbf9cc69d7bf1be4
     environment:
