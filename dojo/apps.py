@@ -72,7 +72,21 @@ class DojoAppConfig(AppConfig):
 
         # Load any signals here that will be ready for runtime
         # Importing the signals file is good enough if using the reciever decorator
-        import dojo.tool_product.signals  # noqa: F401,PLC0415 raised: AppRegistryNotReady
+        import dojo.announcement.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.benchmark.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.cred.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.endpoint.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.engagement.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.file_uploads.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.finding_group.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.notes.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.product.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.product_type.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.risk_acceptance.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.sla_config.helpers  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.tags_signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.test.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.tool_product.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
 
         # Configure audit system after all models are loaded
         # This must be done in ready() to avoid "Models aren't loaded yet" errors
