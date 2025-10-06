@@ -21,14 +21,14 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
-       
-        - name: List files
-          run: ls -la
+    
         
         - name: Setup PHP
           uses: shivammathur/setup-php@v2
           with:
             php-version: 8
+        - name: Install JS
+          run: composer init
         - name: Install deps
           run: composer install --no-progress --no-suggest
         - name: Run Psalm
