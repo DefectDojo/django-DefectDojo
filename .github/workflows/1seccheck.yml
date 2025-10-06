@@ -30,7 +30,7 @@ jobs:
         - name: Run Psalm
           run: ./vendor/bin/psalm --show-info=false
         - name: Upload Psalm report (optional)
-          uses: actions/upload-artifact@v4
+          uses: actions/upload-artifact@v3
           with:
             name: psalm-report
             path: psalm.xml
