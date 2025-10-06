@@ -1561,7 +1561,7 @@ def request_finding_review(request, fid):
 
             create_notification(
                 event="review_requested",  # TODO: - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
-                title="Finding review requested",
+                title=f"Finding review requested for Test created for {finding.test.engagement.product}: {finding.test.engagement.name}: {finding.test} - {finding.title}",
                 requested_by=user,
                 note=new_note,
                 finding=finding,
