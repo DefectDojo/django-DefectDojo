@@ -139,7 +139,7 @@ sqlparse==0.5.3
 cffi==2.0.0
 gitdb==4.0.12
 click-plugins==1.1.1.2
-asgiref==3.9.2
+asgiref==3.10.0
 elementpath==4.8.0
 requests-oauthlib==2.0.0
 vine==5.1.0
