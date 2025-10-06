@@ -22,7 +22,7 @@ jobs:
       steps:
         - uses: actions/checkout@v4
         - name: Setup PHP
-          uses: shivammathur/setup-php@v4
+          uses: shivammathur/setup-php@v2
           with:
             php-version: ‘8.1’
         - name: Install deps
@@ -30,7 +30,7 @@ jobs:
         - name: Run Psalm
           run: ./vendor/bin/psalm --show-info=false
         - name: Upload Psalm report (optional)
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4
           with:
             name: psalm-report
             path: psalm.xml
