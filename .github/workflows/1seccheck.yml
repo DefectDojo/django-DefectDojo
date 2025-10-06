@@ -1,6 +1,10 @@
 name: “Security checks”
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches: [ Nas ]
+  pull_request:
+    branches: [ Nas ]
 
 jobs:
   codeql:
