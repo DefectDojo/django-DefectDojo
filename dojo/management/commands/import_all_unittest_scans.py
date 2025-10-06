@@ -120,7 +120,7 @@ class Command(BaseCommand):
             return self.import_scan(payload, expected_http_status_code)
 
     def import_all_unittest_scans(self, product_name_prefix=None, tests_per_engagement=10, engagements_per_product=50, products_per_product_type=15, *, include_very_big_scans=False, **kwargs):
-        logger.info(f"product_name_prefix: {product_name_prefix}, tests_per_engagement: {tests_per_engagement}, engagements_per_product: {engagements_per_product}, products_per_product_type: {products_per_product_type}")
+        logger.info("product_name_prefix: %s, tests_per_engagement: %s, engagements_per_product: %s, products_per_product_type: %s", product_name_prefix, tests_per_engagement, engagements_per_product, products_per_product_type)
         product_type_prefix = "Sample scans " + datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         product_type_index = 1
 
@@ -159,7 +159,7 @@ class Command(BaseCommand):
                         for attribute_name in dir(module):
                             attribute = getattr(module, attribute_name)
                             if isclass(attribute) and attribute_name.lower() == module_name.replace("_", "") + "parser":
-                                logger.debug(f"Loading {module_name} parser")
+                                logger.debug("Loading %s parser", module_name)
                                 scan_dir = Path("unittests") / "scans" / module_name
                                 for scan_file in scan_dir.glob("*.json"):
                                     if include_very_big_scans or scan_file.name != "very_many_vulns.json":  # jfrog_xray file is huge and takes too long to import
@@ -183,12 +183,12 @@ class Command(BaseCommand):
                                             error_messages[module_name + "/" + scan_file.name] = result.get("message", str(e))
 
                 except:
-                    logger.exception(f"failed to load {module_name}")
+                    logger.exception("failed to load %s", module_name)
                     raise
 
-        logger.error(f"Error count: {error_count}")
+        logger.error("Error count: %s", error_count)
         for scan, message in error_messages.items():
-            logger.error(f"Error importing scan {scan}: {message}")
+            logger.error("Error importing scan %s: %s", scan, message)
 
     def handle(self, *args, **options):
         logger.info("EXPERIMENTAL: This command may be changed/deprecated/removed without prior notice.")

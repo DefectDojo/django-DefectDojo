@@ -2,7 +2,6 @@
 
 from django.db import migrations, models
 # import django.db.models.deletion
-from tagging.registry import register as tag_register
 from django.forms.models import model_to_dict
 import tagulous.models.fields
 import tagulous.models.models
@@ -12,69 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class Migration(migrations.Migration):
-
-    def copy_existing_tags_to_tags_from_django_tagging_field(apps, schema_editor):
-        # We can't import the models directly as it may be a newer
-        # version than this migration expects. We use the historical version.
-        logger.info('Migrating tags from django-tagging to django-tagulous step1. Enable DEBUG logging to find out more.')
-        import tagulous.utils
-        # for model_name in ['Product']:
-        for model_name in ['Product', 'test', 'finding', 'engagement', 'endpoint', 'finding_template', 'app_Analysis', 'objects']:
-            model_class = apps.get_model('dojo', model_name)
-            # the get_model returns a fake class proxy, which is not registered with django-tagging
-            tag_register(model_class)
-
-            for obj in model_class.objects.all():
-                # logger.debug('%s:%s:%s', model_class, obj.id, obj)
-                if obj.tags:
-                    tags_as_string = tagulous.utils.render_tags(obj.tags.all())
-                    logger.debug('%s:%s:%s: found tags: %s', model_class, obj.id, obj, tags_as_string)
-                    obj.tags_from_django_tagging = tags_as_string
-                    # obj.description = tags_as_string
-                    # finding.save() doesn't look at push_all_jira_issue, so we should be good
-                    # if model_name == 'finding2':
-                    #     obj.save(dedupe_option=False, rules_option=False, issue_updater_option=False, push_to_jira=False)
-                    # else:
-                    try:
-                        if hasattr(obj, 'prod_type_id') and obj.prod_type_id == 0:
-                            logger.warning('product found without product type (prod_type==0), changing to: "_tag migration lost and found" product type')
-                            Product_Type_Model = apps.get_model('dojo', 'Product_Type')
-                            prod_type_lost_and_found, created = Product_Type_Model.objects.get_or_create(name='_tag migration lost and found')
-                            obj.prod_type = prod_type_lost_and_found
-                            obj.save()
-                            logger.warning('product type successfully changed to %i', prod_type_lost_and_found.id)
-
-                        obj.save()
-                    except Exception as e:
-                        logger.error('Error saving old existing django-tagging tags to new string field')
-                        logger.error('Details of object:')
-                        logger.error(vars(obj))
-                        logger.error('Model to dict:')
-                        logger.error(model_to_dict(obj))
-
-    def copy_tags_from_django_tagging_field_to_new_tagulous_tags_field(apps, schema_editor):
-        # We can't import the models directly as it may be a newer
-        # version than this migration expects. We use the historical version.
-        logger.info('Migrating tags from django-tagging to django-tagulous step2. Enable DEBUG logging to find out more.')
-        # for model_name in ['Product']:
-        for model_name in ['Product', 'test', 'finding', 'engagement', 'endpoint', 'finding_template', 'app_Analysis', 'objects_product']:
-            model_class = apps.get_model('dojo', model_name)
-
-            for obj in model_class.objects.all():
-                # logger.debug('%s:%s:%s', model_class, obj.id, obj)
-                if obj.tags_from_django_tagging:
-                    logger.debug('%s:%s:%s: found tags: %s', model_class, obj.id, obj, obj.tags_from_django_tagging)
-                    obj.tags = obj.tags_from_django_tagging
-
-                    try:
-                        obj.save()
-                    except Exception as e:
-                        logger.error('Error saving tags to new tagulous m2m field')
-                        logger.error('Details of object:')
-                        logger.error(vars(obj))
-                        logger.error('Model to dict:')
-                        logger.error(model_to_dict(obj))
-
     dependencies = [
         ('dojo', '0065_delete_empty_jira_project_configs'),
     ]
@@ -120,8 +56,6 @@ class Migration(migrations.Migration):
             name='tags_from_django_tagging',
             field=models.TextField(blank=True, editable=False, help_text='Temporary archive with tags from the previous tagging library we used'),
         ),
-
-        migrations.RunPython(copy_existing_tags_to_tags_from_django_tagging_field, migrations.RunPython.noop),
 
         migrations.RenameModel('Objects', 'Objects_Product'),
 
@@ -309,6 +243,4 @@ class Migration(migrations.Migration):
             name='match_field',
             field=models.CharField(choices=[('id', 'id'), ('title', 'title'), ('date', 'date'), ('cwe', 'cwe'), ('cve', 'cve'), ('cvssv3', 'cvssv3'), ('url', 'url'), ('severity', 'severity'), ('description', 'description'), ('mitigation', 'mitigation'), ('impact', 'impact'), ('steps_to_reproduce', 'steps_to_reproduce'), ('severity_justification', 'severity_justification'), ('references', 'references'), ('test', 'test'), ('is_template', 'is_template'), ('active', 'active'), ('verified', 'verified'), ('false_p', 'false_p'), ('duplicate', 'duplicate'), ('duplicate_finding', 'duplicate_finding'), ('out_of_scope', 'out_of_scope'), ('under_review', 'under_review'), ('review_requested_by', 'review_requested_by'), ('under_defect_review', 'under_defect_review'), ('defect_review_requested_by', 'defect_review_requested_by'), ('is_Mitigated', 'is_Mitigated'), ('thread_id', 'thread_id'), ('mitigated', 'mitigated'), ('mitigated_by', 'mitigated_by'), ('reporter', 'reporter'), ('numerical_severity', 'numerical_severity'), ('last_reviewed', 'last_reviewed'), ('last_reviewed_by', 'last_reviewed_by'), ('line_number', 'line_number'), ('sourcefilepath', 'sourcefilepath'), ('sourcefile', 'sourcefile'), ('param', 'param'), ('payload', 'payload'), ('hash_code', 'hash_code'), ('line', 'line'), ('file_path', 'file_path'), ('component_name', 'component_name'), ('component_version', 'component_version'), ('static_finding', 'static_finding'), ('dynamic_finding', 'dynamic_finding'), ('created', 'created'), ('scanner_confidence', 'scanner_confidence'), ('sonarqube_issue', 'sonarqube_issue'), ('unique_id_from_tool', 'unique_id_from_tool'), ('vuln_id_from_tool', 'vuln_id_from_tool'), ('sast_source_object', 'sast_source_object'), ('sast_sink_object', 'sast_sink_object'), ('sast_source_line', 'sast_source_line'), ('sast_source_file_path', 'sast_source_file_path'), ('nb_occurences', 'nb_occurences')], max_length=200),
         ),
-
-        migrations.RunPython(copy_tags_from_django_tagging_field_to_new_tagulous_tags_field, migrations.RunPython.noop),
     ]

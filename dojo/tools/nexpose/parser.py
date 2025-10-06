@@ -94,7 +94,7 @@ class NexposeParser:
             last = ""
 
             for attr in node.attrib:
-                if last != "":
+                if last:
                     if node.get(attr) != node.get(last):
                         ret += str(node.get(attr)) + " "
                 last = attr

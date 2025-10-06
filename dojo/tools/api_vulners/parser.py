@@ -110,7 +110,7 @@ class ApiVulnersParser:
                 for ref in external_references:
                     references += f"{ref} \n"
 
-            if references != "":
+            if references:
                 finding.references = references
 
             findings.append(finding)

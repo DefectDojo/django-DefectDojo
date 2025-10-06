@@ -40,7 +40,6 @@
         </sup>
     {% endif %}
     </td>
-    <td><a href="{% url 'view_product' similar_finding.test.engagement.product.id %}">{{ similar_finding.test.engagement.product.name }}</a>
     <td>
         {% if similar_finding.cwe > 0 %}
         <a target="_blank" href="{{ similar_finding.cwe|cwe_url }}">
