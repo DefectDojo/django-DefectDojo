@@ -24,9 +24,9 @@ jobs:
         - name: Setup PHP
           uses: shivammathur/setup-php@v2
           with:
-            php-version: 8.1
+            php-version: 8
         - name: Install deps
-          run: composer install --no-progress --no-interaction
+          run: composer install --no-progress --no-suggest
         - name: Run Psalm
           run: ./vendor/bin/psalm --show-info=false
         - name: Upload Psalm report (optional)
