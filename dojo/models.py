@@ -2946,7 +2946,7 @@ class Finding(models.Model):
     # Get vulnerability_ids to use for hash_code computation
     def get_vulnerability_ids(self):
 
-        def _get_unsaved_vulnearbility_ids(finding) -> str:
+        def _get_unsaved_vulnerability_ids(finding) -> str:
             if finding.unsaved_vulnerability_ids:
                 deduplicationLogger.debug("get_vulnerability_ids before the finding was saved")
                 # convert list of unsaved vulnerability_ids to the list of their canonical representation
