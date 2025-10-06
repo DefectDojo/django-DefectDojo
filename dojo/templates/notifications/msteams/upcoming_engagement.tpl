@@ -1,52 +1,103 @@
-{% load i18n %}
-{% load display_tags %}
-{% url 'view_engagement' engagement.id as engagement_url %}
+{% load i18n %}{% load display_tags %}{% url 'view_engagement' engagement.id as engagement_url %}
 {
-    "@context": "https://schema.org/extensions",
-    "@type": "MessageCard",
-    "title": "{% trans "Engagement is starting" %}",
-    "summary": "{% trans "Engagement is starting" %}",
-    "sections": [
+    "type": "message",
+    "attachments": [
         {
-            "activityTitle": "DefectDojo",
-            "activityImage": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
-            "text": "{% trans "An Engagement is starting" %}.",
-            "facts": [
-                {
-                    "name": "{% trans "Product" %}:",
-                    "value": "{{ engagement.product.name }}"
-                },
-                {
-                    "name": "{% trans "Engagement" %}:",
-                    "value": "{{ engagement.name }}"
-                },
-                {
-                    "name": "{% trans "Start date" %}:",
-                    "value": "{{ engagement.target_start }}"
-                },
-                {
-                    "name": "{% trans "End date" %}:",
-                    "value": "{{ engagement.target_end }}"
-                }
-            ]
-        }
-        {% if system_settings.disclaimer_notifications and system_settings.disclaimer_notifications.strip %}
-            ,{
-                "activityTitle": "{% trans "Disclaimer" %}",
-                "text": "{{ system_settings.disclaimer_notifications }}"
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "content": {
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                "type": "AdaptiveCard",
+                "version": "1.4",
+                "body": [
+                    {
+                        "type": "ColumnSet",
+                        "columns": [
+                            {
+                                "type": "Column",
+                                "width": "auto",
+                                "items": [
+                                    {
+                                        "type": "Image",
+                                        "url": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/dojo/static/dojo/img/chop.png",
+                                        "size": "Small"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Column",
+                                "width": "stretch",
+                                "items": [
+                                    {
+                                        "type": "TextBlock",
+                                        "text": "DefectDojo",
+                                        "weight": "Bolder",
+                                        "size": "Medium"
+                                    },
+                                    {
+                                        "type": "TextBlock",
+                                        "text": "{% trans 'Upcoming Engagement' %}",
+                                        "weight": "Bolder",
+                                        "size": "Large",
+                                        "color": "Accent"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "TextBlock",
+                        "text": "{% trans 'Engagement' %} [{{ engagement.name }}]({{ engagement_url|full_url }}) {% blocktranslate with start_date=engagement.target_start %}is starting on {{ start_date }}.{% endblocktranslate %}",
+                        "wrap": true,
+                        "spacing": "Medium"
+                    },
+                    {
+                        "type": "FactSet",
+                        "facts": [
+                            {
+                                "title": "{% trans 'Product' %}:",
+                                "value": "{{ engagement.product.name }}"
+                            },
+                            {
+                                "title": "{% trans 'Engagement' %}:",
+                                "value": "{{ engagement.name }}"
+                            },
+                            {
+                                "title": "{% trans 'Start date' %}:",
+                                "value": "{{ engagement.target_start }}"
+                            },
+                            {
+                                "title": "{% trans 'End date' %}:",
+                                "value": "{{ engagement.target_end }}"
+                            }
+                        ],
+                        "spacing": "Medium"
+                    }{% if system_settings.disclaimer_notifications and system_settings.disclaimer_notifications.strip %},
+                    {
+                        "type": "Container",
+                        "style": "attention",
+                        "items": [
+                            {
+                                "type": "TextBlock",
+                                "text": "{% trans 'Disclaimer' %}",
+                                "weight": "Bolder"
+                            },
+                            {
+                                "type": "TextBlock",
+                                "text": "{{ system_settings.disclaimer_notifications }}",
+                                "wrap": true
+                            }
+                        ],
+                        "spacing": "Medium"
+                    }{% endif %}
+                ],
+                "actions": [
+                    {
+                        "type": "Action.OpenUrl",
+                        "title": "{% trans 'View Engagement' %}",
+                        "url": "{{ engagement_url|full_url }}"
+                    }
+                ]
             }
-        {% endif %}
-    ],
-    "potentialAction": [
-        {
-            "@type": "OpenUri",
-            "name": "{% trans "View Engagement" %}",
-            "targets": [
-                {
-                    "os": "default",
-                    "uri": "{{ url|full_url }}"
-                }
-            ]
         }
     ]
 }

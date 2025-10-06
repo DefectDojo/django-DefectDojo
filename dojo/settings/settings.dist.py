@@ -15,6 +15,7 @@ from email.utils import getaddresses
 from pathlib import Path
 
 import environ
+import pghistory
 from celery.schedules import crontab
 from netaddr import IPNetwork, IPSet
 
@@ -30,6 +31,10 @@ env = environ.FileAwareEnv(
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
     DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
+    # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
+    # see https://github.com/laymonage/django-jsonfield-backport
+    # debug_toolbar.E001 is raised when running tests in dev mode via run-unittests.sh
+    DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001"]),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
@@ -86,10 +91,12 @@ env = environ.FileAwareEnv(
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
+    DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
+    # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
+    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 100),
+    DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
-    DD_FORCE_LOWERCASE_TAGS=(bool, True),
-    DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
     DD_DATABASE_HOST=(str, "postgres"),
     DD_DATABASE_NAME=(str, "defectdojo"),
@@ -259,6 +266,10 @@ env = environ.FileAwareEnv(
     DD_TRACK_IMPORT_HISTORY=(bool, True),
     # Delete Auditlogs older than x month; -1 to keep all logs
     DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
+    # Batch size for flushing audit logs per task run
+    DD_AUDITLOG_FLUSH_BATCH_SIZE=(int, 1000),
+    # Maximum number of batches to process per task run
+    DD_AUDITLOG_FLUSH_MAX_BATCHES=(int, 100),
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
@@ -312,6 +323,8 @@ env = environ.FileAwareEnv(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    # Audit logging system: "django-auditlog" (default) or "django-pghistory"
+    DD_AUDITLOG_TYPE=(str, "django-auditlog"),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
@@ -324,6 +337,8 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+    # Dictates if v3 org/asset relabeling (+url routing) will be enabled
+    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
 )
 
 
@@ -396,6 +411,9 @@ DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
 MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
 
 TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
+# Tag bulk add batch size (used by dojo.tag_utils.bulk_add_tag_to_instances)
+TAG_BULK_ADD_BATCH_SIZE = env("DD_TAG_BULK_ADD_BATCH_SIZE")
+
 
 # ------------------------------------------------------------------------------
 # DATABASE
@@ -740,6 +758,7 @@ SESSION_COOKIE_SAMESITE = env("DD_SESSION_COOKIE_SAMESITE")
 # Override default Django behavior for incorrect URLs
 APPEND_SLASH = env("DD_APPEND_SLASH")
 
+
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
 CSRF_COOKIE_SAMESITE = env("DD_CSRF_COOKIE_SAMESITE")
@@ -769,6 +788,8 @@ SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
 # DEFECTDOJO SPECIFIC
 # ------------------------------------------------------------------------------
 
+ENABLE_V3_ORGANIZATION_ASSET_RELABEL = env("DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL")
+
 # Credential Key
 CREDENTIAL_AES_256_KEY = env("DD_CREDENTIAL_AES_256_KEY")
 DB_KEY = env("DD_CREDENTIAL_AES_256_KEY")
@@ -778,11 +799,6 @@ TEAM_NAME = env("DD_TEAM_NAME")
 
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
-
-# Django-tagging settings
-FORCE_LOWERCASE_TAGS = env("DD_FORCE_LOWERCASE_TAGS")
-MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
-
 
 # ------------------------------------------------------------------------------
 # ADMIN
@@ -866,6 +882,7 @@ TEMPLATES = [
                 "dojo.context_processors.bind_alert_count",
                 "dojo.context_processors.bind_announcement",
                 "dojo.context_processors.session_expiry_notification",
+                "dojo.context_processors.labels",
             ],
         },
     },
@@ -885,10 +902,8 @@ INSTALLED_APPS = (
     "polymorphic",  # provides admin templates
     "django.contrib.admin",
     "django.contrib.humanize",
-    "auditlog",
     "dojo",
     "watson",
-    "tagging",  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
     "imagekit",
     "multiselectfield",
     "rest_framework",
@@ -901,6 +916,9 @@ INSTALLED_APPS = (
     "tagulous",
     "fontawesomefree",
     "django_filters",
+    "auditlog",
+    "pgtrigger",
+    "pghistory",
 )
 
 # ------------------------------------------------------------------------------
@@ -919,9 +937,9 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.LoginRequiredMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
     "social_django.middleware.SocialAuthExceptionMiddleware",
-    "watson.middleware.SearchContextMiddleware",
-    "dojo.middleware.AuditlogMiddleware",
     "crum.CurrentRequestUserMiddleware",
+    "dojo.middleware.AuditlogMiddleware",
+    "dojo.middleware.AsyncSearchContextMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
     "dojo.middleware.LongRunningRequestAlertMiddleware",
 ]
@@ -1162,6 +1180,10 @@ if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
 
 CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
 
+# Watson async index update settings
+WATSON_ASYNC_INDEX_UPDATE_THRESHOLD = env("DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD")
+WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE = env("DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE")
+
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
     "add-alerts": {
@@ -1358,6 +1380,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
     "Cycognito Scan": ["title", "severity"],
+    "OpenVAS Parser v2": ["title", "severity", "vuln_id_from_tool", "endpoints"],
+    "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1374,7 +1398,7 @@ if len(env("DD_HASHCODE_FIELDS_PER_SCANNER")) > 0:
             logger.info(f"Replacing {key} with value {value} (previously set to {HASHCODE_FIELDS_PER_SCANNER[key]}) from env var DD_HASHCODE_FIELDS_PER_SCANNER")
             HASHCODE_FIELDS_PER_SCANNER[key] = value
         if key not in HASHCODE_FIELDS_PER_SCANNER:
-            logger.info(f"Adding {key} with value {value} from env var DD_HASHCODE_FIELDS_PER_SCANNER")
+            logger.info("Adding %s with value %s from env var DD_HASHCODE_FIELDS_PER_SCANNER", key, value)
             HASHCODE_FIELDS_PER_SCANNER[key] = value
 
 
@@ -1429,6 +1453,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "HCL AppScan on Cloud SAST XML": True,
     "AWS Inspector2 Scan": True,
     "Cyberwatch scan (Galeax)": True,
+    "OpenVAS Parser v2": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1616,6 +1641,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
+    "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
+    "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1629,7 +1656,7 @@ if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
             logger.info(f"Replacing {key} with value {value} (previously set to {DEDUPLICATION_ALGORITHM_PER_PARSER[key]}) from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
         if key not in DEDUPLICATION_ALGORITHM_PER_PARSER:
-            logger.info(f"Adding {key} with value {value} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
+            logger.info("Adding %s with value %s from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER", key, value)
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
@@ -1651,7 +1678,7 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ("Security", "Security"),
 )
 
-if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
+if env("DD_JIRA_EXTRA_ISSUE_TYPES"):
     for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
         JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
@@ -1815,9 +1842,7 @@ ASYNC_OBEJECT_DELETE_CHUNK_SIZE = env("DD_ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
 # for very large objects
 DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
 
-# django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
-# see https://github.com/laymonage/django-jsonfield-backport
-SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
+SILENCED_SYSTEM_CHECKS = env("DD_SILENCED_SYSTEM_CHECKS")
 
 VULNERABILITY_URLS = {
     "ALAS": "https://alas.aws.amazon.com/AL2/&&.html",  # e.g. https://alas.aws.amazon.com/alas2.html
@@ -1908,8 +1933,11 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
 ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
+AUDITLOG_TYPE = env("DD_AUDITLOG_TYPE")
 AUDITLOG_TWO_STEP_MIGRATION = False
 AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
+AUDITLOG_FLUSH_BATCH_SIZE = env("DD_AUDITLOG_FLUSH_BATCH_SIZE")
+AUDITLOG_FLUSH_MAX_BATCHES = env("DD_AUDITLOG_FLUSH_MAX_BATCHES")
 
 USE_FIRST_SEEN = env("DD_USE_FIRST_SEEN")
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
@@ -1994,3 +2022,28 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
         "debug_toolbar.panels.profiling.ProfilingPanel",
         # 'cachalot.panels.CachalotPanel',
     ]
+
+#########################################################################################################
+# Auditlog configuration                                                                                #
+#########################################################################################################
+
+if ENABLE_AUDITLOG:
+    middleware_list = list(MIDDLEWARE)
+    crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
+
+    if AUDITLOG_TYPE == "django-auditlog":
+        # Insert AuditlogMiddleware before CurrentRequestUserMiddleware
+        middleware_list.insert(crum_index, "dojo.middleware.AuditlogMiddleware")
+    elif AUDITLOG_TYPE == "django-pghistory":
+        # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
+        middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
+
+    MIDDLEWARE = middleware_list
+
+PGHISTORY_FOREIGN_KEY_FIELD = pghistory.ForeignKey(db_index=False)
+PGHISTORY_CONTEXT_FIELD = pghistory.ContextForeignKey(db_index=True)
+PGHISTORY_OBJ_FIELD = pghistory.ObjForeignKey(db_index=True)
+
+#########################################################################################################
+# End of Auditlog configuration                                                                          #
+#########################################################################################################

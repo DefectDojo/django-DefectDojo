@@ -961,6 +961,7 @@ class ImportScanResultsView(View):
             "active": None,
             "verified": None,
             "scan_type": request.POST.get("scan_type"),
+            "test_title": form.cleaned_data.get("test_title"),
             "tags": form.cleaned_data.get("tags"),
             "version": form.cleaned_data.get("version"),
             "branch_tag": form.cleaned_data.get("branch_tag", None),

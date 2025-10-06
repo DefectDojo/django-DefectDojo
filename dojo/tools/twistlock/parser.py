@@ -41,7 +41,7 @@ class TwistlockCSVParser:
                     # Handle alternative formats
                     finding_date = datetime.strptime(date_str[:10], "%Y-%m-%d").date()
                 except ValueError:
-                    logger.warning(f"Could not parse date: {date_str}")
+                    logger.warning("Could not parse date: %s", date_str)
 
         # Build container/image metadata for impact field (Item 3)
         impact_parts = []

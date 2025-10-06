@@ -22,6 +22,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.fields import DictField, MultipleChoiceField
 
+import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission
@@ -122,6 +123,7 @@ from dojo.tools.factory import (
     requires_file,
     requires_tool_type,
 )
+from dojo.user.queries import get_authorized_users
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import is_scan_file_too_large
 from dojo.validators import ImporterFileExtensionValidator, tag_validator
@@ -219,7 +221,7 @@ class TagListSerializerField(serializers.ListField):
             except ValueError:
                 self.fail("invalid_json")
 
-        logger.debug(f"data as json: {data}")
+        logger.debug("data as json: %s", data)
 
         if not isinstance(data, list):
             self.fail("not_a_list", input_type=type(data).__name__)
@@ -238,7 +240,7 @@ class TagListSerializerField(serializers.ListField):
                 tag_validator(sub, exception_class=RestFrameworkValidationError)
             data_safe.extend(substrings)
 
-        logger.debug(f"result after rendering tags: {data_safe}")
+        logger.debug("result after rendering tags: %s", data_safe)
         return data_safe
 
     def to_representation(self, value):
@@ -1674,6 +1676,8 @@ class VulnerabilityIdSerializer(serializers.ModelSerializer):
 
 
 class FindingSerializer(serializers.ModelSerializer):
+    mitigated = serializers.DateTimeField(required=False, allow_null=True)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(
@@ -1772,6 +1776,21 @@ class FindingSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, data):
+        # Enforce mitigated metadata editability (only when non-null values are provided)
+        attempting_to_set_mitigated = any(
+            (field in data) and (data.get(field) is not None)
+            for field in ["mitigated", "mitigated_by"]
+        )
+        user = getattr(self.context.get("request", None), "user", None)
+        if attempting_to_set_mitigated and not finding_helper.can_edit_mitigated_data(user):
+            errors = {}
+            if ("mitigated" in data) and (data.get("mitigated") is not None):
+                errors["mitigated"] = ["Editing mitigated timestamp is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if ("mitigated_by" in data) and (data.get("mitigated_by") is not None):
+                errors["mitigated_by"] = ["Editing mitigated_by is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if errors:
+                raise serializers.ValidationError(errors)
+
         if self.context["request"].method == "PATCH":
             is_active = data.get("active", self.instance.active)
             is_verified = data.get("verified", self.instance.verified)
@@ -1841,6 +1860,8 @@ class FindingSerializer(serializers.ModelSerializer):
 
 
 class FindingCreateSerializer(serializers.ModelSerializer):
+    mitigated = serializers.DateTimeField(required=False, allow_null=True)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True, allow_null=True, required=False, many=True,
     )
@@ -1872,7 +1893,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
 
     # Overriding this to push add Push to JIRA functionality
     def create(self, validated_data):
-        logger.debug(f"Creating finding with validated data: {validated_data}")
+        logger.debug("Creating finding with validated data: %s", validated_data)
         push_to_jira = validated_data.pop("push_to_jira", False)
         notes = validated_data.pop("notes", None)
         found_by = validated_data.pop("found_by", None)
@@ -1910,6 +1931,21 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         return new_finding
 
     def validate(self, data):
+        # Ensure mitigated fields are only set when editable is enabled (ignore nulls)
+        attempting_to_set_mitigated = any(
+            (field in data) and (data.get(field) is not None)
+            for field in ["mitigated", "mitigated_by"]
+        )
+        user = getattr(getattr(self.context, "request", None), "user", None)
+        if attempting_to_set_mitigated and not finding_helper.can_edit_mitigated_data(user):
+            errors = {}
+            if ("mitigated" in data) and (data.get("mitigated") is not None):
+                errors["mitigated"] = ["Editing mitigated timestamp is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if ("mitigated_by" in data) and (data.get("mitigated_by") is not None):
+                errors["mitigated_by"] = ["Editing mitigated_by is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if errors:
+                raise serializers.ValidationError(errors)
+
         if "reporter" not in data:
             request = self.context["request"]
             data["reporter"] = request.user
@@ -2105,8 +2141,14 @@ class CommonImportScanSerializer(serializers.Serializer):
         required=False,
         validators=[ImporterFileExtensionValidator()],
     )
-    product_type_name = serializers.CharField(required=False)
-    product_name = serializers.CharField(required=False)
+    product_type_name = serializers.CharField(
+        required=False,
+        help_text=_("Also referred to as 'Organization' name."),
+    )
+    product_name = serializers.CharField(
+        required=False,
+        help_text=_("Also referred to as 'Asset' name."),
+    )
     engagement_name = serializers.CharField(required=False)
     engagement_end_date = serializers.DateField(
         required=False,
@@ -2161,8 +2203,14 @@ class CommonImportScanSerializer(serializers.Serializer):
     # confused
     test_id = serializers.IntegerField(read_only=True)
     engagement_id = serializers.IntegerField(read_only=True)
-    product_id = serializers.IntegerField(read_only=True)
-    product_type_id = serializers.IntegerField(read_only=True)
+    product_id = serializers.IntegerField(
+        read_only=True,
+        help_text=_("Also referred to as 'Asset' ID."),
+    )
+    product_type_id = serializers.IntegerField(
+        read_only=True,
+        help_text=_("Also referred to as 'Organization' ID."),
+    )
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
     pro = serializers.ListField(read_only=True, required=False)
     apply_tags_to_findings = serializers.BooleanField(
@@ -2317,14 +2365,16 @@ class ImportScanSerializer(CommonImportScanSerializer):
         required=False,
         default=False,
         help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                    "If service has been set, only the findings for this service will be closed. "
+                    "If service has been set, only the findings for this service will be closed; "
+                    "if no service is set, only findings without a service will be closed. "
                     "This only affects findings within the same engagement.",
     )
     close_old_findings_product_scope = serializers.BooleanField(
         required=False,
         default=False,
         help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                    "If service has been set, only the findings for this service will be closed. "
+                    "If service has been set, only the findings for this service will be closed; "
+                    "if no service is set, only findings without a service will be closed. "
                     "This only affects findings within the same product."
                     "By default, it is false meaning that only old findings of the same type in the engagement are in scope.",
     )
@@ -2399,7 +2449,8 @@ class ReImportScanSerializer(CommonImportScanSerializer):
         required=False,
         default=True,
         help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                    "If service has been set, only the findings for this service will be closed. "
+                    "If service has been set, only the findings for this service will be closed; "
+                    "if no service is set, only findings without a service will be closed. "
                     "This only affects findings within the same test.",
     )
     close_old_findings_product_scope = serializers.BooleanField(
@@ -2697,6 +2748,9 @@ class FindingCloseSerializer(serializers.ModelSerializer):
     false_p = serializers.BooleanField(required=False)
     out_of_scope = serializers.BooleanField(required=False)
     duplicate = serializers.BooleanField(required=False)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Dojo_User.objects.all())
+    note = serializers.CharField(required=False, allow_blank=True)
+    note_type = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Note_Type.objects.all())
 
     class Meta:
         model = Finding
@@ -2706,7 +2760,33 @@ class FindingCloseSerializer(serializers.ModelSerializer):
             "false_p",
             "out_of_scope",
             "duplicate",
+            "mitigated_by",
+            "note",
+            "note_type",
         )
+
+    def validate(self, data):
+        request = self.context.get("request")
+        request_user = getattr(request, "user", None)
+
+        mitigated_by_user = data.get("mitigated_by")
+        if mitigated_by_user is not None:
+            # Require permission to edit mitigated metadata
+            if not (request_user and finding_helper.can_edit_mitigated_data(request_user)):
+                raise serializers.ValidationError({
+                    "mitigated_by": ["Not allowed to set mitigated_by."],
+                })
+
+            # Ensure selected user is authorized (Finding_Edit)
+            authorized_users = get_authorized_users(Permissions.Finding_Edit, user=request_user)
+            if not authorized_users.filter(id=mitigated_by_user.id).exists():
+                raise serializers.ValidationError({
+                    "mitigated_by": [
+                        "Selected user is not authorized to be set as mitigated_by.",
+                    ],
+                })
+
+        return data
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):

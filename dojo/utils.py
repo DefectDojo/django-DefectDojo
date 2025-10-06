@@ -35,6 +35,7 @@ from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.http import FileResponse, HttpResponseRedirect
+from django.shortcuts import redirect as django_redirect
 from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -50,6 +51,7 @@ from dojo.github import (
     reopen_external_issue_github,
     update_external_issue_github,
 )
+from dojo.labels import get_labels
 from dojo.models import (
     NOTIFICATION_CHOICES,
     Benchmark_Type,
@@ -74,6 +76,8 @@ from dojo.notifications.helper import create_notification
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 WEEKDAY_FRIDAY = 4  # date.weekday() starts with 0
+
+labels = get_labels()
 
 """
 Helper functions for DefectDojo
@@ -590,8 +594,6 @@ def count_findings(findings: QuerySet) -> tuple[dict["Product", list[int]], dict
         )
     )
     rows = list(agg)
-
-    from dojo.models import Product  # imported lazily to avoid circulars
 
     products = Product.objects.in_bulk([r["prod_id"] for r in rows])
     product_count = {
@@ -1558,10 +1560,24 @@ def get_setting(setting):
 
 
 @dojo_model_to_id
+@dojo_async_task(signature=True)
+@app.task
+@dojo_model_from_id(model=Product)
+def calculate_grade_signature(product, *args, **kwargs):
+    """Returns a signature for calculating product grade that can be used in chords or groups."""
+    return calculate_grade_internal(product, *args, **kwargs)
+
+
+@dojo_model_to_id
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Product)
 def calculate_grade(product, *args, **kwargs):
+    return calculate_grade_internal(product, *args, **kwargs)
+
+
+def calculate_grade_internal(product, *args, **kwargs):
+    """Internal function for calculating product grade."""
     system_settings = System_Settings.objects.get()
     if not product:
         logger.warning("ignoring calculate product for product None!")
@@ -1608,8 +1624,14 @@ def calculate_grade(product, *args, **kwargs):
             logger.debug("Product %s grade %s is up to date", product.id, prod_numeric_grade)
 
 
+def perform_product_grading(product):
+    system_settings = System_Settings.objects.get()
+    if system_settings.enable_product_grade:
+        calculate_grade(product)
+
+
 def get_celery_worker_status():
-    from .tasks import celery_status
+    from .tasks import celery_status  # noqa: PLC0415 circular import
     res = celery_status.apply_async()
 
     # Wait 5 seconds for a response from Celery
@@ -1856,7 +1878,7 @@ def sla_compute_and_notify(*args, **kwargs):
     Notifications are managed the usual way, so you'd have to opt-in.
     Exception is for JIRA issues, which would get a comment anyways.
     """
-    import dojo.jira_link.helper as jira_helper
+    import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
 
     class NotificationEntry:
         def __init__(self, finding=None, jira_issue=None, *, do_jira_sla_comment=False):
@@ -1931,7 +1953,7 @@ def sla_compute_and_notify(*args, **kwargs):
                         findings_list.append(n.finding)
 
                     # producing a "combined" SLA breach notification
-                    title_combined = f"SLA alert ({kind}): product type '{prodtype}', product '{prod}'"
+                    title_combined = f"SLA alert ({kind}): " + labels.ORG_WITH_NAME_LABEL % {"name": prodtype} + ", " + labels.ASSET_WITH_NAME_LABEL % {"name": prod}
                     product = comb_notif_kind[0].finding.test.engagement.product
                     create_notification(
                         event="sla_breach_combined",
@@ -1962,7 +1984,7 @@ def sla_compute_and_notify(*args, **kwargs):
                 query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
             elif system_settings.enable_notify_sla_active:
                 query = Q(active=True, is_mitigated=False, duplicate=False)
-            logger.debug(f"My query: {query}")
+            logger.debug("My query: %s", query)
 
             no_jira_findings = {}
             if system_settings.enable_notify_sla_jira_only:
@@ -2017,19 +2039,19 @@ def sla_compute_and_notify(*args, **kwargs):
                     jira_count += 1
                     jira_instance = jira_helper.get_jira_instance(finding)
                     if jira_instance is not None:
-                        logger.debug(f"JIRA config for finding is {jira_instance}")
+                        logger.debug("JIRA config for finding is %s", jira_instance)
                         # global config or product config set, product level takes precedence
                         try:
                             # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
                             product_jira_sla_comment_enabled = jira_helper.get_jira_project(finding).product_jira_sla_notification
                         except Exception as e:
                             logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
-                            logger.error(f"Error is: {e}")
+                            logger.error("Error is: %s", e)
 
                         jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
 
                         if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
-                            logger.debug(f"Global setting {jiraconfig_sla_notification_enabled} -- Product setting {product_jira_sla_comment_enabled}")
+                            logger.debug("Global setting %s -- Product setting %s", jiraconfig_sla_notification_enabled, product_jira_sla_comment_enabled)
                             do_jira_sla_comment = True
                             logger.debug(f"JIRA issue is {jira_issue.jira_key}")
 
@@ -2054,7 +2076,7 @@ def sla_compute_and_notify(*args, **kwargs):
                     _add_notification(finding, "breaching")
 
             _create_notifications()
-            logger.info(f"SLA run results: Pre-breach: {pre_breach_count}, at-breach: {at_breach_count}, post-breach: {post_breach_count}, post-breach-no-notify: {post_breach_no_notify_count}, with-jira: {jira_count}, TOTAL: {total_count}")
+            logger.info("SLA run results: Pre-breach: %s, at-breach: %s, post-breach: %s, post-breach-no-notify: %s, with-jira: %s, TOTAL: %s", pre_breach_count, at_breach_count, post_breach_count, post_breach_no_notify_count, jira_count, total_count)
 
     except System_Settings.DoesNotExist:
         logger.info("Findings SLA is not enabled.")
@@ -2728,3 +2750,10 @@ def truncate_timezone_aware(dt):
         truncated = timezone.make_aware(truncated)
 
     return truncated
+
+
+def redirect_view(to: str):
+    """"View" that redirects to the view named in 'to.'"""
+    def _redirect(request, **kwargs):
+        return django_redirect(to, **kwargs)
+    return _redirect
