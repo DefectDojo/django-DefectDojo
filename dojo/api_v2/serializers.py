@@ -1761,12 +1761,14 @@ class FindingSerializer(serializers.ModelSerializer):
         if reporter_id := validated_data.get("reporter"):
             instance.reporter = reporter_id
 
+        # Persist vulnerability IDs first so model save computes hash including them (if there is no hash yet)
+        # we can't pass unsaved_vulnerabilitiy_ids to super.update()
+        if parsed_vulnerability_ids:
+            save_vulnerability_ids(instance, parsed_vulnerability_ids)
+
         instance = super().update(
             instance, validated_data,
         )
-
-        if parsed_vulnerability_ids:
-            save_vulnerability_ids(instance, parsed_vulnerability_ids)
 
         if push_to_jira:
             jira_helper.push_to_jira(instance)
@@ -1901,11 +1903,15 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
             logger.debug("VULNERABILITY_ID_SET: %s", vulnerability_ids)
             parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
+            logger.debug("PARSED_VULNERABILITY_IDST: %s", parsed_vulnerability_ids)
             logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
             validated_data["cve"] = parsed_vulnerability_ids[0]
+            # validated_data["unsaved_vulnerability_ids"] = parsed_vulnerability_ids
 
-        new_finding = super().create(
-            validated_data)
+        # super.create() doesn't accept unsaved_vulnerability_ids or dedupe_option=False, so call save directly.
+        new_finding = Finding(**validated_data)
+        new_finding.unsaved_vulnerability_ids = parsed_vulnerability_ids or []
+        new_finding.save()
 
         logger.debug(f"New finding CVE: {new_finding.cve}")
 
@@ -1918,9 +1924,6 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
-            # can we avoid this extra save? the cve has already been set above in validated_data. but there are no tests for this
-            # on finding update nothing is done # with vulnerability_ids?
-            # new_finding.save()
 
         if push_to_jira:
             jira_helper.push_to_jira(new_finding)
