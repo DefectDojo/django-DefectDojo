@@ -2966,7 +2966,7 @@ class Finding(models.Model):
                 return "".join(sorted(vulnerability_id_str_list))
             return ""
 
-        return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnearbility_ids(self) 
+        return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnearbility_ids(self)
 
     # Get endpoints to use for hash_code computation
     # (This sometimes reports "None")
