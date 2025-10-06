@@ -522,17 +522,29 @@
     </script>
 {% endif %}
 <script type="text/javascript">
+    $(document).ready(function(){
+        $("#id_long_term_acceptance").on('change', function() {
+            console.log("Cambio el long")
+            // Si el valor es 'Yes', mostrar el campo de fecha de expiración
+            if ($(this).val() === 'Yes') {
+                $('#id_expiration_date_path').prop('disabled', false);
+            } else {
+                $('#id_expiration_date_path').prop('disabled', true);
+            }
+        });
+    });
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
 <script type="text/javascript">
+    // flow logn risk acceptance
     $(document).ready(function() {
-    $('#calendar').datepicker({
-        format: 'yyyy-mm-dd',
-        language: 'es',
-        autoclose: true,
-        todayHighlight: true
-    });
+        $('#calendar').datepicker({
+            format: 'yyyy-mm-dd',
+            language: 'es',
+            autoclose: true,
+            todayHighlight: true
+        });
     });
     $(document).ready(function() {
         var observer = window.ResizeObserver ? new ResizeObserver(function (entries) {
