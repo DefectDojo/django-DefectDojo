@@ -30,7 +30,7 @@ env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
-    DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, True),
+    DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
     # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
     # see https://github.com/laymonage/django-jsonfield-backport
     # debug_toolbar.E001 is raised when running tests in dev mode via run-unittests.sh
@@ -105,7 +105,7 @@ env = environ.FileAwareEnv(
     DD_DATABASE_PASSWORD=(str, "defectdojo"),
     DD_DATABASE_PORT=(int, 3306),
     DD_DATABASE_USER=(str, "defectdojo"),
-    DD_SECRET_KEY=(str, "test"),
+    DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
