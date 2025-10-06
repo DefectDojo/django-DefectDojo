@@ -26,7 +26,7 @@ jobs:
           with:
             php-version: 8.1
         - name: Install deps
-          run: composer install --no-progress --no-suggest
+          run: composer install --no-progress --no-interaction
         - name: Run Psalm
           run: ./vendor/bin/psalm --show-info=false
         - name: Upload Psalm report (optional)
