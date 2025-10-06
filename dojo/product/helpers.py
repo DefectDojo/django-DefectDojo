@@ -18,16 +18,16 @@ def propagate_tags_on_product(product_id, *args, **kwargs):
 
 def propagate_tags_on_product_sync(product):
     # enagagements
-    logger.debug(f"Propagating tags from {product} to all engagements")
+    logger.debug("Propagating tags from %s to all engagements", product)
     propagate_tags_on_object_list(Engagement.objects.filter(product=product))
     # tests
-    logger.debug(f"Propagating tags from {product} to all tests")
+    logger.debug("Propagating tags from %s to all tests", product)
     propagate_tags_on_object_list(Test.objects.filter(engagement__product=product))
     # findings
-    logger.debug(f"Propagating tags from {product} to all findings")
+    logger.debug("Propagating tags from %s to all findings", product)
     propagate_tags_on_object_list(Finding.objects.filter(test__engagement__product=product))
     # endpoints
-    logger.debug(f"Propagating tags from {product} to all endpoints")
+    logger.debug("Propagating tags from %s to all endpoints", product)
     propagate_tags_on_object_list(Endpoint.objects.filter(product=product))
 
 

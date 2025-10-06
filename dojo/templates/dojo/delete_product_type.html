@@ -2,11 +2,8 @@
 {% load i18n %}
 {% block content %}
     {{ block.super }}
-    <h3>{% blocktrans %}Delete Product Type {{ product_type }}{% endblocktrans %}</h3>
-    <p>
-        {% blocktrans %}Deleting this Product Type will remove any related objects associated
-        with it. These relationships are listed below:{% endblocktrans %}
-    </p>
+    <h3>{{ label_delete_with_name }}</h3>
+    <p>{{ labels.ORG_DELETE_CONFIRM_MESSAGE }}</p>
     <div class="danger-zone panel panel-danger">
         <div class="panel-heading">
             <h3>{% trans "Danger Zone" %}</h3>
@@ -21,7 +18,9 @@
             {{ form }}
 
             <div class="form-group">
-                <button class="btn btn-danger" type="submit" name="delete_product_type" value="delete_product_type">{% trans "Delete Product Type" %}</button>
+                <button class="btn btn-danger" type="submit" name="delete_product_type" value="delete_product_type">
+                {{ labels.ORG_DELETE_LABEL }}
+                </button>
             </div>
         </form>
     </div>

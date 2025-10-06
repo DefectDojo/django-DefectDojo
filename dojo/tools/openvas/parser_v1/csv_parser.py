@@ -79,7 +79,7 @@ class CveColumnMappingStrategy(ColumnMappingStrategy):
         super().__init__()
 
     def map_column_value(self, finding, column_value):
-        if column_value != "":
+        if column_value:
             if "," in column_value:
                 finding.description += "\n**All CVEs:** " + str(column_value)
                 for value in column_value.split(","):

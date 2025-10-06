@@ -1,0 +1,15 @@
+# Development-only dependencies for DefectDojo
+# These are only needed during development and testing
+
+# Debug toolbar for development
+django-debug-toolbar==6.0.0
+django-debug-toolbar-request-history==0.1.4
+
+# Testing dependencies
+vcrpy==7.0.0
+vcrpy-unittest==0.1.7
+django-test-migrations==1.5.0
+parameterized==0.9.0
+
+# Development file watching (hot reload)
+watchdog==6.0.0

@@ -392,7 +392,7 @@ class ProductTest(BaseTestCase):
         # "Click" the dropdown option
         driver.find_element(By.ID, "dropdownMenu1").click()
         # 'click' the Add Product Tracking Files
-        driver.find_element(By.LINK_TEXT, "Add Product Tracking Files").click()
+        driver.find_element(By.LINK_TEXT, "Add Tracked Files").click()
         # Keep a good practice of clearing field before entering value
         # Just fill up to main required fields: 'File path' nd 'review status'
         # Full File path
@@ -419,7 +419,7 @@ class ProductTest(BaseTestCase):
         # "Click" the dropdown option
         driver.find_element(By.ID, "dropdownMenu1").click()
         # 'click' the Edit Product Tracking Files
-        driver.find_element(By.LINK_TEXT, "View Product Tracking Files").click()
+        driver.find_element(By.LINK_TEXT, "View Tracked Files").click()
         # Keep a good practice of clearing field before entering value
         # Edit Custom Value of First field
         driver.find_element(By.LINK_TEXT, "Edit").click()
@@ -431,7 +431,7 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the Tracking file has been updated
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text="Tool Product Configuration Successfully Updated"))
+        self.assertTrue(self.is_success_message_present(text="Tracked File Successfully Updated."))
 
     def test_product_metrics(self):
         # Test To Edit Product Tracking Files

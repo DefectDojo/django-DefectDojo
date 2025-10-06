@@ -86,7 +86,7 @@ class ThreagileParser:
             severity = severity if severity != "Elevated" else "High"
             finding = Finding(
                 title=item.get("category"),
-                cwe=RISK_TO_CWE_MAP.get(item.get("category"), None),
+                cwe=RISK_TO_CWE_MAP.get(item.get("category")),
                 description=item.get("title"),
                 impact=item.get("exploitation_impact"),
                 severity=severity,

@@ -74,6 +74,8 @@ from dojo.api_v2.views import (
     UsersViewSet,
 )
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
+from dojo.asset.api.urls import add_asset_urls
+from dojo.asset.urls import urlpatterns as asset_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
 from dojo.components.urls import urlpatterns as component_urls
@@ -92,8 +94,8 @@ from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.notes.urls import urlpatterns as notes_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
-from dojo.product.urls import urlpatterns as prod_urls
-from dojo.product_type.urls import urlpatterns as pt_urls
+from dojo.organization.api.urls import add_organization_urls
+from dojo.organization.urls import urlpatterns as organization_urls
 from dojo.regulations.urls import urlpatterns as regulations
 from dojo.reports.urls import urlpatterns as reports_urls
 from dojo.search.urls import urlpatterns as search_urls
@@ -180,7 +182,12 @@ v2_api.register(r"questionnaire_answered_questionnaires", QuestionnaireAnsweredS
 v2_api.register(r"questionnaire_engagement_questionnaires", QuestionnaireEngagementSurveyViewSet, basename="engagement_survey")
 v2_api.register(r"questionnaire_general_questionnaires", QuestionnaireGeneralSurveyViewSet, basename="general_survey")
 v2_api.register(r"questionnaire_questions", QuestionnaireQuestionViewSet, basename="question")
+# V3
+add_asset_urls(v2_api)
+add_organization_urls(v2_api)
+
 ur = []
+ur += asset_urls
 ur += dev_env_urls
 ur += endpoint_urls
 ur += eng_urls
@@ -188,8 +195,7 @@ ur += finding_urls
 ur += finding_group_urls
 ur += home_urls
 ur += metrics_urls
-ur += prod_urls
-ur += pt_urls
+ur += organization_urls
 ur += reports_urls
 ur += search_urls
 ur += test_type_urls
