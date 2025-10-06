@@ -10,9 +10,12 @@ createPostgresqlSecret: false
 # can be:
 # - disabled, default
 # - enabled, enables tracking configuration changes based on SHA256
-# trackConfig: disabled
+trackConfig: disabled
 
-# extraLabels: {}
+# Avoid using pre-install hooks, which might cause issues with ArgoCD
+disableHooks: false
+
+extraLabels: {}
 # Add extra labels for k8s
 
 # Enables application network policy
@@ -64,7 +67,8 @@ imagePullPolicy: Always
 repositoryPrefix: defectdojo
 # When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project)
 # Create secrets as: kubectl create secret docker-registry defectdojoregistrykey --docker-username=registry_username --docker-password=registry_password --docker-server='https://index.docker.io/v1/'
-# imagePullSecrets: defectdojoregistrykey
+# @schema type:[string, null]
+imagePullSecrets: ~
 tag: latest
 
 # Additional labels to add to the pods:
@@ -73,7 +77,7 @@ tag: latest
 podLabels: {}
 
 # Allow overriding of revisionHistoryLimit across all deployments.
-# revisionHistoryLimit: 10
+revisionHistoryLimit: 10
 
 securityContext:
   enabled: true
@@ -120,13 +124,13 @@ tests:
 
 admin:
   user: admin
-  password:
+  password: ""
   firstName: Administrator
   lastName: User
   mail: admin@defectdojo.local
-  secretKey:
-  credentialAes256Key:
-  metricsHttpAuthPassword:
+  secretKey: ""
+  credentialAes256Key: ""
+  metricsHttpAuthPassword: ""
 
 monitoring:
   enabled: false
@@ -145,14 +149,37 @@ secrets:
 # Components
 celery:
   broker: redis
-  # To use an external celery broker, set the hostname here
-  brokerHost: ""
   logLevel: INFO
+  # Common annotations to worker and beat deployments and pods.
   annotations: {}
   beat:
+    # Annotations for the Celery beat deployment.
     annotations: {}
     affinity: {}
+    # Additional environment variables injected to Celery beat containers.
+    extraEnv: []
+    # A list of additional initContainers to run before celery beat containers.
+    extraInitContainers: []
+    # Array of additional volume mount points for the celery beat containers.
+    extraVolumeMounts: []
+    # A list of extra volumes to mount
+    # @type: array<map>
+    extraVolumes: []
+    # Enable liveness probe for Celery beat container.
+    livenessProbe: {}
+      # exec:
+      #   command:
+      #     - bash
+      #     - -c
+      #     - celery -A dojo inspect ping -t 5
+      # initialDelaySeconds: 30
+      # periodSeconds: 60
+      # timeoutSeconds: 10
     nodeSelector: {}
+    # Annotations for the Celery beat pods.
+    podAnnotations: {}
+    # Enable readiness probe for Celery beat container.
+    readinessProbe: {}
     replicas: 1
     resources:
       requests:
@@ -161,11 +188,37 @@ celery:
       limits:
         cpu: 2000m
         memory: 256Mi
+    # Enable startup probe for Celery beat container.
+    startupProbe: {}
     tolerations: []
   worker:
+    # Annotations for the Celery worker deployment.
     annotations: {}
     affinity: {}
+    # Additional environment variables injected to Celery worker containers.
+    extraEnv: []
+    # A list of additional initContainers to run before celery worker containers.
+    extraInitContainers: []
+    # Array of additional volume mount points for the celery worker containers.
+    extraVolumeMounts: []
+    # A list of extra volumes to mount.
+    # @type: array<map>
+    extraVolumes: []
+    # Enable liveness probe for Celery worker containers.
+    livenessProbe: {}
+      # exec:
+      #   command:
+      #     - bash
+      #     - -c
+      #     - celery -A dojo inspect ping -t 5
+      # initialDelaySeconds: 30
+      # periodSeconds: 60
+      # timeoutSeconds: 10
     nodeSelector: {}
+    # Annotations for the Celery beat pods.
+    podAnnotations: {}
+    # Enable readiness probe for Celery worker container.
+    readinessProbe: {}
     replicas: 1
     resources:
       requests:
@@ -174,6 +227,8 @@ celery:
       limits:
         cpu: 2000m
         memory: 512Mi
+    # Enable startup probe for Celery worker container.
+    startupProbe: {}
     tolerations: []
     appSettings:
       poolType: solo
@@ -184,39 +239,6 @@ celery:
       # autoscaleMax: 8
       # concurrency: 8
       # prefetchMultiplier: 128
-
-  # A list of extra volumes to mount. This
-  # is useful for bringing in extra data that can be referenced by other configurations
-  # at a well known path, such as local_settings. The
-  # value of this should be a list of objects.
-  #
-  # Example:
-  #
-  # ```yaml
-  # extraVolumes:
-  #   - type: configMap
-  #     name: local_settings
-  #     path: /app/dojo/settings/local_settings.py
-  #     subPath: local_settings.py
-  #   - type: hostPath
-  #     name: host_directory
-  #     path: /tmp
-  #     hostPath: /tmp
-  # ```
-  #
-  # Each object supports the following keys:
-  #
-  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath". Case sensitive.
-  #    Even is supported we are highly recommending to avoid hostPath for security reasons (usually blocked by PSP)
-  # - `name` - Name of the configMap or secret to be mounted. This also controls
-  #    the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
-  # - `path` - defines where file should be exposed
-  # - `subPath` - extracts only particular file from secret or configMap
-  # - `pathType` - only for hostPath, can be one of the "DirectoryOrCreate", "Directory" (default), "FileOrCreate",
-  #   "File", "Socket", "CharDevice", "BlockDevice"
-  # - `hostPath` - only for hostPath, file or directory from local host
-  # @type: array<map>
-  extraVolumes: []
 
 django:
   annotations: {}
@@ -236,6 +258,16 @@ django:
       # nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
       # nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
   nginx:
+    # To extra environment variables to the nginx container, you can use extraEnv. For example:
+    # extraEnv:
+    # - name: FOO
+    #   valueFrom:
+    #     configMapKeyRef:
+    #       name: foo
+    #       key: bar
+    extraEnv: []
+    # Array of additional volume mount points for nginx containers.
+    extraVolumeMounts: []
     tls:
       enabled: false
       generateCertificate: false
@@ -251,6 +283,17 @@ django:
   strategy: {}
   tolerations: []
   uwsgi:
+    # To add (or override) extra variables which need to be pulled from another configMap, you can
+    # use extraEnv. For example:
+    # extraEnv:
+    # - name: DD_DATABASE_HOST
+    #   valueFrom:
+    #     configMapKeyRef:
+    #       name: my-other-postgres-configmap
+    #       key: cluster_endpoint
+    extraEnv: []
+    # Array of additional volume mount points for uwsgi containers.
+    extraVolumeMounts: []
     livenessProbe:
       # Enable liveness checks on uwsgi container.
       enabled: true
@@ -285,51 +328,20 @@ django:
     appSettings:
       processes: 4
       threads: 4
-      # maxFd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
+      maxFd: 0  # 102400 # Use this value to set the maximum number of file descriptors. If set to 0 will be detected by uwsgi
     enableDebug: false  # this also requires DD_DEBUG to be set to True
     certificates:
     # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
-    # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
+    # to create configMap `kubectl create cm defectdojo-ca-certs --from-file=ca.crt`
     # NOTE: it reflects REQUESTS_CA_BUNDLE for celery workers, beats as well
       enabled: false
       configName: defectdojo-ca-certs
       certMountPath: /certs/
       certFileName: ca.crt
 
-  # A list of extra volumes to mount. This
-  # is useful for bringing in extra data that can be referenced by other configurations
-  # at a well known path, such as local_settings. The
-  # value of this should be a list of objects.
-  #
-  # Example:
-  #
-  # ```yaml
-  # extraVolumes:
-  #   - type: configMap
-  #     name: local_settings
-  #     path: /app/dojo/settings/local_settings.py
-  #     container: uwsgi
-  #     subPath: local_settings.py
-  #   - type: hostPath
-  #     name: host_directory
-  #     path: /app/dojo/settings/
-  #     hostPath: /var/run
-  #     container: uwsgi
-  # ```
-  #
-  # Each object supports the following keys:
-  #
-  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath". Case sensitive.
-  #    Even is supported we are highly recommending to avoid hostPath for security reasons (usually blocked by PSP)
-  # - `name` - Name of the configMap or secret to be mounted. This also controls
-  #    the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
-  # - `path` - defines where file should be exposed
-  # - `container` -  defines where volume needs to be mounted, must be uwsgi or nginx
-  # - `subPath` - extracts only particular file from secret or configMap
-  # - `pathType` - only for hostPath, can be one of the "DirectoryOrCreate", "Directory" (default), "FileOrCreate",
-  #   "File", "Socket", "CharDevice", "BlockDevice"
-  # - `hostPath` - only for hostPath, file or directory from local host
-  # @type: array<map>
+  # A list of additional initContainers to run before the uwsgi and nginx containers.
+  extraInitContainers: []
+  # A list of extra volumes to mount.
   extraVolumes: []
 
   # This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume
@@ -344,11 +356,11 @@ django:
     persistentVolumeClaim:
       # set to true to create a new pvc and if django.mediaPersistentVolume.type is set to pvc
       create: false
-      name:
+      name: ""
       size: 5Gi
       accessModes:
       - ReadWriteMany  # check KUBERNETES.md doc first for option to choose
-      storageClassName:
+      storageClassName: ""
 
 initializer:
   run: true
@@ -358,6 +370,7 @@ initializer:
   keepSeconds: 60  # A positive integer will keep this Job and Pod deployed for the specified number of seconds, after which they will be removed. For all other values, the Job and Pod will remain deployed.
   affinity: {}
   nodeSelector: {}
+  tolerations: []
   resources:
     requests:
       cpu: 100m
@@ -365,38 +378,11 @@ initializer:
     limits:
       cpu: 2000m
       memory: 512Mi
-
-  # A list of extra volumes to mount. This
-  # is useful for bringing in extra data that can be referenced by other configurations
-  # at a well known path, such as local_settings. The
-  # value of this should be a list of objects.
-  #
-  # Example:
-  #
-  # ```yaml
-  # extraVolumes:
-  #   - type: configMap
-  #     name: local_settings
-  #     path: /app/dojo/settings/local_settings.py
-  #     subPath: local_settings.py
-  #   - type: hostPath
-  #     name: host_directory
-  #     path: /tmp
-  #     hostPath: /tmp
-  # ```
-  #
-  # Each object supports the following keys:
-  #
-  # - `type` - Type of the volume, must be one of "configMap", "secret", "hostPath". Case sensitive.
-  #    Even is supported we are highly recommending to avoid hostPath for security reasons (usually blocked by PSP)
-  # - `name` - Name of the configMap or secret to be mounted. This also controls
-  #    the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
-  # - `path` - defines where file should be exposed
-  # - `subPath` - extracts only particular file from secret or configMap
-  # - `pathType` - only for hostPath, can be one of the "DirectoryOrCreate", "Directory" (default), "FileOrCreate",
-  #   "File", "Socket", "CharDevice", "BlockDevice"
-  # - `hostPath` - only for hostPath, file or directory from local host
-  # @type: array<map>
+  # Additional environment variables injected to the initializer job pods.
+  extraEnv: []
+  # Array of additional volume mount points for the initializer job (init)containers.
+  extraVolumeMounts: []
+  # A list of extra volumes to attach to the initializer job pods.
   extraVolumes: []
 
   # staticName defines whether name of the job will be the same (e.g., "defectdojo-initializer")
@@ -404,10 +390,9 @@ initializer:
   # This might be handy for ArgoCD deployments
   staticName: false
 
+# For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/postgresql
 postgresql:
-  # To use an external PostgreSQL instance (like CloudSQL), set enabled to false, set items in auth part for authentication,
-  # and uncomment the line below:
-  # postgresServer: "127.0.0.1"
+  # To use an external instance, switch enabled to `false` and set the address in `postgresServer` below
   enabled: true
   auth:
     username: defectdojo
@@ -477,43 +462,47 @@ gke:
   # Only works with serviceAccount.create = true
   workloadIdentityEmail: ""
 
-# For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/master/bitnami/redis
+# For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/redis
 redis:
+  # To use an external instance, switch enabled to `false`` and set the address in `redisServer` below
   enabled: true
-  scheme: "redis"
-  transportEncryption:
-    enabled: false
-    params: ''
   auth:
     existingSecret: defectdojo-redis-specific
     existingSecretPasswordKey: redis-password
     password: ""
   architecture: standalone
-  # To use an external Redis instance, set enabled to false and uncomment
-  # the line below:
-  # redisServer: myrediscluster
   # To use a different port for Redis (default: 6379) add a port number and uncomment the lines below:
   # master:
   #   service:
   #     ports:
   #       redis: xxxx
+  # Sentinel configuration parameters
+  sentinel:
+    enabled: false
+  # If TLS is enabled, the Redis broker will use the redis:// and optionally mount the certificates
+  # from an existing secret.
+  tls:
+    enabled: false
+    # existingSecret: redis-tls
+    # certFilename: tls.crt
+    # certKeyFilename: tls.key
+    # certCAFilename: ca.crt
 
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it
-# extraConfigs:
+extraConfigs: {}
 #   DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
 #   DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
 #   DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
 
 # Extra secrets can be created inside of extraSecrets block:
 # NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
-# extraSecrets:
+extraSecrets: {}
 #   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
-extraConfigs: {}
 
 # To add (or override) extra variables which need to be pulled from another configMap, you can
 # use extraEnv. For example:
-# extraEnv:
+extraEnv: []
 # - name: DD_DATABASE_HOST
 #   valueFrom:
 #     configMapKeyRef:
@@ -523,6 +512,7 @@ extraConfigs: {}
 # To add code snippet which would extend setting functionality, you might add it here
 # It will be stored as ConfigMap and mounted `dojo/settings/local_settings.py`.
 # For more see: https://documentation.defectdojo.com/getting_started/configuration/
+localsettingspy: ""
 # For example:
 # localsettingspy: |
 #   INSTALLED_APPS += (
@@ -531,3 +521,16 @@ extraConfigs: {}
 #   MIDDLEWARE = [
 #       'debug_toolbar.middleware.DebugToolbarMiddleware',
 #   ] + MIDDLEWARE
+#
+# External database support.
+#
+# To use an external Redis instance, set `redis.enabled` to false and set the address here:
+# @schema type:[string, null]
+redisServer: ~
+# Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `redis.tls.enabled`
+redisParams: ""
+#
+# To use an external PostgreSQL instance (like CloudSQL), set `postgresql.enabled` to false,
+# set items in `postgresql.auth` part for authentication, and set the address here:
+# @schema type:[string, null]
+postgresServer: ~

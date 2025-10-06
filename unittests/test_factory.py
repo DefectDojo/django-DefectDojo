@@ -83,5 +83,5 @@ class TestFactory(DojoTestCase):
                 if not found and module_name != "__pycache__":
                     missing_parsers.append(module_name)
         if len(missing_parsers) > 0:
-            logger.error(f"Parsers with invalid names: {missing_parsers}")
+            logger.error("Parsers with invalid names: %s", missing_parsers)
         self.assertEqual(0, len(missing_parsers))

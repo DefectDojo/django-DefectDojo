@@ -233,22 +233,6 @@
   },
   {
     "fields": {
-      "model": "tag",
-      "app_label": "tagging"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 39
-  },
-  {
-    "fields": {
-      "model": "taggeditem",
-      "app_label": "tagging"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 40
-  },
-  {
-    "fields": {
       "expire_date": "2016-09-10T12:40:25.483Z",
       "session_data": "NjIzODFjMWIxMjVhNzQ1NzNhMTRjMzM1MzQ1MjVkY2VmZGI4YjIzNDp7ImRvam9fYnJlYWRjcnVtYnMiOlt7InVybCI6Ii8iLCJ0aXRsZSI6IkhvbWUifSx7InVybCI6Ii9wcm9maWxlIiwidGl0bGUiOiJFbmdpbmVlciBQcm9maWxlIC0gKGFkbWluKSJ9XSwiX2F1dGhfdXNlcl9oYXNoIjoiYzU0NTg4NGExYTNiOWM3NTA0YjAzM2VhOWMxYTJlMzRiMjQ4Nzk1OSIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9pZCI6IjEifQ=="
     },

@@ -28,6 +28,7 @@ def product_tags_post_add_remove(sender, instance, action, **kwargs):
 @receiver(signals.m2m_changed, sender=Test.tags.through)
 @receiver(signals.m2m_changed, sender=Finding.tags.through)
 def make_inherited_tags_sticky(sender, instance, action, **kwargs):
+    """Make sure inherited tags are added back in if they are removed"""
     if action in {"post_add", "post_remove"}:
         if inherit_product_tags(instance):
             tag_list = [tag.name for tag in instance.tags.all()]
@@ -40,6 +41,7 @@ def make_inherited_tags_sticky(sender, instance, action, **kwargs):
 @receiver(signals.post_save, sender=Test)
 @receiver(signals.post_save, sender=Finding)
 def inherit_tags_on_instance(sender, instance, created, **kwargs):
+    """Usually nothing to do when savind a model, except for new models?"""
     if inherit_product_tags(instance):
         tag_list = instance._tags_tagulous.get_tag_list()
         if propagate_inheritance(instance, tag_list=tag_list):

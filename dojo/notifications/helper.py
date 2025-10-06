@@ -19,6 +19,7 @@ from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
+from dojo.labels import get_labels
 from dojo.models import (
     Alerts,
     Dojo_User,
@@ -39,6 +40,9 @@ from dojo.user.queries import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+labels = get_labels()
 
 
 def create_notification(
@@ -120,9 +124,9 @@ class NotificationManagerHelpers:
     def _create_description(self, event: str, kwargs: dict) -> str:
         if kwargs.get("description") is None:
             if event == "product_added":
-                kwargs["description"] = _("Product %s has been created successfully.") % kwargs["title"]
+                kwargs["description"] = labels.ASSET_NOTIFICATION_WITH_NAME_CREATED_MESSAGE % {"name": kwargs["title"]}
             elif event == "product_type_added":
-                kwargs["description"] = _("Product Type %s has been created successfully.") % kwargs["title"]
+                kwargs["description"] = labels.ORG_NOTIFICATION_WITH_NAME_CREATED_MESSAGE % {"name": kwargs["title"]}
             else:
                 kwargs["description"] = _("Event %s has occurred.") % str(event)
 
@@ -234,7 +238,7 @@ class SlackNotificationManger(NotificationManagerHelpers):
             elif self.system_settings.slack_channel is not None:
                 channel = self.system_settings.slack_channel
                 logger.info(
-                    f"Sending system notification to system channel {channel}.",
+                    "Sending system notification to system channel %s.", channel,
                 )
                 self._post_slack_message(event, user, channel, **kwargs)
             else:
@@ -272,11 +276,11 @@ class SlackNotificationManger(NotificationManagerHelpers):
                 if user_email == user["user"]["profile"]["email"]:
                     if "id" in user["user"]:
                         user_id = user["user"]["id"]
-                        logger.debug(f"Slack user ID is {user_id}")
+                        logger.debug("Slack user ID is %s", user_id)
                         slack_user_is_found = True
                 else:
                     logger.warning(
-                        f"A user with email {user_email} could not be found in this Slack workspace.",
+                        "A user with email %s could not be found in this Slack workspace.", user_email,
                     )
 
             if not slack_user_is_found:
@@ -335,9 +339,10 @@ class MSTeamsNotificationManger(NotificationManagerHelpers):
                             "msteams",
                             kwargs,
                         ),
+                        headers={"Content-Type": "application/json"},
                         timeout=settings.REQUESTS_TIMEOUT,
                     )
-                    if res.status_code != 200:
+                    if not (200 <= res.status_code < 300):
                         logger.error("Error when sending message to Microsoft Teams")
                         logger.error(res.status_code)
                         logger.error(res.text)
@@ -496,7 +501,7 @@ class WebhookNotificationManger(NotificationManagerHelpers):
         if not endpoints.exists():
             if user:
                 logger.info(
-                    f"URLs for Webhooks not configured for user '{user}': skipping user notification",
+                    "URLs for Webhooks not configured for user '%s': skipping user notification", user,
                 )
             else:
                 logger.info(
@@ -695,8 +700,7 @@ class NotificationManager(NotificationManagerHelpers):
             self.product = finding.test.engagement.product
             logger.debug("Defined product of finding %s", self.product)
         elif (obj := kwargs.get("obj")) is not None:
-            from dojo.utils import get_product
-
+            from dojo.utils import get_product  # noqa: PLC0415 circular import
             self.product = get_product(obj)
             logger.debug("Defined product of obj %s", self.product)
 

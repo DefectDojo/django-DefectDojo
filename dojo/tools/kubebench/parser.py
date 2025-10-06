@@ -91,13 +91,13 @@ def get_item(vuln, test, description):
     if "audit" in vuln:
         description += "\n"
         description += "Audit: {}\n".format(vuln["audit"])
-    if "reason" in vuln and vuln["reason"] != "":
+    if vuln.get("reason"):
         description += "\n"
         description += "Reason: {}\n".format(vuln["reason"])
-    if "expected_result" in vuln and vuln["expected_result"] != "":
+    if vuln.get("expected_result"):
         description += "\n"
         description += "Expected result: {}\n".format(vuln["expected_result"])
-    if "actual_value" in vuln and vuln["actual_value"] != "":
+    if vuln.get("actual_value"):
         description += "\n"
         description += "Actual value: {}\n".format(vuln["actual_value"])
 

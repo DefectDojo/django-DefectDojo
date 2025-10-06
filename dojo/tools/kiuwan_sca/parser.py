@@ -1,7 +1,10 @@
 import hashlib
 import json
+import logging
 
 from dojo.models import Finding
+
+logger = logging.getLogger(__name__)
 
 __author__ = "mwager"
 
@@ -37,50 +40,59 @@ class KiuwanSCAParser:
             if row["muted"] is True:
                 continue
 
-            finding = Finding(test=test)
-            finding.unique_id_from_tool = row["id"]
-            finding.cve = row["cve"]
-            finding.description = row["description"]
-            finding.severity = self.SEVERITY[row["securityRisk"]]
+            components = row.get("components", [])
+            if not components:
+                logger.debug("Insights Finding from Kiuwan does not have a related component - Skipping.")
+                continue
 
-            if "components" in row and len(row["components"]) > 0:
-                finding.component_name = row["components"][0]["artifact"]
-                finding.component_version = row["components"][0]["version"]
-                finding.title = finding.component_name + " v" + str(finding.component_version)
+            # We want one unique finding in DD for each component affected:
+            for component in components:
+                finding = Finding(test=test)
+                finding.vuln_id_from_tool = str(row["id"])
+                finding.cve = row["cve"]
+                finding.description = row["description"]
+                finding.severity = self.SEVERITY[row["securityRisk"]]
 
-            if not finding.title:
-                finding.title = row["cve"]
+                if "artifact" in component:
+                    finding.component_name = component["artifact"]
+                if "version" in component:
+                    finding.component_version = component["version"]
 
-            if "cwe" in row and "CWE-" in row["cwe"]:
-                finding.cwe = int(row["cwe"].replace("CWE-", ""))
+                if finding.component_name and finding.component_version:
+                    finding.title = f"{finding.component_name} v{finding.component_version}"
+                else:
+                    finding.title = finding.cve or "Unnamed Finding"
 
-            if "epss_score" in row:
-                finding.epss_score = row["epss_score"]
-            if "epss_percentile" in row:
-                finding.epss_percentile = row["epss_percentile"]
+                if "cwe" in row and "CWE-" in row["cwe"]:
+                    finding.cwe = int(row["cwe"].replace("CWE-", ""))
 
-            if "cVSSv3BaseScore" in row:
-                finding.cvssv3_score = float(row["cVSSv3BaseScore"])
+                if "epss_score" in row:
+                    finding.epss_score = row["epss_score"]
+                if "epss_percentile" in row:
+                    finding.epss_percentile = row["epss_percentile"]
 
-            finding.references = "See Kiuwan Web UI"
-            finding.mitigation = "See Kiuwan Web UI"
-            finding.static_finding = True
+                if "cVSSv3BaseScore" in row:
+                    finding.cvssv3_score = float(row["cVSSv3BaseScore"])
 
-            key = hashlib.sha256(
-                (
-                    finding.description
-                    + "|"
-                    + finding.severity
-                    + "|"
-                    + finding.component_name
-                    + "|"
-                    + finding.component_version
-                    + "|"
-                    + str(finding.cwe)
-                ).encode("utf-8"),
-            ).hexdigest()
+                finding.references = "See Kiuwan Web UI"
+                finding.mitigation = "See Kiuwan Web UI"
+                finding.static_finding = True
 
-            if key not in dupes:
-                dupes[key] = finding
+                key = hashlib.sha256(
+                    (
+                        finding.description
+                        + "|"
+                        + finding.severity
+                        + "|"
+                        + finding.component_name
+                        + "|"
+                        + finding.component_version
+                        + "|"
+                        + str(finding.cwe or "")
+                    ).encode("utf-8"),
+                ).hexdigest()
+
+                if key not in dupes:
+                    dupes[key] = finding
 
         return list(dupes.values())
