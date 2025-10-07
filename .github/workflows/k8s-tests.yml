@@ -69,6 +69,8 @@ jobs:
                defectdojo \
                ./helm/defectdojo \
                --set django.ingress.enabled=true \
+               --set images.django.image.tag=latest \
+               --set images.nginx.image.tag=latest \
                --set imagePullPolicy=Never \
                --set initializer.keepSeconds="-1" \
                --set redis.enabled=true \

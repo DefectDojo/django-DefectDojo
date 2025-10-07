@@ -67,6 +67,23 @@
                         "extraVolumes": {
                             "type": "array"
                         },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
                         "livenessProbe": {
                             "type": "object"
                         },
@@ -160,6 +177,23 @@
                         },
                         "extraVolumes": {
                             "type": "array"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "livenessProbe": {
                             "type": "object"
@@ -285,6 +319,23 @@
                 },
                 "extraVolumeMounts": {
                     "type": "array"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "digest": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "resources": {
                     "type": "object",
@@ -419,6 +470,23 @@
                         "extraVolumeMounts": {
                             "type": "array"
                         },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
                         "resources": {
                             "type": "object",
                             "properties": {
@@ -540,6 +608,23 @@
                         },
                         "extraVolumeMounts": {
                             "type": "array"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "livenessProbe": {
                             "type": "object",
@@ -682,6 +767,55 @@
                 "null"
             ]
         },
+        "images": {
+            "type": "object",
+            "properties": {
+                "django": {
+                    "type": "object",
+                    "properties": {
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "nginx": {
+                    "type": "object",
+                    "properties": {
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "initializer": {
             "type": "object",
             "properties": {
@@ -705,6 +839,23 @@
                 },
                 "extraVolumes": {
                     "type": "array"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "digest": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "jobAnnotations": {
                     "type": "object"
@@ -784,7 +935,21 @@
                             "type": "array"
                         },
                         "image": {
-                            "type": "string"
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "imagePullPolicy": {
                             "type": "string"
@@ -1003,9 +1168,6 @@
                 "null"
             ]
         },
-        "repositoryPrefix": {
-            "type": "string"
-        },
         "revisionHistoryLimit": {
             "type": "integer"
         },
@@ -1061,9 +1223,6 @@
         "siteUrl": {
             "type": "string"
         },
-        "tag": {
-            "type": "string"
-        },
         "tests": {
             "type": "object",
             "properties": {
@@ -1072,6 +1231,23 @@
                     "properties": {
                         "automountServiceAccountToken": {
                             "type": "boolean"
+                        },
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "resources": {
                             "type": "object",

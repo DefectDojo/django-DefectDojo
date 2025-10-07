@@ -27,6 +27,20 @@ extraAnnotations: {}
 # Labels globally added to all resources
 extraLabels: {}
 
+images:
+  django:
+    image:
+      registry: ""
+      repository: defectdojo/defectdojo-django
+      tag: ""  # If empty, use appVersion
+      digest: ""
+  nginx:
+    image:
+      registry: ""
+      repository: defectdojo/defectdojo-nginx
+      tag: ""  # If empty, use appVersion
+      digest: ""
+
 # Enables application network policy
 # For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/
 networkPolicy:
@@ -73,13 +87,10 @@ siteUrl: ""
 alternativeHosts: []
 #  - defectdojo.example.com
 imagePullPolicy: Always
-# Where to pull the defectDojo images from. Defaults to "defectdojo/*" repositories on hub.docker.com
-repositoryPrefix: defectdojo
 # When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project)
 # Create secrets as: kubectl create secret docker-registry defectdojoregistrykey --docker-username=registry_username --docker-password=registry_password --docker-server='https://index.docker.io/v1/'
 # @schema type:[string, null]
 imagePullSecrets: ~
-tag: latest
 
 # Additional labels to add to the pods:
 # podLabels:
@@ -104,6 +115,11 @@ serviceAccount:
   labels: {}
 
 dbMigrationChecker:
+  image:  # If empty, uses values from images.django.image
+    registry: ""
+    repository: ""
+    tag: ""
+    digest: ""
   # Enable/disable the DB migration checker.
   enabled: true
   # Container security context for the DB migration checker.
@@ -123,6 +139,11 @@ dbMigrationChecker:
 
 tests:
   unitTests:
+    image:  # If empty, uses values from images.django.image
+      registry: ""
+      repository: ""
+      tag: ""
+      digest: ""
     automountServiceAccountToken: false
     resources:
       requests:
@@ -147,7 +168,11 @@ monitoring:
   prometheus:
     # Add the nginx prometheus exporter sidecar
     enabled: false
-    image: nginx/nginx-prometheus-exporter:1.4.2
+    image:
+      registry: ""
+      repository: nginx/nginx-prometheus-exporter
+      tag: "1.4.2"
+      digest: ""
     imagePullPolicy: IfNotPresent
     # Optional: container security context for nginx prometheus exporter
     containerSecurityContext: {}
@@ -169,6 +194,11 @@ celery:
   # Common annotations to worker and beat deployments and pods.
   annotations: {}
   beat:
+    image:  # If empty, uses values from images.django.image
+      registry: ""
+      repository: ""
+      tag: ""
+      digest: ""
     automountServiceAccountToken: false
     # Annotations for the Celery beat deployment.
     annotations: {}
@@ -213,6 +243,11 @@ celery:
     startupProbe: {}
     tolerations: []
   worker:
+    image:  # If empty, uses values from images.django.image
+      registry: ""
+      repository: ""
+      tag: ""
+      digest: ""
     automountServiceAccountToken: false
     # Annotations for the Celery worker deployment.
     annotations: {}
@@ -288,6 +323,11 @@ django:
       # nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
       # nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
   nginx:
+    image:  # If empty, uses values from images.nginx.image
+      registry: ""
+      repository: ""
+      tag: ""
+      digest: ""
     # Container security context for the nginx containers.
     containerSecurityContext:
       # nginx dockerfile sets USER=1001
@@ -317,6 +357,11 @@ django:
   strategy: {}
   tolerations: []
   uwsgi:
+    image:  # If empty, uses values from images.django.image
+      registry: ""
+      repository: ""
+      tag: ""
+      digest: ""
     containerSecurityContext:
       # django dockerfile sets USER=1001
       runAsUser: 1001
@@ -413,6 +458,11 @@ initializer:
   affinity: {}
   nodeSelector: {}
   tolerations: []
+  image:  # If empty, uses values from images.django.image
+    registry: ""
+    repository: ""
+    tag: ""
+    digest: ""
   resources:
     requests:
       cpu: 100m
