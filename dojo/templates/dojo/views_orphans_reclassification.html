@@ -12,9 +12,9 @@
         <span id="excel-file-info" class="label label-default ml-2">No file selected</span>
     </div>
 
-    <div class="row">
+    <div class="row equal-height-row">
         <div class="col-md-5">
-            <div class="panel panel-primary">
+            <div class="panel panel-primary panel-equal-height">
                 <div class="panel-heading">
                     <i class="fa fa-cubes"></i> Orphan Products
                     <div class="pull-right">
@@ -24,7 +24,7 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="panel-body" style="max-height: 400px; overflow-y: auto;">
+                <div class="panel-body panel-body-scrollable">
                     <div class="text-right mb-2">
                         <a href="{% url 'export_orphan_products' %}?{{ request.GET.urlencode }}" 
                            class="btn btn-success btn-sm" 
@@ -135,25 +135,27 @@
         </div>
 
         <div class="col-md-5">
-            <div class="panel panel-primary">
+            <div class="panel panel-primary panel-equal-height">
                 <div class="panel-heading">
                     <i class="fa fa-tags"></i> Product Type
                 </div>
-                <div class="panel-body">
-                    <select class="mb-3" id="product-type-select" name="product_type" style="max-width: 300px !important;">
-                        <option value="">-- Select Product Type --</option>
-                        {% for product_type in product_types %}
-                            <option value="{{ product_type.id }}" {% if product_type.id|stringformat:"s" == request.GET.product_type %}selected{% endif %}>
-                                {{ product_type.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                <div class="panel-body panel-body-flex">
+                    <div class="product-type-section">
+                        <select class="mb-3" id="product-type-select" name="product_type" style="max-width: 300px !important;">
+                            <option value="">-- Select Product Type --</option>
+                            {% for product_type in product_types %}
+                                <option value="{{ product_type.id }}" {% if product_type.id|stringformat:"s" == request.GET.product_type %}selected{% endif %}>
+                                    {{ product_type.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     
-                    <div class="panel panel-default">
+                    <div class="panel panel-default selected-products-panel">
                         <div class="panel-heading">
                             <small>Products to reclassify: <span id="moved-count">0</span></small>
                         </div>
-                        <div class="panel-body" id="selected-products-preview" style="max-height: 300px; overflow-y: auto;">
+                        <div class="panel-body" id="selected-products-preview">
                             <p class="text-muted text-center">Selected products will appear here.</p>
                         </div>
                     </div>
@@ -248,6 +250,51 @@
 </div>
 
 <style>
+.equal-height-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.panel-equal-height {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+}
+
+.panel-equal-height .panel-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.panel-body-scrollable {
+    overflow-y: auto !important;
+}
+
+.panel-body-flex {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-type-section {
+    flex-shrink: 0;
+    margin-bottom: 15px;
+}
+
+.selected-products-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0 !important;
+    overflow: hidden;
+}
+
+.selected-products-panel .panel-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
 .list-group-item:hover {
     background-color: #f5f5f5;
 }
@@ -283,7 +330,6 @@
     display: none !important;
 }
 
-/* Estilos para el modal de progreso */
 .progress-bar-animated {
     animation: progress-bar-stripes 1s linear infinite;
 }
@@ -345,6 +391,13 @@
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
     margin-bottom: 10px !important;
+}
+
+@media (max-width: 991px) {
+    .panel-equal-height {
+        height: auto;
+        min-height: 400px;
+    }
 }
 </style>
 
