@@ -59,7 +59,7 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertIsNone(endpoint.protocol)
-                self.assertIsNone(endpoint.port)
+                self.assertEqual(endpoint.port,8080)
                 self.assertEqual("www.itsecgames.com", endpoint.host)
                 self.assertIsNone(endpoint.path)
                 # check req/resp
@@ -89,7 +89,7 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertIsNone(endpoint.protocol)
-                self.assertIsNone(endpoint.port)
+                self.assertEqual(endpoint.port,8080)
                 self.assertEqual("www.itsecgames.com", endpoint.host)
                 self.assertIsNone(endpoint.path)
                 # check req/resp
@@ -118,7 +118,7 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertIsNone(endpoint.protocol)
-                self.assertIsNone(endpoint.port)
+                self.assertEqual(endpoint.port,8080)
                 self.assertEqual("www.itsecgames.com", endpoint.host)
                 self.assertIsNone(endpoint.path)
                 # check req/resp
@@ -157,12 +157,12 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertEqual(3, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertIsNone(endpoint.protocol)
-                self.assertIsNone(endpoint.port)
+                self.assertEqual(endpoint.port,9000)
                 self.assertEqual("example.co.id", endpoint.host)
                 self.assertEqual("h/search", endpoint.path)
                 endpoint = finding.unsaved_endpoints[1]
                 self.assertIsNone(endpoint.protocol)
-                self.assertIsNone(endpoint.port)
+                self.assertEqual(endpoint.port,9000)
                 self.assertEqual("example.co.id", endpoint.host)
                 self.assertEqual("m/zmain", endpoint.path)
                 # check req/resp
@@ -190,7 +190,7 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertIsNone(endpoint.protocol)
-                self.assertIsNone(endpoint.port)
+                self.assertEqual(endpoint.port,9000)
                 self.assertEqual("example.co.id", endpoint.host)
                 self.assertIsNone(endpoint.path)
                 # check req/resp
