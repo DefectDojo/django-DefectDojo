@@ -1,4 +1,3 @@
-import datetime
 from datetime import date
 
 from dojo.models import Test
@@ -20,7 +19,7 @@ class TestAcunetixParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual(352, finding.cwe)
-                self.assertEqual(datetime.date(2018, 9, 24), finding.date)
+                self.assertEqual(date(2018, 9, 24), finding.date)
                 self.assertIsNotNone(finding.description)
                 self.assertGreater(len(finding.description), 0)
                 self.assertFalse(finding.false_p)
@@ -47,7 +46,7 @@ class TestAcunetixParser(DojoTestCase):
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Medium", finding.severity)
-                self.assertEqual(datetime.date(2020, 2, 27), finding.date)
+                self.assertEqual(date(2020, 2, 27), finding.date)
                 self.assertIsNotNone(finding.description)
                 self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L", finding.cvssv3)
                 self.assertFalse(finding.false_p)
@@ -77,7 +76,7 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertEqual("Possible virtual host found", finding.title)
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual(200, finding.cwe)
-                self.assertEqual(datetime.date(2020, 2, 27), finding.date)
+                self.assertEqual(date(2020, 2, 27), finding.date)
                 self.assertIsNotNone(finding.description)
                 self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N", finding.cvssv3)
                 self.assertFalse(finding.false_p)
@@ -107,7 +106,7 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertEqual("Unencrypted connection (verified)", finding.title)
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual(310, finding.cwe)
-                self.assertEqual(datetime.date(2020, 2, 27), finding.date)
+                self.assertEqual(date(2020, 2, 27), finding.date)
                 self.assertIsNotNone(finding.description)
                 self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N", finding.cvssv3)
                 self.assertFalse(finding.false_p)
@@ -143,7 +142,7 @@ class TestAcunetixParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEqual("HTML form without CSRF protection", finding.title)
                 self.assertEqual("Medium", finding.severity)
-                self.assertEqual(datetime.date(2020, 4, 28), finding.date)
+                self.assertEqual(date(2020, 4, 28), finding.date)
                 self.assertIsNotNone(finding.description)
                 self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:N", finding.cvssv3)
                 self.assertFalse(finding.false_p)
@@ -179,7 +178,7 @@ class TestAcunetixParser(DojoTestCase):
                 finding = findings[6]
                 self.assertEqual("Content Security Policy (CSP) not implemented", finding.title)
                 self.assertEqual("Info", finding.severity)
-                self.assertEqual(datetime.date(2020, 4, 28), finding.date)
+                self.assertEqual(date(2020, 4, 28), finding.date)
                 self.assertIsNotNone(finding.description)
                 self.assertFalse(finding.false_p)
                 self.assertIn("CSP can be used to prevent and/or mitigate attacks that involve content/code injection,", finding.impact)
