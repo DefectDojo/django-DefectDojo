@@ -68,6 +68,10 @@ jobs:
       - name: Check update of "artifacthub.io/changes" HELM annotation
         if: env.changed == 'true'
         run: |
+          # fast fail if `git show` fails
+          set -e
+          set -o pipefail
+
           target_branch=${{ env.ct-branch }}
 
           echo "Checking Chart.yaml annotation changes"
@@ -76,10 +80,10 @@ jobs:
           current_annotation=$(yq e '.annotations."artifacthub.io/changes"' "helm/defectdojo/Chart.yaml")
 
           # Get target branch version of Chart.yaml annotation
-          target_annotation=$(git show "${{ env.ct-branch }}:helm/defectdojo/Chart.yaml" | yq e '.annotations."artifacthub.io/changes"' -)
+          target_annotation=$(git show "origin/${{ env.ct-branch }}:helm/defectdojo/Chart.yaml" | yq e '.annotations."artifacthub.io/changes"' -)
 
           if [[ "$current_annotation" == "$target_annotation" ]]; then
-            echo "::error file=helm/defectdojo/Chart.yaml::The 'artifacthub.io/changes' annotation has not been updated compared to ${{ env.ct-branch }}"
+            echo "::error::The HELM chart has been updated but the 'artifacthub.io/changes' annotation in 'Chart.yaml' has not been changed (compared to '${{ env.ct-branch }}' branch)"
             exit 1
           fi
 
