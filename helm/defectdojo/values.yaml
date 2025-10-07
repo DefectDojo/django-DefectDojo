@@ -462,7 +462,9 @@ gke:
   # Only works with serviceAccount.create = true
   workloadIdentityEmail: ""
 
-# For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/redis
+# For more advanced options check the chart documentation for Valkey (drop-in Redis replacement).
+# If you continue to use the bundled dependency, the PVC name and values key remain under `redis`.
+# Valkey chart docs: https://github.com/bitnami/charts/tree/main/bitnami/valkey
 redis:
   # To use an external instance, switch enabled to `false`` and set the address in `redisServer` below
   enabled: true
