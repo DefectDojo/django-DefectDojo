@@ -28,8 +28,9 @@ entries:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/nightly-dev/defectdojo-1.7.1-dev.tgz
     version: 1.7.1-dev
   - annotations:
-      artifacthub.io/changes: ""
-      artifacthub.io/prerelease: "true"
+      artifacthub.io/changes: |
+        - kind: changed
+          description: Bump DefectDojo to 2.51.0
     apiVersion: v2
     appVersion: 2.51.0
     created: "2025-10-06T17:40:34.766470806Z"
