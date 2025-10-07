@@ -1,5 +1,5 @@
 import datetime
-from datetime import datetime as date
+from datetime as date
 
 from dojo.models import Test
 from dojo.tools.acunetix.parser import AcunetixParser
@@ -202,4 +202,3 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertIn("resp", req_resp)
                 self.assertIsNotNone(req_resp["resp"])
                 self.assertIsInstance(req_resp["resp"], str)
-                
