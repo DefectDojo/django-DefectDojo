@@ -69,7 +69,7 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertIsNotNone(req_resp["req"])
                 self.assertIsInstance(req_resp["req"], str)
                 self.assertIn("resp", req_resp)
-                self.assertIsNotNone(req_resp["resp"])unittests/tools/test_acunetix_parser.py
+                self.assertIsNotNone(req_resp["resp"])
                 self.assertIsInstance(req_resp["resp"], str)
 
             with self.subTest(i=1):
@@ -132,7 +132,7 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertIsInstance(req_resp["resp"], str)
 
     def test_parse_file_with_example_com(self):
-        with (get_unit_tests_scans_path("acunetix") / "XML_http_example_co_id_port _num.xml").open(encoding="utf-8") as testfile:
+        with (get_unit_tests_scans_path("acunetix") / "XML_http_example_co_id_port_num.xml").open(encoding="utf-8") as testfile:
             parser = AcunetixParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

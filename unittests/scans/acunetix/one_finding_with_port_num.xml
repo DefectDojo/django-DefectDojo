@@ -3,7 +3,7 @@
     <Scan>
         <Name>VijayTest</Name>
         <ShortName>Vijay Short Name</ShortName>
-        <StartURL>https://vijaytest.com:4000"</StartURL>
+        <StartURL>https://vijaytest.com</StartURL>
         <StartTime>24/09/2018, 18:09:55</StartTime>
         <FinishTime>24/09/2018, 21:42:41</FinishTime>
         <ScanTime>212 minutes, 4 seconds</ScanTime>
