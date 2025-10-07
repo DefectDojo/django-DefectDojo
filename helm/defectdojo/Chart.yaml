@@ -13,8 +13,9 @@ dependencies:
     version: ~16.7.0
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: postgresql.enabled
-  - name: redis
-    version: ~19.6.4
+  - name: valkey
+    alias: redis
+    version: ">= 1.0.0"
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: redis.enabled
 annotations:
