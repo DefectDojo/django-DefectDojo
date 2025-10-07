@@ -567,7 +567,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.resources.requests.memory | string | `"128Mi"` |  |
 | celery.worker.startupProbe | object | `{}` |  |
 | celery.worker.tolerations | list | `[]` |  |
-| cloudsql.containerSecurityContext | string | `nil` |  |
+| cloudsql.containerSecurityContext | object | `{}` |  |
 | cloudsql.enable_iam_login | bool | `false` |  |
 | cloudsql.enabled | bool | `false` |  |
 | cloudsql.extraEnv | list | `[]` |  |

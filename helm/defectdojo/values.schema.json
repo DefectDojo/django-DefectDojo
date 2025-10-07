@@ -214,7 +214,7 @@
             "type": "object",
             "properties": {
                 "containerSecurityContext": {
-                    "type": "null"
+                    "type": "object"
                 },
                 "enable_iam_login": {
                     "type": "boolean"
