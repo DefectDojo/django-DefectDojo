@@ -285,7 +285,7 @@ django:
       # nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
   nginx:
     # Container security context for the nginx containers.
-    containerSecurityContext: &nginxSecurityContext
+    containerSecurityContext:
       # nginx dockerfile sets USER=1001
       runAsUser: 1001
     # To extra environment variables to the nginx container, you can use extraEnv. For example:
@@ -313,7 +313,7 @@ django:
   strategy: {}
   tolerations: []
   uwsgi:
-    containerSecurityContext: &djangoSecurityContext
+    containerSecurityContext:
       # django dockerfile sets USER=1001
       runAsUser: 1001
     # To add (or override) extra variables which need to be pulled from another configMap, you can
@@ -491,7 +491,7 @@ cloudsql:
   # whether to use a private IP to connect to the database
   use_private_ip: false
   # Optional: security context for the CloudSQL proxy container.
-  containerSecurityContext:
+  containerSecurityContext: {}
   # Additional environment variables for the CloudSQL proxy container.
   extraEnv: []
   # Array of additional volume mount points for the CloudSQL proxy container
