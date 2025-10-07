@@ -457,6 +457,267 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
             jira_helper.push_to_jira(finding.finding_group)
 
 
+@dojo_async_task(signature=True)
+@app.task
+def post_process_findings_batch_signature(finding_ids, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002
+    return post_process_findings_batch(finding_ids, dedupe_option, rules_option, product_grading_option,
+                                       issue_updater_option, push_to_jira, user, *args, **kwargs)
+
+
+@dojo_async_task
+@app.task
+def post_process_findings_batch(finding_ids, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002
+    # if True:
+    #     msg = "WTF"
+    #     raise ValueError(msg)
+
+    if not finding_ids:
+        return
+
+    system_settings = System_Settings.objects.get()
+
+    # Fetch findings in one go; they should all belong to the same test/import
+    findings = list(
+        Finding.objects.filter(id__in=finding_ids)
+        .select_related("test", "test__engagement", "test__engagement__product")
+        .prefetch_related("endpoints"),
+    )
+    if not findings:
+        return
+
+    # Batch dedupe with single queries per algorithm; fallback to per-finding for anything else
+    if dedupe_option and system_settings.enable_deduplication:
+        first_test = findings[0].test
+        dedup_alg = first_test.deduplication_algorithm
+        scope_on_engagement = first_test.engagement.deduplication_on_engagement
+        if scope_on_engagement:
+            scope_filter = {"test__engagement": first_test.engagement}
+        else:
+            scope_filter = {"test__engagement__product": first_test.engagement.product}
+
+        # Helper functions imported lazily to avoid circulars at import time
+        from dojo.utils import (  # noqa: PLC0415
+            are_endpoints_duplicates,
+            is_deduplication_on_engagement_mismatch,
+            set_duplicate,
+        )
+
+        if dedup_alg == settings.DEDUPE_ALGO_HASH_CODE:
+            logger.debug("deduplicating finding batch with DEDUPE_ALGO_HASH_CODE")
+            hash_codes = {f.hash_code for f in findings if f.hash_code is not None}
+            if hash_codes:
+                existing_qs = (
+                    Finding.objects.filter(**scope_filter, hash_code__in=hash_codes)
+                    .exclude(id__in=finding_ids)
+                    .exclude(hash_code=None)
+                    .exclude(duplicate=True)
+                    .order_by("id")
+                )
+                existing_by_hash = {}
+                for ef in existing_qs:
+                    existing_by_hash.setdefault(ef.hash_code, []).append(ef)
+
+                for new_finding in findings:
+                    if new_finding.hash_code is None:
+                        continue
+                    for candidate in existing_by_hash.get(new_finding.hash_code, []):
+                        if is_deduplication_on_engagement_mismatch(new_finding, candidate):
+                            continue
+                        try:
+                            if are_endpoints_duplicates(new_finding, candidate):
+                                set_duplicate(new_finding, candidate)
+                                break
+                        except Exception as e:
+                            deduplicationLogger.debug(str(e))
+                            continue
+
+        elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
+            logger.debug("deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL")
+            unique_ids = {f.unique_id_from_tool for f in findings if f.unique_id_from_tool is not None}
+            if unique_ids:
+                base_filter = {
+                    **scope_filter,
+                    "unique_id_from_tool__in": unique_ids,
+                }
+                # For product scope, limit to same test_type like the single-finding logic
+                if not scope_on_engagement:
+                    base_filter["test__test_type"] = first_test.test_type
+                existing_qs = (
+                    Finding.objects.filter(**base_filter)
+                    .exclude(id__in=finding_ids)
+                    .exclude(unique_id_from_tool=None)
+                    .exclude(duplicate=True)
+                    .order_by("id")
+                )
+                existing_by_uid = {}
+                for ef in existing_qs:
+                    existing_by_uid.setdefault(ef.unique_id_from_tool, []).append(ef)
+
+                for new_finding in findings:
+                    if new_finding.unique_id_from_tool is None:
+                        continue
+                    for candidate in existing_by_uid.get(new_finding.unique_id_from_tool, []):
+                        # unique_id path sets duplicate without endpoint comparison in utils
+                        try:
+                            set_duplicate(new_finding, candidate)
+                            break
+                        except Exception as e:
+                            deduplicationLogger.debug(str(e))
+                            continue
+
+        elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
+            logger.debug("deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE")
+            hash_codes = {f.hash_code for f in findings if f.hash_code is not None}
+            unique_ids = {f.unique_id_from_tool for f in findings if f.unique_id_from_tool is not None}
+            if hash_codes or unique_ids:
+                from django.db.models import Q  # noqa: PLC0415
+                base_q = Q(**scope_filter)
+                cond = Q()
+                if hash_codes:
+                    cond |= Q(hash_code__isnull=False, hash_code__in=hash_codes)
+                if unique_ids:
+                    uid_q = Q(unique_id_from_tool__isnull=False, unique_id_from_tool__in=unique_ids)
+                    # same test_type constraint for product scope
+                    if not scope_on_engagement:
+                        uid_q &= Q(test__test_type=first_test.test_type)
+                    cond |= uid_q
+                existing_qs = (
+                    Finding.objects.filter(base_q & cond)
+                    .exclude(id__in=finding_ids)
+                    .exclude(duplicate=True)
+                    .order_by("id")
+                )
+                existing_by_hash = {}
+                existing_by_uid = {}
+                for ef in existing_qs:
+                    if ef.hash_code is not None:
+                        existing_by_hash.setdefault(ef.hash_code, []).append(ef)
+                    if ef.unique_id_from_tool is not None:
+                        existing_by_uid.setdefault(ef.unique_id_from_tool, []).append(ef)
+
+                for new_finding in findings:
+                    # Try unique_id first like utils; then hash_code
+                    if new_finding.unique_id_from_tool is not None:
+                        duplicate_found = False
+                        for candidate in existing_by_uid.get(new_finding.unique_id_from_tool, []):
+                            try:
+                                if are_endpoints_duplicates(new_finding, candidate):
+                                    set_duplicate(new_finding, candidate)
+                                    duplicate_found = True
+                                    break
+                            except Exception as e:
+                                deduplicationLogger.debug(str(e))
+                                continue
+                        if not duplicate_found and new_finding.hash_code is not None:
+                            for candidate in existing_by_hash.get(new_finding.hash_code, []):
+                                if is_deduplication_on_engagement_mismatch(new_finding, candidate):
+                                    continue
+                                try:
+                                    if are_endpoints_duplicates(new_finding, candidate):
+                                        set_duplicate(new_finding, candidate)
+                                        break
+                                except Exception as e:
+                                    deduplicationLogger.debug(str(e))
+                                    continue
+                    elif new_finding.hash_code is not None:
+                        for candidate in existing_by_hash.get(new_finding.hash_code, []):
+                            if is_deduplication_on_engagement_mismatch(new_finding, candidate):
+                                continue
+                            try:
+                                if are_endpoints_duplicates(new_finding, candidate):
+                                    set_duplicate(new_finding, candidate)
+                                    break
+                            except Exception as e:
+                                deduplicationLogger.debug(str(e))
+                                continue
+        else:
+            logger.debug("deduplicating finding batch with LEGACY")
+            # Legacy algorithm in batch: candidates share title or CWE, then apply legacy checks
+            from django.db.models import Q  # noqa: PLC0415
+
+            titles = {f.title for f in findings if f.title}
+            cwes = {f.cwe for f in findings if getattr(f, "cwe", 0)}
+            cwes.discard(0)
+
+            if titles or cwes:
+                existing_qs = (
+                    Finding.objects.filter(
+                        Q(**scope_filter) & (Q(title__in=titles) | Q(cwe__in=cwes)),
+                    )
+                    .exclude(id__in=finding_ids)
+                    .exclude(duplicate=True)
+                    .prefetch_related(
+                        "endpoints",
+                        "test",
+                        "test__engagement",
+                        "found_by",
+                        "original_finding",
+                        "test__test_type",
+                    )
+                    .order_by("id")
+                )
+
+                by_title = {}
+                by_cwe = {}
+                for ef in existing_qs:
+                    if ef.title:
+                        by_title.setdefault(ef.title, []).append(ef)
+                    if ef.cwe and ef.cwe != 0:
+                        by_cwe.setdefault(ef.cwe, []).append(ef)
+
+                for new_finding in findings:
+                    # union of candidates with same title or same CWE
+                    candidates = []
+                    if new_finding.title:
+                        candidates.extend(by_title.get(new_finding.title, []))
+                    if getattr(new_finding, "cwe", 0):
+                        candidates.extend(by_cwe.get(new_finding.cwe, []))
+
+                    # apply legacy checks
+                    for candidate in candidates:
+                        if is_deduplication_on_engagement_mismatch(new_finding, candidate):
+                            continue
+
+                        flag_endpoints = False
+                        flag_line_path = False
+
+                        if candidate.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
+                            list1 = [str(e) for e in new_finding.endpoints.all()]
+                            list2 = [str(e) for e in candidate.endpoints.all()]
+                            if all(x in list1 for x in list2):
+                                flag_endpoints = True
+                        elif new_finding.static_finding and new_finding.file_path and len(new_finding.file_path) > 0:
+                            if str(candidate.line) == str(new_finding.line) and candidate.file_path == new_finding.file_path:
+                                flag_line_path = True
+
+                        flag_hash = candidate.hash_code == new_finding.hash_code
+
+                        if (flag_endpoints or flag_line_path) and flag_hash:
+                            try:
+                                set_duplicate(new_finding, candidate)
+                                break
+                            except Exception as e:
+                                deduplicationLogger.debug(str(e))
+                                continue
+
+    # Non-status changing tasks
+    if issue_updater_option:
+        for finding in findings:
+            tool_issue_updater.async_tool_issue_update(finding)
+
+    if product_grading_option and system_settings.enable_product_grade:
+        calculate_grade(findings[0].test.engagement.product)
+
+    if push_to_jira:
+        for finding in findings:
+            if finding.has_jira_issue or not finding.finding_group:
+                jira_helper.push_to_jira(finding)
+            else:
+                jira_helper.push_to_jira(finding.finding_group)
+
+
 @receiver(pre_delete, sender=Finding)
 def finding_pre_delete(sender, instance, **kwargs):
     logger.debug("finding pre_delete: %d", instance.id)

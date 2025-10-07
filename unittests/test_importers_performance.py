@@ -220,7 +220,11 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
         self._import_reimport_performance(
+<<<<<<< HEAD
             expected_num_queries1=603,
+=======
+            expected_num_queries1=593,
+>>>>>>> c10543f124 (initial batching code)
             expected_num_async_tasks1=10,
             expected_num_queries2=515,
             expected_num_async_tasks2=22,
@@ -242,7 +246,11 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
+<<<<<<< HEAD
             expected_num_queries1=569,
+=======
+            expected_num_queries1=559,
+>>>>>>> c10543f124 (initial batching code)
             expected_num_async_tasks1=10,
             expected_num_queries2=508,
             expected_num_async_tasks2=22,
@@ -268,7 +276,11 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
+<<<<<<< HEAD
             expected_num_queries1=604,
+=======
+            expected_num_queries1=594,
+>>>>>>> c10543f124 (initial batching code)
             expected_num_async_tasks1=11,
             expected_num_queries2=516,
             expected_num_async_tasks2=23,
@@ -291,7 +303,11 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
+<<<<<<< HEAD
             expected_num_queries1=570,
+=======
+            expected_num_queries1=560,
+>>>>>>> c10543f124 (initial batching code)
             expected_num_async_tasks1=11,
             expected_num_queries2=509,
             expected_num_async_tasks2=23,
