@@ -1,5 +1,5 @@
 import datetime
-from datetime as date
+from datetime import date
 
 from dojo.models import Test
 from dojo.tools.acunetix.parser import AcunetixParser
