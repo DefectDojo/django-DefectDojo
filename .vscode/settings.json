@@ -1,0 +1,30 @@
+{
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+  "python.testing.pytestEnabled": false,
+  "python.testing.unittestEnabled": true,
+  "python.defaultInterpreterPath": ".venv/bin/python3",
+
+  "python.testing.unittestArgs": [
+    "unittests.tools.test_snyk_issue_api_parser_with_json.TestSnykIssueApiParserWithJson",
+    // This flag is only used when you do not have anything added to the end of settings.dist.py
+    // "--keepdb"
+  ],
+
+  "python.envFile": "${workspaceFolder}/.env.debug",
+  "testing.countBadge": "passed",
+  "testing.gutterEnabled": true,
+
+  // Run tests on save - https://dirk.ndrvn.nl/blog/automatically-run-python-tests-on-save/
+  "runOnSave.commands": [
+    {
+      "languages": ["python"],
+      "command": "testing.refreshTests",
+      "runIn": "vscode"
+    },
+    {
+      "languages": ["python"],
+      "command": "testing.runAll",
+      "runIn": "vscode"
+    }
+  ]
+}

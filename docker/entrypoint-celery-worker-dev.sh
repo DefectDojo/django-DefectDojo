@@ -21,6 +21,19 @@ fi
 # do the check with Django stack
 python3 manage.py check
 
-# hot reload using watmedo as we don't want to install celery[dev] and have that end up in our production images
-watchmedo auto-restart --directory=./ --pattern="*.py;*.tpl" --recursive -- \
-  celery --app=dojo worker --loglevel="${DD_CELERY_LOG_LEVEL}" --pool="${DD_CELERY_WORKER_POOL_TYPE}" --concurrency="${DD_CELERY_WORKER_CONCURRENCY:-1}" "${EXTRA_PARAMS[@]}"
+if [ "${DD_DEBUG}" = "False" ]; then
+  # hot reload using watmedo as we don't want to install celery[dev] and have that end up in our production images
+  watchmedo auto-restart --directory=./ --pattern="*.py;*.tpl" --recursive -- \
+    celery --app=dojo worker --loglevel="${DD_CELERY_LOG_LEVEL}" --pool="${DD_CELERY_WORKER_POOL_TYPE}" --concurrency="${DD_CELERY_WORKER_CONCURRENCY:-1}" "${EXTRA_PARAMS[@]}"
+else
+  watchmedo auto-restart \
+    --directory=./ \
+    --pattern="*.py;*.tpl" \
+    --recursive -- \
+    debugpy --listen 0.0.0.0:5680 \
+    /usr/local/bin/celery --app=dojo worker \
+    --loglevel="${DD_CELERY_LOG_LEVEL}" \
+    --pool="${DD_CELERY_WORKER_POOL_TYPE}" \
+    --concurrency="${DD_CELERY_WORKER_CONCURRENCY:-1}" \
+    "${EXTRA_PARAMS[@]}"
+fi

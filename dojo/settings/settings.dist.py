@@ -9,6 +9,7 @@
 import json
 import logging
 import os
+import sys
 import warnings
 from datetime import timedelta
 from email.utils import getaddresses
@@ -1990,3 +1991,9 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
         "debug_toolbar.panels.profiling.ProfilingPanel",
         # 'cachalot.panels.CachalotPanel',
     ]
+
+# you can use this method or "--keepdb" parameter in settings.json.
+# .vscode one would not support coverage or debugging though somehow, just testing.
+if os.getenv("DJANGO_TEST_KEEPDB", "false").lower() in ("1", "true", "yes"):
+    if "--keepdb" not in sys.argv:
+        sys.argv.append("--keepdb")

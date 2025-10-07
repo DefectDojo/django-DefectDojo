@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "configurations": [
+        {
+
+            "name": "DD (uwsgi service)",
+            "type": "python",
+            "request": "attach",
+            "port": 5678,
+            "host": "localhost",
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "/app"
+                }
+            ],
+            "justMyCode": false,
+            "django": true,
+            "redirectOutput": true
+        },
+        {
+
+            "name": "DD (Celery Worker)",
+            "type": "python",
+            "request": "attach",
+            "port": 5680,
+            "host": "localhost",
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "/app"
+                }
+            ],
+            "justMyCode": false,
+            "django": true,
+            "redirectOutput": true
+        }
+    ],
+    "inputs": [
+        {
+            "id": "testCase",
+            "description": "Test case to run (e.g., unittests.test_utils.TestUtils.test_encryption)",
+            "default": "unittests.test_utils",
+            "type": "promptString"
+        }
+    ]
+}
