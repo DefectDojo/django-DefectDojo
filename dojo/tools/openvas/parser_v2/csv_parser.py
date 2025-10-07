@@ -1,10 +1,10 @@
 import csv
 import io
 import logging
+from typing import TYPE_CHECKING
 
 from dateutil.parser import parse as parse_date
 
-from dojo.models import Finding
 from dojo.tools.openvas.parser_v2.common import (
     OpenVASFindingAuxData,
     cleanup_openvas_text,
@@ -13,6 +13,9 @@ from dojo.tools.openvas.parser_v2.common import (
     postprocess_finding,
     setup_finding,
 )
+
+if TYPE_CHECKING:
+    from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 

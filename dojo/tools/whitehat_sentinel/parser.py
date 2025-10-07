@@ -173,7 +173,7 @@ class WhiteHatSentinelParser:
 
     def _convert_attack_vectors_to_endpoints(
         self, attack_vectors: list[dict],
-    ) -> list["Endpoint"]:
+    ) -> list[Endpoint]:
         """
         Takes a list of Attack Vectors dictionaries from the WhiteHat vuln API and converts them to Defect Dojo
         Endpoints

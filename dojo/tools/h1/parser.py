@@ -4,15 +4,17 @@ import io
 import json
 from contextlib import suppress
 from datetime import datetime
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 import cvss.parser
 from cvss.cvss3 import CVSS3
 from dateutil import parser as date_parser
-from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.utils import timezone
 
 from dojo.models import Finding, Test
+
+if TYPE_CHECKING:
+    from django.core.files.uploadedfile import TemporaryUploadedFile
 
 __author__ = "Kirill Gotsman"
 

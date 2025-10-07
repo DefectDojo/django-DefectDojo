@@ -1,12 +1,15 @@
 import logging
 import re
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import cvss
 from cvss import CVSS2, CVSS3, CVSS4
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 

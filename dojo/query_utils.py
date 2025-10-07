@@ -1,5 +1,9 @@
+from typing import TYPE_CHECKING
+
 from django.db.models import Count, IntegerField, Subquery
-from django.db.models.query import QuerySet
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
 
 
 def build_count_subquery(model_qs: QuerySet, group_field: str) -> Subquery:

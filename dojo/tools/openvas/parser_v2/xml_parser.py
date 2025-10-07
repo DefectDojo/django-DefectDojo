@@ -1,10 +1,10 @@
 import contextlib
 import logging
+from typing import TYPE_CHECKING
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
 
-from dojo.models import Finding
 from dojo.tools.openvas.parser_v2.common import (
     OpenVASFindingAuxData,
     cleanup_openvas_text,
@@ -14,6 +14,9 @@ from dojo.tools.openvas.parser_v2.common import (
     setup_finding,
 )
 from dojo.utils import parse_cvss_data
+
+if TYPE_CHECKING:
+    from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 

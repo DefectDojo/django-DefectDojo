@@ -4,10 +4,13 @@ import re
 import zipfile
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from collections.abc import Iterable
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from .model import BlackduckFinding
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from pathlib import Path
 
 
 class Importer(ABC):

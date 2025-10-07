@@ -1,12 +1,15 @@
 import logging
 import re
 import zipfile
-from xml.etree.ElementTree import Element
+from typing import TYPE_CHECKING
 
 from defusedxml import ElementTree
 
 from dojo.models import Finding, Test
 from dojo.tools.fortify.fortify_data import DescriptionData, RuleData, SnippetData, VulnerabilityData
+
+if TYPE_CHECKING:
+    from xml.etree.ElementTree import Element
 
 logger = logging.getLogger(__name__)
 
