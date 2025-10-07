@@ -146,7 +146,7 @@ monitoring:
   prometheus:
     # Add the nginx prometheus exporter sidecar
     enabled: false
-    image: nginx/nginx-prometheus-exporter:1.4.2
+    image: nginx/nginx-prometheus-exporter:1.5.0
     imagePullPolicy: IfNotPresent
     # Optional: container security context for nginx prometheus exporter
     containerSecurityContext: {}
