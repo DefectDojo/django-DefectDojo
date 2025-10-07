@@ -3,7 +3,7 @@
 <Scan>
         <Name><![CDATA[scan_name]]></Name>
         <ShortName><![CDATA[scan_short_name]]></ShortName>
-        <StartURL><![CDATA[www.itsecgames.com:8080:8080]]></StartURL>
+        <StartURL><![CDATA[www.itsecgames.com:8080]]></StartURL>
         <StartTime><![CDATA[27/02/2020, 12:56:09]]></StartTime>
         <FinishTime><![CDATA[27/02/2020, 14:52:19]]></FinishTime>
         <ScanTime><![CDATA[116 minutes, 5 seconds]]></ScanTime>
