@@ -317,11 +317,6 @@ es-object-atoms@^1.0.0, es-object-atoms@^1.1.1:
   dependencies:
     es-errors "^1.3.0"
 
-eve-raphael@0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/eve-raphael/-/eve-raphael-0.5.0.tgz#17c754b792beef3fa6684d79cf5a47c63c4cda30"
-  integrity sha512-jrxnPsCGqng1UZuEp9DecX/AuSyAszATSjf4oEcRxvfxa1Oux4KkIPKBAAWWnpdwfARtr+Q0o9aPYWjsROD7ug==
-
 flot@flot/flot#~0.8.3:
   version "0.8.3"
   resolved "https://codeload.github.com/flot/flot/tar.gz/453b017cc5acfd75e252b93e8635f57f4196d45d"
@@ -514,12 +509,10 @@ jszip@^3.10.1:
     readable-stream "~2.3.6"
     setimmediate "^1.0.5"
 
-justgage@^1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/justgage/-/justgage-1.7.0.tgz#4b615c6a88c75d4f7fab20dd32b2710e9eb36411"
-  integrity sha512-yJ9O8HU9cxo2UMFyouOJ+cnEsKVyX44Ghu3iLFaKlzahrGUAB0UcEzWDcu7JqEwC7bU/hunoAZLKF/sIcVbYQQ==
-  dependencies:
-    raphael "^2.3.0"
+justgage@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/justgage/-/justgage-2.0.0.tgz#5aae30f977bc1f62e61f25b451cdb6122be2bcb8"
+  integrity sha512-bgDLuXYO5Y0ZzXy82RjBhs/NCu8o+SGzrv1ADDR9XrB9pE6yLgC4lVccn6CUBhRYXWtlDnXaoF6el7ZHXdgWEg==
 
 lie@~3.3.0:
   version "3.3.0"
@@ -594,13 +587,6 @@ process-nextick-args@~2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
-
-raphael@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/raphael/-/raphael-2.3.0.tgz#eabeb09dba861a1d4cee077eaafb8c53f3131f89"
-  integrity sha512-w2yIenZAQnp257XUWGni4bLMVxpUpcIl7qgxEgDIXtmSypYtlNxfXWpOBxs7LBTps5sDwhRnrToJrMUrivqNTQ==
-  dependencies:
-    eve-raphael "0.5.0"
 
 readable-stream@~2.3.6:
   version "2.3.8"
