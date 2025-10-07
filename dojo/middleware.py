@@ -255,6 +255,9 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
             threshold = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_THRESHOLD", 100)
 
             # If threshold is below 0, async updating is disabled
+            if total_instances <= 0:
+                return
+
             if threshold < 0:
                 logger.debug(f"AsyncSearchContextMiddleware: Async updating disabled (threshold={threshold}), using synchronous update")
             elif total_instances > threshold:
