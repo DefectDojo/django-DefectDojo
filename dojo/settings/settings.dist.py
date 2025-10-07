@@ -15,6 +15,7 @@ from email.utils import getaddresses
 from pathlib import Path
 
 import environ
+import pghistory
 from celery.schedules import crontab
 from netaddr import IPNetwork, IPSet
 
@@ -171,6 +172,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL=(str, ""),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ""),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ""),
+    DD_SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL=(bool, True),
     DD_SAML2_ENABLED=(bool, False),
     # Allows to override default SAML authentication backend. Check https://djangosaml2.readthedocs.io/contents/setup.html#custom-user-attributes-processing
     DD_SAML2_AUTHENTICATION_BACKENDS=(str, "djangosaml2.backends.Saml2Backend"),
@@ -264,6 +266,10 @@ env = environ.FileAwareEnv(
     DD_TRACK_IMPORT_HISTORY=(bool, True),
     # Delete Auditlogs older than x month; -1 to keep all logs
     DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
+    # Batch size for flushing audit logs per task run
+    DD_AUDITLOG_FLUSH_BATCH_SIZE=(int, 1000),
+    # Maximum number of batches to process per task run
+    DD_AUDITLOG_FLUSH_MAX_BATCHES=(int, 100),
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
@@ -317,6 +323,8 @@ env = environ.FileAwareEnv(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    # Audit logging system: "django-auditlog" (default) or "django-pghistory"
+    DD_AUDITLOG_TYPE=(str, "django-auditlog"),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
@@ -570,7 +578,7 @@ SOCIAL_AUTH_CREATE_USER = env("DD_SOCIAL_AUTH_CREATE_USER")
 SOCIAL_AUTH_STRATEGY = "social_django.strategy.DjangoStrategy"
 SOCIAL_AUTH_STORAGE = "social_django.models.DjangoStorage"
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ["username", "first_name", "last_name", "email"]
-SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
+SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = env("DD_SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL")
 
 GOOGLE_OAUTH_ENABLED = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED")
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
@@ -894,7 +902,6 @@ INSTALLED_APPS = (
     "polymorphic",  # provides admin templates
     "django.contrib.admin",
     "django.contrib.humanize",
-    "auditlog",
     "dojo",
     "watson",
     "imagekit",
@@ -909,6 +916,9 @@ INSTALLED_APPS = (
     "tagulous",
     "fontawesomefree",
     "django_filters",
+    "auditlog",
+    "pgtrigger",
+    "pghistory",
 )
 
 # ------------------------------------------------------------------------------
@@ -1316,6 +1326,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
     "Github Vulnerability Scan": ["title", "severity", "component_name", "vulnerability_ids", "file_path"],
+    "Github Secrets Detection Report": ["title", "file_path", "line"],
     "Solar Appscreener Scan": ["title", "file_path", "line", "severity"],
     "pip-audit Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "Rubocop Scan": ["vuln_id_from_tool", "file_path", "line"],
@@ -1561,6 +1572,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
+    "Github Secrets Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
     "SARIF": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Azure Security Center Recommendations Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
@@ -1841,6 +1853,7 @@ VULNERABILITY_URLS = {
     "ALSA-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALSA-2024:0827
     "ASA-": "https://security.archlinux.org/",  # e.g. https://security.archlinux.org/ASA-202003-8
     "AVD": "https://avd.aquasec.com/misconfig/",  # e.g. https://avd.aquasec.com/misconfig/avd-ksv-01010
+    "AWS-": "https://aws.amazon.com/security/security-bulletins/",  # e.g. https://aws.amazon.com/security/security-bulletins/AWS-2025-001
     "BAM-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BAM-25498
     "BSERV-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BSERV-19020
     "C-": "https://hub.armosec.io/docs/",  # e.g. https://hub.armosec.io/docs/c-0085
@@ -1920,8 +1933,11 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
 ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
+AUDITLOG_TYPE = env("DD_AUDITLOG_TYPE")
 AUDITLOG_TWO_STEP_MIGRATION = False
 AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
+AUDITLOG_FLUSH_BATCH_SIZE = env("DD_AUDITLOG_FLUSH_BATCH_SIZE")
+AUDITLOG_FLUSH_MAX_BATCHES = env("DD_AUDITLOG_FLUSH_MAX_BATCHES")
 
 USE_FIRST_SEEN = env("DD_USE_FIRST_SEEN")
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
@@ -2006,3 +2022,28 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
         "debug_toolbar.panels.profiling.ProfilingPanel",
         # 'cachalot.panels.CachalotPanel',
     ]
+
+#########################################################################################################
+# Auditlog configuration                                                                                #
+#########################################################################################################
+
+if ENABLE_AUDITLOG:
+    middleware_list = list(MIDDLEWARE)
+    crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
+
+    if AUDITLOG_TYPE == "django-auditlog":
+        # Insert AuditlogMiddleware before CurrentRequestUserMiddleware
+        middleware_list.insert(crum_index, "dojo.middleware.AuditlogMiddleware")
+    elif AUDITLOG_TYPE == "django-pghistory":
+        # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
+        middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
+
+    MIDDLEWARE = middleware_list
+
+PGHISTORY_FOREIGN_KEY_FIELD = pghistory.ForeignKey(db_index=False)
+PGHISTORY_CONTEXT_FIELD = pghistory.ContextForeignKey(db_index=True)
+PGHISTORY_OBJ_FIELD = pghistory.ObjForeignKey(db_index=True)
+
+#########################################################################################################
+# End of Auditlog configuration                                                                          #
+#########################################################################################################

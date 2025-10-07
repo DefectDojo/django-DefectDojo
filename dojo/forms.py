@@ -530,6 +530,8 @@ class ImportScanForm(forms.Form):
     active_verified_choices = [("not_specified", "Not specified (default)"),
                                ("force_to_true", "Force to True"),
                                ("force_to_false", "Force to False")]
+    test_title = forms.CharField(max_length=255, required=False, label="Test Title",
+                                 help_text="Optional title for the Test to be created. If empty, the scan type is used.")
     scan_date = forms.DateTimeField(
         required=False,
         label="Scan Completion Date",
@@ -1915,14 +1917,14 @@ class CloseFindingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop("missing_note_types")
+        # must pop custom kwargs before calling parent __init__ to avoid unexpected kwarg errors
+        self.can_edit_mitigated_data = kwargs.pop("can_edit_mitigated_data") if "can_edit_mitigated_data" in kwargs \
+            else False
         super().__init__(*args, **kwargs)
         if len(queryset) == 0:
             self.fields["note_type"].widget = forms.HiddenInput()
         else:
             self.fields["note_type"] = forms.ModelChoiceField(queryset=queryset, label="Note Type", required=True)
-
-        self.can_edit_mitigated_data = kwargs.pop("can_edit_mitigated_data") if "can_edit_mitigated_data" in kwargs \
-            else False
 
         if self.can_edit_mitigated_data:
             self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)

@@ -14,7 +14,6 @@ from uuid import uuid4
 import dateutil
 import hyperlink
 import tagulous.admin
-from auditlog.registry import auditlog
 from dateutil.parser import parse as datetutilsparse
 from dateutil.relativedelta import relativedelta
 from django import forms
@@ -2946,53 +2945,56 @@ class Finding(models.Model):
 
     # Get vulnerability_ids to use for hash_code computation
     def get_vulnerability_ids(self):
-        vulnerability_id_str = ""
-        if self.id is None:
-            if self.unsaved_vulnerability_ids:
+
+        def _get_unsaved_vulnerability_ids(finding) -> str:
+            if finding.unsaved_vulnerability_ids:
                 deduplicationLogger.debug("get_vulnerability_ids before the finding was saved")
                 # convert list of unsaved vulnerability_ids to the list of their canonical representation
-                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in self.unsaved_vulnerability_ids]
+                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in finding.unsaved_vulnerability_ids]
                 # deduplicate (usually done upon saving finding) and sort endpoints
-                vulnerability_id_str = "".join(sorted(dict.fromkeys(vulnerability_id_str_list)))
-            else:
-                deduplicationLogger.debug("finding has no unsaved vulnerability references")
-        else:
-            vulnerability_ids = Vulnerability_Id.objects.filter(finding=self)
-            deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
-            # convert list of vulnerability_ids to the list of their canonical representation
-            vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in vulnerability_ids.all()]
-            # sort vulnerability_ids strings
-            vulnerability_id_str = "".join(sorted(vulnerability_id_str_list))
-        return vulnerability_id_str
+                return "".join(sorted(dict.fromkeys(vulnerability_id_str_list)))
+            deduplicationLogger.debug("finding has no unsaved vulnerability references")
+            return ""
+
+        def _get_saved_vulnerability_ids(finding) -> str:
+            if finding.id is not None:
+                vulnerability_ids = Vulnerability_Id.objects.filter(finding=finding)
+                deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
+                # convert list of vulnerability_ids to the list of their canonical representation
+                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in vulnerability_ids.all()]
+                # sort vulnerability_ids strings
+                return "".join(sorted(vulnerability_id_str_list))
+            return ""
+
+        return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnerability_ids(self)
 
     # Get endpoints to use for hash_code computation
     # (This sometimes reports "None")
     def get_endpoints(self):
-        endpoint_str = ""
-        if (self.id is None):
-            if len(self.unsaved_endpoints) > 0:
+
+        def _get_unsaved_endpoints(finding) -> str:
+            if len(finding.unsaved_endpoints) > 0:
                 deduplicationLogger.debug("get_endpoints before the finding was saved")
                 # convert list of unsaved endpoints to the list of their canonical representation
-                endpoint_str_list = [str(endpoint) for endpoint in self.unsaved_endpoints]
+                endpoint_str_list = [str(endpoint) for endpoint in finding.unsaved_endpoints]
                 # deduplicate (usually done upon saving finding) and sort endpoints
-                endpoint_str = "".join(
-                    sorted(
-                        dict.fromkeys(endpoint_str_list)))
-            else:
-                # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
-                # In this case, before saving the finding, both static_finding and dynamic_finding are True
-                # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
-                deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
-        else:
-            deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
-            # convert list of endpoints to the list of their canonical representation
-            endpoint_str_list = [str(endpoint) for endpoint in self.endpoints.all()]
-            # sort endpoints strings
-            endpoint_str = "".join(
-                sorted(
-                    endpoint_str_list,
-                ))
-        return endpoint_str
+                return "".join(dict.fromkeys(endpoint_str_list))
+            # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
+            # In this case, before saving the finding, both static_finding and dynamic_finding are True
+            # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
+            deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
+            return ""
+
+        def _get_saved_endpoints(finding) -> str:
+            if finding.id is not None:
+                deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(finding.endpoints.count()))
+                # convert list of endpoints to the list of their canonical representation
+                endpoint_str_list = [str(endpoint) for endpoint in finding.endpoints.all()]
+                # sort endpoints strings
+                return "".join(sorted(endpoint_str_list))
+            return ""
+
+        return _get_saved_endpoints(self) or _get_unsaved_endpoints(self)
 
     # Compute the hash_code from the fields to hash
     def hash_fields(self, fields_to_hash):
@@ -4694,21 +4696,9 @@ class ChoiceAnswer(Answer):
         return "No Response"
 
 
-if settings.ENABLE_AUDITLOG:
-    # Register for automatic logging to database
-    logger.info("enabling audit logging")
-    auditlog.register(Dojo_User, exclude_fields=["password"])
-    auditlog.register(Endpoint)
-    auditlog.register(Engagement)
-    auditlog.register(Finding, m2m_fields={"reviewers"})
-    auditlog.register(Finding_Group)
-    auditlog.register(Product_Type)
-    auditlog.register(Product)
-    auditlog.register(Test)
-    auditlog.register(Risk_Acceptance)
-    auditlog.register(Finding_Template)
-    auditlog.register(Cred_User, exclude_fields=["password"])
-    auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
+# Audit logging registration is now handled in auditlog.py and configured in apps.py
+# This allows for conditional registration of either django-auditlog or django-pghistory
+# The audit system is configured in DojoAppConfig.ready() to ensure all models are loaded
 
 
 from dojo.utils import (  # noqa: E402  # there is issue due to a circular import

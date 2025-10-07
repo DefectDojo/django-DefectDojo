@@ -4,6 +4,7 @@ import logging
 import pathlib
 import re
 from collections import OrderedDict
+from datetime import timedelta
 from enum import Enum
 from json import dumps
 from pathlib import Path
@@ -11,9 +12,12 @@ from pathlib import Path
 # from drf_spectacular.renderers import OpenApiJsonRenderer
 from unittest.mock import ANY, MagicMock, PropertyMock, call, patch
 
+from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.test import tag as test_tag
+from django.test.utils import override_settings
 from django.urls import reverse
+from django.utils import timezone
 from drf_spectacular.drainage import GENERATOR_STATS
 from drf_spectacular.settings import spectacular_settings
 from drf_spectacular.validation import validate_schema
@@ -919,6 +923,102 @@ class FindingCloseAPITest(DojoAPITestCase):
             self.assertTrue(add_comment_mock.called)
 
 
+class FindingCreateUpdateMitigatedFieldsAPITest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        testuser = User.objects.get(username="admin")
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.admin = testuser
+        self.base_url = "/api/v2/findings/"
+
+    def _minimal_create_payload(self, title: str):
+        return {
+            "test": 3,
+            "found_by": [],
+            "title": title,
+            "date": "2020-05-20",
+            "cwe": 1,
+            "severity": "High",
+            "description": "TEST finding",
+            "mitigation": "MITIGATION",
+            "impact": "HIGH",
+            "references": "",
+            "active": False,
+            "verified": False,
+            "false_p": False,
+            "duplicate": False,
+            "out_of_scope": False,
+            "under_review": False,
+            "under_defect_review": False,
+            "numerical_severity": "S0",
+        }
+
+    def test_create_rejects_mitigated_fields_by_default(self):
+        payload = self._minimal_create_payload("API create with mitigated disallowed")
+        past = (timezone.now() - timedelta(days=7)).replace(microsecond=0)
+        payload.update({
+            "is_mitigated": True,
+            "mitigated": past.isoformat(),
+            "mitigated_by": self.admin.id,
+        })
+
+        response = self.client.post(self.base_url, payload, format="json")
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("mitigated", response.data)
+        self.assertIn("mitigated_by", response.data)
+
+    def test_update_rejects_mitigated_fields_by_default(self):
+        finding_id = 7
+        past = (timezone.now() - timedelta(days=7)).replace(microsecond=0)
+        payload = {
+            "is_mitigated": True,
+            "mitigated": past.isoformat(),
+            "mitigated_by": self.admin.id,
+        }
+        response = self.client.patch(f"{self.base_url}{finding_id}/", payload, format="json")
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("mitigated", response.data)
+        self.assertIn("mitigated_by", response.data)
+
+    def test_create_sets_mitigated_fields_when_permitted(self):
+        with patch("dojo.finding.helper.can_edit_mitigated_data", return_value=True):
+            payload = self._minimal_create_payload("API create with mitigated allowed")
+            past = (timezone.now() - timedelta(days=7)).replace(microsecond=0)
+            payload.update({
+                "is_mitigated": True,
+                "mitigated": past.isoformat(),
+                "mitigated_by": self.admin.id,
+            })
+
+            response = self.client.post(self.base_url, payload, format="json")
+            self.assertEqual(201, response.status_code, response.content[:1000])
+
+            created_id = response.data.get("id")
+            self.assertIsNotNone(created_id)
+            created = Finding.objects.get(id=created_id)
+            self.assertEqual(created.mitigated.replace(microsecond=0, tzinfo=created.mitigated.tzinfo), past)
+            self.assertEqual(created.mitigated_by, self.admin)
+
+    def test_update_sets_mitigated_fields_when_permitted(self):
+        finding_id = 7
+        with patch("dojo.finding.helper.can_edit_mitigated_data", return_value=True):
+            past = (timezone.now() - timedelta(days=7)).replace(microsecond=0)
+            payload = {
+                "is_mitigated": True,
+                "mitigated": past.isoformat(),
+                "mitigated_by": self.admin.id,
+            }
+            response = self.client.patch(f"{self.base_url}{finding_id}/", payload, format="json")
+            self.assertEqual(200, response.status_code, response.content[:1000])
+
+            updated = Finding.objects.get(id=finding_id)
+            self.assertEqual(updated.mitigated.replace(microsecond=0, tzinfo=updated.mitigated.tzinfo), past)
+            self.assertEqual(updated.mitigated_by, self.admin)
+
+
 class EndpointStatusTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1313,6 +1413,63 @@ class FindingsTest(BaseClass.BaseClassTest):
         result_json = new_result.json()
         self.assertFalse(result_json["duplicate"])
         self.assertIsNone(result_json["duplicate_finding"])
+
+    def test_hash_code_includes_vulnerability_ids_on_create(self):
+        zap_fields = ["title", "cwe", "severity", "vulnerability_ids"]
+        current = dict(getattr(settings, "HASHCODE_FIELDS_PER_SCANNER", {}))
+        current["ZAP Scan"] = zap_fields
+
+        with override_settings(HASHCODE_FIELDS_PER_SCANNER=current):
+            orig = Finding.objects.filter(test__test_type__name="ZAP Scan").first()
+            self.assertIsNotNone(orig, "Fixture must provide a ZAP Scan finding")
+
+            cve_value = "CVE-9999-0001"
+
+            model_clone = Finding(
+                test=orig.test,
+                title=orig.title,
+                date=orig.date,
+                cwe=orig.cwe,
+                severity=orig.severity,
+                description=orig.description,
+                mitigation=orig.mitigation,
+                impact=orig.impact,
+                references=orig.references,
+                active=orig.active,
+                verified=orig.verified,
+                false_p=orig.false_p,
+                duplicate=orig.duplicate,
+                out_of_scope=orig.out_of_scope,
+                under_review=orig.under_review,
+                under_defect_review=orig.under_defect_review,
+                numerical_severity=orig.numerical_severity,
+                reporter=orig.reporter,
+                static_finding=orig.static_finding,
+                dynamic_finding=orig.dynamic_finding,
+                file_path=orig.file_path,
+                line=orig.line,
+            )
+            model_clone.unsaved_vulnerability_ids = [cve_value]
+            model_clone.save()
+            model_hash = model_clone.hash_code
+
+            payload = self.payload.copy()
+            payload.update({
+                "test": orig.test.id,
+                "title": orig.title,
+                "cwe": orig.cwe,
+                "severity": orig.severity,
+                "vulnerability_ids": [{"vulnerability_id": cve_value}],
+            })
+            payload["found_by"] = []
+
+            response = self.client.post(self.url, payload, format="json")
+            self.assertEqual(201, response.status_code, response.content[:1000])
+            new_id = response.data.get("id")
+            self.assertIsNotNone(new_id)
+            created = Finding.objects.get(id=new_id)
+
+            self.assertEqual(model_hash, created.hash_code)
 
     def test_filter_steps_to_reproduce(self):
         # Confirm initial data

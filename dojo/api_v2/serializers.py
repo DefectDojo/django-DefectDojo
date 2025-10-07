@@ -1676,6 +1676,8 @@ class VulnerabilityIdSerializer(serializers.ModelSerializer):
 
 
 class FindingSerializer(serializers.ModelSerializer):
+    mitigated = serializers.DateTimeField(required=False, allow_null=True)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(
@@ -1759,12 +1761,14 @@ class FindingSerializer(serializers.ModelSerializer):
         if reporter_id := validated_data.get("reporter"):
             instance.reporter = reporter_id
 
+        # Persist vulnerability IDs first so model save computes hash including them (if there is no hash yet)
+        # we can't pass unsaved_vulnerabilitiy_ids to super.update()
+        if parsed_vulnerability_ids:
+            save_vulnerability_ids(instance, parsed_vulnerability_ids)
+
         instance = super().update(
             instance, validated_data,
         )
-
-        if parsed_vulnerability_ids:
-            save_vulnerability_ids(instance, parsed_vulnerability_ids)
 
         if push_to_jira:
             jira_helper.push_to_jira(instance)
@@ -1772,6 +1776,21 @@ class FindingSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, data):
+        # Enforce mitigated metadata editability (only when non-null values are provided)
+        attempting_to_set_mitigated = any(
+            (field in data) and (data.get(field) is not None)
+            for field in ["mitigated", "mitigated_by"]
+        )
+        user = getattr(self.context.get("request", None), "user", None)
+        if attempting_to_set_mitigated and not finding_helper.can_edit_mitigated_data(user):
+            errors = {}
+            if ("mitigated" in data) and (data.get("mitigated") is not None):
+                errors["mitigated"] = ["Editing mitigated timestamp is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if ("mitigated_by" in data) and (data.get("mitigated_by") is not None):
+                errors["mitigated_by"] = ["Editing mitigated_by is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if errors:
+                raise serializers.ValidationError(errors)
+
         if self.context["request"].method == "PATCH":
             is_active = data.get("active", self.instance.active)
             is_verified = data.get("verified", self.instance.verified)
@@ -1841,6 +1860,8 @@ class FindingSerializer(serializers.ModelSerializer):
 
 
 class FindingCreateSerializer(serializers.ModelSerializer):
+    mitigated = serializers.DateTimeField(required=False, allow_null=True)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True, allow_null=True, required=False, many=True,
     )
@@ -1882,11 +1903,15 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
             logger.debug("VULNERABILITY_ID_SET: %s", vulnerability_ids)
             parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
+            logger.debug("PARSED_VULNERABILITY_IDST: %s", parsed_vulnerability_ids)
             logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
             validated_data["cve"] = parsed_vulnerability_ids[0]
+            # validated_data["unsaved_vulnerability_ids"] = parsed_vulnerability_ids
 
-        new_finding = super().create(
-            validated_data)
+        # super.create() doesn't accept unsaved_vulnerability_ids or dedupe_option=False, so call save directly.
+        new_finding = Finding(**validated_data)
+        new_finding.unsaved_vulnerability_ids = parsed_vulnerability_ids or []
+        new_finding.save()
 
         logger.debug(f"New finding CVE: {new_finding.cve}")
 
@@ -1899,9 +1924,6 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
-            # can we avoid this extra save? the cve has already been set above in validated_data. but there are no tests for this
-            # on finding update nothing is done # with vulnerability_ids?
-            # new_finding.save()
 
         if push_to_jira:
             jira_helper.push_to_jira(new_finding)
@@ -1909,6 +1931,21 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         return new_finding
 
     def validate(self, data):
+        # Ensure mitigated fields are only set when editable is enabled (ignore nulls)
+        attempting_to_set_mitigated = any(
+            (field in data) and (data.get(field) is not None)
+            for field in ["mitigated", "mitigated_by"]
+        )
+        user = getattr(getattr(self.context, "request", None), "user", None)
+        if attempting_to_set_mitigated and not finding_helper.can_edit_mitigated_data(user):
+            errors = {}
+            if ("mitigated" in data) and (data.get("mitigated") is not None):
+                errors["mitigated"] = ["Editing mitigated timestamp is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if ("mitigated_by" in data) and (data.get("mitigated_by") is not None):
+                errors["mitigated_by"] = ["Editing mitigated_by is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if errors:
+                raise serializers.ValidationError(errors)
+
         if "reporter" not in data:
             request = self.context["request"]
             data["reporter"] = request.user

@@ -14,8 +14,8 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
-from django.db.models import QuerySet
-from django.db.models.functions import Length
+from django.db.models import F, QuerySet
+from django.db.models.functions import Coalesce, ExtractDay, Length, TruncDate
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -274,7 +274,13 @@ class BaseListFindings:
         )
 
     def get_filtered_findings(self):
-        findings = get_authorized_findings(Permissions.Finding_View).order_by(self.get_order_by())
+        findings = get_authorized_findings(Permissions.Finding_View)
+        # Annotate computed SLA age in days: sla_expiration_date - (sla_start_date or date)
+        findings = findings.annotate(
+            sla_age_days=ExtractDay(
+                F("sla_expiration_date") - Coalesce(F("sla_start_date"), TruncDate("created")),
+            ),
+        ).order_by(self.get_order_by())
         findings = self.filter_findings_by_object(findings)
         return self.filter_findings_by_filter_name(findings)
 
@@ -1138,9 +1144,16 @@ def close_finding(request, fid):
     # we can do this with a Note
     note_type_activation = Note_Type.objects.filter(is_active=True)
     missing_note_types = get_missing_mandatory_notetypes(finding) if len(note_type_activation) else note_type_activation
-    form = CloseFindingForm(missing_note_types=missing_note_types)
+    form = CloseFindingForm(
+        missing_note_types=missing_note_types,
+        can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user),
+    )
     if request.method == "POST":
-        form = CloseFindingForm(request.POST, missing_note_types=missing_note_types)
+        form = CloseFindingForm(
+            request.POST,
+            missing_note_types=missing_note_types,
+            can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user),
+        )
 
         if form.is_valid():
             messages.add_message(request, messages.SUCCESS, "Note Saved.", extra_tags="alert-success")
@@ -1548,7 +1561,7 @@ def request_finding_review(request, fid):
 
             create_notification(
                 event="review_requested",  # TODO: - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
-                title="Finding review requested",
+                title=f"Finding review requested for Test created for {finding.test.engagement.product}: {finding.test.engagement.name}: {finding.test} - {finding.title}",
                 requested_by=user,
                 note=new_note,
                 finding=finding,

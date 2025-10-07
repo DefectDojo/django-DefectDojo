@@ -1624,7 +1624,9 @@ class ApiFindingFilter(DojoFilter):
             ("is_mitigated", "is_mitigated"),
             ("numerical_severity", "numerical_severity"),
             ("out_of_scope", "out_of_scope"),
+            ("planned_remediation_date", "planned_remediation_date"),
             ("severity", "severity"),
+            ("sla_expiration_date", "sla_expiration_date"),
             ("reviewers", "reviewers"),
             ("static_finding", "static_finding"),
             ("test__engagement__product__name", "test__engagement__product__name"),
@@ -1782,10 +1784,12 @@ class FindingFilterHelper(FilterSet):
             ("risk_acceptance__created__date",
              "risk_acceptance__created__date"),
             ("last_reviewed", "last_reviewed"),
+            ("planned_remediation_date", "planned_remediation_date"),
             ("title", "title"),
             ("test__engagement__product__name",
              "test__engagement__product__name"),
             ("service", "service"),
+            ("sla_age_days", "sla_age_days"),
             ("epss_score", "epss_score"),
             ("epss_percentile", "epss_percentile"),
             ("known_exploited", "known_exploited"),
@@ -1805,6 +1809,8 @@ class FindingFilterHelper(FilterSet):
             "known_exploited": "Known Exploited",
             "ransomware_used": "Ransomware Used",
             "kev_date": "Date added to KEV",
+            "sla_age_days": "SLA age (days)",
+            "planned_remediation_date": "Planned Remediation",
         },
     )
 
@@ -3498,6 +3504,81 @@ class LogEntryFilter(DojoFilter):
                 },
             },
         }
+
+
+class PgHistoryFilter(DojoFilter):
+
+    """
+    Filter for django-pghistory audit entries.
+
+    This filter works with pghistory event tables that have:
+    - pgh_created_at: timestamp of the event
+    - pgh_label: event type (insert/update/delete)
+    - user: user ID from context
+    - url: URL from context
+    - remote_addr: IP address from context
+    """
+
+    # Filter by event creation time (equivalent to auditlog timestamp)
+    pgh_created_at = DateRangeFilter(field_name="pgh_created_at", label="Timestamp")
+
+    # Filter by event type/label
+    pgh_label = ChoiceFilter(
+        field_name="pgh_label",
+        label="Event Type",
+        choices=[
+            ("", "All"),
+            ("insert", "Insert"),
+            ("update", "Update"),
+            ("delete", "Delete"),
+            ("initial_import", "Initial Import"),
+        ],
+    )
+
+    # Filter by user (from context)
+    user = ModelChoiceFilter(
+        field_name="user",
+        queryset=Dojo_User.objects.none(),
+        label="User",
+        empty_label="All Users",
+    )
+
+    # Filter by IP address (from context)
+    remote_addr = CharFilter(
+        field_name="remote_addr",
+        lookup_expr="icontains",
+        label="IP Address Contains",
+    )
+
+    # Filter by changes/diff field (JSON field containing what changed)
+    pgh_diff = CharFilter(
+        method="filter_pgh_diff_contains",
+        label="Changes Contains",
+        help_text="Search for field names or values in the changes (optimized for JSONB, but can be slow)",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form.fields["user"].queryset = get_authorized_users(Permissions.Product_View)
+
+    def filter_pgh_diff_contains(self, queryset, name, value):
+        """
+        Custom filter for pgh_diff that uses efficient JSONB operations.
+        Searches both keys and values in the JSONB field.
+        """
+        if not value:
+            return queryset
+
+        # Search in both keys and values using JSONB operators
+        return queryset.filter(
+            Q(pgh_diff__has_key=value) |  # Search in keys: {"severity": [...]}
+            Q(pgh_diff__has_any_keys=[value]) |  # Alternative key search
+            Q(pgh_diff__contains=f'"{value}"'),  # Search in values: ["severity", "other"]
+        )
+
+    class Meta:
+        fields = ["pgh_created_at", "pgh_label", "user", "url", "remote_addr", "pgh_diff"]
+        exclude = []
 
 
 class ProductTypeFilter(DojoFilter):

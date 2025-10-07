@@ -129,10 +129,13 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
             new_state_finding.mitigated = None
             new_state_finding.mitigated_by = None
 
-    # people may try to remove mitigated/mitigated_by by accident
+    # Ensure mitigated metadata is present for mitigated findings
+    # If values are provided (including custom ones), keep them; if missing, set defaults
     if new_state_finding.is_mitigated:
-        new_state_finding.mitigated = new_state_finding.mitigated or now
-        new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
+        if not new_state_finding.mitigated:
+            new_state_finding.mitigated = now
+        if not new_state_finding.mitigated_by:
+            new_state_finding.mitigated_by = user
 
     if is_new_finding or "active" in changed_fields:
         # finding is being (re)activated
@@ -185,7 +188,7 @@ def filter_findings_by_existence(findings):
 
 
 def can_edit_mitigated_data(user):
-    return settings.EDITABLE_MITIGATED_DATA and user.is_superuser
+    return settings.EDITABLE_MITIGATED_DATA and user and getattr(user, "is_superuser", False)
 
 
 def create_finding_group(finds, finding_group_name):
