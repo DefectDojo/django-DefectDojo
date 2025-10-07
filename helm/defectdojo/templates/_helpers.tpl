@@ -1,15 +1,15 @@
-{{/* vim: set filetype=mustache: */}}
-{{/*
-Expand the name of the chart.
+{{- /* vim: set filetype=mustache: */}}
+{{- /*
+  Expand the name of the chart.
 */}}
 {{- define "defectdojo.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
+{{- /*
+  Create a default fully qualified app name.
+  We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+  If release name contains chart name it will be used as a full name.
 */}}
 {{- define "defectdojo.fullname" -}}
 {{- if .Values.fullnameOverride -}}
@@ -24,15 +24,15 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 {{- end -}}
 
-{{/*
-Create chart name and version as used by the chart label.
+{{- /*
+  Create chart name and version as used by the chart label.
 */}}
 {{- define "defectdojo.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{/*
-Create the name of the service account to use
+{{- /*
+  Create the name of the service account to use
 */}}
 {{- define "defectdojo.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
@@ -42,7 +42,7 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Determine the hostname to use for PostgreSQL/Redis.
 */}}
 {{- define "postgresql.hostname" -}}
@@ -67,7 +67,7 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Determine the protocol to use for Redis.
 */}}
 {{- define "redis.scheme" -}}
@@ -82,7 +82,7 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Builds the repository names for use with local or private registries
 */}}
 {{- define "celery.repository" -}}
@@ -109,7 +109,7 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Creates the array for DD_ALLOWED_HOSTS in configmap
 */}}
 {{- define "django.allowed_hosts" -}}
@@ -121,7 +121,7 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Creates the persistentVolumeName
 */}}
 {{- define "django.pvc_name" -}}
@@ -132,7 +132,7 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Define db-migration-checker
 */}}
 {{- define "dbMigrationChecker" -}}
@@ -145,7 +145,11 @@ Create the name of the service account to use
   imagePullPolicy: {{ .Values.imagePullPolicy }}
   {{- if .Values.securityContext.enabled }}
   securityContext:
-    {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 4 }}
+    {{- include "helpers.securityContext" (list
+    .Values
+    "securityContext.containerSecurityContext"
+    "dbMigrationChecker.containerSecurityContext"
+  ) | nindent 4 }}
   {{- end }}
   envFrom:
   - configMapRef:
@@ -163,9 +167,64 @@ Create the name of the service account to use
       secretKeyRef:
         name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
         key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
-  {{- if .Values.extraEnv }}
-  {{- toYaml .Values.extraEnv | nindent 2 }}
+  {{- with .Values.extraEnv }}
+    {{- toYaml . | nindent 2 }}
+  {{- end }}
+  {{- with.Values.dbMigrationChecker.extraEnv }}
+    {{- toYaml . | nindent 2 }}
   {{- end }}
   resources:
     {{- toYaml .Values.dbMigrationChecker.resources | nindent 4 }}
+  {{- with .Values.dbMigrationChecker.extraVolumeMounts }}
+  volumeMounts:
+    {{- . | toYaml | nindent 4 }}
+  {{- end }}
+{{- end -}}
+
+{{- /*
+Returns the JSON representation of the value for a dot-notation path
+from a given context.
+  Args:
+    0: context (e.g., .Values)
+    1: path (e.g., "foo.bar")
+*/}}
+{{- define "helpers.getValue" -}}
+  {{- $ctx := merge dict (index . 0) -}}
+  {{- $path := index . 1 -}}
+  {{- $parts := splitList "." $path -}}
+  {{- $value := $ctx -}}
+  {{- range $idx, $part := $parts -}}
+    {{- if kindIs "map" $value -}}
+      {{- $value = index $value $part -}}
+    {{- else -}}
+      {{- $value = "" -}}
+      {{- /* Exit early by setting to last iteration */}}
+      {{- $idx = sub (len $parts) 1 -}}
+    {{- end -}}
+  {{- end -}}
+  {{- toJson $value -}}
+{{- end -}}
+
+{{- /*
+  Build the security context.
+  Args:
+    0: values context (.Values)
+    1: the default security context key (e.g. "securityContext.containerSecurityContext")
+    2: the key under the context with security context (e.g., "foo.bar")
+*/}}
+{{- define "helpers.securityContext" -}}
+{{- $values := merge dict (index . 0) -}}
+{{- $defaultSecurityContextKey := index . 1 -}}
+{{- $securityContextKey := index . 2 -}}
+{{- $securityContext := dict -}}
+{{- with $values }}
+  {{- $securityContext = (merge
+    $securityContext
+    (include "helpers.getValue" (list $values $defaultSecurityContextKey) | fromJson)
+    (include "helpers.getValue" (list $values $securityContextKey) | fromJson)
+  ) -}}
+{{- end -}}
+{{- with $securityContext -}}
+{{- . | toYaml | nindent 2 -}}
+{{- end -}}
 {{- end -}}
