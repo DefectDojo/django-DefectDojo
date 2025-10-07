@@ -476,23 +476,33 @@ def orphans_reclassification(request: HttpRequest) -> HttpResponse:
 def reclassify_orphan_products(request: HttpRequest) -> HttpResponse:
     if not has_permission_to_reclassify_orphans(request.user):
         raise PermissionDenied
-    
+
     data = request.POST
     product_type_id = data.get('product_type')
     selected_orphan_products = data.getlist('selected_products')
-    
+
     product_type = get_object_or_404(Product_Type, pk=product_type_id)
-    _ = Product.objects.filter(
+
+    Product.objects.filter(
         prod_type__name=ORPHAN_PRODUCT_TYPE_NAME,
         id__in=selected_orphan_products
     ).update(prod_type=product_type)
-    
+
+    products = Product.objects.filter(id__in=selected_orphan_products)
+    for p in products:
+        current_tags = list(p.tags.get_tag_list())
+        if 'identified_by_orphan_reclassification' not in current_tags:
+            current_tags.append('identified_by_orphan_reclassification')
+            p.tags.set(current_tags)
+            p.save()
+
     messages.add_message(
-            request,
-            messages.SUCCESS,
-            f"{len(selected_orphan_products)} products reclassified to '{product_type.name}'.",
-            extra_tags="alert-success")
-    
+        request,
+        messages.SUCCESS,
+        f"{len(selected_orphan_products)} products reclassified to '{product_type.name}'.",
+        extra_tags="alert-success"
+    )
+
     return redirect('orphans_reclassification')
 
 
@@ -568,20 +578,20 @@ def get_processing_status(request):
 def process_batch(request):
     if not has_permission_to_reclassify_orphans(request.user):
         raise PermissionDenied
-    
+
     if request.method == 'POST':
         data = json.loads(request.body)
         session_key = data.get('session_key')
         batch_size = data.get('batch_size', 100)
-        
+
         if not session_key or session_key not in request.session:
             return JsonResponse({'status': 'error', 'message': 'Session not found'})
-        
+
         progress_data = request.session[session_key]
-        
+
         start_index = progress_data['processed']
         end_index = min(start_index + batch_size, progress_data['total'])
-        
+
         if start_index >= end_index:
             return JsonResponse({
                 'status': 'completed',
@@ -591,35 +601,36 @@ def process_batch(request):
                 'failed': progress_data['failed'],
                 'completed': True
             })
-        
+
         batch_products = progress_data['products'][start_index:end_index]
-        
+
         product_names = [p['product_name'] for p in batch_products]
         product_type_names = list(set([p['product_type_name'] for p in batch_products]))
-        
+
         products_qs = Product.objects.filter(
             name__in=product_names,
             prod_type__name=ORPHAN_PRODUCT_TYPE_NAME
         ).select_related('prod_type')
-        
+
         product_types_qs = Product_Type.objects.filter(name__in=product_type_names)
-        
+
         products_dict = {p.name: p for p in products_qs}
         product_types_dict = {pt.name: pt for pt in product_types_qs}
-        
+
         products_to_update = []
         successful_updates = 0
-        
+
         for product_data in batch_products:
             product_name = product_data['product_name']
             product_type_name = product_data['product_type_name']
-            
+
             product = products_dict.get(product_name)
             product_type = product_types_dict.get(product_type_name)
-            
+
             if product and product_type:
                 product.prod_type = product_type
                 products_to_update.append(product)
+
                 product_data['status'] = 'success'
                 successful_updates += 1
             else:
@@ -628,18 +639,25 @@ def process_batch(request):
                     product_data['error'] = "Product not found or not an orphan"
                 else:
                     product_data['error'] = "ProductType not found"
-        
+
         if products_to_update:
             Product.objects.bulk_update(products_to_update, ['prod_type'])
-        
+
+            for product in products_to_update:
+                current_tags = set(product.tags.get_tag_list())
+                if 'identified_by_orphan_reclassification' not in current_tags:
+                    product.tags.add('identified_by_orphan_reclassification')
+
+                product.save()
+
         failed_updates = len(batch_products) - successful_updates
         progress_data['processed'] = end_index
         progress_data['successful'] += successful_updates
         progress_data['failed'] += failed_updates
-        
+
         request.session[session_key] = progress_data
         request.session.modified = True
-        
+
         return JsonResponse({
             'status': 'processing',
             'processed': progress_data['processed'],

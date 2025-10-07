@@ -556,11 +556,13 @@
                                                         {% trans "Vulnerability Black & White Lists" %}
                                                     </a>
                                                 </li>
-                                                <li>
-                                                    <a rel="noopener noreferrer" href="{% url 'orphans_reclassification' %}">
-                                                        {% trans "Reclassify Orphan Products" %}
-                                                    </a>
-                                                </li>
+                                                {% if request.user|is_in_reviewer_group %}
+                                                    <li>
+                                                        <a rel="noopener noreferrer" href="{% url 'orphans_reclassification' %}">
+                                                            {% trans "Reclassify Orphan Products" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
