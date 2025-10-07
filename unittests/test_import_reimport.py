@@ -10,8 +10,6 @@ from django.test import override_settings
 from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
 
 from dojo.models import Finding, Test, Test_Type, User
 
@@ -1751,10 +1749,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         testuser = User.objects.get(username="admin")
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
-
-        token = Token.objects.get(user=testuser)
-        self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        self.login_as_admin()
         # self.url = reverse(self.viewname + '-list')
 
     # Statistics only available in API Response
@@ -2029,10 +2024,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         testuser = User.objects.get(username="admin")
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
-
-        token = Token.objects.get(user=testuser)
-        self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        self.login_as_admin()
         # self.url = reverse(self.viewname + '-list')
 
         self.client_ui = Client()
