@@ -254,20 +254,19 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
             total_instances = sum(len(pk_list) for pk_list in captured_tasks.values())
             threshold = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_THRESHOLD", 100)
 
-            # If threshold is below 0, async updating is disabled
-            if total_instances <= 0:
-                return
-
-            if threshold < 0:
-                logger.debug(f"AsyncSearchContextMiddleware: Async updating disabled (threshold={threshold}), using synchronous update")
-            elif total_instances > threshold:
-                logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances > {threshold} threshold, triggering async update")
-                self._trigger_async_index_update(captured_tasks)
-                # Invalidate to prevent synchronous index update by super()._close_search_context()
-                search_context_manager.invalidate()
-            else:
-                logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances <= {threshold} threshold, using synchronous update")
-                # Let watson handle synchronous update for small numbers
+            # only needed when at least one model instance is updated
+            if total_instances > 0:
+                # If threshold is below 0, async updating is disabled
+                if threshold < 0:
+                    logger.debug(f"AsyncSearchContextMiddleware: Async updating disabled (threshold={threshold}), using synchronous update")
+                elif total_instances > threshold:
+                    logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances > {threshold} threshold, triggering async update")
+                    self._trigger_async_index_update(captured_tasks)
+                    # Invalidate to prevent synchronous index update by super()._close_search_context()
+                    search_context_manager.invalidate()
+                else:
+                    logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances <= {threshold} threshold, using synchronous update")
+                    # Let watson handle synchronous update for small numbers
 
         super()._close_search_context(request)
 
