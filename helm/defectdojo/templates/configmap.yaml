@@ -1,4 +1,5 @@
 {{- $fullName := include "defectdojo.fullname" . -}}
+{{- $defaultBrokerParams := ternary "ssl_cert_reqs=optional" "" .Values.redis.tls.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -28,7 +29,7 @@ data:
   DD_CELERY_BROKER_USER: ''
   DD_CELERY_BROKER_HOST: {{ if eq .Values.celery.broker "redis" }}{{ template "redis.hostname" . }}{{ end }}
   DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "redis" }}{{- if ( hasKey .Values.redis "master" ) -}}{{ .Values.redis.master.service.ports.redis }}{{ else }}6379{{ end }}{{- end -}}'
-  DD_CELERY_BROKER_PARAMS: '{{ if eq .Values.celery.broker "redis" }}{{- if .Values.redis.transportEncryption.enabled -}}{{ .Values.redis.transportEncryption.params | default "ssl_cert_reqs=optional" }}{{ end }}{{ end }}'
+  DD_CELERY_BROKER_PARAMS: '{{ .Values.redisParams | default $defaultBrokerParams }}'
   DD_CELERY_BROKER_PATH: '{{ .Values.celery.path | default "//" }}'
   DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}
   DD_CELERY_WORKER_POOL_TYPE: {{ .Values.celery.worker.appSettings.poolType | default "solo" }}
@@ -47,12 +48,15 @@ data:
   DD_UWSGI_PASS: unix:///run/defectdojo/uwsgi.sock
   DD_UWSGI_NUM_OF_PROCESSES: '{{ .Values.django.uwsgi.appSettings.processes | default 4 }}'
   DD_UWSGI_NUM_OF_THREADS: '{{ .Values.django.uwsgi.appSettings.threads | default 4 }}'
+  {{- if  .Values.django.uwsgi.appSettings.maxFd }}
   DD_UWSGI_MAX_FD: '{{ .Values.django.uwsgi.appSettings.maxFd }}'
+  {{- end }}
   DD_DJANGO_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
   NGINX_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
   METRICS_HTTP_AUTH_USER: {{ .Values.monitoring.user | default "monitoring" }}
 {{- if  .Values.django.uwsgi.certificates.enabled }}
   REQUESTS_CA_BUNDLE: {{ .Values.django.uwsgi.certificates.certMountPath }}{{ .Values.django.uwsgi.certificates.certFileName }}
 {{- end }}
-{{- with .Values.extraConfigs  }}
-  {{- toYaml . | nindent 2 }}{{- end }}
+{{- with .Values.extraConfigs }}
+  {{- toYaml . | nindent 2 }}
+{{- end }}

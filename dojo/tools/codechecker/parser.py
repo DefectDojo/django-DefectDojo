@@ -128,4 +128,4 @@ def get_mapped_severity(severity):
         "STYLE": "Info",
         "UNSPECIFIED": "Info",
     }
-    return switcher.get(severity.upper(), None)
+    return switcher.get(severity.upper())

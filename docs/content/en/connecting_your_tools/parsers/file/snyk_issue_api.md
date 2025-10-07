@@ -2,7 +2,11 @@
 title: "Snyk Issue API"
 toc_hide: true
 ---
-The Snyk Issue API parser supports importing vulnerability data from the Snyk Issue API in JSON format. Currently only parsing issues of type `code` is supported. Samples of ther issue types are welcome.
+The Snyk Issue API parser supports importing vulnerability data from the Snyk Issue API in JSON format.
+
+Currently parsing issues of type `code` (SAST) and `package_vulnerability` (SCA) are supported.
+
+Samples of ther issue types are welcome.
 
 For more information about the Snyk Issue API, refer to the [official Snyk API documentation](https://docs.snyk.io/snyk-api/reference/issues#get-orgs-org_id-issues).
 

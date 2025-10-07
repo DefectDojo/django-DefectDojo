@@ -1,3 +1,4 @@
+import importlib
 import io
 import json
 import logging
@@ -206,7 +207,7 @@ def can_be_pushed_to_jira(obj, form=None):
             return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "error_below_minimum_threshold"
     elif isinstance(obj, Finding_Group):
         finding_group_status = _safely_get_obj_status_for_jira(obj)
-        logger.error(f"Finding group status: {finding_group_status}")
+        logger.error("Finding group status: %s", finding_group_status)
         if "Empty" in finding_group_status:
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it contains no findings above minimum treshold.", "error_empty"
 
@@ -444,7 +445,6 @@ def connect_to_jira(jira_server, jira_username, jira_password):
 def get_jira_connect_method():
     if hasattr(settings, "JIRA_CONNECT_METHOD"):
         try:
-            import importlib
             mn, _, fn = settings.JIRA_CONNECT_METHOD.rpartition(".")
             m = importlib.import_module(mn)
             return getattr(m, fn)
@@ -1655,7 +1655,7 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
     # jform = JIRAProjectForm(request.POST, instance=instance if instance else JIRA_Project(), product=product)
     jform = JIRAProjectForm(request.POST, instance=instance, target=target, product=product, engagement=engagement)
     # logging has_changed because it sometimes doesn't do what we expect
-    logger.debug("jform has changed: %s", str(jform.has_changed()))
+    logger.debug("jform has changed: %s", jform.has_changed())
 
     if jform.has_changed():  # if no data was changed, no need to do anything!
         logger.debug("jform changed_data: %s", jform.changed_data)
@@ -1778,7 +1778,7 @@ def escape_for_jira(text):
 
 def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jira_issue, finding_group: Finding_Group = None) -> bool:
     """Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly"""
-    import dojo.risk_acceptance.helper as ra_helper
+    import dojo.risk_acceptance.helper as ra_helper  # noqa: PLC0415 import error
     status_changed = False
     resolved = resolution_id is not None
     jira_instance = get_jira_instance(finding)

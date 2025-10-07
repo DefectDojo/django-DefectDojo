@@ -658,7 +658,8 @@ class ImportReimportMixin:
     def test_import_veracode_reimport_veracode_same_unique_id_different_hash_code(self):
         logger.debug("reimporting report with one finding having same unique_id_from_tool but different hash_code, verified=False")
 
-        import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
+        with assertTestImportModelsCreated(self, imports=1, created=4, affected_findings=4, closed=0, reactivated=0, untouched=0):
+            import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
 
         test_id = import_veracode_many_findings["test"]
 
@@ -1748,6 +1749,9 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
 
     def setUp(self):
         testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
@@ -2023,6 +2027,9 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
     def setUp(self):
         # still using the API to verify results
         testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)

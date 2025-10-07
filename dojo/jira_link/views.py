@@ -387,7 +387,7 @@ class NewJiraView(View):
             create_notification(
                 event="jira_config_added",
                 title=f"New addition of JIRA: {jform.cleaned_data.get('configuration_name')}",
-                description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was added by {request.user}",
+                description=f'JIRA "{jform.cleaned_data.get('configuration_name')}" was added by {request.user}',
                 url=request.build_absolute_uri(reverse("jira")))
 
             return HttpResponseRedirect(reverse("jira"))
@@ -432,7 +432,7 @@ class AdvancedJiraView(View):
             create_notification(
                 event="jira_config_added",
                 title=f"New addition of JIRA: {jform.cleaned_data.get('configuration_name')}",
-                description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was added by {request.user}",
+                description=f'JIRA "{jform.cleaned_data.get('configuration_name')}" was added by {request.user}',
                 url=request.build_absolute_uri(reverse("jira")))
 
             return HttpResponseRedirect(reverse("jira"))
@@ -486,7 +486,7 @@ class EditJiraView(View):
             create_notification(
                 event="jira_config_edited",
                 title=f"Edit of JIRA: {jform.cleaned_data.get('configuration_name')}",
-                description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was edited by {request.user}",
+                description=f'JIRA "{jform.cleaned_data.get('configuration_name')}" was edited by {request.user}',
                 url=request.build_absolute_uri(reverse("jira")))
 
             return HttpResponseRedirect(reverse("jira"))
