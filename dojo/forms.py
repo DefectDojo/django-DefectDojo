@@ -1115,8 +1115,14 @@ class RiskPendingForm(forms.ModelForm):
         widget=forms.widgets.MultipleHiddenInput(),
     )
     approvers = forms.MultipleChoiceField(
-        choices=[],
+        widget=forms.TextInput(attrs={'disabled': 'disabled'}),
         required=False,
+    )
+    approvers_long_acceptance = forms.ModelChoiceField(
+        queryset=Dojo_User.objects.none(),
+        widget=forms.widgets.Select(attrs={'size': 1}),
+        required=False,
+        help_text=("Selection el user what to aprroved to solicuted")
     )
     path = forms.FileField(
         label="Proof",
@@ -1159,6 +1165,9 @@ class RiskPendingForm(forms.ModelForm):
 
         queryset_permissions = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['accepted_findings'].queryset = queryset_permissions
+        self.fields['approvers_long_acceptance'].queryset = get_users_for_group(
+            GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_risk")
+            ) 
         self.fields['accepted_by'].queryset = get_authorized_contacts_for_product_type(self.severity, product, product_type)
         owner_username = self.fields['owner'].queryset.first().username
         if (category and category in settings.COMPLIANCE_FILTER_RISK) and not self.fields['accepted_by'].queryset.filter(username=owner_username).exists():
@@ -1167,7 +1176,6 @@ class RiskPendingForm(forms.ModelForm):
             self.fields['accepted_by'].queryset = get_users_for_group('Compliance')
         else:
             user_approvers = self.fields['accepted_by'].queryset.filter(username=owner_username) if self.fields['owner'].queryset.filter(global_role__role__name="Maintainer").exists() else self.fields['accepted_by'].queryset.filter(~Q(global_role__role__name="Maintainer"))
-            # Validar que usuarios puede hacepar, con que roles, por ejemploo el de cibersecurity , en mis caso el risk.
             user_approvers = [(user.username,user.username) for user in user_approvers]
             self.fields['approvers'].choices = user_approvers 
 

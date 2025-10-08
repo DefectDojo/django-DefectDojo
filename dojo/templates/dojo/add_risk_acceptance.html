@@ -72,9 +72,13 @@
         $("#id_long_term_acceptance").on('change', function() {
             if ($(this).val() === "True") {
                 date.show();
+                $("#id_approvers").closest(".form-group").hide()
+                $("#id_approvers_long_acceptance").closest(".form-group").show()
                 $("#id_expiration_date").closest(".form-group").show();
             } else {
                 date.hide();
+                $("#id_approvers").closest(".form-group").show()
+                $("#id_approvers_long_acceptance").closest(".form-group").hide()
                 $("#id_expiration_date").closest(".form-group").hide();
             }
         });
