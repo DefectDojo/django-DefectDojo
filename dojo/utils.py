@@ -19,6 +19,7 @@ import cvss
 import hyperlink
 import vobject
 from PIL import Image
+from pypdf import PdfReader
 from django.core.exceptions import ValidationError
 from asteval import Interpreter
 from azure.devops.connection import Connection
@@ -2963,12 +2964,18 @@ def validate_type_file(file, allowed_exts):
         if file.content_type not in allowed_types:
             logger.error("Type of content not allowed")
 
-        if ext in ['.jpg', '.png']:
-            try:
-                img = Image.open(file)
-                img.verify()
+        try:
+            file.seek(0)
+            if ext in ['.jpg', '.png']:
+                    img = Image.open(file)
+                    img.verify()
+                    file.seek(0)
+            elif ext == '.pdf':
                 file.seek(0)
-            except Exception:
-                raise ValidationError("Server error")
+                reader = PdfReader(file)
+                _ = reader.pages[0]
+            file.seek(0)
+        except Exception:
+            raise ValidationError("Server error")
 
         return file
