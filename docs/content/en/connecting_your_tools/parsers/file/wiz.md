@@ -4,10 +4,6 @@ toc_hide: true
 weight: 1
 ---
 
-# Wiz Scanner Parser Documentation
-
-## Overview
-
 The [Wiz](https://www.wiz.io/) parser for DefectDojo supports imports from both Wiz Scanner Standard and SCA (Software Composition Analysis) .csv output from Wiz.io. This document details the parsing of both formats into DefectDojo field mappings, unmapped fields, and location of each field's parsing code for easier troubleshooting and analysis.
 
 ## Supported File Types
