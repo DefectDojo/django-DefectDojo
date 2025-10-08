@@ -56,6 +56,44 @@ class Command(BaseCommand):
         }
         return excluded_fields_map.get(model_name, [])
 
+    def process_batch(self, event_model, event_records, model_name, dry_run, batch_start_time, processed, backfill_count, *, is_final_batch=False):
+        """Process a batch of event records by bulk creating them in the database."""
+        if not event_records:
+            return 0, batch_start_time
+
+        if dry_run:
+            actually_created = len(event_records)
+        else:
+            try:
+                attempted = len(event_records)
+                # No need to pass batch_size since we're already batching ourselves
+                created_objects = event_model.objects.bulk_create(event_records)
+                actually_created = len(created_objects) if created_objects else 0
+
+                if actually_created != attempted:
+                    logger.warning(
+                        f"bulk_create for {model_name}: attempted {attempted}, "
+                        f"actually created {actually_created} ({attempted - actually_created} skipped)",
+                    )
+            except Exception:
+                logger.exception(f"Failed to bulk create events for {model_name}")
+                raise
+
+        # Calculate timing after the actual database operation
+        batch_end_time = time.time()
+        batch_duration = batch_end_time - batch_start_time
+        batch_records_per_second = len(event_records) / batch_duration if batch_duration > 0 else 0
+
+        # Log batch timing
+        if is_final_batch:
+            self.stdout.write(f"  Final batch: {batch_duration:.2f}s ({batch_records_per_second:.1f} records/sec)")
+        else:
+            progress = (processed + actually_created) / backfill_count * 100
+            self.stdout.write(f"  Processed {processed + actually_created:,}/{backfill_count:,} records needing backfill ({progress:.1f}%) - "
+                            f"Last batch: {batch_duration:.2f}s ({batch_records_per_second:.1f} records/sec)")
+
+        return actually_created, batch_end_time
+
     def enable_db_logging(self):
         """Enable database query logging for this command."""
         # Store original DEBUG setting
@@ -257,7 +295,7 @@ class Command(BaseCommand):
 
                         event_records.append(EventModel(**event_data))
 
-                    except Exception as e:
+                    except Exception:
                         failed_records.append(instance.id)
                         logger.exception(
                             f"Failed to prepare event for {model_name} ID {instance.id}",
@@ -265,62 +303,24 @@ class Command(BaseCommand):
 
                     # Bulk create when we hit batch_size records
                     if len(event_records) >= batch_size:
-                        batch_end_time = time.time()
-                        batch_duration = batch_end_time - batch_start_time
-                        batch_records_per_second = len(event_records) / batch_duration if batch_duration > 0 else 0
-
-                        if not dry_run and event_records:
-                            try:
-                                attempted = len(event_records)
-                                created_objects = EventModel.objects.bulk_create(event_records, batch_size=batch_size)
-                                actually_created = len(created_objects) if created_objects else 0
-                                processed += actually_created
-
-                                if actually_created != attempted:
-                                    logger.warning(
-                                        f"bulk_create for {model_name}: attempted {attempted}, "
-                                        f"actually created {actually_created} ({attempted - actually_created} skipped)",
-                                    )
-                            except Exception as e:
-                                logger.exception(f"Failed to bulk create events for {model_name}")
-                                raise
-                        elif dry_run:
-                            processed += len(event_records)
+                        # Process the batch
+                        batch_processed, batch_start_time = self.process_batch(
+                            EventModel, event_records, model_name, dry_run,
+                            batch_start_time, processed, backfill_count,
+                        )
+                        processed += batch_processed
 
                         event_records = []  # Reset for next batch
                         batch_start_time = time.time()  # Reset batch timer
 
-                        # Progress update with batch timing
-                        progress = (processed / backfill_count) * 100
-                        self.stdout.write(f"  Processed {processed:,}/{backfill_count:,} records needing backfill ({progress:.1f}%) - "
-                                        f"Last batch: {batch_duration:.2f}s ({batch_records_per_second:.1f} records/sec)")
-
                 # Handle remaining records
                 if event_records:
-                    batch_end_time = time.time()
-                    batch_duration = batch_end_time - batch_start_time
-                    batch_records_per_second = len(event_records) / batch_duration if batch_duration > 0 else 0
-
-                    if not dry_run:
-                        try:
-                            attempted = len(event_records)
-                            created_objects = EventModel.objects.bulk_create(event_records, batch_size=batch_size)
-                            actually_created = len(created_objects) if created_objects else 0
-                            processed += actually_created
-
-                            if actually_created != attempted:
-                                logger.warning(
-                                    f"bulk_create final batch for {model_name}: attempted {attempted}, "
-                                    f"actually created {actually_created} ({attempted - actually_created} skipped)",
-                                )
-                        except Exception as e:
-                            logger.exception(f"Failed to bulk create final batch for {model_name}")
-                            raise
-                    else:
-                        processed += len(event_records)
-
-                    # Log final batch timing
-                    self.stdout.write(f"  Final batch: {batch_duration:.2f}s ({batch_records_per_second:.1f} records/sec)")
+                    # Process the final batch
+                    batch_processed, _ = self.process_batch(
+                        EventModel, event_records, model_name, dry_run,
+                        batch_start_time, processed, backfill_count, is_final_batch=True,
+                    )
+                    processed += batch_processed
 
                 # Final progress update
                 if backfill_count > 0:
