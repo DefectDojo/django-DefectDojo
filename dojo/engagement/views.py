@@ -974,7 +974,7 @@ class ImportScanResultsView(View):
             "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
             "close_old_findings_product_scope": form.cleaned_data.get("close_old_findings_product_scope", None),
             "group_by": form.cleaned_data.get("group_by", None),
-            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings"),
+            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings", None),
             "environment": self.get_development_environment(environment_name=form.cleaned_data.get("environment")),
         })
         # Create the engagement if necessary
