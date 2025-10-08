@@ -76,6 +76,8 @@ spec:
       volumes:
       - name: run
         emptyDir: {}
+      - name: nginx-cache
+        emptyDir: {}
       {{- if .Values.localsettingspy }}
       - name: localsettingspy
         configMap:
@@ -296,6 +298,8 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        - name: nginx-cache
+          mountPath: /var/cache/nginx
         {{- with .Values.django.extraVolumeMounts }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}

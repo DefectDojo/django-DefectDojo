@@ -4,6 +4,8 @@ services:
     environment:
       USE_TLS: 'true'
       GENERATE_TLS_CERTIFICATE: 'true'
+    tmpfs:
+      - /etc/nginx/ssl:uid=101,gid=101
     ports:
       - target: 8443
         published: ${DD_TLS_PORT:-8443}

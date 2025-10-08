@@ -64,18 +64,23 @@ COPY dojo/ ./dojo/
 RUN env DD_SECRET_KEY='.' DD_DJANGO_DEBUG_TOOLBAR_ENABLED=True python3 manage.py collectstatic --noinput --verbosity=2 && true
 
 FROM nginx:1.29.1-alpine3.22@sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8
-ARG uid=1001
-ARG appuser=defectdojo
+ARG uid=101
+ARG gid=101
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
   apk add --no-cache openssl && \
   chmod -R g=u /var/cache/nginx && \
+  chown -R ${uid}:${gid} /var/cache/nginx && \
   mkdir /var/run/defectdojo && \
   chmod -R g=u /var/run/defectdojo && \
+  chown -R ${uid}:${gid} /var/run/defectdojo && \
+  chmod -R g=u /run/defectdojo && \
+  chown -R ${uid}:${gid} /run/defectdojo && \
   mkdir -p /etc/nginx/ssl && \
   chmod -R g=u /etc/nginx && \
+  chown -R ${uid}:${gid} /etc/nginx && \
   true
 ENV \
   DD_UWSGI_PASS="uwsgi_server" \
@@ -86,6 +91,6 @@ ENV \
   NGINX_METRICS_ENABLED="false" \
   METRICS_HTTP_AUTH_USER="" \
   METRICS_HTTP_AUTH_PASSWORD=""
-USER ${uid}
+USER ${uid}:${gid}
 EXPOSE 8080
 ENTRYPOINT ["/entrypoint-nginx.sh"]

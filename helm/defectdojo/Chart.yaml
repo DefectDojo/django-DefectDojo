@@ -19,4 +19,6 @@ dependencies:
     condition: redis.enabled
 annotations:
   artifacthub.io/prerelease: "true"
-  artifacthub.io/changes: ""
+  artifacthub.io/changes: |
+    - kind: changed
+      description: Hardening of Nginx container

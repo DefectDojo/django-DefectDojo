@@ -286,8 +286,14 @@ django:
   nginx:
     # Container security context for the nginx containers.
     containerSecurityContext:
-      # nginx dockerfile sets USER=1001
-      runAsUser: 1001
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+      runAsNonRoot: true
+      runAsUser: 101
+      runAsGroup: 101
     # To extra environment variables to the nginx container, you can use extraEnv. For example:
     # extraEnv:
     # - name: FOO
