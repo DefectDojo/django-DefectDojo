@@ -100,13 +100,20 @@ class AWSInspector2Parser:
 
         return finding
 
+# Extracting CVSS from packageVulnerabilityDetails.cvss[] 
+# to get the original CVE CVSS score in CVSS object vs  AWS Inspector's adjusted score
     def get_cvss_details(self, finding: Finding, raw_finding: dict) -> Finding:
-        cvss_details = raw_finding.get("inspectorScoreDetails", {}).get("adjustedCvss", {})
-        if cvss_vector := cvss_details.get("scoringVector"):
-            if cvss_data := parse_cvss_data(cvss_vector):
-                finding.cvssv2 = cvss_data.get("cvssv2")
-                finding.cvssv3 = cvss_data.get("cvssv3")
-                finding.cvssv4 = cvss_data.get("cvssv4")
+        package_vuln_details = raw_finding.get("packageVulnerabilityDetails", {})
+        cvss_list = package_vuln_details.get("cvss", [])
+
+        if cvss_list and len(cvss_list) > 0:
+            # Use the first CVSS entry (typically from NVD)
+            cvss_entry = cvss_list[0]
+            if cvss_vector := cvss_entry.get("scoringVector"):
+                if cvss_data := parse_cvss_data(cvss_vector):
+                    finding.cvssv2 = cvss_data.get("cvssv2")
+                    finding.cvssv3 = cvss_data.get("cvssv3")
+                    finding.cvssv4 = cvss_data.get("cvssv4")
 
         return finding
 
