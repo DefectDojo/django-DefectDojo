@@ -163,7 +163,7 @@ zipp==3.23.0
 prompt_toolkit==3.0.52
 prometheus_client==0.22.1
 typing_extensions==4.15.0
-propcache==0.4.0
+propcache==0.4.1
 py==1.11.0
 soupsieve==2.8
 hashids==1.3.1
