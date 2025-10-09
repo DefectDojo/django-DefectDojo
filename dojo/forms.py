@@ -1115,7 +1115,7 @@ class RiskPendingForm(forms.ModelForm):
         widget=forms.widgets.MultipleHiddenInput(),
     )
     approvers = forms.MultipleChoiceField(
-        widget=forms.TextInput(attrs={'disabled': 'disabled'}),
+        widget=forms.widgets.SelectMultiple(attrs={'disabled':'disabled'}),
         required=False,
     )
     approvers_long_acceptance = forms.ModelChoiceField(
@@ -1168,6 +1168,7 @@ class RiskPendingForm(forms.ModelForm):
         self.fields['approvers_long_acceptance'].queryset = get_users_for_group(
             GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_risk")
             ) 
+        self.fields['approvers_long_acceptance'].initial = self.fields['approvers_long_acceptance'].queryset.last()
         self.fields['accepted_by'].queryset = get_authorized_contacts_for_product_type(self.severity, product, product_type)
         owner_username = self.fields['owner'].queryset.first().username
         if (category and category in settings.COMPLIANCE_FILTER_RISK) and not self.fields['accepted_by'].queryset.filter(username=owner_username).exists():
@@ -1176,8 +1177,8 @@ class RiskPendingForm(forms.ModelForm):
             self.fields['accepted_by'].queryset = get_users_for_group('Compliance')
         else:
             user_approvers = self.fields['accepted_by'].queryset.filter(username=owner_username) if self.fields['owner'].queryset.filter(global_role__role__name="Maintainer").exists() else self.fields['accepted_by'].queryset.filter(~Q(global_role__role__name="Maintainer"))
-            user_approvers = [(user.username,user.username) for user in user_approvers]
-            self.fields['approvers'].choices = user_approvers 
+            self.fields['approvers'].choices = [(user.username, user.username) for user in user_approvers]
+            self.fields['approvers'].initial = [user.username for user in user_approvers] 
 
     def clean(self):
         data = self.cleaned_data
@@ -1195,6 +1196,8 @@ class RiskPendingForm(forms.ModelForm):
                 users = get_users_for_group_by_role(value, "Risk")
                 user_names = [user.username for user in users]
                 data["accepted_by"] = user_names
+                if not data['approvers_long_acceptance']:
+                    data['approvers_long_acceptance'] = self.fields['approvers_long_acceptance'].queryset.last()
         elif "accepted_by" in data.keys():
             accepted_by = data["accepted_by"]
             contacts = accepted_by.values()

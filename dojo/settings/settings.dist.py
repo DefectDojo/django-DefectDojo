@@ -399,7 +399,7 @@ env = environ.FileAwareEnv(
     DD_PROVIDER_SECRET=(str, ""),
     DD_PROVIDER_TOKEN=(str, ""),
     # Role that allows risk acceptance bypassing restrictions.
-    DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer", "Risk"]),
+    DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
     # Risk severity levels: Low, Medium, High, Critical
     # num_acceptors: number of acceptors required for risk acceptance
     # roles: roles with permission to accept the risk
