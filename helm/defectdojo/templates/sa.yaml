@@ -15,9 +15,11 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
+    {{- if (not .Values.disableHooks) }}
     helm.sh/resource-policy: keep
     helm.sh/hook: "pre-install"
     helm.sh/hook-delete-policy: "before-hook-creation"
+    {{- end }}
     {{- with .Values.annotations }}
     {{ toYaml . | nindent 4 }}
     {{- end }}

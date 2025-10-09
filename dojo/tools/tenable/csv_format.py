@@ -57,13 +57,13 @@ class TenableCSVParser:
         return "Info"
 
     def _format_cve(self, val):
-        if val is None or val == "":
+        if val is None or not val:
             return None
         cve_match = re.findall(r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE)
         return cve_match or None
 
     def _format_cpe(self, val):
-        if val is None or val == "":
+        if val is None or not val:
             return None
         cpe_match = re.findall(r"cpe:/[^\n\ ]+", val)
         return cpe_match or None

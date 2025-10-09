@@ -195,7 +195,7 @@ class WizParserByDetailedName:
     def _validate_severities(self, severity: str) -> str:
         """Ensure the supplied severity fits what DefectDojo is expecting."""
         if severity not in SEVERITIES:
-            logger.error(f"Severity is not supported: {severity}")
+            logger.error("Severity is not supported: %s", severity)
             # Default to Info severity
             return "Info"
         return severity
@@ -260,6 +260,6 @@ def parse_wiz_datetime(row: dict, column: str) -> datetime:
             )
 
     if not parsed_value:
-        logger.warning(f"Unable to parse Resolved Time: {value}")
+        logger.warning("Unable to parse Resolved Time: %s", value)
 
     return parsed_value
