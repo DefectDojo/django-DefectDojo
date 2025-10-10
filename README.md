@@ -56,8 +56,8 @@ cd django-DefectDojo
 # Building Docker images
 docker compose build
 
-# Run the application (for other profiles besides postgres-redis see  
-# https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md)
+# Run the application
+# (see https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md for more info)
 docker compose up -d
 
 # Obtain admin credentials. The initializer can take up to 3 minutes to run.
@@ -67,7 +67,7 @@ docker compose logs initializer | grep "Admin password:"
 
 ## For Docker Compose V1
 
-You can run Compose V1 by calling `docker-compose` (by adding the hyphen (-) between `docker compose`). 
+You can run Compose V1 by calling `docker-compose` (by adding the hyphen (-) between `docker compose`).
 
 Following commands are using original version so you might need to adjust them:
 ```sh
@@ -132,8 +132,8 @@ Moderators can help you with pull requests or feedback on dev ideas:
 * Blake Owens ([@blakeaowens](https://github.com/blakeaowens))
 
 ## Hall of Fame
-* Jannik Jürgens ([@alles-klar](https://github.com/alles-klar)) - Jannik was a long time contributor and moderator for 
-  DefectDojo and made significant contributions to many areas of the platform. Jannik was instrumental in pioneering 
+* Jannik Jürgens ([@alles-klar](https://github.com/alles-klar)) - Jannik was a long time contributor and moderator for
+  DefectDojo and made significant contributions to many areas of the platform. Jannik was instrumental in pioneering
   and optimizing deployment methods.
 * Valentijn Scholten ([@valentijnscholten](https://github.com/valentijnscholten) |
   [Sponsor](https://github.com/sponsors/valentijnscholten) |

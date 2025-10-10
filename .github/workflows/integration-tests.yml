@@ -76,7 +76,7 @@ jobs:
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
       - name: Start Dojo
-        run: docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
+        run: docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi valkey
         env:
           DJANGO_VERSION: ${{ matrix.os }}
           NGINX_VERSION: alpine

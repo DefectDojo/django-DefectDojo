@@ -41,7 +41,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-echo "Running docker compose unit tests with profile postgres-redis and test case $TEST_CASE ..."
+echo "Running docker compose unit tests and test case $TEST_CASE ..."
 
 # Compose V2 integrates compose functions into the Docker platform,
 # continuing to support most of the previous docker-compose features
@@ -50,8 +50,8 @@ echo "Running docker compose unit tests with profile postgres-redis and test cas
 echo "Building images..."
 ./docker/setEnv.sh integration_tests
 docker compose build
-echo "Setting up DefectDojo with Postgres and Redis..."
-DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
+echo "Setting up DefectDojo"
+DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose -d postgres nginx celerybeat celeryworker mailhog uwsgi valkey
 echo "Initializing DefectDojo..."
 DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --exit-code-from initializer initializer
 echo "Running the integration tests..."
