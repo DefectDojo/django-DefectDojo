@@ -167,4 +167,4 @@ propcache==0.4.1
 py==1.11.0
 soupsieve==2.8
 hashids==1.3.1
-pypdf==6.1.1
+pikepdf==9.11.0
