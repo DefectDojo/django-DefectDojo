@@ -19,8 +19,12 @@ services:
       NGINX_METRICS_ENABLED: "${NGINX_METRICS_ENABLED:-false}"
       DD_UWSGI_HOST: "${DD_UWSGI_HOST:-uwsgi}"
       DD_UWSGI_PORT: "${DD_UWSGI_PORT:-3031}"
+    read_only: true
     volumes:
       - defectdojo_media:/usr/share/nginx/html/media
+    tmpfs:
+      - /run/defectdojo:uid=101,gid=101
+      - /var/cache/nginx:uid=101,gid=101
     ports:
       - target: 8080
         published: ${DD_PORT:-8080}

@@ -611,7 +611,12 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.mediaPersistentVolume.persistentVolumeClaim.size | string | `"5Gi"` |  |
 | django.mediaPersistentVolume.persistentVolumeClaim.storageClassName | string | `""` |  |
 | django.mediaPersistentVolume.type | string | `"emptyDir"` |  |
-| django.nginx.containerSecurityContext.runAsUser | int | `1001` |  |
+| django.nginx.containerSecurityContext.allowPrivilegeEscalation | bool | `false` |  |
+| django.nginx.containerSecurityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| django.nginx.containerSecurityContext.readOnlyRootFilesystem | bool | `true` |  |
+| django.nginx.containerSecurityContext.runAsGroup | int | `101` |  |
+| django.nginx.containerSecurityContext.runAsNonRoot | bool | `true` |  |
+| django.nginx.containerSecurityContext.runAsUser | int | `101` |  |
 | django.nginx.extraEnv | list | `[]` |  |
 | django.nginx.extraVolumeMounts | list | `[]` |  |
 | django.nginx.resources.limits.cpu | string | `"2000m"` |  |
