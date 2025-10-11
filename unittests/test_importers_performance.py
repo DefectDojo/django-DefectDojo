@@ -34,9 +34,6 @@ STACK_HAWK_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_v
 STACK_HAWK_SUBSET_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings_subset.json"
 STACK_HAWK_SCAN_TYPE = "StackHawk HawkScan"
 
-NPM_AUDIT_NO_VULN_FILENAME = get_unit_tests_scans_path("npm_audit") / "one_vuln.json"
-NPM_AUDIT_SCAN_TYPE = "NPM Audit Scan"
-
 
 class TestDojoImporterPerformance(DojoTestCase):
 
@@ -58,7 +55,7 @@ class TestDojoImporterPerformance(DojoTestCase):
             ContentType.objects.get_for_model(model)
 
     @contextmanager
-    def assertNumAsyncTask(self, num):
+    def _assertNumAsyncTask(self, num):
         dojo_async_task_counter.start()
         try:
             yield
@@ -82,7 +79,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         )
         logger.debug(msg)
 
-    def import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
+    def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
         """
         Log output can be quite large as when the assertNumQueries fails, all queries are printed.
         It could be usefule to capture the output in `less`:
@@ -109,7 +106,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         with (
             self.subTest("import1"), impersonate(Dojo_User.objects.get(username="admin")),
             self.assertNumQueries(expected_num_queries1),
-            self.assertNumAsyncTask(expected_num_async_tasks1),
+            self._assertNumAsyncTask(expected_num_async_tasks1),
             STACK_HAWK_SUBSET_FILENAME.open(encoding="utf-8") as scan,
         ):
             import_options = {
@@ -133,7 +130,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         with (
             self.subTest("reimport1"), impersonate(Dojo_User.objects.get(username="admin")),
             self.assertNumQueries(expected_num_queries2),
-            self.assertNumAsyncTask(expected_num_async_tasks2),
+            self._assertNumAsyncTask(expected_num_async_tasks2),
             STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
         ):
             reimport_options = {
@@ -156,7 +153,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         with (
             self.subTest("reimport2"), impersonate(Dojo_User.objects.get(username="admin")),
             self.assertNumQueries(expected_num_queries3),
-            self.assertNumAsyncTask(expected_num_async_tasks3),
+            self._assertNumAsyncTask(expected_num_async_tasks3),
             STACK_HAWK_SUBSET_FILENAME.open(encoding="utf-8") as scan,
         ):
             reimport_options = {
@@ -179,7 +176,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         configure_audit_system()
         configure_pghistory_triggers()
 
-        self.import_reimport_performance(
+        self._import_reimport_performance(
             expected_num_queries1=593,
             expected_num_async_tasks1=10,
             expected_num_queries2=498,
@@ -197,7 +194,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         configure_audit_system()
         configure_pghistory_triggers()
 
-        self.import_reimport_performance(
+        self._import_reimport_performance(
             expected_num_queries1=559,
             expected_num_async_tasks1=10,
             expected_num_queries2=491,
@@ -221,7 +218,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser = User.objects.get(username="admin")
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
-        self.import_reimport_performance(
+        self._import_reimport_performance(
             expected_num_queries1=593,
             expected_num_async_tasks1=10,
             expected_num_queries2=503,
@@ -243,7 +240,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
 
-        self.import_reimport_performance(
+        self._import_reimport_performance(
             expected_num_queries1=559,
             expected_num_async_tasks1=10,
             expected_num_queries2=496,
@@ -269,7 +266,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
         self.system_settings(enable_product_grade=True)
 
-        self.import_reimport_performance(
+        self._import_reimport_performance(
             expected_num_queries1=594,
             expected_num_async_tasks1=11,
             expected_num_queries2=504,
@@ -292,7 +289,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
         self.system_settings(enable_product_grade=True)
 
-        self.import_reimport_performance(
+        self._import_reimport_performance(
             expected_num_queries1=560,
             expected_num_async_tasks1=11,
             expected_num_queries2=497,
