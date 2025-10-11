@@ -78,18 +78,22 @@
                                                     <div style="margin-bottom: 4px;">
                                                         <strong>{{ field }}:</strong>
                                                         <span class="text-danger">
-                                                            {% if values.0 %}
-                                                                {{ values.0|truncatechars:50 }}
+                                                            {% if values.0 is None %}
+                                                                <em>None</em>
+                                                            {% elif values.0 == "" %}
+                                                                <em>''</em>
                                                             {% else %}
-                                                                <em>empty</em>
+                                                                {{ values.0|truncatechars:50 }}
                                                             {% endif %}
                                                         </span>
                                                         to
                                                         <span class="text-success">
-                                                            {% if values.1 %}
-                                                                {{ values.1|truncatechars:50 }}
+                                                            {% if values.1 is None %}
+                                                                <em>None</em>
+                                                            {% elif values.1 == "" %}
+                                                                <em>''</em>
                                                             {% else %}
-                                                                <em>empty</em>
+                                                                {{ values.1|truncatechars:50 }}
                                                             {% endif %}
                                                         </span>
                                                     </div>
