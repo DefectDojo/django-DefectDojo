@@ -79,7 +79,7 @@ jobs:
           target_annotation=$(git show "${{ env.ct-branch }}:helm/defectdojo/Chart.yaml" | yq e '.annotations."artifacthub.io/changes"' -)
 
           if [[ "$current_annotation" == "$target_annotation" ]]; then
-            echo "::error file=helm/defectdojo/Chart.yaml::The 'artifacthub.io/changes' annotation has not been updated compared to ${{ env.ct-branch }}"
+            echo "::error file=helm/defectdojo/Chart.yaml::The 'artifacthub.io/changes' annotation has not been updated compared to ${{ env.ct-branch }}. For more, check the hint in 'helm/defectdojo/Chart.yaml'"
             exit 1
           fi
 
