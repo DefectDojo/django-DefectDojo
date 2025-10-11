@@ -127,6 +127,7 @@ services:
       POSTGRES_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
     volumes:
       - defectdojo_postgres:/var/lib/postgresql/data
+      - ./psql_bck:/psql_bck
   redis:
     # Pinning to this version due to licensing constraints
     image: redis:7.2.11-alpine@sha256:cd3e4dbac9604660d08efac21b27daa2ae91dde1e19203b49ec8567050ba093f
