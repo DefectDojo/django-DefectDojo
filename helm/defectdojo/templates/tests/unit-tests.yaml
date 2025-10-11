@@ -12,6 +12,7 @@ metadata:
     helm.sh/hook: test-success
 spec:
   serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
+  automountServiceAccountToken: {{ .Values.tests.unitTests.automountServiceAccountToken }}
   {{- with .Values.imagePullSecrets }}
   imagePullSecrets:
     - name: {{ . }}

@@ -49,6 +49,9 @@
                         "annotations": {
                             "type": "object"
                         },
+                        "automountServiceAccountToken": {
+                            "type": "boolean"
+                        },
                         "extraEnv": {
                             "type": "array"
                         },
@@ -133,6 +136,9 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        "automountServiceAccountToken": {
+                            "type": "boolean"
                         },
                         "extraEnv": {
                             "type": "array"
@@ -287,6 +293,9 @@
                 },
                 "annotations": {
                     "type": "object"
+                },
+                "automountServiceAccountToken": {
+                    "type": "boolean"
                 },
                 "extraInitContainers": {
                     "type": "array"
@@ -615,6 +624,9 @@
                 },
                 "annotations": {
                     "type": "object"
+                },
+                "automountServiceAccountToken": {
+                    "type": "boolean"
                 },
                 "extraEnv": {
                     "type": "array"
@@ -968,6 +980,9 @@
                 "unitTests": {
                     "type": "object",
                     "properties": {
+                        "automountServiceAccountToken": {
+                            "type": "boolean"
+                        },
                         "resources": {
                             "type": "object",
                             "properties": {

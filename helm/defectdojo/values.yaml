@@ -114,6 +114,7 @@ dbMigrationChecker:
 
 tests:
   unitTests:
+    automountServiceAccountToken: false
     resources:
       requests:
         cpu: 100m
@@ -153,6 +154,7 @@ celery:
   # Common annotations to worker and beat deployments and pods.
   annotations: {}
   beat:
+    automountServiceAccountToken: false
     # Annotations for the Celery beat deployment.
     annotations: {}
     affinity: {}
@@ -192,6 +194,7 @@ celery:
     startupProbe: {}
     tolerations: []
   worker:
+    automountServiceAccountToken: false
     # Annotations for the Celery worker deployment.
     annotations: {}
     affinity: {}
@@ -241,6 +244,7 @@ celery:
       # prefetchMultiplier: 128
 
 django:
+  automountServiceAccountToken: false
   annotations: {}
   service:
     annotations: {}
@@ -364,6 +368,7 @@ django:
 
 initializer:
   run: true
+  automountServiceAccountToken: false
   jobAnnotations: {}
   annotations: {}
   labels: {}
