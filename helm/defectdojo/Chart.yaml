@@ -22,3 +22,5 @@ annotations:
   artifacthub.io/changes: |
     - kind: changed
       description: DRY cloudsql-proxy
+    - kind: added
+      description: Testing on the oldest officially supported k8s
