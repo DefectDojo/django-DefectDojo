@@ -25,4 +25,6 @@ annotations:
     - kind: changed
       description: Each component allow to specific image + allow digest pinning
     - kind: added
+      description: Convert existing comments to descriptors
+    - kind: added
       description: Testing on the oldest officially supported k8s
