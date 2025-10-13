@@ -182,6 +182,43 @@
 {{- end -}}
 
 {{- /*
+  Define cloudsql-proxy
+*/}}
+{{- define "cloudsqlProxy" -}}
+- name: cloudsql-proxy
+  image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+  imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+  {{- with .Values.cloudsql.extraEnv }}
+  env: {{- . | toYaml | nindent 4 }}
+  {{- end }}
+  {{- with .Values.cloudsql.resources }}
+  resources: {{- . | toYaml | nindent 4 }}
+  {{- end }}
+  restartPolicy: Always
+  {{- if .Values.securityContext.enabled }}
+  securityContext:
+    {{- include "helpers.securityContext" (list
+      .Values
+      "securityContext.containerSecurityContext"
+      "cloudsql.containerSecurityContext"
+    ) | nindent 4 }}
+  {{- end }}
+  command: ["/cloud_sql_proxy"]
+  args:
+  - "-verbose={{ .Values.cloudsql.verbose }}"
+  - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
+  {{- if .Values.cloudsql.enable_iam_login }}
+  - "-enable_iam_login"
+  {{- end }}
+  {{- if .Values.cloudsql.use_private_ip }}
+  - "-ip_address_types=PRIVATE"
+  {{- end }}
+  {{- with .Values.cloudsql.extraVolumeMounts }}
+  volumeMounts: {{ . | toYaml | nindent 4 }}
+  {{- end }}
+{{- end -}}
+
+{{- /*
 Returns the JSON representation of the value for a dot-notation path
 from a given context.
   Args:
