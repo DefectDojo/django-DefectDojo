@@ -495,7 +495,12 @@ def post_process_findings_batch(finding_ids, dedupe_option=True, rules_option=Tr
         if scope_on_engagement:
             scope_filter = {"test__engagement": first_test.engagement}
         else:
-            scope_filter = {"test__engagement__product": first_test.engagement.product}
+            # When deduplicating across the product, exclude findings from engagements
+            # that have deduplication_on_engagement=True
+            scope_filter = {
+                "test__engagement__product": first_test.engagement.product,
+                "test__engagement__deduplication_on_engagement": False,
+            }
 
         # Helper functions imported lazily to avoid circulars at import time
         from dojo.utils import (  # noqa: PLC0415

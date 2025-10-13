@@ -239,7 +239,11 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
 
 # true if both findings are on an engagement that have a different "deduplication on engagement" configuration
 def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
-    return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
+    # Return True if findings are from different engagements and at least one has deduplication_on_engagement=True
+    if new_finding.test.engagement != to_duplicate_finding.test.engagement:
+        return (new_finding.test.engagement.deduplication_on_engagement or
+                to_duplicate_finding.test.engagement.deduplication_on_engagement)
+    return False
 
 
 def get_endpoints_as_url(finding):
