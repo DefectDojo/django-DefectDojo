@@ -57,6 +57,8 @@
                 <div class="clearfix">{% include "dojo/paging_snippet.html" with page=findings page_size=True %}</div>
                 {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                     <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
+                        {{ bulk_edit_form.media.css }}
+                        {{ bulk_edit_form.media.js }}
                         {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                             <button class="btn btn-info btn-sm btn-primary dropdown-toggle"
                                     type="button"
@@ -242,18 +244,8 @@
                                             <br />
                                         {% endif %}
                                         <label style="display: block">{% trans "Notes" %}</label>
-                                        {% comment %}
-                                            Quick hack to make bulk edit work without refactoring the whole bulk edit form
-                                            {{ bulk_edit_form.media.css }}
-                                            {{ bulk_edit_form.media.js }}
-                                        {% endcomment %}
                                         {{ bulk_edit_form.notes }}
                                         <label style="display: block">{% trans "Tags" %}</label>
-                                        {% comment %}
-                                            Quick hack to make bulk edit work without refactoring the whole bulk edit form
-                                            {{ bulk_edit_form.media.css }}
-                                            {{ bulk_edit_form.media.js }}
-                                        {% endcomment %}
                                         {{ bulk_edit_form.tags }}
                                         {% if bulk_edit_form.disclaimer %}
                                             <div style="background-color:#DADCE2; border:1px #003333; padding:.3em; margin:.1em; ">
@@ -318,14 +310,14 @@
                                     {% endif %}
                                     <th></th>
                                     <th class="nowrap centered severity-sort" scope="col">
-                                        {% trans "Severity" %}
+                                        {% dojo_sort request 'Severity' 'numerical_severity' %}
                                     </th>
                                     <th class="nowrap" scope="col">
                                         {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                         {% dojo_sort request 'Name' 'title' %}
                                     </th>
                                     <th scope="col">
-                                        {% trans "CWE" %}
+                                        {% dojo_sort request 'CWE' 'cwe' %}
                                     </th>
                                     <th scope="col">
                                         {% trans "Vulnerability Id" %}
@@ -355,11 +347,11 @@
                                         {% endif %}
                                     </th>
                                     <th class="nowrap" scope="col">
-                                        {% trans "Age" %}
+                                        {% dojo_sort request 'Age' 'date' %}
                                     </th>
                                     {% if system_settings.enable_finding_sla %}
                                         <th scope="col">
-                                            {% trans "SLA" %}
+                                            {% dojo_sort request 'SLA' 'sla_age_days' %}
                                         </th>
                                     {% endif %}
                                     <th scope="col">
@@ -392,14 +384,14 @@
                                     {% if show_product_column and product_tab is None %}
                                         <th class="nowrap" scope="col">
                                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
-                                            {% dojo_sort request 'Product' 'test__engagement__product__name' %}
+                                            {% dojo_sort request labels.ASSET_LABEL 'test__engagement__product__name' %}
                                         </th>
                                     {% endif %}
                                     <th scope="col">
-                                        {% trans "Service" %}
+                                        {% dojo_sort request 'Service' 'service' %}
                                     </th>
-                                    <th scope="col"> 
-                                        {% trans "Planned Remediation" %}
+                                    <th scope="col">
+                                        {% dojo_sort request 'Planned Remediation' 'planned_remediation_date' %}
                                     </th>
                                     {% if filter_name != 'Closed' %}
                                         <th scope="col">
@@ -730,6 +722,9 @@
                                         <td class="nowrap">
                                             {% if finding.planned_remediation_date %}{{ finding.planned_remediation_date }}{% endif %}
                                         </td>
+                                        <td class="nowrap">
+                                            {% if finding.planned_remediation_version %}{{ finding.planned_remediation_version }}{% endif %}
+                                        </td>
                                         {% if filter_name != 'Closed' %}
                                             <td class="nowrap">
                                                 {% if finding.reviewers %}
@@ -800,7 +795,7 @@
                         return data;
                     }},
                     { "data": "finding_age" },
-                {% if system_settings.enable_finding_sla %}                
+                {% if system_settings.enable_finding_sla %}
                     { "data": "finding_sla", "type": "num", render: function (data, type, row, meta) {
                         if(type === 'sort') {
                             var api = new $.fn.dataTable.Api(meta.settings);
@@ -828,6 +823,7 @@
                 {% endif %}
                 { "data": "service" },
                 { "data": "planned_remediation_date" },
+                { "data": "planned_remediation_version" },
                 {% if filter_name != 'Closed' %}
                     { "data": "reviewers" },
                 {% endif %}
@@ -867,6 +863,25 @@
             var fileDated = 'Findings_List_' + date;
             var columns = datatables_columns;
 
+            // Determine columns that should be server-sorted via dojo_sort (disable client sorting for these)
+            var serverSortDataKeys = new Set([
+                'severity',
+                'finding',
+                'cwe',
+                'found_date',
+                'finding_age',
+                'finding_sla',
+                'product',
+                'service',
+                'planned_remediation_date'
+            ]);
+            var serverSortTargets = [];
+            for (var i = 0; i < columns.length; i++) {
+                if (serverSortDataKeys.has(columns[i]["data"])) {
+                    serverSortTargets.push(i);
+                }
+            }
+
             // Filter the list of items to display based on what is shown.
             var disallowed_entries = new Set(["checkbox", "action"]);
             var data_column_list = [];
@@ -899,8 +914,13 @@
                     },
                     colReorder: true,
                     "columns": columns,
+                    ordering: true,
                     order: [],
                     columnDefs: [
+                        {
+                            orderable: false,
+                            targets: serverSortTargets
+                        },
                         {
                             "orderable": false,
                             "targets": [0, 1]

@@ -14,7 +14,6 @@ from uuid import uuid4
 import dateutil
 import hyperlink
 import tagulous.admin
-from auditlog.registry import auditlog
 from dateutil.parser import parse as datetutilsparse
 from dateutil.relativedelta import relativedelta
 from django import forms
@@ -1652,7 +1651,8 @@ class Engagement(models.Model):
         with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
-            calculate_grade(self.product)
+            from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+            perform_product_grading(self.product)
 
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
@@ -1826,16 +1826,16 @@ class Endpoint(models.Model):
         errors = []
         null_char_list = ["0x00", "\x00"]
         db_type = connection.vendor
-        if self.protocol or self.protocol == "":
+        if self.protocol is not None:
             if not re.match(r"^[A-Za-z][A-Za-z0-9\.\-\+]+$", self.protocol):  # https://tools.ietf.org/html/rfc3986#section-3.1
                 errors.append(ValidationError(f'Protocol "{self.protocol}" has invalid format'))
-            if self.protocol == "":
+            if not self.protocol:
                 self.protocol = None
 
-        if self.userinfo or self.userinfo == "":
+        if self.userinfo is not None:
             if not re.match(r"^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$", self.userinfo):  # https://tools.ietf.org/html/rfc3986#section-3.2.1
                 errors.append(ValidationError(f'Userinfo "{self.userinfo}" has invalid format'))
-            if self.userinfo == "":
+            if not self.userinfo:
                 self.userinfo = None
 
         if self.host:
@@ -1847,7 +1847,7 @@ class Endpoint(models.Model):
         else:
             errors.append(ValidationError("Host must not be empty"))
 
-        if self.port or self.port == 0:
+        if self.port is not None:
             try:
                 int_port = int(self.port)
                 if not (0 <= int_port < 65536):
@@ -1856,7 +1856,7 @@ class Endpoint(models.Model):
             except ValueError:
                 errors.append(ValidationError(f'Port "{self.port}" has invalid format - it is not a number'))
 
-        if self.path or self.path == "":
+        if self.path is not None:
             while len(self.path) > 0 and self.path[0] == "/":  # Endpoint store "root-less" path
                 self.path = self.path[1:]
             if any(null_char in self.path for null_char in null_char_list):
@@ -1866,10 +1866,10 @@ class Endpoint(models.Model):
                     for remove_str in null_char_list:
                         self.path = self.path.replace(remove_str, "%00")
                     logger.error('Path "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
-            if self.path == "":
+            if not self.path:
                 self.path = None
 
-        if self.query or self.query == "":
+        if self.query is not None:
             if len(self.query) > 0 and self.query[0] == "?":
                 self.query = self.query[1:]
             if any(null_char in self.query for null_char in null_char_list):
@@ -1879,10 +1879,10 @@ class Endpoint(models.Model):
                     for remove_str in null_char_list:
                         self.query = self.query.replace(remove_str, "%00")
                     logger.error('Query "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
-            if self.query == "":
+            if not self.query:
                 self.query = None
 
-        if self.fragment or self.fragment == "":
+        if self.fragment is not None:
             if len(self.fragment) > 0 and self.fragment[0] == "#":
                 self.fragment = self.fragment[1:]
             if any(null_char in self.fragment for null_char in null_char_list):
@@ -1892,7 +1892,7 @@ class Endpoint(models.Model):
                     for remove_str in null_char_list:
                         self.fragment = self.fragment.replace(remove_str, "%00")
                     logger.error('Fragment "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
-            if self.fragment == "":
+            if not self.fragment:
                 self.fragment = None
 
         if errors:
@@ -2050,13 +2050,13 @@ class Endpoint(models.Model):
                 query_parts.append(f"{k}={v}")
         query_string = "&".join(query_parts)
 
-        protocol = url.scheme if url.scheme != "" else None
+        protocol = url.scheme or None
         userinfo = ":".join(url.userinfo) if url.userinfo not in {(), ("",)} else None
-        host = url.host if url.host != "" else None
+        host = url.host or None
         port = url.port
         path = "/".join(url.path)[:500] if url.path not in {None, (), ("",)} else None
-        query = query_string[:1000] if query_string is not None and query_string != "" else None
-        fragment = url.fragment[:500] if url.fragment is not None and url.fragment != "" else None
+        query = query_string[:1000] if query_string is not None and query_string else None
+        fragment = url.fragment[:500] if url.fragment is not None and url.fragment else None
 
         return Endpoint(
             protocol=protocol,
@@ -2251,13 +2251,15 @@ class Test(models.Model):
         deduplicationLogger.debug(f"HASHCODE_ALLOWS_NULL_CWE is: {hashCodeAllowsNullCwe}")
         return hashCodeAllowsNullCwe
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, product_grading_option=True, **kwargs):
         logger.debug("%d test delete", self.id)
         super().delete(*args, **kwargs)
-        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
-            # Suppressing a potential issue created from async delete removing
-            # related objects in a separate task
-            calculate_grade(self.engagement.product)
+        if product_grading_option:
+            with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+                # Suppressing a potential issue created from async delete removing
+                # related objects in a separate task
+                from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+                perform_product_grading(self.engagement.product)
 
     @property
     def statistics(self):
@@ -2856,15 +2858,17 @@ class Finding(models.Model):
 
         return copy
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, product_grading_option=True, **kwargs):
         logger.debug("%d finding delete", self.id)
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
         finding_helper.finding_delete(self)
         super().delete(*args, **kwargs)
-        with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
-            # Suppressing a potential issue created from async delete removing
-            # related objects in a separate task
-            calculate_grade(self.test.engagement.product)
+        if product_grading_option:
+            with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+                # Suppressing a potential issue created from async delete removing
+                # related objects in a separate task
+                from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+                perform_product_grading(self.test.engagement.product)
 
     # only used by bulk risk acceptance api
     @classmethod
@@ -2941,53 +2945,56 @@ class Finding(models.Model):
 
     # Get vulnerability_ids to use for hash_code computation
     def get_vulnerability_ids(self):
-        vulnerability_id_str = ""
-        if self.id is None:
-            if self.unsaved_vulnerability_ids:
+
+        def _get_unsaved_vulnerability_ids(finding) -> str:
+            if finding.unsaved_vulnerability_ids:
                 deduplicationLogger.debug("get_vulnerability_ids before the finding was saved")
                 # convert list of unsaved vulnerability_ids to the list of their canonical representation
-                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in self.unsaved_vulnerability_ids]
+                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in finding.unsaved_vulnerability_ids]
                 # deduplicate (usually done upon saving finding) and sort endpoints
-                vulnerability_id_str = "".join(sorted(dict.fromkeys(vulnerability_id_str_list)))
-            else:
-                deduplicationLogger.debug("finding has no unsaved vulnerability references")
-        else:
-            vulnerability_ids = Vulnerability_Id.objects.filter(finding=self)
-            deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
-            # convert list of vulnerability_ids to the list of their canonical representation
-            vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in vulnerability_ids.all()]
-            # sort vulnerability_ids strings
-            vulnerability_id_str = "".join(sorted(vulnerability_id_str_list))
-        return vulnerability_id_str
+                return "".join(sorted(dict.fromkeys(vulnerability_id_str_list)))
+            deduplicationLogger.debug("finding has no unsaved vulnerability references")
+            return ""
+
+        def _get_saved_vulnerability_ids(finding) -> str:
+            if finding.id is not None:
+                vulnerability_ids = Vulnerability_Id.objects.filter(finding=finding)
+                deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
+                # convert list of vulnerability_ids to the list of their canonical representation
+                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in vulnerability_ids.all()]
+                # sort vulnerability_ids strings
+                return "".join(sorted(vulnerability_id_str_list))
+            return ""
+
+        return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnerability_ids(self)
 
     # Get endpoints to use for hash_code computation
     # (This sometimes reports "None")
     def get_endpoints(self):
-        endpoint_str = ""
-        if (self.id is None):
-            if len(self.unsaved_endpoints) > 0:
+
+        def _get_unsaved_endpoints(finding) -> str:
+            if len(finding.unsaved_endpoints) > 0:
                 deduplicationLogger.debug("get_endpoints before the finding was saved")
                 # convert list of unsaved endpoints to the list of their canonical representation
-                endpoint_str_list = [str(endpoint) for endpoint in self.unsaved_endpoints]
+                endpoint_str_list = [str(endpoint) for endpoint in finding.unsaved_endpoints]
                 # deduplicate (usually done upon saving finding) and sort endpoints
-                endpoint_str = "".join(
-                    sorted(
-                        dict.fromkeys(endpoint_str_list)))
-            else:
-                # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
-                # In this case, before saving the finding, both static_finding and dynamic_finding are True
-                # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
-                deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
-        else:
-            deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
-            # convert list of endpoints to the list of their canonical representation
-            endpoint_str_list = [str(endpoint) for endpoint in self.endpoints.all()]
-            # sort endpoints strings
-            endpoint_str = "".join(
-                sorted(
-                    endpoint_str_list,
-                ))
-        return endpoint_str
+                return "".join(dict.fromkeys(endpoint_str_list))
+            # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
+            # In this case, before saving the finding, both static_finding and dynamic_finding are True
+            # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
+            deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
+            return ""
+
+        def _get_saved_endpoints(finding) -> str:
+            if finding.id is not None:
+                deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(finding.endpoints.count()))
+                # convert list of endpoints to the list of their canonical representation
+                endpoint_str_list = [str(endpoint) for endpoint in finding.endpoints.all()]
+                # sort endpoints strings
+                return "".join(sorted(endpoint_str_list))
+            return ""
+
+        return _get_saved_endpoints(self) or _get_unsaved_endpoints(self)
 
     # Compute the hash_code from the fields to hash
     def hash_fields(self, fields_to_hash):
@@ -4689,25 +4696,12 @@ class ChoiceAnswer(Answer):
         return "No Response"
 
 
-if settings.ENABLE_AUDITLOG:
-    # Register for automatic logging to database
-    logger.info("enabling audit logging")
-    auditlog.register(Dojo_User, exclude_fields=["password"])
-    auditlog.register(Endpoint)
-    auditlog.register(Engagement)
-    auditlog.register(Finding, m2m_fields={"reviewers"})
-    auditlog.register(Finding_Group)
-    auditlog.register(Product_Type)
-    auditlog.register(Product)
-    auditlog.register(Test)
-    auditlog.register(Risk_Acceptance)
-    auditlog.register(Finding_Template)
-    auditlog.register(Cred_User, exclude_fields=["password"])
-    auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
+# Audit logging registration is now handled in auditlog.py and configured in apps.py
+# This allows for conditional registration of either django-auditlog or django-pghistory
+# The audit system is configured in DojoAppConfig.ready() to ensure all models are loaded
 
 
 from dojo.utils import (  # noqa: E402  # there is issue due to a circular import
-    calculate_grade,
     parse_cvss_data,
     to_str_typed,
 )

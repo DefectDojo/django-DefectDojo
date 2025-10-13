@@ -1,5 +1,5 @@
-# Always generate Python 3.12-compatible code.
-target-version = "py312"
+# Always generate Python 3.13-compatible code.
+target-version = "py313"
 
 # Same as Black.
 line-length = 120
@@ -95,7 +95,6 @@ ignore = [
     "E501",
     "E722",
     "SIM102",
-    "SIM115",
     "RUF012",
     "RUF015",
     "D205",
@@ -114,9 +113,8 @@ preview = true
     "S105",  # hardcoded passwords in tests are fine
     "S108",  # tmp paths mentioned in tests are fine
 ]
-
-"dojo/models.py" = [
-    "PLC1901",  # fix later, causes some problems
+"dojo/filters.py" = [
+    "A003",  # ruff upgrade to 0.13.3
 ]
 
 [lint.flake8-boolean-trap]

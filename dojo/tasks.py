@@ -1,16 +1,17 @@
 import logging
-from datetime import date, timedelta
+from datetime import timedelta
 
-from auditlog.models import LogEntry
 from celery.utils.log import get_task_logger
-from dateutil.relativedelta import relativedelta
+from django.apps import apps
 from django.conf import settings
 from django.core.management import call_command
 from django.db.models import Count, Prefetch
 from django.urls import reverse
 from django.utils import timezone
 
+from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
+from dojo.decorators import dojo_async_task
 from dojo.finding.helper import fix_loop_duplicates
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
 from dojo.models import Alerts, Announcement, Endpoint, Engagement, Finding, Product, System_Settings, User
@@ -93,22 +94,7 @@ def cleanup_alerts(*args, **kwargs):
 
 @app.task(bind=True)
 def flush_auditlog(*args, **kwargs):
-    retention_period = settings.AUDITLOG_FLUSH_RETENTION_PERIOD
-
-    if retention_period < 0:
-        logger.info("Flushing auditlog is disabled")
-        return
-
-    logger.info("Running Cleanup Task for Logentries with %d Months retention", retention_period)
-    retention_date = date.today() - relativedelta(months=retention_period)
-    subset = LogEntry.objects.filter(timestamp__date__lt=retention_date)
-    event_count = subset.count()
-    logger.debug("Initially received %d Logentries", event_count)
-    if event_count > 0:
-        subset._raw_delete(subset.db)
-        logger.debug("Total number of audit log entries deleted: %s", event_count)
-    else:
-        logger.debug("No outdated Logentries found")
+    run_flush_auditlog()
 
 
 @app.task(bind=True)
@@ -129,7 +115,7 @@ def async_dupe_delete(*args, **kwargs):
         logger.info("delete excess duplicates (max_dupes per finding: %s, max deletes per run: %s)", dupe_max, total_duplicate_delete_count_max_per_run)
         deduplicationLogger.info("delete excess duplicates (max_dupes per finding: %s, max deletes per run: %s)", dupe_max, total_duplicate_delete_count_max_per_run)
 
-        # limit to 100 to prevent overlapping jobs
+        # limit to settings.DUPE_DELETE_MAX_PER_RUN to prevent overlapping jobs
         results = Finding.objects \
                 .filter(duplicate=True) \
                 .order_by() \
@@ -146,13 +132,17 @@ def async_dupe_delete(*args, **kwargs):
             queryset=Finding.objects.filter(duplicate=True).order_by("date")))
 
         total_deleted_count = 0
+        affected_products = set()
         for original in originals_with_too_many_duplicates:
             duplicate_list = original.original_finding.all()
             dupe_count = len(duplicate_list) - dupe_max
 
             for finding in duplicate_list:
                 deduplicationLogger.debug(f"deleting finding {finding.id}:{finding.title} ({finding.hash_code}))")
-                finding.delete()
+                # Collect the product for batch grading later
+                affected_products.add(finding.test.engagement.product)
+                # Skip individual product grading during deletion
+                finding.delete(product_grading_option=False)
                 total_deleted_count += 1
                 dupe_count -= 1
                 if dupe_count <= 0:
@@ -164,6 +154,14 @@ def async_dupe_delete(*args, **kwargs):
                 break
 
         logger.info("total number of excess duplicates deleted: %s", total_deleted_count)
+
+        # Batch product grading for all affected products
+        if affected_products:
+            system_settings = System_Settings.objects.get()
+            if system_settings.enable_product_grade:
+                logger.info("performing batch product grading for %s products", len(affected_products))
+                for product in affected_products:
+                    calculate_grade(product)
 
 
 @app.task(ignore_result=False)
@@ -222,3 +220,53 @@ def evaluate_pro_proposition(*args, **kwargs):
 @app.task
 def clear_sessions(*args, **kwargs):
     call_command("clearsessions")
+
+
+@dojo_async_task
+@app.task
+def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
+    """
+    Async task to update watson search indexes for a specific model type.
+
+    Args:
+        model_key: Model identifier like 'dojo.finding'
+        pk_list: List of primary keys for instances of this model type. it's advised to chunk the list into batches of 1000 or less.
+
+    """
+    from watson.search import SearchContextManager, default_search_engine  # noqa: PLC0415 circular import
+
+    logger.debug(f"Starting async watson index update for {len(pk_list)} {model_name} instances")
+
+    try:
+        # Create new SearchContextManager and start it
+        context_manager = SearchContextManager()
+        context_manager.start()
+
+        # Get the default engine and model class
+        engine = default_search_engine
+        app_label, model_name = model_name.split(".")
+        model_class = apps.get_model(app_label, model_name)
+
+        # Bulk load instances and add them to the context
+        instances = model_class.objects.filter(pk__in=pk_list)
+        instances_added = 0
+        instances_skipped = 0
+
+        for instance in instances:
+            try:
+                # Add to watson context (this will trigger indexing on end())
+                context_manager.add_to_context(engine, instance)
+                instances_added += 1
+            except Exception as e:
+                logger.warning(f"Skipping {model_name}:{instance.pk} - {e}")
+                instances_skipped += 1
+                continue
+
+        # Let watson handle the bulk indexing
+        context_manager.end()
+
+        logger.info(f"Completed async watson index update: {instances_added} updated, {instances_skipped} skipped")
+
+    except Exception as e:
+        logger.error(f"Watson async index update failed for {model_name}: {e}")
+        raise

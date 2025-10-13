@@ -405,6 +405,10 @@ def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
     end_date = datetime.combine(test.target_end, datetime.max.time())
+    if timezone.is_naive(start_date):
+        start_date = timezone.make_aware(start_date)
+    if timezone.is_naive(end_date):
+        end_date = timezone.make_aware(end_date)
     uid = f"dojo_test_{test.id}_{test.engagement.id}_{test.engagement.product.id}"
     cal = get_cal_event(
         start_date,
@@ -911,7 +915,7 @@ class ReImportScanResultsView(View):
             "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
             "group_by": form.cleaned_data.get("group_by", None),
             "close_old_findings": form.cleaned_data.get("close_old_findings", None),
-            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings"),
+            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings", None),
         })
         # Override the form values of active and verified
         if activeChoice := form.cleaned_data.get("active", None):

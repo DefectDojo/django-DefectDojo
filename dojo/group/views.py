@@ -39,6 +39,7 @@ from dojo.group.queries import (
     get_product_type_groups_for_group,
 )
 from dojo.group.utils import get_auth_group_name
+from dojo.labels import get_labels
 from dojo.models import Dojo_Group, Dojo_Group_Member, Global_Role, Product_Group, Product_Type_Group
 from dojo.utils import (
     add_breadcrumb,
@@ -49,6 +50,9 @@ from dojo.utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+labels = get_labels()
 
 
 class ListGroups(View):
@@ -514,6 +518,7 @@ def delete_group_member(request, mid):
 def add_product_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     group_form = Add_Product_Group_GroupForm(initial={"group": group.id})
+    page_name = str(labels.ASSET_GROUPS_ADD_LABEL)
 
     if request.method == "POST":
         group_form = Add_Product_Group_GroupForm(request.POST, initial={"group": group.id})
@@ -529,12 +534,13 @@ def add_product_group(request, gid):
                         product_group.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Product groups added successfully.",
+                                 labels.ASSET_GROUPS_ADD_SUCCESS_MESSAGE,
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_group", args=(gid, )))
 
-    add_breadcrumb(title="Add Product Group", top_level=False, request=request)
+    add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/new_product_group_group.html", {
+        "name": page_name,
         "group": group,
         "form": group_form,
     })
@@ -544,6 +550,7 @@ def add_product_group(request, gid):
 def add_product_type_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     group_form = Add_Product_Type_Group_GroupForm(initial={"group": group.id})
+    page_name = str(labels.ORG_GROUPS_ADD_LABEL)
 
     if request.method == "POST":
         group_form = Add_Product_Type_Group_GroupForm(request.POST, initial={"group": group.id})
@@ -559,12 +566,13 @@ def add_product_type_group(request, gid):
                         product_type_group.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     "Product type groups added successfully.",
+                                     labels.ORG_GROUPS_ADD_SUCCESS_MESSAGE,
                                      extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("view_group", args=(gid, )))
 
-    add_breadcrumb(title="Add Product Type Group", top_level=False, request=request)
+    add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/new_product_type_group_group.html", {
+        "name": page_name,
         "group": group,
         "form": group_form,
     })

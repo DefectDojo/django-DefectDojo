@@ -19,13 +19,14 @@ from django.db import DEFAULT_DB_ALIAS
 from django.db.models import OuterRef, Q, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.cache import cache_page
+from django.views.decorators.http import require_POST
 from django.views.decorators.vary import vary_on_cookie
 from openpyxl import Workbook
 from openpyxl.styles import Font
@@ -961,6 +962,7 @@ class ImportScanResultsView(View):
             "active": None,
             "verified": None,
             "scan_type": request.POST.get("scan_type"),
+            "test_title": form.cleaned_data.get("test_title"),
             "tags": form.cleaned_data.get("tags"),
             "version": form.cleaned_data.get("version"),
             "branch_tag": form.cleaned_data.get("branch_tag", None),
@@ -973,7 +975,7 @@ class ImportScanResultsView(View):
             "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
             "close_old_findings_product_scope": form.cleaned_data.get("close_old_findings_product_scope", None),
             "group_by": form.cleaned_data.get("group_by", None),
-            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings"),
+            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings", None),
             "environment": self.get_development_environment(environment_name=form.cleaned_data.get("environment")),
         })
         # Create the engagement if necessary
@@ -1131,6 +1133,40 @@ def close_eng(request, eid):
         "Engagement closed successfully.",
         extra_tags="alert-success")
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+
+
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
+@require_POST
+def unlink_jira(request, eid):
+    eng = get_object_or_404(Engagement, id=eid)
+    logger.info("trying to unlink a linked jira epic from engagement %d:%s", eng.id, eng.name)
+    if eng.has_jira_issue:
+        try:
+            jira_helper.unlink_jira(request, eng)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Link to JIRA epic successfully deleted",
+                extra_tags="alert-success",
+            )
+            return JsonResponse({"result": "OK"})
+        except Exception:
+            logger.exception("Link to JIRA epic could not be deleted")
+            messages.add_message(
+                request,
+                messages.ERROR,
+                "Link to JIRA epic could not be deleted, see alerts for details",
+                extra_tags="alert-danger",
+            )
+            return HttpResponse(status=500)
+    else:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Link to JIRA epic not found",
+            extra_tags="alert-danger",
+        )
+        return HttpResponse(status=400)
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
@@ -1552,6 +1588,10 @@ def engagement_ics(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     start_date = datetime.combine(eng.target_start, datetime.min.time())
     end_date = datetime.combine(eng.target_end, datetime.max.time())
+    if timezone.is_naive(start_date):
+        start_date = timezone.make_aware(start_date)
+    if timezone.is_naive(end_date):
+        end_date = timezone.make_aware(end_date)
     uid = f"dojo_eng_{eng.id}_{eng.product.id}"
     cal = get_cal_event(
         start_date,

@@ -5,6 +5,7 @@ from contextlib import suppress
 from threading import local
 from urllib.parse import quote
 
+import pghistory.middleware
 from auditlog.context import set_actor
 from auditlog.middleware import AuditlogMiddleware as _AuditlogMiddleware
 from django.conf import settings
@@ -12,6 +13,8 @@ from django.db import models
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.functional import SimpleLazyObject
+from watson.middleware import SearchContextMiddleware
+from watson.search import search_context_manager
 
 from dojo.models import Dojo_User
 from dojo.product_announcements import LongRunningRequestProductAnnouncement
@@ -60,7 +63,7 @@ class LoginRequiredMiddleware:
                 return HttpResponseRedirect(fullURL)
 
         if request.user.is_authenticated:
-            logger.debug("Authenticated user: %s", str(request.user))
+            logger.debug("Authenticated user: %s", request.user)
             with suppress(ModuleNotFoundError):  # to avoid unittests to fail
                 uwsgi = __import__("uwsgi", globals(), locals(), ["set_logvar"], 0)
                 # this populates dd_user log var, so can appear in the uwsgi logs
@@ -191,6 +194,26 @@ class AuditlogMiddleware(_AuditlogMiddleware):
             return self.get_response(request)
 
 
+class PgHistoryMiddleware(pghistory.middleware.HistoryMiddleware):
+
+    """
+    Custom pghistory middleware for DefectDojo that extends the built-in HistoryMiddleware
+    to add remote_addr context following the pattern from:
+    https://django-pghistory.readthedocs.io/en/3.8.1/context/#middleware
+    """
+
+    def get_context(self, request):
+        context = super().get_context(request)
+
+        # Add remote address with proxy support
+        remote_addr = request.META.get("HTTP_X_FORWARDED_FOR")
+        # Get the first IP if there are multiple (proxy chain), or fall back to REMOTE_ADDR
+        remote_addr = remote_addr.split(",")[0].strip() if remote_addr else request.META.get("REMOTE_ADDR")
+
+        context["remote_addr"] = remote_addr
+        return context
+
+
 class LongRunningRequestAlertMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -210,3 +233,76 @@ class LongRunningRequestAlertMiddleware:
             LongRunningRequestProductAnnouncement(request=request, duration=duration)
 
         return response
+
+
+class AsyncSearchContextMiddleware(SearchContextMiddleware):
+
+    """
+    Ensures Watson index updates are triggered asynchronously.
+    Inherits from watson's SearchContextMiddleware to minimize the amount of code we need to maintain.
+    """
+
+    def _close_search_context(self, request):
+        """Override watson's close behavior to trigger async updates when above threshold."""
+        if search_context_manager.is_active():
+            from django.conf import settings  # noqa: PLC0415 circular import
+
+            # Extract tasks and check if we should trigger async update
+            captured_tasks = self._extract_tasks_for_async()
+
+            # Get total number of instances across all model types
+            total_instances = sum(len(pk_list) for pk_list in captured_tasks.values())
+            threshold = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_THRESHOLD", 100)
+
+            # If threshold is below 0, async updating is disabled
+            if threshold < 0:
+                logger.debug(f"AsyncSearchContextMiddleware: Async updating disabled (threshold={threshold}), using synchronous update")
+            elif total_instances > threshold:
+                logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances > {threshold} threshold, triggering async update")
+                self._trigger_async_index_update(captured_tasks)
+                # Invalidate to prevent synchronous index update by super()._close_search_context()
+                search_context_manager.invalidate()
+            else:
+                logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances <= {threshold} threshold, using synchronous update")
+                # Let watson handle synchronous update for small numbers
+
+        super()._close_search_context(request)
+
+    def _extract_tasks_for_async(self):
+        """Extract tasks from the search context and group by model type for async processing."""
+        current_tasks, _is_invalid = search_context_manager._stack[-1]
+
+        # Group by model type for efficient batch processing
+        model_groups = {}
+        for _engine, obj in current_tasks:
+            model_key = f"{obj._meta.app_label}.{obj._meta.model_name}"
+            if model_key not in model_groups:
+                model_groups[model_key] = []
+            model_groups[model_key].append(obj.pk)
+
+        # Log what we extracted per model type
+        for model_key, pk_list in model_groups.items():
+            logger.debug(f"AsyncSearchContextMiddleware: Extracted {len(pk_list)} {model_key} instances for async indexing")
+
+        return model_groups
+
+    def _trigger_async_index_update(self, model_groups):
+        """Trigger async tasks to update search indexes, chunking large lists into batches of settings.WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE."""
+        if not model_groups:
+            return
+
+        # Import here to avoid circular import
+        from django.conf import settings  # noqa: PLC0415 circular import
+
+        from dojo.tasks import update_watson_search_index_for_model  # noqa: PLC0415 circular import
+
+        # Create tasks per model type, chunking large lists into configurable batches
+        for model_name, pk_list in model_groups.items():
+            # Chunk into batches using configurable batch size (compatible with Python 3.11)
+            batch_size = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE", 1000)
+            batches = [pk_list[i:i + batch_size] for i in range(0, len(pk_list), batch_size)]
+
+            # Create tasks for each batch and log each one
+            for i, batch in enumerate(batches, 1):
+                logger.debug(f"AsyncSearchContextMiddleware: Triggering batch {i}/{len(batches)} for {model_name}: {len(batch)} instances")
+                update_watson_search_index_for_model(model_name, batch)
