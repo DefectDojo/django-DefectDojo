@@ -3,20 +3,23 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "initializer.jobname" . }}
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.initializer.jobAnnotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
   labels:
     defectdojo.org/component: initializer
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
-    {{- with .Values.extraLabels }}
-      {{- toYaml . | nindent 4 }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
     {{- end }}
-  annotations:
-    {{- with .Values.initializer.jobAnnotations }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+  name: {{ template "initializer.jobname" . }}
+  namespace: {{ .Release.Namespace }}
 spec:
   {{- if and (int .Values.initializer.keepSeconds) (gt (int .Values.initializer.keepSeconds) 0) }}
   ttlSecondsAfterFinished: {{ .Values.initializer.keepSeconds }}
@@ -38,6 +41,14 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        {{- include "helpers.securityContext" (list
+          .Values
+          "securityContext.podSecurityContext"
+          "initializer.podSecurityContext"
+        ) | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -63,29 +74,7 @@ spec:
       {{- end }}
       initContainers:
       {{- if .Values.cloudsql.enabled }}
-      - name: cloudsql-proxy
-        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
-        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
-        restartPolicy: Always
-        securityContext:
-          runAsNonRoot: true
-        command: ["/cloud_sql_proxy"]
-        args:
-        - "-verbose={{ .Values.cloudsql.verbose }}"
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
-        {{- if .Values.cloudsql.enable_iam_login }}
-        - "-enable_iam_login"
-        {{- end }}
-        {{- if .Values.cloudsql.use_private_ip }}
-        - "-ip_address_types=PRIVATE"
-        {{- end }}
-        volumeMounts:
-        {{- range .Values.initializer.extraVolumes }}
-        - name: userconfig-{{ .name }}
-          readOnly: true
-          mountPath: {{ .path }}
-          subPath: {{ .subPath }}
-        {{- end }}
+      {{- include "cloudsqlProxy" . | nindent 6 }}
       {{- end }}
       - name: wait-for-db
         command:
@@ -96,7 +85,11 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+          {{- include "helpers.securityContext" (list
+            .Values
+            "securityContext.containerSecurityContext"
+            "django.uwsgi.containerSecurityContext"
+          ) | nindent 10 }}
         {{- end }}
         envFrom:
         - configMapRef:
@@ -123,7 +116,11 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+          {{- include "helpers.securityContext" (list
+            .Values
+            "securityContext.containerSecurityContext"
+            "initializer.containerSecurityContext"
+          ) | nindent 10 }}
         {{- end }}
         volumeMounts:
         {{- if .Values.localsettingspy }}

@@ -915,7 +915,7 @@ class ReImportScanResultsView(View):
             "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
             "group_by": form.cleaned_data.get("group_by", None),
             "close_old_findings": form.cleaned_data.get("close_old_findings", None),
-            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings"),
+            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings", None),
         })
         # Override the form values of active and verified
         if activeChoice := form.cleaned_data.get("active", None):

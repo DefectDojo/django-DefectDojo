@@ -722,6 +722,9 @@
                                         <td class="nowrap">
                                             {% if finding.planned_remediation_date %}{{ finding.planned_remediation_date }}{% endif %}
                                         </td>
+                                        <td class="nowrap">
+                                            {% if finding.planned_remediation_version %}{{ finding.planned_remediation_version }}{% endif %}
+                                        </td>
                                         {% if filter_name != 'Closed' %}
                                             <td class="nowrap">
                                                 {% if finding.reviewers %}
@@ -820,6 +823,7 @@
                 {% endif %}
                 { "data": "service" },
                 { "data": "planned_remediation_date" },
+                { "data": "planned_remediation_version" },
                 {% if filter_name != 'Closed' %}
                     { "data": "reviewers" },
                 {% endif %}
