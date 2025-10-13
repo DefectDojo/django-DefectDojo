@@ -13,10 +13,10 @@ dependencies:
     version: ~16.7.0
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: postgresql.enabled
-  - name: redis
-    version: ~19.6.4
-    repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
-    condition: redis.enabled
+  - name: valkey
+    version: ~0.7.4
+    repository: "https://valkey.io/valkey-helm/"
+    condition: valkey.enabled
 # For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/
 # This is example for "artifacthub.io/changes"
 # artifacthub.io/changes: |
@@ -37,6 +37,8 @@ annotations:
   artifacthub.io/changes: |
     - kind: changed
       description: DRY cloudsql-proxy
+    - kind: changed
+      description: Replace redis with valkey
     - kind: changed
       description: Each component allow to specific image + allow digest pinning + allow different tags for Django and Nginx
     - kind: added

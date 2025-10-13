@@ -54,6 +54,7 @@ Helm >= v3
 Then pull the dependent charts:
 
 ```zsh
+helm repo add valkey https://valkey.io/valkey-helm/
 helm dependency update ./helm/defectdojo
 ```
 
