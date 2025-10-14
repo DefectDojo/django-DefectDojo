@@ -4,6 +4,7 @@ Management command to backfill existing data into django-pghistory.
 This command creates initial snapshots for all existing records in tracked models.
 """
 import logging
+import time
 
 from django.apps import apps
 from django.conf import settings
@@ -33,6 +34,16 @@ class Command(BaseCommand):
             action="store_true",
             help="Show what would be done without actually creating events",
         )
+        parser.add_argument(
+            "--log-queries",
+            action="store_true",
+            help="Enable database query logging (default: enabled)",
+        )
+        parser.add_argument(
+            "--no-log-queries",
+            action="store_true",
+            help="Disable database query logging",
+        )
 
     def get_excluded_fields(self, model_name):
         """Get the list of excluded fields for a specific model from pghistory configuration."""
@@ -45,6 +56,89 @@ class Command(BaseCommand):
         }
         return excluded_fields_map.get(model_name, [])
 
+    def process_batch(self, event_model, event_records, model_name, dry_run, batch_start_time, processed, backfill_count, *, is_final_batch=False):
+        """Process a batch of event records by bulk creating them in the database."""
+        if not event_records:
+            return 0, batch_start_time
+
+        if dry_run:
+            actually_created = len(event_records)
+        else:
+            try:
+                attempted = len(event_records)
+                # No need to pass batch_size since we're already batching ourselves
+                created_objects = event_model.objects.bulk_create(event_records)
+                actually_created = len(created_objects) if created_objects else 0
+
+                if actually_created != attempted:
+                    logger.warning(
+                        f"bulk_create for {model_name}: attempted {attempted}, "
+                        f"actually created {actually_created} ({attempted - actually_created} skipped)",
+                    )
+            except Exception:
+                logger.exception(f"Failed to bulk create events for {model_name}")
+                raise
+
+        # Calculate timing after the actual database operation
+        batch_end_time = time.time()
+        batch_duration = batch_end_time - batch_start_time
+        batch_records_per_second = len(event_records) / batch_duration if batch_duration > 0 else 0
+
+        # Log batch timing
+        if is_final_batch:
+            self.stdout.write(f"  Final batch: {batch_duration:.2f}s ({batch_records_per_second:.1f} records/sec)")
+        else:
+            progress = (processed + actually_created) / backfill_count * 100
+            self.stdout.write(f"  Processed {processed + actually_created:,}/{backfill_count:,} records needing backfill ({progress:.1f}%) - "
+                            f"Last batch: {batch_duration:.2f}s ({batch_records_per_second:.1f} records/sec)")
+
+        return actually_created, batch_end_time
+
+    def enable_db_logging(self):
+        """Enable database query logging for this command."""
+        # Store original DEBUG setting
+        self.original_debug = settings.DEBUG
+
+        # Configure database query logging
+        db_logger = logging.getLogger("django.db.backends")
+        db_logger.setLevel(logging.DEBUG)
+
+        # Add a handler if one doesn't exist
+        if not db_logger.handlers:
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            )
+            handler.setFormatter(formatter)
+            db_logger.addHandler(handler)
+
+        # Also enable the SQL logger specifically
+        sql_logger = logging.getLogger("django.db.backends.sql")
+        sql_logger.setLevel(logging.DEBUG)
+
+        # Ensure the root logger propagates to our handlers
+        if not sql_logger.handlers:
+            sql_logger.addHandler(handler)
+
+        # Enable query logging in Django settings
+        settings.DEBUG = True
+
+        self.stdout.write(
+            self.style.SUCCESS("Database query logging enabled"),
+        )
+
+    def disable_db_logging(self):
+        """Disable database query logging."""
+        # Restore original DEBUG setting
+        settings.DEBUG = self.original_debug
+
+        # Disable query logging by setting a higher level
+        logging.getLogger("django.db.backends").setLevel(logging.INFO)
+        logging.getLogger("django.db.backends.sql").setLevel(logging.INFO)
+        self.stdout.write(
+            self.style.SUCCESS("Database query logging disabled"),
+        )
+
     def handle(self, *args, **options):
         if not settings.ENABLE_AUDITLOG or settings.AUDITLOG_TYPE != "django-pghistory":
             self.stdout.write(
@@ -54,6 +148,17 @@ class Command(BaseCommand):
                 ),
             )
             return
+
+        # Enable database query logging based on options
+        # Default to enabled unless explicitly disabled
+        enable_query_logging = not options.get("no_log_queries")
+
+        if enable_query_logging:
+            self.enable_db_logging()
+        else:
+            self.stdout.write(
+                self.style.WARNING("Database query logging disabled"),
+            )
 
         # Models that are tracked by pghistory
         tracked_models = [
@@ -83,9 +188,11 @@ class Command(BaseCommand):
             )
 
         total_processed = 0
+        total_start_time = time.time()
         self.stdout.write(f"Starting backfill for {len(tracked_models)} model(s)...")
 
         for model_name in tracked_models:
+            model_start_time = time.time()
             self.stdout.write(f"\nProcessing {model_name}...")
 
             try:
@@ -143,6 +250,7 @@ class Command(BaseCommand):
                 processed = 0
                 event_records = []
                 failed_records = []
+                batch_start_time = time.time()
 
                 for instance in records_needing_backfill.iterator():
                     try:
@@ -156,8 +264,17 @@ class Command(BaseCommand):
                         for field in instance._meta.fields:
                             field_name = field.name
                             if field_name not in excluded_fields:
-                                field_value = getattr(instance, field_name)
-                                event_data[field_name] = field_value
+                                # Handle foreign key fields differently
+                                if field.many_to_one:  # ForeignKey field
+                                    # For foreign keys, use the _id field to get the raw ID value
+                                    # Store it under the _id field name for the Event model
+                                    field_id_name = f"{field_name}_id"
+                                    field_value = getattr(instance, field_id_name)
+                                    event_data[field_id_name] = field_value
+                                else:
+                                    # For non-foreign key fields, use value_from_object() to avoid queries
+                                    field_value = field.value_from_object(instance)
+                                    event_data[field_name] = field_value
 
                         # Explicitly preserve created timestamp from the original instance
                         # Only if not excluded and exists
@@ -178,57 +295,32 @@ class Command(BaseCommand):
 
                         event_records.append(EventModel(**event_data))
 
-                    except Exception as e:
+                    except Exception:
                         failed_records.append(instance.id)
-                        logger.error(
-                            f"Failed to prepare event for {model_name} ID {instance.id}: {e}",
+                        logger.exception(
+                            f"Failed to prepare event for {model_name} ID {instance.id}",
                         )
 
                     # Bulk create when we hit batch_size records
                     if len(event_records) >= batch_size:
-                        if not dry_run and event_records:
-                            try:
-                                attempted = len(event_records)
-                                created_objects = EventModel.objects.bulk_create(event_records, batch_size=batch_size)
-                                actually_created = len(created_objects) if created_objects else 0
-                                processed += actually_created
-
-                                if actually_created != attempted:
-                                    logger.warning(
-                                        f"bulk_create for {model_name}: attempted {attempted}, "
-                                        f"actually created {actually_created} ({attempted - actually_created} skipped)",
-                                    )
-                            except Exception as e:
-                                logger.error(f"Failed to bulk create events for {model_name}: {e}")
-                                raise
-                        elif dry_run:
-                            processed += len(event_records)
+                        # Process the batch
+                        batch_processed, batch_start_time = self.process_batch(
+                            EventModel, event_records, model_name, dry_run,
+                            batch_start_time, processed, backfill_count,
+                        )
+                        processed += batch_processed
 
                         event_records = []  # Reset for next batch
-
-                        # Progress update
-                        progress = (processed / backfill_count) * 100
-                        self.stdout.write(f"  Processed {processed:,}/{backfill_count:,} records needing backfill ({progress:.1f}%)")
+                        batch_start_time = time.time()  # Reset batch timer
 
                 # Handle remaining records
                 if event_records:
-                    if not dry_run:
-                        try:
-                            attempted = len(event_records)
-                            created_objects = EventModel.objects.bulk_create(event_records, batch_size=batch_size)
-                            actually_created = len(created_objects) if created_objects else 0
-                            processed += actually_created
-
-                            if actually_created != attempted:
-                                logger.warning(
-                                    f"bulk_create final batch for {model_name}: attempted {attempted}, "
-                                    f"actually created {actually_created} ({attempted - actually_created} skipped)",
-                                )
-                        except Exception as e:
-                            logger.error(f"Failed to bulk create final batch for {model_name}: {e}")
-                            raise
-                    else:
-                        processed += len(event_records)
+                    # Process the final batch
+                    batch_processed, _ = self.process_batch(
+                        EventModel, event_records, model_name, dry_run,
+                        batch_start_time, processed, backfill_count, is_final_batch=True,
+                    )
+                    processed += batch_processed
 
                 # Final progress update
                 if backfill_count > 0:
@@ -237,18 +329,25 @@ class Command(BaseCommand):
 
                 total_processed += processed
 
-                # Show completion summary
+                # Calculate timing for this model
+                model_end_time = time.time()
+                model_duration = model_end_time - model_start_time
+                records_per_second = processed / model_duration if model_duration > 0 else 0
+
+                # Show completion summary with timing
                 if failed_records:
                     self.stdout.write(
                         self.style.WARNING(
                             f"  ⚠ Completed {model_name}: {processed:,} records processed, "
-                            f"{len(failed_records)} records failed",
+                            f"{len(failed_records)} records failed in {model_duration:.2f}s "
+                            f"({records_per_second:.1f} records/sec)",
                         ),
                     )
                 else:
                     self.stdout.write(
                         self.style.SUCCESS(
-                            f"  ✓ Completed {model_name}: {processed:,} records",
+                            f"  ✓ Completed {model_name}: {processed:,} records in {model_duration:.2f}s "
+                            f"({records_per_second:.1f} records/sec)",
                         ),
                     )
 
@@ -256,10 +355,20 @@ class Command(BaseCommand):
                 self.stdout.write(
                     self.style.ERROR(f"  ✗ Failed to process {model_name}: {e}"),
                 )
-                logger.error(f"Error processing {model_name}: {e}")
+                logger.exception(f"Error processing {model_name}")
+
+        # Calculate total timing
+        total_end_time = time.time()
+        total_duration = total_end_time - total_start_time
+        total_records_per_second = total_processed / total_duration if total_duration > 0 else 0
+
+        # Disable database query logging if it was enabled
+        if enable_query_logging:
+            self.disable_db_logging()
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"\nBACKFILL COMPLETE: Processed {total_processed:,} records",
+                f"\nBACKFILL COMPLETE: Processed {total_processed:,} records in {total_duration:.2f}s "
+                f"({total_records_per_second:.1f} records/sec)",
             ),
         )
