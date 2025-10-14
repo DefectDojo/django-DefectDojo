@@ -50,6 +50,7 @@ spec:
         ) | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.initializer.automountServiceAccountToken }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ . }}
