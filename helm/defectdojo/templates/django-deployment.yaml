@@ -59,6 +59,7 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.django.automountServiceAccountToken }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ quote . }}
