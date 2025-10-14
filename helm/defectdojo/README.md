@@ -529,6 +529,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.beat.affinity | object | `{}` |  |
 | celery.beat.annotations | object | `{}` |  |
 | celery.beat.automountServiceAccountToken | bool | `false` |  |
+| celery.beat.containerSecurityContext | object | `{}` |  |
 | celery.beat.extraEnv | list | `[]` |  |
 | celery.beat.extraInitContainers | list | `[]` |  |
 | celery.beat.extraVolumeMounts | list | `[]` |  |
@@ -551,6 +552,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.annotations | object | `{}` |  |
 | celery.worker.appSettings.poolType | string | `"solo"` |  |
 | celery.worker.automountServiceAccountToken | bool | `false` |  |
+| celery.worker.containerSecurityContext | object | `{}` |  |
 | celery.worker.extraEnv | list | `[]` |  |
 | celery.worker.extraInitContainers | list | `[]` |  |
 | celery.worker.extraVolumeMounts | list | `[]` |  |
@@ -594,6 +596,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.affinity | object | `{}` |  |
 | django.annotations | object | `{}` |  |
 | django.automountServiceAccountToken | bool | `false` |  |
+| django.extraEnv | list | `[]` |  |
 | django.extraInitContainers | list | `[]` |  |
 | django.extraVolumeMounts | list | `[]` |  |
 | django.extraVolumes | list | `[]` |  |
@@ -674,6 +677,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | initializer.affinity | object | `{}` |  |
 | initializer.annotations | object | `{}` |  |
 | initializer.automountServiceAccountToken | bool | `false` |  |
+| initializer.containerSecurityContext | object | `{}` |  |
 | initializer.extraEnv | list | `[]` |  |
 | initializer.extraVolumeMounts | list | `[]` |  |
 | initializer.extraVolumes | list | `[]` |  |
