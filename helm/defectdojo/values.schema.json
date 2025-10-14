@@ -330,9 +330,9 @@
                 "automountServiceAccountToken": {
                     "type": "boolean"
                 },
-		"extraEnv": {
-		    "type": "array"
-		},
+                "extraEnv": {
+                    "type": "array"
+                },
                 "extraInitContainers": {
                     "type": "array"
                 },
@@ -695,8 +695,8 @@
                     "type": "boolean"
                 },
                 "containerSecurityContext": {
-		            "type": "object"
-		        },
+                    "type": "object"
+                },
                 "extraEnv": {
                     "type": "array"
                 },
