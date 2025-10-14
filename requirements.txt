@@ -113,7 +113,7 @@ wcwidth==0.2.14
 kombu==5.5.4
 six==1.17.0
 attrs==25.4.0
-idna==3.10
+idna==3.11
 importlib-metadata==8.7.0
 packaging==25.0
 pysaml2==7.5.0
