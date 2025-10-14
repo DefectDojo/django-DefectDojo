@@ -52,6 +52,7 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.celery.beat.automountServiceAccountToken }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ . }}

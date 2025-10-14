@@ -117,5 +117,5 @@ jobs:
           fi
           cp -f ./build/index.yaml ./index.yaml
           git add ./index.yaml
-          git commit -m "Update index.yaml"
+          git commit -m "Update index.yaml - ${{ inputs.release_number }}"
           git push -u origin helm-charts

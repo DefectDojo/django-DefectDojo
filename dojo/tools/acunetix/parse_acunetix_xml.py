@@ -67,7 +67,7 @@ class AcunetixXMLParser:
         root = parse(filename).getroot()
         for scan in root.findall("Scan"):
             start_url = scan.findtext("StartURL")
-            if ":" not in start_url:
+            if "://" not in start_url:
                 start_url = "//" + start_url
             # get report date
             if scan.findtext("StartTime") and scan.findtext("StartTime"):
