@@ -52,9 +52,9 @@
                         "automountServiceAccountToken": {
                             "type": "boolean"
                         },
-			"containerSecurityContext": {
-			    "type": "object"
-			},
+                        "containerSecurityContext": {
+                            "type": "object"
+                        },
                         "extraEnv": {
                             "type": "array"
                         },
@@ -146,8 +146,8 @@
                         "automountServiceAccountToken": {
                             "type": "boolean"
                         },
-			"containerSecurityContext": {
-			    "type": "object"
+                        "containerSecurityContext": {
+                            "type": "object"
                         },
                         "extraEnv": {
                             "type": "array"
@@ -694,12 +694,12 @@
                 "automountServiceAccountToken": {
                     "type": "boolean"
                 },
+                "containerSecurityContext": {
+		            "type": "object"
+		        },
                 "extraEnv": {
                     "type": "array"
                 },
-                "containerSecurityContext": {
-		    "type": "object"
-		},
                 "extraVolumeMounts": {
                     "type": "array"
                 },
