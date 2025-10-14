@@ -35,5 +35,7 @@ annotations:
   #     description: Critical bug
   artifacthub.io/prerelease: "true"
   artifacthub.io/changes: |
+    - kind: fixed
+      description: Drop initialDelaySeconds if eq. zero
     - kind: added
       description: Add support for automountServiceAccountToken
