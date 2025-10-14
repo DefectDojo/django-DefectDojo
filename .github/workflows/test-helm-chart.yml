@@ -78,9 +78,13 @@ jobs:
 
           # Get current branch annotation
           current_annotation=$(yq e '.annotations."artifacthub.io/changes"' "helm/defectdojo/Chart.yaml")
+          echo "Current annotation: "
+          echo $current_annotation
 
           # Get target branch version of Chart.yaml annotation
           target_annotation=$(git show "origin/${{ env.ct-branch }}:helm/defectdojo/Chart.yaml" | yq e '.annotations."artifacthub.io/changes"' -)
+          echo "Target annotation: "
+          echo $target_annotation
 
           if [[ "$current_annotation" == "$target_annotation" ]]; then
             echo "::error file=helm/defectdojo/Chart.yaml::The 'artifacthub.io/changes' annotation has not been updated compared to ${{ env.ct-branch }}. For more, check the hint in 'helm/defectdojo/Chart.yaml'"
