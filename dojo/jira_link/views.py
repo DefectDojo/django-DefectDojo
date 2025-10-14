@@ -327,6 +327,7 @@ class NewJiraView(View):
                 return render(request, self.get_template(), {"jform": jform})
             # authentication successful
             # Get the open and close keys
+            msg = "Unable to find Open/Close ID's (invalid issue key specified?). They will need to be found manually"
             try:
                 issue_id = jform.cleaned_data.get("issue_key")
                 key_url = jira_server.strip("/") + "/rest/api/latest/issue/" + issue_id + "/transitions?expand=transitions.fields"
@@ -339,8 +340,9 @@ class NewJiraView(View):
                     if node["to"]["statusCategory"]["name"] == "Done":
                         close_key = close_key or int(node["id"])
             except Exception:
-                msg = "Unable to find Open/Close ID's (invalid issue key specified?). They will need to be found manually"
                 logger.exception(msg)  # already logged in jira_helper
+
+            if not open_key or not close_key:
                 messages.add_message(
                     request,
                     messages.ERROR,
