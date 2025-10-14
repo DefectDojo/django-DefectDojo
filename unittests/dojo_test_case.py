@@ -499,7 +499,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def login_as_admin(self):
         testuser = self.get_test_admin()
-        token = Token.objects.get(user=testuser)
+        token, _ = Token.objects.get_or_create(user=testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
