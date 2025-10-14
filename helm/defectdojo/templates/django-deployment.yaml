@@ -2,20 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $fullName }}-django
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.django.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
   labels:
     defectdojo.org/component: django
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
-    {{- with .Values.extraLabels }}
-      {{- toYaml . | nindent 4 }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
     {{- end }}
-  {{- with .Values.django.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  name: {{ $fullName }}-django
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.django.replicas }}
   {{- with .Values.django.strategy }}
@@ -36,15 +39,12 @@ spec:
         defectdojo.org/component: django
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        {{- with .Values.extraLabels }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .Values.podLabels }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- range $key, $value := mergeOverwrite dict .Values.extraLabels .Values.podLabels }}
+        {{ $key }}: {{ quote $value }}
+      {{- end }}
       annotations:
-      {{- with .Values.django.annotations }}
-        {{- toYaml . | nindent 8 }}
+      {{- range $key, $value := mergeOverwrite dict .Values.extraAnnotations .Values.django.annotations }}
+        {{ $key }}: {{ quote $value }}
       {{- end }}
       {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
         prometheus.io/path: /metrics
@@ -65,8 +65,14 @@ spec:
       - name: {{ quote . }}
       {{- end }}
       {{- if .Values.django.mediaPersistentVolume.enabled }}
+      {{- if .Values.securityContext.enabled }}
       securityContext:
-        fsGroup: {{ .Values.django.mediaPersistentVolume.fsGroup | default 1001 }}
+        {{- include "helpers.securityContext" (list
+          .Values
+          "securityContext.podSecurityContext"
+          "django.podSecurityContext"
+        ) | nindent 8 }}
+      {{- end }}
       {{- end }}
       volumes:
       - name: run
@@ -99,25 +105,10 @@ spec:
       - {{- . | toYaml | nindent 8 }}
       {{- end }}
       {{- if .Values.cloudsql.enabled }}
-      - name: cloudsql-proxy
-        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
-        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
-        restartPolicy: Always
-        securityContext:
-          runAsNonRoot: true
-        command: ["/cloud_sql_proxy"]
-        args:
-        - "-verbose={{ .Values.cloudsql.verbose }}"
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
-        {{- if .Values.cloudsql.enable_iam_login }}
-        - "-enable_iam_login"
-        {{- end }}
-        {{- if .Values.cloudsql.use_private_ip }}
-        - "-ip_address_types=PRIVATE"
-        {{- end }}
+      {{- include "cloudsqlProxy" . | nindent 6 }}
       {{- end }}
       {{- if .Values.dbMigrationChecker.enabled }}
-      {{$data := dict "fullName" $fullName }}
+      {{- $data := dict "fullName" $fullName }}
       {{- $newContext := merge . (dict "fullName" $fullName) }}
       {{- include "dbMigrationChecker" $newContext | nindent 6 }}
       {{- end }}
@@ -127,7 +118,13 @@ spec:
       - name: metrics
         image: {{ .Values.monitoring.prometheus.image }}
         imagePullPolicy: {{ .Values.monitoring.prometheus.imagePullPolicy }}
-        command: [ '/usr/bin/nginx-prometheus-exporter', '--nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
+        command:
+        - /usr/bin/nginx-prometheus-exporter
+        - --nginx.scrape-uri
+        - http://127.0.0.1:8080/nginx_status
+        {{- with .Values.monitoring.prometheus.extraEnv }}
+        env: {{- . | toYaml | nindent 8 }}
+        {{- end }}
         ports:
         - name: http-metrics
           protocol: TCP
@@ -139,13 +136,31 @@ spec:
           periodSeconds: 20
           initialDelaySeconds: 15
           timeoutSeconds: 5
+        {{- with .Values.monitoring.prometheus.resources }}
+        resources: {{- . | toYaml | nindent 10 }}
+        {{- end }}
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          {{- include "helpers.securityContext" (list
+            .Values
+            "securityContext.containerSecurityContext"
+            "monitoring.prometheus.containerSecurityContext"
+          ) | nindent 10 }}
+        {{- end }}
+        {{- with .Values.monitoring.prometheus.extraVolumeMounts }}
+        volumeMounts: {{ . | toYaml | nindent 10 }}
+        {{- end }}
       {{- end }}
       - name: uwsgi
         image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+          {{- include "helpers.securityContext" (list
+            .Values
+            "securityContext.containerSecurityContext"
+            "django.uwsgi.containerSecurityContext"
+          ) | nindent 10 }}
         {{- end }}
         volumeMounts:
         - name: run
@@ -159,6 +174,9 @@ spec:
         {{- if .Values.django.uwsgi.certificates.enabled }}
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
+        {{- end }}
+        {{- with .Values.django.extraVolumeMounts }}
+          {{- . | toYaml | nindent 8 }}
         {{- end }}
         {{- with .Values.django.uwsgi.extraVolumeMounts }}
           {{- . | toYaml | nindent 8 }}
@@ -213,6 +231,9 @@ spec:
         {{- with .Values.extraEnv }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
+        {{- with .Values.django.extraEnv }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
         {{- with .Values.django.uwsgi.extraEnv }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
@@ -237,11 +258,18 @@ spec:
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.securityContext.nginxSecurityContext | nindent 10 }}
+          {{- include "helpers.securityContext" (list
+            .Values
+            "securityContext.containerSecurityContext"
+            "django.nginx.containerSecurityContext"
+          ) | nindent 10 }}
         {{- end }}
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        {{- with .Values.django.extraVolumeMounts }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
         {{- with .Values.django.nginx.extraVolumeMounts }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
@@ -267,6 +295,9 @@ spec:
         - name: GENERATE_TLS_CERTIFICATE
           value: '{{ .Values.django.nginx.tls.generateCertificate }}'
         {{- with .Values.extraEnv }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
+        {{- with .Values.django.extraEnv }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
         {{- with .Values.django.nginx.extraEnv }}

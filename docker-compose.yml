@@ -120,7 +120,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   postgres:
-    image: postgres:18.0-alpine@sha256:70b32afe0c274b4d93098fd724fcdaab3aba47270a4f1e63cbf9cc69d7bf1be4
+    image: postgres:18.0-alpine@sha256:f898ac406e1a9e05115cc2efcb3c3abb3a92a4c0263f3b6f6aaae354cbb1953a
     environment:
       POSTGRES_DB: ${DD_DATABASE_NAME:-defectdojo}
       POSTGRES_USER: ${DD_DATABASE_USER:-defectdojo}
@@ -129,7 +129,7 @@ services:
       - defectdojo_postgres:/var/lib/postgresql/data
   redis:
     # Pinning to this version due to licensing constraints
-    image: redis:7.2.11-alpine@sha256:7632e82373929f39cdbead93f2e45d8b3cd295072c4755e00e7e6b19d56cc512
+    image: redis:7.2.11-alpine@sha256:cd3e4dbac9604660d08efac21b27daa2ae91dde1e19203b49ec8567050ba093f
     volumes:
       - defectdojo_redis:/data
 volumes:
