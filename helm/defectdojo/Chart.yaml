@@ -34,4 +34,6 @@ annotations:
   #   - kind: security
   #     description: Critical bug
   artifacthub.io/prerelease: "true"
-  artifacthub.io/changes: ""
+  artifacthub.io/changes: |
+    - kind: added
+      description: Add support for automountServiceAccountToken
