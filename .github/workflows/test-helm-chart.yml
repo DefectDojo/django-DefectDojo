@@ -34,8 +34,8 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@0d28d3144d3a25ea2cc349d6e59901c4ff469b3b # v2.7.0
         with:
-          yamale_version: 4.0.4
-          yamllint_version: 1.35.1
+          yamale_version: 6.0.0
+          yamllint_version: 1.37.1
 
       - name: Determine target branch
         id: ct-branch-target
@@ -78,12 +78,16 @@ jobs:
 
           # Get current branch annotation
           current_annotation=$(yq e '.annotations."artifacthub.io/changes"' "helm/defectdojo/Chart.yaml")
+          echo "Current annotation: "
+          echo $current_annotation
 
           # Get target branch version of Chart.yaml annotation
           target_annotation=$(git show "origin/${{ env.ct-branch }}:helm/defectdojo/Chart.yaml" | yq e '.annotations."artifacthub.io/changes"' -)
+          echo "Target annotation: "
+          echo $target_annotation
 
           if [[ "$current_annotation" == "$target_annotation" ]]; then
-            echo "::error::The HELM chart has been updated but the 'artifacthub.io/changes' annotation in 'Chart.yaml' has not been changed (compared to '${{ env.ct-branch }}' branch)"
+            echo "::error file=helm/defectdojo/Chart.yaml::The 'artifacthub.io/changes' annotation has not been updated compared to ${{ env.ct-branch }}. For more, check the hint in 'helm/defectdojo/Chart.yaml'"
             exit 1
           fi
 

@@ -495,7 +495,7 @@ kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 
 # General information about chart values
 
-![Version: 1.7.1-dev](https://img.shields.io/badge/Version-1.7.1--dev-informational?style=flat-square) ![AppVersion: 2.52.0-dev](https://img.shields.io/badge/AppVersion-2.52.0--dev-informational?style=flat-square)
+![Version: 1.7.2-dev](https://img.shields.io/badge/Version-1.7.2--dev-informational?style=flat-square) ![AppVersion: 2.52.0-dev](https://img.shields.io/badge/AppVersion-2.52.0--dev-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -528,6 +528,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.annotations | object | `{}` |  |
 | celery.beat.affinity | object | `{}` |  |
 | celery.beat.annotations | object | `{}` |  |
+| celery.beat.automountServiceAccountToken | bool | `false` |  |
 | celery.beat.containerSecurityContext | object | `{}` |  |
 | celery.beat.extraEnv | list | `[]` |  |
 | celery.beat.extraInitContainers | list | `[]` |  |
@@ -550,6 +551,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.affinity | object | `{}` |  |
 | celery.worker.annotations | object | `{}` |  |
 | celery.worker.appSettings.poolType | string | `"solo"` |  |
+| celery.worker.automountServiceAccountToken | bool | `false` |  |
 | celery.worker.containerSecurityContext | object | `{}` |  |
 | celery.worker.extraEnv | list | `[]` |  |
 | celery.worker.extraInitContainers | list | `[]` |  |
@@ -593,6 +595,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | disableHooks | bool | `false` |  |
 | django.affinity | object | `{}` |  |
 | django.annotations | object | `{}` |  |
+| django.automountServiceAccountToken | bool | `false` |  |
 | django.extraEnv | list | `[]` |  |
 | django.extraInitContainers | list | `[]` |  |
 | django.extraVolumeMounts | list | `[]` |  |
@@ -673,6 +676,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | imagePullSecrets | string | `nil` |  |
 | initializer.affinity | object | `{}` |  |
 | initializer.annotations | object | `{}` |  |
+| initializer.automountServiceAccountToken | bool | `false` |  |
 | initializer.containerSecurityContext | object | `{}` |  |
 | initializer.extraEnv | list | `[]` |  |
 | initializer.extraVolumeMounts | list | `[]` |  |
@@ -747,6 +751,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | serviceAccount.name | string | `""` |  |
 | siteUrl | string | `""` |  |
 | tag | string | `"latest"` |  |
+| tests.unitTests.automountServiceAccountToken | bool | `false` |  |
 | tests.unitTests.resources.limits.cpu | string | `"500m"` |  |
 | tests.unitTests.resources.limits.memory | string | `"512Mi"` |  |
 | tests.unitTests.resources.requests.cpu | string | `"100m"` |  |
