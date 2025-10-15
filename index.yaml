@@ -3,6 +3,34 @@ entries:
   defectdojo:
   - annotations:
       artifacthub.io/changes: |
+        - kind: changed
+          description: DRY cloudsql-proxy
+      artifacthub.io/prerelease: "true"
+    apiVersion: v2
+    appVersion: 2.52.0-dev
+    created: "2025-10-15T05:10:59.846056027Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: ~16.7.0
+    - condition: redis.enabled
+      name: redis
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: ~19.6.4
+    description: A Helm chart for Kubernetes to install DefectDojo
+    digest: 674aebd4e41be83e7117b7469bd37dd9f59d82c0b9b9c11f782a424cd5ef31af
+    icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
+    maintainers:
+    - email: defectdojo-project@owasp.org
+      name: madchap
+      url: https://github.com/DefectDojo/django-DefectDojo
+    name: defectdojo
+    urls:
+    - https://github.com/DefectDojo/django-DefectDojo/releases/download/nightly-dev/defectdojo-1.7.2-dev.tgz
+    version: 1.7.2-dev
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: Add support for automountServiceAccountToken
         - kind: changed
@@ -6738,4 +6766,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2025-10-14T16:23:58.250428064Z"
+generated: "2025-10-15T05:10:59.833765138Z"
