@@ -60,6 +60,7 @@ spec:
         ) | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.celery.beat.automountServiceAccountToken }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ . }}

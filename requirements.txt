@@ -18,7 +18,7 @@ django_extensions==4.1
 django-slack==5.19.0
 django-watson==1.6.3
 django-prometheus==2.4.1
-Django==5.1.12
+Django==5.1.13
 djangorestframework==3.16.1
 html2text==2025.4.15
 humanize==4.13.0
@@ -33,9 +33,9 @@ cryptography==46.0.2
 python-dateutil==2.9.0.post0
 redis==6.4.0
 requests==2.32.5
-sqlalchemy==2.0.43  # Required by Celery broker transport
+sqlalchemy==2.0.44  # Required by Celery broker transport
 urllib3==2.5.0
-uWSGI==2.0.30
+uWSGI==2.0.31
 vobject==0.9.9
 whitenoise==5.2.0
 titlecase==2.4.1
