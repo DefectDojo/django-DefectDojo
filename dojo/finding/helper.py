@@ -584,7 +584,6 @@ def post_process_findings_batch(finding_ids, dedupe_option=True, rules_option=Tr
             hash_codes = {f.hash_code for f in findings if f.hash_code is not None}
             unique_ids = {f.unique_id_from_tool for f in findings if f.unique_id_from_tool is not None}
             if hash_codes or unique_ids:
-  # noqa: PLC0415
                 cond = Q()
                 if hash_codes:
                     cond |= Q(hash_code__isnull=False, hash_code__in=hash_codes)
@@ -608,7 +607,6 @@ def post_process_findings_batch(finding_ids, dedupe_option=True, rules_option=Tr
                         existing_by_hash.setdefault(ef.hash_code, []).append(ef)
                     if ef.unique_id_from_tool is not None:
                         existing_by_uid.setdefault(ef.unique_id_from_tool, []).append(ef)
-
 
                 # Debug logging for SARIF
                 logger.debug(f"SARIF Debug: Found {len(existing_by_hash)} unique hash codes in existing findings")
@@ -693,7 +691,6 @@ def post_process_findings_batch(finding_ids, dedupe_option=True, rules_option=Tr
         else:
             logger.debug(f"deduplicating finding batch with LEGACY - {len(finding_ids)} findings")
             # Legacy algorithm in batch: candidates share title or CWE, then apply legacy checks
-  # noqa: PLC0415
 
             titles = {f.title for f in findings if f.title}
             cwes = {f.cwe for f in findings if getattr(f, "cwe", 0)}
