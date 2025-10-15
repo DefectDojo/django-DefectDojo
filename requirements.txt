@@ -33,9 +33,9 @@ cryptography==46.0.2
 python-dateutil==2.9.0.post0
 redis==6.4.0
 requests==2.32.5
-sqlalchemy==2.0.43  # Required by Celery broker transport
+sqlalchemy==2.0.44  # Required by Celery broker transport
 urllib3==2.5.0
-uWSGI==2.0.30
+uWSGI==2.0.31
 vobject==0.9.9
 whitenoise==5.2.0
 titlecase==2.4.1
@@ -60,7 +60,7 @@ django-ratelimit==4.1.0
 argon2-cffi==25.1.0
 blackduck==1.1.3
 pycurl==7.45.7  # Required for Celery Broker AWS (SQS) support
-boto3==1.40.49  # Required for Celery Broker AWS (SQS) support
+boto3==1.40.52  # Required for Celery Broker AWS (SQS) support
 netaddr==1.3.0
 vulners==3.1.1
 fontawesomefree==6.6.0
