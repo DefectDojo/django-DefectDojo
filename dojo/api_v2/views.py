@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db.models.query import QuerySet as DjangoQuerySet
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -2814,15 +2815,16 @@ def report_generate(request, obj, options):
             ),
         )
 
-    elif type(obj).__name__ == "CastTaggedQuerySet":
+    elif isinstance(obj, DjangoQuerySet):
+        # Support any Django QuerySet (including Tagulous CastTaggedQuerySet)
         findings = report_finding_filter_class(
             request.GET,
             queryset=prefetch_related_findings_for_report(obj).distinct(),
         )
 
         report_name = "Finding"
-
     else:
+        logger.warning(f"Report cannot be generated for object of type {type(obj).__name__}")
         raise Http404
 
     result = {
