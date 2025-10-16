@@ -362,12 +362,17 @@ def reset_finding_related(finding):
         logger.error(e)
         raise ApiError.internal_server_error(detail=e)
 
-def get_sla_expiration_transfer_finding():
+def get_sla_expiration_transfer_finding(finding):
     expiration_delta_days = sla_expiration_transfer_finding('TransferFindingExpiration')
-    logger.debug(f"Update RiskAcceptanceExpiration: {expiration_delta_days}")
-    expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days.get("critical"))
+    logger.debug(f"Update TransferFindingExpiration: {expiration_delta_days}")
+    priority = finding.get_severity_related_to_priority()
+    expiration_date = timezone.now().date() + relativedelta(
+        days=expiration_delta_days.get(
+            priority
+        )
+    )
     created_date = timezone.now().date()
-    return expiration_delta_days.get('critical'), expiration_date, created_date
+    return expiration_delta_days.get(priority), expiration_date, created_date
 
 
 def delete_transfer_finding_finding(transfer_finding):
