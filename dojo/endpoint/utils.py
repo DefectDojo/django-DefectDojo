@@ -10,7 +10,7 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from hyperlink._url import SCHEME_PORT_MAP
+from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
 from dojo.models import DojoMeta, Endpoint
 
