@@ -85,20 +85,64 @@
 {{- /*
   Builds the repository names for use with local or private registries
 */}}
-{{- define "celery.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-django
+{{- define "celery.beat.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.celery.beat.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
 {{- end -}}
 
-{{- define "django.nginx.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-nginx
+{{- define "celery.worker.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.celery.worker.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
 {{- end -}}
 
-{{- define "django.uwsgi.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-django
+{{- define "django.nginx.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.django.nginx.image .Values.images.nginx.image) "global" .Values.global "chart" .Chart ) }}
 {{- end -}}
 
-{{- define "initializer.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-django
+{{- define "django.uwsgi.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.django.uwsgi.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
+{{- end -}}
+
+{{- define "initializer.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.initializer.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
+{{- end -}}
+
+{{- define "dbMigrationChecker.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.dbMigrationChecker.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
+{{- end -}}
+
+{{- define "unitTests.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.tests.unitTests.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
+{{- end -}}
+
+{{- define "monitoring.prometheus.image" -}}
+{{ include "images.image" (dict "imageRoot" .Values.monitoring.prometheus.image "global" .Values.global ) }}
+{{- end -}}
+
+{{- /*
+Return the proper image name.
+If image tag and digest are not defined, termination fallbacks to chart appVersion.
+{{ include "images.image" ( dict "imageRoot" .Values.path.to.the.image "global" .Values.global "chart" .Chart ) }}
+Inspired by Bitnami Common Chart v2.31.7
+*/}}
+{{- define "images.image" -}}
+{{- $registryName := default .imageRoot.registry ((.global).imageRegistry) -}}
+{{- $repositoryName := .imageRoot.repository -}}
+{{- $separator := ":" -}}
+{{- $termination := .imageRoot.tag | toString -}}
+
+{{- if not .imageRoot.tag }}
+  {{- if .chart }}
+    {{- $termination = .chart.AppVersion | toString -}}
+  {{- end -}}
+{{- end -}}
+{{- if .imageRoot.digest }}
+    {{- $separator = "@" -}}
+    {{- $termination = .imageRoot.digest | toString -}}
+{{- end -}}
+{{- if $registryName }}
+    {{- printf "%s/%s%s%s" $registryName $repositoryName $separator $termination -}}
+{{- else -}}
+    {{- printf "%s%s%s"  $repositoryName $separator $termination -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "initializer.jobname" -}}
@@ -141,7 +185,7 @@
   - sh
   - -c
   - while ! /app/manage.py migrate --check; do echo "Database is not migrated to the latest state yet"; sleep 5; done; echo "Database is migrated to the latest state";
-  image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
+  image: '{{ template "dbMigrationChecker.image" . }}'
   imagePullPolicy: {{ .Values.imagePullPolicy }}
   {{- if .Values.securityContext.enabled }}
   securityContext:
