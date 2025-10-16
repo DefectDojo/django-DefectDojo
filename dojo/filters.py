@@ -150,6 +150,7 @@ class CharFieldFilterANDExpression(CharFieldInFilter):
 class TagExistsIContainsFilter(CharFilter):
     pass
 
+
 class FindingStatusFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs
