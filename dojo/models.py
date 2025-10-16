@@ -231,15 +231,15 @@ class Dojo_User(User):
     def force_password_reset(user):
         return hasattr(user, "usercontactinfo") and user.usercontactinfo.force_password_reset
 
-    def disable_force_password_reset(user):
-        if hasattr(user, "usercontactinfo"):
-            user.usercontactinfo.force_password_reset = False
-            user.usercontactinfo.save()
+    def disable_force_password_reset(self):
+        if hasattr(self, "usercontactinfo"):
+            self.usercontactinfo.force_password_reset = False
+            self.usercontactinfo.save()
 
-    def enable_force_password_reset(user):
-        if hasattr(user, "usercontactinfo"):
-            user.usercontactinfo.force_password_reset = True
-            user.usercontactinfo.save()
+    def enable_force_password_reset(self):
+        if hasattr(self, "usercontactinfo"):
+            self.usercontactinfo.force_password_reset = True
+            self.usercontactinfo.save()
 
     @staticmethod
     def generate_full_name(user):
