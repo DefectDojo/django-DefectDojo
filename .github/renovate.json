@@ -1,20 +1,40 @@
 {
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
   "dependencyDashboard": true,
   "dependencyDashboardApproval": false,
-  "baseBranches": ["dev"],
+  "baseBranchPatterns": ["dev"],
   "rebaseWhen": "conflicted",
   "separateMinorPatch": true,
-  "ignorePaths": ["requirements.txt", "requirements-lint.txt", "components/package.json", "components/package-lock.json", "dojo/components/yarn.lock", "dojo/components/package.json", "Dockerfile**"],
+  "ignorePaths": [
+    "requirements.txt",
+    "requirements-lint.txt",
+    "components/package.json",
+    "components/package-lock.json",
+    "dojo/components/yarn.lock",
+    "dojo/components/package.json",
+    "Dockerfile**"
+  ],
   "ignoreDeps": [],
   "packageRules": [{
-    "packagePatterns": ["*"],
-    "commitMessageExtra": "from {{currentVersion}} to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}",
+    "matchPackageNames": ["*"],
+    "commitMessageExtra": "from {{currentVersion}} to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}",
     "commitMessageSuffix": "({{packageFile}})",
     "labels": ["dependencies"]
   }],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^.github/workflows//"
+      ],
+      "matchStrings": [
+        "\\w*:\\s[\"']?(?<currentValue>\\S*[^\"']?)[\"']?\\s#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
   "registryAliases": {
     "bitnami": "https://charts.bitnami.com/bitnami"
   }
