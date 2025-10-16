@@ -23,6 +23,18 @@
     "commitMessageSuffix": "({{packageFile}})",
     "labels": ["dependencies"]
   }],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^.github/workflows//"
+      ],
+      "matchStrings": [
+        "\\w*:\\s[\"']?(?<currentValue>\\S*[^\"']?)[\"']?\\s#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
   "registryAliases": {
     "bitnami": "https://charts.bitnami.com/bitnami"
   }
