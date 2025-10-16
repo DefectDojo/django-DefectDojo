@@ -23,7 +23,7 @@
                 </div>
                 <div class="panel-footer">
                     <div class="clearfix">
-                        <a class="btn btn-success disabled pull-right run_report" href="#">Run</a>
+                        <a class="btn btn-success disabled pull-right run_report" href="#" data-toggle="tooltip" title="Add at least one section from Available Widgets before running." style="pointer-events: auto;">Run</a>
                     </div>
                 </div>
             </div>
@@ -83,8 +83,19 @@
                 }
             });
 
-            if ($('.in-use-widgets ul#sortable2 li').length > 0) {
-                $('a.run_report').removeClass('disabled');
+            if ($('.in-use-widgets ul#sortable2 li').not('.report-options').length > 0) {
+                var $run = $('a.run_report');
+                $run.removeClass('disabled')
+                    .css('pointer-events', '')
+                    .attr('title', 'Run the report')
+                    .attr('data-original-title', 'Run the report');
+            }
+            else {
+                var $run = $('a.run_report');
+                $run.addClass('disabled')
+                    .css('pointer-events', 'auto')
+                    .attr('title', 'Add at least one section from "Available Widgets" before running.')
+                    .attr('data-original-title', 'Add at least one section from "Available Widgets" before running.');
             }
         }
 
@@ -147,6 +158,13 @@
 
         function runReport(event) {
             var valid = true;
+
+            // Require at least one content widget (exclude report options)
+            if ($('.in-use-widgets ul#sortable2 li').not('.report-options').length === 0) {
+                alert('Please add at least one section from "Available Widgets" before running.');
+                event.preventDefault();
+                return;
+            }
 
             $('.in-use-widgets .form-control').not('#finding-list .form-control')
                 .not('#endpoint-list .form-control').not('#wysiwyg-content .form-control')
@@ -218,11 +236,21 @@
                 remove: function (event, ui) {
                     ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
 
-                    if ($('.in-use-widgets ul#sortable2 li').length > 0) {
-                        $('a.run_report').removeClass('disabled');
+                    if ($('.in-use-widgets ul#sortable2 li').not('.report-options').length > 0) {
+                        var $run = $('a.run_report');
+                        $run.removeClass('disabled')
+                            .css('pointer-events', '')
+                            .attr('title', 'Run the report')
+                            .attr('data-original-title', 'Run the report')
+                            .tooltip('fixTitle');
                     }
                     else {
-                        $('a.run_report').addClass('disabled');
+                        var $run = $('a.run_report');
+                        $run.addClass('disabled')
+                            .css('pointer-events', 'auto')
+                            .attr('title', 'Add at least one section from "Available Widgets" before running.')
+                            .attr('data-original-title', 'Add at least one section from "Available Widgets" before running.')
+                            .tooltip('fixTitle');
                     }
                 },
                 receive: function(event, ui) {
@@ -235,11 +263,21 @@
                     ui.item.find('[data-toggle="tooltip"]').tooltip();
                     ui.item.find('[data-toggle="tooltip"]').tooltip('hide');
 
-                    if ($('.in-use-widgets ul#sortable2 li').length > 0) {
-                        $('a.run_report').removeClass('disabled');
+                    if ($('.in-use-widgets ul#sortable2 li').not('.report-options').length > 0) {
+                        var $run = $('a.run_report');
+                        $run.removeClass('disabled')
+                            .css('pointer-events', '')
+                            .attr('title', 'Run the report')
+                            .attr('data-original-title', 'Run the report')
+                            .tooltip('fixTitle');
                     }
                     else {
-                        $('a.run_report').addClass('disabled');
+                        var $run = $('a.run_report');
+                        $run.addClass('disabled')
+                            .css('pointer-events', 'auto')
+                            .attr('title', 'Add at least one section from "Available Widgets" before running.')
+                            .attr('data-original-title', 'Add at least one section from "Available Widgets" before running.')
+                            .tooltip('fixTitle');
                     }
 
                     if (ui.item.attr('class') === 'wysiwyg-content') {
@@ -339,7 +377,7 @@
                 retrieveReportData("{% url 'report_endpoints' %}" + $a.attr('href'), $a.closest('li.endpoint-list'));
             })
 
-            $('[data-toggle="tooltip"]').tooltip()
+            $('[data-toggle="tooltip"]').tooltip({container: 'body', placement: 'top'})
 
             $(document).on('click', '.in-use-widgets .panel-available-widget .panel-heading', function (event) {
                 $(this).siblings('.panel-body').slideToggle();
