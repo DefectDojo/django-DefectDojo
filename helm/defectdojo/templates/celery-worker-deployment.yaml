@@ -95,7 +95,7 @@ spec:
       {{- end }}
       containers:
       - name: celery
-        image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
+        image: "{{ template "celery.worker.image" . }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- with .Values.celery.worker.livenessProbe }}
         livenessProbe: {{ toYaml . | nindent 10 }}

@@ -69,16 +69,6 @@ jobs:
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
 
-      - name: Add yq
-        uses: mikefarah/yq@0ecdce24e83f0fa127940334be98c86b07b0c488 # v4.48.1
-
-      - name: Pin version docker version
-        id: pin_image
-        run: |-
-          yq --version
-          yq -i '.tag="${{ inputs.release_number }}"'  helm/defectdojo/values.yaml
-          echo "Current image tag:`yq -r '.tag' helm/defectdojo/values.yaml`"
-
       - name: Package Helm chart
         id: package-helm-chart
         run: |

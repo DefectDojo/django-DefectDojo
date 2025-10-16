@@ -99,7 +99,7 @@ spec:
       - command:
         - /entrypoint-celery-beat.sh
         name: celery
-        image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
+        image: "{{ template "celery.beat.image" . }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- with .Values.celery.beat.livenessProbe }}
         livenessProbe: {{ toYaml . | nindent 10 }}

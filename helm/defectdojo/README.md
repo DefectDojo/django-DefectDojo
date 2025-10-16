@@ -495,7 +495,7 @@ kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 
 # General information about chart values
 
-![Version: 1.7.2-dev](https://img.shields.io/badge/Version-1.7.2--dev-informational?style=flat-square) ![AppVersion: 2.52.0-dev](https://img.shields.io/badge/AppVersion-2.52.0--dev-informational?style=flat-square)
+![Version: 1.8.0-dev](https://img.shields.io/badge/Version-1.8.0--dev-informational?style=flat-square) ![AppVersion: 2.52.0-dev](https://img.shields.io/badge/AppVersion-2.52.0--dev-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -534,6 +534,10 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.beat.extraInitContainers | list | `[]` |  |
 | celery.beat.extraVolumeMounts | list | `[]` |  |
 | celery.beat.extraVolumes | list | `[]` |  |
+| celery.beat.image.digest | string | `""` |  |
+| celery.beat.image.registry | string | `""` |  |
+| celery.beat.image.repository | string | `""` |  |
+| celery.beat.image.tag | string | `""` |  |
 | celery.beat.livenessProbe | object | `{}` |  |
 | celery.beat.nodeSelector | object | `{}` |  |
 | celery.beat.podAnnotations | object | `{}` |  |
@@ -557,6 +561,10 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.extraInitContainers | list | `[]` |  |
 | celery.worker.extraVolumeMounts | list | `[]` |  |
 | celery.worker.extraVolumes | list | `[]` |  |
+| celery.worker.image.digest | string | `""` |  |
+| celery.worker.image.registry | string | `""` |  |
+| celery.worker.image.repository | string | `""` |  |
+| celery.worker.image.tag | string | `""` |  |
 | celery.worker.livenessProbe | object | `{}` |  |
 | celery.worker.nodeSelector | object | `{}` |  |
 | celery.worker.podAnnotations | object | `{}` |  |
@@ -588,6 +596,10 @@ A Helm chart for Kubernetes to install DefectDojo
 | dbMigrationChecker.enabled | bool | `true` |  |
 | dbMigrationChecker.extraEnv | list | `[]` |  |
 | dbMigrationChecker.extraVolumeMounts | list | `[]` |  |
+| dbMigrationChecker.image.digest | string | `""` |  |
+| dbMigrationChecker.image.registry | string | `""` |  |
+| dbMigrationChecker.image.repository | string | `""` |  |
+| dbMigrationChecker.image.tag | string | `""` |  |
 | dbMigrationChecker.resources.limits.cpu | string | `"200m"` |  |
 | dbMigrationChecker.resources.limits.memory | string | `"200Mi"` |  |
 | dbMigrationChecker.resources.requests.cpu | string | `"100m"` |  |
@@ -617,6 +629,10 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.nginx.containerSecurityContext.runAsUser | int | `1001` |  |
 | django.nginx.extraEnv | list | `[]` |  |
 | django.nginx.extraVolumeMounts | list | `[]` |  |
+| django.nginx.image.digest | string | `""` |  |
+| django.nginx.image.registry | string | `""` |  |
+| django.nginx.image.repository | string | `""` |  |
+| django.nginx.image.tag | string | `""` |  |
 | django.nginx.resources.limits.cpu | string | `"2000m"` |  |
 | django.nginx.resources.limits.memory | string | `"256Mi"` |  |
 | django.nginx.resources.requests.cpu | string | `"100m"` |  |
@@ -641,6 +657,10 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.uwsgi.enableDebug | bool | `false` |  |
 | django.uwsgi.extraEnv | list | `[]` |  |
 | django.uwsgi.extraVolumeMounts | list | `[]` |  |
+| django.uwsgi.image.digest | string | `""` |  |
+| django.uwsgi.image.registry | string | `""` |  |
+| django.uwsgi.image.repository | string | `""` |  |
+| django.uwsgi.image.tag | string | `""` |  |
 | django.uwsgi.livenessProbe.enabled | bool | `true` |  |
 | django.uwsgi.livenessProbe.failureThreshold | int | `6` |  |
 | django.uwsgi.livenessProbe.initialDelaySeconds | int | `0` |  |
@@ -674,6 +694,14 @@ A Helm chart for Kubernetes to install DefectDojo
 | host | string | `"defectdojo.default.minikube.local"` |  |
 | imagePullPolicy | string | `"Always"` |  |
 | imagePullSecrets | string | `nil` |  |
+| images.django.image.digest | string | `""` |  |
+| images.django.image.registry | string | `""` |  |
+| images.django.image.repository | string | `"defectdojo/defectdojo-django"` |  |
+| images.django.image.tag | string | `""` |  |
+| images.nginx.image.digest | string | `""` |  |
+| images.nginx.image.registry | string | `""` |  |
+| images.nginx.image.repository | string | `"defectdojo/defectdojo-nginx"` |  |
+| images.nginx.image.tag | string | `""` |  |
 | initializer.affinity | object | `{}` |  |
 | initializer.annotations | object | `{}` |  |
 | initializer.automountServiceAccountToken | bool | `false` |  |
@@ -681,6 +709,10 @@ A Helm chart for Kubernetes to install DefectDojo
 | initializer.extraEnv | list | `[]` |  |
 | initializer.extraVolumeMounts | list | `[]` |  |
 | initializer.extraVolumes | list | `[]` |  |
+| initializer.image.digest | string | `""` |  |
+| initializer.image.registry | string | `""` |  |
+| initializer.image.repository | string | `""` |  |
+| initializer.image.tag | string | `""` |  |
 | initializer.jobAnnotations | object | `{}` |  |
 | initializer.keepSeconds | int | `60` |  |
 | initializer.labels | object | `{}` |  |
@@ -699,7 +731,10 @@ A Helm chart for Kubernetes to install DefectDojo
 | monitoring.prometheus.enabled | bool | `false` |  |
 | monitoring.prometheus.extraEnv | list | `[]` |  |
 | monitoring.prometheus.extraVolumeMounts | list | `[]` |  |
-| monitoring.prometheus.image | string | `"nginx/nginx-prometheus-exporter:1.4.2"` |  |
+| monitoring.prometheus.image.digest | string | `""` |  |
+| monitoring.prometheus.image.registry | string | `""` |  |
+| monitoring.prometheus.image.repository | string | `"nginx/nginx-prometheus-exporter"` |  |
+| monitoring.prometheus.image.tag | string | `"1.4.2"` |  |
 | monitoring.prometheus.imagePullPolicy | string | `"IfNotPresent"` |  |
 | monitoring.prometheus.resources | object | `{}` |  |
 | networkPolicy.annotations | object | `{}` |  |
@@ -739,7 +774,6 @@ A Helm chart for Kubernetes to install DefectDojo
 | redis.tls.enabled | bool | `false` |  |
 | redisParams | string | `""` |  |
 | redisServer | string | `nil` |  |
-| repositoryPrefix | string | `"defectdojo"` |  |
 | revisionHistoryLimit | int | `10` |  |
 | secrets.annotations | object | `{}` |  |
 | securityContext.containerSecurityContext.runAsNonRoot | bool | `true` |  |
@@ -750,8 +784,11 @@ A Helm chart for Kubernetes to install DefectDojo
 | serviceAccount.labels | object | `{}` |  |
 | serviceAccount.name | string | `""` |  |
 | siteUrl | string | `""` |  |
-| tag | string | `"latest"` |  |
 | tests.unitTests.automountServiceAccountToken | bool | `false` |  |
+| tests.unitTests.image.digest | string | `""` |  |
+| tests.unitTests.image.registry | string | `""` |  |
+| tests.unitTests.image.repository | string | `""` |  |
+| tests.unitTests.image.tag | string | `""` |  |
 | tests.unitTests.resources.limits.cpu | string | `"500m"` |  |
 | tests.unitTests.resources.limits.memory | string | `"512Mi"` |  |
 | tests.unitTests.resources.requests.cpu | string | `"100m"` |  |
