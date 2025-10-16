@@ -147,6 +147,9 @@ class CharFieldFilterANDExpression(CharFieldInFilter):
         )
 
 
+class TagExistsIContainsFilter(CharFilter):
+    pass
+
 class FindingStatusFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs
@@ -353,6 +356,25 @@ class DojoFilter(FilterSet):
 
                 if exclude:
                     self.form.fields[field].label = "Not " + self.form.fields[field].label
+
+    def filter_queryset(self, queryset):
+        qs = super().filter_queryset(queryset)
+        try:
+            if hasattr(self, "form") and hasattr(self.form, "cleaned_data"):
+                for name, f in self.filters.items():
+                    field_name = getattr(f, "field_name", "") or ""
+                    # filtering on tag names would result duplicate rows, one for each matching tag
+                    if "tags__name" in field_name:
+                        value = self.form.cleaned_data.get(name, None)
+                        if value not in (None, "", [], (), {}):
+                            # distinct has a performance impact, so only apply it if needed.
+                            # we considered Postgress' DISTINCT ON, but it would enforce ordering by id
+                            # we considered changing to an EXISTS subquery, but it would make
+                            # our code dependant on the some of the django-tagulous internal
+                            return qs.distinct()
+        except Exception:
+            return qs.distinct()
+        return qs
 
 
 def get_tags_model_from_field_name(field):
