@@ -34,8 +34,5 @@
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
-  ],
-  "registryAliases": {
-    "bitnami": "https://charts.bitnami.com/bitnami"
-  }
+  ]
 }
