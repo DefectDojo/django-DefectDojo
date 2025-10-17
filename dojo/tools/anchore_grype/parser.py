@@ -30,9 +30,9 @@ class AnchoreGrypeParser:
         )
 
     def get_findings(self, file, test):
-        logger.debug(f"file: {file}")
+        logger.debug("file: %s", file)
         data = json.load(file)
-        logger.debug(f"data: {data}")
+        logger.debug("data: %s", data)
         dupes = {}
         for item in data.get("matches", []):
             vulnerability = item["vulnerability"]
@@ -223,11 +223,11 @@ class AnchoreGrypeParser:
 
     def get_epss_values(self, vuln_id, epss_list):
         if not isinstance(epss_list, list):
-            logger.debug(f"epss_list is not a list: {epss_list}")
+            logger.debug("epss_list is not a list: %s", epss_list)
             return None, None
 
         if isinstance(epss_list, list):
-            logger.debug(f"epss_list: {epss_list}")
+            logger.debug("epss_list: %s", epss_list)
             for epss_data in epss_list:
                 if epss_data.get("cve") != vuln_id:
                     continue
@@ -235,10 +235,10 @@ class AnchoreGrypeParser:
                     epss_score = float(epss_data.get("epss"))
                     epss_percentile = float(epss_data.get("percentile"))
                 except (TypeError, ValueError):
-                    logger.debug(f"epss_data is not a float: {epss_data}")
+                    logger.debug("epss_data is not a float: %s", epss_data)
                 else:
                     return epss_score, epss_percentile
-        logger.debug(f"epss not found for vuln_id: {vuln_id} in epss_list: {epss_list}")
+        logger.debug("epss not found for vuln_id: %s in epss_list: %s", vuln_id, epss_list)
         return None, None
 
     def get_vulnerability_ids(self, vuln_id, related_vulnerabilities):

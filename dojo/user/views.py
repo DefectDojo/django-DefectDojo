@@ -46,12 +46,16 @@ from dojo.forms import (
     UserContactInfoForm,
 )
 from dojo.group.queries import get_authorized_group_members_for_user
+from dojo.labels import get_labels
 from dojo.models import Alerts, Dojo_Group_Member, Dojo_User, Product_Member, Product_Type_Member
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting
 
 logger = logging.getLogger(__name__)
+
+
+labels = get_labels()
 
 
 class DojoLoginView(LoginView):
@@ -171,7 +175,7 @@ def logout_view(request):
 
 @user_passes_test(lambda u: u.is_active)
 def alerts(request):
-    alerts = Alerts.objects.filter(user_id=request.user)
+    alerts = Alerts.objects.filter(user_id=request.user).order_by("-id")
 
     if request.method == "POST":
         removed_alerts = request.POST.getlist("alert_select")
@@ -190,7 +194,7 @@ def alerts(request):
 
 
 def delete_alerts(request):
-    alerts = Alerts.objects.filter(user_id=request.user)
+    alerts = Alerts.objects.filter(user_id=request.user).order_by("-id")
 
     if request.method == "POST":
         alerts.filter().delete()
@@ -504,6 +508,7 @@ def delete_user(request, uid):
 
 @user_passes_test(lambda u: u.is_superuser)
 def add_product_type_member(request, uid):
+    page_name = str(labels.ORG_USERS_ADD_LABEL)
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Type_Member_UserForm(initial={"user": user.id})
     if request.method == "POST":
@@ -520,11 +525,12 @@ def add_product_type_member(request, uid):
                         product_type_member.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    _("Product type members added successfully."),
+                                    labels.ORG_USERS_ADD_SUCCESS_MESSAGE,
                                     extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("view_user", args=(uid, )))
-    add_breadcrumb(title=_("Add Product Type Member"), top_level=False, request=request)
+    add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/new_product_type_member_user.html", {
+        "name": page_name,
         "user": user,
         "form": memberform,
     })
@@ -532,6 +538,7 @@ def add_product_type_member(request, uid):
 
 @user_passes_test(lambda u: u.is_superuser)
 def add_product_member(request, uid):
+    page_name = str(labels.ASSET_USERS_MEMBER_ADD_LABEL)
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Member_UserForm(initial={"user": user.id})
     if request.method == "POST":
@@ -548,11 +555,12 @@ def add_product_member(request, uid):
                         product_member.save()
             messages.add_message(request,
                                 messages.SUCCESS,
-                                _("Product members added successfully."),
+                                labels.ASSET_USERS_MEMBER_ADD_SUCCESS_MESSAGE,
                                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_user", args=(uid, )))
-    add_breadcrumb(title=_("Add Product Member"), top_level=False, request=request)
+    add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/new_product_member_user.html", {
+        "name": page_name,
         "user": user,
         "form": memberform,
     })
@@ -650,7 +658,7 @@ class DojoPasswordResetForm(PasswordResetForm):
                 connection.open()
                 connection.close()
         except Exception as e:
-            logger.error(f"SMTP Server Connection Failure: {e}")
+            logger.error("SMTP Server Connection Failure: %s", e)
             msg = "SMTP server is not configured correctly..."
             raise ValidationError(msg)
 

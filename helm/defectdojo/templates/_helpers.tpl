@@ -53,15 +53,16 @@ Create the name of the service account to use
 {{-   printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
 {{-  end -}}
 {{- else -}}
-{{-  printf "%s" ( .Values.postgresql.postgresServer | default "127.0.0.1" ) -}}
+{{- .Values.postgresServer | default "127.0.0.1" | quote -}}
 {{- end -}}
 {{- end -}}
+
 {{- define "redis.hostname" -}}
 {{- if eq .Values.celery.broker "redis" -}}
 {{- if .Values.redis.enabled -}}
 {{- printf "%s-%s" .Release.Name "redis-master" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- printf "%s" (.Values.celery.brokerHost | default .Values.redis.redisServer) -}}
+{{- .Values.redisServer | default "127.0.0.1" | quote -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -71,9 +72,9 @@ Create the name of the service account to use
 */}}
 {{- define "redis.scheme" -}}
 {{- if eq .Values.celery.broker "redis" -}}
-{{- if .Values.redis.transportEncryption.enabled -}}
+{{- if .Values.redis.tls.enabled -}}
 {{- printf "rediss" -}}
-{{- else if eq .Values.redis.scheme "sentinel" -}}
+{{- else if .Values.redis.sentinel.enabled -}}
 {{- printf "sentinel" -}}
 {{- else -}}
 {{- printf "redis" -}}
