@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "2.51.1"
+appVersion: "2.52.0-dev"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.7.1
+version: 1.7.2-dev
 icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
 maintainers:
   - name: madchap
@@ -17,25 +17,25 @@ dependencies:
     version: ~19.6.4
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: redis.enabled
+# For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/
+# This is example for "artifacthub.io/changes"
+# artifacthub.io/changes: |
+#   - kind: added
+#     description: Cool feature
+#   - kind: fixed
+#     description: Minor bug
+#   - kind: changed
+#     description: Broken feature
+#   - kind: removed
+#     description: Old bug
+#   - kind: deprecated
+#     description: Not-needed feature
+#   - kind: security
+#     description: Critical bug
 annotations:
-  # For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/
-  # This is example for "artifacthub.io/changes"
-  # artifacthub.io/changes: |
-  #   - kind: added
-  #     description: Cool feature
-  #   - kind: fixed
-  #     description: Minor bug
-  #   - kind: changed
-  #     description: Broken feature
-  #   - kind: removed
-  #     description: Old bug
-  #   - kind: deprecated
-  #     description: Not-needed feature
-  #   - kind: security
-  #     description: Critical bug
-  artifacthub.io/prerelease: "false"
+  artifacthub.io/prerelease: "true"
   artifacthub.io/changes: |
+    - kind: fixed
+      description: Drop initialDelaySeconds if eq. zero
     - kind: added
       description: Add support for automountServiceAccountToken
-    - kind: changed
-      description: Bump DefectDojo to 2.51.1
