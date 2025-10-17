@@ -102,7 +102,7 @@ pandas==2.3.3
 pyarrow==21.0.0
 # Pinning Dependencies
 azure-core==1.35.1
-protobuf==6.32.1
+protobuf==6.33.0
 billiard==4.2.1
 botocore==1.40.52
 et_xmlfile==2.0.0
