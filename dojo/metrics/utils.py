@@ -107,22 +107,48 @@ def finding_queries(
     monthly_counts = query_counts_for_period(MetricsPeriod.MONTH, months_between)
     weekly_counts = query_counts_for_period(MetricsPeriod.WEEK, weeks_between)
 
-    top_ten = get_authorized_products(Permissions.Product_View)
+    # Build Top 10 from all authorized Findings (not date-limited) to avoid empty lists due to date window
+    findings_for_top_ten = all_authorized_findings
+    if len(prod_type) > 0:
+        findings_for_top_ten = findings_for_top_ten.filter(
+            test__engagement__product__prod_type__in=prod_type,
+        )
     if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
-        top_ten = top_ten.filter(engagement__test__finding__verified=True)
+        findings_for_top_ten = findings_for_top_ten.filter(verified=True)
 
-    top_ten = top_ten.filter(engagement__test__finding__false_p=False,
-                             engagement__test__finding__duplicate=False,
-                             engagement__test__finding__out_of_scope=False,
-                             engagement__test__finding__mitigated__isnull=True,
-                             engagement__test__finding__severity__in=("Critical", "High", "Medium", "Low"),
-                             prod_type__in=prod_type)
+    findings_for_top_ten = findings_for_top_ten.filter(
+        false_p=False,
+        duplicate=False,
+        out_of_scope=False,
+        mitigated__isnull=True,
+        active=True,
+        risk_accepted=False,
+        severity__in=("Critical", "High", "Medium", "Low"),
+    )
 
-    top_ten = severity_count(
-        top_ten, "annotate", "engagement__test__finding__severity",
-    ).order_by(
+    # Group by product id/name and count findings by severity
+    top_ten = findings_for_top_ten.values(
+        product_id=F("test__engagement__product__id"),
+        product_name=F("test__engagement__product__name"),
+    )
+    top_ten = severity_count(top_ten, "annotate", "severity").order_by(
         "-critical", "-high", "-medium", "-low",
     )[:10]
+
+    # Remap keys to match template expectations (id/name)
+    top_ten = [
+        {
+            "id": row.get("product_id"),
+            "name": row.get("product_name"),
+            "critical": row.get("critical"),
+            "high": row.get("high"),
+            "medium": row.get("medium"),
+            "low": row.get("low"),
+            "info": row.get("info"),
+            "total": row.get("total"),
+        }
+        for row in top_ten
+    ]
 
     return {
         "all": filtered_findings,
