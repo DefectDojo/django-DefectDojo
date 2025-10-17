@@ -171,7 +171,7 @@ monitoring:
     image:
       registry: ""
       repository: nginx/nginx-prometheus-exporter
-      tag: "1.4.2"
+      tag: "1.5.1"
       digest: ""
     imagePullPolicy: IfNotPresent
     # Optional: container security context for nginx prometheus exporter
