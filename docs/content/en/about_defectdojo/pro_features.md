@@ -54,6 +54,7 @@ See our [Connectors Guide](/en/connecting_your_tools/connectors/about_connectors
 
 Supported tools for Connectors include:
 
+* Anchore
 * AWS Security Hub
 * BurpSuite
 * Checkmarx ONE
