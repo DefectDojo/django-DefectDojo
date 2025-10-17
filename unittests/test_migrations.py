@@ -1,6 +1,7 @@
 import datetime
 from unittest import skip
 
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django_test_migrations.contrib.unittest_case import MigratorTestCase
 
@@ -32,7 +33,6 @@ class TestOptiEndpointStatus(MigratorTestCase):
             target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
             test_type_id=1,
         )
-        from django.contrib.auth import get_user_model
         user = get_user_model().objects.create().pk
 
         self.finding = Finding.objects.create(test_id=self.test.pk, reporter_id=user).pk

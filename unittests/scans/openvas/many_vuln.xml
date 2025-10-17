@@ -149,13 +149,13 @@
         </ports>
         <results start="1" max="-1">
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}467e39e554a</name>
+                <name>467e39e554a</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717168Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>512/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.100111">
                     <type>nvt</type>
@@ -189,13 +189,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}530765cf437</name>
+                <name>530765cf437</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717208Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>1524/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.103549">
                     <type>nvt</type>
@@ -224,13 +224,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}5f5c7518c92</name>
+                <name>5f5c7518c92</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717216Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>8787/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.108010">
                     <type>nvt</type>
@@ -304,13 +304,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}8c49cb44d75</name>
+                <name>8c49cb44d75</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717246Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>general/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.103674">
                     <type>nvt</type>
@@ -349,13 +349,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}22a938294ad</name>
+                <name>22a938294ad</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717262Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.800320">
                     <type>nvt</type>
@@ -402,13 +402,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}9e2edd735b3</name>
+                <name>9e2edd735b3</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717281Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>3632/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.103553">
                     <type>nvt</type>
@@ -453,13 +453,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}0b02451a968</name>
+                <name>0b02451a968</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717494Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>5900/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.106056">
                     <type>nvt</type>
@@ -498,13 +498,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}e93a2434477</name>
+                <name>e93a2434477</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717503Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>5432/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.103552">
                     <type>nvt</type>
@@ -531,13 +531,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}3723bfe0094</name>
+                <name>3723bfe0094</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717511Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>6667/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.809883">
                     <type>nvt</type>
@@ -580,13 +580,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}3723bfe0094</name>
+                <name>3723bfe0094</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717520Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>6697/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.809883">
                     <type>nvt</type>
@@ -629,13 +629,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}a358693375b</name>
+                <name>a358693375b</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717529Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>21/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.108718">
                     <type>nvt</type>
@@ -690,13 +690,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}4ecebea5997</name>
+                <name>4ecebea5997</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717538Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.10498">
                     <type>nvt</type>
@@ -740,13 +740,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}dcc8491b116</name>
+                <name>dcc8491b116</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717558Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>21/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.103185">
                     <type>nvt</type>
@@ -781,13 +781,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}a358693375b</name>
+                <name>a358693375b</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717575Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>2121/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.108718">
                     <type>nvt</type>
@@ -839,13 +839,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}edca4d29119</name>
+                <name>edca4d29119</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717584Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.11229">
                     <type>nvt</type>
@@ -883,13 +883,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}28996b2da9a</name>
+                <name>28996b2da9a</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717594Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.103482">
                     <type>nvt</type>
@@ -956,13 +956,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}f209b933bd1</name>
+                <name>f209b933bd1</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717604Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>22/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.140001">
                     <type>nvt</type>
@@ -1029,13 +1029,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}dcc8491b116</name>
+                <name>dcc8491b116</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717613Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>6200/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.103185">
                     <type>nvt</type>
@@ -1070,13 +1070,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}d803f61f444</name>
+                <name>d803f61f444</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717621Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>5432/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.105042">
                     <type>nvt</type>
@@ -1115,13 +1115,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}e70046de17f</name>
+                <name>e70046de17f</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717637Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.801281">
                     <type>nvt</type>
@@ -1164,13 +1164,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}944cfcaaf66</name>
+                <name>944cfcaaf66</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717645Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>21/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.900600">
                     <type>nvt</type>
@@ -1222,13 +1222,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}cc1c4db6d4f</name>
+                <name>cc1c4db6d4f</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717654Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.141636">
                     <type>nvt</type>
@@ -1276,13 +1276,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}44d224b77c4</name>
+                <name>44d224b77c4</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717662Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.141830">
                     <type>nvt</type>
@@ -1314,13 +1314,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}e70046de17f</name>
+                <name>e70046de17f</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717670Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.800400">
                     <type>nvt</type>
@@ -1361,13 +1361,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}71c655fd352</name>
+                <name>71c655fd352</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717677Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>445/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.108011">
                     <type>nvt</type>
@@ -1400,13 +1400,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}e79b358813f</name>
+                <name>e79b358813f</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717686Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>5432/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.111012">
                     <type>nvt</type>
@@ -1463,13 +1463,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}75693259c28</name>
+                <name>75693259c28</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717697Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.11213">
                     <type>nvt</type>
@@ -1538,13 +1538,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}316b754124f</name>
+                <name>316b754124f</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717709Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>22/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.150713">
                     <type>nvt</type>
@@ -1601,13 +1601,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}79868c7d9b2</name>
+                <name>79868c7d9b2</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717720Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>22/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.117687">
                     <type>nvt</type>
@@ -1638,13 +1638,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}e3e389ce2ba</name>
+                <name>e3e389ce2ba</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717728Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>5432/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.103440">
                     <type>nvt</type>
@@ -1712,13 +1712,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}66ec0c4c6a4</name>
+                <name>66ec0c4c6a4</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717749Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.10056">
                     <type>nvt</type>
@@ -1756,13 +1756,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}fec842e796e</name>
+                <name>fec842e796e</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717762Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>5432/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.103955">
                     <type>nvt</type>
@@ -1808,13 +1808,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}bccd1cd5b97</name>
+                <name>bccd1cd5b97</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717769Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.103210">
                     <type>nvt</type>
@@ -1854,13 +1854,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}68aaba31879</name>
+                <name>68aaba31879</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717783Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.108440">
                     <type>nvt</type>
@@ -1909,13 +1909,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}4406907af6b</name>
+                <name>4406907af6b</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717794Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>5900/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.108529">
                     <type>nvt</type>
@@ -1951,13 +1951,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}1fa3ebb87ec</name>
+                <name>1fa3ebb87ec</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717806Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>21/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.108528">
                     <type>nvt</type>
@@ -1991,13 +1991,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}1fa3ebb87ec</name>
+                <name>1fa3ebb87ec</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717816Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>2121/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.108528">
                     <type>nvt</type>
@@ -2031,13 +2031,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}e79b358813f</name>
+                <name>e79b358813f</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717825Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>5432/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.117274">
                     <type>nvt</type>
@@ -2099,13 +2099,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}9c322581ba5</name>
+                <name>9c322581ba5</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717836Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.801660">
                     <type>nvt</type>
@@ -2144,13 +2144,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}2b0831858b0</name>
+                <name>2b0831858b0</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717847Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.141637">
                     <type>nvt</type>
@@ -2192,13 +2192,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}55390940921</name>
+                <name>55390940921</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717855Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>22/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.105611">
                     <type>nvt</type>
@@ -2266,13 +2266,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}1fe916ed11d</name>
+                <name>1fe916ed11d</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717864Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>80/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.802391">
                     <type>nvt</type>
@@ -2320,13 +2320,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}101c559718c</name>
+                <name>101c559718c</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717875Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>5432/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.106223">
                     <type>nvt</type>
@@ -2370,13 +2370,13 @@
                 <original_severity>5</original_severity>
             </result>
             <result id="b87d3a32-8ff8-4010-aada-4b4f578b084d">
-                <name>{v1}fec842e796e</name>
+                <name>fec842e796e</name>
                 <owner>
                     <name>gps</name>
                 </owner>
                 <modification_time></modification_time>
                 <creation_time>2023-09-29T11:36:37.717887Z</creation_time>
-                <host>192.168.1.1001<asset /><hostname>{v1}b6b9f466d63</hostname></host>
+                <host>192.168.1.1001<asset /><hostname>b6b9f466d63</hostname></host>
                 <port>5432/tcp</port>
                 <nvt oid="1.3.6.1.4.1.25623.1.0.105880">
                     <type>nvt</type>

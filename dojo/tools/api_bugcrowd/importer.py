@@ -29,7 +29,7 @@ class BugcrowdApiImporter:
         for page in submissions_paged:
             submissions += page
             counter += 1
-        logger.debug(f"{counter} Bugcrowd submissions pages fetched")
+        logger.debug("%s Bugcrowd submissions pages fetched", counter)
 
         return submissions, config
 

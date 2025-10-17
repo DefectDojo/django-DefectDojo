@@ -1,1 +1,1 @@
-scan_added.tpl
+{% include "notifications/mail/scan_added.tpl" %}

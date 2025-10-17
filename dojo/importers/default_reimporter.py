@@ -6,6 +6,7 @@ from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
+from dojo.decorators import we_want_async
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -15,6 +16,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.utils import perform_product_grading
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -176,18 +178,31 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.reactivated_items = []
         self.unchanged_items = []
         self.group_names_to_findings_dict = {}
+        # Progressive batching for chord execution
+        post_processing_task_signatures = []
+        current_batch_number = 1
+        max_batch_size = 1024
 
         logger.debug(f"starting reimport of {len(parsed_findings) if parsed_findings else 0} items.")
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
         deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
 
-        for non_clean_unsaved_finding in parsed_findings:
-            # make sure the severity is something is digestible
-            unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
-            # Filter on minimum severity if applicable
-            if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
-                # finding's severity is below the configured threshold : ignoring the finding
+        # Pre-sanitize and filter by minimum severity to avoid loop control pitfalls
+        cleaned_findings = []
+        for raw_finding in parsed_findings or []:
+            sanitized = self.sanitize_severity(raw_finding)
+            if Finding.SEVERITIES[sanitized.severity] > Finding.SEVERITIES[self.minimum_severity]:
+                logger.debug(
+                    "skipping finding due to minimum severity filter (finding=%s severity=%s min=%s)",
+                    getattr(sanitized, "title", "<no-title>"),
+                    sanitized.severity,
+                    self.minimum_severity,
+                )
                 continue
+            cleaned_findings.append(sanitized)
+
+        for idx, unsaved_finding in enumerate(cleaned_findings):
+            is_final = idx == len(cleaned_findings) - 1
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
             if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
@@ -236,12 +251,31 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     unsaved_finding,
                 )
-                # finding = new finding or existing finding still in the upload report
-                # to avoid pushing a finding group multiple times, we push those outside of the loop
-                if self.findings_groups_enabled and self.group_by:
-                    finding.save()
-                else:
-                    finding.save(push_to_jira=self.push_to_jira)
+                # all data is already saved on the finding, we only need to trigger post processing
+
+                # Execute post-processing task immediately if async, otherwise execute synchronously
+                push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+
+                post_processing_task_signature = finding_helper.post_process_finding_save_signature(
+                    finding,
+                    dedupe_option=True,
+                    rules_option=True,
+                    product_grading_option=False,
+                    issue_updater_option=True,
+                    push_to_jira=push_to_jira,
+                )
+                post_processing_task_signatures.append(post_processing_task_signature)
+
+            # Check if we should launch a chord (batch full or end of findings)
+            if we_want_async(async_user=self.user) and post_processing_task_signatures:
+                post_processing_task_signatures, current_batch_number, _ = self.maybe_launch_post_processing_chord(
+                    post_processing_task_signatures,
+                    current_batch_number,
+                    max_batch_size,
+                    is_final,
+                )
+            else:
+                post_processing_task_signature()
 
         self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
         # due to #3958 we can have duplicates inside the same report
@@ -253,6 +287,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.untouched = set(self.unchanged_items) - set(self.to_mitigate) - set(self.new_items) - set(self.reactivated_items)
         # Process groups
         self.process_groups_for_all_findings(**kwargs)
+
+        # Note: All chord batching is now handled within the loop above
+
+        # Synchronous tasks were already executed during processing, just calculate grade
+        perform_product_grading(self.test.engagement.product)
+
         # Process the results and return them back
         return self.process_results(**kwargs)
 
@@ -287,12 +327,17 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     f"Mitigated by {self.test.test_type} re-upload.",
                     finding_groups_enabled=self.findings_groups_enabled,
+                    product_grading_option=False,
                 )
                 mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in findings if finding.finding_group is not None}:
                 jira_helper.push_to_jira(finding_group)
+
+        # Calculate grade once after all findings have been closed
+        if mitigated_findings:
+            perform_product_grading(self.test.engagement.product)
 
         return mitigated_findings
 
@@ -336,11 +381,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 hash_code=unsaved_finding.hash_code,
             ).exclude(hash_code=None).order_by("id")
         if self.deduplication_algorithm == "unique_id_from_tool":
+            deduplicationLogger.debug(f"unique_id_from_tool: {unsaved_finding.unique_id_from_tool}")
             return Finding.objects.filter(
                 test=self.test,
                 unique_id_from_tool=unsaved_finding.unique_id_from_tool,
             ).exclude(unique_id_from_tool=None).order_by("id")
         if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+            deduplicationLogger.debug(f"unique_id_from_tool: {unsaved_finding.unique_id_from_tool}")
+            deduplicationLogger.debug(f"hash_code: {unsaved_finding.hash_code}")
             query = Finding.objects.filter(
                 Q(test=self.test),
                 (Q(hash_code__isnull=False) & Q(hash_code=unsaved_finding.hash_code))
@@ -500,10 +548,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if existing_finding.get_sla_configuration().restart_sla_on_reactivation:
             # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
             existing_finding.sla_start_date = self.now
+        existing_finding = self.process_cve(existing_finding)
+        if existing_finding.get_sla_configuration().restart_sla_on_reactivation:
+            # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
+            existing_finding.sla_start_date = self.now
+        # don't dedupe before endpoints are added, postprocessing will be done on next save (in calling method)
+        existing_finding.save_no_options()
 
-        existing_finding.save(dedupe_option=False)
-        # don't dedupe before endpoints are added
-        existing_finding.save(dedupe_option=False)
         note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
         note.save()
         endpoint_statuses = existing_finding.status_finding.exclude(
@@ -551,6 +602,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 existing_finding.active = False
                 if self.verified is not None:
                     existing_finding.verified = self.verified
+                existing_finding = self.process_cve(existing_finding)
+                existing_finding.save_no_options()
+
             elif unsaved_finding.risk_accepted or unsaved_finding.false_p or unsaved_finding.out_of_scope:
                 logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
                 logger.debug(
@@ -563,6 +617,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 existing_finding.active = False
                 if self.verified is not None:
                     existing_finding.verified = self.verified
+                existing_finding = self.process_cve(existing_finding)
+                existing_finding.save_no_options()
             else:
                 # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
                 self.unchanged_items.append(existing_finding)
@@ -597,6 +653,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # scan_date was provided, override value from parser
         if self.scan_date_override:
             unsaved_finding.date = self.scan_date.date()
+        unsaved_finding = self.process_cve(unsaved_finding)
+        # Hash code is already calculated earlier as it's the primary matching criteria for reimport
         # Save it. Don't dedupe before endpoints are added.
         unsaved_finding.save_no_options()
         finding = unsaved_finding
@@ -640,7 +698,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Process vulnerability IDs
         if finding_from_report.unsaved_vulnerability_ids:
             finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids
-
+        # legacy cve field has already been processed/set earlier
         return self.process_vulnerability_ids(finding)
 
     def process_groups_for_all_findings(

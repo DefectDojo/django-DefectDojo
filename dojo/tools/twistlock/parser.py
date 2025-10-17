@@ -41,7 +41,7 @@ class TwistlockCSVParser:
                     # Handle alternative formats
                     finding_date = datetime.strptime(date_str[:10], "%Y-%m-%d").date()
                 except ValueError:
-                    logger.warning(f"Could not parse date: {date_str}")
+                    logger.warning("Could not parse date: %s", date_str)
 
         # Build container/image metadata for impact field (Item 3)
         impact_parts = []
@@ -177,13 +177,14 @@ class TwistlockJsonParser:
 
     def get_items(self, tree, test):
         items = {}
-        if "results" in tree:
+        results = tree.get("results") or []
+        if results:
             # Extract image metadata for impact field (Item 3)
-            result = tree["results"][0]
+            result = results[0]
             image_metadata = self.build_image_metadata(result)
 
             # Parse vulnerabilities
-            vulnerabilityTree = result.get("vulnerabilities", [])
+            vulnerabilityTree = result.get("vulnerabilities") or []
             for node in vulnerabilityTree:
                 item = get_item(node, test, image_metadata)
                 unique_key = node["id"] + str(
@@ -194,7 +195,7 @@ class TwistlockJsonParser:
                 items[unique_key] = item
 
             # Parse compliance findings
-            complianceTree = result.get("compliances", [])
+            complianceTree = result.get("compliances") or []
             for node in complianceTree:
                 item = get_compliance_item(node, test, image_metadata)
                 # Create unique key for compliance findings - prefer ID if available
@@ -326,11 +327,14 @@ def get_compliance_item(compliance, test, image_metadata=""):
 
 
 def convert_severity(severity):
-    if severity.lower() == "important":
+    if not severity:
+        return "Info"
+    sev_lower = severity.lower()
+    if sev_lower == "important":
         return "High"
-    if severity.lower() == "moderate":
+    if sev_lower == "moderate":
         return "Medium"
-    if severity.lower() in {"information", "informational", ""}:
+    if sev_lower in {"information", "informational", ""}:
         return "Info"
     return severity.title()
 

@@ -11,18 +11,16 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
     {{- with .Values.extraLabels }}
-        {{- toYaml . | nindent 4 }}
+      {{- toYaml . | nindent 4 }}
     {{- end }}
-{{- if .Values.celery.annotations }}
+  {{- with mergeOverwrite .Values.celery.annotations .Values.celery.beat.annotations }}
   annotations:
-{{- with .Values.celery.annotations }}
-  {{- toYaml . | nindent 4 }}
-{{- end }}
-{{- end }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.celery.beat.replicas }}
-  {{- if .Values.revisionHistoryLimit }}
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- with .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ . }}
   {{- end }}
   selector:
     matchLabels:
@@ -44,7 +42,7 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
-      {{- with .Values.celery.beat.annotations }}
+      {{- with mergeOverwrite .Values.celery.annotations .Values.celery.beat.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if eq (.Values.trackConfig | default "disabled") "enabled" }}
@@ -54,9 +52,10 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
-      {{- if .Values.imagePullSecrets }}
+      automountServiceAccountToken: {{ .Values.celery.beat.automountServiceAccountToken }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-      - name: {{ .Values.imagePullSecrets }}
+      - name: {{ . }}
       {{- end }}
       volumes:
       - name: run
@@ -71,22 +70,16 @@ spec:
         configMap:
           name: {{ .Values.django.uwsgi.certificates.configName }}
       {{- end }}
-      {{- range .Values.celery.extraVolumes }}
-      - name: userconfig-{{ .name }}
-        {{ .type }}:
-          {{- if (eq .type "configMap") }}
-          name: {{ .name }}
-          {{- else if (eq .type "secret") }}
-          secretName: {{ .name }}
-          {{- else if (eq .type "hostPath") }}
-          type: {{ .pathType | default "Directory" }}
-          path: {{ .hostPath }}
-          {{- end }}
+      {{- with .Values.celery.beat.extraVolumes }}
+        {{- . | toYaml | nindent 6 }}
       {{- end }}
-      {{- if or .Values.dbMigrationChecker.enabled .Values.cloudsql.enabled }}
+      {{- if coalesce .Values.dbMigrationChecker.enabled .Values.cloudsql.enabled .Values.celery.beat.extraInitContainers }}
       initContainers:
+      {{- range .Values.celery.beat.extraInitContainers }}
+      - {{- . | toYaml | nindent 8 }}
       {{- end }}
-      {{- if .Values.cloudsql.enabled  }}
+      {{- end }}
+      {{- if .Values.cloudsql.enabled }}
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
@@ -115,6 +108,15 @@ spec:
         name: celery
         image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with .Values.celery.beat.livenessProbe }}
+        livenessProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.celery.beat.readinessProbe }}
+        readinessProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.celery.beat.startupProbe }}
+        startupProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
@@ -128,15 +130,12 @@ spec:
           mountPath: /app/dojo/settings/local_settings.py
           subPath: file
         {{- end }}
-        {{- if  .Values.django.uwsgi.certificates.enabled }}
+        {{- if .Values.django.uwsgi.certificates.enabled }}
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
         {{- end }}
-        {{- range .Values.celery.extraVolumes }}
-        - name: userconfig-{{ .name }}
-          readOnly: true
-          mountPath: {{ .path }}
-          subPath: {{ .subPath }}
+        {{- with .Values.celery.beat.extraVolumeMounts }}
+          {{- . | toYaml | nindent 8 }}
         {{- end }}
         envFrom:
         - configMapRef:
@@ -162,8 +161,12 @@ spec:
             secretKeyRef:
               name: {{ $fullName }}
               key: DD_SECRET_KEY
+              optional: true
         {{- with .Values.extraEnv }}
-          {{- toYaml . | nindent 8 }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
+        {{- with .Values.celery.beat.extraEnv }}
+          {{- . | toYaml | nindent 8 }}
         {{- end }}
         resources:
           {{- toYaml .Values.celery.beat.resources | nindent 10 }}

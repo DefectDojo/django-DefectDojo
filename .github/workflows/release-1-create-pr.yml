@@ -80,12 +80,22 @@ jobs:
               sed -ri "0,/version/s/version: \S+/$NEW_CHART_VERSION/" helm/defectdojo/Chart.yaml
           fi
 
+      - name: Update values in HELM chart
+        run: |
+          yq -i '.annotations."artifacthub.io/prerelease" = "false"' helm/defectdojo/Chart.yaml
+          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: Bump DefectDojo to ${{ inputs.release_number }}\n"' helm/defectdojo/Chart.yaml
+
       - name: Check version numbers
         run: |
           grep -H version dojo/__init__.py
           grep -H version components/package.json
           grep -H appVersion helm/defectdojo/Chart.yaml
           grep -H version helm/defectdojo/Chart.yaml
+
+      - name: Run helm-docs
+        uses: losisin/helm-docs-github-action@a57fae5676e4c55a228ea654a1bcaec8dd3cf5b5 # v1.6.2
+        with:
+          chart-search-root: "helm/defectdojo"
 
       - name: Push version changes
         uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6.0.1
@@ -97,7 +107,7 @@ jobs:
           branch: ${{ env.NEW_BRANCH }}
 
       - name: Create Pull Request
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
