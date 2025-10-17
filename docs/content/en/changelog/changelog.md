@@ -8,23 +8,36 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
+## Oct 2025: v2.51
+
+### Oct 13, 2025: v2.51.1
+
+No significant Pro changes are present in this release.
+
+### Oct 6, 2025: v2.51.0
+
+* **(MCP)** Added MCP toggle for Superusers only.
+* **(Pro UI)** Bypassed endpoint validation on Edit Finding form when Endpoints have not changed.
+* **(Pro UI)** Collapsed additional fields in the Universal Parser preview for cleaner display.
+* **(Pro UI)** Updated Engagement Deduplication form label and help text for clarity.
+
 ## Sept 2025: v2.50
 
-### Sept 15, 2025: v2.50.3
+#### Sept 15, 2025: v2.50.3
 
 * **(Pro UI)** Added support for [CVSSv4.0](https://www.first.org/cvss/v4-0/) vector strings.
 
-### Sept 15, 2025: v2.50.2
+#### Sept 15, 2025: v2.50.2
 
 * **(Pro UI)** Added Any/All status filtering.  Filtering by status allows you to apply either AND (inner join) logic, or OR (outer join) logic to the filter.
 * **(Pro UI)** Added Contact Support form for On-Premise installs.
 
-### Sept 9, 2025: v2.50.1
+#### Sept 9, 2025: v2.50.1
 
 * **(Tools)** Removed CSV limit for Qualys HackerGuardian
 * **(SSO)** Removed Force Password Reset for users created via SSO
 
-### Sept 2, 2025: v2.50.0
+#### Sept 2, 2025: v2.50.0
 
 * **(Pro UI)** "Date During" filter has been added to the UI, allowing users to filter by a range of dates
 * **(Pro UI)** Vulnerability ID column can now be sorted, however the sorting only considers the **first** vulnerability ID.
@@ -35,7 +48,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 The Pro UI has been significantly reorganized, with changes to page organization.
 ![image](images/pro_ui_249.png)
 
-### August 25: 2.49.3
+#### August 25: 2.49.3
 
 [Integrations](/en/share_your_findings/integrations/) has been added to DefectDojo Pro, adding an Jira-style integrations for Azure DevOps, GitHub and GitLab boards.
 
