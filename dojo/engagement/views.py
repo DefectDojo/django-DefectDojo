@@ -426,7 +426,7 @@ class ViewEngagement(View):
             Finding.objects.filter(risk_acceptance=OuterRef("pk")),
             group_field="risk_acceptance",
         )
-        return eng.risk_acceptance.all().select_related("owner").annotate(
+        return eng.risk_acceptance_set.all().select_related("owner").annotate(
             accepted_findings_count=Coalesce(accepted_findings_subquery, Value(0)),
         )
 
@@ -1276,8 +1276,6 @@ def add_risk_acceptance(request, eid, fid=None):
             if notes:
                 risk_acceptance.notes.add(notes)
 
-            eng.risk_acceptance.add(risk_acceptance)
-
             findings = form.cleaned_data["accepted_findings"]
 
             risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
@@ -1291,7 +1289,7 @@ def add_risk_acceptance(request, eid, fid=None):
             return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(eid, )))
     else:
         risk_acceptance_title_suggestion = f"Accept: {finding}"
-        form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion})
+        form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion, "engagement": eng.id})
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).prefetch_related("test", "finding_group_set").order_by("test__id", "numerical_severity", "title")
 
@@ -1301,6 +1299,10 @@ def add_risk_acceptance(request, eid, fid=None):
         form.fields["accepted_findings"].initial = {fid}
         # Change the label for each finding in the dropdown
         form.fields["accepted_findings"].label_from_instance = lambda obj: f"({obj.test.scan_type}) - ({obj.severity}) - {obj.title} - {obj.date} - {obj.status()} - {obj.finding_group})"
+
+    field = form.fields["engagement"]
+    field.widget = field.hidden_widget()
+
     product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
 
@@ -1311,20 +1313,20 @@ def add_risk_acceptance(request, eid, fid=None):
                   })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
-def view_risk_acceptance(request, eid, raid):
-    return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
+@user_is_authorized(Risk_Acceptance, Permissions.Engagement_View, "raid")
+def view_risk_acceptance(request, raid):
+    return view_edit_risk_acceptance(request, raid=raid, edit_mode=False)
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
-def edit_risk_acceptance(request, eid, raid):
-    return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
+@user_is_authorized(Risk_Acceptance, Permissions.Risk_Acceptance, "raid")
+def edit_risk_acceptance(request, raid):
+    return view_edit_risk_acceptance(request, raid=raid, edit_mode=True)
 
 
 # will only be called by view_risk_acceptance and edit_risk_acceptance
-def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
+def view_edit_risk_acceptance(request, raid, *, edit_mode=False):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
+    eng = risk_acceptance.engagement
 
     if edit_mode and not eng.product.enable_full_risk_acceptance:
         raise PermissionDenied
@@ -1433,11 +1435,15 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                     extra_tags="alert-success")
         if not errors:
             logger.debug("redirecting to return_url")
-            return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
+            return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(raid, )))
         logger.error("errors found")
 
     elif edit_mode:
         risk_acceptance_form = EditRiskAcceptanceForm(instance=risk_acceptance)
+
+    if risk_acceptance_form:
+        field = risk_acceptance_form.fields["engagement"]
+        field.widget = field.hidden_widget()
 
     note_form = NoteForm()
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
@@ -1481,34 +1487,32 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
-def expire_risk_acceptance(request, eid, raid):
+@user_is_authorized(Risk_Acceptance, Permissions.Risk_Acceptance, "raid")
+def expire_risk_acceptance(request, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
-    # Validate the engagement ID exists before moving forward
-    get_object_or_404(Engagement, pk=eid)
 
     ra_helper.expire_now(risk_acceptance)
 
-    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
+    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(raid, )))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
-def reinstate_risk_acceptance(request, eid, raid):
+@user_is_authorized(Risk_Acceptance, Permissions.Risk_Acceptance, "raid")
+def reinstate_risk_acceptance(request, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
+    eng = risk_acceptance.engagement
 
     if not eng.product.enable_full_risk_acceptance:
         raise PermissionDenied
 
     ra_helper.reinstate(risk_acceptance, risk_acceptance.expiration_date)
 
-    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
+    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(raid, )))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
-def delete_risk_acceptance(request, eid, raid):
+@user_is_authorized(Risk_Acceptance, Permissions.Risk_Acceptance, "raid")
+def delete_risk_acceptance(request, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
+    eng = risk_acceptance.engagement
 
     ra_helper.delete(eng, risk_acceptance)
 
@@ -1520,13 +1524,10 @@ def delete_risk_acceptance(request, eid, raid):
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
-def download_risk_acceptance(request, eid, raid):
+@user_is_authorized(Risk_Acceptance, Permissions.Risk_Acceptance, "raid")
+def download_risk_acceptance(request, raid):
     mimetypes.init()
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-    # Ensure the risk acceptance is under the supplied engagement
-    if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
-        raise PermissionDenied
     response = StreamingHttpResponse(
         FileIterWrapper(
             (Path(settings.MEDIA_ROOT) / "risk_acceptance.path.name").open(mode="rb")))

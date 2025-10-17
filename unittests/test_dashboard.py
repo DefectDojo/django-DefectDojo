@@ -49,7 +49,7 @@ def accept(when: datetime, product_id: int, title: str):
     with patch("django.db.models.fields.timezone.now") as mock_now:
         mock_now.return_value = when
         findings = Finding.objects.filter(test__engagement__product_id=product_id, title=title)
-        ra = Risk_Acceptance.objects.create(name="My Risk Acceptance", owner_id=1)
+        ra = Risk_Acceptance.objects.create(name="My Risk Acceptance", owner_id=1, engagement=findings[0].test.engagement)
         ra.accepted_findings.add(*findings)
         findings.update(risk_accepted=True)
 

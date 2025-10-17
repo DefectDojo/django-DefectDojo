@@ -351,7 +351,7 @@ def product_type_counts(request):
                                                             "Critical", "High", "Medium", "Low")).prefetch_related(
                     "test__engagement__product",
                     "test__engagement__product__prod_type",
-                    "test__engagement__risk_acceptance",
+                    "test__engagement__risk_acceptance_set",
                     "reporter").order_by(
                     "numerical_severity")
 
@@ -396,7 +396,7 @@ def product_type_counts(request):
                                                             "Critical", "High", "Medium", "Low")).prefetch_related(
                     "test__engagement__product",
                     "test__engagement__product__prod_type",
-                    "test__engagement__risk_acceptance",
+                    "test__engagement__risk_acceptance_set",
                     "reporter").order_by(
                     "numerical_severity")
 
@@ -553,7 +553,7 @@ def product_tag_counts(request):
                                                             "Critical", "High", "Medium", "Low")).prefetch_related(
                     "test__engagement__product",
                     "test__engagement__product__prod_type",
-                    "test__engagement__risk_acceptance",
+                    "test__engagement__risk_acceptance_set",
                     "reporter").order_by(
                     "numerical_severity")
 
@@ -601,7 +601,7 @@ def product_tag_counts(request):
                                                             "Critical", "High", "Medium", "Low")).prefetch_related(
                     "test__engagement__product",
                     "test__engagement__product__prod_type",
-                    "test__engagement__risk_acceptance",
+                    "test__engagement__risk_acceptance_set",
                     "reporter").order_by(
                     "numerical_severity")
 

@@ -403,7 +403,7 @@ def finding_queries(request, prod):
     # prefetch only what's needed to avoid lots of repeated queries
     findings_query = findings_query.prefetch_related(
         # 'test__engagement',
-        # 'test__engagement__risk_acceptance',
+        # 'test__engagement__risk_acceptance_set',
         # 'found_by',
         # 'test',
         # 'test__test_type',
@@ -472,7 +472,7 @@ def endpoint_queries(request, prod):
                                                      finding__severity__in=(
                                                          "Critical", "High", "Medium", "Low", "Info")).prefetch_related(
         "finding__test__engagement",
-        "finding__test__engagement__risk_acceptance",
+        "finding__test__engagement__risk_acceptance_set",
         "finding__risk_acceptance_set",
         "finding__reporter").annotate(severity=F("finding__severity"))
     filter_string_matching = get_system_setting("filter_string_matching", False)
