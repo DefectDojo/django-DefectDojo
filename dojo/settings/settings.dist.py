@@ -214,6 +214,8 @@ env = environ.FileAwareEnv(
     # `RemoteUser` is usually used behind AuthN proxy and users should not know about this mechanism from Swagger because it is not usable by users.
     # It should be hidden by default.
     DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER=(bool, False),
+    # Some security policies require allowing users to have only one active session
+    DD_SINGLE_USER_SESSION=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
     DD_DOCUMENTATION_URL=(str, "https://documentation.defectdojo.com"),
     # merging findings doesn't always work well with dedupe and reimport etc.
@@ -919,6 +921,7 @@ INSTALLED_APPS = (
     "auditlog",
     "pgtrigger",
     "pghistory",
+    "single_session",
 )
 
 # ------------------------------------------------------------------------------
@@ -1148,6 +1151,13 @@ if AUTH_REMOTEUSER_ENABLED:
     REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = \
         ("dojo.remote_user.RemoteUserAuthentication",) + \
         REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"]
+
+# ------------------------------------------------------------------------------
+# SINGLE_USER_SESSION
+# ------------------------------------------------------------------------------
+
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SINGLE_USER_SESSION = env("DD_SINGLE_USER_SESSION")
 
 # ------------------------------------------------------------------------------
 # CELERY
