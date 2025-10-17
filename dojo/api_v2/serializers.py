@@ -695,14 +695,14 @@ class DojoGroupSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
+        permissions_in_payload = None
         new_configuration_permissions = None
         if (
             "auth_group" in validated_data
             and "permissions" in validated_data["auth_group"]
         ):  # This field was renamed from "configuration_permissions" in the meantime
-            new_configuration_permissions = set(
-                validated_data.pop("auth_group")["permissions"],
-            )
+            permissions_in_payload = validated_data.pop("auth_group")["permissions"]
+            new_configuration_permissions = set(permissions_in_payload)
 
         instance = super().update(instance, validated_data)
 
@@ -722,6 +722,10 @@ class DojoGroupSerializer(serializers.ModelSerializer):
                 new_configuration_permissions,
             )
             instance.auth_group.permissions.set(new_permissions)
+
+        # Clear all configuration permissions if an empty list is provided
+        if isinstance(permissions_in_payload, list) and len(permissions_in_payload) == 0:
+            instance.auth_group.permissions.clear()
 
         return instance
 
