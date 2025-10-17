@@ -536,13 +536,13 @@ class UserSerializer(serializers.ModelSerializer):
         return ret
 
     def update(self, instance, validated_data):
+        permissions_in_payload = None
         new_configuration_permissions = None
         if (
             "user_permissions" in validated_data
         ):  # This field was renamed from "configuration_permissions" in the meantime
-            new_configuration_permissions = set(
-                validated_data.pop("user_permissions"),
-            )
+            permissions_in_payload = validated_data.pop("user_permissions")
+            new_configuration_permissions = set(permissions_in_payload)
 
         instance = super().update(instance, validated_data)
 
@@ -562,6 +562,10 @@ class UserSerializer(serializers.ModelSerializer):
                 new_configuration_permissions,
             )
             instance.user_permissions.set(new_permissions)
+
+        # Clear all configuration permissions if an empty list is provided
+        if isinstance(permissions_in_payload, list) and len(permissions_in_payload) == 0:
+            instance.user_permissions.clear()
 
         return instance
 
