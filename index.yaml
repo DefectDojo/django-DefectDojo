@@ -5,6 +5,38 @@ entries:
       artifacthub.io/changes: |
         - kind: changed
           description: DRY cloudsql-proxy
+        - kind: changed
+          description: Each component allow to specific image + allow digest pinning
+        - kind: added
+          description: Testing on the oldest officially supported k8s
+      artifacthub.io/prerelease: "true"
+    apiVersion: v2
+    appVersion: 2.52.0-dev
+    created: "2025-10-17T05:11:29.560365519Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: ~16.7.0
+    - condition: redis.enabled
+      name: redis
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: ~19.6.4
+    description: A Helm chart for Kubernetes to install DefectDojo
+    digest: 976ced408feeeb40173683d4b46486a14c7bb6fac3b26237c4806ecb0a5114cd
+    icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
+    maintainers:
+    - email: defectdojo-project@owasp.org
+      name: madchap
+      url: https://github.com/DefectDojo/django-DefectDojo
+    name: defectdojo
+    urls:
+    - https://github.com/DefectDojo/django-DefectDojo/releases/download/nightly-dev/defectdojo-1.8.0-dev.tgz
+    version: 1.8.0-dev
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: DRY cloudsql-proxy
         - kind: added
           description: Testing on the oldest officially supported k8s
       artifacthub.io/prerelease: "true"
@@ -6768,4 +6800,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2025-10-16T05:11:17.728168188Z"
+generated: "2025-10-17T05:11:29.548592685Z"
