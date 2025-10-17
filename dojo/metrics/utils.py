@@ -27,7 +27,6 @@ from dojo.filters import (
 from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, OPEN_FINDINGS_QUERY
 from dojo.finding.queries import get_authorized_findings
 from dojo.models import Endpoint_Status, Finding, Product_Type
-from dojo.product.queries import get_authorized_products
 from dojo.utils import (
     get_system_setting,
     queryset_check,
@@ -243,19 +242,39 @@ def endpoint_queries(
     monthly_counts = query_counts_for_period(MetricsPeriod.MONTH, months_between)
     weekly_counts = query_counts_for_period(MetricsPeriod.WEEK, weeks_between)
 
-    top_ten = get_authorized_products(Permissions.Product_View)
-    top_ten = top_ten.filter(engagement__test__finding__status_finding__mitigated=False,
-                             engagement__test__finding__status_finding__false_positive=False,
-                             engagement__test__finding__status_finding__out_of_scope=False,
-                             engagement__test__finding__status_finding__risk_accepted=False,
-                             engagement__test__finding__severity__in=("Critical", "High", "Medium", "Low"),
-                             prod_type__in=prod_type)
+    # Build Top 10 from Findings related to the open Endpoint_Status queryset
+    findings_for_top_ten = findings_queryset(endpoints_qs).filter(
+        false_p=False,
+        duplicate=False,
+        out_of_scope=False,
+        risk_accepted=False,
+        severity__in=("Critical", "High", "Medium", "Low"),
+    )
+    if len(prod_type) > 0:
+        findings_for_top_ten = findings_for_top_ten.filter(
+            test__engagement__product__prod_type__in=prod_type,
+        )
 
-    top_ten = severity_count(
-        top_ten, "annotate", "engagement__test__finding__severity",
-    ).order_by(
+    top_ten = findings_for_top_ten.values(
+        product_id=F("test__engagement__product__id"),
+        product_name=F("test__engagement__product__name"),
+    )
+    top_ten = severity_count(top_ten, "annotate", "severity").order_by(
         "-critical", "-high", "-medium", "-low",
     )[:10]
+    top_ten = [
+        {
+            "id": row.get("product_id"),
+            "name": row.get("product_name"),
+            "critical": row.get("critical"),
+            "high": row.get("high"),
+            "medium": row.get("medium"),
+            "low": row.get("low"),
+            "info": row.get("info"),
+            "total": row.get("total"),
+        }
+        for row in top_ten
+    ]
 
     return {
         "all": endpoints,
