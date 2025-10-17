@@ -12,6 +12,7 @@ It is not unusual that in some cases a webhook can not be delivered. It is usual
 
 <!-- Replaced the kroki rendering with a screenshot to avoid failures in GHA -->
 <!-- The transition state diagram is located here: docs/content/en/open_source/notification_webhooks/transition-state -->
+<!-- Github Issue here: https://github.com/DefectDojo/django-DefectDojo/issues/13457 -->
 ![image](images/webhook-state-transition-flow.png)
 
 Notes: 
