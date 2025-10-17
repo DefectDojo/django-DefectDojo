@@ -12,7 +12,7 @@ from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models.query import QuerySet as DjangoQuerySet
-from django.http import FileResponse, Http404, HttpResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -2824,8 +2824,10 @@ def report_generate(request, obj, options):
 
         report_name = "Finding"
     else:
-        logger.warning(f"Report cannot be generated for object of type {type(obj).__name__}")
-        raise Http404
+        obj_type = type(obj).__name__
+        msg = f"Report cannot be generated for object of type {obj_type}"
+        logger.warning(msg)
+        raise ValidationError(msg)
 
     result = {
         "product_type": product_type,
