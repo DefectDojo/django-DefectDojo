@@ -147,10 +147,6 @@ class CharFieldFilterANDExpression(CharFieldInFilter):
         )
 
 
-class TagExistsIContainsFilter(CharFilter):
-    pass
-
-
 class FindingStatusFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs
@@ -360,21 +356,30 @@ class DojoFilter(FilterSet):
 
     def filter_queryset(self, queryset):
         qs = super().filter_queryset(queryset)
-        try:
-            if hasattr(self, "form") and hasattr(self.form, "cleaned_data"):
-                for name, f in self.filters.items():
-                    field_name = getattr(f, "field_name", "") or ""
-                    # filtering on tag names would result duplicate rows, one for each matching tag
-                    if "tags__name" in field_name:
-                        value = self.form.cleaned_data.get(name, None)
-                        if value not in (None, "", [], (), {}):
-                            # distinct has a performance impact, so only apply it if needed.
-                            # we considered Postgress' DISTINCT ON, but it would enforce ordering by id
-                            # we considered changing to an EXISTS subquery, but it would make
-                            # our code dependant on the some of the django-tagulous internal
+        if hasattr(self, "form") and hasattr(self.form, "cleaned_data"):
+            for name, f in self.filters.items():
+                field_name = getattr(f, "field_name", "") or ""
+                # Only apply distinct for tag lookups that can duplicate base rows
+                if "tags__name" in field_name:
+                    value = self.form.cleaned_data.get(name, None)
+                    if value not in (None, "", [], (), {}):
+                        lookup_expr = getattr(f, "lookup_expr", None)
+                        is_exclude = getattr(f, "exclude", False)
+                        needs_distinct = (
+                            is_exclude
+                            or lookup_expr in {
+                                "in",
+                                "contains",
+                                "icontains",
+                                "startswith",
+                                "istartswith",
+                                "endswith",
+                                "iendswith",
+                            }
+                        )
+                        # exact/iexact typically won't duplicate rows
+                        if needs_distinct:
                             return qs.distinct()
-        except Exception:
-            return qs.distinct()
         return qs
 
 
