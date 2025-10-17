@@ -10,20 +10,37 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Oct 2025: v2.51
 
-### Oct 13, 2025: v2.51.1
+### Oct 14, 2025: v2.51.1
+
+* **(Pro UI)** Added Finding Quick Report feature.  Quick report allows users to quickly render an HTML report with the currently displayed Findings on a Finding table.
+
+![image](images/quick_report.png)
+
+* **(Pro UI)** Added vector builder and calculator to the Edit Finding form, for CVSSv3 and CVSSv4.  You can build vector strings using the 🛠️ button next to the CVSSv3 / CVSSv4 string entry on the Edit Finding form.
+
+Click the calculator button to render a score based on the vector string.
+
+![image](images/pro_cvss_vector_and_score.png)
+![image](images/cvssv4_vector_builder.png)
+
+* **(Pro UI)** Added Similar Findings view on Findings when enabled in System Settings.  
+* **(Pro UI)** File names (for attached artifacts) can now be edited directly in the UI.
+* **(Pro UI)** Redirect user to Home after a successful Support Inquiry submission.  
+
+### Oct 6, 2025: v2.51.0
 
 No significant Pro changes are present in this release.
 
-### Oct 6, 2025: v2.51.0
+## Sept 2025: v2.50
+
+#### Sept 29, 2025: v2.50.4
 
 * **(MCP)** Added MCP toggle for Superusers only.
 * **(Pro UI)** Bypassed endpoint validation on Edit Finding form when Endpoints have not changed.
 * **(Pro UI)** Collapsed additional fields in the Universal Parser preview for cleaner display.
 * **(Pro UI)** Updated Engagement Deduplication form label and help text for clarity.
 
-## Sept 2025: v2.50
-
-#### Sept 15, 2025: v2.50.3
+#### Sept 22, 2025: v2.50.3
 
 * **(Pro UI)** Added support for [CVSSv4.0](https://www.first.org/cvss/v4-0/) vector strings.
 
