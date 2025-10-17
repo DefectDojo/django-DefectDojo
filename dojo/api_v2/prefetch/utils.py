@@ -33,7 +33,7 @@ def _is_one_to_one_relation(field):
     return isinstance(field, related.ForwardManyToOneDescriptor)
 
 
-def _get_prefetchable_fields(serializer):
+def get_prefetchable_fields(serializer):
     """
     Get the fields that are prefetchable according to the serializer description.
     Method mainly used by for automatic schema generation.
