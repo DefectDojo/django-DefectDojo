@@ -285,7 +285,7 @@
                 </tr>
                 <tr>
                     {% block header_body %}
-                        <td title="hash_code: {{ finding.hash_code }}">{{ finding.id }}</td>
+                        <td title="unique_id_from_tool: {{ finding.unique_id_from_tool }}, hash_code: {{ finding.hash_code }}"">{{ finding.id }}</td>
                         <td>
                             <span class="label severity severity-{{ finding.severity }}">
                                 {% if finding.severity %}
@@ -1209,7 +1209,7 @@
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })
-            
+
             // Configure tooltips for CVSS vectors - try multiple approaches
             $(document).on('shown.bs.tooltip shown.bs.popover', function() {
                 $('.tooltip-inner, .popover-content').css({
@@ -1221,7 +1221,7 @@
                     'max-width': '1200px !important'
                 });
             });
-            
+
             // Force tooltip configuration
             $('.has-popover').each(function() {
                 $(this).on('mouseenter', function() {
