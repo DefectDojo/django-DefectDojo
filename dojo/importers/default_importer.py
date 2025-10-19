@@ -204,7 +204,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # scan_date was provided, override value from parser
             if self.scan_date_override:
                 unsaved_finding.date = self.scan_date.date()
-            if self.service is not None:
+            if self.service is not None and self.service != "":
                 unsaved_finding.service = self.service
 
             # Force parsers to use unsaved_tags (stored in below after saving)
@@ -343,7 +343,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         else:
             old_findings = old_findings.filter(test__engagement=self.test.engagement)
         # Use the service to differentiate further
-        if self.service is not None:
+        if self.service is not None and self.service != "":
             old_findings = old_findings.filter(service=self.service)
         else:
             old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=""))
