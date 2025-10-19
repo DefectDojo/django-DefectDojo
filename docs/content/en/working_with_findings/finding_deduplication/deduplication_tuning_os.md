@@ -103,14 +103,41 @@ Notes:
 
 ## After changing deduplication settings
 
-- Changes to dedupe configuration (e.g., `HASHCODE_FIELDS_PER_SCANNER`, `HASH_CODE_FIELDS_ALWAYS`, `DEDUPLICATION_ALGORITHM_PER_PARSER`) trigger background processing via Celery.
-- Hashes for findings of the affected test types are recalculated asynchronously; deduplication relationships can update over time.
-- Allow some time after changes or imports before evaluating results, as updates are not instantaneous.
+- Changes to dedupe configuration (e.g., `HASHCODE_FIELDS_PER_SCANNER`, `HASH_CODE_FIELDS_ALWAYS`, `DEDUPLICATION_ALGORITHM_PER_PARSER`) are not applied retroactively automatically. To re-evaluate existing findings you must run the management command below.
+
+Run inside the uwsgi container. Example (hash codes only, no dedupe):
+
+```bash
+docker compose exec uwsgi /bin/bash -c "python manage.py dedupe --hash_code_only"
+```
+
+Help/usage:
+
+options:
+  --parser PARSER       List of parsers for which hash_code needs recomputing
+                        (defaults to all parsers)
+  --hash_code_only      Only compute hash codes
+  --dedupe_only         Only run deduplication
+  --dedupe_sync         Run dedupe in the foreground, default false
+```
+
+If you submit dedupe to Celery (without `--dedupe_sync`), allow time for tasks to complete before evaluating results.
 
 ## Where to configure
 
 - Prefer environment variables in deployments. For local development or advanced overrides, use `local_settings.py`.
 - See `configuration.md` for details on how to set environment variables and configure local overrides.
+
+### Troubleshooting
+
+To help troubleshooting deduplication use the following tools:
+
+- Observe log out in the `dojo.specific-loggers.deduplication` category. This is a class independant logger that outputs details about the deduplication process and settings when processing findings.
+- Observe the `unique_id_from_tool` and `hash_code` values by hovering over the `ID` field or `Status` column:
+
+![Unique ID from Tool and Hash Code on the View Finding page](images/hash_code_id_field.png)
+
+![Unique ID from Tool and Hash Code on the Finding List Status Column](images/hash_code_status_column.png)
 
 ## Related documentation
 
