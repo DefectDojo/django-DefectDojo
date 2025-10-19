@@ -537,6 +537,11 @@ def post_process_findings_batch(finding_ids, dedupe_option=True, rules_option=Tr
                     if new_finding.hash_code is None:
                         continue
                     for candidate in existing_by_hash.get(new_finding.hash_code, []):
+                        if candidate.id == new_finding.id:
+                            continue  # Skip self-comparison
+                        # Prefer anchoring on the older finding (lower id)
+                        if candidate.id >= new_finding.id:
+                            continue
                         if is_deduplication_on_engagement_mismatch(new_finding, candidate):
                             continue
                         try:
@@ -571,6 +576,11 @@ def post_process_findings_batch(finding_ids, dedupe_option=True, rules_option=Tr
                     if new_finding.unique_id_from_tool is None:
                         continue
                     for candidate in existing_by_uid.get(new_finding.unique_id_from_tool, []):
+                        if candidate.id == new_finding.id:
+                            continue  # Skip self-comparison
+                        # Prefer anchoring on the older finding (lower id)
+                        if candidate.id >= new_finding.id:
+                            continue
                         # unique_id path sets duplicate without endpoint comparison in utils
                         try:
                             set_duplicate(new_finding, candidate)
@@ -729,6 +739,11 @@ def post_process_findings_batch(finding_ids, dedupe_option=True, rules_option=Tr
 
                     # apply legacy checks
                     for candidate in candidates:
+                        if candidate.id == new_finding.id:
+                            continue  # Skip self-comparison
+                        # Prefer anchoring on the older finding (lower id)
+                        if candidate.id >= new_finding.id:
+                            continue
                         if is_deduplication_on_engagement_mismatch(new_finding, candidate):
                             continue
 
