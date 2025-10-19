@@ -78,10 +78,8 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         dup_count = Finding.objects.filter(test=test, duplicate=True).count()
         self.assertEqual(expected_duplicates, dup_count)
 
-        # duplicates should be sorted by id
-        if dup_count > 0:
-            for finding in test.finding_set.filter(duplicate=True):
-                self.assertTrue(finding.duplicate_finding.id < finding.id)
+        # Assess duplicate structure invariants
+        self._assess_duplicates_in_test(test)
 
         return test_id
 
@@ -114,6 +112,9 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         first_dup_count = Finding.objects.filter(test=first_test, duplicate=True).count()
         self.assertEqual(first_import_duplicates, first_dup_count)
 
+        # Assess duplicate structure invariants on first import
+        self._assess_duplicates_in_test(first_test)
+
         # Second import: subset into the same engagement
         response_json = self.import_scan_with_params(
             subset_filename,
@@ -134,6 +135,9 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         # The second test should contain expected duplicates
         second_test_dup_count = Finding.objects.filter(test=second_test, duplicate=True).count()
         self.assertEqual(expected_duplicates, second_test_dup_count)
+
+        # Assess duplicate structure invariants on second import
+        self._assess_duplicates_in_test(second_test)
 
         # Engagement should have total duplicates from both imports
         total_expected_duplicates = first_import_duplicates + expected_duplicates
@@ -169,6 +173,9 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         first_dup_count = Finding.objects.filter(test=first_test, duplicate=True).count()
         self.assertEqual(expected_duplicates, first_dup_count)
 
+        # Assess duplicate structure invariants
+        self._assess_duplicates_in_test(first_test)
+
         # Second import: same scan into Product B (different product)
         response_json = self.import_scan_with_params(
             filename,
@@ -189,6 +196,9 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         # The second test should contain expected duplicates (different products don't deduplicate)
         second_test_dup_count = Finding.objects.filter(test=second_test, duplicate=True).count()
         self.assertEqual(expected_duplicates, second_test_dup_count)
+
+        # Assess duplicate structure invariants
+        self._assess_duplicates_in_test(second_test)
 
         # First product should still have expected duplicates
         first_prod_dup_count = Finding.objects.filter(test__engagement__product=first_test.engagement.product, duplicate=True).count()
@@ -235,6 +245,10 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         # Product should have expected duplicates total
         prod_dup_count = Finding.objects.filter(test__engagement__product=first_test.engagement.product, duplicate=True).count()
         self.assertEqual(expected_duplicates, prod_dup_count)
+
+        # Assess duplicate structure invariants on both tests
+        self._assess_duplicates_in_test(first_test)
+        self._assess_duplicates_in_test(second_test)
 
         return second_test.id
 
@@ -290,7 +304,44 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         prod_dup_count = Finding.objects.filter(test__engagement__product=first_test.engagement.product, duplicate=True).count()
         self.assertEqual(total_expected_duplicates, prod_dup_count)
 
+        # Assess duplicate structure invariants on both tests
+        self._assess_duplicates_in_test(first_test)
+        self._assess_duplicates_in_test(second_test)
+
         return second_test.id
+
+    # Duplicate structure assessment helpers
+    def _assess_duplicates_in_test(self, test: Test):
+        self._assert_duplicates_have_original(test)
+        self._assert_duplicates_have_greater_id(test)
+        self._assert_no_duplicate_loops(test)
+
+    def _assert_duplicates_have_original(self, test: Test):
+        for finding in Finding.objects.filter(test=test, duplicate=True):
+            self.assertIsNotNone(
+                finding.duplicate_finding,
+                msg=f"Duplicate finding {finding.id} has no duplicate_finding set",
+            )
+
+    def _assert_duplicates_have_greater_id(self, test: Test):
+        for finding in Finding.objects.filter(test=test, duplicate=True).select_related("duplicate_finding"):
+            if finding.duplicate_finding is None:
+                # Let the previous assertion report this
+                continue
+            self.assertTrue(
+                finding.id > finding.duplicate_finding.id,
+                msg=f"Duplicate finding {finding.id} should reference an original with a lower id ({finding.duplicate_finding.id})",
+            )
+
+    def _assert_no_duplicate_loops(self, test: Test):
+        for finding in Finding.objects.filter(test=test, duplicate=True).select_related("duplicate_finding"):
+            # A duplicate cannot point to another duplicate
+            if finding.duplicate_finding is None:
+                continue
+            self.assertFalse(
+                finding.duplicate_finding.duplicate,
+                msg=f"Duplicate finding {finding.id} points to another duplicate {finding.duplicate_finding.id}",
+            )
 
     # We need to cover all 4 types of deduplication algorithms:
     # - LEGACY (Zap)
