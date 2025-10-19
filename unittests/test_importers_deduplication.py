@@ -300,116 +300,116 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
     # - UNIQUE_ID_FROM_TOOL_OR_HASH_CODE (Veracode)
     # - UNIQUE_ID_FROM_TOOL_OR_HASH_CODE (StackHawk)
 
-    # # Test cases for ZAP (LEGACY algorithm)
-    # def test_zap_single_import_no_duplicates(self):
-    #     """Test that importing ZAP scan (LEGACY algorithm) creates 0 duplicate findings"""
-    #     self._test_single_import_assess_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 0)
+    # Test cases for ZAP (LEGACY algorithm)
+    def test_zap_single_import_no_duplicates(self):
+        """Test that importing ZAP scan (LEGACY algorithm) creates 0 duplicate findings"""
+        self._test_single_import_assess_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 0)
 
-    # def test_zap_full_then_subset_duplicates(self):
-    #     """Test that importing full ZAP scan then subset creates duplicates"""
-    #     self._test_full_then_subset_duplicates("scans/zap/dvwa_baseline_dojo.xml", "scans/zap/dvwa_baseline_dojo_subset.xml", "ZAP Scan", 10)
+    def test_zap_full_then_subset_duplicates(self):
+        """Test that importing full ZAP scan then subset creates duplicates"""
+        self._test_full_then_subset_duplicates("scans/zap/dvwa_baseline_dojo.xml", "scans/zap/dvwa_baseline_dojo_subset.xml", "ZAP Scan", 10)
 
-    # def test_zap_different_products_no_duplicates(self):
-    #     """Test that importing ZAP scan into different products creates 0 duplicates"""
-    #     self._test_different_products_no_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 0)
+    def test_zap_different_products_no_duplicates(self):
+        """Test that importing ZAP scan into different products creates 0 duplicates"""
+        self._test_different_products_no_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 0)
 
-    # def test_zap_same_product_different_engagements_duplicates(self):
-    #     """Test that importing ZAP scan into same product but different engagements creates duplicates"""
-    #     self._test_same_product_different_engagements_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 19)
+    def test_zap_same_product_different_engagements_duplicates(self):
+        """Test that importing ZAP scan into same product but different engagements creates duplicates"""
+        self._test_same_product_different_engagements_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 19)
 
-    # def test_zap_same_product_different_engagements_dedupe_on_engagements_no_duplicates(self):
-    #     """Test that importing ZAP scan into same product but different engagements with dedupe_on_engagements creates 0 duplicates"""
-    #     self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 0)
+    def test_zap_same_product_different_engagements_dedupe_on_engagements_no_duplicates(self):
+        """Test that importing ZAP scan into same product but different engagements with dedupe_on_engagements creates 0 duplicates"""
+        self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 0)
 
-    # # Test cases for ZAP (LEGACY algorithm) with internal duplicates
-    # def test_zap_single_import_internal_duplicates(self):
-    #     """Test that importing ZAP scan (LEGACY algorithm) creates 3 internal duplicates"""
-    #     self._test_single_import_assess_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 3)
+    # Test cases for ZAP (LEGACY algorithm) with internal duplicates
+    def test_zap_single_import_internal_duplicates(self):
+        """Test that importing ZAP scan (LEGACY algorithm) creates 3 internal duplicates"""
+        self._test_single_import_assess_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 3)
 
-    # def test_zap_full_then_subset_internal_duplicates(self):
-    #     """Test that importing full ZAP scan then subset creates 3 internal duplicates + 6 cross engagement duplicates"""
-    #     self._test_full_then_subset_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates_subset.xml", "ZAP Scan", 6, first_import_duplicates=3)
+    def test_zap_full_then_subset_internal_duplicates(self):
+        """Test that importing full ZAP scan then subset creates 3 internal duplicates + 6 cross engagement duplicates"""
+        self._test_full_then_subset_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates_subset.xml", "ZAP Scan", 6, first_import_duplicates=3)
 
-    # def test_zap_different_products_internal_duplicates(self):
-    #     """Test that importing ZAP scan into different products creates 3 internal duplicates"""
-    #     self._test_different_products_no_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 3)
+    def test_zap_different_products_internal_duplicates(self):
+        """Test that importing ZAP scan into different products creates 3 internal duplicates"""
+        self._test_different_products_no_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 3)
 
-    # def test_zap_same_product_different_engagements_internal_duplicates(self):
-    #     """Test that importing ZAP scan into same product but different engagements creates 13 duplicates + 3 internal duplicates = 16 total duplicates"""
-    #     self._test_same_product_different_engagements_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 16)
+    def test_zap_same_product_different_engagements_internal_duplicates(self):
+        """Test that importing ZAP scan into same product but different engagements creates 13 duplicates + 3 internal duplicates = 16 total duplicates"""
+        self._test_same_product_different_engagements_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 16)
 
-    # def test_zap_same_product_different_engagements_dedupe_on_engagements_internal_duplicates(self):
-    #     """Test that importing ZAP scan with 3 internal dupcliates into same product but different engagements with dedupe_on_engagements creates only 3 duplicates and no cross engagement duplicates"""
-    #     self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 3, first_import_duplicates=3)
+    def test_zap_same_product_different_engagements_dedupe_on_engagements_internal_duplicates(self):
+        """Test that importing ZAP scan with 3 internal dupcliates into same product but different engagements with dedupe_on_engagements creates only 3 duplicates and no cross engagement duplicates"""
+        self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 3, first_import_duplicates=3)
 
-    # # Test cases for Checkmarx Scan detailed (UNIQUE_ID_FROM_TOOL algorithm)
-    # # Please note the non-detailed version uses HASH_CODE algorithm
-    # def test_checkmarx_single_import_no_duplicates(self):
-    #     """Test that importing Checkmarx scan (UNIQUE_ID_FROM_TOOL algorithm) creates 0 duplicate findings"""
-    #     self._test_single_import_assess_duplicates("scans/checkmarx/multiple_findings.json", "Checkmarx Scan detailed", 0)
+    # Test cases for Checkmarx Scan detailed (UNIQUE_ID_FROM_TOOL algorithm)
+    # Please note the non-detailed version uses HASH_CODE algorithm
+    def test_checkmarx_single_import_no_duplicates(self):
+        """Test that importing Checkmarx scan (UNIQUE_ID_FROM_TOOL algorithm) creates 0 duplicate findings"""
+        self._test_single_import_assess_duplicates("scans/checkmarx/multiple_findings.json", "Checkmarx Scan detailed", 0)
 
-    # def test_checkmarx_full_then_subset_duplicates(self):
-    #     """Test that importing full Checkmarx scan then subset creates duplicates"""
-    #     # For now, use the same file for both full and subset
-    #     self._test_full_then_subset_duplicates("scans/checkmarx/multiple_findings.json", "scans/checkmarx/multiple_findings_fabricated_subset.json",
-    #     "Checkmarx Scan detailed", 5)
+    def test_checkmarx_full_then_subset_duplicates(self):
+        """Test that importing full Checkmarx scan then subset creates duplicates"""
+        # For now, use the same file for both full and subset
+        self._test_full_then_subset_duplicates("scans/checkmarx/multiple_findings.json", "scans/checkmarx/multiple_findings_fabricated_subset.json",
+        "Checkmarx Scan detailed", 5)
 
-    # def test_checkmarx_different_products_no_duplicates(self):
-    #     """Test that importing Checkmarx scan into different products creates 0 duplicates"""
-    #     self._test_different_products_no_duplicates("scans/checkmarx/multiple_findings.json", "Checkmarx Scan detailed", 0)
+    def test_checkmarx_different_products_no_duplicates(self):
+        """Test that importing Checkmarx scan into different products creates 0 duplicates"""
+        self._test_different_products_no_duplicates("scans/checkmarx/multiple_findings.json", "Checkmarx Scan detailed", 0)
 
-    # def test_checkmarx_same_product_different_engagements_duplicates(self):
-    #     """Test that importing Checkmarx scan into same product but different engagements creates duplicates"""
-    #     self._test_same_product_different_engagements_duplicates("scans/checkmarx/multiple_findings.json", "Checkmarx Scan detailed", 10)
+    def test_checkmarx_same_product_different_engagements_duplicates(self):
+        """Test that importing Checkmarx scan into same product but different engagements creates duplicates"""
+        self._test_same_product_different_engagements_duplicates("scans/checkmarx/multiple_findings.json", "Checkmarx Scan detailed", 10)
 
-    # def test_checkmarx_same_product_different_engagements_dedupe_on_engagements_no_duplicates(self):
-    #     """Test that importing Checkmarx scan into same product but different engagements with dedupe_on_engagements creates 0 duplicates"""
-    #     self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/checkmarx/multiple_findings.json",
-    #     "Checkmarx Scan detailed", 0)
+    def test_checkmarx_same_product_different_engagements_dedupe_on_engagements_no_duplicates(self):
+        """Test that importing Checkmarx scan into same product but different engagements with dedupe_on_engagements creates 0 duplicates"""
+        self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/checkmarx/multiple_findings.json",
+        "Checkmarx Scan detailed", 0)
 
-    # # Test cases for Checkmarx Scan detailed (UNIQUE_ID_FROM_TOOL algorithm) with internal duplicates
-    # # Please note the non-detailed version uses HASH_CODE algorithm
-    # def test_checkmarx_single_import_internal_duplicates(self):
-    #     """Test that importing Checkmarx scan (UNIQUE_ID_FROM_TOOL algorithm) creates 5 internal duplicates"""
-    #     self._test_single_import_assess_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 6)
+    # Test cases for Checkmarx Scan detailed (UNIQUE_ID_FROM_TOOL algorithm) with internal duplicates
+    # Please note the non-detailed version uses HASH_CODE algorithm
+    def test_checkmarx_single_import_internal_duplicates(self):
+        """Test that importing Checkmarx scan (UNIQUE_ID_FROM_TOOL algorithm) creates 5 internal duplicates"""
+        self._test_single_import_assess_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 6)
 
-    # def test_checkmarx_full_then_subset_internal_duplicates(self):
-    #     """Test that importing full Checkmarx scan then subset creates 3 internal duplicates + 6 cross engagement duplicates"""
-    #     self._test_full_then_subset_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "scans/checkmarx/multiple_findings_fabricated_internal_duplicates_subset.json", "Checkmarx Scan detailed", 6, first_import_duplicates=6)
+    def test_checkmarx_full_then_subset_internal_duplicates(self):
+        """Test that importing full Checkmarx scan then subset creates 3 internal duplicates + 6 cross engagement duplicates"""
+        self._test_full_then_subset_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "scans/checkmarx/multiple_findings_fabricated_internal_duplicates_subset.json", "Checkmarx Scan detailed", 6, first_import_duplicates=6)
 
-    # def test_checkmarx_different_products_internal_duplicates(self):
-    #     """Test that importing Checkmarx scan into different products creates 5 internal duplicates"""
-    #     self._test_different_products_no_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 6)
+    def test_checkmarx_different_products_internal_duplicates(self):
+        """Test that importing Checkmarx scan into different products creates 5 internal duplicates"""
+        self._test_different_products_no_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 6)
 
-    # def test_checkmarx_same_product_different_engagements_internal_duplicates(self):
-    #     """Test that importing Checkmarx scan into same product but different engagements creates 13 duplicates + 3 internal duplicates = 16 total duplicates"""
-    #     self._test_same_product_different_engagements_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 16)
+    def test_checkmarx_same_product_different_engagements_internal_duplicates(self):
+        """Test that importing Checkmarx scan into same product but different engagements creates 13 duplicates + 3 internal duplicates = 16 total duplicates"""
+        self._test_same_product_different_engagements_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 16)
 
-    # def test_checkmarx_same_product_different_engagements_dedupe_on_engagements_internal_duplicates(self):
-    #     """Test that importing Checkmarx scan with 6 internal dupcliates into same product but different engagements with dedupe_on_engagements creates only 6 duplicates and no cross engagement duplicates"""
-    #     self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 6, first_import_duplicates=6)
+    def test_checkmarx_same_product_different_engagements_dedupe_on_engagements_internal_duplicates(self):
+        """Test that importing Checkmarx scan with 6 internal dupcliates into same product but different engagements with dedupe_on_engagements creates only 6 duplicates and no cross engagement duplicates"""
+        self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 6, first_import_duplicates=6)
 
-    # # Test cases for Trivy (HASH_CODE algorithm)
-    # def test_trivy_single_import_no_duplicates(self):
-    #     """Test that importing Trivy scan (HASH_CODE algorithm) creates 0 duplicate findings"""
-    #     self._test_single_import_assess_duplicates("scans/trivy/kubernetes.json", "Trivy Scan", 0)
+    # Test cases for Trivy (HASH_CODE algorithm)
+    def test_trivy_single_import_no_duplicates(self):
+        """Test that importing Trivy scan (HASH_CODE algorithm) creates 0 duplicate findings"""
+        self._test_single_import_assess_duplicates("scans/trivy/kubernetes.json", "Trivy Scan", 0)
 
-    # def test_trivy_full_then_subset_duplicates(self):
-    #     """Test that importing full Trivy scan then subset creates duplicates"""
-    #     # For now, use the same file for both full and subset
-    #     self._test_full_then_subset_duplicates("scans/trivy/kubernetes.json", "scans/trivy/kubernetes_fabricated_subset.json", "Trivy Scan", 13)
+    def test_trivy_full_then_subset_duplicates(self):
+        """Test that importing full Trivy scan then subset creates duplicates"""
+        # For now, use the same file for both full and subset
+        self._test_full_then_subset_duplicates("scans/trivy/kubernetes.json", "scans/trivy/kubernetes_fabricated_subset.json", "Trivy Scan", 13)
 
-    # def test_trivy_different_products_no_duplicates(self):
-    #     """Test that importing Trivy scan into different products creates 0 duplicates"""
-    #     self._test_different_products_no_duplicates("scans/trivy/kubernetes.json", "Trivy Scan", 0)
+    def test_trivy_different_products_no_duplicates(self):
+        """Test that importing Trivy scan into different products creates 0 duplicates"""
+        self._test_different_products_no_duplicates("scans/trivy/kubernetes.json", "Trivy Scan", 0)
 
-    # def test_trivy_same_product_different_engagements_duplicates(self):
-    #     """Test that importing Trivy scan into same product but different engagements creates duplicates"""
-    #     self._test_same_product_different_engagements_duplicates("scans/trivy/kubernetes.json", "Trivy Scan", 20)
+    def test_trivy_same_product_different_engagements_duplicates(self):
+        """Test that importing Trivy scan into same product but different engagements creates duplicates"""
+        self._test_same_product_different_engagements_duplicates("scans/trivy/kubernetes.json", "Trivy Scan", 20)
 
-    # def test_trivy_same_product_different_engagements_dedupe_on_engagements_no_duplicates(self):
-    #     """Test that importing Trivy scan into same product but different engagements with dedupe_on_engagements creates 0 duplicates"""
-    #     self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/trivy/kubernetes.json", "Trivy Scan", 0)
+    def test_trivy_same_product_different_engagements_dedupe_on_engagements_no_duplicates(self):
+        """Test that importing Trivy scan into same product but different engagements with dedupe_on_engagements creates 0 duplicates"""
+        self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/trivy/kubernetes.json", "Trivy Scan", 0)
 
     # Test cases for Trivy (HASH_CODE algorithm) with internal duplicates
     def test_trivy_single_import_internal_duplicates(self):
