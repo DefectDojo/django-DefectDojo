@@ -13,7 +13,7 @@ from dojo.models import (
     System_Settings,
     Test,
     User,
-    _copy_model_util,
+    copy_model_util,
 )
 
 from .dojo_test_case import DojoTestCase
@@ -1199,7 +1199,7 @@ class TestDuplicationLogic(DojoTestCase):
 
     def copy_and_reset_finding(self, find_id):
         org = Finding.objects.get(id=find_id)
-        new = _copy_model_util(org)
+        new = copy_model_util(org)
         new.duplicate = False
         new.duplicate_finding = None
         new.active = True
@@ -1236,13 +1236,13 @@ class TestDuplicationLogic(DojoTestCase):
 
     def copy_and_reset_test(self, test_id):
         org = Test.objects.get(id=test_id)
-        new = _copy_model_util(org)
+        new = copy_model_util(org)
         # return unsaved new finding and reloaded existing finding
         return new, Test.objects.get(id=test_id)
 
     def copy_and_reset_engagement(self, eng_id):
         org = Engagement.objects.get(id=eng_id)
-        new = _copy_model_util(org)
+        new = copy_model_util(org)
         # return unsaved new finding and reloaded existing finding
         return new, Engagement.objects.get(id=eng_id)
 

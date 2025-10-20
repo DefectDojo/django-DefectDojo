@@ -14,9 +14,11 @@ jobs:
       matrix:
         include:
           # databases, broker and k8s are independent, so we don't need to test each combination
-          # lastest k8s version (https://kubernetes.io/releases/) and oldest supported version from aws
-          # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
-          - k8s: 'v1.34.0'
+          # lastest k8s version (https://kubernetes.io/releases/) and the oldest officially supported version
+          # are tested (https://kubernetes.io/releases/)
+          - k8s: 'v1.34.1'
+            os: debian
+          - k8s: 'v1.31.13'
             os: debian
     steps:
       - name: Checkout
@@ -67,6 +69,8 @@ jobs:
                defectdojo \
                ./helm/defectdojo \
                --set django.ingress.enabled=true \
+               --set images.django.image.tag=latest \
+               --set images.nginx.image.tag=latest \
                --set imagePullPolicy=Never \
                --set initializer.keepSeconds="-1" \
                --set redis.enabled=true \

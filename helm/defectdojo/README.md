@@ -11,7 +11,7 @@ this [guide](https://helm.sh/docs/using_helm/#installing-helm).
 
 ## Supported Kubernetes Versions
 
-The tests cover the deployment on the lastest [kubernetes version](https://kubernetes.io/releases/) and the oldest supported [version from AWS](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions). The assumption is that version in between do not have significant differences. Current tested versions can looks up in the [github k8s workflow](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/k8s-tests.yml).
+The tests cover the deployment on the lastest [kubernetes version](https://kubernetes.io/releases/) and [the oldest officially supported version](https://kubernetes.io/releases/). The assumption is that version in between do not have significant differences. Current tested versions can looks up in the [github k8s workflow](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/k8s-tests.yml).
 
 ## Helm chart
 
@@ -495,7 +495,7 @@ kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 
 # General information about chart values
 
-![Version: 1.7.2-dev](https://img.shields.io/badge/Version-1.7.2--dev-informational?style=flat-square) ![AppVersion: 2.52.0-dev](https://img.shields.io/badge/AppVersion-2.52.0--dev-informational?style=flat-square)
+![Version: 1.8.0-dev](https://img.shields.io/badge/Version-1.8.0--dev-informational?style=flat-square) ![AppVersion: 2.52.0-dev](https://img.shields.io/badge/AppVersion-2.52.0--dev-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -524,99 +524,109 @@ A Helm chart for Kubernetes to install DefectDojo
 | admin.password | string | `""` |  |
 | admin.secretKey | string | `""` |  |
 | admin.user | string | `"admin"` |  |
-| alternativeHosts | list | `[]` |  |
-| celery.annotations | object | `{}` |  |
+| alternativeHosts | list | `[]` | optional list of alternative hostnames to use that gets appended to DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match the global hostname. |
+| celery.annotations | object | `{}` | Common annotations to worker and beat deployments and pods. |
 | celery.beat.affinity | object | `{}` |  |
-| celery.beat.annotations | object | `{}` |  |
+| celery.beat.annotations | object | `{}` | Annotations for the Celery beat deployment. |
 | celery.beat.automountServiceAccountToken | bool | `false` |  |
-| celery.beat.containerSecurityContext | object | `{}` |  |
-| celery.beat.extraEnv | list | `[]` |  |
-| celery.beat.extraInitContainers | list | `[]` |  |
-| celery.beat.extraVolumeMounts | list | `[]` |  |
-| celery.beat.extraVolumes | list | `[]` |  |
-| celery.beat.livenessProbe | object | `{}` |  |
+| celery.beat.containerSecurityContext | object | `{}` | Container security context for the Celery beat containers. |
+| celery.beat.extraEnv | list | `[]` | Additional environment variables injected to Celery beat containers. |
+| celery.beat.extraInitContainers | list | `[]` | A list of additional initContainers to run before celery beat containers. |
+| celery.beat.extraVolumeMounts | list | `[]` | Array of additional volume mount points for the celery beat containers. |
+| celery.beat.extraVolumes | list | `[]` | A list of extra volumes to mount @type: array<map> |
+| celery.beat.image.digest | string | `""` |  |
+| celery.beat.image.registry | string | `""` |  |
+| celery.beat.image.repository | string | `""` |  |
+| celery.beat.image.tag | string | `""` |  |
+| celery.beat.livenessProbe | object | `{}` | Enable liveness probe for Celery beat container. ``` exec:   command:     - bash     - -c     - celery -A dojo inspect ping -t 5 initialDelaySeconds: 30 periodSeconds: 60 timeoutSeconds: 10 ``` |
 | celery.beat.nodeSelector | object | `{}` |  |
-| celery.beat.podAnnotations | object | `{}` |  |
-| celery.beat.podSecurityContext | object | `{}` |  |
-| celery.beat.readinessProbe | object | `{}` |  |
+| celery.beat.podAnnotations | object | `{}` | Annotations for the Celery beat pods. |
+| celery.beat.podSecurityContext | object | `{}` | Pod security context for the Celery beat pods. |
+| celery.beat.readinessProbe | object | `{}` | Enable readiness probe for Celery beat container. |
 | celery.beat.replicas | int | `1` |  |
 | celery.beat.resources.limits.cpu | string | `"2000m"` |  |
 | celery.beat.resources.limits.memory | string | `"256Mi"` |  |
 | celery.beat.resources.requests.cpu | string | `"100m"` |  |
 | celery.beat.resources.requests.memory | string | `"128Mi"` |  |
-| celery.beat.startupProbe | object | `{}` |  |
+| celery.beat.startupProbe | object | `{}` | Enable startup probe for Celery beat container. |
 | celery.beat.tolerations | list | `[]` |  |
 | celery.broker | string | `"redis"` |  |
 | celery.logLevel | string | `"INFO"` |  |
 | celery.worker.affinity | object | `{}` |  |
-| celery.worker.annotations | object | `{}` |  |
-| celery.worker.appSettings.poolType | string | `"solo"` |  |
+| celery.worker.annotations | object | `{}` | Annotations for the Celery worker deployment. |
+| celery.worker.appSettings.poolType | string | `"solo"` | Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops) poolType: prefork autoscaleMin: 2 autoscaleMax: 8 concurrency: 8 prefetchMultiplier: 128 |
 | celery.worker.automountServiceAccountToken | bool | `false` |  |
-| celery.worker.containerSecurityContext | object | `{}` |  |
-| celery.worker.extraEnv | list | `[]` |  |
-| celery.worker.extraInitContainers | list | `[]` |  |
-| celery.worker.extraVolumeMounts | list | `[]` |  |
-| celery.worker.extraVolumes | list | `[]` |  |
-| celery.worker.livenessProbe | object | `{}` |  |
+| celery.worker.containerSecurityContext | object | `{}` | Container security context for the Celery worker containers. |
+| celery.worker.extraEnv | list | `[]` | Additional environment variables injected to Celery worker containers. |
+| celery.worker.extraInitContainers | list | `[]` | A list of additional initContainers to run before celery worker containers. |
+| celery.worker.extraVolumeMounts | list | `[]` | Array of additional volume mount points for the celery worker containers. |
+| celery.worker.extraVolumes | list | `[]` | A list of extra volumes to mount. @type: array<map> |
+| celery.worker.image.digest | string | `""` |  |
+| celery.worker.image.registry | string | `""` |  |
+| celery.worker.image.repository | string | `""` |  |
+| celery.worker.image.tag | string | `""` |  |
+| celery.worker.livenessProbe | object | `{}` | Enable liveness probe for Celery worker containers. ``` exec:   command:     - bash     - -c     - celery -A dojo inspect ping -t 5 initialDelaySeconds: 30 periodSeconds: 60 timeoutSeconds: 10 ``` |
 | celery.worker.nodeSelector | object | `{}` |  |
-| celery.worker.podAnnotations | object | `{}` |  |
-| celery.worker.podSecurityContext | object | `{}` |  |
-| celery.worker.readinessProbe | object | `{}` |  |
+| celery.worker.podAnnotations | object | `{}` | Annotations for the Celery beat pods. |
+| celery.worker.podSecurityContext | object | `{}` | Pod security context for the Celery worker pods. |
+| celery.worker.readinessProbe | object | `{}` | Enable readiness probe for Celery worker container. |
 | celery.worker.replicas | int | `1` |  |
 | celery.worker.resources.limits.cpu | string | `"2000m"` |  |
 | celery.worker.resources.limits.memory | string | `"512Mi"` |  |
 | celery.worker.resources.requests.cpu | string | `"100m"` |  |
 | celery.worker.resources.requests.memory | string | `"128Mi"` |  |
-| celery.worker.startupProbe | object | `{}` |  |
+| celery.worker.startupProbe | object | `{}` | Enable startup probe for Celery worker container. |
 | celery.worker.tolerations | list | `[]` |  |
-| cloudsql.containerSecurityContext | object | `{}` |  |
-| cloudsql.enable_iam_login | bool | `false` |  |
-| cloudsql.enabled | bool | `false` |  |
-| cloudsql.extraEnv | list | `[]` |  |
-| cloudsql.extraVolumeMounts | list | `[]` |  |
-| cloudsql.image.pullPolicy | string | `"IfNotPresent"` |  |
-| cloudsql.image.repository | string | `"gcr.io/cloudsql-docker/gce-proxy"` |  |
-| cloudsql.image.tag | string | `"1.37.9"` |  |
-| cloudsql.instance | string | `""` |  |
-| cloudsql.resources | object | `{}` |  |
-| cloudsql.use_private_ip | bool | `false` |  |
-| cloudsql.verbose | bool | `true` |  |
-| createPostgresqlSecret | bool | `false` |  |
-| createRedisSecret | bool | `false` |  |
-| createSecret | bool | `false` |  |
-| dbMigrationChecker.containerSecurityContext | object | `{}` |  |
-| dbMigrationChecker.enabled | bool | `true` |  |
-| dbMigrationChecker.extraEnv | list | `[]` |  |
-| dbMigrationChecker.extraVolumeMounts | list | `[]` |  |
-| dbMigrationChecker.resources.limits.cpu | string | `"200m"` |  |
-| dbMigrationChecker.resources.limits.memory | string | `"200Mi"` |  |
-| dbMigrationChecker.resources.requests.cpu | string | `"100m"` |  |
-| dbMigrationChecker.resources.requests.memory | string | `"100Mi"` |  |
-| disableHooks | bool | `false` |  |
+| cloudsql | object | `{"containerSecurityContext":{},"enable_iam_login":false,"enabled":false,"extraEnv":[],"extraVolumeMounts":[],"image":{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.9"},"instance":"","resources":{},"use_private_ip":false,"verbose":true}` | Google CloudSQL support in GKE via gce-proxy |
+| cloudsql.containerSecurityContext | object | `{}` | Optional: security context for the CloudSQL proxy container. |
+| cloudsql.enable_iam_login | bool | `false` | use IAM database authentication |
+| cloudsql.enabled | bool | `false` | To use CloudSQL in GKE set 'enable: true' |
+| cloudsql.extraEnv | list | `[]` | Additional environment variables for the CloudSQL proxy container. |
+| cloudsql.extraVolumeMounts | list | `[]` | Array of additional volume mount points for the CloudSQL proxy container |
+| cloudsql.image | object | `{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.9"}` | set repo and image tag of gce-proxy |
+| cloudsql.instance | string | `""` | set CloudSQL instance: 'project:zone:instancename' |
+| cloudsql.resources | object | `{}` | Optional: add resource requests/limits for the CloudSQL proxy container. |
+| cloudsql.use_private_ip | bool | `false` | whether to use a private IP to connect to the database |
+| cloudsql.verbose | bool | `true` | By default, the proxy has verbose logging. Set this to false to make it less verbose |
+| createPostgresqlSecret | bool | `false` | create postgresql secret in defectdojo chart, outside of postgresql chart |
+| createRedisSecret | bool | `false` | create redis secret in defectdojo chart, outside of redis chart |
+| createSecret | bool | `false` | create defectdojo specific secret |
+| dbMigrationChecker.containerSecurityContext | object | `{}` | Container security context for the DB migration checker. |
+| dbMigrationChecker.enabled | bool | `true` | Enable/disable the DB migration checker. |
+| dbMigrationChecker.extraEnv | list | `[]` | Additional environment variables for DB migration checker. |
+| dbMigrationChecker.extraVolumeMounts | list | `[]` | Array of additional volume mount points for DB migration checker. |
+| dbMigrationChecker.image.digest | string | `""` |  |
+| dbMigrationChecker.image.registry | string | `""` |  |
+| dbMigrationChecker.image.repository | string | `""` |  |
+| dbMigrationChecker.image.tag | string | `""` |  |
+| dbMigrationChecker.resources | object | `{"limits":{"cpu":"200m","memory":"200Mi"},"requests":{"cpu":"100m","memory":"100Mi"}}` | Resource requests/limits for the DB migration checker. |
+| disableHooks | bool | `false` | Avoid using pre-install hooks, which might cause issues with ArgoCD |
 | django.affinity | object | `{}` |  |
 | django.annotations | object | `{}` |  |
 | django.automountServiceAccountToken | bool | `false` |  |
-| django.extraEnv | list | `[]` |  |
-| django.extraInitContainers | list | `[]` |  |
-| django.extraVolumeMounts | list | `[]` |  |
-| django.extraVolumes | list | `[]` |  |
+| django.extraEnv | list | `[]` | Additional environment variables injected to all Django containers and initContainers. |
+| django.extraInitContainers | list | `[]` | A list of additional initContainers to run before the uwsgi and nginx containers. |
+| django.extraVolumeMounts | list | `[]` | Array of additional volume mount points common to all containers and initContainers. |
+| django.extraVolumes | list | `[]` | A list of extra volumes to mount. |
 | django.ingress.activateTLS | bool | `true` |  |
-| django.ingress.annotations | object | `{}` |  |
+| django.ingress.annotations | object | `{}` | Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...) `kubernetes.io/ingress.class: nginx` Depending on the size and complexity of your scans, you might want to increase the default ingress timeouts if you see repeated 504 Gateway Timeouts `nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"` `nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"` |
 | django.ingress.enabled | bool | `true` |  |
 | django.ingress.ingressClassName | string | `""` |  |
 | django.ingress.secretName | string | `"defectdojo-tls"` |  |
-| django.mediaPersistentVolume.enabled | bool | `true` |  |
-| django.mediaPersistentVolume.fsGroup | int | `1001` |  |
-| django.mediaPersistentVolume.name | string | `"media"` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.accessModes[0] | string | `"ReadWriteMany"` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.create | bool | `false` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.name | string | `""` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.size | string | `"5Gi"` |  |
-| django.mediaPersistentVolume.persistentVolumeClaim.storageClassName | string | `""` |  |
-| django.mediaPersistentVolume.type | string | `"emptyDir"` |  |
-| django.nginx.containerSecurityContext.runAsUser | int | `1001` |  |
-| django.nginx.extraEnv | list | `[]` |  |
-| django.nginx.extraVolumeMounts | list | `[]` |  |
+| django.mediaPersistentVolume | object | `{"enabled":true,"fsGroup":1001,"name":"media","persistentVolumeClaim":{"accessModes":["ReadWriteMany"],"create":false,"name":"","size":"5Gi","storageClassName":""},"type":"emptyDir"}` | This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume |
+| django.mediaPersistentVolume.name | string | `"media"` | any name |
+| django.mediaPersistentVolume.persistentVolumeClaim | object | `{"accessModes":["ReadWriteMany"],"create":false,"name":"","size":"5Gi","storageClassName":""}` | in case if pvc specified, should point to the already existing pvc |
+| django.mediaPersistentVolume.persistentVolumeClaim.accessModes | list | `["ReadWriteMany"]` | check KUBERNETES.md doc first for option to choose |
+| django.mediaPersistentVolume.persistentVolumeClaim.create | bool | `false` | set to true to create a new pvc and if django.mediaPersistentVolume.type is set to pvc |
+| django.mediaPersistentVolume.type | string | `"emptyDir"` | could be emptyDir (not for production) or pvc |
+| django.nginx.containerSecurityContext | object | `{"runAsUser":1001}` | Container security context for the nginx containers. |
+| django.nginx.containerSecurityContext.runAsUser | int | `1001` | nginx dockerfile sets USER=1001 |
+| django.nginx.extraEnv | list | `[]` | To extra environment variables to the nginx container, you can use extraEnv. For example: extraEnv: - name: FOO   valueFrom:     configMapKeyRef:       name: foo       key: bar |
+| django.nginx.extraVolumeMounts | list | `[]` | Array of additional volume mount points for nginx containers. |
+| django.nginx.image.digest | string | `""` |  |
+| django.nginx.image.registry | string | `""` |  |
+| django.nginx.image.repository | string | `""` |  |
+| django.nginx.image.tag | string | `""` |  |
 | django.nginx.resources.limits.cpu | string | `"2000m"` |  |
 | django.nginx.resources.limits.memory | string | `"256Mi"` |  |
 | django.nginx.resources.requests.cpu | string | `"100m"` |  |
@@ -624,30 +634,34 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.nginx.tls.enabled | bool | `false` |  |
 | django.nginx.tls.generateCertificate | bool | `false` |  |
 | django.nodeSelector | object | `{}` |  |
-| django.podSecurityContext.fsGroup | int | `1001` |  |
+| django.podSecurityContext | object | `{"fsGroup":1001}` | Pod security context for the Django pods. |
 | django.replicas | int | `1` |  |
 | django.service.annotations | object | `{}` |  |
 | django.service.type | string | `""` |  |
 | django.strategy | object | `{}` |  |
 | django.tolerations | list | `[]` |  |
-| django.uwsgi.appSettings.maxFd | int | `0` |  |
+| django.uwsgi.appSettings.maxFd | int | `0` | Use this value to set the maximum number of file descriptors. If set to 0 will be detected by uwsgi e.g. 102400 |
 | django.uwsgi.appSettings.processes | int | `4` |  |
 | django.uwsgi.appSettings.threads | int | `4` |  |
 | django.uwsgi.certificates.certFileName | string | `"ca.crt"` |  |
 | django.uwsgi.certificates.certMountPath | string | `"/certs/"` |  |
 | django.uwsgi.certificates.configName | string | `"defectdojo-ca-certs"` |  |
-| django.uwsgi.certificates.enabled | bool | `false` |  |
-| django.uwsgi.containerSecurityContext.runAsUser | int | `1001` |  |
-| django.uwsgi.enableDebug | bool | `false` |  |
-| django.uwsgi.extraEnv | list | `[]` |  |
-| django.uwsgi.extraVolumeMounts | list | `[]` |  |
-| django.uwsgi.livenessProbe.enabled | bool | `true` |  |
+| django.uwsgi.certificates.enabled | bool | `false` | includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible to create configMap `kubectl create cm defectdojo-ca-certs --from-file=ca.crt` NOTE: it reflects REQUESTS_CA_BUNDLE for celery workers, beats as well |
+| django.uwsgi.containerSecurityContext.runAsUser | int | `1001` | django dockerfile sets USER=1001 |
+| django.uwsgi.enableDebug | bool | `false` | this also requires DD_DEBUG to be set to True |
+| django.uwsgi.extraEnv | list | `[]` | To add (or override) extra variables which need to be pulled from another configMap, you can use extraEnv. For example: extraEnv: - name: DD_DATABASE_HOST   valueFrom:     configMapKeyRef:       name: my-other-postgres-configmap       key: cluster_endpoint |
+| django.uwsgi.extraVolumeMounts | list | `[]` | Array of additional volume mount points for uwsgi containers. |
+| django.uwsgi.image.digest | string | `""` |  |
+| django.uwsgi.image.registry | string | `""` |  |
+| django.uwsgi.image.repository | string | `""` |  |
+| django.uwsgi.image.tag | string | `""` |  |
+| django.uwsgi.livenessProbe.enabled | bool | `true` | Enable liveness checks on uwsgi container. |
 | django.uwsgi.livenessProbe.failureThreshold | int | `6` |  |
 | django.uwsgi.livenessProbe.initialDelaySeconds | int | `0` |  |
 | django.uwsgi.livenessProbe.periodSeconds | int | `10` |  |
 | django.uwsgi.livenessProbe.successThreshold | int | `1` |  |
 | django.uwsgi.livenessProbe.timeoutSeconds | int | `5` |  |
-| django.uwsgi.readinessProbe.enabled | bool | `true` |  |
+| django.uwsgi.readinessProbe.enabled | bool | `true` | Enable readiness checks on uwsgi container. |
 | django.uwsgi.readinessProbe.failureThreshold | int | `6` |  |
 | django.uwsgi.readinessProbe.initialDelaySeconds | int | `0` |  |
 | django.uwsgi.readinessProbe.periodSeconds | int | `10` |  |
@@ -657,106 +671,103 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.uwsgi.resources.limits.memory | string | `"512Mi"` |  |
 | django.uwsgi.resources.requests.cpu | string | `"100m"` |  |
 | django.uwsgi.resources.requests.memory | string | `"256Mi"` |  |
-| django.uwsgi.startupProbe.enabled | bool | `true` |  |
+| django.uwsgi.startupProbe.enabled | bool | `true` | Enable startup checks on uwsgi container. |
 | django.uwsgi.startupProbe.failureThreshold | int | `30` |  |
 | django.uwsgi.startupProbe.initialDelaySeconds | int | `0` |  |
 | django.uwsgi.startupProbe.periodSeconds | int | `5` |  |
 | django.uwsgi.startupProbe.successThreshold | int | `1` |  |
 | django.uwsgi.startupProbe.timeoutSeconds | int | `1` |  |
-| extraAnnotations | object | `{}` |  |
-| extraConfigs | object | `{}` |  |
-| extraEnv | list | `[]` |  |
-| extraLabels | object | `{}` |  |
-| extraSecrets | object | `{}` |  |
-| gke.useGKEIngress | bool | `false` |  |
-| gke.useManagedCertificate | bool | `false` |  |
-| gke.workloadIdentityEmail | string | `""` |  |
-| host | string | `"defectdojo.default.minikube.local"` |  |
+| extraAnnotations | object | `{}` | Annotations globally added to all resources |
+| extraConfigs | object | `{}` | To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below: NOTE  Do not store any kind of sensitive information inside of it ``` DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true' DD_SOCIAL_AUTH_AUTH0_KEY: 'dev' DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx' ``` |
+| extraEnv | list | `[]` | To add (or override) extra variables which need to be pulled from another configMap, you can use extraEnv. For example: ``` - name: DD_DATABASE_HOST   valueFrom:     configMapKeyRef:       name: my-other-postgres-configmap       key: cluster_endpoint ``` |
+| extraLabels | object | `{}` | Labels globally added to all resources |
+| extraSecrets | object | `{}` | Extra secrets can be created inside of extraSecrets block: NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret ``` DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx' ``` |
+| gke | object | `{"useGKEIngress":false,"useManagedCertificate":false,"workloadIdentityEmail":""}` | Settings to make running the chart on GKE simpler |
+| gke.useGKEIngress | bool | `false` | Set to true to configure the Ingress to use the GKE provided ingress controller |
+| gke.useManagedCertificate | bool | `false` | Set to true to have GKE automatically provision a TLS certificate for the host specified Requires useGKEIngress to be set to true When using this option, be sure to set django.ingress.activateTLS to false |
+| gke.workloadIdentityEmail | string | `""` | Workload Identity allows the K8s service account to assume the IAM access of a GCP service account to interact with other GCP services Only works with serviceAccount.create = true |
+| host | string | `"defectdojo.default.minikube.local"` | Primary hostname of instance |
 | imagePullPolicy | string | `"Always"` |  |
-| imagePullSecrets | string | `nil` |  |
+| imagePullSecrets | string | `nil` | When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project) Create secrets as: kubectl create secret docker-registry defectdojoregistrykey --docker-username=registry_username --docker-password=registry_password --docker-server='https://index.docker.io/v1/' |
+| images.django.image.digest | string | `""` |  |
+| images.django.image.registry | string | `""` |  |
+| images.django.image.repository | string | `"defectdojo/defectdojo-django"` |  |
+| images.django.image.tag | string | `""` |  |
+| images.nginx.image.digest | string | `""` |  |
+| images.nginx.image.registry | string | `""` |  |
+| images.nginx.image.repository | string | `"defectdojo/defectdojo-nginx"` |  |
+| images.nginx.image.tag | string | `""` |  |
 | initializer.affinity | object | `{}` |  |
 | initializer.annotations | object | `{}` |  |
 | initializer.automountServiceAccountToken | bool | `false` |  |
-| initializer.containerSecurityContext | object | `{}` |  |
-| initializer.extraEnv | list | `[]` |  |
-| initializer.extraVolumeMounts | list | `[]` |  |
-| initializer.extraVolumes | list | `[]` |  |
+| initializer.containerSecurityContext | object | `{}` | Container security context for the initializer Job container |
+| initializer.extraEnv | list | `[]` | Additional environment variables injected to the initializer job pods. |
+| initializer.extraVolumeMounts | list | `[]` | Array of additional volume mount points for the initializer job (init)containers. |
+| initializer.extraVolumes | list | `[]` | A list of extra volumes to attach to the initializer job pods. |
+| initializer.image.digest | string | `""` |  |
+| initializer.image.registry | string | `""` |  |
+| initializer.image.repository | string | `""` |  |
+| initializer.image.tag | string | `""` |  |
 | initializer.jobAnnotations | object | `{}` |  |
-| initializer.keepSeconds | int | `60` |  |
+| initializer.keepSeconds | int | `60` | A positive integer will keep this Job and Pod deployed for the specified number of seconds, after which they will be removed. For all other values, the Job and Pod will remain deployed. |
 | initializer.labels | object | `{}` |  |
 | initializer.nodeSelector | object | `{}` |  |
-| initializer.podSecurityContext | object | `{}` |  |
+| initializer.podSecurityContext | object | `{}` | Pod security context for the initializer Job |
 | initializer.resources.limits.cpu | string | `"2000m"` |  |
 | initializer.resources.limits.memory | string | `"512Mi"` |  |
 | initializer.resources.requests.cpu | string | `"100m"` |  |
 | initializer.resources.requests.memory | string | `"256Mi"` |  |
 | initializer.run | bool | `true` |  |
-| initializer.staticName | bool | `false` |  |
+| initializer.staticName | bool | `false` | staticName defines whether name of the job will be the same (e.g., "defectdojo-initializer") or different every time - generated based on current time (e.g., "defectdojo-initializer-2024-11-11-18-57") This might be handy for ArgoCD deployments |
 | initializer.tolerations | list | `[]` |  |
-| localsettingspy | string | `""` |  |
+| localsettingspy | string | `""` | To add code snippet which would extend setting functionality, you might add it here It will be stored as ConfigMap and mounted `dojo/settings/local_settings.py`. For more see: https://documentation.defectdojo.com/getting_started/configuration/ For example: ``` localsettingspy: |   INSTALLED_APPS += (     'debug_toolbar',   )   MIDDLEWARE = [       'debug_toolbar.middleware.DebugToolbarMiddleware',   ] + MIDDLEWARE ``` |
 | monitoring.enabled | bool | `false` |  |
-| monitoring.prometheus.containerSecurityContext | object | `{}` |  |
-| monitoring.prometheus.enabled | bool | `false` |  |
-| monitoring.prometheus.extraEnv | list | `[]` |  |
-| monitoring.prometheus.extraVolumeMounts | list | `[]` |  |
-| monitoring.prometheus.image | string | `"nginx/nginx-prometheus-exporter:1.4.2"` |  |
+| monitoring.prometheus.containerSecurityContext | object | `{}` | Optional: container security context for nginx prometheus exporter |
+| monitoring.prometheus.enabled | bool | `false` | Add the nginx prometheus exporter sidecar |
+| monitoring.prometheus.extraEnv | list | `[]` | Optional: additional environment variables injected to the nginx prometheus exporter container |
+| monitoring.prometheus.extraVolumeMounts | list | `[]` | Array of additional volume mount points for the nginx prometheus exporter |
+| monitoring.prometheus.image.digest | string | `""` |  |
+| monitoring.prometheus.image.registry | string | `""` |  |
+| monitoring.prometheus.image.repository | string | `"nginx/nginx-prometheus-exporter"` |  |
+| monitoring.prometheus.image.tag | string | `"1.4.2"` |  |
 | monitoring.prometheus.imagePullPolicy | string | `"IfNotPresent"` |  |
-| monitoring.prometheus.resources | object | `{}` |  |
-| networkPolicy.annotations | object | `{}` |  |
-| networkPolicy.egress | list | `[]` |  |
-| networkPolicy.enabled | bool | `false` |  |
-| networkPolicy.ingress | list | `[]` |  |
-| networkPolicy.ingressExtend | list | `[]` |  |
-| podLabels | object | `{}` |  |
-| postgresServer | string | `nil` |  |
-| postgresql.architecture | string | `"standalone"` |  |
-| postgresql.auth.database | string | `"defectdojo"` |  |
-| postgresql.auth.existingSecret | string | `"defectdojo-postgresql-specific"` |  |
-| postgresql.auth.password | string | `""` |  |
-| postgresql.auth.secretKeys.adminPasswordKey | string | `"postgresql-postgres-password"` |  |
-| postgresql.auth.secretKeys.replicationPasswordKey | string | `"postgresql-replication-password"` |  |
-| postgresql.auth.secretKeys.userPasswordKey | string | `"postgresql-password"` |  |
-| postgresql.auth.username | string | `"defectdojo"` |  |
-| postgresql.enabled | bool | `true` |  |
-| postgresql.primary.affinity | object | `{}` |  |
-| postgresql.primary.containerSecurityContext.enabled | bool | `true` |  |
-| postgresql.primary.containerSecurityContext.runAsUser | int | `1001` |  |
-| postgresql.primary.name | string | `"primary"` |  |
-| postgresql.primary.nodeSelector | object | `{}` |  |
-| postgresql.primary.persistence.enabled | bool | `true` |  |
-| postgresql.primary.podSecurityContext.enabled | bool | `true` |  |
-| postgresql.primary.podSecurityContext.fsGroup | int | `1001` |  |
-| postgresql.primary.service.ports.postgresql | int | `5432` |  |
-| postgresql.shmVolume.chmod.enabled | bool | `false` |  |
-| postgresql.volumePermissions.containerSecurityContext.runAsUser | int | `1001` |  |
-| postgresql.volumePermissions.enabled | bool | `false` |  |
-| redis.architecture | string | `"standalone"` |  |
-| redis.auth.existingSecret | string | `"defectdojo-redis-specific"` |  |
-| redis.auth.existingSecretPasswordKey | string | `"redis-password"` |  |
-| redis.auth.password | string | `""` |  |
-| redis.enabled | bool | `true` |  |
-| redis.sentinel.enabled | bool | `false` |  |
-| redis.tls.enabled | bool | `false` |  |
-| redisParams | string | `""` |  |
-| redisServer | string | `nil` |  |
-| repositoryPrefix | string | `"defectdojo"` |  |
-| revisionHistoryLimit | int | `10` |  |
-| secrets.annotations | object | `{}` |  |
-| securityContext.containerSecurityContext.runAsNonRoot | bool | `true` |  |
-| securityContext.enabled | bool | `true` |  |
-| securityContext.podSecurityContext.runAsNonRoot | bool | `true` |  |
-| serviceAccount.annotations | object | `{}` |  |
-| serviceAccount.create | bool | `true` |  |
-| serviceAccount.labels | object | `{}` |  |
-| serviceAccount.name | string | `""` |  |
-| siteUrl | string | `""` |  |
-| tag | string | `"latest"` |  |
+| monitoring.prometheus.resources | object | `{}` | Optional: add resource requests/limits for the nginx prometheus exporter container |
+| networkPolicy | object | `{"annotations":{},"egress":[],"enabled":false,"ingress":[],"ingressExtend":[]}` | Enables application network policy For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/ |
+| networkPolicy.egress | list | `[]` |  ``` egress: - to:   - ipBlock:       cidr: 10.0.0.0/24   ports:   - protocol: TCP     port: 443 ``` |
+| networkPolicy.ingress | list | `[]` | For more detailed configuration with ports and peers. It will ignore ingressExtend ``` ingress:  - from:     - podSelector:         matchLabels:           app.kubernetes.io/instance: defectdojo     - podSelector:         matchLabels:           app.kubernetes.io/instance: defectdojo-prometheus    ports:    - protocol: TCP      port: 8443 ``` |
+| networkPolicy.ingressExtend | list | `[]` | if additional labels need to be allowed (e.g. prometheus scraper) ``` ingressExtend:  - podSelector:      matchLabels:      app.kubernetes.io/instance: defectdojo-prometheus ``` |
+| podLabels | object | `{}` | Additional labels to add to the pods: ``` podLabels:   key: value ``` |
+| postgresServer | string | `nil` | To use an external PostgreSQL instance (like CloudSQL), set `postgresql.enabled` to false, set items in `postgresql.auth` part for authentication, and set the address here: |
+| postgresql | object | `{"architecture":"standalone","auth":{"database":"defectdojo","existingSecret":"defectdojo-postgresql-specific","password":"","secretKeys":{"adminPasswordKey":"postgresql-postgres-password","replicationPasswordKey":"postgresql-replication-password","userPasswordKey":"postgresql-password"},"username":"defectdojo"},"enabled":true,"primary":{"affinity":{},"containerSecurityContext":{"enabled":true,"runAsUser":1001},"name":"primary","nodeSelector":{},"persistence":{"enabled":true},"podSecurityContext":{"enabled":true,"fsGroup":1001},"service":{"ports":{"postgresql":5432}}},"shmVolume":{"chmod":{"enabled":false}},"volumePermissions":{"containerSecurityContext":{"runAsUser":1001},"enabled":false}}` | For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/postgresql |
+| postgresql.enabled | bool | `true` | To use an external instance, switch enabled to `false` and set the address in `postgresServer` below |
+| postgresql.primary.containerSecurityContext.enabled | bool | `true` | Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC |
+| postgresql.primary.containerSecurityContext.runAsUser | int | `1001` | runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully. |
+| postgresql.primary.podSecurityContext.enabled | bool | `true` | Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC |
+| postgresql.primary.podSecurityContext.fsGroup | int | `1001` | fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully. |
+| postgresql.volumePermissions.containerSecurityContext | object | `{"runAsUser":1001}` | if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above |
+| redis | object | `{"architecture":"standalone","auth":{"existingSecret":"defectdojo-redis-specific","existingSecretPasswordKey":"redis-password","password":""},"enabled":true,"sentinel":{"enabled":false},"tls":{"enabled":false}}` | For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/redis |
+| redis.enabled | bool | `true` | To use an external instance, switch enabled to `false`` and set the address in `redisServer` below |
+| redis.tls.enabled | bool | `false` | If TLS is enabled, the Redis broker will use the redis:// and optionally mount the certificates from an existing secret. |
+| redisParams | string | `""` | Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `redis.tls.enabled` |
+| redisServer | string | `nil` | To use an external Redis instance, set `redis.enabled` to false and set the address here: |
+| revisionHistoryLimit | int | `10` | Allow overriding of revisionHistoryLimit across all deployments. |
+| secrets.annotations | object | `{}` | Add annotations for secret resources |
+| securityContext | object | `{"containerSecurityContext":{"runAsNonRoot":true},"enabled":true,"podSecurityContext":{"runAsNonRoot":true}}` | Security context settings |
+| serviceAccount.annotations | object | `{}` | Optional additional annotations to add to the DefectDojo's Service Account. |
+| serviceAccount.create | bool | `true` | Specifies whether a service account should be created. |
+| serviceAccount.labels | object | `{}` | Optional additional labels to add to the DefectDojo's Service Account. |
+| serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
+| siteUrl | string | `""` | The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira. Use syntax: `siteUrl: 'https://<yourdomain>'` |
 | tests.unitTests.automountServiceAccountToken | bool | `false` |  |
+| tests.unitTests.image.digest | string | `""` |  |
+| tests.unitTests.image.registry | string | `""` |  |
+| tests.unitTests.image.repository | string | `""` |  |
+| tests.unitTests.image.tag | string | `""` |  |
 | tests.unitTests.resources.limits.cpu | string | `"500m"` |  |
 | tests.unitTests.resources.limits.memory | string | `"512Mi"` |  |
 | tests.unitTests.resources.requests.cpu | string | `"100m"` |  |
 | tests.unitTests.resources.requests.memory | string | `"128Mi"` |  |
-| trackConfig | string | `"disabled"` |  |
+| trackConfig | string | `"disabled"` | Track configuration (trackConfig): will automatically respin application pods in case of config changes detection can be: 1. disabled (default) 2. enabled, enables tracking configuration changes based on SHA256 |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

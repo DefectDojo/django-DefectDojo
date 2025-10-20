@@ -129,7 +129,7 @@ jobs:
       # If this step fails, install https://github.com/losisin/helm-values-schema-json and run locally `helm schema --use-helm-docs` in `helm/defectdojo` before committing your changes.
       # The helm schema will be generated for you.
       - name: Generate values schema json
-        uses: losisin/helm-values-schema-json-action@d5847286fa04322702c4f8d45031974798c83ac7 # v2.3.0
+        uses: losisin/helm-values-schema-json-action@660c441a4a507436a294fc55227e1df54aca5407 # v2.3.1
         with:
           fail-on-diff: true
           working-directory: "helm/defectdojo"
