@@ -628,13 +628,16 @@ def engagement_post_delete(sender, instance, **kwargs):
 def fix_loop_duplicates():
     """Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates."""
     """ i.e. A -> B -> C. This can lead to problems when deleting findingns, performing deduplication, etc """
-    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).order_by("-id")
+    # Build base queryset without selecting full rows to minimize memory
+    loop_qs = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False)
 
-    loop_count = len(candidates)
+    # Use COUNT(*) at the DB instead of materializing the queryset
+    loop_count = loop_qs.count()
 
     if loop_count > 0:
-        deduplicationLogger.info(f"Identified {len(candidates)} Findings with Loops")
-        for find_id in candidates.values_list("id", flat=True):
+        deduplicationLogger.info(f"Identified {loop_count} Findings with Loops")
+        # Stream IDs only in descending order to avoid loading full Finding rows
+        for find_id in loop_qs.order_by("-id").values_list("id", flat=True).iterator(chunk_size=1000):
             removeLoop(find_id, 50)
 
         new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)

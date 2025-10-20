@@ -2231,7 +2231,9 @@ class Test(models.Model):
         else:
             deduplicationLogger.debug("Section HASHCODE_FIELDS_PER_SCANNER not found in settings.dist.py")
 
-        deduplicationLogger.debug(f"HASHCODE_FIELDS_PER_SCANNER is: {hashCodeFields}")
+        hash_code_fields_always = getattr(settings, "HASH_CODE_FIELDS_ALWAYS", [])
+        deduplicationLogger.debug(f"HASHCODE_FIELDS_PER_SCANNER is: {hashCodeFields} + HASH_CODE_FIELDS_ALWAYS: {hash_code_fields_always}")
+
         return hashCodeFields
 
     @property
@@ -2935,6 +2937,13 @@ class Finding(models.Model):
                 # Generically use the finding attribute having the same name, converts to str in case it's integer
                 fields_to_hash += str(getattr(self, hashcodeField))
                 deduplicationLogger.debug(hashcodeField + " : " + str(getattr(self, hashcodeField)))
+
+        # Log the hash_code fields that are always included (but are not part of the hash_code_fields list as they are inserted downtstream in self.hash_fields)
+        hash_code_fields_always = getattr(settings, "HASH_CODE_FIELDS_ALWAYS", [])
+        for hashcodeField in hash_code_fields_always:
+            if getattr(self, hashcodeField):
+                deduplicationLogger.debug(hashcodeField + " : " + str(getattr(self, hashcodeField)))
+
         deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
 
