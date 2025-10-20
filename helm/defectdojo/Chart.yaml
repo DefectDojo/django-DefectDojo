@@ -23,7 +23,7 @@ annotations:
     - kind: changed
       description: DRY cloudsql-proxy
     - kind: changed
-      description: Each component allow to specific image + allow digest pinning
+      description: Each component allow to specific image + allow digest pinning + allow different tags for Django and Nginx
     - kind: added
       description: Convert existing comments to descriptors
     - kind: added
