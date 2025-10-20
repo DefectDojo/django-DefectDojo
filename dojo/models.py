@@ -129,7 +129,7 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
             obj.tags.set(cleaned_tag_list)
 
 
-def _copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
+def copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
     if exclude_fields is None:
         exclude_fields = []
     new_model_instance = model_in_database.__class__()
@@ -231,15 +231,15 @@ class Dojo_User(User):
     def force_password_reset(user):
         return hasattr(user, "usercontactinfo") and user.usercontactinfo.force_password_reset
 
-    def disable_force_password_reset(user):
-        if hasattr(user, "usercontactinfo"):
-            user.usercontactinfo.force_password_reset = False
-            user.usercontactinfo.save()
+    def disable_force_password_reset(self):
+        if hasattr(self, "usercontactinfo"):
+            self.usercontactinfo.force_password_reset = False
+            self.usercontactinfo.save()
 
-    def enable_force_password_reset(user):
-        if hasattr(user, "usercontactinfo"):
-            user.usercontactinfo.force_password_reset = True
-            user.usercontactinfo.save()
+    def enable_force_password_reset(self):
+        if hasattr(self, "usercontactinfo"):
+            self.usercontactinfo.force_password_reset = True
+            self.usercontactinfo.save()
 
     @staticmethod
     def generate_full_name(user):
@@ -750,7 +750,7 @@ class NoteHistory(models.Model):
     current_editor = models.ForeignKey(Dojo_User, editable=False, null=True, on_delete=models.CASCADE)
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         copy.save()
         return copy
 
@@ -776,7 +776,7 @@ class Notes(models.Model):
         return self.entry
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_history = list(self.history.all())
         # Save the object before setting any ManyToMany relationships
@@ -801,7 +801,7 @@ class FileUpload(models.Model):
             storage.delete(path)
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Add unique modifier to file name
         copy.title = f"{self.title} - clone-{str(uuid4())[:8]}"
         # Create new unique file name
@@ -1581,7 +1581,7 @@ class Engagement(models.Model):
         return reverse("view_engagement", args=[str(self.id)])
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
@@ -1699,7 +1699,7 @@ class Endpoint_Status(models.Model):
         return f"'{self.finding}' on '{self.endpoint}'"
 
     def copy(self, finding=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         current_endpoint = self.endpoint
         if finding:
             copy.finding = finding
@@ -2161,7 +2161,7 @@ class Test(models.Model):
         return bc
 
     def copy(self, engagement=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
@@ -2829,7 +2829,7 @@ class Finding(models.Model):
         return reverse("view_finding", args=[str(self.id)])
 
     def copy(self, test=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
@@ -3813,7 +3813,7 @@ class Risk_Acceptance(models.Model):
         return None
 
     def copy(self, engagement=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
