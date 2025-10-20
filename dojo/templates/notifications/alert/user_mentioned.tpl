@@ -1,4 +1,4 @@
 {% load i18n %}{% blocktranslate trimmed %}
-User {{ user }} jotted a note on {{ section }}{% endblocktranslate %}:
+User {{ requested_by }} jotted a note on {{ section }}{% endblocktranslate %}:
 
     {{ note }}
