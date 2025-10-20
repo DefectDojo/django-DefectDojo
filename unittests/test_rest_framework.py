@@ -34,7 +34,7 @@ from rest_framework.test import APIClient
 
 from dojo.api_v2.mixins import DeletePreviewModelMixin
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
-from dojo.api_v2.prefetch.utils import get_prefetchable_fields
+from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
 from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
@@ -416,7 +416,7 @@ class BaseClass:
         @skipIfNotSubclass(PrefetchRetrieveMixin)
         def test_detail_prefetch(self):
             # print("=======================================================")
-            prefetchable_fields = [x[0] for x in get_prefetchable_fields(self.viewset.serializer_class)]
+            prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
 
             current_objects = self.client.get(self.url, format="json").data
             relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
@@ -508,7 +508,7 @@ class BaseClass:
 
         @skipIfNotSubclass(PrefetchListMixin)
         def test_list_prefetch(self):
-            prefetchable_fields = [x[0] for x in get_prefetchable_fields(self.viewset.serializer_class)]
+            prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
 
             response = self.client.get(self.url, data={
                 "prefetch": ",".join(prefetchable_fields),

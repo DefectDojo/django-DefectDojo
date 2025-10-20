@@ -4,7 +4,7 @@ from datetime import datetime
 import html2text
 from defusedxml import ElementTree
 from django.conf import settings
-from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
+from hyperlink._url import SCHEME_PORT_MAP
 
 from dojo.models import Endpoint, Finding
 

@@ -1,5 +1,5 @@
 from .prefetcher import _Prefetcher
-from .utils import get_prefetchable_fields
+from .utils import _get_prefetchable_fields
 
 
 def _get_path_to_GET_serializer_map(generator):
@@ -53,7 +53,7 @@ def prefetch_postprocessing_hook(result, generator, request, public):
                 if parameter["name"] == "prefetch":
                     prefetcher = _Prefetcher()
 
-                    fields = get_prefetchable_fields(
+                    fields = _get_prefetchable_fields(
                         serializer_classes[path](),
                     )
 

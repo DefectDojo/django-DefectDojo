@@ -96,7 +96,6 @@ class ImporterOptions:
         for field in self.field_names:
             logger.debug(f"{field}: {getattr(self, field)}")
 
-    @staticmethod
     def _compress_decorator(function):
         @wraps(function)
         def inner_compress_function(*args, **kwargs):
@@ -104,7 +103,6 @@ class ImporterOptions:
             return function(*args, **kwargs)
         return inner_compress_function
 
-    @staticmethod
     def _decompress_decorator(function):
         @wraps(function)
         def inner_decompress_function(*args, **kwargs):

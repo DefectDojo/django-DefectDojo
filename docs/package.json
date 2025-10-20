@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@docsearch/css": "4.1.0",
-    "@docsearch/js": "4.2.0",
+    "@docsearch/js": "4.1.0",
     "@thulite/doks-core": "1.8.0",
     "@thulite/images": "3.3.0",
     "@thulite/inline-svg": "1.2.1",

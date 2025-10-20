@@ -108,7 +108,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         parser = self.get_parser()
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
-        parsed_findings = self.parse_findings(scan, parser) or []
+        parsed_findings = self.parse_findings(scan, parser)
         # process the findings in the foreground or background
         new_findings = self.determine_process_method(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that

@@ -1,10 +1,11 @@
 import hashlib
+import json
 import re
 
 from dojo.models import Finding
 
 
-class MobSFjsonreport:
+class MobsfscanParser:
 
     """A class that can be used to parse the mobsfscan (https://github.com/MobSF/mobsfscan) JSON report file."""
 
@@ -14,7 +15,19 @@ class MobSFjsonreport:
         "INFO": "Low",
     }
 
-    def get_findings(self, data, test):
+    def get_scan_types(self):
+        return ["Mobsfscan Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Mobsfscan Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON report for mobsfscan report file."
+
+    def get_findings(self, filename, test):
+        data = json.load(filename)
+        if len(data.get("results")) == 0:
+            return []
         dupes = {}
         for key, item in data.get("results").items():
             metadata = item.get("metadata")

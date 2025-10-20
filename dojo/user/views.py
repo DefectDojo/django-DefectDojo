@@ -287,7 +287,7 @@ def change_password(request):
             new_password = form.cleaned_data["new_password"]
 
             user.set_password(new_password)
-            user.disable_force_password_reset()
+            Dojo_User.disable_force_password_reset(user)
             user.save()
 
             messages.add_message(request,

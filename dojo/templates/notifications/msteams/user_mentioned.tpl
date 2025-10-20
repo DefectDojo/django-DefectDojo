@@ -54,7 +54,7 @@ NOTE: This template is currently NOT USED in practice because:
                     },
                     {
                         "type": "TextBlock",
-                        "text": "{% trans 'User' %} {{ requested_by }} {% trans 'mentioned you in' %} {{ section }}.",
+                        "text": "{% trans 'User' %} {{ user }} {% trans 'mentioned you in' %} {{ section }}.",
                         "wrap": true,
                         "spacing": "Medium"
                     },
@@ -63,7 +63,7 @@ NOTE: This template is currently NOT USED in practice because:
                         "facts": [
                             {
                                 "title": "{% trans 'User' %}:",
-                                "value": "{{ requested_by }}"
+                                "value": "{{ user }}"
                             },
                             {
                                 "title": "{% trans 'Section' %}:",

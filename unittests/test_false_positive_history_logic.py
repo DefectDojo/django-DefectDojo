@@ -12,7 +12,7 @@ from dojo.models import (
     System_Settings,
     Test,
     User,
-    copy_model_util,
+    _copy_model_util,
 )
 
 from .dojo_test_case import DojoTestCase
@@ -1719,7 +1719,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def copy_and_reset_finding(self, find_id):
         org = Finding.objects.get(id=find_id)
-        new = copy_model_util(org)
+        new = _copy_model_util(org)
         new.duplicate = False
         new.duplicate_finding = None
         new.false_p = False
@@ -1730,19 +1730,19 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def copy_and_reset_test(self, test_id):
         org = Test.objects.get(id=test_id)
-        new = copy_model_util(org)
+        new = _copy_model_util(org)
         # return unsaved new test and reloaded existing test
         return new, Test.objects.get(id=test_id)
 
     def copy_and_reset_engagement(self, eng_id):
         org = Engagement.objects.get(id=eng_id)
-        new = copy_model_util(org)
+        new = _copy_model_util(org)
         # return unsaved new engagement and reloaded existing engagement
         return new, Engagement.objects.get(id=eng_id)
 
     def copy_and_reset_product(self, prod_id):
         org = Product.objects.get(id=prod_id)
-        new = copy_model_util(org)
+        new = _copy_model_util(org)
         new.name = f"{org.name} (Copy {datetime.now()})"
         # return unsaved new product and reloaded existing product
         return new, Product.objects.get(id=prod_id)

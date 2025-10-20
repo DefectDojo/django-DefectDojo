@@ -222,7 +222,7 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
                     if username:
                         dojo_user = Dojo_User.objects.filter(username=username).first()
                         if dojo_user:
-                            dojo_user.enable_force_password_reset()
+                            Dojo_User.enable_force_password_reset(dojo_user)
                 raise Ratelimited
             return fn(request, *args, **kw)
         return _wrapped

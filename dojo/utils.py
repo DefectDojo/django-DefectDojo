@@ -1461,8 +1461,7 @@ def process_tag_notifications(request, note, parent_url, parent_title):
         title=f"{request.user} jotted a note",
         url=parent_url,
         icon="commenting",
-        recipients=users_to_notify,
-        requested_by=get_current_user())
+        recipients=users_to_notify)
 
 
 def encrypt(key, iv, plaintext):

@@ -2,12 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.celery.annotations .Values.celery.worker.annotations }}
-  annotations:
-    {{- range $key, $value := . }}
-    {{ $key }}: {{ quote $value }}
-    {{- end }}
-  {{- end }}
+  name: {{ $fullName }}-celery-worker
   labels:
     defectdojo.org/component: celery
     defectdojo.org/subcomponent: worker
@@ -15,11 +10,13 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
-    {{- range $key, $value := .Values.extraLabels }}
-    {{ $key }}: {{ quote $value }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
     {{- end }}
-  name: {{ $fullName }}-celery-worker
-  namespace: {{ .Release.Namespace }}
+  {{- with mergeOverwrite .Values.celery.annotations .Values.celery.worker.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.celery.worker.replicas }}
   {{- with .Values.revisionHistoryLimit }}
@@ -38,12 +35,15 @@ spec:
         defectdojo.org/subcomponent: worker
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        {{- range $key, $value := mergeOverwrite dict .Values.extraLabels .Values.podLabels }}
-        {{ $key }}: {{ quote $value }}
+        {{- with .Values.extraLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.podLabels }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
-      {{- range $key, $value := mergeOverwrite dict .Values.extraAnnotations .Values.celery.annotations .Values.celery.worker.podAnnotations }}
-        {{ $key }}: {{ quote $value }}
+      {{- with mergeOverwrite .Values.celery.annotations .Values.celery.worker.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- if eq (.Values.trackConfig | default "disabled") "enabled" }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
@@ -51,14 +51,6 @@ spec:
         checksum/esecret: {{ include (print $.Template.BasePath "/extra-secret.yaml") . | sha256sum }}
       {{- end }}
     spec:
-      {{- if .Values.securityContext.enabled }} 
-      securityContext:
-        {{- include "helpers.securityContext" (list
-          .Values
-          "securityContext.podSecurityContext"
-          "celery.worker.podSecurityContext"
-        ) | nindent 8 }}
-      {{- end }}
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.celery.worker.automountServiceAccountToken }}
       {{- with .Values.imagePullSecrets }}
@@ -66,12 +58,12 @@ spec:
       - name: {{ . }}
       {{- end }}
       volumes:
-      {{- if .Values.localsettingspy }}
+      {{- if  .Values.localsettingspy }}
       - name: localsettingspy
         configMap:
           name: {{ $fullName }}-localsettingspy
       {{- end }}
-      {{- if .Values.django.uwsgi.certificates.enabled }}
+      {{- if  .Values.django.uwsgi.certificates.enabled }}
       - name: cert-mount
         configMap:
           name: {{ .Values.django.uwsgi.certificates.configName }}
@@ -86,7 +78,22 @@ spec:
       {{- end }}
       {{- end }}
       {{- if .Values.cloudsql.enabled  }}
-      {{- include "cloudsqlProxy" . | nindent 6 }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        restartPolicy: Always
+        securityContext:
+          runAsNonRoot: true
+        command: ["/cloud_sql_proxy"]
+        args:
+        - "-verbose={{ .Values.cloudsql.verbose }}"
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
+        {{- end }}
       {{- end }}
       {{- if .Values.dbMigrationChecker.enabled }}
       {{$data := dict "fullName" $fullName }}
@@ -95,7 +102,7 @@ spec:
       {{- end }}
       containers:
       - name: celery
-        image: "{{ template "celery.worker.image" . }}"
+        image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- with .Values.celery.worker.livenessProbe }}
         livenessProbe: {{ toYaml . | nindent 10 }}
@@ -108,11 +115,7 @@ spec:
         {{- end }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- include "helpers.securityContext" (list
-            .Values
-            "securityContext.containerSecurityContext"
-            "celery.worker.containerSecurityContext"
-          ) | nindent 10 }}
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
         {{- end }}
         command: ['/entrypoint-celery-worker.sh']
         volumeMounts:
@@ -122,7 +125,7 @@ spec:
           mountPath: /app/dojo/settings/local_settings.py
           subPath: file
         {{- end }}
-        {{- if .Values.django.uwsgi.certificates.enabled }}
+        {{- if  .Values.django.uwsgi.certificates.enabled }}
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
         {{- end }}

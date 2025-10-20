@@ -3,22 +3,21 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  {{- with .Values.extraAnnotations }}
-  annotations:
-    {{- range $key, $value := . }}
-    {{ $key }}: {{ quote $value }}
-    {{- end }}
-  {{- end }}
+  name: {{ $fullName }}
   labels:
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
-    {{- range $key, $value := .Values.extraLabels }}
-    {{ $key }}: {{ quote $value }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
     {{- end }}
-  name: {{ $fullName }}
-  namespace: {{ .Release.Namespace }}
+{{- if .Values.annotations }}
+  annotations:
+{{- with .Values.annotations }}
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
 data:
   DD_ADMIN_USER: {{ .Values.admin.user | default "admin" }}
   DD_ADMIN_MAIL: {{ .Values.admin.Mail | default "admin@defectdojo.local" }}

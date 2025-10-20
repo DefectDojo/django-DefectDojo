@@ -19,7 +19,7 @@ spec:
   {{- end }}
   containers:
     - name: unit-tests
-      image: '{{ template "unitTests.image" . }}'
+      image: '{{ .Values.repositoryPrefix }}/defectdojo-django:{{ .Values.tag }}'
       imagePullPolicy: {{ .Values.imagePullPolicy }}
       {{- if .Values.securityContext.enabled }}
       securityContext:
