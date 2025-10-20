@@ -17,6 +17,21 @@ dependencies:
     version: ~19.6.4
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: redis.enabled
+# For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/
+# This is example for "artifacthub.io/changes"
+# artifacthub.io/changes: |
+#   - kind: added
+#     description: Cool feature
+#   - kind: fixed
+#     description: Minor bug
+#   - kind: changed
+#     description: Broken feature
+#   - kind: removed
+#     description: Old bug
+#   - kind: deprecated
+#     description: Not-needed feature
+#   - kind: security
+#     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "true"
   artifacthub.io/changes: |

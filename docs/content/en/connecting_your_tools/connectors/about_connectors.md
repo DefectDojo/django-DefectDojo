@@ -25,6 +25,7 @@ But everyone needs a starting point, and that's where Connectors come in. Connec
 
 We currently support Connectors for the following tools, with more on the way:
 
+* **Anchore**
 * **AWS Security Hub**
 * **BurpSuite**
 * **Checkmarx ONE**
