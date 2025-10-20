@@ -819,6 +819,45 @@ class TestDuplicationLogic(DojoTestCase):
         # expect duplicate, as endpoints shouldn't affect dedupe and hash_code due to unique_id
         self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
 
+    def test_identical_endpoints_unique_id(self):
+        # create identical copy and add the same endpoint to both original and new
+        finding_124 = Finding.objects.get(id=124)
+        ep_o = Endpoint(product=finding_124.test.engagement.product, finding=finding_124, host="samehost.com", protocol="https")
+        ep_o.save()
+        finding_124.endpoints.add(ep_o)
+        finding_124.save(dedupe_option=False)
+
+        finding_new, finding_124 = self.copy_and_reset_finding(find_id=124)
+        finding_new.save(dedupe_option=False)
+        ep_n = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="samehost.com", protocol="https")
+        ep_n.save()
+        finding_new.endpoints.add(ep_n)
+        finding_new.save()
+
+        # expect duplicate: unique_id match dominates regardless of identical endpoints
+        self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
+
+    def test_extra_endpoints_unique_id(self):
+        # add endpoints to original and more endpoints to new
+        finding_124 = Finding.objects.get(id=124)
+        ep1 = Endpoint(product=finding_124.test.engagement.product, finding=finding_124, host="base1.com", protocol="https")
+        ep1.save()
+        finding_124.endpoints.add(ep1)
+        finding_124.save(dedupe_option=False)
+
+        finding_new, finding_124 = self.copy_and_reset_finding(find_id=124)
+        finding_new.save(dedupe_option=False)
+        ep2 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="base1.com", protocol="https")
+        ep2.save()
+        ep3 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="extra.com", protocol="https")
+        ep3.save()
+        finding_new.endpoints.add(ep2)
+        finding_new.endpoints.add(ep3)
+        finding_new.save()
+
+        # expect duplicate: unique_id match regardless of extra endpoints
+        self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
+
     # algo unique_id_or_hash_code Veracode scan
 
     def test_identical_unique_id_or_hash_code(self):
@@ -827,6 +866,66 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.save()
 
         # expect duplicate as uid matches
+        self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+
+    def test_identical_endpoints_unique_id_or_hash_code(self):
+        # add identical endpoints to original and new; uid match should dedupe
+        finding_224 = Finding.objects.get(id=224)
+        ep_o = Endpoint(product=finding_224.test.engagement.product, finding=finding_224, host="endpoint.same.com", protocol="https")
+        ep_o.save()
+        finding_224.endpoints.add(ep_o)
+        finding_224.save(dedupe_option=False)
+
+        finding_new, finding_224 = self.copy_and_reset_finding(find_id=224)
+        finding_new.save(dedupe_option=False)
+        ep_n = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="endpoint.same.com", protocol="https")
+        ep_n.save()
+        finding_new.endpoints.add(ep_n)
+        finding_new.save()
+
+        self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+
+    def test_extra_endpoints_unique_id_or_hash_code(self):
+        # add endpoint to original; add original + extra endpoint to new; uid match should dedupe
+        finding_224 = Finding.objects.get(id=224)
+        ep_o = Endpoint(product=finding_224.test.engagement.product, finding=finding_224, host="endpoint.base.com", protocol="https")
+        ep_o.save()
+        finding_224.endpoints.add(ep_o)
+        finding_224.save(dedupe_option=False)
+
+        finding_new, finding_224 = self.copy_and_reset_finding(find_id=224)
+        finding_new.save(dedupe_option=False)
+        ep_n1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="endpoint.base.com", protocol="https")
+        ep_n1.save()
+        ep_n2 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="endpoint.extra.com", protocol="https")
+        ep_n2.save()
+        finding_new.endpoints.add(ep_n1)
+        finding_new.endpoints.add(ep_n2)
+        finding_new.save()
+
+        self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+
+    def test_intersect_endpoints_unique_id_or_hash_code(self):
+        # original has two endpoints; new has one overlapping and one different; uid match should dedupe
+        finding_224 = Finding.objects.get(id=224)
+        ep_o1 = Endpoint(product=finding_224.test.engagement.product, finding=finding_224, host="ep1.com", protocol="https")
+        ep_o1.save()
+        ep_o2 = Endpoint(product=finding_224.test.engagement.product, finding=finding_224, host="ep2.com", protocol="https")
+        ep_o2.save()
+        finding_224.endpoints.add(ep_o1)
+        finding_224.endpoints.add(ep_o2)
+        finding_224.save(dedupe_option=False)
+
+        finding_new, finding_224 = self.copy_and_reset_finding(find_id=224)
+        finding_new.save(dedupe_option=False)
+        ep_n1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="ep2.com", protocol="https")
+        ep_n1.save()
+        ep_n2 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="ep3.com", protocol="https")
+        ep_n2.save()
+        finding_new.endpoints.add(ep_n1)
+        finding_new.endpoints.add(ep_n2)
+        finding_new.save()
+
         self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
 
     # existing BUG? finding gets matched on hash code, while there is also an existing finding with matching unique_id_from_tool
@@ -857,6 +956,92 @@ class TestDuplicationLogic(DojoTestCase):
 
         # expect duplicate, uid mismatch, but same hash_code
         self.assert_finding(finding_new, not_pk=224, duplicate=False, not_hash_code=finding_224.hash_code)
+
+    def test_uid_mismatch_hash_match_identical_endpoints_unique_id_or_hash_code(self):
+        # Force UID mismatch but ensure hash matches; set identical endpoints on both
+        dedupe_algo_endpoint_fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = ["host", "port"]
+
+        finding_224 = Finding.objects.get(id=224)
+        # add endpoint to original
+        ep_o = Endpoint(product=finding_224.test.engagement.product, finding=finding_224, host="same.com", protocol="https")
+        ep_o.save()
+        finding_224.endpoints.add(ep_o)
+        finding_224.save(dedupe_option=False)
+
+        # create new with same title/desc to keep hash same, different uid
+        finding_new, finding_224 = self.copy_and_reset_finding(find_id=224)
+        finding_new.unique_id_from_tool = "DIFF-UID"
+        finding_new.save(dedupe_option=False)
+        ep_n = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="same.com", protocol="https")
+        ep_n.save()
+        finding_new.endpoints.add(ep_n)
+        finding_new.save()
+
+        # expect duplicate via hash path despite UID mismatch and identical endpoints
+        self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=finding_224.id, hash_code=finding_224.hash_code)
+
+        # reset
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
+
+    def test_uid_mismatch_hash_match_extra_endpoints_unique_id_or_hash_code(self):
+        # Force UID mismatch but ensure hash matches; new has extra endpoints
+        dedupe_algo_endpoint_fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = ["host", "port"]
+
+        finding_224 = Finding.objects.get(id=224)
+        ep_o = Endpoint(product=finding_224.test.engagement.product, finding=finding_224, host="base.com", protocol="https")
+        ep_o.save()
+        finding_224.endpoints.add(ep_o)
+        finding_224.save(dedupe_option=False)
+
+        finding_new, finding_224 = self.copy_and_reset_finding(find_id=224)
+        finding_new.unique_id_from_tool = "DIFF-UID"
+        finding_new.save(dedupe_option=False)
+        ep_n1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="base.com", protocol="https")
+        ep_n1.save()
+        ep_n2 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="extra.com", protocol="https")
+        ep_n2.save()
+        finding_new.endpoints.add(ep_n1)
+        finding_new.endpoints.add(ep_n2)
+        finding_new.save()
+
+        # expect duplicate via hash path despite UID mismatch and extra endpoints
+        self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=finding_224.id, hash_code=finding_224.hash_code)
+
+        # reset
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
+
+    def test_uid_mismatch_hash_match_intersect_endpoints_unique_id_or_hash_code(self):
+        # Force UID mismatch but ensure hash matches; endpoints partially overlap
+        dedupe_algo_endpoint_fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = ["host", "port"]
+
+        finding_224 = Finding.objects.get(id=224)
+        ep_o1 = Endpoint(product=finding_224.test.engagement.product, finding=finding_224, host="ep1.com", protocol="https")
+        ep_o1.save()
+        ep_o2 = Endpoint(product=finding_224.test.engagement.product, finding=finding_224, host="ep2.com", protocol="https")
+        ep_o2.save()
+        finding_224.endpoints.add(ep_o1)
+        finding_224.endpoints.add(ep_o2)
+        finding_224.save(dedupe_option=False)
+
+        finding_new, finding_224 = self.copy_and_reset_finding(find_id=224)
+        finding_new.unique_id_from_tool = "DIFF-UID"
+        finding_new.save(dedupe_option=False)
+        ep_n1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="ep2.com", protocol="https")
+        ep_n1.save()
+        ep_n2 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="ep3.com", protocol="https")
+        ep_n2.save()
+        finding_new.endpoints.add(ep_n1)
+        finding_new.endpoints.add(ep_n2)
+        finding_new.save()
+
+        # expect duplicate via hash path despite UID mismatch and intersecting endpoints
+        self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=finding_224.id, hash_code=finding_224.hash_code)
+
+        # reset
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
 
     def test_identical_ordering_unique_id_or_hash_code(self):
         # create identical copy
