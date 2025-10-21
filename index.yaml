@@ -14,7 +14,7 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 2.52.0-dev
-    created: "2025-10-20T05:07:13.49237962Z"
+    created: "2025-10-21T05:11:58.052611402Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -25,7 +25,7 @@ entries:
       repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
       version: ~19.6.4
     description: A Helm chart for Kubernetes to install DefectDojo
-    digest: 2d7fc7c5f936b7e8fd5ee41091c4ef403d546142a68ed0bbf4462b719a84131e
+    digest: 8a80b4554f33f57d5e63fc1fb6d2f7dec0dcdc412657e3c1434298e266f84e89
     icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
     maintainers:
     - email: defectdojo-project@owasp.org
@@ -6834,4 +6834,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2025-10-20T15:28:40.338887724Z"
+generated: "2025-10-21T05:11:58.040977882Z"
