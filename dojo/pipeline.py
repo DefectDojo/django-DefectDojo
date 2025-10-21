@@ -108,7 +108,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
 
 
 def update_oidc_groups(backend, uid, user=None, social=None, *args, **kwargs):
-    if settings.OIDC_AUTH_ENABLED and settings.DD_SOCIAL_AUTH_OIDC_GET_GROUPS and isinstance(backend, OpenIdConnectAuth):
+    if settings.OIDC_AUTH_ENABLED and settings.OIDC_GET_GROUPS and isinstance(backend, OpenIdConnectAuth):
         response = kwargs.get("response", {})
         group_names = response.get("groups", [])
 
