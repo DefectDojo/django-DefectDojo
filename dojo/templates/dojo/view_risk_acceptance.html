@@ -148,11 +148,10 @@
                         <td>{{ risk_acceptance.long_term_acceptance}}
                         <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
                         <td>
-                            {% if risk_acceptance.expiration_date %}
-                                <input type="text" id="calendar" name="expiration_date", value="{{ risk_acceptance.expiration_date|date:'m/d/y' }}" readonly>
-                                <i class="fa-solid fa-pencil"></i>
+                            {% if risk_acceptance.expiration_date and risk_acceptance|has_object_permission:"Risk_Acceptance_Expire_Date_Edit" %}
+                                <input id="id_expiration_date" type="date" name="expiration_date" value="{{ risk_acceptance.expiration_date|date:'Y-m-d' }}" data-raid="{{ risk_acceptance.id }}"/>
                             {% else %}
-                                Never
+                                {{ risk_acceptance.expiration_date|date }}
                             {% endif %}
                         </td>
                         <td>{{ risk_acceptance.expiration_date_handled|date }}</td>
@@ -314,7 +313,7 @@
                                 <input type="hidden" name="risk_accept_finding_id" value="{{ finding.id }}"/>
                                 <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
 
-                                <button class="btn btn-success btn-sm btn-tf help help-tooltip" type="submit" name="risk_accept_pending" value="Accept" title="Accept Risk">
+                                <button id="id_risk_accept_pending" class="btn btn-success btn-sm btn-tf help help-tooltip" type="submit" name="risk_accept_pending" value="Accept" title="Accept Risk">
                                     <i class="fas fa-check"></i>
                                 </button>
 
@@ -521,18 +520,66 @@
         });
     </script>
 {% endif %}
-<script type="text/javascript">
+<script type="module">
+    // cookies token
+    import {MAX_RETRY, RETRY_INTERVAL} from '{% static "dojo/js/settings.js" %}'
+     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    async function updateRiskAcceptance(data, risk_acceptance_id){
+        try{
+        response = await $.ajax({
+            url: "/api/v2/risk_acceptance/" + risk_acceptance_id + "/",
+            type: "PATCH",
+            headers: { "X-CSRFToken": csrftoken,
+            "Content-Type": "application/json"},
+            retry: MAX_RETRY,
+            retryInterval: RETRY_INTERVAL,
+            data: JSON.stringify(data),
+        })
+        return response
+        }
+        catch(error){
+        console.error("Update Risk_Acceptance errors: ", error)
+        throw error
+        }
+    }
+
     $(document).ready(function(){
         $("#id_long_term_acceptance").on('change', function() {
-            console.log("Cambio el long")
-            // Si el valor es 'Yes', mostrar el campo de fecha de expiración
             if ($(this).val() === 'Yes') {
                 $('#id_expiration_date_path').prop('disabled', false);
             } else {
                 $('#id_expiration_date_path').prop('disabled', true);
             }
         });
+        // Trigger change calendar
+        $("#id_expiration_date").on('change', function() {
+            var expiration_date_ra = $(this).val();
+            var raid = $(this).data('raid')
+            response = updateRiskAcceptance(
+                {"expiration_date": expiration_date_ra},
+                raid
+            ).then(function(response){
+                console.log(response)
+            })
+        });
+        // Trigger change event risk acceptance button
+        $("#id_risk_accept_pending").click(function(e) {
+            let alert = localStorage.getItem('raExpirationDateAlerta');
+            if(!alert){
+                e.preventDefault();
+                let ms = confirm("Are you sure you want to accept this risk with date expiration " + $("#id_expiration_date").val() + "?");
+                if (ms){
+                    localStorage.setItem('raExpirationDateAlerta', 'true');
+                    return; 
+                } else {
+                    console.log("The risk acceptance was cancelled.");
+                    return; // exit function
+                }
+            }
+        });
     });
+
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>

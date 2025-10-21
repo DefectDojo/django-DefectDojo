@@ -1,5 +1,4 @@
 import re
-
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import (
@@ -13,6 +12,7 @@ from dojo.authorization.authorization import (
     user_has_global_permission,
     user_has_permission,
 )
+from dojo.api_v2.api_error import ApiError
 from dojo.group.queries import get_users_for_group, get_users_for_group_by_role
 from dojo.authorization.roles_permissions import Permissions
 from dojo.templatetags.authorization_tags import is_in_group
@@ -29,35 +29,47 @@ from dojo.models import (
     Product_Type,
     Test,
     GeneralSettings,
+    Risk_Acceptance,
 )
 
-def get_field_permissions_by_role_groups(user, field):
+def check_field_permissions(request, post_model, post_pk):
     """ Check if user has permission to edit specific fields based on their role group. """
+
     FIELD_PERMISSIONS = {
         "Admin": "__all__",
-        "Risk": ["expiration_date"],
-        "Developer": [],
-        "Leader": [],
+        "Risk": {f"expiration_date": Permissions.Risk_Acceptance_Expire_Date_Edit},
+        "Developer": {},
+        "Leader": {},
     }
+    # validation by group security
     role_group = "Risk"
     users = get_users_for_group_by_role(
         GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_risk"),
         role_group
     )
-    if field in FIELD_PERMISSIONS.get(role_group):
-        if user in users:
+    field_request = request.data.keys()
+    if request.user in users:
+        allowed_fields = FIELD_PERMISSIONS.get(role_group, [])
+        if allowed_fields == "__all__":
             return True
+        if not allowed_fields or not field_request:
+            return False
+        for field in field_request:
+            if field not in allowed_fields.keys():
+                raise ApiError.precondition_failed(
+                    detail=f"User does not have permission to edit field: {field}"
+                )
+        return True
     return False
 
-def check_patch_permission(request, post_model, post_pk, post_permission):
-    if request.method == "PATCH":
-        if request.data.get(post_pk) is None:
-            msg = f"Unable to check for permissions: Attribute '{post_pk}' is required"
-            raise ParseError(msg)
-        obj = get_object_or_404(post_model, pk=request.data.get(post_pk))
-        get_field_permissions_by_role_groups(request.user, "expiration_date")
-        return user_has_permission(request.user, obj, post_permission)
-    return True
+
+def check_patch_permission(request, post_model, patch_pk, patch_permission):
+    if patch_pk is None:
+        msg = f"Unable to check for permissions: Parameters '{patch_pk}' is required"
+        raise ParseError(msg)
+    obj = get_object_or_404(post_model, pk=patch_pk)
+    return user_has_permission(request.user, obj, patch_permission)
+
 
 def check_post_permission(request, post_model, post_pk, post_permission):
     if request.method == "POST":
@@ -368,7 +380,8 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
 
    
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, view, *args, **kwargs):
+        risk_acceptance_id = view.kwargs.get("pk", None) 
 
         if UserHasRiskAcceptancePermission.path_risk_acceptance_bulk.match(request.path):
             return user_has_global_permission(request.user, Permissions.Risk_Acceptance_Bulk) 
@@ -378,15 +391,15 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
             request.path,
         ):
             if request.method in ["PATCH"]:
-                return check_patch_permission(
-                    request, Product, "product", Permissions.Risk_Acceptance_Edit,
-                )
+                if check_patch_permission(request, Risk_Acceptance, risk_acceptance_id, Permissions.Risk_Acceptance_Edit) is True:
+                    return True
+                else:
+                    return check_field_permissions(request, Risk_Acceptance, "risk_acceptance")
             else:
                 return check_post_permission(
                     request, Product, "product", Permissions.Risk_Acceptance,
                 )
-        # related object only need object permission
-        return True
+        return False
 
     def has_object_permission(self, request, view, obj):
         if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(

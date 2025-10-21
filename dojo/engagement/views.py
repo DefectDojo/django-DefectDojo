@@ -1314,7 +1314,10 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             test__engagement=eng,
             active=True,
             severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
-        form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
+        if form.cleaned_data['long_term_acceptance'] == "True":
+            form.fields["approvers"].widget.attrs['value'] = form.cleaned_data["approvers_long_acceptance"].username
+        else:
+            form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
 
         for finding in findings:
             if (

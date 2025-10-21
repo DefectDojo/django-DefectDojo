@@ -1157,18 +1157,17 @@ class RiskPendingForm(forms.ModelForm):
             "RiskAcceptanceExpiration"
         )
         logger.debug(f"RiskAcceptanceExpiration: {expiration_delta_days}")
-        expiration_date = timezone.now().date() + relativedelta(
+        self.expiration_date_sla = timezone.now().date() + relativedelta(
             days=expiration_delta_days.get(self.severity.lower())
         )
-        self.fields["expiration_date"].initial = expiration_date
+        self.fields["expiration_date"].initial = self.expiration_date
         self.fields['owner'].queryset = get_owner_user()
 
         queryset_permissions = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['accepted_findings'].queryset = queryset_permissions
-        self.fields['approvers_long_acceptance'].queryset = get_users_for_group(
-            GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_risk")
-            ) 
-        self.fields['approvers_long_acceptance'].initial = self.fields['approvers_long_acceptance'].queryset.last()
+        if value :=  GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_risk"):
+            self.fields['approvers_long_acceptance'].queryset = get_users_for_group_by_role(value, "Risk")
+            self.fields['approvers_long_acceptance'].initial = self.fields['approvers_long_acceptance'].queryset.last()
         self.fields['accepted_by'].queryset = get_authorized_contacts_for_product_type(self.severity, product, product_type)
         owner_username = self.fields['owner'].queryset.first().username
         if (category and category in settings.COMPLIANCE_FILTER_RISK) and not self.fields['accepted_by'].queryset.filter(username=owner_username).exists():
@@ -1188,16 +1187,15 @@ class RiskPendingForm(forms.ModelForm):
             msg = "The date cannot be in the past!"
             raise forms.ValidationError(msg)
         if long_term_acceptance == "False":
+            self.fields["expiration_date"] = self.fields["expiration_date_sla"] #security assignment
             sla = sla_expiration_risk_acceptance("RiskAcceptanceExpiration")
             date_sla = timezone.now().date() + relativedelta(days=sla.get(self.severity.lower()))
-            data["expiration_date"] = date_sla
+            data["expiration_date"] != date_sla
         if data["long_term_acceptance"] == "True":
-            if value := GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE"):
-                users = get_users_for_group_by_role(value, "Risk")
-                user_names = [user.username for user in users]
-                data["accepted_by"] = user_names
-                if not data['approvers_long_acceptance']:
-                    data['approvers_long_acceptance'] = self.fields['approvers_long_acceptance'].queryset.last()
+            user_approver = data["approvers_long_acceptance"]
+            data["accepted_by"] = [user_approver.username]
+            if not data['approvers_long_acceptance']:
+                data['approvers_long_acceptance'] = self.fields['approvers_long_acceptance'].queryset.last()
         elif "accepted_by" in data.keys():
             accepted_by = data["accepted_by"]
             contacts = accepted_by.values()
