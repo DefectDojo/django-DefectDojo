@@ -32,13 +32,23 @@ images:
     image:
       registry: ""
       repository: defectdojo/defectdojo-django
-      tag: ""  # If empty, use appVersion
+      # -- If empty, use appVersion.
+      # Another possible values are: latest, X.X.X, X.X.X-debian, X.X.X-alpine (where X.X.X is version of DD).
+      # For dev builds (only for testing purposes): nightly-dev, nightly-dev-debian, nightly-dev-alpine.
+      # To see all, check https://hub.docker.com/r/defectdojo/defectdojo-django/tags.
+      tag: ""
+      # -- Prefix "sha@" is expected in this place
       digest: ""
   nginx:
     image:
       registry: ""
       repository: defectdojo/defectdojo-nginx
-      tag: ""  # If empty, use appVersion
+      # -- If empty, use appVersion.
+      # Another possible values are: latest, X.X.X, X.X.X-alpine (where X.X.X is version of DD).
+      # For dev builds (only for testing purposes): nightly-dev, nightly-dev-alpine.
+      # To see all, check https://hub.docker.com/r/defectdojo/defectdojo-nginx/tags.
+      tag: ""
+      # -- Prefix "sha@" is expected in this place
       digest: ""
 
 # -- Enables application network policy
@@ -124,7 +134,8 @@ serviceAccount:
   labels: {}
 
 dbMigrationChecker:
-  image:  # If empty, uses values from images.django.image
+  # -- If empty, uses values from images.django.image
+  image:
     registry: ""
     repository: ""
     tag: ""
@@ -148,7 +159,8 @@ dbMigrationChecker:
 
 tests:
   unitTests:
-    image:  # If empty, uses values from images.django.image
+    # -- If empty, uses values from images.django.image
+    image:
       registry: ""
       repository: ""
       tag: ""
@@ -203,7 +215,8 @@ celery:
   # -- Common annotations to worker and beat deployments and pods.
   annotations: {}
   beat:
-    image:  # If empty, uses values from images.django.image
+    # -- If empty, uses values from images.django.image
+    image:
       registry: ""
       repository: ""
       tag: ""
@@ -254,7 +267,8 @@ celery:
     startupProbe: {}
     tolerations: []
   worker:
-    image:  # If empty, uses values from images.django.image
+    # -- If empty, uses values from images.django.image
+    image:
       registry: ""
       repository: ""
       tag: ""
@@ -335,7 +349,8 @@ django:
     # `nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"`
     annotations: {}
   nginx:
-    image:  # If empty, uses values from images.nginx.image
+    # -- If empty, uses values from images.nginx.image
+    image:
       registry: ""
       repository: ""
       tag: ""
@@ -369,7 +384,8 @@ django:
   strategy: {}
   tolerations: []
   uwsgi:
-    image:  # If empty, uses values from images.django.image
+    # -- If empty, uses values from images.django.image
+    image:
       registry: ""
       repository: ""
       tag: ""
@@ -475,7 +491,8 @@ initializer:
   affinity: {}
   nodeSelector: {}
   tolerations: []
-  image:  # If empty, uses values from images.django.image
+  # -- If empty, uses values from images.django.image
+  image:
     registry: ""
     repository: ""
     tag: ""
