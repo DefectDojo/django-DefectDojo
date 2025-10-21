@@ -118,6 +118,9 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS=(bool, False),  # If true, the redirect after login will use the HTTPS protocol
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_OIDC_GET_GROUPS=(bool, False),
+    DD_SOCIAL_AUTH_OIDC_GROUPS_FILTER=(str, ""),
+    DD_SOCIAL_AUTH_OIDC_CLEANUP_GROUPS=(bool, True),
     DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT=(str, ""),
     DD_SOCIAL_AUTH_OIDC_ID_KEY=(str, ""),
     DD_SOCIAL_AUTH_OIDC_KEY=(str, ""),
@@ -583,6 +586,7 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.load_extra_data",
     "social_core.pipeline.user.user_details",
     "dojo.pipeline.update_azure_groups",
+    "dojo.pipeline.update_oidc_groups",
     "dojo.pipeline.update_product_access",
 )
 
@@ -641,6 +645,9 @@ if GITLAB_PROJECT_AUTO_IMPORT:
 
 # Mandatory settings
 OIDC_AUTH_ENABLED = env("DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED")
+OIDC_GET_GROUPS = env("DD_SOCIAL_AUTH_OIDC_GET_GROUPS")
+OIDC_GROUPS_FILTER = env("DD_SOCIAL_AUTH_OIDC_GROUPS_FILTER")
+OIDC_CLEANUP_GROUPS = env("DD_SOCIAL_AUTH_OIDC_CLEANUP_GROUPS")
 SOCIAL_AUTH_OIDC_OIDC_ENDPOINT = env("DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
 SOCIAL_AUTH_OIDC_KEY = env("DD_SOCIAL_AUTH_OIDC_KEY")
 SOCIAL_AUTH_OIDC_SECRET = env("DD_SOCIAL_AUTH_OIDC_SECRET")

@@ -7,6 +7,7 @@ import social_core.pipeline.user
 from django.conf import settings
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
+from social_core.backends.open_id_connect import OpenIdConnectAuth
 
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.models import Dojo_Group, Dojo_Group_Member, Product, Product_Member, Product_Type, Role
@@ -104,6 +105,31 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
             assign_user_to_groups(user, group_names, Dojo_Group.AZURE)
         if settings.AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS:
             cleanup_old_groups_for_user(user, group_names)
+
+
+def update_oidc_groups(backend, uid, user=None, social=None, *args, **kwargs):
+    if settings.OIDC_AUTH_ENABLED and settings.DD_SOCIAL_AUTH_OIDC_GET_GROUPS and isinstance(backend, OpenIdConnectAuth):
+        response = kwargs.get("response", {})
+        group_names = response.get("groups", [])
+
+        if not group_names:
+            logger.warning("No 'groups' claim found in Dex OIDC response. Skipping group assignment.")
+            return
+        logger.debug(f"Dex OIDC groups received: {group_names}")
+        filtered_group_names = []
+        group_filter = getattr(settings, "OIDC_GROUPS_FILTER", None)
+        for group_name in group_names:
+            try:
+                if group_filter and not re.search(group_filter, group_name):
+                    logger.debug(f"Skipping group '{group_name}' due to OIDC_GROUPS_FILTER: {group_filter}")
+                    continue
+                filtered_group_names.append(group_name)
+            except Exception as e:
+                logger.error(f"Error processing group '{group_name}': {e}")
+        if filtered_group_names:
+            assign_user_to_groups(user, filtered_group_names, Dojo_Group.OIDC)
+        if getattr(settings, "OIDC_CLEANUP_GROUPS", False):
+            cleanup_old_groups_for_user(user, filtered_group_names)
 
 
 def is_group_id(group):
