@@ -113,9 +113,9 @@ def update_oidc_groups(backend, uid, user=None, social=None, *args, **kwargs):
         group_names = response.get("groups", [])
 
         if not group_names:
-            logger.warning("No 'groups' claim found in Dex OIDC response. Skipping group assignment.")
+            logger.warning("No 'groups' claim found in OIDC response. Skipping group assignment.")
             return
-        logger.debug(f"Dex OIDC groups received: {group_names}")
+        logger.debug(f"OIDC groups received: {group_names}")
         filtered_group_names = []
         group_filter = getattr(settings, "OIDC_GROUPS_FILTER", None)
         for group_name in group_names:
