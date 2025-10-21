@@ -33,7 +33,7 @@ from dojo.metrics.utils import (
     identify_view,
     severity_count,
 )
-from dojo.models import Dojo_User, Finding, Product, Product_Type, Risk_Acceptance
+from dojo.models import Dojo_User, Finding, Product_Type, Risk_Acceptance
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.utils import (
@@ -355,15 +355,20 @@ def product_type_counts(request):
                     "reporter").order_by(
                     "numerical_severity")
 
-                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                                engagement__test__finding__verified=True,
-                                                engagement__test__finding__false_p=False,
-                                                engagement__test__finding__duplicate=False,
-                                                engagement__test__finding__out_of_scope=False,
-                                                engagement__test__finding__mitigated__isnull=True,
-                                                engagement__test__finding__severity__in=(
-                                                    "Critical", "High", "Medium", "Low"),
-                                                prod_type=pt)
+                # Build Top 10 from Findings for this product type
+                top_ten = Finding.objects.filter(
+                    date__lte=end_date,
+                    verified=True,
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    mitigated__isnull=True,
+                    severity__in=("Critical", "High", "Medium", "Low"),
+                    test__engagement__product__prod_type=pt,
+                ).values(
+                    name=F("test__engagement__product__name"),
+                )
+                top_ten = severity_count(top_ten, "annotate", "severity").order_by("-critical", "-high", "-medium", "-low")[:10]
             else:
                 overall_in_pt = Finding.objects.filter(date__lt=end_date,
                                                     false_p=False,
@@ -400,16 +405,20 @@ def product_type_counts(request):
                     "reporter").order_by(
                     "numerical_severity")
 
-                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                                engagement__test__finding__false_p=False,
-                                                engagement__test__finding__duplicate=False,
-                                                engagement__test__finding__out_of_scope=False,
-                                                engagement__test__finding__mitigated__isnull=True,
-                                                engagement__test__finding__severity__in=(
-                                                    "Critical", "High", "Medium", "Low"),
-                                                prod_type=pt)
+                top_ten = Finding.objects.filter(
+                    date__lte=end_date,
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    mitigated__isnull=True,
+                    severity__in=("Critical", "High", "Medium", "Low"),
+                    test__engagement__product__prod_type=pt,
+                ).values(
+                    name=F("test__engagement__product__name"),
+                )
+                top_ten = severity_count(top_ten, "annotate", "severity").order_by("-critical", "-high", "-medium", "-low")[:10]
 
-            top_ten = severity_count(top_ten, "annotate", "engagement__test__finding__severity").order_by("-critical", "-high", "-medium", "-low")[:10]
+            # top_ten already annotated above using Findings-based grouping
 
             cip = {"S0": 0,
                    "S1": 0,
@@ -557,15 +566,21 @@ def product_tag_counts(request):
                     "reporter").order_by(
                     "numerical_severity")
 
-                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                                engagement__test__finding__verified=True,
-                                                engagement__test__finding__false_p=False,
-                                                engagement__test__finding__duplicate=False,
-                                                engagement__test__finding__out_of_scope=False,
-                                                engagement__test__finding__mitigated__isnull=True,
-                                                engagement__test__finding__severity__in=(
-                                                    "Critical", "High", "Medium", "Low"),
-                                                tags__name=pt, engagement__product__in=prods)
+                # Build Top 10 from Findings for this product tag
+                top_ten = Finding.objects.filter(
+                    date__lte=end_date,
+                    verified=True,
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    mitigated__isnull=True,
+                    severity__in=("Critical", "High", "Medium", "Low"),
+                    test__engagement__product__tags__name=pt,
+                    test__engagement__product__in=prods,
+                ).values(
+                    name=F("test__engagement__product__name"),
+                )
+                top_ten = severity_count(top_ten, "annotate", "severity").order_by("-critical", "-high", "-medium", "-low")[:10]
             else:
                 overall_in_pt = Finding.objects.filter(date__lt=end_date,
                                                     false_p=False,
@@ -605,16 +620,21 @@ def product_tag_counts(request):
                     "reporter").order_by(
                     "numerical_severity")
 
-                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                                engagement__test__finding__false_p=False,
-                                                engagement__test__finding__duplicate=False,
-                                                engagement__test__finding__out_of_scope=False,
-                                                engagement__test__finding__mitigated__isnull=True,
-                                                engagement__test__finding__severity__in=(
-                                                    "Critical", "High", "Medium", "Low"),
-                                                tags__name=pt, engagement__product__in=prods)
+                top_ten = Finding.objects.filter(
+                    date__lte=end_date,
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    mitigated__isnull=True,
+                    severity__in=("Critical", "High", "Medium", "Low"),
+                    test__engagement__product__tags__name=pt,
+                    test__engagement__product__in=prods,
+                ).values(
+                    name=F("test__engagement__product__name"),
+                )
+                top_ten = severity_count(top_ten, "annotate", "severity").order_by("-critical", "-high", "-medium", "-low")[:10]
 
-            top_ten = severity_count(top_ten, "annotate", "engagement__test__finding__severity").order_by("-critical", "-high", "-medium", "-low")[:10]
+            # top_ten already annotated above using Findings-based grouping
 
             cip = {"S0": 0,
                    "S1": 0,

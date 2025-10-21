@@ -354,6 +354,34 @@ class DojoFilter(FilterSet):
                 if exclude:
                     self.form.fields[field].label = "Not " + self.form.fields[field].label
 
+    def filter_queryset(self, queryset):
+        qs = super().filter_queryset(queryset)
+        if hasattr(self, "form") and hasattr(self.form, "cleaned_data"):
+            for name, f in self.filters.items():
+                field_name = getattr(f, "field_name", "") or ""
+                # Only apply distinct for tag lookups that can duplicate base rows
+                if "tags__name" in field_name:
+                    value = self.form.cleaned_data.get(name, None)
+                    if value not in (None, "", [], (), {}):
+                        lookup_expr = getattr(f, "lookup_expr", None)
+                        is_exclude = getattr(f, "exclude", False)
+                        needs_distinct = (
+                            is_exclude
+                            or lookup_expr in {
+                                "in",
+                                "contains",
+                                "icontains",
+                                "startswith",
+                                "istartswith",
+                                "endswith",
+                                "iendswith",
+                            }
+                        )
+                        # exact/iexact typically won't duplicate rows
+                        if needs_distinct:
+                            return qs.distinct()
+        return qs
+
 
 def get_tags_model_from_field_name(field):
     exclude = False

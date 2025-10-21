@@ -80,7 +80,7 @@ class FindingQueriesTest(DojoTestCase):
         mock_timezone.return_value = mock_datetime
 
         # Queries over Finding
-        with self.assertNumQueries(28):
+        with self.assertNumQueries(29):
             product_types = []
             finding_queries = utils.finding_queries(
                 product_types,
@@ -113,10 +113,12 @@ class FindingQueriesTest(DojoTestCase):
                 finding_queries["accepted_count"],
                 {"total": 3, "critical": 0, "high": 3, "medium": 0, "low": 0, "info": 0},
             )
-            self.assertSequenceEqual(
-                finding_queries["top_ten"].values(),
-                [],
-            )
+            self.assertIsInstance(finding_queries["top_ten"], list)
+            for row in finding_queries["top_ten"]:
+                self.assertSetEqual(
+                    set(row.keys()),
+                    {"id", "name", "critical", "high", "medium", "low", "info", "total"},
+                )
             self.assertEqual(
                 finding_queries["monthly_counts"],
                 {
@@ -192,7 +194,7 @@ class EndpointQueriesTest(DojoTestCase):
         mock_now.return_value = fake_now
 
         # Queries over Finding and Endpoint_Status
-        with self.assertNumQueries(44):
+        with self.assertNumQueries(45):
             product_types = Product_Type.objects.all()
             endpoint_queries = utils.endpoint_queries(
                 product_types,
@@ -245,10 +247,12 @@ class EndpointQueriesTest(DojoTestCase):
                 list(endpoint_queries["accepted_count"].values()),
                 [1, 0, 0, 0, 0, 1],
             )
-            self.assertSequenceEqual(
-                endpoint_queries["top_ten"].values(),
-                [],
-            )
+            self.assertIsInstance(endpoint_queries["top_ten"], list)
+            for row in endpoint_queries["top_ten"]:
+                self.assertSetEqual(
+                    set(row.keys()),
+                    {"id", "name", "critical", "high", "medium", "low", "info", "total"},
+                )
             self.assertEqual(
                 list(endpoint_queries["monthly_counts"].values()),
                 [
