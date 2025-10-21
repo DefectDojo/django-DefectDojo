@@ -14,7 +14,7 @@ dependencies:
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: postgresql.enabled
   - name: redis
-    version: ~19.6.4
+    version: "22.0.6"
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: redis.enabled
 # For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/
