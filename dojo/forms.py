@@ -1157,10 +1157,10 @@ class RiskPendingForm(forms.ModelForm):
             "RiskAcceptanceExpiration"
         )
         logger.debug(f"RiskAcceptanceExpiration: {expiration_delta_days}")
-        self.expiration_date_sla = timezone.now().date() + relativedelta(
+        expiration_date = timezone.now().date() + relativedelta(
             days=expiration_delta_days.get(self.severity.lower())
         )
-        self.fields["expiration_date"].initial = self.expiration_date
+        self.fields["expiration_date"].initial = expiration_date
         self.fields['owner'].queryset = get_owner_user()
 
         queryset_permissions = get_authorized_findings(Permissions.Risk_Acceptance)
@@ -1187,10 +1187,9 @@ class RiskPendingForm(forms.ModelForm):
             msg = "The date cannot be in the past!"
             raise forms.ValidationError(msg)
         if long_term_acceptance == "False":
-            self.fields["expiration_date"] = self.fields["expiration_date_sla"] #security assignment
             sla = sla_expiration_risk_acceptance("RiskAcceptanceExpiration")
             date_sla = timezone.now().date() + relativedelta(days=sla.get(self.severity.lower()))
-            data["expiration_date"] != date_sla
+            data["expiration_date"] != date_sla  # secure assignment of the expiration date
         if data["long_term_acceptance"] == "True":
             user_approver = data["approvers_long_acceptance"]
             data["accepted_by"] = [user_approver.username]
