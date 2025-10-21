@@ -339,26 +339,22 @@ def are_endpoints_duplicates(new_finding, to_duplicate_finding):
     return False
 
 
-def build_dedupe_scope_queryset(test, *, include_product_scope_filter=False):
+def build_dedupe_scope_queryset(test):
     scope_on_engagement = test.engagement.deduplication_on_engagement
     if scope_on_engagement:
-        scope_filter = {"test__engagement": test.engagement}
+        scope_q = Q(test__engagement=test.engagement)
     else:
-        scope_filter = {"test__engagement__product": test.engagement.product}
-
-    base_queryset = Finding.objects.filter(**scope_filter)
-
-    if include_product_scope_filter and not scope_on_engagement:
-        base_queryset = base_queryset.filter(
+        # Product scope limited to current product, but exclude engagements that opted into engagement-scoped dedupe
+        scope_q = Q(test__engagement__product=test.engagement.product) & (
             Q(test__engagement=test.engagement)
-            | Q(test__engagement__deduplication_on_engagement=False),
+            | Q(test__engagement__deduplication_on_engagement=False)
         )
 
-    return base_queryset, scope_on_engagement
+    return Finding.objects.filter(scope_q)
 
 
 def find_candidates_for_deduplication_hash(test, findings, *, include_product_scope_filter):
-    base_queryset, _ = build_dedupe_scope_queryset(test, include_product_scope_filter=include_product_scope_filter)
+    base_queryset = build_dedupe_scope_queryset(test)
     hash_codes = {f.hash_code for f in findings if getattr(f, "hash_code", None) is not None}
     if not hash_codes:
         return {}
@@ -376,7 +372,7 @@ def find_candidates_for_deduplication_hash(test, findings, *, include_product_sc
 
 
 def find_candidates_for_deduplication_unique_id(test, findings, *, include_product_scope_filter):
-    base_queryset, _ = build_dedupe_scope_queryset(test, include_product_scope_filter=include_product_scope_filter)
+    base_queryset = build_dedupe_scope_queryset(test)
     unique_ids = {f.unique_id_from_tool for f in findings if getattr(f, "unique_id_from_tool", None) is not None}
     if not unique_ids:
         return {}
@@ -391,7 +387,7 @@ def find_candidates_for_deduplication_unique_id(test, findings, *, include_produ
 
 
 def find_candidates_for_deduplication_uid_or_hash(test, findings, *, include_product_scope_filter):
-    base_queryset, _ = build_dedupe_scope_queryset(test, include_product_scope_filter=include_product_scope_filter)
+    base_queryset = build_dedupe_scope_queryset(test)
     hash_codes = {f.hash_code for f in findings if getattr(f, "hash_code", None) is not None}
     unique_ids = {f.unique_id_from_tool for f in findings if getattr(f, "unique_id_from_tool", None) is not None}
     if not hash_codes and not unique_ids:
@@ -420,7 +416,7 @@ def find_candidates_for_deduplication_uid_or_hash(test, findings, *, include_pro
 
 
 def find_candidates_for_deduplication_legacy(test, findings, *, include_product_scope_filter):
-    base_queryset, _ = build_dedupe_scope_queryset(test, include_product_scope_filter=include_product_scope_filter)
+    base_queryset = build_dedupe_scope_queryset(test)
     titles = {f.title for f in findings if getattr(f, "title", None)}
     cwes = {f.cwe for f in findings if getattr(f, "cwe", 0)}
     cwes.discard(0)
