@@ -455,10 +455,10 @@ def _is_candidate_older(new_finding, candidate):
     return candidate.id < new_finding.id
 
 
-def match_hash_candidate(new_finding, existing_by_hash):
+def match_hash_candidate(new_finding, candidates_by_hash):
     if new_finding.hash_code is None:
         return None
-    possible_matches = existing_by_hash.get(new_finding.hash_code, [])
+    possible_matches = candidates_by_hash.get(new_finding.hash_code, [])
     deduplicationLogger.debug(f"Found {len(possible_matches)} findings with same hash_code")
 
     for candidate in possible_matches:
@@ -472,11 +472,11 @@ def match_hash_candidate(new_finding, existing_by_hash):
     return None
 
 
-def match_unique_id_candidate(new_finding, existing_by_uid):
+def match_unique_id_candidate(new_finding, candidates_by_uid):
     if new_finding.unique_id_from_tool is None:
         return None
 
-    possible_matches = existing_by_uid.get(new_finding.unique_id_from_tool, [])
+    possible_matches = candidates_by_uid.get(new_finding.unique_id_from_tool, [])
     deduplicationLogger.debug(f"Found {len(possible_matches)} findings with same unique_id_from_tool")
     for candidate in possible_matches:
         if not _is_candidate_older(new_finding, candidate):
@@ -488,19 +488,26 @@ def match_unique_id_candidate(new_finding, existing_by_uid):
     return None
 
 
-def match_uid_or_hash_candidate(new_finding, existing_by_uid, existing_by_hash):
-    match = match_unique_id_candidate(new_finding, existing_by_uid)
+def match_uid_or_hash_candidate(new_finding, candidated_by_uid, candidated_by_hash):
+    match = match_unique_id_candidate(new_finding, candidated_by_uid)
     if match:
         return match
-    return match_hash_candidate(new_finding, existing_by_hash)
+    return match_hash_candidate(new_finding, candidated_by_hash)
 
 
-def match_legacy_candidate(new_finding, by_title, by_cwe):
+def match_legacy_candidate(new_finding, candidates_by_title, candidates_by_cwe):
+    # ---------------------------------------------------------
+    # 1) Collects all the findings that have the same:
+    #      (title  and static_finding and dynamic_finding)
+    #      or (CWE and static_finding and dynamic_finding)
+    #    as the new one
+    #    (this is "cond1")
+    # ---------------------------------------------------------
     candidates = []
     if getattr(new_finding, "title", None):
-        candidates.extend(by_title.get(new_finding.title, []))
+        candidates.extend(candidates_by_title.get(new_finding.title, []))
     if getattr(new_finding, "cwe", 0):
-        candidates.extend(by_cwe.get(new_finding.cwe, []))
+        candidates.extend(candidates_by_cwe.get(new_finding.cwe, []))
 
     for candidate in candidates:
         if not _is_candidate_older(new_finding, candidate):
@@ -512,6 +519,12 @@ def match_legacy_candidate(new_finding, by_title, by_cwe):
 
         flag_endpoints = False
         flag_line_path = False
+
+        # ---------------------------------------------------------
+        # 2) If existing and new findings have endpoints: compare them all
+        #    Else look at line+file_path
+        #    (if new finding is not static, do not deduplicate)
+        # ---------------------------------------------------------
 
         if candidate.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
             list1 = [str(e) for e in new_finding.endpoints.all()]
@@ -547,11 +560,11 @@ def _dedupe_batch_hash_code(findings):
     if not findings:
         return
     test = findings[0].test
-    existing_by_hash = find_candidates_for_deduplication_hash(test, findings, include_product_scope_filter=True)
-    if not existing_by_hash:
+    candidates_by_hash = find_candidates_for_deduplication_hash(test, findings, include_product_scope_filter=True)
+    if not candidates_by_hash:
         return
     for new_finding in findings:
-        match = match_hash_candidate(new_finding, existing_by_hash)
+        match = match_hash_candidate(new_finding, candidates_by_hash)
         if match:
             try:
                 set_duplicate(new_finding, match)
@@ -563,11 +576,11 @@ def _dedupe_batch_unique_id(findings):
     if not findings:
         return
     test = findings[0].test
-    existing_by_uid = find_candidates_for_deduplication_unique_id(test, findings, include_product_scope_filter=True)
-    if not existing_by_uid:
+    candidates_by_uid = find_candidates_for_deduplication_unique_id(test, findings, include_product_scope_filter=True)
+    if not candidates_by_uid:
         return
     for new_finding in findings:
-        match = match_unique_id_candidate(new_finding, existing_by_uid)
+        match = match_unique_id_candidate(new_finding, candidates_by_uid)
         if match:
             try:
                 set_duplicate(new_finding, match)
@@ -579,14 +592,14 @@ def _dedupe_batch_uid_or_hash(findings):
     if not findings:
         return
     test = findings[0].test
-    existing_by_uid, existing_by_hash = find_candidates_for_deduplication_uid_or_hash(test, findings, include_product_scope_filter=True)
-    if not (existing_by_uid or existing_by_hash):
+    candidates_by_uid, existing_by_hash = find_candidates_for_deduplication_uid_or_hash(test, findings, include_product_scope_filter=True)
+    if not (candidates_by_uid or existing_by_hash):
         return
     for new_finding in findings:
         if new_finding.duplicate:
             continue
 
-        match = match_uid_or_hash_candidate(new_finding, existing_by_uid, existing_by_hash)
+        match = match_uid_or_hash_candidate(new_finding, candidates_by_uid, existing_by_hash)
         if match:
             try:
                 set_duplicate(new_finding, match)
@@ -599,11 +612,11 @@ def _dedupe_batch_legacy(findings):
     if not findings:
         return
     test = findings[0].test
-    by_title, by_cwe = find_candidates_for_deduplication_legacy(test, findings, include_product_scope_filter=True)
-    if not (by_title or by_cwe):
+    candidates_by_title, candidates_by_cwe = find_candidates_for_deduplication_legacy(test, findings, include_product_scope_filter=True)
+    if not (candidates_by_title or candidates_by_cwe):
         return
     for new_finding in findings:
-        match = match_legacy_candidate(new_finding, by_title, by_cwe)
+        match = match_legacy_candidate(new_finding, candidates_by_title, candidates_by_cwe)
         if match:
             try:
                 set_duplicate(new_finding, match)
