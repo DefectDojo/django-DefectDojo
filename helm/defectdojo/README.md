@@ -534,10 +534,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.beat.extraInitContainers | list | `[]` | A list of additional initContainers to run before celery beat containers. |
 | celery.beat.extraVolumeMounts | list | `[]` | Array of additional volume mount points for the celery beat containers. |
 | celery.beat.extraVolumes | list | `[]` | A list of extra volumes to mount @type: array<map> |
-| celery.beat.image.digest | string | `""` |  |
-| celery.beat.image.registry | string | `""` |  |
-| celery.beat.image.repository | string | `""` |  |
-| celery.beat.image.tag | string | `""` |  |
+| celery.beat.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | If empty, uses values from images.django.image |
 | celery.beat.livenessProbe | object | `{}` | Enable liveness probe for Celery beat container. ``` exec:   command:     - bash     - -c     - celery -A dojo inspect ping -t 5 initialDelaySeconds: 30 periodSeconds: 60 timeoutSeconds: 10 ``` |
 | celery.beat.nodeSelector | object | `{}` |  |
 | celery.beat.podAnnotations | object | `{}` | Annotations for the Celery beat pods. |
@@ -561,10 +558,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.extraInitContainers | list | `[]` | A list of additional initContainers to run before celery worker containers. |
 | celery.worker.extraVolumeMounts | list | `[]` | Array of additional volume mount points for the celery worker containers. |
 | celery.worker.extraVolumes | list | `[]` | A list of extra volumes to mount. @type: array<map> |
-| celery.worker.image.digest | string | `""` |  |
-| celery.worker.image.registry | string | `""` |  |
-| celery.worker.image.repository | string | `""` |  |
-| celery.worker.image.tag | string | `""` |  |
+| celery.worker.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | If empty, uses values from images.django.image |
 | celery.worker.livenessProbe | object | `{}` | Enable liveness probe for Celery worker containers. ``` exec:   command:     - bash     - -c     - celery -A dojo inspect ping -t 5 initialDelaySeconds: 30 periodSeconds: 60 timeoutSeconds: 10 ``` |
 | celery.worker.nodeSelector | object | `{}` |  |
 | celery.worker.podAnnotations | object | `{}` | Annotations for the Celery beat pods. |
@@ -595,10 +589,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | dbMigrationChecker.enabled | bool | `true` | Enable/disable the DB migration checker. |
 | dbMigrationChecker.extraEnv | list | `[]` | Additional environment variables for DB migration checker. |
 | dbMigrationChecker.extraVolumeMounts | list | `[]` | Array of additional volume mount points for DB migration checker. |
-| dbMigrationChecker.image.digest | string | `""` |  |
-| dbMigrationChecker.image.registry | string | `""` |  |
-| dbMigrationChecker.image.repository | string | `""` |  |
-| dbMigrationChecker.image.tag | string | `""` |  |
+| dbMigrationChecker.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | If empty, uses values from images.django.image |
 | dbMigrationChecker.resources | object | `{"limits":{"cpu":"200m","memory":"200Mi"},"requests":{"cpu":"100m","memory":"100Mi"}}` | Resource requests/limits for the DB migration checker. |
 | disableHooks | bool | `false` | Avoid using pre-install hooks, which might cause issues with ArgoCD |
 | django.affinity | object | `{}` |  |
@@ -623,10 +614,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.nginx.containerSecurityContext.runAsUser | int | `1001` | nginx dockerfile sets USER=1001 |
 | django.nginx.extraEnv | list | `[]` | To extra environment variables to the nginx container, you can use extraEnv. For example: extraEnv: - name: FOO   valueFrom:     configMapKeyRef:       name: foo       key: bar |
 | django.nginx.extraVolumeMounts | list | `[]` | Array of additional volume mount points for nginx containers. |
-| django.nginx.image.digest | string | `""` |  |
-| django.nginx.image.registry | string | `""` |  |
-| django.nginx.image.repository | string | `""` |  |
-| django.nginx.image.tag | string | `""` |  |
+| django.nginx.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | If empty, uses values from images.nginx.image |
 | django.nginx.resources.limits.cpu | string | `"2000m"` |  |
 | django.nginx.resources.limits.memory | string | `"256Mi"` |  |
 | django.nginx.resources.requests.cpu | string | `"100m"` |  |
@@ -651,10 +639,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.uwsgi.enableDebug | bool | `false` | this also requires DD_DEBUG to be set to True |
 | django.uwsgi.extraEnv | list | `[]` | To add (or override) extra variables which need to be pulled from another configMap, you can use extraEnv. For example: extraEnv: - name: DD_DATABASE_HOST   valueFrom:     configMapKeyRef:       name: my-other-postgres-configmap       key: cluster_endpoint |
 | django.uwsgi.extraVolumeMounts | list | `[]` | Array of additional volume mount points for uwsgi containers. |
-| django.uwsgi.image.digest | string | `""` |  |
-| django.uwsgi.image.registry | string | `""` |  |
-| django.uwsgi.image.repository | string | `""` |  |
-| django.uwsgi.image.tag | string | `""` |  |
+| django.uwsgi.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | If empty, uses values from images.django.image |
 | django.uwsgi.livenessProbe.enabled | bool | `true` | Enable liveness checks on uwsgi container. |
 | django.uwsgi.livenessProbe.failureThreshold | int | `6` |  |
 | django.uwsgi.livenessProbe.initialDelaySeconds | int | `0` |  |
@@ -689,14 +674,14 @@ A Helm chart for Kubernetes to install DefectDojo
 | host | string | `"defectdojo.default.minikube.local"` | Primary hostname of instance |
 | imagePullPolicy | string | `"Always"` |  |
 | imagePullSecrets | string | `nil` | When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project) Create secrets as: kubectl create secret docker-registry defectdojoregistrykey --docker-username=registry_username --docker-password=registry_password --docker-server='https://index.docker.io/v1/' |
-| images.django.image.digest | string | `""` |  |
+| images.django.image.digest | string | `""` | Prefix "sha@" is expected in this place |
 | images.django.image.registry | string | `""` |  |
 | images.django.image.repository | string | `"defectdojo/defectdojo-django"` |  |
-| images.django.image.tag | string | `""` |  |
-| images.nginx.image.digest | string | `""` |  |
+| images.django.image.tag | string | `""` | If empty, use appVersion. Another possible values are: latest, X.X.X, X.X.X-debian, X.X.X-alpine (where X.X.X is version of DD). For dev builds (only for testing purposes): nightly-dev, nightly-dev-debian, nightly-dev-alpine. To see all, check https://hub.docker.com/r/defectdojo/defectdojo-django/tags. |
+| images.nginx.image.digest | string | `""` | Prefix "sha@" is expected in this place |
 | images.nginx.image.registry | string | `""` |  |
 | images.nginx.image.repository | string | `"defectdojo/defectdojo-nginx"` |  |
-| images.nginx.image.tag | string | `""` |  |
+| images.nginx.image.tag | string | `""` | If empty, use appVersion. Another possible values are: latest, X.X.X, X.X.X-alpine (where X.X.X is version of DD). For dev builds (only for testing purposes): nightly-dev, nightly-dev-alpine. To see all, check https://hub.docker.com/r/defectdojo/defectdojo-nginx/tags. |
 | initializer.affinity | object | `{}` |  |
 | initializer.annotations | object | `{}` |  |
 | initializer.automountServiceAccountToken | bool | `false` |  |
@@ -704,10 +689,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | initializer.extraEnv | list | `[]` | Additional environment variables injected to the initializer job pods. |
 | initializer.extraVolumeMounts | list | `[]` | Array of additional volume mount points for the initializer job (init)containers. |
 | initializer.extraVolumes | list | `[]` | A list of extra volumes to attach to the initializer job pods. |
-| initializer.image.digest | string | `""` |  |
-| initializer.image.registry | string | `""` |  |
-| initializer.image.repository | string | `""` |  |
-| initializer.image.tag | string | `""` |  |
+| initializer.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | If empty, uses values from images.django.image |
 | initializer.jobAnnotations | object | `{}` |  |
 | initializer.keepSeconds | int | `60` | A positive integer will keep this Job and Pod deployed for the specified number of seconds, after which they will be removed. For all other values, the Job and Pod will remain deployed. |
 | initializer.labels | object | `{}` |  |
@@ -759,10 +741,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | siteUrl | string | `""` | The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira. Use syntax: `siteUrl: 'https://<yourdomain>'` |
 | tests.unitTests.automountServiceAccountToken | bool | `false` |  |
-| tests.unitTests.image.digest | string | `""` |  |
-| tests.unitTests.image.registry | string | `""` |  |
-| tests.unitTests.image.repository | string | `""` |  |
-| tests.unitTests.image.tag | string | `""` |  |
+| tests.unitTests.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | If empty, uses values from images.django.image |
 | tests.unitTests.resources.limits.cpu | string | `"500m"` |  |
 | tests.unitTests.resources.limits.memory | string | `"512Mi"` |  |
 | tests.unitTests.resources.requests.cpu | string | `"100m"` |  |
