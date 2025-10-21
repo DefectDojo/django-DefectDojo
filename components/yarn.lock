@@ -204,10 +204,10 @@ datatables.net-buttons@3.2.4:
     datatables.net "^2"
     jquery ">=1.7"
 
-datatables.net-colreorder@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/datatables.net-colreorder/-/datatables.net-colreorder-2.1.1.tgz#ddcbfb27d5e2b97fe8ce4acdb8ca35442a801fe5"
-  integrity sha512-alhSZYEYmxsXujl43nIHh2+Ym8o/CBm/2kPIExcUz7sOB8FOw2Q614KztqRYh46V5IA+RUuGSxzodjakZ63wAQ==
+datatables.net-colreorder@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/datatables.net-colreorder/-/datatables.net-colreorder-2.1.2.tgz#cf45eae93f4afd0bbe2f34d47105b312defa8cc7"
+  integrity sha512-lIsUyOt2nBm4sD2cSzDKZcIVrGgrZkh90Z2f03s8p7DYcZSfXMHAhFBrDYf9/eAK6wJnODN8EDMsrtPHfgoSXA==
   dependencies:
     datatables.net "^2"
     jquery ">=1.7"
@@ -509,10 +509,10 @@ jszip@^3.10.1:
     readable-stream "~2.3.6"
     setimmediate "^1.0.5"
 
-justgage@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/justgage/-/justgage-2.0.0.tgz#5aae30f977bc1f62e61f25b451cdb6122be2bcb8"
-  integrity sha512-bgDLuXYO5Y0ZzXy82RjBhs/NCu8o+SGzrv1ADDR9XrB9pE6yLgC4lVccn6CUBhRYXWtlDnXaoF6el7ZHXdgWEg==
+justgage@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/justgage/-/justgage-2.0.1.tgz#aa2b83817b354da1150229ae6d1d49198e6fbc17"
+  integrity sha512-TfKADSp5KGF8YcQxOj7jYuTnzAB1HRiObQXJI0B/rSx1gu9s00D/CQc0e0jBnnFsRQs1uTI16l4AtTUCRymXXg==
 
 lie@~3.3.0:
   version "3.3.0"

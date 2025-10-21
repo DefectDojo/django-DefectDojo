@@ -7,6 +7,7 @@ import mimetypes
 import os
 import pathlib
 import re
+import pikepdf
 from calendar import monthrange
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
@@ -19,7 +20,6 @@ import cvss
 import hyperlink
 import vobject
 from PIL import Image
-from pypdf import PdfReader
 from django.core.exceptions import ValidationError
 from asteval import Interpreter
 from azure.devops.connection import Connection
@@ -77,6 +77,10 @@ from dojo.models import (
     User,
 )
 from dojo.notifications.helper import create_notification
+
+DANGEROUS_KEYS = {
+    "/JavaScript", "/JS", "/AA", "/OpenAction", "/AcroForm", "/Launch", "/EmbeddedFiles"
+}
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -2948,6 +2952,43 @@ def parse_cvss_data(cvss_vector_string: str) -> dict:
     return {}
 
 
+def validate_pdf(uploaded_file):
+    uploaded_file.seek(0)
+    header = uploaded_file.read(4)
+    if header != b'%PDF':
+        raise ValidationError("This file is not a valid PDF.")
+    uploaded_file.seek(0)
+
+    if hasattr(uploaded_file, 'content_type') and uploaded_file.content_type != 'application/pdf':
+        raise ValidationError("The content type is not permitted.")
+
+    try:
+        with pikepdf.open(uploaded_file) as pdf:
+            root = pdf.Root
+            for key in DANGEROUS_KEYS:
+                if key in root:
+                    raise ValidationError(f"The PDF contains potentially dangerous content in the root: {key}")
+
+            for obj_num in range(len(pdf.objects)):
+                try:
+                    obj = pdf.objects[obj_num]
+                    if isinstance(obj, pikepdf.Dictionary):
+                        for key in obj.keys():
+                            if key in DANGEROUS_KEYS:
+                                raise ValidationError(f"The PDF contains dangerous content in object {obj_num}: {key}")
+                except Exception as inner_exc:
+                    logger.debug("Error reading object %d: %s", obj_num, str(inner_exc))
+                    continue
+
+    except pikepdf.PdfError:
+        raise ValidationError("The PDF file is damaged or cannot be parsed.")
+    except Exception as e:
+        logger.error("VALIDATION FILE: %s", str(e))
+        raise ValidationError(f"Error validating the PDF: {e}")
+
+    uploaded_file.seek(0)
+
+
 def validate_type_file(file, allowed_exts):
         if not file:
             return file
@@ -2971,9 +3012,7 @@ def validate_type_file(file, allowed_exts):
                     img.verify()
                     file.seek(0)
             elif ext == '.pdf':
-                file.seek(0)
-                reader = PdfReader(file)
-                _ = reader.pages[0]
+                validate_pdf(file)
             file.seek(0)
         except Exception:
             raise ValidationError("Server error")

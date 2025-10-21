@@ -3298,18 +3298,17 @@ class Finding(models.Model):
 
     def get_sla_configuration(self):
         return self.test.engagement.product.sla_configuration
+    
+    def get_severity_related_to_priority(self):
+        """Get severity related to priority the finding"""
 
-    def get_sla_period(self):
-        sla_configuration = self.get_sla_configuration()
-        
-        severity = self.severity.lower()
         severity_mapping = {
             "Very-Critical": "critical",
             "Critical": "high",
             "High": "medium",
             "Medium-Low": "low",
         }
-
+        severity = self.severity.lower()
         if self.tags:
             if any(tag in self.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
                 # If the finding has a tag that matches the priority filter tags, use the priority field
@@ -3329,9 +3328,14 @@ class Finding(models.Model):
                         severity = "High"
                     elif float(RP_MEDIUM_LOW.split("-")[0]) <= priority <= float(RP_MEDIUM_LOW.split("-")[1]):
                         severity = "Medium-Low"
+        return severity_mapping.get(severity, severity)
 
-        sla_period = getattr(sla_configuration, severity_mapping.get(severity, severity), None)
-        enforce_period = getattr(sla_configuration, str("enforce_" + severity_mapping.get(severity, severity)), None)
+
+    def get_sla_period(self):
+        sla_configuration = self.get_sla_configuration()
+        severity = self.get_severity_related_to_priority()
+        sla_period = getattr(sla_configuration, severity, None)
+        enforce_period = getattr(sla_configuration, str("enforce_" + severity), None)
         return sla_period, enforce_period
 
     def set_sla_expiration_date(self):

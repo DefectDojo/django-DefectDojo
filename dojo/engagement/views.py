@@ -1588,13 +1588,15 @@ def add_transfer_finding(request, eid, fid=None):
                 destination_product_obj: Product = Product.objects.get(id=id_destination_product) if id_destination_product else None
                 transfer_findings.destination_product_type = destination_product_obj.prod_type
                 transfer_findings.destination_product = destination_product_obj
-                __, expiration_date, __ = get_sla_expiration_transfer_finding()
-                transfer_findings.expiration_date = expiration_date
                 transfer_findings.save()
                 findings = request.POST.getlist('findings')
                 for finding in findings:
-                    # create tansferFindigFinding
                     obj_finding = Finding.objects.get(id=int(finding))
+                    # set expiration date of transfer findings
+                    if not transfer_findings.expiration_date:
+                        __, transfer_findings.expiration_date, __ = get_sla_expiration_transfer_finding(obj_finding)
+                        transfer_findings.save()
+                    # create transferFindingFinding
                     transfer_finding_finding = TransferFindingFinding.objects.create(findings=obj_finding,
                                                                                      transfer_findings=transfer_findings,
                                                                                      finding_related=None)
@@ -1620,13 +1622,17 @@ def add_transfer_finding(request, eid, fid=None):
         else:
             logger.error(form.errors)
     else:
-        form = TransferFindingForm(initial={"title": f"transfer finding - {finding.title}",
-                                            "findings": finding,
-                                            "owner": request.user.username,
-                                            "status": "Transfer Pending",
-                                            "severity": finding.severity,
-                                            "owner": request.user},
-                                   product=product)
+        form = TransferFindingForm(
+            initial={
+                "title": f"transfer finding - {finding.title}",
+                "findings": finding,
+                "owner": request.user.username,
+                "status": "Transfer Pending",
+                "severity": finding.severity,
+                "owner": request.user
+            },
+            product=product
+        )
 
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             form.fields["findings"].queryset = exclude_test_or_finding_with_tag(
