@@ -5,7 +5,7 @@ from django.test.utils import override_settings
 
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Engagement, Finding, Product, User, copy_model_util
-from dojo.utils import set_duplicate
+from dojo.finding.deduplication import set_duplicate
 
 from .dojo_test_case import DojoTestCase
 
