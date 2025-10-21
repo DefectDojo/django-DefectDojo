@@ -376,13 +376,13 @@ def find_candidates_for_deduplication_hash(test, findings, *, include_product_sc
 
 
 def find_candidates_for_deduplication_unique_id(test, findings, *, include_product_scope_filter):
-    base_queryset, scope_on_engagement = build_dedupe_scope_queryset(test, include_product_scope_filter=include_product_scope_filter)
+    base_queryset, _ = build_dedupe_scope_queryset(test, include_product_scope_filter=include_product_scope_filter)
     unique_ids = {f.unique_id_from_tool for f in findings if getattr(f, "unique_id_from_tool", None) is not None}
     if not unique_ids:
         return {}
     existing_qs = base_queryset.filter(unique_id_from_tool__in=unique_ids).exclude(unique_id_from_tool=None).exclude(duplicate=True).order_by("id")
-    if not scope_on_engagement:
-        existing_qs = existing_qs.filter(test__test_type=test.test_type)
+    # unique_id_from_tool can only apply to the same test_type because it is parser dependent
+    existing_qs = existing_qs.filter(test__test_type=test.test_type)
     existing_by_uid = {}
     for ef in existing_qs:
         existing_by_uid.setdefault(ef.unique_id_from_tool, []).append(ef)
@@ -391,7 +391,7 @@ def find_candidates_for_deduplication_unique_id(test, findings, *, include_produ
 
 
 def find_candidates_for_deduplication_uid_or_hash(test, findings, *, include_product_scope_filter):
-    base_queryset, scope_on_engagement = build_dedupe_scope_queryset(test, include_product_scope_filter=include_product_scope_filter)
+    base_queryset, _ = build_dedupe_scope_queryset(test, include_product_scope_filter=include_product_scope_filter)
     hash_codes = {f.hash_code for f in findings if getattr(f, "hash_code", None) is not None}
     unique_ids = {f.unique_id_from_tool for f in findings if getattr(f, "unique_id_from_tool", None) is not None}
     if not hash_codes and not unique_ids:
@@ -401,9 +401,8 @@ def find_candidates_for_deduplication_uid_or_hash(test, findings, *, include_pro
     if hash_codes:
         cond |= Q(hash_code__isnull=False, hash_code__in=hash_codes)
     if unique_ids:
-        uid_q = Q(unique_id_from_tool__isnull=False, unique_id_from_tool__in=unique_ids)
-        if not scope_on_engagement:
-            uid_q &= Q(test__test_type=test.test_type)
+        # unique_id_from_tool can only apply to the same test_type because it is parser dependent
+        uid_q = Q(unique_id_from_tool__isnull=False, unique_id_from_tool__in=unique_ids) & Q(test__test_type=test.test_type)
         cond |= uid_q
 
     existing_qs = base_queryset.filter(cond).exclude(duplicate=True).order_by("id")
@@ -488,11 +487,11 @@ def match_unique_id_candidate(new_finding, candidates_by_uid):
     return None
 
 
-def match_uid_or_hash_candidate(new_finding, candidated_by_uid, candidated_by_hash):
-    match = match_unique_id_candidate(new_finding, candidated_by_uid)
+def match_uid_or_hash_candidate(new_finding, candidates_by_uid, candidates_by_hash):
+    match = match_unique_id_candidate(new_finding, candidates_by_uid)
     if match:
         return match
-    return match_hash_candidate(new_finding, candidated_by_hash)
+    return match_hash_candidate(new_finding, candidates_by_hash)
 
 
 def match_legacy_candidate(new_finding, candidates_by_title, candidates_by_cwe):
