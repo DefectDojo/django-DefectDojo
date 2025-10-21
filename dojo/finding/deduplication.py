@@ -450,9 +450,8 @@ def find_candidates_for_deduplication_legacy(test, findings, *, include_product_
     return by_title, by_cwe
 
 
-def _is_candidate_older(candidate, new_finding):
-    if candidate.id == new_finding.id:
-        return False
+def _is_candidate_older(new_finding, candidate):
+    # Ensure the newer finding is marked as duplicate of the older finding
     return candidate.id < new_finding.id
 
 
@@ -463,7 +462,7 @@ def match_hash_candidate(new_finding, existing_by_hash):
     deduplicationLogger.debug(f"Found {len(possible_matches)} findings with same hash_code")
 
     for candidate in possible_matches:
-        if not _is_candidate_older(candidate, new_finding):
+        if not _is_candidate_older(new_finding, candidate):
             continue
         if is_deduplication_on_engagement_mismatch(new_finding, candidate):
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
@@ -480,7 +479,7 @@ def match_unique_id_candidate(new_finding, existing_by_uid):
     possible_matches = existing_by_uid.get(new_finding.unique_id_from_tool, [])
     deduplicationLogger.debug(f"Found {len(possible_matches)} findings with same unique_id_from_tool")
     for candidate in possible_matches:
-        if not _is_candidate_older(candidate, new_finding):
+        if not _is_candidate_older(new_finding, candidate):
             continue
         if is_deduplication_on_engagement_mismatch(new_finding, candidate):
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
@@ -504,7 +503,7 @@ def match_legacy_candidate(new_finding, by_title, by_cwe):
         candidates.extend(by_cwe.get(new_finding.cwe, []))
 
     for candidate in candidates:
-        if not _is_candidate_older(candidate, new_finding):
+        if not _is_candidate_older(new_finding, candidate):
             continue
         if is_deduplication_on_engagement_mismatch(new_finding, candidate):
             deduplicationLogger.debug(
