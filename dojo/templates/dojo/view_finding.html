@@ -922,6 +922,9 @@
             </div>
             <div id="vuln_desc" class="panel-body finding-description collapse in">
               <pre>{{ finding.description|markdown_render|default_if_none:"" }}</pre>
+               <a href="{% url 'request_vlnerability_retest' finding.id %}">
+                Click to retest vulnerability
+               </a>
             </div>
         </div>
 

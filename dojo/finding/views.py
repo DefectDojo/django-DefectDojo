@@ -126,6 +126,11 @@ from dojo.utils import (
     update_external_issue,
 )
 
+from dojo.tools.api_edgescan.api_client import EdgescanAPI
+from django.core.exceptions import ValidationError
+
+from dojo.models import Product_API_Scan_Configuration
+
 JFORM_PUSH_TO_JIRA_MESSAGE = "jform.push_to_jira: %s"
 
 logger = logging.getLogger(__name__)
@@ -1712,6 +1717,52 @@ def request_finding_review(request, fid):
         {"finding": finding, "product_tab": product_tab, "user": user, "form": form, "enable_table_filtering": get_system_setting("enable_ui_table_based_searching")},
     )
 
+
+@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
+def request_vlnerability_retest(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+    if request.method == "GET":
+        try:
+            client, config = prepare_client(finding.test)
+            data = client.request_vlnerability_retest(finding.unique_id_from_tool)
+            return JsonResponse(data)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+def prepare_client(test):
+        product = test.engagement.product
+        if test.api_scan_configuration:
+            config = test.api_scan_configuration
+            if config.product != product:
+                msg = (
+                    "API Scan Configuration for Edgescan and Product do not match. "
+                    f'Product: "{product.name}" ({product.id}), config.product: "{config.product.name}" ({config.product.id})'
+                )
+                raise ValidationError(msg)
+        else:
+            configs = Product_API_Scan_Configuration.objects.filter(
+                product=product,
+            )
+            if configs.count() == 1:
+                config = configs.first()
+            elif configs.count() > 1:
+                msg = (
+                    "More than one Product API Scan Configuration has been configured, but none of them has been "
+                    "chosen.\nPlease specify at Test which one should be used. "
+                    f'Product: "{product.name}" ({product.id})'
+                )
+                raise ValidationError(msg)
+            else:
+                msg = (
+                    "There are no API Scan Configurations for this Product.\n"
+                    "Please add at least one API Scan Configuration for Edgescan to this Product. "
+                    f'Product: "{product.name}" ({product.id})'
+                )
+                raise ValidationError(msg)
+
+        tool_config = config.tool_configuration
+        return EdgescanAPI(tool_config), config
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def clear_finding_review(request, fid):

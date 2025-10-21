@@ -48,6 +48,18 @@ class EdgescanAPI:
         response.raise_for_status()
         return response.json()
 
+    def request_vlnerability_retest(self, vulnerability_id):
+        url = f"{self.url}/api/v1/vulnerabilities/retest.json"
+        payload={"vulnerability_ids": [vulnerability_id]}
+        response = requests.post(
+            url=url,
+            headers=self.get_headers(),
+            proxies=self.get_proxies(),
+            timeout=settings.REQUESTS_TIMEOUT,
+            json=payload
+        )
+        return response.json()
+
     def get_headers(self):
         return {
             "X-API-TOKEN": self.api_key,

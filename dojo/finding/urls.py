@@ -130,6 +130,8 @@ urlpatterns = [
         views.risk_unaccept, name="risk_unaccept_finding"),
     re_path(r"^finding/(?P<fid>\d+)/request_review$",
         views.request_finding_review, name="request_finding_review"),
+    re_path(r"^finding/(?P<fid>\d+)/request_vlnerability_retest$",
+        views.request_vlnerability_retest, name="request_vlnerability_retest"),
     re_path(r"^finding/(?P<fid>\d+)/review$",
         views.clear_finding_review, name="clear_finding_review"),
     re_path(r"^finding/(?P<fid>\d+)/copy$",
