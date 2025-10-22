@@ -158,7 +158,7 @@ referencing==0.37.0
 tzdata==2025.2
 jsonschema-specifications==2025.9.1
 googleapis-common-protos==1.71.0
-grpcio==1.75.1
+grpcio==1.76.0
 zipp==3.23.0
 prompt_toolkit==3.0.52
 prometheus_client==0.22.1
