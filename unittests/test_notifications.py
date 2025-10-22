@@ -831,7 +831,7 @@ class TestNotificationWebhooks(DojoTestCase):
                 scan_type="ZAP Scan",
             ).notify_scan_added(test, updated_count=0)
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added_empty")
-            self.maxDiff = None
+            self.maxDiff = 99999
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": "Event scan_added_empty has occurred.",
                 "title": "Created/Updated 0 findings for notif prod: notif eng: notif test (Acunetix Scan)",
@@ -895,32 +895,32 @@ class TestNotificationWebhooks(DojoTestCase):
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"]["findings"], {
                 "new": [{
-                    "id": 232,
+                    "id": 234,
                     "title": "New Finding",
                     "severity": "Critical",
-                    "url_api": "http://localhost:8080/api/v2/findings/232/",
-                    "url_ui": "http://localhost:8080/finding/232",
-                }],
-                "mitigated": [{
-                    "id": 233,
-                    "title": "Mitigated Finding",
-                    "severity": "Medium",
-                    "url_api": "http://localhost:8080/api/v2/findings/233/",
-                    "url_ui": "http://localhost:8080/finding/233",
-                }],
-                "reactivated": [{
-                    "id": 234,
-                    "title": "Reactivated Finding",
-                    "severity": "Low",
                     "url_api": "http://localhost:8080/api/v2/findings/234/",
                     "url_ui": "http://localhost:8080/finding/234",
                 }],
-                "untouched": [{
+                "mitigated": [{
                     "id": 235,
-                    "title": "Untouched Finding",
-                    "severity": "Info",
+                    "title": "Mitigated Finding",
+                    "severity": "Medium",
                     "url_api": "http://localhost:8080/api/v2/findings/235/",
                     "url_ui": "http://localhost:8080/finding/235",
+                }],
+                "reactivated": [{
+                    "id": 236,
+                    "title": "Reactivated Finding",
+                    "severity": "Low",
+                    "url_api": "http://localhost:8080/api/v2/findings/236/",
+                    "url_ui": "http://localhost:8080/finding/236",
+                }],
+                "untouched": [{
+                    "id": 237,
+                    "title": "Untouched Finding",
+                    "severity": "Info",
+                    "url_api": "http://localhost:8080/api/v2/findings/237/",
+                    "url_ui": "http://localhost:8080/finding/237",
                 }],
             })
 
@@ -948,32 +948,32 @@ class TestNotificationWebhooks(DojoTestCase):
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"]["findings"], {
                 "new": [{
-                    "id": 236,
+                    "id": 238,
                     "title": "Colon: New Finding",
                     "severity": "Critical",
-                    "url_api": "http://localhost:8080/api/v2/findings/236/",
-                    "url_ui": "http://localhost:8080/finding/236",
-                }],
-                "mitigated": [{
-                    "id": 237,
-                    "title": "[Brackets] Mitigated Finding",
-                    "severity": "Medium",
-                    "url_api": "http://localhost:8080/api/v2/findings/237/",
-                    "url_ui": "http://localhost:8080/finding/237",
-                }],
-                "reactivated": [{
-                    "id": 238,
-                    "title": '"Quotation1" Reactivated Finding',
-                    "severity": "Low",
                     "url_api": "http://localhost:8080/api/v2/findings/238/",
                     "url_ui": "http://localhost:8080/finding/238",
                 }],
-                "untouched": [{
+                "mitigated": [{
                     "id": 239,
-                    "title": "'Quotation2' Untouched Finding",
-                    "severity": "Info",
+                    "title": "[Brackets] Mitigated Finding",
+                    "severity": "Medium",
                     "url_api": "http://localhost:8080/api/v2/findings/239/",
                     "url_ui": "http://localhost:8080/finding/239",
+                }],
+                "reactivated": [{
+                    "id": 240,
+                    "title": '"Quotation1" Reactivated Finding',
+                    "severity": "Low",
+                    "url_api": "http://localhost:8080/api/v2/findings/240/",
+                    "url_ui": "http://localhost:8080/finding/240",
+                }],
+                "untouched": [{
+                    "id": 241,
+                    "title": "'Quotation2' Untouched Finding",
+                    "severity": "Info",
+                    "url_api": "http://localhost:8080/api/v2/findings/241/",
+                    "url_ui": "http://localhost:8080/finding/241",
                 }],
             })
 
