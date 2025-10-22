@@ -50,189 +50,19 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
 
 
 def deduplicate_legacy(new_finding):
-    # ---------------------------------------------------------
-    # 1) Collects all the findings that have the same:
-    #      (title  and static_finding and dynamic_finding)
-    #      or (CWE and static_finding and dynamic_finding)
-    #    as the new one
-    #    (this is "cond1")
-    # ---------------------------------------------------------
-    if new_finding.test.engagement.deduplication_on_engagement:
-        eng_findings_cwe = Finding.objects.filter(
-            test__engagement=new_finding.test.engagement,
-            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True).values("id")
-        eng_findings_title = Finding.objects.filter(
-            test__engagement=new_finding.test.engagement,
-            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True).values("id")
-    else:
-        eng_findings_cwe = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True).values("id")
-        eng_findings_title = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True).values("id")
-
-    total_findings = Finding.objects.filter(Q(id__in=eng_findings_cwe) | Q(id__in=eng_findings_title)).prefetch_related("endpoints", "test", "test__engagement", "found_by", "original_finding", "test__test_type")
-    deduplicationLogger.debug("Found "
-        + str(len(eng_findings_cwe)) + " findings with same cwe, "
-        + str(len(eng_findings_title)) + " findings with same title: "
-        + str(len(total_findings)) + " findings with either same title or same cwe")
-
-    # total_findings = total_findings.order_by('date')
-    for find in total_findings.order_by("id"):
-        flag_endpoints = False
-        flag_line_path = False
-        flag_hash = False
-        if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug(
-                "deduplication_on_engagement_mismatch, skipping dedupe.")
-            continue
-
-        # ---------------------------------------------------------
-        # 2) If existing and new findings have endpoints: compare them all
-        #    Else look at line+file_path
-        #    (if new finding is not static, do not deduplicate)
-        # ---------------------------------------------------------
-
-        if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
-            list1 = [str(e) for e in new_finding.endpoints.all()]
-            list2 = [str(e) for e in find.endpoints.all()]
-
-            if all(x in list1 for x in list2):
-                deduplicationLogger.debug("%s: existing endpoints are present in new finding", find.id)
-                flag_endpoints = True
-        elif new_finding.static_finding and new_finding.file_path and len(new_finding.file_path) > 0:
-            if str(find.line) == str(new_finding.line) and find.file_path == new_finding.file_path:
-                deduplicationLogger.debug("%s: file_path and line match", find.id)
-                flag_line_path = True
-            else:
-                deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
-        else:
-            deduplicationLogger.debug("find.static/dynamic: %s/%s", find.static_finding, find.dynamic_finding)
-            deduplicationLogger.debug("new_finding.static/dynamic: %s/%s", new_finding.static_finding, new_finding.dynamic_finding)
-            deduplicationLogger.debug("find.file_path: %s", find.file_path)
-            deduplicationLogger.debug("new_finding.file_path: %s", new_finding.file_path)
-
-            deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
-
-        if find.hash_code == new_finding.hash_code:
-            flag_hash = True
-
-        deduplicationLogger.debug(
-            "deduplication flags for new finding (" + ("dynamic" if new_finding.dynamic_finding else "static") + ") " + str(new_finding.id) + " and existing finding " + str(find.id)
-            + " flag_endpoints: " + str(flag_endpoints) + " flag_line_path:" + str(flag_line_path) + " flag_hash:" + str(flag_hash))
-
-        # ---------------------------------------------------------
-        # 3) Findings are duplicate if (cond1 is true) and they have the same:
-        #    hash
-        #    and (endpoints or (line and file_path)
-        # ---------------------------------------------------------
-        if ((flag_endpoints or flag_line_path) and flag_hash):
-            try:
-                set_duplicate(new_finding, find)
-            except Exception as e:
-                deduplicationLogger.debug(str(e))
-                continue
-
-            break
+    _dedupe_batch_legacy([new_finding])
 
 
 def deduplicate_unique_id_from_tool(new_finding):
-    if new_finding.test.engagement.deduplication_on_engagement:
-        existing_findings = Finding.objects.filter(
-            test__engagement=new_finding.test.engagement,
-            unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
-                id=new_finding.id).exclude(
-                    unique_id_from_tool=None).exclude(
-                        duplicate=True).order_by("id")
-    else:
-        existing_findings = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            # the unique_id_from_tool is unique for a given tool: do not compare with other tools
-            test__test_type=new_finding.test.test_type,
-            unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
-                id=new_finding.id).exclude(
-                    unique_id_from_tool=None).exclude(
-                        duplicate=True).order_by("id")
-
-    deduplicationLogger.debug("Found "
-        + str(len(existing_findings)) + " findings with same unique_id_from_tool")
-    for find in existing_findings:
-        if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug(
-                "deduplication_on_engagement_mismatch, skipping dedupe.")
-            continue
-        try:
-            set_duplicate(new_finding, find)
-            break
-        except Exception as e:
-            deduplicationLogger.debug(str(e))
-            continue
+    _dedupe_batch_unique_id([new_finding])
 
 
 def deduplicate_hash_code(new_finding):
-    if new_finding.test.engagement.deduplication_on_engagement:
-        existing_findings = Finding.objects.filter(
-            test__engagement=new_finding.test.engagement,
-            hash_code=new_finding.hash_code).exclude(
-                id=new_finding.id).exclude(
-                    hash_code=None).exclude(
-                        duplicate=True).order_by("id")
-    else:
-        existing_findings = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            hash_code=new_finding.hash_code).exclude(
-                id=new_finding.id).exclude(
-                    hash_code=None).exclude(
-                        duplicate=True).order_by("id")
-
-    deduplicationLogger.debug("Found "
-        + str(len(existing_findings)) + " findings with same hash_code")
-    for find in existing_findings:
-        if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug(
-                "deduplication_on_engagement_mismatch, skipping dedupe.")
-            continue
-        try:
-            if are_endpoints_duplicates(new_finding, find):
-                set_duplicate(new_finding, find)
-                break
-        except Exception as e:
-            deduplicationLogger.debug(str(e))
-            continue
+    _dedupe_batch_hash_code([new_finding])
 
 
 def deduplicate_uid_or_hash_code(new_finding):
-    if new_finding.test.engagement.deduplication_on_engagement:
-        existing_findings = Finding.objects.filter(
-            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code))
-            # unique_id_from_tool can only apply to the same test_type because it is parser dependent
-            | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
-            test__engagement=new_finding.test.engagement).exclude(
-                id=new_finding.id).exclude(
-                        duplicate=True).order_by("id")
-    else:
-        # same without "test__engagement=new_finding.test.engagement" condition
-        existing_findings = Finding.objects.filter(
-            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code))
-            | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
-            test__engagement__product=new_finding.test.engagement.product).exclude(
-                id=new_finding.id).exclude(
-                        duplicate=True).order_by("id")
-    deduplicationLogger.debug("Found "
-        + str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
-    for find in existing_findings:
-        if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug(
-                "deduplication_on_engagement_mismatch, skipping dedupe.")
-            continue
-        try:
-            if are_endpoints_duplicates(new_finding, find):
-                set_duplicate(new_finding, find)
-        except Exception as e:
-            deduplicationLogger.debug(str(e))
-            continue
-        break
+    _dedupe_batch_uid_or_hash([new_finding])
 
 
 def set_duplicate(new_finding, existing_finding):
@@ -454,7 +284,7 @@ def match_hash_candidate(new_finding, candidates_by_hash):
     if new_finding.hash_code is None:
         return None
     possible_matches = candidates_by_hash.get(new_finding.hash_code, [])
-    deduplicationLogger.debug(f"Found {len(possible_matches)} findings with same hash_code")
+    deduplicationLogger.debug(f"Found {len(possible_matches)} findings with same hash_code, ids={[(c.id, c.hash_code) for c in possible_matches]}")
 
     for candidate in possible_matches:
         if not _is_candidate_older(new_finding, candidate):
@@ -472,9 +302,10 @@ def match_unique_id_candidate(new_finding, candidates_by_uid):
         return None
 
     possible_matches = candidates_by_uid.get(new_finding.unique_id_from_tool, [])
-    deduplicationLogger.debug(f"Found {len(possible_matches)} findings with same unique_id_from_tool")
+    deduplicationLogger.debug(f"Found {len(possible_matches)} findings with same unique_id_from_tool, ids={[(c.id, c.unique_id_from_tool) for c in possible_matches]}")
     for candidate in possible_matches:
         if not _is_candidate_older(new_finding, candidate):
+            deduplicationLogger.debug("UID: newer candidate, skipping dedupe.")
             continue
         if is_deduplication_on_engagement_mismatch(new_finding, candidate):
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
@@ -586,6 +417,7 @@ def _dedupe_batch_unique_id(findings):
 def _dedupe_batch_uid_or_hash(findings):
     if not findings:
         return
+
     test = findings[0].test
     candidates_by_uid, existing_by_hash = find_candidates_for_deduplication_uid_or_hash(test, findings, include_product_scope_filter=True)
     if not (candidates_by_uid or existing_by_hash):
