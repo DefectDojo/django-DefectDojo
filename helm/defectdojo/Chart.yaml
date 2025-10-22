@@ -2,7 +2,7 @@ apiVersion: v2
 appVersion: "2.52.0-dev"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.8.0-dev
+version: 1.7.3-dev
 icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
 maintainers:
   - name: madchap
@@ -34,12 +34,4 @@ dependencies:
 #     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "true"
-  artifacthub.io/changes: |
-    - kind: changed
-      description: DRY cloudsql-proxy
-    - kind: changed
-      description: Each component allow to specific image + allow digest pinning + allow different tags for Django and Nginx
-    - kind: added
-      description: Convert existing comments to descriptors
-    - kind: added
-      description: Testing on the oldest officially supported k8s
+  artifacthub.io/changes: ""
