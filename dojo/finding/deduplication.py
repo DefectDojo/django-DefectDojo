@@ -315,10 +315,29 @@ def match_unique_id_candidate(new_finding, candidates_by_uid):
 
 
 def match_uid_or_hash_candidate(new_finding, candidates_by_uid, candidates_by_hash):
-    match = match_unique_id_candidate(new_finding, candidates_by_uid)
-    if match:
-        return match
-    return match_hash_candidate(new_finding, candidates_by_hash)
+    # Combine UID and hash candidates and walk oldest-first
+    uid_list = candidates_by_uid.get(new_finding.unique_id_from_tool, []) if new_finding.unique_id_from_tool is not None else []
+    hash_list = candidates_by_hash.get(new_finding.hash_code, []) if new_finding.hash_code is not None else []
+    deduplicationLogger.debug("UID_OR_HASH: uid_list ids=%s hash_list ids=%s", [c.id for c in uid_list], [c.id for c in hash_list])
+    combined_by_id = {c.id: c for c in uid_list}
+    for c in hash_list:
+        combined_by_id.setdefault(c.id, c)
+    deduplicationLogger.debug("UID_OR_HASH: combined candidate ids (sorted)=%s", sorted(combined_by_id.keys()))
+    for candidate_id in sorted(combined_by_id.keys()):
+        candidate = combined_by_id[candidate_id]
+        # Exclude self
+        if candidate.id == new_finding.id:
+            continue
+        if is_deduplication_on_engagement_mismatch(new_finding, candidate):
+            deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
+            return None
+        if are_endpoints_duplicates(new_finding, candidate):
+            deduplicationLogger.debug("UID_OR_HASH: endpoints match, returning candidate %s with test_type %s unique_id_from_tool %s hash_code %s", candidate.id, candidate.test.test_type, candidate.unique_id_from_tool, candidate.hash_code)
+            return candidate
+        deduplicationLogger.debug("UID_OR_HASH: endpoints mismatch, skipping candidate %s", candidate.id)
+        # Parity with old per-finding logic: only consider the oldest candidate and stop
+        return None
+    return None
 
 
 def match_legacy_candidate(new_finding, candidates_by_title, candidates_by_cwe):
