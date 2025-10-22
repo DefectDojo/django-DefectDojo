@@ -3,8 +3,8 @@
        "number":35,
        "created_at":"2024-01-19T14:11:18Z",
        "updated_at":"2024-01-19T14:11:20Z",
-       "url":"https://api.github.com/repos/XX/YY/code-scanning/alerts/35",
-       "html_url":"https://github.com/XX/YY/security/code-scanning/35",
+       "url":"https://api.github.com/repos/OWASP/test-repository/code-scanning/alerts/35",
+       "html_url":"https://github.com/OWASP/test-repository/security/code-scanning/35",
        "state":"open",
        "fixed_at":"None",
        "dismissed_by":"None",
@@ -30,7 +30,7 @@
           "version":"2.16.2"
        },
        "most_recent_instance":{
-          "ref":"refs/XX/YY",
+          "ref":"refs/OWASP/test-repository",
           "analysis_key":"dynamic/github-code-scanning/codeql:analyze",
           "environment":"{\"language\":\"python\"}",
           "category":"/language:python",
@@ -40,24 +40,22 @@
              "text":"This expression stores sensitive data (secret) as clear text."
           },
           "location":{
-             "path":"Unsafe Deserialization/file.py",
+             "path":"src/file.py",
              "start_line":42,
              "end_line":42,
              "start_column":17,
              "end_column":23
           },
-          "classifications":[
-             
-          ]
+          "classifications":[]
        },
-       "instances_url":"https://api.github.com/repos/XX/YY/code-scanning/alerts/35/instances"
+       "instances_url":"https://api.github.com/repos/OWASP/test-repository/code-scanning/alerts/35/instances"
     },
     {
        "number":34,
        "created_at":"2024-01-19T14:11:18Z",
        "updated_at":"2024-01-19T14:11:20Z",
-       "url":"https://api.github.com/repos/XX/YY/code-scanning/alerts/34",
-       "html_url":"https://github.com/XX/YY/security/code-scanning/34",
+       "url":"https://api.github.com/repos/OWASP/test-repository/code-scanning/alerts/34",
+       "html_url":"https://github.com/OWASP/test-repository/security/code-scanning/34",
        "state":"open",
        "fixed_at":"None",
        "dismissed_by":"None",
@@ -86,7 +84,7 @@
           "version":"2.16.2"
        },
        "most_recent_instance":{
-          "ref":"refs/XX/YY",
+          "ref":"refs/OWASP/test-repository",
           "analysis_key":"dynamic/github-code-scanning/codeql:analyze",
           "environment":"{\"language\":\"python\"}",
           "category":"/language:python",
@@ -96,16 +94,14 @@
              "text":"This path depends on a user-provided value."
           },
           "location":{
-             "path":"Path Traversal/file2.py",
+             "path":"src/file2.py",
              "start_line":78,
              "end_line":78,
              "start_column":25,
              "end_column":63
           },
-          "classifications":[
-             
-          ]
+          "classifications":[]
        },
-       "instances_url":"https://api.github.com/repos/XX/YY/code-scanning/alerts/34/instances"
+       "instances_url":"https://api.github.com/repos/OWASP/test-repository/code-scanning/alerts/34/instances"
     }
  ]
