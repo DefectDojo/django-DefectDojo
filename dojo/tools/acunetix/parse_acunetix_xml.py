@@ -67,10 +67,10 @@ class AcunetixXMLParser:
         root = parse(filename).getroot()
         for scan in root.findall("Scan"):
             start_url = scan.findtext("StartURL")
-            if ":" not in start_url:
+            if "://" not in start_url:
                 start_url = "//" + start_url
             # get report date
-            if scan.findtext("StartTime") and scan.findtext("StartTime") != "":
+            if scan.findtext("StartTime") and scan.findtext("StartTime"):
                 report_date = dateutil.parser.parse(
                     scan.findtext("StartTime"), dayfirst=True,
                 ).date()
@@ -89,11 +89,11 @@ class AcunetixXMLParser:
                     dynamic_finding=False,
                     nb_occurences=1,
                 )
-                if item.findtext("Impact") and item.findtext("Impact") != "":
+                if item.findtext("Impact") and item.findtext("Impact"):
                     finding.impact = item.findtext("Impact")
                 if item.findtext("Recommendation") and item.findtext(
                     "Recommendation",
-                ) != "":
+                ):
                     finding.mitigation = item.findtext("Recommendation")
                 if report_date:
                     finding.date = report_date
@@ -151,7 +151,7 @@ class AcunetixXMLParser:
                     port=url.port,
                     path=item.findtext("Affects"),
                 )
-                if url.scheme is not None and url.scheme != "":
+                if url.scheme is not None and url.scheme:
                     endpoint.protocol = url.scheme
                 finding.unsaved_endpoints = [endpoint]
                 dupe_key = hashlib.sha256(

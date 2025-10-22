@@ -8,12 +8,13 @@ from contextlib import suppress
 from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
+from urllib.parse import urlparse
 from uuid import uuid4
 
 import dateutil
 import hyperlink
 import tagulous.admin
-from auditlog.registry import auditlog
+from dateutil.parser import parse as datetutilsparse
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
@@ -41,6 +42,7 @@ from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
+from titlecase import titlecase
 
 from dojo.validators import cvss3_validator, cvss4_validator
 
@@ -670,7 +672,7 @@ class System_Settings(models.Model):
             "This is a performance enhancement to avoid fetching objects unnecessarily.",
         ))
 
-    from dojo.middleware import System_Settings_Manager
+    from dojo.middleware import System_Settings_Manager  # noqa: PLC0415 circular import
     objects = System_Settings_Manager()
 
     def clean(self):
@@ -870,7 +872,6 @@ class Product_Type(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("product_type", args=[str(self.id)])
 
     def get_breadcrumbs(self):
@@ -1092,7 +1093,7 @@ class SLA_Configuration(models.Model):
                     product.async_updating = True
                     super(Product, product).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
+                from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async  # noqa: I001, PLC0415 circular import
                 update_sla_expiration_dates_sla_config_async(self, products, tuple(severities))
 
     def clean(self):
@@ -1254,11 +1255,10 @@ class Product(models.Model):
                     sla_config.async_updating = True
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_product_async
+                from dojo.sla_config.helpers import update_sla_expiration_dates_product_async  # noqa: I001, PLC0415 circular import
                 update_sla_expiration_dates_product_async(self, sla_config)
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_product", args=[str(self.id)])
 
     @cached_property
@@ -1309,7 +1309,7 @@ class Product(models.Model):
         if start_date is None or end_date is None:
             return {}
 
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
         findings = Finding.objects.filter(test__engagement__product=self,
                                         mitigated__isnull=True,
                                         false_p=False,
@@ -1347,7 +1347,7 @@ class Product(models.Model):
 
     @property
     def has_jira_configured(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_configured(self)
 
     def violates_sla(self):
@@ -1578,7 +1578,6 @@ class Engagement(models.Model):
                                             "%b %d, %Y"))
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_engagement", args=[str(self.id)])
 
     def copy(self):
@@ -1624,7 +1623,7 @@ class Engagement(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
 
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement=self)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
@@ -1637,7 +1636,7 @@ class Engagement(models.Model):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self)
 
     @property
@@ -1646,13 +1645,14 @@ class Engagement(models.Model):
 
     def delete(self, *args, **kwargs):
         logger.debug("%d engagement delete", self.id)
-        from dojo.finding import helper
-        helper.prepare_duplicates_for_delete(engagement=self)
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
+        finding_helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
         with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing
             # related objects in a separate task
-            calculate_grade(self.product)
+            from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+            perform_product_grading(self.product)
 
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
@@ -1820,23 +1820,22 @@ class Endpoint(models.Model):
             return url
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_endpoint", args=[str(self.id)])
 
     def clean(self):
         errors = []
         null_char_list = ["0x00", "\x00"]
         db_type = connection.vendor
-        if self.protocol or self.protocol == "":
+        if self.protocol is not None:
             if not re.match(r"^[A-Za-z][A-Za-z0-9\.\-\+]+$", self.protocol):  # https://tools.ietf.org/html/rfc3986#section-3.1
                 errors.append(ValidationError(f'Protocol "{self.protocol}" has invalid format'))
-            if self.protocol == "":
+            if not self.protocol:
                 self.protocol = None
 
-        if self.userinfo or self.userinfo == "":
+        if self.userinfo is not None:
             if not re.match(r"^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$", self.userinfo):  # https://tools.ietf.org/html/rfc3986#section-3.2.1
                 errors.append(ValidationError(f'Userinfo "{self.userinfo}" has invalid format'))
-            if self.userinfo == "":
+            if not self.userinfo:
                 self.userinfo = None
 
         if self.host:
@@ -1848,7 +1847,7 @@ class Endpoint(models.Model):
         else:
             errors.append(ValidationError("Host must not be empty"))
 
-        if self.port or self.port == 0:
+        if self.port is not None:
             try:
                 int_port = int(self.port)
                 if not (0 <= int_port < 65536):
@@ -1857,7 +1856,7 @@ class Endpoint(models.Model):
             except ValueError:
                 errors.append(ValidationError(f'Port "{self.port}" has invalid format - it is not a number'))
 
-        if self.path or self.path == "":
+        if self.path is not None:
             while len(self.path) > 0 and self.path[0] == "/":  # Endpoint store "root-less" path
                 self.path = self.path[1:]
             if any(null_char in self.path for null_char in null_char_list):
@@ -1866,11 +1865,11 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.path = self.path.replace(remove_str, "%00")
-                    logger.error(f'Path "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
-            if self.path == "":
+                    logger.error('Path "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
+            if not self.path:
                 self.path = None
 
-        if self.query or self.query == "":
+        if self.query is not None:
             if len(self.query) > 0 and self.query[0] == "?":
                 self.query = self.query[1:]
             if any(null_char in self.query for null_char in null_char_list):
@@ -1879,11 +1878,11 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.query = self.query.replace(remove_str, "%00")
-                    logger.error(f'Query "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
-            if self.query == "":
+                    logger.error('Query "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
+            if not self.query:
                 self.query = None
 
-        if self.fragment or self.fragment == "":
+        if self.fragment is not None:
             if len(self.fragment) > 0 and self.fragment[0] == "#":
                 self.fragment = self.fragment[1:]
             if any(null_char in self.fragment for null_char in null_char_list):
@@ -1892,8 +1891,8 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.fragment = self.fragment.replace(remove_str, "%00")
-                    logger.error(f'Fragment "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
-            if self.fragment == "":
+                    logger.error('Fragment "%s" has invalid format - It contains the NULL character. The following action was taken: %s', old_value, action_string)
+            if not self.fragment:
                 self.fragment = None
 
         if errors:
@@ -2038,7 +2037,6 @@ class Endpoint(models.Model):
         try:
             url = hyperlink.parse(url=uri)
         except UnicodeDecodeError:
-            from urllib.parse import urlparse
             url = hyperlink.parse(url="//" + urlparse(uri).netloc)
         except hyperlink.URLParseError as e:
             msg = f"Invalid URL format: {e}"
@@ -2052,13 +2050,13 @@ class Endpoint(models.Model):
                 query_parts.append(f"{k}={v}")
         query_string = "&".join(query_parts)
 
-        protocol = url.scheme if url.scheme != "" else None
+        protocol = url.scheme or None
         userinfo = ":".join(url.userinfo) if url.userinfo not in {(), ("",)} else None
-        host = url.host if url.host != "" else None
+        host = url.host or None
         port = url.port
         path = "/".join(url.path)[:500] if url.path not in {None, (), ("",)} else None
-        query = query_string[:1000] if query_string is not None and query_string != "" else None
-        fragment = url.fragment[:500] if url.fragment is not None and url.fragment != "" else None
+        query = query_string[:1000] if query_string is not None and query_string else None
+        fragment = url.fragment[:500] if url.fragment is not None and url.fragment else None
 
         return Endpoint(
             protocol=protocol,
@@ -2151,7 +2149,6 @@ class Test(models.Model):
         return str(self.test_type)
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_test", args=[str(self.id)])
 
     def test_type_name(self) -> str:
@@ -2191,7 +2188,7 @@ class Test(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test=self)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
@@ -2234,7 +2231,9 @@ class Test(models.Model):
         else:
             deduplicationLogger.debug("Section HASHCODE_FIELDS_PER_SCANNER not found in settings.dist.py")
 
-        deduplicationLogger.debug(f"HASHCODE_FIELDS_PER_SCANNER is: {hashCodeFields}")
+        hash_code_fields_always = getattr(settings, "HASH_CODE_FIELDS_ALWAYS", [])
+        deduplicationLogger.debug(f"HASHCODE_FIELDS_PER_SCANNER is: {hashCodeFields} + HASH_CODE_FIELDS_ALWAYS: {hash_code_fields_always}")
+
         return hashCodeFields
 
     @property
@@ -2254,13 +2253,15 @@ class Test(models.Model):
         deduplicationLogger.debug(f"HASHCODE_ALLOWS_NULL_CWE is: {hashCodeAllowsNullCwe}")
         return hashCodeAllowsNullCwe
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, product_grading_option=True, **kwargs):
         logger.debug("%d test delete", self.id)
         super().delete(*args, **kwargs)
-        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
-            # Suppressing a potential issue created from async delete removing
-            # related objects in a separate task
-            calculate_grade(self.engagement.product)
+        if product_grading_option:
+            with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+                # Suppressing a potential issue created from async delete removing
+                # related objects in a separate task
+                from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+                perform_product_grading(self.engagement.product)
 
     @property
     def statistics(self):
@@ -2740,16 +2741,15 @@ class Finding(models.Model):
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
         logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-        from dojo.finding import helper as finding_helper
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
 
         # if not isinstance(self.date, (datetime, date)):
         #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
 
         if not user:
-            from dojo.utils import get_current_user
+            from dojo.utils import get_current_user  # noqa: PLC0415 circular import
             user = get_current_user()
         # Title Casing
-        from titlecase import titlecase
         self.title = titlecase(self.title[:511])
         # Set the date of the finding if nothing is supplied
         if self.date is None:
@@ -2788,9 +2788,9 @@ class Finding(models.Model):
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
-            from dojo.utils import apply_cwe_to_template
-            self = apply_cwe_to_template(self)
-
+            from dojo.utils import apply_cwe_to_template  # noqa: PLC0415 circular import
+            # No need to use the returned variable since `self` Is updated in memory
+            apply_cwe_to_template(self)
             if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
                 self.static_finding = True
                 self.dynamic_finding = False
@@ -2826,7 +2826,6 @@ class Finding(models.Model):
             logger.debug("no options selected that require finding post processing")
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_finding", args=[str(self.id)])
 
     def copy(self, test=None):
@@ -2861,20 +2860,22 @@ class Finding(models.Model):
 
         return copy
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, product_grading_option=True, **kwargs):
         logger.debug("%d finding delete", self.id)
-        from dojo.finding import helper
-        helper.finding_delete(self)
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
+        finding_helper.finding_delete(self)
         super().delete(*args, **kwargs)
-        with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
-            # Suppressing a potential issue created from async delete removing
-            # related objects in a separate task
-            calculate_grade(self.test.engagement.product)
+        if product_grading_option:
+            with suppress(Finding.DoesNotExist, Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+                # Suppressing a potential issue created from async delete removing
+                # related objects in a separate task
+                from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
+                perform_product_grading(self.test.engagement.product)
 
     # only used by bulk risk acceptance api
     @classmethod
     def unaccepted_open_findings(cls):
-        from dojo.utils import get_system_setting
+        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
         results = cls.objects.filter(active=True, duplicate=False, risk_accepted=False)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             results = results.filter(verified=True)
@@ -2936,6 +2937,13 @@ class Finding(models.Model):
                 # Generically use the finding attribute having the same name, converts to str in case it's integer
                 fields_to_hash += str(getattr(self, hashcodeField))
                 deduplicationLogger.debug(hashcodeField + " : " + str(getattr(self, hashcodeField)))
+
+        # Log the hash_code fields that are always included (but are not part of the hash_code_fields list as they are inserted downtstream in self.hash_fields)
+        hash_code_fields_always = getattr(settings, "HASH_CODE_FIELDS_ALWAYS", [])
+        for hashcodeField in hash_code_fields_always:
+            if getattr(self, hashcodeField):
+                deduplicationLogger.debug(hashcodeField + " : " + str(getattr(self, hashcodeField)))
+
         deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
 
@@ -2946,53 +2954,56 @@ class Finding(models.Model):
 
     # Get vulnerability_ids to use for hash_code computation
     def get_vulnerability_ids(self):
-        vulnerability_id_str = ""
-        if self.id is None:
-            if self.unsaved_vulnerability_ids:
+
+        def _get_unsaved_vulnerability_ids(finding) -> str:
+            if finding.unsaved_vulnerability_ids:
                 deduplicationLogger.debug("get_vulnerability_ids before the finding was saved")
                 # convert list of unsaved vulnerability_ids to the list of their canonical representation
-                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in self.unsaved_vulnerability_ids]
+                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in finding.unsaved_vulnerability_ids]
                 # deduplicate (usually done upon saving finding) and sort endpoints
-                vulnerability_id_str = "".join(sorted(dict.fromkeys(vulnerability_id_str_list)))
-            else:
-                deduplicationLogger.debug("finding has no unsaved vulnerability references")
-        else:
-            vulnerability_ids = Vulnerability_Id.objects.filter(finding=self)
-            deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
-            # convert list of vulnerability_ids to the list of their canonical representation
-            vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in vulnerability_ids.all()]
-            # sort vulnerability_ids strings
-            vulnerability_id_str = "".join(sorted(vulnerability_id_str_list))
-        return vulnerability_id_str
+                return "".join(sorted(dict.fromkeys(vulnerability_id_str_list)))
+            deduplicationLogger.debug("finding has no unsaved vulnerability references")
+            return ""
+
+        def _get_saved_vulnerability_ids(finding) -> str:
+            if finding.id is not None:
+                vulnerability_ids = Vulnerability_Id.objects.filter(finding=finding)
+                deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
+                # convert list of vulnerability_ids to the list of their canonical representation
+                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in vulnerability_ids.all()]
+                # sort vulnerability_ids strings
+                return "".join(sorted(vulnerability_id_str_list))
+            return ""
+
+        return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnerability_ids(self)
 
     # Get endpoints to use for hash_code computation
     # (This sometimes reports "None")
     def get_endpoints(self):
-        endpoint_str = ""
-        if (self.id is None):
-            if len(self.unsaved_endpoints) > 0:
+
+        def _get_unsaved_endpoints(finding) -> str:
+            if len(finding.unsaved_endpoints) > 0:
                 deduplicationLogger.debug("get_endpoints before the finding was saved")
                 # convert list of unsaved endpoints to the list of their canonical representation
-                endpoint_str_list = [str(endpoint) for endpoint in self.unsaved_endpoints]
+                endpoint_str_list = [str(endpoint) for endpoint in finding.unsaved_endpoints]
                 # deduplicate (usually done upon saving finding) and sort endpoints
-                endpoint_str = "".join(
-                    sorted(
-                        dict.fromkeys(endpoint_str_list)))
-            else:
-                # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
-                # In this case, before saving the finding, both static_finding and dynamic_finding are True
-                # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
-                deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
-        else:
-            deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
-            # convert list of endpoints to the list of their canonical representation
-            endpoint_str_list = [str(endpoint) for endpoint in self.endpoints.all()]
-            # sort endpoints strings
-            endpoint_str = "".join(
-                sorted(
-                    endpoint_str_list,
-                ))
-        return endpoint_str
+                return "".join(dict.fromkeys(endpoint_str_list))
+            # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
+            # In this case, before saving the finding, both static_finding and dynamic_finding are True
+            # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
+            deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
+            return ""
+
+        def _get_saved_endpoints(finding) -> str:
+            if finding.id is not None:
+                deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(finding.endpoints.count()))
+                # convert list of endpoints to the list of their canonical representation
+                endpoint_str_list = [str(endpoint) for endpoint in finding.endpoints.all()]
+                # sort endpoints strings
+                return "".join(sorted(endpoint_str_list))
+            return ""
+
+        return _get_saved_endpoints(self) or _get_unsaved_endpoints(self)
 
     # Compute the hash_code from the fields to hash
     def hash_fields(self, fields_to_hash):
@@ -3084,9 +3095,8 @@ class Finding(models.Model):
         return ", ".join([str(s) for s in status])
 
     def _age(self, start_date):
-        from dateutil.parser import parse
         if start_date and isinstance(start_date, str):
-            start_date = parse(start_date).date()
+            start_date = datetutilsparse(start_date).date()
 
         if isinstance(start_date, datetime):
             start_date = start_date.date()
@@ -3183,7 +3193,7 @@ class Finding(models.Model):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self)
 
     @cached_property
@@ -3196,12 +3206,12 @@ class Finding(models.Model):
         if not self.has_finding_group:
             return False
 
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self.finding_group)
 
     @property
     def has_jira_configured(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_configured(self)
 
     @cached_property
@@ -3281,7 +3291,7 @@ class Finding(models.Model):
         return ""
 
     def get_sast_source_file_path_with_link(self):
-        from dojo.utils import create_bleached_link
+        from dojo.utils import create_bleached_link  # noqa: PLC0415 circular import
         if self.sast_source_file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
@@ -3292,7 +3302,7 @@ class Finding(models.Model):
         return create_bleached_link(link, self.sast_source_file_path)
 
     def get_file_path_with_link(self):
-        from dojo.utils import create_bleached_link
+        from dojo.utils import create_bleached_link  # noqa: PLC0415 circular import
         if self.file_path is None:
             return None
         if self.test.engagement.source_code_management_uri is None:
@@ -3406,9 +3416,7 @@ class Finding(models.Model):
         return link
 
     def get_references_with_links(self):
-        import re
-
-        from dojo.utils import create_bleached_link
+        from dojo.utils import create_bleached_link  # noqa: PLC0415 circular import
         if self.references is None:
             return None
         matches = re.findall(r"([\(|\[]?(https?):((//)|(\\\\))+([\w\d:#@%/;$~_?\+-=\\\.&](#!)?)*[\)|\]]?)", self.references)
@@ -3452,7 +3460,7 @@ class Finding(models.Model):
         return (self.sla_expiration_date and self.sla_expiration_date < timezone.now().date())
 
     def set_hash_code(self, dedupe_option):
-        from dojo.utils import get_custom_method
+        from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
         if hash_method := get_custom_method("FINDING_HASH_METHOD"):
             hash_method(self, dedupe_option)
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
@@ -3481,7 +3489,6 @@ class Vulnerability_Id(models.Model):
         return self.vulnerability_id
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_finding", args=[str(self.finding.id)])
 
 
@@ -3524,7 +3531,7 @@ class Finding_Group(TimeStampedModel):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         return jira_helper.has_jira_issue(self)
 
     @cached_property
@@ -3585,7 +3592,6 @@ class Finding_Group(TimeStampedModel):
         return min(find.get_sla_start_date() for find in self.findings.all())
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("view_test", args=[str(self.test.id)])
 
     class Meta:
@@ -3624,7 +3630,6 @@ class Finding_Template(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("edit_template", args=[str(self.id)])
 
     def get_breadcrumbs(self):
@@ -4567,7 +4572,7 @@ class TextQuestion(Question):
 
     def get_form(self):
         """Returns the form for this model"""
-        from .forms import TextQuestionForm
+        from .forms import TextQuestionForm  # noqa: PLC0415
         return TextQuestionForm
 
 
@@ -4600,7 +4605,7 @@ class ChoiceQuestion(Question):
 
     def get_form(self):
         """Returns the form for this model"""
-        from .forms import ChoiceQuestionForm
+        from .forms import ChoiceQuestionForm  # noqa: PLC0415
         return ChoiceQuestionForm
 
 
@@ -4700,25 +4705,12 @@ class ChoiceAnswer(Answer):
         return "No Response"
 
 
-if settings.ENABLE_AUDITLOG:
-    # Register for automatic logging to database
-    logger.info("enabling audit logging")
-    auditlog.register(Dojo_User, exclude_fields=["password"])
-    auditlog.register(Endpoint)
-    auditlog.register(Engagement)
-    auditlog.register(Finding, m2m_fields={"reviewers"})
-    auditlog.register(Finding_Group)
-    auditlog.register(Product_Type)
-    auditlog.register(Product)
-    auditlog.register(Test)
-    auditlog.register(Risk_Acceptance)
-    auditlog.register(Finding_Template)
-    auditlog.register(Cred_User, exclude_fields=["password"])
-    auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
+# Audit logging registration is now handled in auditlog.py and configured in apps.py
+# This allows for conditional registration of either django-auditlog or django-pghistory
+# The audit system is configured in DojoAppConfig.ready() to ensure all models are loaded
 
 
 from dojo.utils import (  # noqa: E402  # there is issue due to a circular import
-    calculate_grade,
     parse_cvss_data,
     to_str_typed,
 )

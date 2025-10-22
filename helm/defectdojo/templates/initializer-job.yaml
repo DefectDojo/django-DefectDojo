@@ -39,12 +39,13 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
-      {{- if .Values.imagePullSecrets }}
+      automountServiceAccountToken: {{ .Values.initializer.automountServiceAccountToken }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-      - name: {{ .Values.imagePullSecrets }}
+      - name: {{ . }}
       {{- end }}
       volumes:
-      {{- if  .Values.localsettingspy }}
+      {{- if .Values.localsettingspy }}
       - name: localsettingspy
         configMap:
           name: {{ $fullName }}-localsettingspy
@@ -62,7 +63,7 @@ spec:
           {{- end }}
       {{- end }}
       initContainers:
-      {{- if .Values.cloudsql.enabled  }}
+      {{- if .Values.cloudsql.enabled }}
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
@@ -78,6 +79,13 @@ spec:
         {{- end }}
         {{- if .Values.cloudsql.use_private_ip }}
         - "-ip_address_types=PRIVATE"
+        {{- end }}
+        volumeMounts:
+        {{- range .Values.initializer.extraVolumes }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
         {{- end }}
       {{- end }}
       - name: wait-for-db
@@ -95,14 +103,21 @@ spec:
         - configMapRef:
             name: {{ $fullName }}
         - secretRef:
-            name: {{ $fullName }}
+            name: {{ $fullName }}-extrasecrets
             optional: true
         env:
-        {{- with .Values.extraEnv }}
+        {{- with .Values.initializer.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         resources:
           {{- toYaml .Values.initializer.resources | nindent 10 }}
+        volumeMounts:
+        {{- range .Values.initializer.extraVolumes }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
       containers:
       - name: initializer
         image: "{{ template "initializer.repository" . }}:{{ .Values.tag }}"
@@ -112,7 +127,7 @@ spec:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
         {{- end }}
         volumeMounts:
-        {{- if  .Values.localsettingspy }}
+        {{- if .Values.localsettingspy }}
         - name: localsettingspy
           readOnly: true
           mountPath: /app/dojo/settings/local_settings.py
@@ -131,13 +146,17 @@ spec:
             name: {{ $fullName }}
         - secretRef:
             name: {{ $fullName }}
+            optional: true
+        - secretRef:
+            name: {{ $fullName }}-extrasecrets
+            optional: true
         env:
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Values.postgresql.auth.existingSecret }}
               key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
-        {{- with .Values.extraEnv }}
+        {{- with .Values.initializer.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         resources:

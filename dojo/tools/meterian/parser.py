@@ -114,7 +114,7 @@ class MeterianParser:
                     ref_link = self.get_reference_url(link)
                     if ref_link is not None:
                         references += "- " + ref_link + "\n"
-                if references != "":
+                if references:
                     finding.references = references
 
                 findings.append(finding)

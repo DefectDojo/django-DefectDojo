@@ -11,7 +11,8 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.http import FileResponse, Http404, HttpResponse
+from django.db.models.query import QuerySet as DjangoQuerySet
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -31,6 +32,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
+import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
     mixins as dojo_mixins,
@@ -40,6 +42,7 @@ from dojo.api_v2 import (
     prefetch,
     serializers,
 )
+from dojo.api_v2.prefetch.prefetcher import _Prefetcher
 from dojo.authorization.roles_permissions import Permissions
 from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.endpoint.queries import (
@@ -83,6 +86,7 @@ from dojo.jira_link.queries import (
     get_authorized_jira_issues,
     get_authorized_jira_projects,
 )
+from dojo.labels import get_labels
 from dojo.models import (
     Announcement,
     Answer,
@@ -175,6 +179,9 @@ from dojo.utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+labels = get_labels()
 
 
 def schema_with_prefetch() -> dict:
@@ -584,8 +591,6 @@ class EngagementViewSet(
     )
     @action(detail=True, methods=["get", "post"])
     def complete_checklist(self, request, pk=None):
-        from dojo.api_v2.prefetch.prefetcher import _Prefetcher
-
         engagement = self.get_object()
         check_lists = Check_List.objects.filter(engagement=engagement)
         if request.method == "POST":
@@ -925,49 +930,27 @@ class FindingViewSet(
         if request.method == "POST":
             finding_close = serializers.FindingCloseSerializer(
                 data=request.data,
+                context={"request": request},
             )
             if finding_close.is_valid():
-                finding.is_mitigated = finding_close.validated_data[
-                    "is_mitigated"
-                ]
-                if settings.EDITABLE_MITIGATED_DATA:
-                    finding.mitigated = (
-                        finding_close.validated_data["mitigated"]
-                        or timezone.now()
-                    )
-                else:
-                    finding.mitigated = timezone.now()
-                finding.mitigated_by = request.user
-                finding.active = False
-                finding.false_p = finding_close.validated_data.get(
-                    "false_p", False,
+                # Use shared helper to perform close operations
+                finding_helper.close_finding(
+                    finding=finding,
+                    user=request.user,
+                    is_mitigated=finding_close.validated_data["is_mitigated"],
+                    mitigated=(finding_close.validated_data.get("mitigated") if finding_helper.can_edit_mitigated_data(request.user) else timezone.now()),
+                    mitigated_by=finding_close.validated_data.get("mitigated_by") or (request.user if not finding_helper.can_edit_mitigated_data(request.user) else None),
+                    false_p=finding_close.validated_data.get("false_p", False),
+                    out_of_scope=finding_close.validated_data.get("out_of_scope", False),
+                    duplicate=finding_close.validated_data.get("duplicate", False),
+                    note_entry=finding_close.validated_data.get("note"),
+                    note_type=finding_close.validated_data.get("note_type"),
                 )
-                finding.duplicate = finding_close.validated_data.get(
-                    "duplicate", False,
-                )
-                finding.out_of_scope = finding_close.validated_data.get(
-                    "out_of_scope", False,
-                )
-
-                endpoints_status = finding.status_finding.all()
-                for e_status in endpoints_status:
-                    e_status.mitigated_by = request.user
-                    if settings.EDITABLE_MITIGATED_DATA:
-                        e_status.mitigated_time = (
-                            finding_close.validated_data["mitigated"]
-                            or timezone.now()
-                        )
-                    else:
-                        e_status.mitigated_time = timezone.now()
-                    e_status.mitigated = True
-                    e_status.last_modified = timezone.now()
-                    e_status.save()
-                finding.save()
             else:
                 return Response(
                     finding_close.errors, status=status.HTTP_400_BAD_REQUEST,
                 )
-        serialized_finding = serializers.FindingCloseSerializer(finding)
+        serialized_finding = serializers.FindingCloseSerializer(finding, context={"request": request})
         return Response(serialized_finding.data)
 
     @extend_schema(
@@ -2648,7 +2631,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             jira_driver = test or (engagement or (product or None))
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
-        logger.debug(f"push_to_jira: {push_to_jira}")
+        logger.debug("push_to_jira: %s", push_to_jira)
         serializer.save(push_to_jira=push_to_jira)
 
 
@@ -2747,7 +2730,7 @@ def report_generate(request, obj, options):
     if type(obj).__name__ == "Product_Type":
         product_type = obj
 
-        report_name = "Product Type Report: " + str(product_type)
+        report_name = labels.ORG_REPORT_WITH_NAME_TITLE % {"name": str(product_type)}
 
         findings = report_finding_filter_class(
             request.GET,
@@ -2776,7 +2759,7 @@ def report_generate(request, obj, options):
     elif type(obj).__name__ == "Product":
         product = obj
 
-        report_name = "Product Report: " + str(product)
+        report_name = labels.ASSET_REPORT_WITH_NAME_TITLE % {"name": str(product)}
 
         findings = report_finding_filter_class(
             request.GET,
@@ -2832,16 +2815,19 @@ def report_generate(request, obj, options):
             ),
         )
 
-    elif type(obj).__name__ == "CastTaggedQuerySet":
+    elif isinstance(obj, DjangoQuerySet):
+        # Support any Django QuerySet (including Tagulous CastTaggedQuerySet)
         findings = report_finding_filter_class(
             request.GET,
             queryset=prefetch_related_findings_for_report(obj).distinct(),
         )
 
         report_name = "Finding"
-
     else:
-        raise Http404
+        obj_type = type(obj).__name__
+        msg = f"Report cannot be generated for object of type {obj_type}"
+        logger.warning(msg)
+        raise ValidationError(msg)
 
     result = {
         "product_type": product_type,

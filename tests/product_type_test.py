@@ -22,7 +22,7 @@ class ProductTypeTest(BaseTestCase):
         driver.find_element(By.ID, "id_critical_product").click()
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_success_message_present(text="Product type added successfully."))
+        self.assertTrue(self.is_success_message_present(text="Product Type added successfully."))
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
@@ -69,7 +69,7 @@ class ProductTypeTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").send_keys("Edited product test type")
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_success_message_present(text="Product type updated successfully."))
+        self.assertTrue(self.is_success_message_present(text="Product Type updated successfully."))
 
     def test_delete_product_type(self):
         logger.debug("\n\nDebug Print Log: testing 'delete product type' \n")

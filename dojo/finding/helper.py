@@ -7,10 +7,12 @@ from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
 from django.db.utils import IntegrityError
 from django.dispatch.dispatcher import receiver
+from django.urls import reverse
 from django.utils import timezone
 from fieldsignals import pre_save_changed
 
 import dojo.jira_link.helper as jira_helper
+import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.endpoint.utils import save_endpoints_to_add
@@ -21,13 +23,24 @@ from dojo.models import (
     Engagement,
     Finding,
     Finding_Group,
+    Notes,
     System_Settings,
     Test,
     Vulnerability_Id,
     Vulnerability_Id_Template,
 )
 from dojo.notes.helper import delete_related_notes
-from dojo.utils import get_current_user, mass_model_updater, to_str_typed
+from dojo.notifications.helper import create_notification
+from dojo.tools import tool_issue_updater
+from dojo.utils import (
+    calculate_grade,
+    close_external_issue,
+    do_dedupe_finding,
+    do_false_positive_history,
+    get_current_user,
+    mass_model_updater,
+    to_str_typed,
+)
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -116,10 +129,13 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
             new_state_finding.mitigated = None
             new_state_finding.mitigated_by = None
 
-    # people may try to remove mitigated/mitigated_by by accident
+    # Ensure mitigated metadata is present for mitigated findings
+    # If values are provided (including custom ones), keep them; if missing, set defaults
     if new_state_finding.is_mitigated:
-        new_state_finding.mitigated = new_state_finding.mitigated or now
-        new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
+        if not new_state_finding.mitigated:
+            new_state_finding.mitigated = now
+        if not new_state_finding.mitigated_by:
+            new_state_finding.mitigated_by = user
 
     if is_new_finding or "active" in changed_fields:
         # finding is being (re)activated
@@ -153,8 +169,26 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
     new_state_finding.last_status_update = now
 
 
+def filter_findings_by_existence(findings):
+    """
+    Return only findings that still exist in the database (by id).
+
+    Centralized helper used by importers to avoid FK violations during
+    bulk_create.
+    """
+    if not findings:
+        return []
+    candidate_ids = [finding.id for finding in findings if getattr(finding, "id", None)]
+    if not candidate_ids:
+        return []
+    existing_ids = set(
+        Finding.objects.filter(id__in=candidate_ids).values_list("id", flat=True),
+    )
+    return [finding for finding in findings if finding.id in existing_ids]
+
+
 def can_edit_mitigated_data(user):
-    return settings.EDITABLE_MITIGATED_DATA and user.is_superuser
+    return settings.EDITABLE_MITIGATED_DATA and user and getattr(user, "is_superuser", False)
 
 
 def create_finding_group(finds, finding_group_name):
@@ -263,7 +297,6 @@ def get_group_by_group_name(finding, finding_group_by_option):
     else:
         msg = f"Invalid group_by option {finding_group_by_option}"
         raise ValueError(msg)
-
     if group_name:
         return f"Findings in: {group_name}"
 
@@ -350,10 +383,32 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
 
 
 @dojo_model_to_id
+@dojo_async_task(signature=True)
+@app.task
+@dojo_model_from_id
+def post_process_finding_save_signature(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+    """
+    Returns a task signature for post-processing a finding. This is useful for creating task signatures
+    that can be used in chords or groups or to await results. We need this extra method because of our dojo_async decorator.
+    If we use more of these celery features, we should probably move away from that decorator.
+    """
+    return post_process_finding_save_internal(finding, dedupe_option, rules_option, product_grading_option,
+                                   issue_updater_option, push_to_jira, user, *args, **kwargs)
+
+
+@dojo_model_to_id
 @dojo_async_task
 @app.task
 @dojo_model_from_id
 def post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+
+    return post_process_finding_save_internal(finding, dedupe_option, rules_option, product_grading_option,
+                                   issue_updater_option, push_to_jira, user, *args, **kwargs)
+
+
+def post_process_finding_save_internal(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
 
     if not finding:
@@ -366,7 +421,6 @@ def post_process_finding_save(finding, dedupe_option=True, rules_option=True, pr
     if dedupe_option:
         if finding.hash_code is not None:
             if system_settings.enable_deduplication:
-                from dojo.utils import do_dedupe_finding
                 do_dedupe_finding(finding, *args, **kwargs)
             else:
                 deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
@@ -378,17 +432,14 @@ def post_process_finding_save(finding, dedupe_option=True, rules_option=True, pr
         if system_settings.enable_deduplication:
             deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
         else:
-            from dojo.utils import do_false_positive_history
             do_false_positive_history(finding, *args, **kwargs)
 
     # STEP 2 run all non-status changing tasks as celery tasks in the background
     if issue_updater_option:
-        from dojo.tools import tool_issue_updater
         tool_issue_updater.async_tool_issue_update(finding)
 
     if product_grading_option:
         if system_settings.enable_product_grade:
-            from dojo.utils import calculate_grade
             calculate_grade(finding.test.engagement.product)
         else:
             deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
@@ -396,7 +447,6 @@ def post_process_finding_save(finding, dedupe_option=True, rules_option=True, pr
     # Adding a snippet here for push to JIRA so that it's in one place
     if push_to_jira:
         logger.debug("pushing finding %s to jira from finding.save()", finding.pk)
-        import dojo.jira_link.helper as jira_helper
 
         # current approach is that whenever a finding is in a group, the group will be pushed to JIRA
         # based on feedback we could introduct another push_group_to_jira boolean everywhere
@@ -452,7 +502,6 @@ def finding_post_delete(sender, instance, **kwargs):
     # Catch instances in async delete where a single object is deleted more than once
     with suppress(Finding.DoesNotExist):
         logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
-        # calculate_grade(instance.test.engagement.product)
 
 
 def reset_duplicate_before_delete(dupe):
@@ -579,13 +628,16 @@ def engagement_post_delete(sender, instance, **kwargs):
 def fix_loop_duplicates():
     """Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates."""
     """ i.e. A -> B -> C. This can lead to problems when deleting findingns, performing deduplication, etc """
-    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).order_by("-id")
+    # Build base queryset without selecting full rows to minimize memory
+    loop_qs = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False)
 
-    loop_count = len(candidates)
+    # Use COUNT(*) at the DB instead of materializing the queryset
+    loop_count = loop_qs.count()
 
     if loop_count > 0:
-        deduplicationLogger.info(f"Identified {len(candidates)} Findings with Loops")
-        for find_id in candidates.values_list("id", flat=True):
+        deduplicationLogger.info(f"Identified {loop_count} Findings with Loops")
+        # Stream IDs only in descending order to avoid loading full Finding rows
+        for find_id in loop_qs.order_by("-id").values_list("id", flat=True).iterator(chunk_size=1000):
             removeLoop(find_id, 50)
 
         new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
@@ -686,3 +738,91 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
         finding_template.cve = vulnerability_ids[0]
     else:
         finding_template.cve = None
+
+
+def close_finding(
+    *,
+    finding,
+    user,
+    is_mitigated,
+    mitigated,
+    mitigated_by,
+    false_p,
+    out_of_scope,
+    duplicate,
+    note_entry=None,
+    note_type=None,
+) -> None:
+    """
+    Shared close logic used by UI and API.
+
+    Handles status updates, endpoint statuses, risk acceptance, external issues,
+    JIRA sync, and notification.
+    """
+    # Core status updates
+    finding.is_mitigated = is_mitigated
+    now = timezone.now()
+    finding.mitigated = mitigated or now
+    finding.mitigated_by = mitigated_by or user
+    finding.active = False
+    finding.false_p = bool(false_p)
+    finding.out_of_scope = bool(out_of_scope)
+    finding.duplicate = bool(duplicate)
+    finding.under_review = False
+    finding.last_reviewed = finding.mitigated
+    finding.last_reviewed_by = user
+
+    # Create note if provided
+    new_note = None
+    if note_entry:
+        new_note = Notes.objects.create(
+            entry=note_entry,
+            author=user,
+            note_type=note_type,
+            date=finding.mitigated,
+        )
+        finding.notes.add(new_note)
+
+    # Endpoint statuses
+    for status in finding.status_finding.all():
+        status.mitigated_by = finding.mitigated_by
+        status.mitigated_time = finding.mitigated
+        status.mitigated = True
+        status.last_modified = timezone.now()
+        status.save()
+
+    # Risk acceptance
+    ra_helper.risk_unaccept(user, finding, perform_save=False)
+
+    # External issues (best effort)
+    close_external_issue(finding, "Closed by defectdojo", "github")
+
+    # JIRA sync
+    push_to_jira = False
+    finding_in_group = finding.has_finding_group
+    jira_issue_exists = finding.has_jira_issue or (
+        finding.finding_group and finding.finding_group.has_jira_issue
+    )
+    jira_instance = jira_helper.get_jira_instance(finding)
+    jira_project = jira_helper.get_jira_project(finding)
+    if jira_issue_exists:
+        push_to_jira = (
+            jira_helper.is_push_all_issues(finding)
+            or (jira_instance and jira_instance.finding_jira_sync)
+        )
+        if new_note and (getattr(jira_project, "push_notes", False) or push_to_jira) and not finding_in_group:
+            jira_helper.add_comment(finding, new_note, force_push=True)
+
+    # Persist and push JIRA if applicable
+    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+    if push_to_jira and finding_in_group:
+        jira_helper.push_to_jira(finding.finding_group)
+
+    # Notification
+    create_notification(
+        event="finding_closed",
+        title=f"Closing of {finding.title}",
+        finding=finding,
+        description=f'The finding "{finding.title}" was closed by {user}',
+        url=reverse("view_finding", args=(finding.id,)),
+    )
