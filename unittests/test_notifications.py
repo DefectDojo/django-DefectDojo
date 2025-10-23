@@ -927,20 +927,6 @@ class TestNotificationWebhooks(DojoTestCase):
                     "url_api": f"http://localhost:8080/api/v2/findings/{untouched_finding.id}/",
                     "url_ui": f"http://localhost:8080/finding/{untouched_finding.id}",
                 }],
-                "reactivated": [{
-                    "id": 236,
-                    "title": "Reactivated Finding",
-                    "severity": "Low",
-                    "url_api": "http://localhost:8080/api/v2/findings/236/",
-                    "url_ui": "http://localhost:8080/finding/236",
-                }],
-                "untouched": [{
-                    "id": 237,
-                    "title": "Untouched Finding",
-                    "severity": "Info",
-                    "url_api": "http://localhost:8080/api/v2/findings/237/",
-                    "url_ui": "http://localhost:8080/finding/237",
-                }],
             })
 
         with self.subTest("scan_added problematic titles"):
@@ -998,20 +984,6 @@ class TestNotificationWebhooks(DojoTestCase):
                     "severity": "Info",
                     "url_api": f"http://localhost:8080/api/v2/findings/{quotation2_untouched_finding.id}/",
                     "url_ui": f"http://localhost:8080/finding/{quotation2_untouched_finding.id}",
-                }],
-                "reactivated": [{
-                    "id": 240,
-                    "title": '"Quotation1" Reactivated Finding',
-                    "severity": "Low",
-                    "url_api": "http://localhost:8080/api/v2/findings/240/",
-                    "url_ui": "http://localhost:8080/finding/240",
-                }],
-                "untouched": [{
-                    "id": 241,
-                    "title": "'Quotation2' Untouched Finding",
-                    "severity": "Info",
-                    "url_api": "http://localhost:8080/api/v2/findings/241/",
-                    "url_ui": "http://localhost:8080/finding/241",
                 }],
             })
 
