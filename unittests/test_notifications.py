@@ -428,6 +428,7 @@ class TestNotificationWebhooks(DojoTestCase):
             super().run(result)
 
     def setUp(self):
+        self.system_settings(enable_webhooks_notifications=True)
         self.sys_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.url_base = "http://webhook.endpoint:8080"
 
