@@ -76,6 +76,7 @@
                             "type": "array"
                         },
                         "image": {
+                            "description": "If empty, uses values from images.django.image",
                             "type": "object",
                             "properties": {
                                 "digest": {
@@ -199,6 +200,7 @@
                             "type": "array"
                         },
                         "image": {
+                            "description": "If empty, uses values from images.django.image",
                             "type": "object",
                             "properties": {
                                 "digest": {
@@ -364,6 +366,7 @@
                     "type": "array"
                 },
                 "image": {
+                    "description": "If empty, uses values from images.django.image",
                     "type": "object",
                     "properties": {
                         "digest": {
@@ -531,6 +534,7 @@
                             "type": "array"
                         },
                         "image": {
+                            "description": "If empty, uses values from images.nginx.image",
                             "type": "object",
                             "properties": {
                                 "digest": {
@@ -677,6 +681,7 @@
                             "type": "array"
                         },
                         "image": {
+                            "description": "If empty, uses values from images.django.image",
                             "type": "object",
                             "properties": {
                                 "digest": {
@@ -858,6 +863,7 @@
                             "type": "object",
                             "properties": {
                                 "digest": {
+                                    "description": "Prefix \"sha@\" is expected in this place",
                                     "type": "string"
                                 },
                                 "registry": {
@@ -867,6 +873,7 @@
                                     "type": "string"
                                 },
                                 "tag": {
+                                    "description": "If empty, use appVersion. Another possible values are: latest, X.X.X, X.X.X-debian, X.X.X-alpine (where X.X.X is version of DD). For dev builds (only for testing purposes): nightly-dev, nightly-dev-debian, nightly-dev-alpine. To see all, check https://hub.docker.com/r/defectdojo/defectdojo-django/tags.",
                                     "type": "string"
                                 }
                             }
@@ -880,6 +887,7 @@
                             "type": "object",
                             "properties": {
                                 "digest": {
+                                    "description": "Prefix \"sha@\" is expected in this place",
                                     "type": "string"
                                 },
                                 "registry": {
@@ -889,6 +897,7 @@
                                     "type": "string"
                                 },
                                 "tag": {
+                                    "description": "If empty, use appVersion. Another possible values are: latest, X.X.X, X.X.X-alpine (where X.X.X is version of DD). For dev builds (only for testing purposes): nightly-dev, nightly-dev-alpine. To see all, check https://hub.docker.com/r/defectdojo/defectdojo-nginx/tags.",
                                     "type": "string"
                                 }
                             }
@@ -926,6 +935,7 @@
                     "type": "array"
                 },
                 "image": {
+                    "description": "If empty, uses values from images.django.image",
                     "type": "object",
                     "properties": {
                         "digest": {
@@ -1353,6 +1363,7 @@
                             "type": "boolean"
                         },
                         "image": {
+                            "description": "If empty, uses values from images.django.image",
                             "type": "object",
                             "properties": {
                                 "digest": {

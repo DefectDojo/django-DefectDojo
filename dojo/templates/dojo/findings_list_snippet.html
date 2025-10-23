@@ -664,7 +664,7 @@
                                                 title="Test: {{ finding.test }}">{{ finding.test.test_type }}</a>
                                             {% endif %}
                                         </td>
-                                        <td class="nowrap">
+                                        <td class="nowrap" title="unique_id_from_tool: {{ finding.unique_id_from_tool }}, hash_code: {{ finding.hash_code }}">
                                             {{ finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}
                                         </td>
                                         {% if system_settings.enable_jira %}
