@@ -36,7 +36,6 @@ def check_field_permissions(request, post_model, post_pk):
     """ Check if user has permission to edit specific fields based on their role group. """
 
     FIELD_PERMISSIONS = {
-        "Admin": "__all__",
         "Risk": {f"expiration_date": Permissions.Risk_Acceptance_Expire_Date_Edit},
         "Developer": {},
         "Leader": {},
@@ -399,7 +398,7 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
                 return check_post_permission(
                     request, Product, "product", Permissions.Risk_Acceptance,
                 )
-        return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
