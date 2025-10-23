@@ -3,51 +3,19 @@
 
 {% block head_extra %}
     {{ block.super }}
-    <!-- fullCalendar CSS from CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.5/dist/fullcalendar.min.css" rel="stylesheet" />
-{% endblock %}
-
-{% block content %}
-    {{ block.super }}
-    <form method="GET" id="calfilter" action="/calendar">
-        <div class="container-fluid chosen-container side-by-side">
-            <div class="row">
-                <div style="display: inline-block;">
-                    <select data-placeholder="Calendar type" id="caltype" class="chosen-select">
-                        <option value="engagements">Engagements</option>
-                        <option value="tests">Tests</option>
-                    </select>
-                </div>
-                <div style="display: inline-block;">
-                    <select data-placeholder="All users" multiple id="lead" name="lead" class="chosen-select">
-                        <option value="0">All users</option>
-                        <option value="-1">Unassigned</option>
-                        {% for u in users %}
-                            <option value="{{ u.id }}">{{ u.username }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div style="display: inline-block;">
-                    <input class="btn btn-primary" type="submit" value="Apply" />
-                </div>
-            </div>
-        </div>
-    </form>
-    <br/><br/>
-    <div id="calendar"></div>
-    <br/><br/>
+    <!-- Using locally stored FullCalendar CSS (no external CDN) -->
+    <link href="{% static 'vendor/fullcalendar/fullcalendar.min.css' %}" rel="stylesheet" />
 {% endblock %}
 
 {% block postscript %}
     {{ block.super }}
-    <!-- jQuery and fullCalendar JS from CDN -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.5/dist/fullcalendar.min.js"></script>
+    <!-- Using locally stored JS libraries to avoid missing SRI on external CDNs -->
+    <script src="{% static 'vendor/fullcalendar/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/fullcalendar/moment.min.js' %}"></script>
+    <script src="{% static 'vendor/fullcalendar/fullcalendar.min.js' %}"></script>
 
     <script>
         $(function () {
-            // Change form action on calendar type change
             $('#caltype').change(function() {
                 $('#calfilter').attr('action', '/calendar/' + $(this).val());
             });
@@ -66,7 +34,7 @@
                     right: 'month,basicWeek,basicDay'
                 },
                 editable: false,
-                eventLimit: true,
+                eventLimit: true, // allow "more" link when too many events
                 events: [
                     {% if caltype == 'tests' %}
                         {% for t in tests %}
@@ -102,7 +70,7 @@
                 dayRender: function(date, cell) {
                     // Highlight Saturdays and Sundays
                     if (date.day() === 0 || date.day() === 6) {
-                        cell.css("background-color", "#f0e68c"); // light yellow
+                        cell.css("background-color", "#f0e68c");
                     }
                 }
             });
