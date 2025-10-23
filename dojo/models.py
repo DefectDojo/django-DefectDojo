@@ -25,7 +25,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
 from django.db import connection, models
-from django.db.models import Count, JSONField, Q
+from django.db.models import Count, F, JSONField, Q
 from django.db.models.expressions import Case, When
 from django.db.models.functions import Lower
 from django.urls import reverse
@@ -1690,6 +1690,17 @@ class Endpoint_Status(models.Model):
         indexes = [
             models.Index(fields=["finding", "mitigated"]),
             models.Index(fields=["endpoint", "mitigated"]),
+            # Optimize frequent lookups of "active" statuses (mitigated/flags all False)
+            models.Index(
+                name="idx_eps_active_by_endpoint",
+                fields=["endpoint"],
+                condition=Q(mitigated=False, false_positive=False, out_of_scope=False, risk_accepted=False),
+            ),
+            models.Index(
+                name="idx_eps_active_by_finding",
+                fields=["finding"],
+                condition=Q(mitigated=False, false_positive=False, out_of_scope=False, risk_accepted=False),
+            ),
         ]
         constraints = [
             models.UniqueConstraint(fields=["finding", "endpoint"], name="endpoint-finding relation"),
@@ -1749,6 +1760,12 @@ class Endpoint(models.Model):
         ordering = ["product", "host", "protocol", "port", "userinfo", "path", "query", "fragment"]
         indexes = [
             models.Index(fields=["product"]),
+            # Fast case-insensitive equality on host within product scope
+            models.Index(
+                F("product"),
+                Lower("host"),
+                name="idx_ep_product_lower_host",
+            ),
         ]
 
     def __hash__(self):

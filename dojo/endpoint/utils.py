@@ -6,7 +6,6 @@ import re
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv46_address
-from django.db import transaction
 from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -55,21 +54,24 @@ def endpoint_filter(**kwargs):
 
 
 def endpoint_get_or_create(**kwargs):
-    with transaction.atomic():
-        qs = endpoint_filter(**kwargs)
-        count = qs.count()
-        if count == 0:
-            return Endpoint.objects.get_or_create(**kwargs)
-        if count == 1:
-            return qs.order_by("id").first(), False
-        logger.warning(
-            f"Endpoints in your database are broken. "
-            f"Please access {reverse('endpoint_migrate')} and migrate them to new format or remove them.",
-        )
-        # Get the oldest endpoint first, and return that instead
-        # a datetime is not captured on the endpoint model, so ID
-        # will have to work here instead
-        return qs.order_by("id").first(), False
+    qs = endpoint_filter(**kwargs)
+    # Fetch up to two matches in a single round-trip. This covers
+    # the common cases efficiently: zero (create) or one (reuse).
+    matches = list(qs.order_by("id")[:2])
+    if not matches:
+        # Most common case: nothing exists yet
+        return Endpoint.objects.create(**kwargs), True
+    if len(matches) == 1:
+        # Common case: exactly one existing endpoint
+        return matches[0], False
+    logger.warning(
+        f"Endpoints in your database are broken. "
+        f"Please access {reverse('endpoint_migrate')} and migrate them to new format or remove them.",
+    )
+    # Get the oldest endpoint first, and return that instead
+    # a datetime is not captured on the endpoint model, so ID
+    # will have to work here instead
+    return matches[0], False
 
 
 def clean_hosts_run(apps, change):
