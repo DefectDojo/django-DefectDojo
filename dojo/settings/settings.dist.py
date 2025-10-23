@@ -93,7 +93,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
-    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 100),
+    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 10),
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
