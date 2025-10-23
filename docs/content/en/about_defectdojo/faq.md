@@ -12,9 +12,7 @@ Here are some frequently asked questions about working with DefectDojo - both in
 
 ### How should I organize my security testing in DefectDojo?
 
-DefectDojo can support any security testing or reporting environment, but to optimize your use of DefectDojo you'll need to make sure things are in the right place.
-
-There's no one-size-fits-all solution for DefectDojo, because everyone's security team and operations look different.  We have a very detailed article on [common use cases](/en/about_defectdojo/examples_of_use/) that has examples of how different organizations apply RBAC and the DefectDojo data model to support their needs.
+While DefectDojo can support any security or testing environment, everyone’s security team and operations look different, so there’s no one-size-fits-all approach to using it. We have a very detailed article on [common use cases](/en/about_defectdojo/examples_of_use) that has examples of how different organizations apply RBAC and the DefectDojo data model to support their needs.
 
 ### What are the recommended workflows for security testing in DefectDojo?
 
