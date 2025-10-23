@@ -25,6 +25,19 @@ class WazuhV4_7:
                 agent_ip = item.get("agent_ip")
                 detection_time = item.get("detection_time").split("T")[0]
 
+                # Map Wazuh severity to its equivalent in DefectDojo
+                SEVERITY_MAP = {
+                    "Critical": "Critical",
+                    "High": "High",
+                    "Medium": "Medium",
+                    "Low": "Low",
+                    "Info": "Info",
+                    "Informational": "Info",
+                    "Untriaged": "Info",
+                }
+                # Get DefectDojo severity and default to "Info" if severity is not in the mapping
+                severity = SEVERITY_MAP.get(severity, "Info")
+
                 references = "\n".join(links) if links else None
 
                 title = (
