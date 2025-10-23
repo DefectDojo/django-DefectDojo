@@ -13,12 +13,14 @@
     <div class="container-fluid chosen-container side-by-side">
         <div class="row">
             <div style="display: inline-block;">
+                <label for="caltype" class="sr-only">{% trans "Calendar type" %}</label>
                 <select data-placeholder="Calendar type" id="caltype" class="chosen-select">
                     <option value="engagements">Engagements</option>
                     <option value="tests">Tests</option>
                 </select>
             </div>
             <div style="display: inline-block;">
+                <label for="lead" class="sr-only">{% trans "Select users" %}</label>
                 <select data-placeholder="All users" multiple id="lead" name="lead" class="chosen-select">
                     <option value="0">All users</option>
                     <option value="-1">Unassigned</option>
@@ -116,4 +118,3 @@
         });
     </script>
 {% endblock %}
-
