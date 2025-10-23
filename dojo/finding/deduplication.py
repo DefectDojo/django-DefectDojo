@@ -1,4 +1,5 @@
 import logging
+from operator import attrgetter
 
 import hyperlink
 from django.conf import settings
@@ -216,6 +217,39 @@ def find_candidates_for_deduplication_unique_id(test, findings, *, include_produ
     return existing_by_uid
 
 
+def deduplicate_uid_or_hash_code_old(new_finding):
+    if new_finding.test.engagement.deduplication_on_engagement:
+        existing_findings = Finding.objects.filter(
+            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code))
+            # unique_id_from_tool can only apply to the same test_type because it is parser dependent
+            | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
+            test__engagement=new_finding.test.engagement).exclude(
+                id=new_finding.id).exclude(
+                        duplicate=True).order_by("id")
+    else:
+        # same without "test__engagement=new_finding.test.engagement" condition
+        existing_findings = Finding.objects.filter(
+            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code))
+            | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
+            test__engagement__product=new_finding.test.engagement.product).exclude(
+                id=new_finding.id).exclude(
+                        duplicate=True).order_by("id")
+    deduplicationLogger.debug("Found "
+        + str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
+    for find in existing_findings:
+        if is_deduplication_on_engagement_mismatch(new_finding, find):
+            deduplicationLogger.debug(
+                "deduplication_on_engagement_mismatch, skipping dedupe.")
+            continue
+        try:
+            if are_endpoints_duplicates(new_finding, find):
+                set_duplicate(new_finding, find)
+                break
+        except Exception as e:
+            deduplicationLogger.debug(str(e))
+            continue
+
+
 def find_candidates_for_deduplication_uid_or_hash(test, findings, *, include_product_scope_filter):
     base_queryset = build_dedupe_scope_queryset(test)
     hash_codes = {f.hash_code for f in findings if getattr(f, "hash_code", None) is not None}
@@ -325,8 +359,7 @@ def match_uid_or_hash_candidate(new_finding, candidates_by_uid, candidates_by_ha
     deduplicationLogger.debug("UID_OR_HASH: combined candidate ids (sorted)=%s", sorted(combined_by_id.keys()))
     for candidate_id in sorted(combined_by_id.keys()):
         candidate = combined_by_id[candidate_id]
-        # Exclude self
-        if candidate.id == new_finding.id:
+        if not _is_candidate_older(new_finding, candidate):
             continue
         if is_deduplication_on_engagement_mismatch(new_finding, candidate):
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
@@ -407,6 +440,7 @@ def _dedupe_batch_hash_code(findings):
     if not candidates_by_hash:
         return
     for new_finding in findings:
+        deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_HASH_CODE")
         match = match_hash_candidate(new_finding, candidates_by_hash)
         if match:
             try:
@@ -423,6 +457,7 @@ def _dedupe_batch_unique_id(findings):
     if not candidates_by_uid:
         return
     for new_finding in findings:
+        deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL")
         match = match_unique_id_candidate(new_finding, candidates_by_uid)
         if match:
             try:
@@ -440,6 +475,7 @@ def _dedupe_batch_uid_or_hash(findings):
     if not (candidates_by_uid or existing_by_hash):
         return
     for new_finding in findings:
+        deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE")
         if new_finding.duplicate:
             continue
 
@@ -460,6 +496,7 @@ def _dedupe_batch_legacy(findings):
     if not (candidates_by_title or candidates_by_cwe):
         return
     for new_finding in findings:
+        deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_LEGACY")
         match = match_legacy_candidate(new_finding, candidates_by_title, candidates_by_cwe)
         if match:
             try:
@@ -471,6 +508,10 @@ def _dedupe_batch_legacy(findings):
 def dedupe_batch_of_findings(findings):
     if not findings:
         return
+
+    # sort findings by id to ensure deduplication is deterministic/reproducible
+    findings = sorted(findings, key=attrgetter("id"))
+
     test = findings[0].test
     dedup_alg = test.deduplication_algorithm
 
