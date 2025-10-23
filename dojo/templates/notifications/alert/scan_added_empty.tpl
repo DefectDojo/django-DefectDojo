@@ -1,1 +1,1 @@
-{% include "notifications/alert/scan_added.tpl" %}
+{% include notifications/alert/scan_added.tpl %}
