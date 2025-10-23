@@ -90,9 +90,12 @@ def set_duplicate(new_finding, existing_finding):
     new_finding.duplicate_finding = existing_finding
 
     # Make sure transitive duplication is flattened
-    # if A -> B and B is made a duplicate of C here, aferwards:
+    # if A -> B and B is made a duplicate of C here, afterwards:
     # A -> C and B -> C should be true
-    for find in new_finding.original_finding.all().order_by("-id"):
+    # Ordering is ensured by the prefetch in post_process_findings_batch
+    # (we prefetch "original_finding" ordered by -id), so avoid calling
+    # order_by here to prevent bypassing the prefetch cache.
+    for find in new_finding.original_finding.all():
         new_finding.original_finding.remove(find)
         set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
@@ -181,10 +184,14 @@ def build_dedupe_scope_queryset(test):
             | Q(test__engagement__deduplication_on_engagement=False)
         )
 
-    return Finding.objects.filter(scope_q)
+    return (
+        Finding.objects.filter(scope_q)
+        .select_related("test", "test__engagement", "test__test_type")
+        .prefetch_related("endpoints")
+    )
 
 
-def find_candidates_for_deduplication_hash(test, findings, *, include_product_scope_filter):
+def find_candidates_for_deduplication_hash(test, findings):
     base_queryset = build_dedupe_scope_queryset(test)
     hash_codes = {f.hash_code for f in findings if getattr(f, "hash_code", None) is not None}
     if not hash_codes:
@@ -202,7 +209,7 @@ def find_candidates_for_deduplication_hash(test, findings, *, include_product_sc
     return existing_by_hash
 
 
-def find_candidates_for_deduplication_unique_id(test, findings, *, include_product_scope_filter):
+def find_candidates_for_deduplication_unique_id(test, findings):
     base_queryset = build_dedupe_scope_queryset(test)
     unique_ids = {f.unique_id_from_tool for f in findings if getattr(f, "unique_id_from_tool", None) is not None}
     if not unique_ids:
@@ -250,7 +257,7 @@ def deduplicate_uid_or_hash_code_old(new_finding):
             continue
 
 
-def find_candidates_for_deduplication_uid_or_hash(test, findings, *, include_product_scope_filter):
+def find_candidates_for_deduplication_uid_or_hash(test, findings):
     base_queryset = build_dedupe_scope_queryset(test)
     hash_codes = {f.hash_code for f in findings if getattr(f, "hash_code", None) is not None}
     unique_ids = {f.unique_id_from_tool for f in findings if getattr(f, "unique_id_from_tool", None) is not None}
@@ -279,7 +286,7 @@ def find_candidates_for_deduplication_uid_or_hash(test, findings, *, include_pro
     return existing_by_uid, existing_by_hash
 
 
-def find_candidates_for_deduplication_legacy(test, findings, *, include_product_scope_filter):
+def find_candidates_for_deduplication_legacy(test, findings):
     base_queryset = build_dedupe_scope_queryset(test)
     titles = {f.title for f in findings if getattr(f, "title", None)}
     cwes = {f.cwe for f in findings if getattr(f, "cwe", 0)}
@@ -287,14 +294,7 @@ def find_candidates_for_deduplication_legacy(test, findings, *, include_product_
     if not titles and not cwes:
         return {}, {}
 
-    existing_qs = base_queryset.filter(Q(title__in=titles) | Q(cwe__in=cwes)).exclude(duplicate=True).prefetch_related(
-        "endpoints",
-        "test",
-        "test__engagement",
-        "found_by",
-        "original_finding",
-        "test__test_type",
-    ).order_by("id")
+    existing_qs = base_queryset.filter(Q(title__in=titles) | Q(cwe__in=cwes)).exclude(duplicate=True).order_by("id")
 
     by_title = {}
     by_cwe = {}
@@ -436,7 +436,7 @@ def _dedupe_batch_hash_code(findings):
     if not findings:
         return
     test = findings[0].test
-    candidates_by_hash = find_candidates_for_deduplication_hash(test, findings, include_product_scope_filter=True)
+    candidates_by_hash = find_candidates_for_deduplication_hash(test, findings)
     if not candidates_by_hash:
         return
     for new_finding in findings:
@@ -453,7 +453,7 @@ def _dedupe_batch_unique_id(findings):
     if not findings:
         return
     test = findings[0].test
-    candidates_by_uid = find_candidates_for_deduplication_unique_id(test, findings, include_product_scope_filter=True)
+    candidates_by_uid = find_candidates_for_deduplication_unique_id(test, findings)
     if not candidates_by_uid:
         return
     for new_finding in findings:
@@ -471,7 +471,7 @@ def _dedupe_batch_uid_or_hash(findings):
         return
 
     test = findings[0].test
-    candidates_by_uid, existing_by_hash = find_candidates_for_deduplication_uid_or_hash(test, findings, include_product_scope_filter=True)
+    candidates_by_uid, existing_by_hash = find_candidates_for_deduplication_uid_or_hash(test, findings)
     if not (candidates_by_uid or existing_by_hash):
         return
     for new_finding in findings:
@@ -492,7 +492,7 @@ def _dedupe_batch_legacy(findings):
     if not findings:
         return
     test = findings[0].test
-    candidates_by_title, candidates_by_cwe = find_candidates_for_deduplication_legacy(test, findings, include_product_scope_filter=True)
+    candidates_by_title, candidates_by_cwe = find_candidates_for_deduplication_legacy(test, findings)
     if not (candidates_by_title or candidates_by_cwe):
         return
     for new_finding in findings:

@@ -3,6 +3,7 @@ from contextlib import suppress
 from time import strftime
 
 from django.conf import settings
+from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
 from django.db.utils import IntegrityError
@@ -478,8 +479,15 @@ def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_op
     # use list() to force a complete query execution and related objects to be loaded once
     findings = list(
         Finding.objects.filter(id__in=finding_ids)
-        .select_related("test", "test__engagement", "test__engagement__product")
-        .prefetch_related("endpoints"),
+        .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
+        .prefetch_related(
+            "endpoints",
+            # Prefetch duplicates of each new finding to avoid N+1 when set_duplicate iterates
+            Prefetch(
+                "original_finding",
+                queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
+            ),
+        ),
     )
 
     if not findings:
