@@ -55,6 +55,30 @@
                         "automountServiceAccountToken": {
                             "type": "boolean"
                         },
+                        "autoscaling": {
+                            "description": "Autoscaling configuration for Celery beat deployment.",
+                            "type": "object",
+                            "properties": {
+                                "autoscaleBehavior": {
+                                    "type": "object"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "maxReplicas": {
+                                    "type": "integer"
+                                },
+                                "minReplicas": {
+                                    "type": "integer"
+                                },
+                                "targetCPUUtilizationPercentage": {
+                                    "type": "integer"
+                                },
+                                "targetMemoryUtilizationPercentage": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
                         "containerSecurityContext": {
                             "description": "Container security context for the Celery beat containers.",
                             "type": "object"
@@ -103,6 +127,21 @@
                         "podAnnotations": {
                             "description": "Annotations for the Celery beat pods.",
                             "type": "object"
+                        },
+                        "podDisruptionBudget": {
+                            "description": "Configure pod disruption budgets for Celery beat ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget",
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "minAvailable": {
+                                    "type": "string"
+                                },
+                                "unhealthyPodEvictionPolicy": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "podSecurityContext": {
                             "description": "Pod security context for the Celery beat pods.",
@@ -179,6 +218,30 @@
                         "automountServiceAccountToken": {
                             "type": "boolean"
                         },
+                        "autoscaling": {
+                            "description": "Autoscaling configuration for Celery worker deployment.",
+                            "type": "object",
+                            "properties": {
+                                "autoscaleBehavior": {
+                                    "type": "object"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "maxReplicas": {
+                                    "type": "integer"
+                                },
+                                "minReplicas": {
+                                    "type": "integer"
+                                },
+                                "targetCPUUtilizationPercentage": {
+                                    "type": "integer"
+                                },
+                                "targetMemoryUtilizationPercentage": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
                         "containerSecurityContext": {
                             "description": "Container security context for the Celery worker containers.",
                             "type": "object"
@@ -227,6 +290,21 @@
                         "podAnnotations": {
                             "description": "Annotations for the Celery beat pods.",
                             "type": "object"
+                        },
+                        "podDisruptionBudget": {
+                            "description": "Configure pod disruption budgets for Celery worker ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget",
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "minAvailable": {
+                                    "type": "string"
+                                },
+                                "unhealthyPodEvictionPolicy": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "podSecurityContext": {
                             "description": "Pod security context for the Celery worker pods.",
@@ -429,6 +507,30 @@
                 "automountServiceAccountToken": {
                     "type": "boolean"
                 },
+                "autoscaling": {
+                    "description": "Autoscaling configuration for the Django deployment.",
+                    "type": "object",
+                    "properties": {
+                        "autoscaleBehavior": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "maxReplicas": {
+                            "type": "integer"
+                        },
+                        "minReplicas": {
+                            "type": "integer"
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "integer"
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "integer"
+                        }
+                    }
+                },
                 "extraEnv": {
                     "description": "Additional environment variables injected to all Django containers and initContainers.",
                     "type": "array"
@@ -593,6 +695,21 @@
                 },
                 "nodeSelector": {
                     "type": "object"
+                },
+                "podDisruptionBudget": {
+                    "description": "Configure pod disruption budgets for django ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget",
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "minAvailable": {
+                            "type": "string"
+                        },
+                        "unhealthyPodEvictionPolicy": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "podSecurityContext": {
                     "description": "Pod security context for the Django pods.",

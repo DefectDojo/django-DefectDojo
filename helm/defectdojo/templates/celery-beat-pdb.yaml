@@ -1,0 +1,31 @@
+{{- if .Values.celery.beat.podDisruptionBudget.enabled }}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.celery.annotations .Values.celery.beat.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
+  labels:
+    defectdojo.org/component: celery
+    defectdojo.org/subcomponent: beat
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  name: {{ $fullName }}-celery-beat
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}
+      defectdojo.org/component: celery
+      defectdojo.org/subcomponent: beat
+{{ toYaml (omit .Values.celery.beat.podDisruptionBudget "enabled" ) | indent 2 }}
+{{- end }}

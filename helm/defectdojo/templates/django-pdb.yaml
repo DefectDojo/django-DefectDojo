@@ -1,0 +1,32 @@
+{{- if .Values.django.podDisruptionBudget.enabled }}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  {{- if or .Values.extraAnnotations .Values.django.podDisruptionBudget.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.extraAnnotations }}
+    {{ $key }}: {{ quote $value }}
+  {{- end }}
+  {{- range $key, $value := .Values.django.annotations }}
+    {{ $key }}: {{ quote $value }}
+  {{- end }}
+  {{- end }}
+  labels:
+    defectdojo.org/component: django
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  name: {{ $fullName }}-django
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}
+      defectdojo.org/component: django
+{{ toYaml (omit .Values.django.podDisruptionBudget "enabled" ) | indent 2 }}
+{{- end }}
