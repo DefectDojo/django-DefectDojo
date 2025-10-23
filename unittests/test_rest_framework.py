@@ -1034,7 +1034,7 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Risk_Acceptance
         self.permission_create = Permissions.Risk_Acceptance
-        self.permission_update = Permissions.Risk_Acceptance
+        self.permission_update = Permissions.Risk_Acceptance_Edit
         self.permission_delete = Permissions.Risk_Acceptance
         self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

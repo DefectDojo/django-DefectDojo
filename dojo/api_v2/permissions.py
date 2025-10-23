@@ -92,8 +92,8 @@ def check_object_permission(
 
     if request.method == "GET":
         return user_has_permission(request.user, obj, get_permission)
-    if request.method in ["PUT", "PATCH"]:
-        return user_has_permission(request.user, obj, get_permission)
+    if request.method in {"PUT", "PATCH"}:
+        return user_has_permission(request.user, obj, put_permission)
     if request.method == "DELETE":
         return user_has_permission(request.user, obj, delete_permission)
     if request.method == "POST":
@@ -379,7 +379,7 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
 
    
 
-    def has_permission(self, request, view, *args, **kwargs):
+    def has_permission(self, request, view):
         risk_acceptance_id = view.kwargs.get("pk", None) 
 
         if UserHasRiskAcceptancePermission.path_risk_acceptance_bulk.match(request.path):
@@ -389,7 +389,7 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
         ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(
             request.path,
         ):
-            if request.method in ["PATCH"]:
+            if request.method in ["PATCH", "PUT"]:
                 if check_patch_permission(request, Risk_Acceptance, risk_acceptance_id, Permissions.Risk_Acceptance_Edit) is True:
                     return True
                 else:
