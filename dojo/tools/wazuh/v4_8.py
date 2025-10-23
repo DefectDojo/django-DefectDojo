@@ -25,6 +25,19 @@ class WazuhV4_8:
             detection_time = vuln.get("detected_at").split("T")[0]
             references = vuln.get("reference")
 
+            # Map Wazuh severity to its equivalent in DefectDojo
+            SEVERITY_MAP = {
+                "Critical": "Critical",
+                "High": "High",
+                "Medium": "Medium",
+                "Low": "Low",
+                "Info": "Info",
+                "Informational": "Info",
+                "Untriaged": "Info",
+            }
+            # Get DefectDojo severity and default to "Info" if severity is not in the mapping
+            severity = SEVERITY_MAP.get(severity, "Info")
+
             title = (
                 cve + " affects (version: " + item.get("package").get("version") + ")"
             )
