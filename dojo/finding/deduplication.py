@@ -335,8 +335,6 @@ def match_uid_or_hash_candidate(new_finding, candidates_by_uid, candidates_by_ha
             deduplicationLogger.debug("UID_OR_HASH: endpoints match, returning candidate %s with test_type %s unique_id_from_tool %s hash_code %s", candidate.id, candidate.test.test_type, candidate.unique_id_from_tool, candidate.hash_code)
             return candidate
         deduplicationLogger.debug("UID_OR_HASH: endpoints mismatch, skipping candidate %s", candidate.id)
-        # Parity with old per-finding logic: only consider the oldest candidate and stop
-        return None
     return None
 
 
