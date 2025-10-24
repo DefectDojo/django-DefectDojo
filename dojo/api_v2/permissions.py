@@ -49,8 +49,6 @@ def check_field_permissions(request, post_model, post_pk):
     field_request = request.data.keys()
     if request.user in users:
         allowed_fields = FIELD_PERMISSIONS.get(role_group, [])
-        if allowed_fields == "__all__":
-            return True
         if not allowed_fields or not field_request:
             return False
         for field in field_request:
