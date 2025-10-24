@@ -831,7 +831,7 @@ class TestNotificationWebhooks(DojoTestCase):
                 scan_type="ZAP Scan",
             ).notify_scan_added(test, updated_count=0)
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added_empty")
-            self.maxDiff = None
+            self.maxDiff = 99999
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": "Event scan_added_empty has occurred.",
                 "title": "Created/Updated 0 findings for notif prod: notif eng: notif test (Acunetix Scan)",
@@ -872,6 +872,11 @@ class TestNotificationWebhooks(DojoTestCase):
             })
 
         with self.subTest("scan_added"):
+            new_finding = Finding.objects.create(test=test, title="New Finding", severity="Critical")
+            mitigated_finding = Finding.objects.create(test=test, title="Mitigated Finding", severity="Medium")
+            reactivated_finding = Finding.objects.create(test=test, title="Reactivated Finding", severity="Low")
+            untouched_finding = Finding.objects.create(test=test, title="Untouched Finding", severity="Info")
+
             BaseImporter(
                 environment=Development_Environment.objects.get_or_create(name="Development")[0],
                 scan_type="ZAP Scan",
@@ -879,52 +884,57 @@ class TestNotificationWebhooks(DojoTestCase):
                 test,
                 updated_count=4,
                 new_findings=[
-                    Finding.objects.create(test=test, title="New Finding", severity="Critical"),
+                    new_finding,
                 ],
                 findings_mitigated=[
-                    Finding.objects.create(test=test, title="Mitigated Finding", severity="Medium"),
+                    mitigated_finding,
                 ],
                 findings_reactivated=[
-                    Finding.objects.create(test=test, title="Reactivated Finding", severity="Low"),
+                    reactivated_finding,
                 ],
                 findings_untouched=[
-                    Finding.objects.create(test=test, title="Untouched Finding", severity="Info"),
+                    untouched_finding,
                 ],
             )
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added")
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"]["findings"], {
                 "new": [{
-                    "id": 232,
+                    "id": new_finding.id,
                     "title": "New Finding",
                     "severity": "Critical",
-                    "url_api": "http://localhost:8080/api/v2/findings/232/",
-                    "url_ui": "http://localhost:8080/finding/232",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{new_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{new_finding.id}",
                 }],
                 "mitigated": [{
-                    "id": 233,
+                    "id": mitigated_finding.id,
                     "title": "Mitigated Finding",
                     "severity": "Medium",
-                    "url_api": "http://localhost:8080/api/v2/findings/233/",
-                    "url_ui": "http://localhost:8080/finding/233",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{mitigated_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{mitigated_finding.id}",
                 }],
                 "reactivated": [{
-                    "id": 234,
+                    "id": reactivated_finding.id,
                     "title": "Reactivated Finding",
                     "severity": "Low",
-                    "url_api": "http://localhost:8080/api/v2/findings/234/",
-                    "url_ui": "http://localhost:8080/finding/234",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{reactivated_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{reactivated_finding.id}",
                 }],
                 "untouched": [{
-                    "id": 235,
+                    "id": untouched_finding.id,
                     "title": "Untouched Finding",
                     "severity": "Info",
-                    "url_api": "http://localhost:8080/api/v2/findings/235/",
-                    "url_ui": "http://localhost:8080/finding/235",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{untouched_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{untouched_finding.id}",
                 }],
             })
 
         with self.subTest("scan_added problematic titles"):
+            colon_new_finding = Finding.objects.create(test=test, title="Colon: New Finding", severity="Critical")
+            brackets_mitigated_finding = Finding.objects.create(test=test, title="[Brackets] Mitigated Finding", severity="Medium")
+            quotation1_reactivated_finding = Finding.objects.create(test=test, title='"Quotation1" Reactivated Finding', severity="Low")
+            quotation2_untouched_finding = Finding.objects.create(test=test, title="'Quotation2' Untouched Finding", severity="Info")
+
             BaseImporter(
                 environment=Development_Environment.objects.get_or_create(name="Development")[0],
                 scan_type="ZAP Scan",
@@ -932,48 +942,48 @@ class TestNotificationWebhooks(DojoTestCase):
                 test,
                 updated_count=4,
                 new_findings=[
-                    Finding.objects.create(test=test, title="Colon: New Finding", severity="Critical"),
+                    colon_new_finding,
                 ],
                 findings_mitigated=[
-                    Finding.objects.create(test=test, title="[Brackets] Mitigated Finding", severity="Medium"),
+                    brackets_mitigated_finding,
                 ],
                 findings_reactivated=[
-                    Finding.objects.create(test=test, title='"Quotation1" Reactivated Finding', severity="Low"),
+                    quotation1_reactivated_finding,
                 ],
                 findings_untouched=[
-                    Finding.objects.create(test=test, title="'Quotation2' Untouched Finding", severity="Info"),
+                    quotation2_untouched_finding,
                 ],
             )
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added")
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"]["findings"], {
                 "new": [{
-                    "id": 236,
+                    "id": colon_new_finding.id,
                     "title": "Colon: New Finding",
                     "severity": "Critical",
-                    "url_api": "http://localhost:8080/api/v2/findings/236/",
-                    "url_ui": "http://localhost:8080/finding/236",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{colon_new_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{colon_new_finding.id}",
                 }],
                 "mitigated": [{
-                    "id": 237,
+                    "id": brackets_mitigated_finding.id,
                     "title": "[Brackets] Mitigated Finding",
                     "severity": "Medium",
-                    "url_api": "http://localhost:8080/api/v2/findings/237/",
-                    "url_ui": "http://localhost:8080/finding/237",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{brackets_mitigated_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{brackets_mitigated_finding.id}",
                 }],
                 "reactivated": [{
-                    "id": 238,
+                    "id": quotation1_reactivated_finding.id,
                     "title": '"Quotation1" Reactivated Finding',
                     "severity": "Low",
-                    "url_api": "http://localhost:8080/api/v2/findings/238/",
-                    "url_ui": "http://localhost:8080/finding/238",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{quotation1_reactivated_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{quotation1_reactivated_finding.id}",
                 }],
                 "untouched": [{
-                    "id": 239,
+                    "id": quotation2_untouched_finding.id,
                     "title": "'Quotation2' Untouched Finding",
                     "severity": "Info",
-                    "url_api": "http://localhost:8080/api/v2/findings/239/",
-                    "url_ui": "http://localhost:8080/finding/239",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{quotation2_untouched_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{quotation2_untouched_finding.id}",
                 }],
             })
 
