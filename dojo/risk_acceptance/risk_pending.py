@@ -90,6 +90,8 @@ def risk_accepted_succesfully(
 ):
     if not finding.active:
         return True
+    if risk_acceptance.long_term_acceptance:
+        finding.tags.add("long_term_risk_acceptance")
     finding.risk_status = "Risk Accepted"
     finding.risk_accepted = True
     finding.active = False
@@ -372,6 +374,8 @@ def delete(eng, risk_acceptance):
 def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     logger.debug('removing finding %i from risk acceptance %i', finding.id, risk_acceptance.id)
     risk_acceptance.accepted_findings.remove(finding)
+    if risk_acceptance.long_term_acceptance:
+        finding.tags.remove("long_term_risk_acceptance")
     finding.active = True
     finding.risk_accepted = False
     finding.accepted_by = ""
