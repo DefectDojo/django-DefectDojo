@@ -255,6 +255,8 @@ celery:
     podSecurityContext: {}
     # -- Enable readiness probe for Celery beat container.
     readinessProbe: {}
+    # @schema maximum:1
+    # -- Multiple replicas are not allowed (Beat is intended to be a singleton) because scaling to >1 will double-run schedules
     replicas: 1
     resources:
       requests:
