@@ -946,7 +946,6 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.LongRunningRequestAlertMiddleware",
 ]
 
-
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
 
 # WhiteNoise allows your web app to serve its own static files,
