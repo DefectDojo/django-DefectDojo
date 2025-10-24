@@ -54,6 +54,9 @@ def endpoint_filter(**kwargs):
 
 
 def endpoint_get_or_create(**kwargs):
+    # This code looks a bit ugly/complicated.
+    # But this method is called so frequently that we need to optimize it.
+    # It executes at most one SELECT and one optional INSERT.
     qs = endpoint_filter(**kwargs)
     # Fetch up to two matches in a single round-trip. This covers
     # the common cases efficiently: zero (create) or one (reuse).
