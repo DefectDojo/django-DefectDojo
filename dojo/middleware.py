@@ -6,11 +6,14 @@ from threading import local
 from urllib.parse import quote
 
 import pghistory.middleware
+import requests
 from auditlog.context import set_actor
 from auditlog.middleware import AuditlogMiddleware as _AuditlogMiddleware
 from django.conf import settings
+from django.contrib import messages
 from django.db import models
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.functional import SimpleLazyObject
 from watson.middleware import SearchContextMiddleware
@@ -71,6 +74,87 @@ class LoginRequiredMiddleware:
             path = request.path_info.lstrip("/")
             if Dojo_User.force_password_reset(request.user) and path != "change_password":
                 return HttpResponseRedirect(reverse("change_password"))
+
+        return self.get_response(request)
+
+
+class AuthProviderHealthCheckMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.providers = [
+            {
+                "name": "OIDC",
+                "enabled": getattr(settings, "OIDC_AUTH_ENABLED", False),
+                "endpoint": getattr(settings, "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT", None),
+                "path_prefix": "/login/oidc/",
+                "check_path": "/.well-known/openid-configuration",
+            },
+            {
+                "name": "GitLab",
+                "enabled": getattr(settings, "GITLAB_OAUTH2_ENABLED", False),
+                "endpoint": getattr(settings, "SOCIAL_AUTH_GITLAB_API_URL", None),
+                "path_prefix": "/login/gitlab/",
+                "check_path": "",
+            },
+            {
+                "name": "GitHub Enterprise",
+                "enabled": getattr(settings, "GITHUB_ENTERPRISE_OAUTH2_ENABLED", False),
+                "endpoint": getattr(settings, "SOCIAL_AUTH_GITHUB_ENTERPRISE_URL", None),
+                "path_prefix": "/login/github/",
+                "check_path": "",
+            },
+            {
+                "name": "Google",
+                "enabled": getattr(settings, "GOOGLE_OAUTH_ENABLED", False),
+                "endpoint": "https://accounts.google.com",
+                "path_prefix": "/login/google-oauth2/",
+                "check_path": "/.well-known/openid-configuration",
+            },
+            {
+                "name": "Azure AD",
+                "enabled": getattr(settings, "AZUREAD_TENANT_OAUTH2_ENABLED", False),
+                "endpoint": f"https://login.microsoftonline.com/{getattr(settings, 'SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID', '')}",
+                "path_prefix": "/login/azuread-tenant-oauth2/",
+                "check_path": "/v2.0/.well-known/openid-configuration",
+            },
+            {
+                "name": "Okta",
+                "enabled": getattr(settings, "OKTA_OAUTH_ENABLED", False),
+                "endpoint": getattr(settings, "SOCIAL_AUTH_OKTA_OAUTH2_API_URL", None),
+                "path_prefix": "/login/okta-oauth2/",
+                "check_path": "/.well-known/openid-configuration",
+            },
+            {
+                "name": "Keycloak",
+                "enabled": getattr(settings, "KEYCLOAK_OAUTH2_ENABLED", False),
+                "endpoint": getattr(settings, "SOCIAL_AUTH_KEYCLOAK_OAUTH2_API_URL", None),
+                "path_prefix": "/login/keycloak-oauth2/",
+                "check_path": "/.well-known/openid-configuration",
+            },
+            {
+                "name": "Auth0",
+                "enabled": getattr(settings, "AUTH0_OAUTH2_ENABLED", False),
+                "endpoint": getattr(settings, "SOCIAL_AUTH_AUTH0_DOMAIN", None),
+                "path_prefix": "/login/auth0/",
+                "check_path": "/.well-known/openid-configuration",
+            },
+        ]
+
+    def __call__(self, request):
+        for provider in self.providers:
+            if provider["enabled"] and provider["endpoint"] and request.path.startswith(provider["path_prefix"]):
+                check_url = provider["endpoint"] + provider["check_path"]
+                try:
+                    response = requests.get(check_url, timeout=3, allow_redirects=False)
+                    if response.status_code >= 500:
+                        raise requests.exceptions.RequestException(provider["name"] + " returned " + str(response.status_code))
+                except requests.exceptions.RequestException as e:
+                    logger.warning(f"{provider['name']} provider unavailable: {e!s}")
+                    messages.error(
+                        request,
+                        f"{provider['name']} login is temporarily unavailable. Please use the standard login below.",
+                    )
+                    return redirect("/login")
 
         return self.get_response(request)
 

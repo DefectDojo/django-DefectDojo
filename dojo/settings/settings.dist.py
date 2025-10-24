@@ -924,15 +924,17 @@ INSTALLED_APPS = (
 # ------------------------------------------------------------------------------
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
+
 DJANGO_MIDDLEWARE_CLASSES = [
     "django.middleware.common.CommonMiddleware",
     "dojo.middleware.APITrailingSlashMiddleware",
     "dojo.middleware.DojoSytemSettingsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "dojo.middleware.AuthProviderHealthCheckMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dojo.middleware.LoginRequiredMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
@@ -943,6 +945,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.request_cache.middleware.RequestCacheMiddleware",
     "dojo.middleware.LongRunningRequestAlertMiddleware",
 ]
+
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
 
