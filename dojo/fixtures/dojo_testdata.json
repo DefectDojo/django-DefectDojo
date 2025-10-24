@@ -3071,5 +3071,325 @@
       "note": null,
       "owner": 6
     }
+  },
+  {
+    "model": "dojo.test_type",
+    "pk": 1000,
+    "fields": {
+      "name": "SonarQube Scan detailed",
+      "static_tool": false,
+      "dynamic_tool": false,
+      "active": true,
+      "dynamically_generated": false
+    }
+  },
+  {
+    "model": "dojo.test",
+    "pk": 90,
+    "fields": {
+      "engagement": 5,
+      "lead": [
+        "admin"
+      ],
+      "test_type": 1000,
+      "scan_type": "SonarQube Scan detailed",
+      "title": null,
+      "description": null,
+      "target_start": "2025-10-22T08:29:41.333Z",
+      "target_end": "2025-10-22T08:29:41.333Z",
+      "percent_complete": 100,
+      "environment": 1,
+      "updated": "2025-10-22T08:29:41.590Z",
+      "created": "2025-10-22T08:29:41.343Z",
+      "version": "",
+      "build_id": "",
+      "commit_hash": "",
+      "branch_tag": "",
+      "api_scan_configuration": null,
+      "notes": [],
+      "files": [],
+      "tags": [],
+      "inherited_tags": []
+    }
+  },
+  {
+    "model": "dojo.finding",
+    "pk": 232,
+    "fields": {
+      "title": "Disabling CSRF Protections Is Security-Sensitive",
+      "date": "2025-10-22",
+      "sla_start_date": null,
+      "sla_expiration_date": "2025-11-21",
+      "cwe": 352,
+      "cve": null,
+      "epss_score": null,
+      "epss_percentile": null,
+      "known_exploited": false,
+      "ransomware_used": false,
+      "kev_date": null,
+      "cvssv3": null,
+      "cvssv3_score": null,
+      "cvssv4": null,
+      "cvssv4_score": null,
+      "url": null,
+      "severity": "High",
+      "description": "A cross-site request forgery (CSRF) attack occurs when a trusted user of a web application can be forced, by an attacker, to perform sensitive\nactions that he didn&#8217;t intend, such as updating his profile or sending a message, more generally anything that can change the state of the\napplication.\nThe attacker can trick the user/victim to click on a link, corresponding to the privileged action, or to visit a malicious web site that embeds a\nhidden web request and as web browsers automatically include cookies, the actions can be authenticated and sensitive.\n**Ask Yourself Whether**\n\n   The web application uses cookies to authenticate users. \n   There exist sensitive operations in the web application that can be performed when the user is authenticated. \n   The state / resources of the web application can be modified by doing HTTP POST or HTTP DELETE requests for example. \n\nThere is a risk if you answered yes to any of those questions.\n**Recommended Secure Coding Practices**\n\n   Protection against CSRF attacks is strongly recommended:\n    \n       to be activated by default for all unsafe HTTP\n      methods. \n       implemented, for example, with an unguessable CSRF token \n      \n   Of course all sensitive operations should not be performed with safe HTTP methods like GET which are designed to be\n  used only for information retrieval. \n\n**Sensitive Code Example**\nFor a Django application, the code is sensitive when,\n\n   django.middleware.csrf.CsrfViewMiddleware is not used in the Django settings: \n\n\nMIDDLEWARE = [\n    'django.middleware.security.SecurityMiddleware',\n    'django.contrib.sessions.middleware.SessionMiddleware',\n    'django.middleware.common.CommonMiddleware',\n    'django.contrib.auth.middleware.AuthenticationMiddleware',\n    'django.contrib.messages.middleware.MessageMiddleware',\n    'django.middleware.clickjacking.XFrameOptionsMiddleware',\n] # Sensitive: django.middleware.csrf.CsrfViewMiddleware is missing\n\n\n   the CSRF protection is disabled on a view: \n\n\n@csrf_exempt # Sensitive\ndef example(request):\n    return HttpResponse(\"default\")\n\nFor a Flask application, the code is sensitive when,\n\n   the WTF_CSRF_ENABLED setting is set to false: \n\n\napp = Flask(__name__)\napp.config['WTF_CSRF_ENABLED'] = False # Sensitive\n\n\n   the application doesn&#8217;t use the CSRFProtect module: \n\n\napp = Flask(__name__) # Sensitive: CSRFProtect is missing\n\n@app.route('/')\ndef hello_world():\n    return 'Hello, World!'\n\n\n   the CSRF protection is disabled on a view: \n\n\napp = Flask(__name__)\ncsrf = CSRFProtect()\ncsrf.init_app(app)\n\n@app.route('/example/', methods=['POST'])\n@csrf.exempt # Sensitive\ndef example():\n    return 'example '\n\n\n   the CSRF protection is disabled on a form: \n\n\nclass unprotectedForm(FlaskForm):\n    class Meta:\n        csrf = False # Sensitive\n\n    name = TextField('name')\n    submit = SubmitField('submit')\n\n**Compliant Solution**\nFor a Django application,\n\n   it is recommended to protect all the views with django.middleware.csrf.CsrfViewMiddleware: \n\n\nMIDDLEWARE = [\n    'django.middleware.security.SecurityMiddleware',\n    'django.contrib.sessions.middleware.SessionMiddleware',\n    'django.middleware.common.CommonMiddleware',\n    'django.middleware.csrf.CsrfViewMiddleware', # Compliant\n    'django.contrib.auth.middleware.AuthenticationMiddleware',\n    'django.contrib.messages.middleware.MessageMiddleware',\n    'django.middleware.clickjacking.XFrameOptionsMiddleware',\n]\n\n\n   and to not disable the CSRF protection on specific views: \n\n\ndef example(request): # Compliant\n    return HttpResponse(\"default\")\n\nFor a Flask application,\n\n   the CSRFProtect module should be used (and not disabled further with WTF_CSRF_ENABLED set to false):\n  \n\n\napp = Flask(__name__)\ncsrf = CSRFProtect()\ncsrf.init_app(app) # Compliant\n\n\n   and it is recommended to not disable the CSRF protection on specific views or forms: \n\n\n@app.route('/example/', methods=['POST']) # Compliant\ndef example():\n    return 'example '\n\nclass unprotectedForm(FlaskForm):\n    class Meta:\n        csrf = True # Compliant\n\n    name = TextField('name')\n    submit = SubmitField('submit')",
+      "mitigation": "Make sure disabling CSRF protection is safe here.",
+      "fix_available": null,
+      "impact": "No impact provided",
+      "steps_to_reproduce": null,
+      "severity_justification": null,
+      "references": "python:S4502\nunsafe HTTP\n      methods\nsafe HTTP\nDjango\nDjango settings\nFlask\nDjango\nFlask\nOWASP Top 10 2021 Category A1\nMITRE, CWE-352\nOWASP Top 10 2017 Category A6\nOWASP: Cross-Site Request Forgery\nSANS Top 25",
+      "test": 90,
+      "active": true,
+      "verified": true,
+      "false_p": false,
+      "duplicate": false,
+      "duplicate_finding": null,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "under_review": false,
+      "last_status_update": "2025-10-22T08:29:41.361Z",
+      "review_requested_by": null,
+      "under_defect_review": false,
+      "defect_review_requested_by": null,
+      "is_mitigated": false,
+      "thread_id": 0,
+      "mitigated": null,
+      "mitigated_by": null,
+      "reporter": [
+        "admin"
+      ],
+      "numerical_severity": "S1",
+      "last_reviewed": "2025-10-22T08:29:41.336Z",
+      "last_reviewed_by": [
+        "admin"
+      ],
+      "param": null,
+      "payload": null,
+      "hash_code": "ed09b1b5980bd7b9d67b58ba3a3200b788b567a8b3359b5b66d861112b025b9e",
+      "line": 8,
+      "file_path": "vulnerable-flask-app.py",
+      "component_name": null,
+      "component_version": null,
+      "static_finding": true,
+      "dynamic_finding": false,
+      "created": "2025-10-22T08:29:41.361Z",
+      "scanner_confidence": null,
+      "sonarqube_issue": null,
+      "unique_id_from_tool": "AYvNd32RyD1npIoQXyT1",
+      "vuln_id_from_tool": null,
+      "sast_source_object": null,
+      "sast_sink_object": null,
+      "sast_source_line": null,
+      "sast_source_file_path": null,
+      "nb_occurences": null,
+      "publish_date": null,
+      "service": null,
+      "planned_remediation_date": null,
+      "planned_remediation_version": null,
+      "effort_for_fixing": null,
+      "reviewers": [],
+      "notes": [],
+      "files": [],
+      "found_by": [
+        1000
+      ],
+      "tags": [],
+      "inherited_tags": []
+    }
+  },
+  {
+    "model": "dojo.test_import",
+    "pk": 6829,
+    "fields": {
+      "created": "2025-10-22T08:29:41.453Z",
+      "modified": "2025-10-22T08:29:41.453Z",
+      "test": 90,
+      "import_settings": {
+        "tags": [],
+        "active": true,
+        "verified": true,
+        "push_to_jira": false,
+        "minimum_severity": "Info",
+        "close_old_findings": false
+      },
+      "type": "import",
+      "version": "",
+      "build_id": "",
+      "commit_hash": "",
+      "branch_tag": ""
+    }
+  },
+  {
+    "model": "dojo.test_import_finding_action",
+    "pk": 80213,
+    "fields": {
+      "created": "2025-10-22T08:29:41.458Z",
+      "modified": "2025-10-22T08:29:41.458Z",
+      "test_import": 6829,
+      "finding": 232,
+      "action": "N"
+    }
+  },
+  {
+    "model": "dojo.test_type",
+    "pk": 1001,
+    "fields": {
+      "name": "HackerOne Cases",
+      "static_tool": false,
+      "dynamic_tool": false,
+      "active": true,
+      "dynamically_generated": false
+    }
+  },
+  {
+    "model": "dojo.test",
+    "pk": 91,
+    "fields": {
+      "engagement": 5,
+      "lead": [
+        "admin"
+      ],
+      "test_type": 1001,
+      "scan_type": "HackerOne Cases",
+      "title": null,
+      "description": null,
+      "target_start": "2025-10-22T08:52:53.734Z",
+      "target_end": "2025-10-22T08:52:53.734Z",
+      "percent_complete": 100,
+      "environment": 1,
+      "updated": "2025-10-22T08:52:53.859Z",
+      "created": "2025-10-22T08:52:53.737Z",
+      "version": "",
+      "build_id": "",
+      "commit_hash": "",
+      "branch_tag": "",
+      "api_scan_configuration": null,
+      "notes": [],
+      "files": [],
+      "tags": [],
+      "inherited_tags": []
+    }
+  },
+  {
+    "model": "dojo.finding",
+    "pk": 233,
+    "fields": {
+      "title": "Sensitive Account Balance Information Exposure via Example's DaviPlata Payment Link Integration",
+      "date": "2025-10-22",
+      "sla_start_date": null,
+      "sla_expiration_date": "2026-01-20",
+      "cwe": 0,
+      "cve": null,
+      "epss_score": null,
+      "epss_percentile": null,
+      "known_exploited": false,
+      "ransomware_used": false,
+      "kev_date": null,
+      "cvssv3": null,
+      "cvssv3_score": null,
+      "cvssv4": null,
+      "cvssv4_score": null,
+      "url": null,
+      "severity": "Medium",
+      "description": "**ID**: 2501687\n**Weakness Category**: Information Disclosure\n**Substate**: triaged\n**Reporter**: reporter\n**Assigned To**: Group example.co Team\n**Public**: no\n**Awarded On**: 2024-08-28 19:40:24 UTC\n**Bounty Price**: 400.0\n**First Response On**: 2024-05-14 22:14:16 UTC\n**Structured Scope**: 1489537348\n",
+      "mitigation": null,
+      "fix_available": null,
+      "impact": null,
+      "steps_to_reproduce": null,
+      "severity_justification": null,
+      "references": null,
+      "test": 91,
+      "active": true,
+      "verified": true,
+      "false_p": false,
+      "duplicate": false,
+      "duplicate_finding": null,
+      "out_of_scope": false,
+      "risk_accepted": false,
+      "under_review": false,
+      "last_status_update": "2025-10-22T08:52:53.755Z",
+      "review_requested_by": null,
+      "under_defect_review": false,
+      "defect_review_requested_by": null,
+      "is_mitigated": false,
+      "thread_id": 0,
+      "mitigated": null,
+      "mitigated_by": null,
+      "reporter": [
+        "admin"
+      ],
+      "numerical_severity": "S2",
+      "last_reviewed": "2025-10-22T08:52:53.735Z",
+      "last_reviewed_by": [
+        "admin"
+      ],
+      "param": null,
+      "payload": null,
+      "hash_code": "684facb6f2fd8faa50a28637d4f7fc1ba9ad3d3a932d39960e99e3c10aec3495",
+      "line": null,
+      "file_path": null,
+      "component_name": null,
+      "component_version": null,
+      "static_finding": false,
+      "dynamic_finding": true,
+      "created": "2025-10-22T08:52:53.755Z",
+      "scanner_confidence": null,
+      "sonarqube_issue": null,
+      "unique_id_from_tool": null,
+      "vuln_id_from_tool": null,
+      "sast_source_object": null,
+      "sast_sink_object": null,
+      "sast_source_line": null,
+      "sast_source_file_path": null,
+      "nb_occurences": null,
+      "publish_date": null,
+      "service": null,
+      "planned_remediation_date": null,
+      "planned_remediation_version": null,
+      "effort_for_fixing": null,
+      "reviewers": [],
+      "notes": [],
+      "files": [],
+      "found_by": [
+        1001
+      ],
+      "tags": [],
+      "inherited_tags": []
+    }
+  },
+  {
+    "model": "dojo.test_import",
+    "pk": 6830,
+    "fields": {
+      "created": "2025-10-22T08:52:53.797Z",
+      "modified": "2025-10-22T08:52:53.797Z",
+      "test": 91,
+      "import_settings": {
+        "tags": [],
+        "active": true,
+        "verified": true,
+        "push_to_jira": false,
+        "minimum_severity": "Info",
+        "close_old_findings": false
+      },
+      "type": "import",
+      "version": "",
+      "build_id": "",
+      "commit_hash": "",
+      "branch_tag": ""
+    }
+  },
+  {
+    "model": "dojo.test_import_finding_action",
+    "pk": 80214,
+    "fields": {
+      "created": "2025-10-22T08:52:53.798Z",
+      "modified": "2025-10-22T08:52:53.798Z",
+      "test_import": 6830,
+      "finding": 233,
+      "action": "N"
+    }
   }
 ]
