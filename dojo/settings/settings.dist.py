@@ -924,7 +924,6 @@ INSTALLED_APPS = (
 # ------------------------------------------------------------------------------
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
-
 DJANGO_MIDDLEWARE_CLASSES = [
     "django.middleware.common.CommonMiddleware",
     "dojo.middleware.APITrailingSlashMiddleware",
