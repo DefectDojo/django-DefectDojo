@@ -16,6 +16,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.functional import SimpleLazyObject
+from social_core.exceptions import AuthCanceled, AuthFailed
+from social_django.middleware import SocialAuthExceptionMiddleware
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
 
@@ -78,58 +80,12 @@ class LoginRequiredMiddleware:
         return self.get_response(request)
 
 
-class AuthProviderHealthCheckMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-        self.providers = {
-            "/login/oidc/": {
-                "name": "OIDC",
-                "endpoint": getattr(settings, "SOCIAL_AUTH_OIDC_OIDC_ENDPOINT", None),
-            },
-            "/login/google-oauth2/": {
-                "name": "Google",
-                "endpoint": "https://accounts.google.com/.well-known/openid-configuration",
-            },
-            "/login/okta-oauth2/": {
-                "name": "Okta",
-                "endpoint": getattr(settings, "SOCIAL_AUTH_OKTA_OAUTH2_API_URL", None),
-            },
-            "/login/azuread-tenant-oauth2/": {
-                "name": "Azure AD",
-                "endpoint": f"https://login.microsoftonline.com/{getattr(settings, 'SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID', '')}/v2.0/.well-known/openid-configuration",
-            },
-            "/login/keycloak-oauth2/": {
-                "name": "Keycloak",
-                "endpoint": getattr(settings, "SOCIAL_AUTH_KEYCLOAK_OAUTH2_API_URL", None),
-            },
-            "/login/auth0/": {
-                "name": "Auth0",
-                "endpoint": getattr(settings, "SOCIAL_AUTH_AUTH0_DOMAIN", None),
-            },
-            "/login/gitlab/": {
-                "name": "GitLab",
-                "endpoint": getattr(settings, "SOCIAL_AUTH_GITLAB_API_URL", None),
-            },
-            "/login/github/": {
-                "name": "GitHub Enterprise",
-                "endpoint": getattr(settings, "SOCIAL_AUTH_GITHUB_ENTERPRISE_URL", None),
-            },
-        }
-
-    def __call__(self, request):
-        for path, config in self.providers.items():
-            if request.path.startswith(path) and config["endpoint"]:
-                try:
-                    response = requests.get(config["endpoint"], timeout=3, allow_redirects=False)
-                    if response.status_code >= 500:
-                        raise requests.exceptions.RequestException(config["name"] + " returned " + str(response.status_code))
-                except requests.exceptions.RequestException:
-                    messages.error(
-                        request,
-                        f"Login via {config['name']} is temporarily unavailable. Please use the standard login below. ",
-                    )
-                    return redirect("/login")
-        return self.get_response(request)
+class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
+    def process_exception(self, request, exception):
+        if isinstance(exception, (requests.exceptions.RequestException, AuthCanceled, AuthFailed)):
+            messages.error(request, "Login via social authentication is temporarily unavailable. Please use the standard login below.")
+            return redirect("/login")
+        return super().process_exception(request, exception)
 
 
 class DojoSytemSettingsMiddleware:
