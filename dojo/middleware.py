@@ -82,8 +82,14 @@ class LoginRequiredMiddleware:
 
 class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
     def process_exception(self, request, exception):
-        if isinstance(exception, (requests.exceptions.RequestException, AuthCanceled, AuthFailed)):
+        if isinstance(exception, requests.exceptions.RequestException):
             messages.error(request, "Login via social authentication is temporarily unavailable. Please use the standard login below.")
+            return redirect("/login")
+        if isinstance(exception, AuthCanceled):
+            messages.warning(request, "Social login was canceled. Please try again or use the standard login.")
+            return redirect("/login")
+        if isinstance(exception, AuthFailed):
+            messages.error(request, "Social login failed. Please try again or use the standard login.")
             return redirect("/login")
         return super().process_exception(request, exception)
 

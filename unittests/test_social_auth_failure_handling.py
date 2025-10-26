@@ -1,26 +1,18 @@
 
+from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpResponse
-from django.test import RequestFactory, override_settings
+from django.test import RequestFactory
 from requests.exceptions import ConnectionError as RequestsConnectionError
+from social_core.exceptions import AuthCanceled, AuthFailed
 
 from dojo.middleware import CustomSocialAuthExceptionMiddleware
 
 from .dojo_test_case import DojoTestCase
 
 
-@override_settings(
-    SOCIAL_AUTH_OIDC_AUTH_ENABLED=True,
-    SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=True,
-    GOOGLE_OAUTH_ENABLED=True,
-    SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=True,
-    AZUREAD_TENANT_OAUTH2_ENABLED=True,
-    GITLAB_OAUTH2_ENABLED=True,
-    KEYCLOAK_OAUTH2_ENABLED=True,
-    GITHUB_ENTERPRISE_OAUTH2_ENABLED=True,
-)
 class TestSocialAuthFailureHandling(DojoTestCase):
 
     def setUp(self):
@@ -46,10 +38,17 @@ class TestSocialAuthFailureHandling(DojoTestCase):
             "/login/keycloak-oauth2/",
             "/login/github/",
         ]
-
+        exceptions = [
+            (RequestsConnectionError("Host unreachable"), "Login via social authentication is temporarily unavailable. Please use the standard login below."),
+            (AuthCanceled("User canceled login"), "Social login was canceled. Please try again or use the standard login."),
+            (AuthFailed("Token exchange failed"), "Social login failed. Please try again or use the standard login."),
+        ]
         for path in login_paths:
-            with self.subTest(path=path):
-                request = self._prepare_request(path)
-                response = self.middleware.process_exception(request, RequestsConnectionError("Host unreachable"))
-                self.assertEqual(response.status_code, 302)
-                self.assertEqual(response.url, "/login")
+            for exception, expected_message in exceptions:
+                with self.subTest(path=path, exception=type(exception).__name__):
+                    request = self._prepare_request(path)
+                    response = self.middleware.process_exception(request, exception)
+                    self.assertEqual(response.status_code, 302)
+                    self.assertEqual(response.url, "/login")
+                    storage = list(messages.get_messages(request))
+                    self.assertTrue(any(expected_message in str(msg) for msg in storage))
