@@ -1,9 +1,11 @@
 import logging
 from typing import List
 from django.urls import reverse
+from datetime import datetime
+from django.utils import timezone
 from django.conf import settings
 from dojo.notifications.helper import create_notification
-from dojo.models import Finding, Risk_Acceptance, Dojo_User, System_Settings
+from dojo.models import Finding, Risk_Acceptance, Dojo_User, System_Settings, GeneralSettings
 from crum import get_current_user
 logger = logging.getLogger(__name__)
 
@@ -83,10 +85,15 @@ class Notification:
         enable_acceptance_risk_for_email= kwargs["enable_acceptance_risk_for_email"]
         permission_keys = kwargs.get("permission_keys", None)
         title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
+        subject = f"🙋‍♂️Request of aceptance of risk {risk_pending.id}🙏"
         description=f"requested acceptance of the risks <b>{risk_pending.name}</b> for the findings that are part of <b>{product_type}</b> of aplication <b>{product}</b>",
+        if risk_pending.long_term_acceptance:
+            long_term = risk_pending.expiration_date.date() - timezone.now().date()
+            description = f"requested acceptance <b>long-term</b> of {long_term.days} days for the findings that are part of <b>{product_type}</b> of aplication <b>{product}</b>",
+            subject = f"🙋‍♂️Request of aceptance long term of risk {risk_pending.id}  🙏"
         create_notification(event='risk_acceptance_request',
                         title=title, risk_acceptance=risk_pending,
-                        subject=f"🙋‍♂️Request of aceptance of risk {risk_pending.id}🙏",
+                        subject=subject,
                         accepted_findings=risk_pending.accepted_findings.all(),
                         reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
                         product=risk_pending.engagement.product,
@@ -196,3 +203,28 @@ class Notification:
                 ),
             ),
         )
+    
+    @staticmethod
+    def risk_acceptance_request_long_term(*args, **kwargs):
+        risk_pending = kwargs["risk_pending"]
+        product = risk_pending.engagement.product
+        product_type = product.prod_type
+        enable_acceptance_risk_for_email= kwargs["enable_acceptance_risk_for_email"]
+        permission_keys = kwargs.get("permission_keys", None)
+        title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
+        long_term = risk_pending.expiration_date - timezone.now().date()
+        description=f"requested acceptance <b>long-term</b> of {long_term.days} days for the findings that are part of <b>{product_type}</b> of aplication <b>{product}</b>",
+        create_notification(event='risk_acceptance_long_term_request',
+                        title=title, risk_acceptance=risk_pending,
+                        subject=f"🙋‍♂️Request of aceptance long term of risk {risk_pending.id}🙏",
+                        accepted_findings=risk_pending.accepted_findings.all(),
+                        reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
+                        product=risk_pending.engagement.product,
+                        description=description,
+                        permission_keys=permission_keys,
+                        enable_acceptance_risk_for_email=enable_acceptance_risk_for_email,
+                        recipients=risk_pending.accepted_by_user,
+                        icon="bell",
+                        owner=risk_pending.owner,
+                        color_icon="#1B30DE",
+                        url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))

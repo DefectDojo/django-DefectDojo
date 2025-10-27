@@ -26,6 +26,7 @@ from dojo.risk_acceptance.helper import post_jira_comments, get_product_type_pre
 from dojo.product_type.helper import get_contacts_product_type_and_product_by_serverity
 from dojo.risk_acceptance.notification import Notification
 from dojo.user.queries import get_role_members, get_user
+from dojo.group.queries import get_users_for_group_by_role
 from dojo.risk_acceptance.queries import (
     abuse_control_min_vulnerability_closed,
     abuse_control_max_vulnerability_accepted)
@@ -89,6 +90,8 @@ def risk_accepted_succesfully(
 ):
     if not finding.active:
         return True
+    if risk_acceptance.long_term_acceptance:
+        finding.tags.add("long_term_risk_acceptance")
     finding.risk_status = "Risk Accepted"
     finding.risk_accepted = True
     finding.active = False
@@ -112,8 +115,15 @@ def risk_accepted_succesfully(
             risk_acceptance=risk_acceptance,
             finding=finding) 
 
-
-
+def user_has_permission_long_risk_acceptance(user, risk_acceptance):
+    if risk_acceptance and risk_acceptance.long_term_acceptance:
+        users = get_users_for_group_by_role(
+            GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_risk"),
+            "Risk" 
+        )
+        if user in users:
+            return True
+    return False
 
 
 def role_has_exclusive_permissions(user):
@@ -169,6 +179,7 @@ def rules_for_direct_acceptance(finding: Finding,
     if (
         user.is_superuser is True
         or role_has_exclusive_permissions(user)
+        or user_has_permission_long_risk_acceptance(user, risk_acceptance)
         or number_of_acceptors_required == 0
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
         or (finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK)
@@ -250,6 +261,12 @@ def is_permissions_risk_acceptance(
     if finding.mitigated or finding.active is False:
         return False
 
+    # Validate whether the user has permission to accept a risk based on their group membership.
+    group_name =  GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_risk")
+    users = get_users_for_group_by_role(group_name, "Risk")
+    if user in users and finding.risk_accepted is False:
+        return True
+
     result = False
     if get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
         result = True
@@ -260,7 +277,7 @@ def is_permissions_risk_acceptance(
         and len(user.groups.filter(dojo_group__name="Compliance")) > 0
     ):
         result = True
-
+    
     contacts = get_contacts_product_type_and_product_by_serverity(engagement, finding.severity, user)
     if contacts:
         contacts_ids = [contact.id for contact in contacts]
@@ -315,39 +332,6 @@ def limit_assumption_of_vulnerability(**kwargs):
     return result
 
 
-def limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance(**kwargs):
-    # "LTVLT - Limit of Temporarily Assumed Vulnerabilities Limited to Tolerance"
-    result = {}
-    result["status"] = True
-    result["message"] = ""
-    return result
-
-
-def percentage_of_vulnerabilitiese_closed(**kwargs):
-    """ PVC - Percentage of vulnerabilitiese closed """
-    result = kwargs["result"]
-    response = abuse_control_min_vulnerability_closed(
-        product_id=kwargs["product_id"],
-        min_percentage=settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["percentage"],
-        days=settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["days"])
-    logger.debug(f"Abuse Control: {response}")
-    if settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["active"]:
-        result = response
-    return result
-
-
-def temporaly_assumed_vulnerabilities(**kwargs):
-    """ TAV - Temporarily Assumed Vulnerabilities """
-    result = kwargs["result"]
-    response = abuse_control_max_vulnerability_accepted(
-        product_id=kwargs["product_id"],
-        max_percentage=settings.TEMPORARILY_ASSUMED_VULNERABILITIES["percentage"])
-    logger.debug(f"Abuse Control: {response}")
-    if settings.TEMPORARILY_ASSUMED_VULNERABILITIES["active"]:
-        result = response
-    return result
-
-
 def abuse_control(user, finding: Finding, product: Product, product_type: Product_Type):
     result = {}
     result["status"] = True
@@ -357,10 +341,7 @@ def abuse_control(user, finding: Finding, product: Product, product_type: Produc
         return {"Privileged role": {"status": True, "message": "This user has risk acceptance privileges"}}
 
     rule_abuse_control = {
-        "LAV": limit_assumption_of_vulnerability,
-        "PVC": percentage_of_vulnerabilitiese_closed,
-        "TAV": temporaly_assumed_vulnerabilities,
-        "LTVLT": limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance
+        "LAV": limit_assumption_of_vulnerability
     }
     result_dict = {}
     for key, rule in rule_abuse_control.items():
@@ -393,6 +374,8 @@ def delete(eng, risk_acceptance):
 def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     logger.debug('removing finding %i from risk acceptance %i', finding.id, risk_acceptance.id)
     risk_acceptance.accepted_findings.remove(finding)
+    if risk_acceptance.long_term_acceptance:
+        finding.tags.remove("long_term_risk_acceptance")
     finding.active = True
     finding.risk_accepted = False
     finding.accepted_by = ""

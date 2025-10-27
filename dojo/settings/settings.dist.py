@@ -1337,7 +1337,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.AuditlogMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
-    "dojo.middleware.LongRunningRequestAlertMiddleware",
+    # "dojo.middleware.LongRunningRequestAlertMiddleware", # Disable middleware
 ]
 
 # CORS

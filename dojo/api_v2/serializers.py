@@ -1519,22 +1519,30 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        # Determine findings to risk accept, and findings to unaccept risk
-        existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
-        new_findings_ids = [x.id for x in validated_data.get("accepted_findings", [])]
-        new_findings = Finding.objects.filter(id__in=new_findings_ids)
-        findings_to_add = set(new_findings) - set(existing_findings)
-        findings_to_remove = set(existing_findings) - set(new_findings)
-        findings_to_add = Finding.objects.filter(id__in=[x.id for x in findings_to_add])
-        findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
-        # Make the update in the database
-        instance = super().update(instance, validated_data)
-        user = getattr(self.context.get("request", None), "user", None)
-        # Add the new findings
-        ra_helper.add_findings_to_risk_acceptance(user, instance, findings_to_add)
-        # Remove the ones that were not present in the payload
-        for finding in findings_to_remove:
-            ra_helper.remove_finding_from_risk_acceptance(user, instance, finding)
+        is_partial = getattr(self, "partial", False)
+        should_process_findings = (
+            not is_partial or  # PUT request
+            "accepted_findings" in self.context['request'].data  # PATCH con accepted_findings
+    )
+        if should_process_findings: 
+            # Determine findings to risk accept, and findings to unaccept risk
+            existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
+            new_findings_ids = [x.id for x in validated_data.get("accepted_findings", [])]
+            new_findings = Finding.objects.filter(id__in=new_findings_ids)
+            findings_to_add = set(new_findings) - set(existing_findings)
+            findings_to_remove = set(existing_findings) - set(new_findings)
+            findings_to_add = Finding.objects.filter(id__in=[x.id for x in findings_to_add])
+            findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
+            # Make the update in the database
+            instance = super().update(instance, validated_data)
+            user = getattr(self.context.get("request", None), "user", None)
+            ra_helper.add_findings_to_risk_acceptance(user, instance, findings_to_add)
+            # Remove the ones that were not present in the payload
+            for finding in findings_to_remove:
+                ra_helper.remove_finding_from_risk_acceptance(user, instance, finding)
+        else:
+            instance = super().update(instance, validated_data)
+            # Add the new findings
         return instance
 
     @extend_schema_field(serializers.CharField())
