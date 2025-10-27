@@ -1692,6 +1692,9 @@ class FindingSerializer(serializers.ModelSerializer):
         many=True, read_only=True, source="risk_acceptance_set",
     )
     push_to_jira = serializers.BooleanField(default=False)
+    found_by = serializers.PrimaryKeyRelatedField(
+        queryset=Test_Type.objects.all(), many=True,
+    )
     age = serializers.IntegerField(read_only=True)
     sla_days_remaining = serializers.IntegerField(read_only=True, allow_null=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
@@ -1773,6 +1776,18 @@ class FindingSerializer(serializers.ModelSerializer):
         # we can't pass unsaved_vulnerabilitiy_ids to super.update()
         if parsed_vulnerability_ids:
             save_vulnerability_ids(instance, parsed_vulnerability_ids)
+
+        # Get found_by from validated_data
+        found_by = validated_data.pop("found_by", None)
+
+        # Handle updates to found_by data
+        if found_by:
+            instance.found_by.clear()
+            instance.found_by.add(*found_by)
+        # If there is no argument entered for found_by, the user would like to clear out the values on the Finding's found_by field
+        # Findings still maintain original found_by value associated with their test
+        else:
+            instance.found_by.clear()
 
         instance = super().update(
             instance, validated_data,
