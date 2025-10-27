@@ -1,10 +1,11 @@
+from unittest.mock import patch
 
 from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpResponse
-from django.test import RequestFactory
+from django.test import RequestFactory, override_settings
 from requests.exceptions import ConnectionError as RequestsConnectionError
 from social_core.exceptions import AuthCanceled, AuthFailed
 
@@ -15,9 +16,7 @@ from .dojo_test_case import DojoTestCase
 
 class TestSocialAuthMiddlewareUnit(DojoTestCase):
 
-    """
-    Unit tests for CustomSocialAuthExceptionMiddleware.
-    """
+    """Unit tests for CustomSocialAuthExceptionMiddleware."""
 
     def setUp(self):
         self.factory = RequestFactory()
@@ -66,3 +65,47 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
         self.assertEqual(response.url, "/login")
         storage = list(messages.get_messages(request))
         self.assertTrue(any("Social login failed. Please try again or use the standard login." in str(msg) for msg in storage))
+
+
+@override_settings(
+    AUTHENTICATION_BACKENDS=(
+        "social_core.backends.github.GithubOAuth2",
+        "social_core.backends.gitlab.GitLabOAuth2",
+        "social_core.backends.keycloak.KeycloakOAuth2",
+        "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
+        "social_core.backends.auth0.Auth0OAuth2",
+        "social_core.backends.okta.OktaOAuth2",
+        "social_core.backends.open_id_connect.OpenIdConnectAuth",
+        "django.contrib.auth.backends.ModelBackend",
+    ),
+)
+class TestSocialAuthIntegrationFailures(DojoTestCase):
+
+    """Integration tests for social auth failures."""
+
+    BACKEND_CLASS_PATHS = {
+        "github": "social_core.backends.github.GithubOAuth2",
+        "gitlab": "social_core.backends.gitlab.GitLabOAuth2",
+        "keycloak": "social_core.backends.keycloak.KeycloakOAuth2",
+        "azuread-tenant-oauth2": "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
+        "auth0": "social_core.backends.auth0.Auth0OAuth2",
+        "okta-oauth2": "social_core.backends.okta.OktaOAuth2",
+        "oidc": "social_core.backends.open_id_connect.OpenIdConnectAuth",
+    }
+
+    def _test_backend_exception(self, backend_slug, exception, expected_message):
+        backend_class_path = self.BACKEND_CLASS_PATHS[backend_slug]
+        with patch(f"{backend_class_path}.auth_complete", side_effect=exception):
+            response = self.client.get(f"/complete/{backend_slug}/", follow=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, expected_message)
+
+    def test_all_backends_auth_failed(self):
+        for backend in self.BACKEND_CLASS_PATHS:
+            with self.subTest(backend=backend):
+                self._test_backend_exception(backend, AuthFailed(backend=None), "Social login failed. Please try again or use the standard login.")
+
+    def test_all_backends_auth_canceled(self):
+        for backend in self.BACKEND_CLASS_PATHS:
+            with self.subTest(backend=backend):
+                self._test_backend_exception(backend, AuthCanceled(backend=None), "Social login was canceled. Please try again or use the standard login.")
