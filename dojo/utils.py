@@ -429,6 +429,8 @@ def deduplicate_unique_id_from_tool(new_finding):
     if new_finding.test.engagement.deduplication_on_engagement:
         existing_findings = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
+            # the unique_id_from_tool is unique for a given tool: do not compare with other tools
+            test__test_type=new_finding.test.test_type,
             unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(

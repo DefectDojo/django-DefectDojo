@@ -538,9 +538,7 @@
     <div class="panel panel-default">
         <table id="error_notes" class="table-striped table table-condensed table-hover centered">
             <tr>
-                {% if finding.service %}
                 <th>Service</th>
-                {% endif %}
                 {% if finding.file_path %}
                 <th>Location</th>
                 {% endif %}
@@ -577,13 +575,11 @@
                 {% endif %}
             </tr>
             <tr>
-                {% if finding.service %}
                 <td>
                     <span>
                         {{ finding.service }}
                     </span>
                 </td>
-                {% endif %}
                 {% if finding.file_path %}
                 <td>
                     <span>

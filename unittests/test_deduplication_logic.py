@@ -1,10 +1,17 @@
+import json
 import logging
 import unittest
+from pathlib import Path
+from unittest import skip
 
 from crum import impersonate
 from django.conf import settings
+from django.core import serializers
+from django.utils import timezone
 
+from dojo.importers.default_importer import DefaultImporter
 from dojo.models import (
+    Development_Environment,
     Endpoint,
     Endpoint_Status,
     Engagement,
@@ -12,11 +19,13 @@ from dojo.models import (
     Product,
     System_Settings,
     Test,
+    Test_Import,
+    Test_Import_Finding_Action,
     User,
     copy_model_util,
 )
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -137,6 +146,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 class TestDuplicationLogic(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
+    # fixtures = ["dojo_testdata.json", "dojo_testdata2.json"]
 
     def run(self, result=None):
         testuser = User.objects.get(username="admin")
@@ -759,6 +769,17 @@ class TestDuplicationLogic(DojoTestCase):
         # expect not duplicate as dedupe_inside_engagement is True
         self.assert_finding(finding_new, not_pk=124, duplicate=False, hash_code=finding_124.hash_code)
 
+    def test_dedupe_inside_engagement_unique_id_different_test_type(self):
+        # create identical copy
+        finding_new, finding_124 = self.copy_and_reset_finding(find_id=124)
+
+        # first setup some finding with same unique_id in same engagement, but different test (same test_type)
+        finding_new.test = Test.objects.get(id=90)
+        finding_new.save()
+
+        # expect not duplicate as the test_type doesn't match
+        self.assert_finding(finding_new, not_pk=124, duplicate=False, hash_code=finding_124.hash_code)
+
     def test_dedupe_inside_engagement_unique_id(self):
         # create identical copy
         finding_new, finding_124 = self.copy_and_reset_finding(find_id=124)
@@ -767,7 +788,7 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.test = Test.objects.get(id=66)
         finding_new.save()
 
-        # expect duplicate as dedupe_inside_engagement is True and the other test is in the same engagement
+        # expect duplicate as dedupe_inside_engagement is True and the other test is in the same engagement and has the same test type
         self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
 
     def test_dedupe_inside_engagement_unique_id2(self):
@@ -1116,15 +1137,28 @@ class TestDuplicationLogic(DojoTestCase):
         # but existing BUG? it is marked as duplicate of 124 which has the same hash and same engagement, but different unique_id_from_tool at same test_type
         self.assert_finding(finding_new, not_pk=22, duplicate=True, duplicate_finding_id=124, hash_code=finding_22.hash_code)
 
+    def test_dedupe_inside_engagement_unique_id_or_hash_code_different_test_type(self):
+        # create identical copy
+
+        finding_new, _ = self.copy_and_reset_finding(find_id=224)
+
+        # first setup some finding with same unique_id in same engagement, but different test, different test_type
+        finding_new.test = Test.objects.get(id=91)
+        finding_new.save()
+
+        # expect not duplicate as the test_type doesn't match
+        self.assert_finding(finding_new, not_pk=224, duplicate=False)
+
     def test_dedupe_inside_engagement_unique_id_or_hash_code(self):
         # create identical copy
+
         finding_new, finding_224 = self.copy_and_reset_finding(find_id=224)
 
         # first setup some finding with same unique_id in same engagement, but different test (same test_type)
-        finding_new.test = Test.objects.get(id=66)
+        finding_new.test = Test.objects.get(id=88)
         finding_new.save()
 
-        # expect duplicate as dedupe_inside_engagement is True and the other test is in the same engagement
+        # expect duplicate as dedupe_inside_engagement is True and the other test is in the same engagement and has the same test type
         self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
 
     def test_dedupe_inside_engagement_unique_id_or_hash_code2(self):
@@ -1398,6 +1432,63 @@ class TestDuplicationLogic(DojoTestCase):
 
         # by default hash_code should be generated
         self.assertIsNotNone(finding_new.hash_code)
+
+    @skip
+    def test_build_fixture_for_extra_import(self):
+        # This test can be run if we want to add more testdata to the dojo_testdata.json fixture
+        # It will generate a dojo_testdata_extra.json fixture which can be added to the list of fixtures above
+        # or the contents can be copied into dojo_testdata.json
+        admin = self.get_test_admin()
+        eng = Engagement.objects.get(id=5)
+        # Ensure environment exists
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+
+        scan_path = get_unit_tests_scans_path("sonarqube") / "sonar-single-finding.json"
+        with scan_path.open(encoding="utf-8") as scan:
+            import_options = {
+                "scan": scan,
+                "scan_type": "SonarQube Scan detailed",
+                "engagement": eng,
+                "user": admin,
+                "lead": admin,
+                "environment": environment,
+                "scan_date": timezone.now(),
+                "min_severity": "Info",
+                "active": True,
+                "verified": True,
+                "push_to_jira": False,
+                "close_old_findings": False,
+            }
+            importer = DefaultImporter(**import_options)
+            test, _, len_new, len_closed, _, _, _ = importer.process_scan(scan)
+            self.assertEqual(1, len_new)
+            self.assertEqual(0, len_closed)
+
+        # Dump entire DB to new fixture file
+        repo_root = Path(__file__).resolve().parents[1]
+        output_path = repo_root / "dojo" / "fixtures" / "dojo_testdata2.json"
+        # Dump only the new Test and its Findings as a minimal additive fixture
+        findings_qs = Finding.objects.filter(test=test).order_by("id")
+        test_imports_qs = Test_Import.objects.filter(test=test).order_by("id")
+        actions_qs = Test_Import_Finding_Action.objects.filter(test_import__in=test_imports_qs).order_by("id")
+        payload = []
+        # Include the Test_Type to keep the additive fixture self-sufficient for this test
+        payload.extend(json.loads(serializers.serialize(
+            "json", [test.test_type], use_natural_foreign_keys=True, use_natural_primary_keys=True,
+        )))
+        payload.extend(json.loads(serializers.serialize(
+            "json", [test], use_natural_foreign_keys=True, use_natural_primary_keys=True,
+        )))
+        payload.extend(json.loads(serializers.serialize(
+            "json", findings_qs, use_natural_foreign_keys=True, use_natural_primary_keys=True,
+        )))
+        payload.extend(json.loads(serializers.serialize(
+            "json", test_imports_qs, use_natural_foreign_keys=True, use_natural_primary_keys=True,
+        )))
+        payload.extend(json.loads(serializers.serialize(
+            "json", actions_qs, use_natural_foreign_keys=True, use_natural_primary_keys=True,
+        )))
+        output_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
     # # utility methods
 

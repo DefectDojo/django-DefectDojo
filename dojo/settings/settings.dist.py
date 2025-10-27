@@ -93,7 +93,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
-    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 100),
+    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 10),
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
@@ -1897,6 +1897,7 @@ VULNERABILITY_URLS = {
     "LEN-": "https://support.lenovo.com/cl/de/product_security/",  # e.g. https://support.lenovo.com/cl/de/product_security/LEN-94953
     "MGAA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGAA-2013-0054.html
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
+    "MSRC_": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/msrc_cve-2025-59200
     "NCSC-": "https://advisories.ncsc.nl/advisory?id=",  # e.g. https://advisories.ncsc.nl/advisory?id=NCSC-2025-0191
     "NN-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/NN-2021:2-01
     "NTAP-": "https://security.netapp.com/advisory/",  # e.g. https://security.netapp.com/advisory/ntap-20250328-0007

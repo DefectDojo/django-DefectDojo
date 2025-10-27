@@ -43,3 +43,5 @@ annotations:
       description: Convert existing comments to descriptors
     - kind: added
       description: Testing on the oldest officially supported k8s
+    - kind: added
+      description: Checker for maximal number of celery beats
