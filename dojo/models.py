@@ -3010,6 +3010,7 @@ class Finding(models.Model):
         if hasattr(settings, "HASH_CODE_FIELDS_ALWAYS"):
             for field in settings.HASH_CODE_FIELDS_ALWAYS:
                 if getattr(self, field):
+                    deduplicationLogger.debug("adding HASH_CODE_FIELDS_ALWAYSfield %s to hash_fields: %s", field, getattr(self, field))
                     fields_to_hash += str(getattr(self, field))
 
         logger.debug("fields_to_hash      : %s", fields_to_hash)
