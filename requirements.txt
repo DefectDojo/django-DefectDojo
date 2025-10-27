@@ -29,7 +29,7 @@ lxml==6.0.2
 Markdown==3.9
 openpyxl==3.1.5
 Pillow==12.0.0  # required by django-imagekit
-psycopg[c]==3.2.11
+psycopg[c]==3.2.12
 cryptography==46.0.3
 python-dateutil==2.9.0.post0
 redis==7.0.0
