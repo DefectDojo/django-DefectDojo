@@ -48,7 +48,7 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
             "/login/github/",
         ]
         exceptions = [
-            (RequestsConnectionError("Host unreachable"), "Login via social authentication is temporarily unavailable. Please use the standard login below."),
+            (RequestsConnectionError("Host unreachable"), "Please use the standard login below."),
             (AuthCanceled("User canceled login"), "Social login was canceled. Please try again or use the standard login."),
             (AuthFailed("Token exchange failed"), "Social login failed. Please try again or use the standard login."),
         ]
@@ -58,7 +58,7 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
                     request = self._prepare_request(path)
                     response = self.middleware.process_exception(request, exception)
                     self.assertEqual(response.status_code, 302)
-                    self.assertEqual(response.url, "/login")
+                    self.assertEqual(response.url, "/login?force_login_form")
                     storage = list(messages.get_messages(request))
                     self.assertTrue(any(expected_message in str(msg) for msg in storage))
 
@@ -68,7 +68,7 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
         exception = AuthFailed("Should be handled globally")
         response = self.middleware.process_exception(request, exception)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/login")
+        self.assertEqual(response.url, "/login?force_login_form")
         storage = list(messages.get_messages(request))
         self.assertTrue(any("Social login failed. Please try again or use the standard login." in str(msg) for msg in storage))
 
