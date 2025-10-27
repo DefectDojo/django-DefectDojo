@@ -70,6 +70,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     def setUp(self):
         super().setUp()
         self.system_settings(enable_jira=True)
+        self.system_settings(enable_webhooks_notifications=True)
         self.testuser = User.objects.get(username="admin")
         self.testuser.usercontactinfo.block_execution = True
         self.testuser.usercontactinfo.save()
