@@ -1296,3 +1296,14 @@ def has_user_permission_view(permission_render_view, product):
         return True
     
     return False
+
+@register.filter()
+def validate_type_file(filename, type=None):
+    dict_image_types = {
+        "img": ["png", "jpeg"]
+    }
+
+    type_file =  filename.split('.')[-1].lower()
+    if type_file in dict_image_types.get(type, []):
+        return True
+    return False

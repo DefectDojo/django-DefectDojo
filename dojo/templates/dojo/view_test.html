@@ -21,6 +21,7 @@
 {% endblock %}
 {% block content %}
     {{ block.super }}
+    {% include 'dojo/view_modal_img.html' %}
     <!--Test Header begin -->
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -191,6 +192,7 @@
             </table>
         </div>
     </div>
+
     {% if test.description %}
         <div class="row">
             <div class="col-md-12" id="cred">
@@ -1620,13 +1622,19 @@
                         <div class="col-md-2" style="text-align: center">
                             <div class="row">
                                 {% url 'access_file' fid=file.id oid=test.id obj_type='Test' as image_url %}
-                                <a rel="noopener noreferrer" href="{{ image_url }}" target="_blank" download>
-                                    {% if file|get_thumbnail %}
-                                        <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
-                                    {% else %}
-                                        <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
-                                    {% endif %}
+                                {% if file.file.name|validate_type_file:'img' %}
+                                    <a rel="noopener noreferrer">
+                                {% else %}
+                                    {% url 'download_file' fid=file.id oid=test.id obj_type='Test' as image_url %}
+                                    <a rel="noopener noreferrer" href="{{ image_url }}" target="_blank" download>
+                                {% endif %}
+
+                                {% if file|get_thumbnail %}
+                                    <img src="{{ image_url }}" alt="thumbnail" style="width:150px" data-file-id="{{file.id}}" data-test-id="{{test.id}}"/>
+                                {% else %}
+                                    <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
                                 </a>
+                                {% endif %}
                             </div>
                             <div class="row">
                                 <caption style="text-align:center">{{ file.title }}</caption>
@@ -1642,6 +1650,7 @@
     <div class="protip">
         <i class="fa-solid fa-lightbulb"></i> <strong>{% trans "ProTip!" %}</strong> {% trans "Type" %}s <kbd>e</kbd> {% trans "to edit this test. Type" %} <kbd>a</kbd> {% trans "to add a finding to this test." %}
     </div>
+
 {% endblock %}
 
 {% block postscript %}
@@ -2202,6 +2211,18 @@
 
 
 
+    </script>
+    <script type="text/javascript">
+      
+    let h
+    $(document).on("click", "img[data-file-id]", function() {
+        var fileId = $(this).data('file-id');
+        var testId = $(this).data('test-id');
+        var imageUrl = location.protocol.concat("//").concat(window.location.host) + "/access_file/" + fileId + "/" + testId + "/Test";
+        var imgTag = '<img src="' + imageUrl + '" alt="Imagen">';
+        $("#idDivContectImg").html(imgTag);
+        $('#modalGenericImgId').modal('show');
+    });
     </script>
     {% include "dojo/filter_js_snippet.html" %}
     {% include "dojo/snippets/selectpicker_in_dropdown.html" %}

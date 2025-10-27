@@ -2816,10 +2816,12 @@ def generate_file_response_from_file_path(
         file_size = pathlib.Path(file_path).stat().st_size
     # Generate the FileResponse
     full_file_name = f"{file_name}{file_extension}"
+    content_type, _ = mimetypes.guess_type(file_path)
+
     response = FileResponse(
         path.open("rb"),
         filename=full_file_name,
-        content_type=f"{mimetypes.guess_type(file_path)}",
+        content_type=content_type,
     )
     # Add some important headers
     response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'
