@@ -13,7 +13,11 @@ from dojo.middleware import CustomSocialAuthExceptionMiddleware
 from .dojo_test_case import DojoTestCase
 
 
-class TestSocialAuthFailureHandling(DojoTestCase):
+class TestSocialAuthMiddlewareUnit(DojoTestCase):
+
+    """
+    Unit tests for CustomSocialAuthExceptionMiddleware.
+    """
 
     def setUp(self):
         self.factory = RequestFactory()
@@ -52,3 +56,13 @@ class TestSocialAuthFailureHandling(DojoTestCase):
                     self.assertEqual(response.url, "/login")
                     storage = list(messages.get_messages(request))
                     self.assertTrue(any(expected_message in str(msg) for msg in storage))
+
+    def test_non_social_auth_path_still_redirects_on_auth_exception(self):
+        """Ensure middleware handles AuthFailed even on unrelated paths."""
+        request = self._prepare_request("/some/other/path/")
+        exception = AuthFailed("Should be handled globally")
+        response = self.middleware.process_exception(request, exception)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/login")
+        storage = list(messages.get_messages(request))
+        self.assertTrue(any("Social login failed. Please try again or use the standard login." in str(msg) for msg in storage))
