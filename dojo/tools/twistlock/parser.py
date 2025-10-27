@@ -6,7 +6,6 @@ import logging
 import textwrap
 import dateutil
 import base64
-from datetime import datetime
 
 from dojo.models import Finding
 from django.conf import settings
@@ -35,14 +34,14 @@ class TwistlockCSVParser:
         data_tag = row.get("Tag", "")
         data_type = row.get("Type")
         data_package_license = row.get("Package License", "")
-        data_cluster = row.get("Clusters", "")
+        data_cluster = row.get("Clusters", "") or row.get("Cluster", "")
         data_namespaces = row.get("Namespaces", "")
         data_package_path = row.get("Package Path", "")
         data_name = row.get("Name", "")
         data_cloud_id = row.get("Id", "")
         data_runtime = row.get("Runtime", "")
         data_cause = row.get("Cause", "")
-        data_found_in = row.get("Found In", "")
+        data_found_in = row.get("Found in", "")
         data_purl = row.get("PURL", "")
         data_risk_factors = row.get("Risk Factors", "")
         data_hostname = row.get("Hostname", "")
@@ -59,6 +58,7 @@ class TwistlockCSVParser:
         data_unique_id = row.get("Custom Id", "")
         data_ami_id = row.get("Ami Id", "")
         data_labels = row.get("Labels", "")
+        data_collections = row.get("Collections", "")
 
         # Build container/image metadata for impact field (Item 3)
         impact_parts = []
@@ -80,6 +80,8 @@ class TwistlockCSVParser:
             impact_parts.append(f"Image ID: {image_id}")
         if distro:
             impact_parts.append(f"Distribution: {distro}")
+        if data_collections:
+            impact_parts.append(f"Environment: {self.get_environment_type(data_collections)}")
 
         # Host and container information
         hosts = row.get("Hosts", "")
@@ -180,6 +182,18 @@ class TwistlockCSVParser:
             finding.unsaved_vulnerability_ids = [data_vulnerability_id]
 
         return finding
+
+    def get_environment_type(self, collections_str):
+        if not collections_str:
+            return "Unknown"
+        if "PDN" in collections_str:
+            return "Production"
+        elif "QA" in collections_str:
+            return "Staging"
+        elif "DEV" in collections_str:
+            return "Development"
+        else:
+            return "Unknown"
 
     def get_tags(self, row):
         tags = row.get("Custom Tag", None)
