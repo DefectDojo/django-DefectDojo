@@ -12,7 +12,7 @@ from django import forms
 from django.apps import apps
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Count, JSONField, Q
+from django.db.models import Count, JSONField, Q, F
 from django.forms import HiddenInput
 from django.utils.timezone import now, tzinfo
 from django.utils.translation import gettext_lazy as _
@@ -368,7 +368,14 @@ class FindingSLAFilter(ChoiceFilter):
                 mitigated=None,
             ) & Q(sla_expiration_date__lt=now().date()),
         )
-    
+
+    def sla_violated_mitigated(self, qs, name):
+        # return findings that have an sla expiration date before the mitigated date
+        return qs.filter(
+            Q(sla_expiration_date__lt=F('mitigated')),
+        )
+        
+
     def sla_left_seven_days(self, qs, name):
         return qs.filter(
             Q(sla_expiration_date__gte=timezone.now().date()) & 
@@ -380,6 +387,7 @@ class FindingSLAFilter(ChoiceFilter):
         0: (_("False"), sla_satisfied),
         1: (_("True"), sla_violated),
         2: (_("SLA left in next 7 days"), sla_left_seven_days),
+        3: (_("SLA violated mitigated"), sla_violated_mitigated),
     }
 
     def __init__(self, *args, **kwargs):
@@ -1891,6 +1899,8 @@ class FindingFilterHelper(FilterSet):
         choices=Product.LIFECYCLE_CHOICES,
         label="Product lifecycle")
     priority = FindingPriorityFilter(label="Priority")
+    description = CharFilter(lookup_expr="icontains", label="Description contains", help_text="Finding description contains")
+    impact = CharFilter(lookup_expr="icontains", label="Impact contains", help_text="Finding impact contains")
 
     has_component = BooleanFilter(
         field_name="component_name",
