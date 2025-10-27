@@ -311,6 +311,15 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     & Q(unique_id_from_tool__in=new_unique_ids_from_tool)
                 ),
             )
+        if self.deduplication_algorithm == "unique_id_from_tool_preferred_over_hash_code":
+            old_findings = old_findings.exclude(
+                (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool__in=new_unique_ids_from_tool))
+                | (
+                    Q(unique_id_from_tool__isnull=True)
+                    & Q(hash_code__isnull=False)
+                    & Q(hash_code__in=new_hash_codes)
+                ),
+            )
         # Accommodate for product scope or engagement scope
         if self.close_old_findings_product_scope:
             old_findings = old_findings.filter(test__engagement__product=self.test.engagement.product)

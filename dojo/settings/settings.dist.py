@@ -1965,12 +1965,16 @@ DEDUPE_ALGO_HASH_CODE = "hash_code"
 # unique_id_from_tool or hash_code
 # Makes it possible to deduplicate on a technical id (same parser) and also on some functional fields (cross-parsers deduplication)
 DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = "unique_id_from_tool_or_hash_code"
+# unique_id_from_tool preferred over hash_code
+# First tries to deduplicate on unique_id_from_tool, if not present falls back to hash_code
+DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_PREFERRED_OVER_HASH_CODE = "unique_id_from_tool_preferred_over_hash_code"
 
 DEDUPE_ALGOS = [
     DEDUPE_ALGO_LEGACY,
     DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     DEDUPE_ALGO_HASH_CODE,
     DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_PREFERRED_OVER_HASH_CODE
 ]
 
 # Allows to deduplicate with endpoints if endpoints is not included in the hashcode.
@@ -2089,7 +2093,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Blackduck Binary Analysis": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "docker-bench-security Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Vulners Scan": DEDUPE_ALGO_HASH_CODE,
-    "Twistlock Image Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Twistlock Image Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_PREFERRED_OVER_HASH_CODE,
     "NeuVector (REST)": DEDUPE_ALGO_HASH_CODE,
     "NeuVector (compliance)": DEDUPE_ALGO_HASH_CODE,
     "Wpscan": DEDUPE_ALGO_HASH_CODE,

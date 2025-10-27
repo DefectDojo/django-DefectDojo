@@ -339,6 +339,11 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
             deduplicate_hash_code(new_finding)
         elif deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
             deduplicate_uid_or_hash_code(new_finding)
+        elif deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_PREFERRED_OVER_HASH_CODE:
+            if new_finding.unique_id_from_tool:
+                deduplicate_unique_id_from_tool(new_finding)
+            else:
+                deduplicate_hash_code(new_finding)
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
