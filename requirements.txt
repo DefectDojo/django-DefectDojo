@@ -36,7 +36,7 @@ lxml==6.0.2
 Markdown==3.9
 openpyxl==3.1.5
 Pillow==12.0.0  # required by django-imagekit
-psycopg[c]==3.2.11
+psycopg[c]==3.2.12
 psycopg-pool==3.2.7
 cryptography==46.0.3
 python-dateutil==2.9.0.post0
@@ -99,12 +99,12 @@ opentelemetry-semantic-conventions==0.59b0
 opentelemetry-instrumentation==0.59b0
 django-redis==6.0.0
 pandas==2.3.3
-pyarrow==21.0.0
+pyarrow==22.0.0
 # Pinning Dependencies
 azure-core==1.36.0
 protobuf==6.33.0
 billiard==4.2.1
-botocore==1.40.58
+botocore==1.40.59
 et_xmlfile==2.0.0
 inflection==0.5.1
 requests-toolbelt==1.0.0
@@ -167,4 +167,4 @@ propcache==0.4.1
 py==1.11.0
 soupsieve==2.8
 hashids==1.3.1
-pikepdf==9.11.0
+pikepdf==10.0.0
