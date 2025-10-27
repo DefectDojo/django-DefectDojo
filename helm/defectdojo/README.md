@@ -393,8 +393,8 @@ Sample secret template (replace the placeholders with your PostgreSQL credential
 ```YAML
 apiversion: v1
 kind: Secret
-metadata:
-  name: defectdojo-postgresql-specific
+metadata: 
+  name: defectdojo-postgresql-specific 
 type: Opaque
 stringData:  # I chose stringData for better visualization of the credentials for debugging
   password: <user-password>
@@ -510,7 +510,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | Repository | Name | Version |
 |------------|------|---------|
 | oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | postgresql | ~16.7.0 |
-| oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | valkey (aliased as `redis`) | >= 1.0.0 |
+| oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | redis(valkey) | >= 1.0.0 |
 
 ## Values
 
