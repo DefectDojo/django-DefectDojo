@@ -1,6 +1,5 @@
 title = "DefectDojo Documentation"
 baseurl = "http://localhost/"
-canonifyURLs = false
 disableAliases = true
 disableHugoGeneratorInject = true
 disableKinds = ["taxonomy", "term"]
@@ -84,3 +83,6 @@ copyRight = "Copyright (c) 2020-2024 Thulite"
   hint = "photo"
   quality = 85
   resampleFilter = "Lanczos"
+
+[pagination]
+  pagerSize = 10
