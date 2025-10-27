@@ -1,6 +1,6 @@
 ---
 title: "Integrators Tool Reference"
-description: "Beta Feature"
+description: "How to integrate DefectDojo Integrators for pushing Issues out"
 weight: 1
 ---
 
@@ -101,7 +101,7 @@ The GitLab integration allows you to add issues to a [GitLab Project](https://do
 
 ### Issue Tracker Mapping
 
-- **Project Name**: The name of the project in GitLab that you want to send issues to
+- **Project Name**: The name of the project in GitLab that you want to send issues to.
 
 ### Severity Mapping Details
 
@@ -122,3 +122,62 @@ By default, GitLab has statuses of 'opened' and 'closed'.  Additional status lab
 - **Closed Mapping**: `closed`
 - **False Positive Mapping**: `closed`
 - **Risk Accepted Mapping**: `closed`
+
+## ServiceNow
+
+The ServiceNow Integration allows you to push DefectDojo Findings as ServiceNow Incidents.
+
+### Instance Setup
+
+Your ServiceNow instance will require you to obtain a Refresh Token, associated with the User or Service account that will push Incidents to ServiceNow.
+
+You'll need to start by creating an OAuth registration on your ServiceNow instance for DefectDojo:
+
+1. In the left-hand navigation bar, search for “Application Registry” and select it.
+2. Click “New”.
+3. Choose “Create an OAuth API endpoint for external clients”.
+4. Fill in the required fields:
+    * Name: Provide a meaningful name for your application (e.g., Vulnerability Integration Client).
+    * (Optional) Adjust the Token Lifespan:
+    * Access Token Lifespan: Default is 1800 seconds (30 minutes).
+    * Refresh Token Lifespan: The default is 8640000 seconds (approximately 100 days).
+5. Click Submit to create the application record.
+6. After submission, select the application from the list and take note of the **Client ID and Client Secret** fields.
+
+You will then need to use this registration to obtain a Refresh Token, which can only be obtained through the ServiceNow API.  Open a terminal window and paste the following (substituting the variables wrapped in `{{}}` with your user's actual information)
+
+```
+curl --request POST \
+ --url {{INSTANCE_HOST}}/oauth_token.do \
+ --header 'content-type: application/x-www-form-urlencoded' \
+ --data grant_type=password \
+ --data 'client_id={{CLIENT_ID}}' \
+ --data 'client_secret={{CLIENT_SECRET}}' \
+ --data 'username={{USERNAME}}' \
+ --data 'password={{PASSWORD}}'
+ ```
+
+If your ServiceNow credentials are correct, and allow for admin level-access to ServiceNow, you should receive a response with a RefreshToken.  You'll need that token to complete integration with DefectDojo.
+
+- **Instance Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to the URL for your ServiceNow server, for example `https://your-organization.service-now.com/`.
+- **Refresh Token** is where the Refresh Token should be entered.
+- **Client ID** should be the Client ID set in the OAuth App Registration.
+- **Client ID** should be the Client Secret set in the OAuth App Registration.
+
+### Severity Mapping Details
+
+This maps to the ServiceNow Impact field.
+- **Info Mapping**: `1`
+- **Low Mapping**: `1`
+- **Medium Mapping**: `2`
+- **High Mapping**: `3`
+- **Critical Mapping**: `3`
+
+### Status Mapping Details
+
+- **Status Field Name**: `State`
+- **Active Mapping**: `New`
+- **Closed Mapping**: `Closed`
+- **False Positive Mapping**: `Resolved`
+- **Risk Accepted Mapping**: `Resolved`
