@@ -17,12 +17,31 @@ dependencies:
     version: ~19.6.4
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: redis.enabled
+# For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/
+# This is example for "artifacthub.io/changes"
+# artifacthub.io/changes: |
+#   - kind: added
+#     description: Cool feature
+#   - kind: fixed
+#     description: Minor bug
+#   - kind: changed
+#     description: Broken feature
+#   - kind: removed
+#     description: Old bug
+#   - kind: deprecated
+#     description: Not-needed feature
+#   - kind: security
+#     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "true"
   artifacthub.io/changes: |
     - kind: changed
       description: DRY cloudsql-proxy
     - kind: changed
-      description: Each component allow to specific image + allow digest pinning
+      description: Each component allow to specific image + allow digest pinning + allow different tags for Django and Nginx
+    - kind: added
+      description: Convert existing comments to descriptors
     - kind: added
       description: Testing on the oldest officially supported k8s
+    - kind: added
+      description: Checker for maximal number of celery beats

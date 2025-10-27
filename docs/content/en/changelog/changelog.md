@@ -8,28 +8,53 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
+## Oct 2025: v2.51
+
+### Oct 14, 2025: v2.51.1
+
+* **(Pro UI)** Added Finding Quick Report feature.  Quick report allows users to quickly render an HTML report with the currently displayed Findings on a Finding table.
+
+![image](images/quick_report.png)
+
+* **(Pro UI)** Added vector builder and calculator to the Edit Finding form, for CVSSv3 and CVSSv4.  You can build vector strings using the 🛠️ button next to the CVSSv3 / CVSSv4 string entry on the Edit Finding form.
+
+Click the calculator button to render a score based on the vector string.
+
+![image](images/pro_cvss_vector_and_score.png)
+![image](images/cvssv4_vector_builder.png)
+
+* **(Pro UI)** Added Similar Findings view on Findings when enabled in System Settings.  
+* **(Pro UI)** File names (for attached artifacts) can now be edited directly in the UI.
+* **(Pro UI)** Redirect user to Home after a successful Support Inquiry submission.  
+
+### Oct 6, 2025: v2.51.0
+
+No significant Pro changes are present in this release.
+
 ## Sept 2025: v2.50
 
-### Sept 22, 2025: v2.50.4
+#### Sept 29, 2025: v2.50.4
 
-* **(Pro UI)** Changes Engagement Deduplication form label and help text
-* **(Pro UI)** Adds toggle for MCP (for superusers only)
+* **(MCP)** Added MCP toggle for Superusers only.
+* **(Pro UI)** Bypassed endpoint validation on Edit Finding form when Endpoints have not changed.
+* **(Pro UI)** Collapsed additional fields in the Universal Parser preview for cleaner display.
+* **(Pro UI)** Updated Engagement Deduplication form label and help text for clarity.
 
-### Sept 15, 2025: v2.50.3
+#### Sept 22, 2025: v2.50.3
 
 * **(Pro UI)** Added support for [CVSSv4.0](https://www.first.org/cvss/v4-0/) vector strings.
 
-### Sept 15, 2025: v2.50.2
+#### Sept 15, 2025: v2.50.2
 
 * **(Pro UI)** Added Any/All status filtering.  Filtering by status allows you to apply either AND (inner join) logic, or OR (outer join) logic to the filter.
 * **(Pro UI)** Added Contact Support form for On-Premise installs.
 
-### Sept 9, 2025: v2.50.1
+#### Sept 9, 2025: v2.50.1
 
 * **(Tools)** Removed CSV limit for Qualys HackerGuardian
 * **(SSO)** Removed Force Password Reset for users created via SSO
 
-### Sept 2, 2025: v2.50.0
+#### Sept 2, 2025: v2.50.0
 
 * **(Pro UI)** "Date During" filter has been added to the UI, allowing users to filter by a range of dates
 * **(Pro UI)** Vulnerability ID column can now be sorted, however the sorting only considers the **first** vulnerability ID.
@@ -40,7 +65,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 The Pro UI has been significantly reorganized, with changes to page organization.
 ![image](images/pro_ui_249.png)
 
-### August 25: 2.49.3
+#### August 25: 2.49.3
 
 [Integrations](/en/share_your_findings/integrations/) has been added to DefectDojo Pro, adding an Jira-style integrations for Azure DevOps, GitHub and GitLab boards.
 

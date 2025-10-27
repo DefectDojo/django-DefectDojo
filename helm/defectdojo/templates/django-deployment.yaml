@@ -246,7 +246,9 @@ spec:
             - name: Host
               value: {{ .Values.host }}
           failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold }}
+          {{- if .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
           initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
+          {{- end }}
           periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
           successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold }}
           timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds }}
@@ -315,7 +317,9 @@ spec:
             - name: Host
               value: {{ .Values.host }}
           failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold }}
+          {{- if .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
           initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
+          {{- end }}
           periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
           successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold }}
           timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds }}
@@ -332,7 +336,9 @@ spec:
             - name: Host
               value: {{ .Values.host }}
           failureThreshold: {{ .Values.django.uwsgi.readinessProbe.failureThreshold }}
+          {{- if .Values.django.uwsgi.readinessProbe.initialDelaySeconds }}
           initialDelaySeconds: {{ .Values.django.uwsgi.readinessProbe.initialDelaySeconds }}
+          {{- end }}
           periodSeconds: {{ .Values.django.uwsgi.readinessProbe.periodSeconds }}
           successThreshold: {{ .Values.django.uwsgi.readinessProbe.successThreshold }}
           timeoutSeconds: {{ .Values.django.uwsgi.readinessProbe.timeoutSeconds }}
@@ -349,7 +355,9 @@ spec:
             - name: Host
               value: {{ .Values.host }}
           failureThreshold: {{ .Values.django.uwsgi.startupProbe.failureThreshold }}
+          {{- if .Values.django.uwsgi.startupProbe.initialDelaySeconds }}
           initialDelaySeconds: {{ .Values.django.uwsgi.startupProbe.initialDelaySeconds }}
+          {{- end }}
           periodSeconds: {{ .Values.django.uwsgi.startupProbe.periodSeconds }}
           successThreshold: {{ .Values.django.uwsgi.startupProbe.successThreshold }}
           timeoutSeconds: {{ .Values.django.uwsgi.startupProbe.timeoutSeconds }}

@@ -12,7 +12,7 @@
     "preview": "vite preview --outDir public"
   },
   "dependencies": {
-    "@docsearch/css": "4.1.0",
+    "@docsearch/css": "4.2.0",
     "@docsearch/js": "4.2.0",
     "@thulite/doks-core": "1.8.0",
     "@thulite/images": "3.3.0",
@@ -23,9 +23,9 @@
   },
   "devDependencies": {
     "prettier": "3.6.2",
-    "vite": "7.1.9"
+    "vite": "7.1.12"
   },
   "engines": {
-    "node": "22.20.0"
+    "node": "22.21.0"
   }
 }

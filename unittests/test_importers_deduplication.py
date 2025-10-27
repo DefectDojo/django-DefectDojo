@@ -78,10 +78,8 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         dup_count = Finding.objects.filter(test=test, duplicate=True).count()
         self.assertEqual(expected_duplicates, dup_count)
 
-        # duplicates should be sorted by id
-        if dup_count > 0:
-            for finding in test.finding_set.filter(duplicate=True):
-                self.assertTrue(finding.duplicate_finding.id < finding.id)
+        # Assess duplicate structure invariants
+        self._assess_duplicates_in_test(test)
 
         return test_id
 
@@ -114,6 +112,9 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         first_dup_count = Finding.objects.filter(test=first_test, duplicate=True).count()
         self.assertEqual(first_import_duplicates, first_dup_count)
 
+        # Assess duplicate structure invariants on first import
+        self._assess_duplicates_in_test(first_test)
+
         # Second import: subset into the same engagement
         response_json = self.import_scan_with_params(
             subset_filename,
@@ -134,6 +135,9 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         # The second test should contain expected duplicates
         second_test_dup_count = Finding.objects.filter(test=second_test, duplicate=True).count()
         self.assertEqual(expected_duplicates, second_test_dup_count)
+
+        # Assess duplicate structure invariants on second import
+        self._assess_duplicates_in_test(second_test)
 
         # Engagement should have total duplicates from both imports
         total_expected_duplicates = first_import_duplicates + expected_duplicates
@@ -169,6 +173,9 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         first_dup_count = Finding.objects.filter(test=first_test, duplicate=True).count()
         self.assertEqual(expected_duplicates, first_dup_count)
 
+        # Assess duplicate structure invariants
+        self._assess_duplicates_in_test(first_test)
+
         # Second import: same scan into Product B (different product)
         response_json = self.import_scan_with_params(
             filename,
@@ -189,6 +196,9 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         # The second test should contain expected duplicates (different products don't deduplicate)
         second_test_dup_count = Finding.objects.filter(test=second_test, duplicate=True).count()
         self.assertEqual(expected_duplicates, second_test_dup_count)
+
+        # Assess duplicate structure invariants
+        self._assess_duplicates_in_test(second_test)
 
         # First product should still have expected duplicates
         first_prod_dup_count = Finding.objects.filter(test__engagement__product=first_test.engagement.product, duplicate=True).count()
@@ -235,6 +245,10 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         # Product should have expected duplicates total
         prod_dup_count = Finding.objects.filter(test__engagement__product=first_test.engagement.product, duplicate=True).count()
         self.assertEqual(expected_duplicates, prod_dup_count)
+
+        # Assess duplicate structure invariants on both tests
+        self._assess_duplicates_in_test(first_test)
+        self._assess_duplicates_in_test(second_test)
 
         return second_test.id
 
@@ -290,32 +304,97 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         prod_dup_count = Finding.objects.filter(test__engagement__product=first_test.engagement.product, duplicate=True).count()
         self.assertEqual(total_expected_duplicates, prod_dup_count)
 
+        # Assess duplicate structure invariants on both tests
+        self._assess_duplicates_in_test(first_test)
+        self._assess_duplicates_in_test(second_test)
+
         return second_test.id
+
+    # Duplicate structure assessment helpers
+    def _assess_duplicates_in_test(self, test: Test):
+        self._assert_duplicates_have_original(test)
+        self._assert_duplicates_have_greater_id(test)
+        self._assert_no_duplicate_loops(test)
+
+    def _assert_duplicates_have_original(self, test: Test):
+        for finding in Finding.objects.filter(test=test, duplicate=True):
+            self.assertIsNotNone(
+                finding.duplicate_finding,
+                msg=f"Duplicate finding {finding.id} has no duplicate_finding set",
+            )
+
+    def _assert_duplicates_have_greater_id(self, test: Test):
+        for finding in Finding.objects.filter(test=test, duplicate=True).select_related("duplicate_finding"):
+            if finding.duplicate_finding is None:
+                # Let the previous assertion report this
+                continue
+            self.assertTrue(
+                finding.id > finding.duplicate_finding.id,
+                msg=f"Duplicate finding {finding.id} should reference an original with a lower id ({finding.duplicate_finding.id})",
+            )
+
+    def _assert_no_duplicate_loops(self, test: Test):
+        for finding in Finding.objects.filter(test=test, duplicate=True).select_related("duplicate_finding"):
+            # A duplicate cannot point to another duplicate
+            if finding.duplicate_finding is None:
+                continue
+            self.assertFalse(
+                finding.duplicate_finding.duplicate,
+                msg=f"Duplicate finding {finding.id} points to another duplicate {finding.duplicate_finding.id}",
+            )
+
+    # We need to cover all 4 types of deduplication algorithms:
+    # - LEGACY (Zap)
+    # - UNIQUE_ID_FROM_TOOL (Checkmarx)
+    # - HASH_CODE (Trivy)
+    # - UNIQUE_ID_FROM_TOOL_OR_HASH_CODE (SARIF)
+    # - UNIQUE_ID_FROM_TOOL_OR_HASH_CODE (Veracode)
+    # - UNIQUE_ID_FROM_TOOL_OR_HASH_CODE (StackHawk)
 
     # Test cases for ZAP (LEGACY algorithm)
     def test_zap_single_import_no_duplicates(self):
         """Test that importing ZAP scan (LEGACY algorithm) creates 0 duplicate findings"""
-        self._test_single_import_assess_duplicates("scans/zap/dvwa_baseline_dojo_subset.xml", "ZAP Scan", 0)
+        self._test_single_import_assess_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 0)
 
     def test_zap_full_then_subset_duplicates(self):
         """Test that importing full ZAP scan then subset creates duplicates"""
-        # For now, use the same file for both full and subset since we don't have a proper subset
-        # This will test the same file imported twice into the same engagement
-        self._test_full_then_subset_duplicates("scans/zap/dvwa_baseline_dojo_subset.xml", "scans/zap/dvwa_baseline_dojo_subset.xml", "ZAP Scan", 10)
+        self._test_full_then_subset_duplicates("scans/zap/dvwa_baseline_dojo.xml", "scans/zap/dvwa_baseline_dojo_subset.xml", "ZAP Scan", 10)
 
     def test_zap_different_products_no_duplicates(self):
         """Test that importing ZAP scan into different products creates 0 duplicates"""
-        self._test_different_products_no_duplicates("scans/zap/dvwa_baseline_dojo_subset.xml", "ZAP Scan", 0)
+        self._test_different_products_no_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 0)
 
     def test_zap_same_product_different_engagements_duplicates(self):
         """Test that importing ZAP scan into same product but different engagements creates duplicates"""
-        self._test_same_product_different_engagements_duplicates("scans/zap/dvwa_baseline_dojo_subset.xml", "ZAP Scan", 10)
+        self._test_same_product_different_engagements_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 19)
 
     def test_zap_same_product_different_engagements_dedupe_on_engagements_no_duplicates(self):
         """Test that importing ZAP scan into same product but different engagements with dedupe_on_engagements creates 0 duplicates"""
-        self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/zap/dvwa_baseline_dojo_subset.xml", "ZAP Scan", 0)
+        self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/zap/dvwa_baseline_dojo.xml", "ZAP Scan", 0)
 
-    # Test cases for Checkmarx (UNIQUE_ID_FROM_TOOL algorithm)
+    # Test cases for ZAP (LEGACY algorithm) with internal duplicates
+    def test_zap_single_import_internal_duplicates(self):
+        """Test that importing ZAP scan (LEGACY algorithm) creates 3 internal duplicates"""
+        self._test_single_import_assess_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 3)
+
+    def test_zap_full_then_subset_internal_duplicates(self):
+        """Test that importing full ZAP scan then subset creates 3 internal duplicates + 6 cross engagement duplicates"""
+        self._test_full_then_subset_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates_subset.xml", "ZAP Scan", 6, first_import_duplicates=3)
+
+    def test_zap_different_products_internal_duplicates(self):
+        """Test that importing ZAP scan into different products creates 3 internal duplicates"""
+        self._test_different_products_no_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 3)
+
+    def test_zap_same_product_different_engagements_internal_duplicates(self):
+        """Test that importing ZAP scan into same product but different engagements creates 13 duplicates + 3 internal duplicates = 16 total duplicates"""
+        self._test_same_product_different_engagements_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 16)
+
+    def test_zap_same_product_different_engagements_dedupe_on_engagements_internal_duplicates(self):
+        """Test that importing ZAP scan with 3 internal dupcliates into same product but different engagements with dedupe_on_engagements creates only 3 duplicates and no cross engagement duplicates"""
+        self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/zap/dvwa_baseline_dojo_fabricated_internal_duplicates.xml", "ZAP Scan", 3, first_import_duplicates=3)
+
+    # Test cases for Checkmarx Scan detailed (UNIQUE_ID_FROM_TOOL algorithm)
+    # Please note the non-detailed version uses HASH_CODE algorithm
     def test_checkmarx_single_import_no_duplicates(self):
         """Test that importing Checkmarx scan (UNIQUE_ID_FROM_TOOL algorithm) creates 0 duplicate findings"""
         self._test_single_import_assess_duplicates("scans/checkmarx/multiple_findings.json", "Checkmarx Scan detailed", 0)
@@ -323,8 +402,8 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
     def test_checkmarx_full_then_subset_duplicates(self):
         """Test that importing full Checkmarx scan then subset creates duplicates"""
         # For now, use the same file for both full and subset
-        self._test_full_then_subset_duplicates("scans/checkmarx/multiple_findings.json", "scans/checkmarx/multiple_findings.json",
-        "Checkmarx Scan detailed", 10)
+        self._test_full_then_subset_duplicates("scans/checkmarx/multiple_findings.json", "scans/checkmarx/multiple_findings_fabricated_subset.json",
+        "Checkmarx Scan detailed", 5)
 
     def test_checkmarx_different_products_no_duplicates(self):
         """Test that importing Checkmarx scan into different products creates 0 duplicates"""
@@ -339,6 +418,28 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/checkmarx/multiple_findings.json",
         "Checkmarx Scan detailed", 0)
 
+    # Test cases for Checkmarx Scan detailed (UNIQUE_ID_FROM_TOOL algorithm) with internal duplicates
+    # Please note the non-detailed version uses HASH_CODE algorithm
+    def test_checkmarx_single_import_internal_duplicates(self):
+        """Test that importing Checkmarx scan (UNIQUE_ID_FROM_TOOL algorithm) creates 5 internal duplicates"""
+        self._test_single_import_assess_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 6)
+
+    def test_checkmarx_full_then_subset_internal_duplicates(self):
+        """Test that importing full Checkmarx scan then subset creates 3 internal duplicates + 6 cross engagement duplicates"""
+        self._test_full_then_subset_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "scans/checkmarx/multiple_findings_fabricated_internal_duplicates_subset.json", "Checkmarx Scan detailed", 6, first_import_duplicates=6)
+
+    def test_checkmarx_different_products_internal_duplicates(self):
+        """Test that importing Checkmarx scan into different products creates 5 internal duplicates"""
+        self._test_different_products_no_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 6)
+
+    def test_checkmarx_same_product_different_engagements_internal_duplicates(self):
+        """Test that importing Checkmarx scan into same product but different engagements creates 13 duplicates + 3 internal duplicates = 16 total duplicates"""
+        self._test_same_product_different_engagements_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 16)
+
+    def test_checkmarx_same_product_different_engagements_dedupe_on_engagements_internal_duplicates(self):
+        """Test that importing Checkmarx scan with 6 internal dupcliates into same product but different engagements with dedupe_on_engagements creates only 6 duplicates and no cross engagement duplicates"""
+        self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/checkmarx/multiple_findings_fabricated_internal_duplicates.json", "Checkmarx Scan detailed", 6, first_import_duplicates=6)
+
     # Test cases for Trivy (HASH_CODE algorithm)
     def test_trivy_single_import_no_duplicates(self):
         """Test that importing Trivy scan (HASH_CODE algorithm) creates 0 duplicate findings"""
@@ -347,7 +448,7 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
     def test_trivy_full_then_subset_duplicates(self):
         """Test that importing full Trivy scan then subset creates duplicates"""
         # For now, use the same file for both full and subset
-        self._test_full_then_subset_duplicates("scans/trivy/kubernetes.json", "scans/trivy/kubernetes.json", "Trivy Scan", 20)
+        self._test_full_then_subset_duplicates("scans/trivy/kubernetes.json", "scans/trivy/kubernetes_fabricated_subset.json", "Trivy Scan", 13)
 
     def test_trivy_different_products_no_duplicates(self):
         """Test that importing Trivy scan into different products creates 0 duplicates"""
@@ -361,13 +462,34 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         """Test that importing Trivy scan into same product but different engagements with dedupe_on_engagements creates 0 duplicates"""
         self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/trivy/kubernetes.json", "Trivy Scan", 0)
 
+    # Test cases for Trivy (HASH_CODE algorithm) with internal duplicates
+    def test_trivy_single_import_internal_duplicates(self):
+        """Test that importing Trivy scan (HASH_CODE algorithm) creates 3 internal duplicates"""
+        self._test_single_import_assess_duplicates("scans/trivy/kubernetes_fabricated_internal_duplicates.json", "Trivy Scan", 3)
+
+    def test_trivy_full_then_subset_internal_duplicates(self):
+        """Test that importing full Trivy scan then subset creates 3 internal duplicates + 5 cross engagement duplicates"""
+        self._test_full_then_subset_duplicates("scans/trivy/kubernetes_fabricated_internal_duplicates.json", "scans/trivy/kubernetes_fabricated_internal_duplicates_subset.json", "Trivy Scan", 5, first_import_duplicates=3)
+
+    def test_trivy_different_products_internal_duplicates(self):
+        """Test that importing Trivy scan into different products creates 3 internal duplicates"""
+        self._test_different_products_no_duplicates("scans/trivy/kubernetes_fabricated_internal_duplicates.json", "Trivy Scan", 3)
+
+    def test_trivy_same_product_different_engagements_internal_duplicates(self):
+        """Test that importing Trivy scan into same product but different engagements creates 13 duplicates + 3 internal duplicates = 16 total duplicates"""
+        self._test_same_product_different_engagements_duplicates("scans/trivy/kubernetes_fabricated_internal_duplicates.json", "Trivy Scan", 16)
+
+    def test_trivy_same_product_different_engagements_dedupe_on_engagements_internal_duplicates(self):
+        """Test that importing Trivy scan with 6 internal dupcliates into same product but different engagements with dedupe_on_engagements creates only 3 duplicates and no cross engagement duplicates"""
+        self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/trivy/kubernetes_fabricated_internal_duplicates.json", "Trivy Scan", 3, first_import_duplicates=3)
+
     # Test cases for SARIF (UNIQUE_ID_FROM_TOOL_OR_HASH_CODE algorithm)
     # The samples for SARIF is the bash report that has internal duplicates
     # These are used on purpose so we capture the behaviour of import and reimport in this scenario.
     def test_sarif_single_import_no_duplicates(self):
         """Test that importing SARIF scan (UNIQUE_ID_FROM_TOOL_OR_HASH_CODE algorithm) creates 0 duplicate findings"""
         # bash-report.sarif has 18 internal duplicates, so we expect 18 duplicates even on first import
-        test_id = self._test_single_import_assess_duplicates("scans/sarif/bash-report.sarif", "SARIF", 18)
+        test_id = self._test_single_import_assess_duplicates("scans/sarif/bash-report-fabricated-no-internal-dupes.sarif", "SARIF", 0)
 
         # duplicates should be sorted by id (currently not usefull as tests are running celery tasks in the foreground)
         for finding in Finding.objects.filter(test_id=test_id, duplicate=True):
@@ -378,20 +500,56 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         # For now, use the same file for both full and subset
         # First import has 18 internal duplicates, second import also has 18 internal duplicates + 9 cross-import duplicates = 27 total in second test
         # Total = 18 (first) + 27 (second) = 45
-        self._test_full_then_subset_duplicates("scans/sarif/bash-report.sarif", "scans/sarif/bash-report.sarif", "SARIF", 27, first_import_duplicates=18)
+        self._test_full_then_subset_duplicates("scans/sarif/bash-report-fabricated-no-internal-dupes.sarif", "scans/sarif/bash-report-fabricated-no-internal-dupes-subset.sarif", "SARIF", 4)
 
     def test_sarif_different_products_no_duplicates(self):
         """Test that importing SARIF scan into different products creates 0 duplicates"""
         # bash-report.sarif has 18 internal duplicates per import
-        self._test_different_products_no_duplicates("scans/sarif/bash-report.sarif", "SARIF", 18)
+        self._test_different_products_no_duplicates("scans/sarif/bash-report-fabricated-no-internal-dupes.sarif", "SARIF", 0)
 
     def test_sarif_same_product_different_engagements_duplicates(self):
         """Test that importing SARIF scan into same product but different engagements creates duplicates"""
         # 18 internal duplicates in first import + 18 in second import + 9 cross-import duplicates = 45 total
-        self._test_same_product_different_engagements_duplicates("scans/sarif/bash-report.sarif", "SARIF", 45)
+        self._test_same_product_different_engagements_duplicates("scans/sarif/bash-report-fabricated-no-internal-dupes.sarif", "SARIF", 5)
 
     def test_sarif_same_product_different_engagements_dedupe_on_engagements_no_duplicates(self):
         """Test that importing SARIF scan into same product but different engagements with dedupe_on_engagements creates 0 duplicates"""
+        # bash-report.sarif has 18 internal duplicates per import
+        # Second test has 18 internal duplicates (no cross-engagement duplicates due to dedupe_on_engagements=True)
+        # Total product duplicates = 18 (first) + 18 (second) = 36
+        self._test_same_product_different_engagements_dedupe_on_engagements_no_duplicates("scans/sarif/bash-report-fabricated-no-internal-dupes.sarif", "SARIF", 0)
+
+    # Test cases for SARIF (UNIQUE_ID_FROM_TOOL_OR_HASH_CODE algorithm) with internal duplicates
+    # The samples for SARIF is the bash report that has internal duplicates
+    # These are used on purpose so we capture the behaviour of import and reimport in this scenario.
+    def test_sarif_single_import_internal_duplicates(self):
+        """Test that importing SARIF scan (UNIQUE_ID_FROM_TOOL_OR_HASH_CODE algorithm) creates 18 internal duplicates"""
+        # bash-report.sarif has 18 internal duplicates, so we expect 18 duplicates even on first import
+        test_id = self._test_single_import_assess_duplicates("scans/sarif/bash-report.sarif", "SARIF", 18)
+
+        # duplicates should be sorted by id (currently not usefull as tests are running celery tasks in the foreground)
+        for finding in Finding.objects.filter(test_id=test_id, duplicate=True):
+            self.assertTrue(finding.duplicate_finding.id < finding.id)
+
+    def test_sarif_full_then_subset_internal_duplicates(self):
+        """Test that importing full SARIF scan then subset creates 18 internal duplicates + 9 cross-import duplicates = 27 duplicates in second import"""
+        # For now, use the same file for both full and subset
+        # First import has 18 internal duplicates, second import also has 18 internal duplicates + 9 cross-import duplicates = 27 total in second test
+        # Total = 18 (first) + 27 (second) = 45
+        self._test_full_then_subset_duplicates("scans/sarif/bash-report.sarif", "scans/sarif/bash-report.sarif", "SARIF", 27, first_import_duplicates=18)
+
+    def test_sarif_different_products_internal_duplicates(self):
+        """Test that importing SARIF scan into different products creates 18 internal duplicates per import"""
+        # bash-report.sarif has 18 internal duplicates per import
+        self._test_different_products_no_duplicates("scans/sarif/bash-report.sarif", "SARIF", 18)
+
+    def test_sarif_same_product_different_engagements_internal_duplicates(self):
+        """Test that importing SARIF scan into same product but different engagements creates 45 total duplicates (18 + 18 + 9)"""
+        # 18 internal duplicates in first import + 18 in second import + 9 cross-import duplicates = 45 total
+        self._test_same_product_different_engagements_duplicates("scans/sarif/bash-report.sarif", "SARIF", 45)
+
+    def test_sarif_same_product_different_engagements_dedupe_on_engagements_internal_duplicates(self):
+        """Test that importing SARIF scan with 18 internal duplicates into same product but different engagements with dedupe_on_engagements creates only 18 duplicates (no cross-engagement duplicates)"""
         # bash-report.sarif has 18 internal duplicates per import
         # Second test has 18 internal duplicates (no cross-engagement duplicates due to dedupe_on_engagements=True)
         # Total product duplicates = 18 (first) + 18 (second) = 36
