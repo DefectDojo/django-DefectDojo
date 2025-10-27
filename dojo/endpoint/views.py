@@ -14,8 +14,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie
 
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
@@ -41,8 +39,6 @@ from dojo.utils import (
 
 logger = logging.getLogger(__name__)
 
-@cache_page(settings.CACHE_PAGE_TIME)
-@vary_on_cookie
 def process_endpoints_view(request, *, host_view=False, vulnerable=False):
 
     if vulnerable:
