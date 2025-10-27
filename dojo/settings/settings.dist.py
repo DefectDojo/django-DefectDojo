@@ -93,7 +93,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
-    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 100),
+    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 10),
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
@@ -214,6 +214,8 @@ env = environ.FileAwareEnv(
     # `RemoteUser` is usually used behind AuthN proxy and users should not know about this mechanism from Swagger because it is not usable by users.
     # It should be hidden by default.
     DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER=(bool, False),
+    # Some security policies require allowing users to have only one active session
+    DD_SINGLE_USER_SESSION=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
     DD_DOCUMENTATION_URL=(str, "https://documentation.defectdojo.com"),
     # merging findings doesn't always work well with dedupe and reimport etc.
@@ -622,6 +624,8 @@ SOCIAL_AUTH_OIDC_OIDC_ENDPOINT = env("DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
 SOCIAL_AUTH_OIDC_KEY = env("DD_SOCIAL_AUTH_OIDC_KEY")
 SOCIAL_AUTH_OIDC_SECRET = env("DD_SOCIAL_AUTH_OIDC_SECRET")
 # Optional settings
+if value := env("DD_LOGIN_REDIRECT_URL"):
+    SOCIAL_AUTH_LOGIN_REDIRECT_URL = value
 if value := env("DD_SOCIAL_AUTH_OIDC_ID_KEY"):
     SOCIAL_AUTH_OIDC_ID_KEY = value
 if value := env("DD_SOCIAL_AUTH_OIDC_USERNAME_KEY"):
@@ -919,6 +923,7 @@ INSTALLED_APPS = (
     "auditlog",
     "pgtrigger",
     "pghistory",
+    "single_session",
 )
 
 # ------------------------------------------------------------------------------
@@ -1150,6 +1155,13 @@ if AUTH_REMOTEUSER_ENABLED:
         REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"]
 
 # ------------------------------------------------------------------------------
+# SINGLE_USER_SESSION
+# ------------------------------------------------------------------------------
+
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SINGLE_USER_SESSION = env("DD_SINGLE_USER_SESSION")
+
+# ------------------------------------------------------------------------------
 # CELERY
 # ------------------------------------------------------------------------------
 
@@ -1325,6 +1337,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
+    "Github SAST Scan": ["vuln_id_from_tool", "severity", "file_path", "line"],
     "Github Vulnerability Scan": ["title", "severity", "component_name", "vulnerability_ids", "file_path"],
     "Github Secrets Detection Report": ["title", "file_path", "line"],
     "Solar Appscreener Scan": ["title", "file_path", "line", "severity"],
@@ -1357,7 +1370,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "HCLAppScan XML": ["title", "description"],
     "HCL AppScan on Cloud SAST XML": ["title", "file_path", "line", "severity"],
     "KICS Scan": ["file_path", "line", "severity", "description", "title"],
-    "MobSF Scan": ["title", "description", "severity"],
+    "MobSF Scan": ["title", "description", "severity", "file_path"],
     "MobSF Scorecard Scan": ["title", "description", "severity"],
     "OSV Scan": ["title", "description", "severity"],
     "Snyk Code Scan": ["vuln_id_from_tool", "file_path"],
@@ -1571,6 +1584,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
+    "Github SAST Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Secrets Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
