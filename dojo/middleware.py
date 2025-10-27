@@ -16,7 +16,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.functional import SimpleLazyObject
-from social_core.exceptions import AuthCanceled, AuthFailed
+from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden
 from social_django.middleware import SocialAuthExceptionMiddleware
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
@@ -90,6 +90,9 @@ class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
             return redirect("/login?force_login_form")
         if isinstance(exception, AuthFailed):
             messages.error(request, "Social login failed. Please try again or use the standard login.")
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthForbidden):
+            messages.error(request, "You are not authorized to log in via this method. Please contact support or use the standard login.")
             return redirect("/login?force_login_form")
         return super().process_exception(request, exception)
 

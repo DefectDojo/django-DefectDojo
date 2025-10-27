@@ -7,7 +7,7 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpResponse
 from django.test import RequestFactory, override_settings
 from requests.exceptions import ConnectionError as RequestsConnectionError
-from social_core.exceptions import AuthCanceled, AuthFailed
+from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden
 
 from dojo.middleware import CustomSocialAuthExceptionMiddleware
 
@@ -19,7 +19,7 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
     """
     Unit tests:
     Directly test CustomSocialAuthExceptionMiddleware behavior
-    by simulating exceptions (ConnectionError, AuthCanceled, AuthFailed),
+    by simulating exceptions (ConnectionError, AuthCanceled, AuthFailed, AuthForbidden),
     without relying on actual backend configuration or whether the
     /complete/<backend>/ URLs are registered and accessible.
     """
@@ -51,6 +51,7 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
             (RequestsConnectionError("Host unreachable"), "Please use the standard login below."),
             (AuthCanceled("User canceled login"), "Social login was canceled. Please try again or use the standard login."),
             (AuthFailed("Token exchange failed"), "Social login failed. Please try again or use the standard login."),
+            (AuthForbidden("User not allowed"), "You are not authorized to log in via this method. Please contact support or use the standard login."),
         ]
         for path in login_paths:
             for exception, expected_message in exceptions:
@@ -72,6 +73,16 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
         storage = list(messages.get_messages(request))
         self.assertTrue(any("Social login failed. Please try again or use the standard login." in str(msg) for msg in storage))
 
+    def test_non_social_auth_path_redirects_on_auth_forbidden(self):
+        """Ensure middleware handles AuthForbidden even on unrelated paths."""
+        request = self._prepare_request("/some/other/path/")
+        exception = AuthForbidden("User not allowed")
+        response = self.middleware.process_exception(request, exception)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/login?force_login_form")
+        storage = list(messages.get_messages(request))
+        self.assertTrue(any("You are not authorized to log in via this method." in str(msg) for msg in storage))
+
 
 @override_settings(
     AUTHENTICATION_BACKENDS=(
@@ -89,8 +100,8 @@ class TestSocialAuthIntegrationFailures(DojoTestCase):
 
     """
     Integration tests:
-    Simulates social login failures by calling /complete/<backend>/ URLs
-    and mocking auth_complete() to raise AuthFailed and AuthCanceled.
+    Simulate social login failures by calling /complete/<backend>/ URLs
+    and mocking auth_complete() to raise AuthFailed, AuthCanceled, and AuthForbidden.
     Verifies that the middleware is correctly integrated and handles backend failures.
     """
 
@@ -120,3 +131,12 @@ class TestSocialAuthIntegrationFailures(DojoTestCase):
         for backend in self.BACKEND_CLASS_PATHS:
             with self.subTest(backend=backend):
                 self._test_backend_exception(backend, AuthCanceled(backend=None), "Social login was canceled. Please try again or use the standard login.")
+
+    def test_all_backends_auth_forbidden(self):
+        for backend in self.BACKEND_CLASS_PATHS:
+            with self.subTest(backend=backend):
+                self._test_backend_exception(
+                    backend,
+                    AuthForbidden(backend=None),
+                    "You are not authorized to log in via this method. Please contact support or use the standard login.",
+                )
