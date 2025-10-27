@@ -318,10 +318,16 @@ class AutoCreateContextManager:
             target_end = (timezone.now() + timedelta(days=365)).date()
         # Create the engagement
         with transaction.atomic():
-            return Engagement.objects.select_for_update().create(
+            # Lock the parent product row to serialize engagement creation per product
+            locked_product = Product.objects.select_for_update().get(pk=product.pk)
+            # Re-check for an existing engagement now that we hold the lock
+            existing = get_last_object_or_none(Engagement, product=locked_product, name=engagement_name)
+            if existing:
+                return existing
+            return Engagement.objects.create(
                 engagement_type="CI/CD",
                 name=engagement_name,
-                product=product,
+                product=locked_product,
                 lead=get_current_user(),
                 target_start=target_start,
                 target_end=target_end,

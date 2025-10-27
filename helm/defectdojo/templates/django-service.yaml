@@ -2,22 +2,23 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $fullName }}-django
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.django.service.annotations }}
+  annotations:
+  {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
   labels:
     defectdojo.org/component: django
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
-    {{- with .Values.extraLabels }}
-      {{- toYaml . | nindent 4 }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
     {{- end }}
-{{- if .Values.django.service.annotations }}
-  annotations:
-  {{- range $key, $value := .Values.django.service.annotations }}
-    {{ $key }}: {{ $value | quote }}
-  {{- end }}
-{{- end }}
+  name: {{ $fullName }}-django
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     defectdojo.org/component: django
