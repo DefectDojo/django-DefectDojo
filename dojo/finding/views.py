@@ -21,7 +21,6 @@ from django.db.models import QuerySet
 from django.db.models.functions import Length
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
-from dojo.api_v2.api_error import ApiError
 from django.shortcuts import get_object_or_404, render
 from django.template.defaultfilters import pluralize
 from django.urls import reverse
@@ -30,8 +29,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.http import require_POST
-from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie
 from dojo.decorators import dojo_ratelimit_view
 from django.utils.decorators import method_decorator
 from imagekit import ImageSpec
@@ -304,7 +301,6 @@ class BaseListFindings:
         return self.filter_findings_by_form(request, findings)
 
 @method_decorator(dojo_ratelimit_view(), name='dispatch')
-@method_decorator(cache_page(settings.CACHE_PAGE_TIME), name='get')
 class ListFindings(View, BaseListFindings):
     def get_initial_context(self, request: HttpRequest):
         context = {
@@ -361,7 +357,7 @@ class ListFindings(View, BaseListFindings):
             add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
         return request, context
-    @vary_on_cookie
+    
     def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         # Store the product and engagement ids
         self.product_id = product_id
@@ -397,7 +393,6 @@ class ListFindings(View, BaseListFindings):
         # Render the view
         return render(request, self.get_template(), context)
 
-@method_decorator(cache_page(settings.CACHE_PAGE_TIME), name='get')
 class ListOpenFindings(ListFindings):
     def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Open"
@@ -427,7 +422,6 @@ class ListInactiveFindings(ListFindings):
         self.filter_name = "Inactive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
-@method_decorator(cache_page(settings.CACHE_PAGE_TIME), name='get')
 class ListAcceptedFindings(ListFindings):
     def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Accepted"
@@ -439,7 +433,6 @@ class ListTransferFinding(ListFindings):
         self.filter_name = "Transfer Accepted"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
-@method_decorator(cache_page(settings.CACHE_PAGE_TIME), name='get')
 class ListClosedFindings(ListFindings):
     def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Closed"

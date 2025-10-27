@@ -315,7 +315,7 @@ class TrivyParser:
                     description=description,
                     impact=impact,
                     mitigation=mitigation,
-                    component_name=package_name,
+                    component_name=package_name.replace(":", "_"),
                     component_version=package_version,
                     cvssv3=cvssv3,
                     cvssv3_score=cvssv3_score,

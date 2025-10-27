@@ -13,7 +13,6 @@ from time import strftime
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
-from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
@@ -204,8 +203,6 @@ def get_filtered_engagements(request, view):
 
 
 @dojo_ratelimit_view()
-@cache_page(settings.CACHE_PAGE_TIME)
-@vary_on_cookie
 def engagements(request, view):
     if not view:
         view = "active"

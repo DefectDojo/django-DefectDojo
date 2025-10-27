@@ -24,8 +24,6 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views import View
-from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie
 from github import Github
 
 from dojo.decorators import dojo_ratelimit_view
@@ -144,8 +142,6 @@ from dojo.utils import (
 logger = logging.getLogger(__name__)
 
 @dojo_ratelimit_view()
-@cache_page(settings.CACHE_PAGE_TIME)
-@vary_on_cookie
 def product(request):
     prods = get_authorized_products(Permissions.Product_View)
     # perform all stuff for filtering and pagination first, before annotation/prefetching

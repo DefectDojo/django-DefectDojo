@@ -1,4 +1,3 @@
-from bs4 import BeautifulSoup
 import sys
 import io
 import logging
@@ -8,23 +7,19 @@ from itertools import islice
 from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from django.conf import settings
 from openpyxl import Workbook
-from datetime import datetime
-from tempfile import NamedTemporaryFile
 from openpyxl.styles import Font
 import botocore.exceptions
 from botocore.client import Config
-from django.http import HttpResponse
 from dojo.home.helper import get_key_for_user_and_urlpath, encode_string
 from abc import ABC, abstractmethod
 from django.core.cache import cache
 from django.conf import settings
 from django.template.loader import render_to_string
 from dojo.reports.multipart_uploder import S3MultipartUploader
-from dojo.models import GeneralSettings, Product, Test, Engagement
-from dojo.reports.utils import get_url_presigned, upload_s3
+from dojo.models import GeneralSettings
+from dojo.reports.utils import get_url_presigned, upload_s3, configure_headers_excel, configure_values_excel, configure_headers_csv, configure_values_csv
 from dojo.notifications.helper import create_notification
 from dojo.reports import helper as helper_reports
-from dojo.utils import calculate_severity_priority
 logger = logging.getLogger(__name__)
 
 class BaseReportManager(ABC):
@@ -238,27 +233,7 @@ class CSVReportManager(BaseReportManager):
         if self.first_row:
             fields = []
             self.fields = fields
-            for key in dir(finding):
-                try:
-                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith("_"):
-                        if callable(getattr(finding, key)) and key not in allowed_attributes:
-                            continue
-                        fields.append(key)
-                except Exception as exc:
-                    logger.error("Error in attribute: " + str(exc))
-                    fields.append(key)
-                    continue
-            fields.extend((
-                "namespace",
-                "custom_id",
-                "found_by",
-                "engagement",
-                "product",
-                "product_type",
-                "endpoints",
-                "vulnerability_ids",
-                "tags",
-            ))
+            configure_headers_csv(finding, excludes_list, allowed_attributes, fields)
             self.fields = fields
             self.add_extra_headers()
 
@@ -267,71 +242,7 @@ class CSVReportManager(BaseReportManager):
         self.first_row = False
         if not self.first_row:
             fields = []
-            for key in dir(finding):
-                try:
-                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith("_"):
-                        if not callable(getattr(finding, key)):
-                            value = finding.__dict__.get(key)
-                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
-                            if callable(getattr(finding, key)):
-                                func = getattr(finding, key)
-                                result = func()
-                                value = result
-                            else:
-                                value = str(getattr(finding, key))
-                        if value and isinstance(value, str):
-                            value = value.replace("\n", " NEWLINE ").replace("\r", "")
-                        if key == "priority":
-                            value = calculate_severity_priority(finding.tags, value)
-                        fields.append(value)
-                except Exception as exc:
-                    logger.error("Error in attribute: " + str(exc))
-                    fields.append("Value not supported")
-                    continue
-            soup = BeautifulSoup(finding.description, "html.parser")
-            namespace_value = ""
-            customid_value = ""
-            namespace_label = soup.find("strong", string="Namespaces:")
-            customid_label = soup.find("strong", string="Custom Id:")
-            if namespace_label:
-                namespace_value = namespace_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
-            if customid_label:
-                customid_value = customid_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
-            fields.append(namespace_value)
-            fields.append(customid_value)
-            fields.append(finding.test.test_type.name)
-            fields.append(finding.test.engagement.name)
-            fields.append(finding.test.engagement.product.name)
-            fields.append(finding.test.engagement.product.prod_type.name)
-
-            endpoint_value = ""
-            for endpoint in finding.endpoints.all():
-                endpoint_value += f"{endpoint}; "
-            endpoint_value = endpoint_value.removesuffix("; ")
-            if len(endpoint_value) > self.excel_char_limit:
-                endpoint_value = endpoint_value[:self.excel_char_limit - 3] + "..."
-            fields.append(endpoint_value)
-
-            vulnerability_ids_value = ""
-            for num_vulnerability_ids, vulnerability_id in enumerate(finding.vulnerability_ids):
-                if num_vulnerability_ids > 5:
-                    vulnerability_ids_value += "..."
-                    break
-                vulnerability_ids_value += f"{vulnerability_id}; "
-            if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
-                vulnerability_ids_value += finding.cve
-            vulnerability_ids_value = vulnerability_ids_value.removesuffix("; ")
-            fields.append(vulnerability_ids_value)
-            # Tags
-            tags_value = ""
-            for num_tags, tag in enumerate(finding.tags.all()):
-                if num_tags > 5:
-                    tags_value += "..."
-                    break
-                tags_value += f"{tag}; "
-            tags_value = tags_value.removesuffix("; ")
-            fields.append(tags_value)
-
+            configure_values_csv(finding, excludes_list, allowed_foreign_keys, allowed_attributes, fields, self.excel_char_limit)
             self.fields = fields
             self.finding = finding
             self.add_extra_values()
@@ -379,131 +290,14 @@ class ExcelReportManager(BaseReportManager):
         ):
         if self.first_row:
             col_num = 1
-            for key in dir(finding):
-                try:
-                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith("_"):
-                        if callable(getattr(finding, key)) and key not in allowed_attributes:
-                            continue
-                        cell = self.worksheet.cell(row=self.row_num, column=col_num, value=key)
-                        cell.font = self.font_bold
-                        col_num += 1
-                except Exception as exc:
-                    logger.error("Error in attribute: " + str(exc))
-                    cell = self.worksheet.cell(row=self.row_num, column=col_num, value=key)
-                    col_num += 1
-                    continue
-            cell = self.worksheet.cell(row=self.row_num, column=col_num, value="namespace")
-            cell.font = self.font_bold
-            col_num += 1
-            cell = self.worksheet.cell(row=self.row_num, column=col_num, value="custom_id")
-            cell.font = self.font_bold
-            col_num += 1
-            cell = self.worksheet.cell(row=self.row_num, column=col_num, value="found_by")
-            cell.font = self.font_bold
-            col_num += 1
-            cell = self.worksheet.cell(row=self.row_num, column=col_num, value="engagement")
-            cell.font = self.font_bold
-            col_num += 1
-            cell = self.worksheet.cell(row=self.row_num, column=col_num, value="product")
-            cell.font = self.font_bold
-            col_num += 1
-            cell = self.worksheet.cell(row=self.row_num, column=col_num, value="product_type")
-            cell.font = self.font_bold
-            col_num += 1
-            cell = self.worksheet.cell(row=self.row_num, column=col_num, value="endpoints")
-            cell.font = self.font_bold
-            col_num += 1
-            cell = self.worksheet.cell(row=self.row_num, column=col_num, value="vulnerability_ids")
-            cell.font = self.font_bold
-            col_num += 1
-            cell = self.worksheet.cell(row=self.row_num, column=col_num, value="tags")
-            cell.font = self.font_bold
-            col_num += 1
-            cell = self.worksheet.cell(row=self.row_num, column=col_num, value="risk_acceptance_expiration_date")
-            cell.font = self.font_bold
-            col_num += 1
+            configure_headers_excel(finding, self.worksheet, self.font_bold, excludes_list, allowed_attributes, self.row_num, col_num)
             self.col_num = col_num
             self.row_num += 1
             self.add_extra_headers()
         self.first_row = False
         if not self.first_row:
             col_num = 1
-            for key in dir(finding):
-                try:
-                    if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith("_"):
-                        if not callable(getattr(finding, key)):
-                            value = finding.__dict__.get(key)
-                        if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
-                            if callable(getattr(finding, key)):
-                                func = getattr(finding, key)
-                                result = func()
-                                value = result
-                            else:
-                                value = str(getattr(finding, key))
-                        if value and isinstance(value, datetime):
-                            value = value.replace(tzinfo=None)
-                        if key == "priority":
-                            value = calculate_severity_priority(finding.tags, value)
-                        self.worksheet.cell(row=self.row_num, column=col_num, value=value)
-                        col_num += 1
-                except Exception as exc:
-                    logger.error("Error in attribute: " + str(exc))
-                    self.worksheet.cell(row=self.row_num, column=col_num, value="Value not supported")
-                    col_num += 1
-                    continue
-            soup = BeautifulSoup(finding.description, "html.parser")
-            namespace_value = ""
-            customid_value = ""
-            namespace_label = soup.find("strong", string="Namespaces:")
-            customid_label = soup.find("strong", string="Custom Id:")
-            if namespace_label:
-                namespace_value = namespace_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
-            if customid_label:
-                customid_value = customid_label.find_parent("p").get_text(strip=True).split(":")[-1].strip()
-            self.worksheet.cell(row=self.row_num, column=col_num, value=namespace_value)
-            col_num += 1
-            self.worksheet.cell(row=self.row_num, column=col_num, value=customid_value)
-            col_num += 1
-            self.worksheet.cell(row=self.row_num, column=col_num, value=finding.test.test_type.name)
-            col_num += 1
-            self.worksheet.cell(row=self.row_num, column=col_num, value=finding.test.engagement.name)
-            col_num += 1
-            self.worksheet.cell(row=self.row_num, column=col_num, value=finding.test.engagement.product.name)
-            col_num += 1
-            self.worksheet.cell(row=self.row_num, column=col_num, value=finding.test.engagement.product.prod_type.name)
-            col_num += 1
-
-            endpoint_value = ""
-            for endpoint in finding.endpoints.all():
-                endpoint_value += f"{endpoint}; \n"
-            endpoint_value = endpoint_value.removesuffix("; \n")
-            if len(endpoint_value) > self.EXCEL_CHAR_LIMIT:
-                endpoint_value = endpoint_value[:self.EXCEL_CHAR_LIMIT - 3] + "..."
-            self.worksheet.cell(row=self.row_num, column=col_num, value=endpoint_value)
-            col_num += 1
-
-            vulnerability_ids_value = ""
-            for num_vulnerability_ids, vulnerability_id in enumerate(finding.vulnerability_ids):
-                if num_vulnerability_ids > 5:
-                    vulnerability_ids_value += "..."
-                    break
-                vulnerability_ids_value += f"{vulnerability_id}; \n"
-            if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
-                vulnerability_ids_value += finding.cve
-            vulnerability_ids_value = vulnerability_ids_value.removesuffix("; \n")
-            self.worksheet.cell(row=self.row_num, column=col_num, value=vulnerability_ids_value)
-            col_num += 1
-            # tags
-            tags_value = ""
-            for tag in finding.tags.all():
-                tags_value += f"{tag}; \n"
-            tags_value = tags_value.removesuffix("; \n")
-            self.worksheet.cell(row=self.row_num, column=col_num, value=tags_value)
-            col_num += 1
-            if finding.risk_acceptance:
-                value = finding.risk_acceptance.expiration_date.strftime("%Y-%m-%d")
-                self.worksheet.cell(row=self.row_num, column=col_num, value=value)
-                col_num += 1
+            configure_values_excel(finding, self.worksheet, excludes_list, allowed_foreign_keys, allowed_attributes, self.row_num, col_num, self.EXCEL_CHAR_LIMIT)
             self.col_num = col_num
             self.row_num = self.row_num
             self.findings = finding

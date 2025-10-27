@@ -365,6 +365,17 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             ).order_by("id")
             deduplicationLogger.debug(query.query)
             return query
+        if self.deduplication_algorithm == "unique_id_from_tool_preferred_over_hash_code":
+            if unsaved_finding.unique_id_from_tool:
+                return Finding.objects.filter(
+                    test=self.test,
+                    unique_id_from_tool=unsaved_finding.unique_id_from_tool,
+                ).exclude(unique_id_from_tool=None).order_by("id")
+            else:
+                return Finding.objects.filter(
+                    test=self.test,
+                    hash_code=unsaved_finding.hash_code,
+                ).exclude(hash_code=None).order_by("id")
         if self.deduplication_algorithm == "legacy":
             # This is the legacy reimport behavior. Although it's pretty flawed and doesn't match the legacy algorithm for deduplication,
             # this is left as is for simplicity.
