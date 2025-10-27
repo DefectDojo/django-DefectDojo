@@ -41,7 +41,6 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         # Authenticate API client as admin for import endpoints
         self.login_as_admin()
 
-        self.system_settings(enable_webhooks_notifications=False)
         self.system_settings(enable_product_grade=False)
         self.system_settings(enable_github=False)
         self.system_settings(enable_deduplication=True)
