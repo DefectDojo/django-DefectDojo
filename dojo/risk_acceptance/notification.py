@@ -212,7 +212,7 @@ class Notification:
         enable_acceptance_risk_for_email= kwargs["enable_acceptance_risk_for_email"]
         permission_keys = kwargs.get("permission_keys", None)
         title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
-        long_term = risk_pending.expiration_date_requested - timezone.now().date()
+        long_term = risk_pending.expiration_date - timezone.now().date()
         description=f"requested acceptance <b>long-term</b> of {long_term.days} days for the findings that are part of <b>{product_type}</b> of aplication <b>{product}</b>",
         create_notification(event='risk_acceptance_long_term_request',
                         title=title, risk_acceptance=risk_pending,
