@@ -4,7 +4,7 @@ on:
   pull_request:
 env:
   SHELLCHECK_REPO: 'koalaman/shellcheck'
-  SHELLCHECK_VERSION: 'v0.9.0' # renovate: datasource=github-releases depName=koalaman/shellcheck versioning=loose
+  SHELLCHECK_VERSION: 'v0.9.0' # renovate: datasource=github-releases depName=koalaman/shellcheck
   SHELLCHECK_SHA: '038fd81de6b7e20cc651571362683853670cdc71' # Renovate config is not currently adjusted to update hash - it needs to be done manually for now
 jobs:
   shellcheck:
