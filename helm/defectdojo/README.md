@@ -495,7 +495,7 @@ kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 
 # General information about chart values
 
-![Version: 1.7.3-dev](https://img.shields.io/badge/Version-1.7.3--dev-informational?style=flat-square) ![AppVersion: 2.52.0-dev](https://img.shields.io/badge/AppVersion-2.52.0--dev-informational?style=flat-square)
+![Version: 1.7.4-dev](https://img.shields.io/badge/Version-1.7.4--dev-informational?style=flat-square) ![AppVersion: 2.52.0-dev](https://img.shields.io/badge/AppVersion-2.52.0--dev-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
