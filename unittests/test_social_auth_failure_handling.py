@@ -16,7 +16,13 @@ from .dojo_test_case import DojoTestCase
 
 class TestSocialAuthMiddlewareUnit(DojoTestCase):
 
-    """Unit tests for CustomSocialAuthExceptionMiddleware."""
+    """
+    Unit tests:
+    Directly test CustomSocialAuthExceptionMiddleware behavior
+    by simulating exceptions (ConnectionError, AuthCanceled, AuthFailed),
+    without relying on actual backend configuration or whether the
+    /complete/<backend>/ URLs are registered and accessible.
+    """
 
     def setUp(self):
         self.factory = RequestFactory()
@@ -81,7 +87,12 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
 )
 class TestSocialAuthIntegrationFailures(DojoTestCase):
 
-    """Integration tests for social auth failures."""
+    """
+    Integration tests:
+    Simulates social login failures by calling /complete/<backend>/ URLs
+    and mocking auth_complete() to raise AuthFailed and AuthCanceled.
+    Verifies that the middleware is correctly integrated and handles backend failures.
+    """
 
     BACKEND_CLASS_PATHS = {
         "github": "social_core.backends.github.GithubOAuth2",
