@@ -3,14 +3,11 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  {{- if or .Values.extraAnnotations .Values.django.autoscaling.annotations }}
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.django.annotations }}
   annotations:
-  {{- range $key, $value := .Values.extraAnnotations }}
+    {{- range $key, $value := . }}
     {{ $key }}: {{ quote $value }}
-  {{- end }}
-  {{- range $key, $value := .Values.django.annotations }}
-    {{ $key }}: {{ quote $value }}
-  {{- end }}
+    {{- end }}
   {{- end }}
   name: {{ $fullName }}-django
   namespace: {{ .Release.Namespace }}

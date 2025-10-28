@@ -1,4 +1,4 @@
-{{- if .Values.celery.worker.podDisruptionBudget.enabled }}
+{{- if and .Values.celery.worker.podDisruptionBudget.enabled (or (gt (int .Values.celery.worker.replicas) 1) .Values.celery.worker.autoscaling.enabled) }}
 {{- $fullName := include "defectdojo.fullname" . -}}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -24,7 +24,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ include "defectdojo.name" . }}
       defectdojo.org/component: celery
       defectdojo.org/subcomponent: worker
 {{ toYaml (omit .Values.celery.worker.podDisruptionBudget "enabled" ) | indent 2 }}

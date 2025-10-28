@@ -529,7 +529,6 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.beat.affinity | object | `{}` |  |
 | celery.beat.annotations | object | `{}` | Annotations for the Celery beat deployment. |
 | celery.beat.automountServiceAccountToken | bool | `false` |  |
-| celery.beat.autoscaling | object | `{"autoscaleBehavior":{},"enabled":false,"maxReplicas":5,"minReplicas":2,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":80}` | Autoscaling configuration for Celery beat deployment. |
 | celery.beat.containerSecurityContext | object | `{}` | Container security context for the Celery beat containers. |
 | celery.beat.extraEnv | list | `[]` | Additional environment variables injected to Celery beat containers. |
 | celery.beat.extraInitContainers | list | `[]` | A list of additional initContainers to run before celery beat containers. |
@@ -539,7 +538,6 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.beat.livenessProbe | object | `{}` | Enable liveness probe for Celery beat container. ``` exec:   command:     - bash     - -c     - celery -A dojo inspect ping -t 5 initialDelaySeconds: 30 periodSeconds: 60 timeoutSeconds: 10 ``` |
 | celery.beat.nodeSelector | object | `{}` |  |
 | celery.beat.podAnnotations | object | `{}` | Annotations for the Celery beat pods. |
-| celery.beat.podDisruptionBudget | object | `{"enabled":false,"minAvailable":"50%","unhealthyPodEvictionPolicy":"AlwaysAllow"}` | Configure pod disruption budgets for Celery beat ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget |
 | celery.beat.podSecurityContext | object | `{}` | Pod security context for the Celery beat pods. |
 | celery.beat.readinessProbe | object | `{}` | Enable readiness probe for Celery beat container. |
 | celery.beat.replicas | int | `1` |  |
@@ -564,7 +562,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | If empty, uses values from images.django.image |
 | celery.worker.livenessProbe | object | `{}` | Enable liveness probe for Celery worker containers. ``` exec:   command:     - bash     - -c     - celery -A dojo inspect ping -t 5 initialDelaySeconds: 30 periodSeconds: 60 timeoutSeconds: 10 ``` |
 | celery.worker.nodeSelector | object | `{}` |  |
-| celery.worker.podAnnotations | object | `{}` | Annotations for the Celery beat pods. |
+| celery.worker.podAnnotations | object | `{}` | Annotations for the Celery worker pods. |
 | celery.worker.podDisruptionBudget | object | `{"enabled":false,"minAvailable":"50%","unhealthyPodEvictionPolicy":"AlwaysAllow"}` | Configure pod disruption budgets for Celery worker ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget |
 | celery.worker.podSecurityContext | object | `{}` | Pod security context for the Celery worker pods. |
 | celery.worker.readinessProbe | object | `{}` | Enable readiness probe for Celery worker container. |
@@ -574,6 +572,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.resources.requests.cpu | string | `"100m"` |  |
 | celery.worker.resources.requests.memory | string | `"128Mi"` |  |
 | celery.worker.startupProbe | object | `{}` | Enable startup probe for Celery worker container. |
+| celery.worker.terminationGracePeriodSeconds | int | `300` |  |
 | celery.worker.tolerations | list | `[]` |  |
 | cloudsql | object | `{"containerSecurityContext":{},"enable_iam_login":false,"enabled":false,"extraEnv":[],"extraVolumeMounts":[],"image":{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.9"},"instance":"","resources":{},"use_private_ip":false,"verbose":true}` | Google CloudSQL support in GKE via gce-proxy |
 | cloudsql.containerSecurityContext | object | `{}` | Optional: security context for the CloudSQL proxy container. |
@@ -633,6 +632,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.service.annotations | object | `{}` |  |
 | django.service.type | string | `""` |  |
 | django.strategy | object | `{}` |  |
+| django.terminationGracePeriodSeconds | int | `60` |  |
 | django.tolerations | list | `[]` |  |
 | django.uwsgi.appSettings.maxFd | int | `0` | Use this value to set the maximum number of file descriptors. If set to 0 will be detected by uwsgi e.g. 102400 |
 | django.uwsgi.appSettings.processes | int | `4` |  |
