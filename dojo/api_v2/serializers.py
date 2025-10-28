@@ -1779,16 +1779,14 @@ class FindingSerializer(serializers.ModelSerializer):
 
         # Get found_by from validated_data
         found_by = validated_data.pop("found_by", None)
-
         # Handle updates to found_by data
         if found_by:
-            instance.found_by.clear()
-            instance.found_by.add(*found_by)
+            instance.found_by.set(found_by)
         # If there is no argument entered for found_by, the user would like to clear out the values on the Finding's found_by field
         # Findings still maintain original found_by value associated with their test
-        else:
+        # In the event the user does not supply the found_by field at all, we do not modify it
+        elif isinstance(found_by, list) and len(found_by) == 0:
             instance.found_by.clear()
-
         instance = super().update(
             instance, validated_data,
         )
