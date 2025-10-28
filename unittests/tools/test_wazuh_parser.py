@@ -60,3 +60,10 @@ class TestWazuhParser(DojoTestCase):
             self.assertEqual("CVE-2025-27558 affects (version: 6.8.0-60.63)", findings[0].title)
             self.assertEqual("Critical", findings[0].severity)
             self.assertEqual(9.1, findings[0].cvssv3_score)
+
+    def test_parse_wazuh_abnormal_severity(self):
+        with (get_unit_tests_scans_path("wazuh") / "wazuh_abnormal_severity.json").open(encoding="utf-8") as testfile:
+            parser = WazuhParser()
+            findings = parser.get_findings(testfile, Test())
+            for finding in findings:
+                self.assertEqual("Info", finding.severity)
