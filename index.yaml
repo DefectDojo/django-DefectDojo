@@ -11,10 +11,12 @@ entries:
           description: Convert existing comments to descriptors
         - kind: added
           description: Testing on the oldest officially supported k8s
+        - kind: added
+          description: Checker for maximal number of celery beats
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 2.52.0-dev
-    created: "2025-10-27T05:07:37.582362303Z"
+    created: "2025-10-28T05:11:15.511385955Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -25,7 +27,7 @@ entries:
       repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
       version: ~19.6.4
     description: A Helm chart for Kubernetes to install DefectDojo
-    digest: 239d9eb3ba9d5dd20f7750887cd6b0b5f37b95a3166481846f7cff13148e1410
+    digest: edd653197b649b7eef2d6720fd86823ec2d01713403b4bf05dda6f065828769c
     icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
     maintainers:
     - email: defectdojo-project@owasp.org
@@ -6862,4 +6864,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2025-10-27T16:50:39.669185367Z"
+generated: "2025-10-28T05:11:15.498942677Z"
