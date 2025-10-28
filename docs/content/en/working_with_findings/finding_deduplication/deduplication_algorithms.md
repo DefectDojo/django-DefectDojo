@@ -36,11 +36,9 @@ Endpoints can influence deduplication in different ways depending on the algorit
     - Set it to a list of endpoint attributes (e.g. `["host", "port"]`). If at least one endpoint pair between the two findings matches on all listed attributes, deduplication can occur.
 
 ### Unique ID From Tool or Hash Code
+A finding is a duplicate with another if they have the same unique_id_from_tool OR the same hash_code.
 
-- Intended flow:
-  1) Try to deduplicate using the tool’s unique ID (endpoints ignored on this path).
-  2) If no match by unique ID, fall back to the Hash Code path.
-- When falling back to hash code, endpoint behavior is identical to the Hash Code algorithm.
+The endpoints also have to match for the findings to be considered duplicates, see the Hash Code algorithm above.
 
 ### Legacy (OS only)
 
