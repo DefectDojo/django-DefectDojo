@@ -30,7 +30,9 @@
         "/^.github/workflows//"
       ],
       "matchStrings": [
-        "\\w*:\\s[\"']?(?<currentValue>\\S*[^\"']?)[\"']?\\s#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s"
+        "\\w*:\\s\"(?<currentValue>\\S+)\"\\s#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s",
+        "\\w*:\\s'(?<currentValue>\\S+)'\\s#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s",
+        "\\w*:\\s(?<currentValue>\\S+)\\s#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
