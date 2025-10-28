@@ -325,7 +325,7 @@ env = environ.FileAwareEnv(
     DD_DELETE_PREVIEW=(bool, True),
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, [".txt", ".pdf", ".json", ".xml", ".csv", ".yml", ".png", ".jpeg",
-                                 ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip", ".fpr"]),
+                                 ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip", ".fpr", ".webm", ".mp4"]),
     # List of acceptable file types that can be (re)imported
     DD_FILE_IMPORT_TYPES=(list, [".xml", ".csv", ".nessus", ".json", ".jsonl", ".html", ".js", ".zip",
                                  ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl"]),

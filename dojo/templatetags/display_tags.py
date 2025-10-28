@@ -1300,7 +1300,8 @@ def has_user_permission_view(permission_render_view, product):
 @register.filter()
 def validate_type_file(filename, type=None):
     dict_image_types = {
-        "img": ["png", "jpeg"]
+        "img": ["png", "jpeg"],
+        "video": ["webm", "mp4"]
     }
 
     type_file =  filename.split('.')[-1].lower()
