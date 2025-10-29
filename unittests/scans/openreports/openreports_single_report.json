@@ -1,0 +1,66 @@
+{
+    "apiVersion": "openreports.io/v1alpha1",
+    "kind": "Report",
+    "metadata": {
+        "creationTimestamp": "2025-10-27T08:28:32Z",
+        "generation": 3,
+        "labels": {
+            "app.kubernetes.io/managed-by": "image-scanner"
+        },
+        "name": "deployment-test-app-630fc",
+        "namespace": "test",
+        "ownerReferences": [
+            {
+                "apiVersion": "stas.statnett.no/v1alpha1",
+                "blockOwnerDeletion": true,
+                "controller": true,
+                "kind": "ContainerImageScan",
+                "name": "deployment-test-app-630fc",
+                "uid": "1bd065b0-4272-4a1b-9596-8010e256f3c6"
+            }
+        ],
+        "resourceVersion": "4932284",
+        "uid": "b1fcca57-2efd-44d3-89e9-949e29b61936"
+    },
+    "results": [
+        {
+            "category": "vulnerability scan",
+            "message": "openssl: Out-of-bounds read in HTTP client no_proxy handling",
+            "policy": "CVE-2025-9232",
+            "properties": {
+                "fixedVersion": "3.5.4-r0",
+                "installedVersion": "3.5.2-r1",
+                "pkgName": "libcrypto3",
+                "primaryURL": "https://avd.aquasec.com/nvd/cve-2025-9232"
+            },
+            "result": "warn",
+            "severity": "low",
+            "source": "image-scanner"
+        },
+        {
+            "category": "vulnerability scan",
+            "message": "database/sql: Postgres Scan Race Condition",
+            "policy": "CVE-2025-47907",
+            "properties": {
+                "fixedVersion": "1.23.12, 1.24.6",
+                "installedVersion": "v1.24.4",
+                "pkgName": "stdlib",
+                "primaryURL": "https://avd.aquasec.com/nvd/cve-2025-47907"
+            },
+            "result": "fail",
+            "severity": "high",
+            "source": "image-scanner"
+        }
+    ],
+    "scope": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "name": "test-app",
+        "uid": "d0cbd625-d495-415e-bf39-b4e3c4f4366e"
+    },
+    "summary": {
+        "fail": 1,
+        "skip": 0,
+        "warn": 1
+    }
+}
