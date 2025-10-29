@@ -11,7 +11,7 @@ jobs:
     if: github.repository == 'DefectDojo/django-DefectDojo' # Notify only in core repo, not in forks - it would just fail in fork
     steps:
       - name: Notify reviewers in Slack
-        uses: DefectDojo-Inc/notify-pr-reviewers-action@be26734e06338b41be6e70ce96027a51aa9ba9c6 # master
+        uses: DefectDojo-Inc/notify-pr-reviewers-action # Do not use a specific version to always get the latest updates
         with:
           owner: "DefectDojo"
           repository: "django-DefectDojo"
