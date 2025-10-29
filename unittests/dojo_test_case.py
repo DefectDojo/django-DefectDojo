@@ -64,6 +64,7 @@ def toggle_system_setting_boolean(flag_name, value):
                 System_Settings.objects.update(**{flag_name: not value})
                 # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
                 DojoSytemSettingsMiddleware.load()
+
         return wrapper
 
     return decorator
@@ -94,7 +95,6 @@ def with_system_setting(field, value):
 
 
 class DojoTestUtilsMixin:
-
     def get_test_admin(self, *args, **kwargs):
         return User.objects.get(username="admin")
 
@@ -111,8 +111,12 @@ class DojoTestUtilsMixin:
         product_type.save()
         return product_type
 
-    def create_sla_configuration(self, name, *args, description="dummy description", critical=7, high=30, medium=60, low=120, **kwargs):
-        sla_configuration = SLA_Configuration(name=name, description=description, critical=critical, high=high, medium=medium, low=low)
+    def create_sla_configuration(
+        self, name, *args, description="dummy description", critical=7, high=30, medium=60, low=120, **kwargs
+    ):
+        sla_configuration = SLA_Configuration(
+            name=name, description=description, critical=critical, high=high, medium=medium, low=low
+        )
         sla_configuration.save()
         return sla_configuration
 
@@ -138,12 +142,21 @@ class DojoTestUtilsMixin:
         return response.data
 
     def create_engagement(self, name, product, *args, description=None, **kwargs):
-        engagement = Engagement(name=name, description=description, product=product, target_start=timezone.now(), target_end=timezone.now())
+        engagement = Engagement(
+            name=name, description=description, product=product, target_start=timezone.now(), target_end=timezone.now()
+        )
         engagement.save()
         return engagement
 
     def create_test(self, engagement=None, scan_type=None, title=None, *args, description=None, **kwargs):
-        test = Test(title=title, scan_type=scan_type, engagement=engagement, test_type=Test_Type.objects.get(name=scan_type), target_start=timezone.now(), target_end=timezone.now())
+        test = Test(
+            title=title,
+            scan_type=scan_type,
+            engagement=engagement,
+            test_type=Test_Type.objects.get(name=scan_type),
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
         test.save()
         return test
 
@@ -224,7 +237,6 @@ class DojoTestUtilsMixin:
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
             "sla_configuration": 1,
-
         }
 
     def get_new_product_without_jira_project_data(self):
@@ -257,7 +269,6 @@ class DojoTestUtilsMixin:
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
             "sla_configuration": 1,
-
         }
 
     def get_product_with_jira_project_data2(self, product):
@@ -274,7 +285,6 @@ class DojoTestUtilsMixin:
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
             "sla_configuration": 1,
-
         }
 
     def get_product_with_empty_jira_project_data(self, product):
@@ -306,7 +316,9 @@ class DojoTestUtilsMixin:
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = "/product/%i"
 
-        response = self.client.post(reverse("new_product"), urlencode(data), content_type="application/x-www-form-urlencoded")
+        response = self.client.post(
+            reverse("new_product"), urlencode(data), content_type="application/x-www-form-urlencoded"
+        )
 
         # logger.debug('after: JIRA_Project last')
         # self.log_model_instance(JIRA_Project.objects.last())
@@ -337,7 +349,9 @@ class DojoTestUtilsMixin:
         jira_project.push_all_issues = True
         jira_project.save()
 
-    def add_product_jira_with_data(self, data, expected_delta_jira_project_db, expect_redirect_to=None, *, expect_200=False):
+    def add_product_jira_with_data(
+        self, data, expected_delta_jira_project_db, expect_redirect_to=None, *, expect_200=False
+    ):
         jira_project_count_before = self.db_jira_project_count()
 
         response = self.add_product_jira(data, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
@@ -346,20 +360,38 @@ class DojoTestUtilsMixin:
 
         return response
 
-    def add_product_with_jira_project(self, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False):
-        return self.add_product_jira_with_data(self.get_new_product_with_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
+    def add_product_with_jira_project(
+        self, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False
+    ):
+        return self.add_product_jira_with_data(
+            self.get_new_product_with_jira_project_data(),
+            expected_delta_jira_project_db,
+            expect_redirect_to=expect_redirect_to,
+            expect_200=expect_200,
+        )
 
-    def add_product_without_jira_project(self, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False):
+    def add_product_without_jira_project(
+        self, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False
+    ):
         logger.debug("adding product without jira project")
-        return self.add_product_jira_with_data(self.get_new_product_without_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
+        return self.add_product_jira_with_data(
+            self.get_new_product_without_jira_project_data(),
+            expected_delta_jira_project_db,
+            expect_redirect_to=expect_redirect_to,
+            expect_200=expect_200,
+        )
 
     def edit_product_jira(self, product, data, expect_redirect_to=None, *, expect_200=False):
-        response = self.client.get(reverse("edit_product", args=(product.id, )))
+        response = self.client.get(reverse("edit_product", args=(product.id,)))
 
         # logger.debug('before: JIRA_Project last')
         # self.log_model_instance(JIRA_Project.objects.last())
 
-        response = self.client.post(reverse("edit_product", args=(product.id, )), urlencode(data), content_type="application/x-www-form-urlencoded")
+        response = self.client.post(
+            reverse("edit_product", args=(product.id,)),
+            urlencode(data),
+            content_type="application/x-www-form-urlencoded",
+        )
         # self.log_model_instance(product)
         # logger.debug('after: JIRA_Project last')
         # self.log_model_instance(JIRA_Project.objects.last())
@@ -372,7 +404,9 @@ class DojoTestUtilsMixin:
             self.assertEqual(response.status_code, 200)
         return response
 
-    def edit_jira_project_for_product_with_data(self, product, data, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=None):
+    def edit_jira_project_for_product_with_data(
+        self, product, data, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=None
+    ):
         jira_project_count_before = self.db_jira_project_count()
 
         if not expect_redirect_to and not expect_200:
@@ -383,20 +417,43 @@ class DojoTestUtilsMixin:
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
 
-    def edit_jira_project_for_product(self, product, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False):
-        return self.edit_jira_project_for_product_with_data(product, self.get_product_with_jira_project_data(product), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
+    def edit_jira_project_for_product(
+        self, product, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False
+    ):
+        return self.edit_jira_project_for_product_with_data(
+            product,
+            self.get_product_with_jira_project_data(product),
+            expected_delta_jira_project_db,
+            expect_redirect_to=expect_redirect_to,
+            expect_200=expect_200,
+        )
 
-    def edit_jira_project_for_product2(self, product, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False):
-        return self.edit_jira_project_for_product_with_data(product, self.get_product_with_jira_project_data2(product), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
+    def edit_jira_project_for_product2(
+        self, product, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False
+    ):
+        return self.edit_jira_project_for_product_with_data(
+            product,
+            self.get_product_with_jira_project_data2(product),
+            expected_delta_jira_project_db,
+            expect_redirect_to=expect_redirect_to,
+            expect_200=expect_200,
+        )
 
-    def empty_jira_project_for_product(self, product, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False):
+    def empty_jira_project_for_product(
+        self, product, expected_delta_jira_project_db=0, expect_redirect_to=None, *, expect_200=False
+    ):
         logger.debug("empty jira project for product")
         jira_project_count_before = self.db_jira_project_count()
 
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = self.get_expected_redirect_product(product)
 
-        response = self.edit_product_jira(product, self.get_product_with_empty_jira_project_data(product), expect_redirect_to=expect_redirect_to, expect_200=expect_200)
+        response = self.edit_product_jira(
+            product,
+            self.get_product_with_empty_jira_project_data(product),
+            expect_redirect_to=expect_redirect_to,
+            expect_200=expect_200,
+        )
 
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
@@ -478,7 +535,6 @@ class DojoTestUtilsMixin:
 
 
 class DojoTestCase(TestCase, DojoTestUtilsMixin):
-
     def __init__(self, *args, **kwargs):
         TestCase.__init__(self, *args, **kwargs)
 
@@ -493,7 +549,6 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
 
 
 class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
-
     def __init__(self, *args, **kwargs):
         APITestCase.__init__(self, *args, **kwargs)
 
@@ -533,17 +588,37 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                 return item
         return None
 
-    def import_scan_with_params(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False,
-                                push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=None, group_by=None, engagement_name=None,
-                                product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
-                                scan_date=None, service=None, force_active=True, force_verified=True):
-
+    def import_scan_with_params(
+        self,
+        filename,
+        scan_type="ZAP Scan",
+        engagement=1,
+        minimum_severity="Low",
+        *,
+        active=True,
+        verified=False,
+        push_to_jira=None,
+        endpoint_to_add=None,
+        tags=None,
+        close_old_findings=None,
+        group_by=None,
+        engagement_name=None,
+        product_name=None,
+        product_type_name=None,
+        auto_create_context=None,
+        expected_http_status_code=201,
+        test_title=None,
+        scan_date=None,
+        service=None,
+        force_active=True,
+        force_verified=True,
+    ):
         with (get_unit_tests_path() / filename).open(encoding="utf-8") as testfile:
             payload = {
-                    "minimum_severity": minimum_severity,
-                    "scan_type": scan_type,
-                    "file": testfile,
-                    "version": "1.0.1",
+                "minimum_severity": minimum_severity,
+                "scan_type": scan_type,
+                "file": testfile,
+                "version": "1.0.1",
             }
 
             if close_old_findings is not None:
@@ -593,17 +668,38 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
             return self.import_scan(payload, expected_http_status_code)
 
-    def reimport_scan_with_params(self, test_id, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False, push_to_jira=None,
-                                  tags=None, close_old_findings=None, group_by=None, engagement_name=None, scan_date=None, service=None,
-                                  product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
+    def reimport_scan_with_params(
+        self,
+        test_id,
+        filename,
+        scan_type="ZAP Scan",
+        engagement=1,
+        minimum_severity="Low",
+        *,
+        active=True,
+        verified=False,
+        push_to_jira=None,
+        tags=None,
+        close_old_findings=None,
+        group_by=None,
+        engagement_name=None,
+        scan_date=None,
+        service=None,
+        product_name=None,
+        product_type_name=None,
+        auto_create_context=None,
+        expected_http_status_code=201,
+        test_title=None,
+        dry_run=None,
+    ):
         with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
-                    "minimum_severity": minimum_severity,
-                    "active": active,
-                    "verified": verified,
-                    "scan_type": scan_type,
-                    "file": testfile,
-                    "version": "1.0.1",
+                "minimum_severity": minimum_severity,
+                "active": active,
+                "verified": verified,
+                "scan_type": scan_type,
+                "file": testfile,
+                "version": "1.0.1",
             }
 
             if close_old_findings is not None:
@@ -645,11 +741,22 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             if service is not None:
                 payload["service"] = service
 
+            if dry_run is not None:
+                payload["dry_run"] = dry_run
+
             return self.reimport_scan(payload, expected_http_status_code=expected_http_status_code)
 
-    def endpoint_meta_import_scan_with_params(self, filename, product=1, product_name=None, *,
-                                              create_endpoints=True, create_tags=True, create_dojo_meta=True,
-                                              expected_http_status_code=201):
+    def endpoint_meta_import_scan_with_params(
+        self,
+        filename,
+        product=1,
+        product_name=None,
+        *,
+        create_endpoints=True,
+        create_tags=True,
+        create_dojo_meta=True,
+        expected_http_status_code=201,
+    ):
         with Path(filename).open(encoding="utf-8") as testfile:
             payload = {
                 "create_endpoints": create_endpoints,
@@ -708,7 +815,17 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json["count"], count)
 
-    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None, false_p=None, component_name=None, component_version=None, severity=None):
+    def get_test_findings_api(
+        self,
+        test_id,
+        active=None,
+        verified=None,
+        is_mitigated=None,
+        false_p=None,
+        component_name=None,
+        component_version=None,
+        severity=None,
+    ):
         payload = {"test": test_id}
         if active is not None:
             payload["active"] = active
@@ -807,9 +924,23 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             logger.debug("no findings")
         else:
             for finding in findings_content_json["results"]:
-                logger.debug(str(finding["id"]) + ": " + finding["title"][:5] + ":" + finding["severity"] + ": active: " + str(finding["active"]) + ": verified: " + str(finding["verified"])
-                        + ": is_mitigated: " + str(finding["is_mitigated"]) + ": notes: " + str([n["id"] for n in finding["notes"]])
-                        + ": endpoints: " + str(finding["endpoints"]))
+                logger.debug(
+                    str(finding["id"])
+                    + ": "
+                    + finding["title"][:5]
+                    + ":"
+                    + finding["severity"]
+                    + ": active: "
+                    + str(finding["active"])
+                    + ": verified: "
+                    + str(finding["verified"])
+                    + ": is_mitigated: "
+                    + str(finding["is_mitigated"])
+                    + ": notes: "
+                    + str([n["id"] for n in finding["notes"]])
+                    + ": endpoints: "
+                    + str(finding["endpoints"])
+                )
 
         logger.debug("endpoints")
         for ep in Endpoint.objects.all():
@@ -817,7 +948,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         logger.debug("endpoint statuses")
         for eps in Endpoint_Status.objects.all():
-            logger.debug(str(eps.id) + ": " + str(eps.endpoint) + ": " + str(eps.endpoint.id) + ": " + str(eps.mitigated))
+            logger.debug(
+                str(eps.id) + ": " + str(eps.endpoint) + ": " + str(eps.endpoint.id) + ": " + str(eps.mitigated)
+            )
 
     def get_product_api(self, product_id):
         response = self.client.get(reverse("product-list") + f"{product_id}/", format="json")
