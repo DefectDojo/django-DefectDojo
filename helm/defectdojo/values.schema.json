@@ -113,7 +113,9 @@
                             "type": "object"
                         },
                         "replicas": {
-                            "type": "integer"
+                            "description": "Multiple replicas are not allowed (Beat is intended to be a singleton) because scaling to \u003e1 will double-run schedules",
+                            "type": "integer",
+                            "maximum": 1
                         },
                         "resources": {
                             "type": "object",

@@ -429,6 +429,8 @@ def deduplicate_unique_id_from_tool(new_finding):
     if new_finding.test.engagement.deduplication_on_engagement:
         existing_findings = Finding.objects.filter(
             test__engagement=new_finding.test.engagement,
+            # the unique_id_from_tool is unique for a given tool: do not compare with other tools
+            test__test_type=new_finding.test.test_type,
             unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
@@ -508,7 +510,7 @@ def deduplicate_uid_or_hash_code(new_finding):
                 id=new_finding.id).exclude(
                         duplicate=True).order_by("id")
     deduplicationLogger.debug("Found "
-        + str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
+        + str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code: " + str([find.id for find in existing_findings]))
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
             deduplicationLogger.debug(
@@ -517,10 +519,10 @@ def deduplicate_uid_or_hash_code(new_finding):
         try:
             if are_endpoints_duplicates(new_finding, find):
                 set_duplicate(new_finding, find)
+                break
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-        break
 
 
 def set_duplicate(new_finding, existing_finding):
