@@ -20,7 +20,7 @@ class TestOpenreportsParser(DojoTestCase):
             parser = OpenreportsParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 2)
-            
+
             # Test first finding (warn/low severity)
             finding1 = findings[0]
             self.assertEqual("CVE-2025-9232 in libcrypto3", finding1.title)
@@ -59,13 +59,13 @@ class TestOpenreportsParser(DojoTestCase):
             parser = OpenreportsParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 2)
-            
+
             # Verify findings from different reports have different services
             services = {finding.service for finding in findings}
             self.assertEqual(len(services), 2)
             self.assertIn("test/Deployment/app1", services)
             self.assertIn("test/Deployment/app2", services)
-            
+
             # Verify CVE IDs
             cve_ids = [finding.unsaved_vulnerability_ids[0] for finding in findings]
             self.assertIn("CVE-2025-9232", cve_ids)
@@ -75,9 +75,9 @@ class TestOpenreportsParser(DojoTestCase):
         parser = OpenreportsParser()
         scan_types = parser.get_scan_types()
         self.assertEqual(["OpenReports Scan"], scan_types)
-        
+
         label = parser.get_label_for_scan_types("OpenReports Scan")
         self.assertEqual("OpenReports Scan", label)
-        
+
         description = parser.get_description_for_scan_types("OpenReports Scan")
         self.assertEqual("Import OpenReports JSON scan report.", description)

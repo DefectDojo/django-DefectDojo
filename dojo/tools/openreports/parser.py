@@ -74,23 +74,23 @@ class OpenreportsParser:
 
     def _parse_report(self, test, report):
         findings = []
-        
+
         # Extract metadata
         metadata = report.get("metadata", {})
         report_name = metadata.get("name", "")
         namespace = metadata.get("namespace", "")
-        
+
         # Extract scope information
         scope = report.get("scope", {})
         scope_kind = scope.get("kind", "")
         scope_name = scope.get("name", "")
-        
+
         # Create service identifier from scope and metadata
         service_name = f"{namespace}/{scope_kind}/{scope_name}" if namespace else f"{scope_kind}/{scope_name}"
-        
+
         # Extract results
         results = report.get("results", [])
-        
+
         for result in results:
             if not isinstance(result, dict):
                 continue
@@ -110,23 +110,20 @@ class OpenreportsParser:
             result_status = result.get("result", "")
             severity = result.get("severity", "info").lower()
             source = result.get("source", "")
-            
+
             # Extract properties
             properties = result.get("properties", {})
             pkg_name = properties.get("pkgName", "")
             installed_version = properties.get("installedVersion", "")
             fixed_version = properties.get("fixedVersion", "")
             primary_url = properties.get("primaryURL", "")
-            
+
             # Convert severity to DefectDojo format
             severity_normalized = OPENREPORTS_SEVERITIES.get(severity, "Info")
-            
+
             # Create title
-            if policy.startswith("CVE-"):
-                title = f"{policy} in {pkg_name}"
-            else:
-                title = f"{policy}: {message}"
-            
+            title = f"{policy} in {pkg_name}" if policy.startswith("CVE-") else f"{policy}: {message}"
+
             # Create description
             description = DESCRIPTION_TEMPLATE.format(
                 message=message,
@@ -139,25 +136,24 @@ class OpenreportsParser:
                 fixed_version=fixed_version,
                 primary_url=primary_url,
             )
-            
+
             # Determine if fix is available
             fix_available = bool(fixed_version and fixed_version.strip())
-            
+
             # Set mitigation based on fixed version
             mitigation = f"Upgrade to version: {fixed_version}" if fixed_version else ""
-            
+
             # Set references
-            references = primary_url if primary_url else ""
-            
+            references = primary_url or ""
+
             # Determine active status based on result
-            active = result_status not in ["skip", "pass"]
-            verified = result_status in ["fail", "warn"]
-            
+            active = result_status not in {"skip", "pass"}
+            verified = result_status in {"fail", "warn"}
+
             # Create tags
             tags = [category, source]
             if scope_kind := service_name.split("/")[1] if "/" in service_name else "":
                 tags.append(scope_kind)
-            
             finding = Finding(
                 test=test,
                 title=title,
@@ -175,13 +171,13 @@ class OpenreportsParser:
                 fix_available=fix_available,
                 tags=tags,
             )
-            
+
             # Add vulnerability ID if it's a CVE
             if policy.startswith("CVE-"):
                 finding.unsaved_vulnerability_ids = [policy]
-            
-            return finding
-            
+            else:
+                return finding
+
         except KeyError as exc:
             logger.warning("Failed to parse OpenReports result due to missing key: %r", exc)
             return None
