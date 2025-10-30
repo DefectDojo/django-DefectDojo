@@ -30,6 +30,7 @@ def group_post_save_handler(sender, **kwargs):
     created = kwargs.pop("created")
     group = kwargs.pop("instance")
     if created:
+        # Create authentication group
         auth_group = Group(name=get_auth_group_name(group))
         auth_group.save()
         group.auth_group = auth_group
@@ -51,7 +52,6 @@ def group_post_save_handler(sender, **kwargs):
             member.group = group
             member.role = Role.objects.get(is_owner=True)
             member.save()
-
             # Add user to authentication group as well
             auth_group.user_set.add(user)
 
