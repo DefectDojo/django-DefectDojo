@@ -1,6 +1,7 @@
 import logging
 
 from crum import get_current_user
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser, Group
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
@@ -29,7 +30,6 @@ def group_post_save_handler(sender, **kwargs):
     created = kwargs.pop("created")
     group = kwargs.pop("instance")
     if created:
-        # Create authentication group
         auth_group = Group(name=get_auth_group_name(group))
         auth_group.save()
         group.auth_group = auth_group
@@ -44,12 +44,16 @@ def group_post_save_handler(sender, **kwargs):
             except Dojo_User.DoesNotExist:
                 logger.error(f"Group post-save: No Dojo_User found for user with pk '{user.pk}'.")
                 return
-        member = Dojo_Group_Member()
-        member.user = user
-        member.group = group
-        member.role = Role.objects.get(is_owner=True)
-        member.save()
-        auth_group.user_set.add(user)
+        if not settings.AZUREAD_TENANT_OAUTH2_GET_GROUPS:
+            # Add the current user as the owner of the group
+            member = Dojo_Group_Member()
+            member.user = user
+            member.group = group
+            member.role = Role.objects.get(is_owner=True)
+            member.save()
+
+            # Add user to authentication group as well
+            auth_group.user_set.add(user)
 
 
 @receiver(post_delete, sender=Dojo_Group)
