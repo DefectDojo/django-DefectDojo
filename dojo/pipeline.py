@@ -188,7 +188,5 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         username = details.get("email")
     if not username:
         username = details.get("fullname")
-    if not username:
-        logger.error("User creation failed: No valid identifier found in details (username, email, fullname).")
     details["username"] = sanitize_username(username)
     return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)
