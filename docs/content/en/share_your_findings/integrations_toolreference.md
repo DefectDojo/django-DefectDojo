@@ -1,6 +1,6 @@
 ---
 title: "Integrators Tool Reference"
-description: "How to integrate DefectDojo Integrators for pushing Issues out"
+description: "Detailed setup guides for Integrators"
 weight: 1
 ---
 
