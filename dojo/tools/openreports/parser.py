@@ -31,13 +31,13 @@ DESCRIPTION_TEMPLATE = """{message}
 
 class OpenreportsParser:
     def get_scan_types(self):
-        return ["OpenReports Scan"]
+        return ["OpenReports"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "OpenReports Scan"
+        return "OpenReports"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import OpenReports JSON scan report."
+        return "Import OpenReports JSON report."
 
     def get_findings(self, scan_file, test):
         scan_data = scan_file.read()
@@ -79,6 +79,7 @@ class OpenreportsParser:
         metadata = report.get("metadata", {})
         report_name = metadata.get("name", "")
         namespace = metadata.get("namespace", "")
+        report_uid = metadata.get("uid", "")
 
         # Extract scope information
         scope = report.get("scope", {})
@@ -95,13 +96,13 @@ class OpenreportsParser:
             if not isinstance(result, dict):
                 continue
 
-            finding = self._create_finding_from_result(test, result, service_name, report_name)
+            finding = self._create_finding_from_result(test, result, service_name, report_name, report_uid)
             if finding:
                 findings.append(finding)
 
         return findings
 
-    def _create_finding_from_result(self, test, result, service_name, report_name):
+    def _create_finding_from_result(self, test, result, service_name, report_name, report_uid):
         try:
             # Extract basic fields
             message = result.get("message", "")
@@ -175,8 +176,15 @@ class OpenreportsParser:
             # Add vulnerability ID if it's a CVE
             if policy.startswith("CVE-"):
                 finding.unsaved_vulnerability_ids = [policy]
-            else:
-                return finding
+
+            # Create unique_id_from_tool for deduplication
+            # Use the report UID if available (from metadata.uid), otherwise fall back to service_name
+            # Format: report_uid:policy:package_name (preferred) or policy:package_name:service_name (fallback)
+            # This uses the stable UID from the OpenReports API that won't change on reimport
+            unique_id_components = [report_uid, policy, pkg_name] if report_uid else [policy, pkg_name, service_name]
+            finding.unique_id_from_tool = ":".join(unique_id_components)
+
+            return finding  # noqa: TRY300 - This is intentional
 
         except KeyError as exc:
             logger.warning("Failed to parse OpenReports result due to missing key: %r", exc)

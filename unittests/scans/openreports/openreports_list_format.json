@@ -91,6 +91,20 @@
                     "result": "fail",
                     "severity": "high",
                     "source": "image-scanner"
+                },
+                {
+                    "category": "configuration scan",
+                    "message": "Container running as root user",
+                    "policy": "SECURITY-001",
+                    "properties": {
+                        "fixedVersion": "",
+                        "installedVersion": "latest",
+                        "pkgName": "container-config",
+                        "primaryURL": "https://security.example.com/policies/SECURITY-001"
+                    },
+                    "result": "warn",
+                    "severity": "medium",
+                    "source": "policy-scanner"
                 }
             ],
             "scope": {
@@ -102,7 +116,7 @@
             "summary": {
                 "fail": 1,
                 "skip": 0,
-                "warn": 0
+                "warn": 1
             }
         }
     ],

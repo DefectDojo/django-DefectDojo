@@ -50,6 +50,20 @@
             "result": "fail",
             "severity": "high",
             "source": "image-scanner"
+        },
+        {
+            "category": "compliance check",
+            "message": "Missing security headers in HTTP response",
+            "policy": "CIS-BENCH-001",
+            "properties": {
+                "fixedVersion": "Configure proper security headers",
+                "installedVersion": "N/A",
+                "pkgName": "web-server",
+                "primaryURL": "https://www.cisecurity.org/benchmark/docker"
+            },
+            "result": "fail",
+            "severity": "low",
+            "source": "compliance-scanner"
         }
     ],
     "scope": {
@@ -59,7 +73,7 @@
         "uid": "d0cbd625-d495-415e-bf39-b4e3c4f4366e"
     },
     "summary": {
-        "fail": 1,
+        "fail": 2,
         "skip": 0,
         "warn": 1
     }
