@@ -6,13 +6,18 @@ from threading import local
 from urllib.parse import quote
 
 import pghistory.middleware
+import requests
 from auditlog.context import set_actor
 from auditlog.middleware import AuditlogMiddleware as _AuditlogMiddleware
 from django.conf import settings
+from django.contrib import messages
 from django.db import models
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.functional import SimpleLazyObject
+from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden
+from social_django.middleware import SocialAuthExceptionMiddleware
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
 
@@ -73,6 +78,23 @@ class LoginRequiredMiddleware:
                 return HttpResponseRedirect(reverse("change_password"))
 
         return self.get_response(request)
+
+
+class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
+    def process_exception(self, request, exception):
+        if isinstance(exception, requests.exceptions.RequestException):
+            messages.error(request, "Please use the standard login below.")
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthCanceled):
+            messages.warning(request, "Social login was canceled. Please try again or use the standard login.")
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthFailed):
+            messages.error(request, "Social login failed. Please try again or use the standard login.")
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthForbidden):
+            messages.error(request, "You are not authorized to log in via this method. Please contact support or use the standard login.")
+            return redirect("/login?force_login_form")
+        return super().process_exception(request, exception)
 
 
 class DojoSytemSettingsMiddleware:
