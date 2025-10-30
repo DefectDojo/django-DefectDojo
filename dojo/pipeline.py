@@ -183,5 +183,12 @@ def sanitize_username(username):
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if not settings.SOCIAL_AUTH_CREATE_USER:
         return None
-    details["username"] = sanitize_username(details.get("username"))
+    username = details.get("username")
+    if not username:
+        username = details.get("email")
+    if not username:
+        username = details.get("fullname")
+    if not username:
+        logger.warning("User creation failed: No valid identifier found in details (username, email, fullname).")
+    details["username"] = sanitize_username(username)
     return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)
