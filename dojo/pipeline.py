@@ -209,9 +209,13 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if not settings.SOCIAL_AUTH_CREATE_USER:
         return None
 <<<<<<< HEAD
+<<<<<<< HEAD
     username = details.get(settings.SOCIAL_AUTH_CREATE_USER_MAPPING)
     details["username"] = sanitize_username(username)
 =======
     details["username"] = sanitize_username(details.get("email"))
 >>>>>>> 0b9d5238e5 (update)
+=======
+    details["username"] = sanitize_username(details.get("username"))
+>>>>>>> b9d07c6a56 (Aktualisieren von pipeline.py)
     return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)
