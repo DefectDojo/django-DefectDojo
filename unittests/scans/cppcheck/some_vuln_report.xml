@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="2.18.0"/>
+    <errors>
+        <error id="uninitvar" severity="warning" msg="Uninitialized variable: fin" verbose="Uninitialized variable: fin" cwe="457" file0="contrib/minizip/minizip.c">
+            <location file="contrib/minizip/minizip.c" line="495" column="21"/>
+            <symbol>fin</symbol>
+        </error>
+    </errors>
+</results>
