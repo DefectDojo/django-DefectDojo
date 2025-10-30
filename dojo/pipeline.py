@@ -111,7 +111,6 @@ def update_oidc_groups(backend, uid, user=None, social=None, *args, **kwargs):
     if settings.OIDC_AUTH_ENABLED and settings.OIDC_GET_GROUPS and isinstance(backend, OpenIdConnectAuth):
         response = kwargs.get("response", {})
         group_names = response.get("groups", [])
-
         if not group_names:
             logger.warning("No 'groups' claim found in OIDC response. Skipping group assignment.")
             return
@@ -126,7 +125,7 @@ def update_oidc_groups(backend, uid, user=None, social=None, *args, **kwargs):
                 filtered_group_names.append(group_name)
             except Exception as e:
                 logger.error(f"Error processing group '{group_name}': {e}")
-        if filtered_group_names:
+        if len(filtered_group_names) > 0:
             assign_user_to_groups(user, filtered_group_names, Dojo_Group.OIDC)
         if getattr(settings, "OIDC_CLEANUP_GROUPS", False):
             cleanup_old_groups_for_user(user, filtered_group_names)
@@ -209,6 +208,10 @@ def sanitize_username(username):
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if not settings.SOCIAL_AUTH_CREATE_USER:
         return None
+<<<<<<< HEAD
     username = details.get(settings.SOCIAL_AUTH_CREATE_USER_MAPPING)
     details["username"] = sanitize_username(username)
+=======
+    details["username"] = sanitize_username(details.get("email"))
+>>>>>>> 0b9d5238e5 (update)
     return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)
