@@ -1,11 +1,11 @@
 # Dojo
-from dojo.templatetags.authorization_tags import is_in_group
+from dojo.templatetags.authorization_tags import is_in_group, has_permission_to_reclassify_orphans
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification
 from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm, EditFindingExclusionForm
-from dojo.models import Product, Product_Type, GeneralSettings
+from dojo.models import Product, Product_Type, System_Settings
 from dojo.engine_tools.helpers import (
     add_findings_to_whitelist, 
     get_reviewers_members, 
@@ -14,8 +14,7 @@ from dojo.engine_tools.helpers import (
     send_mail_to_cybersecurity,
     has_valid_comments,
     add_findings_to_blacklist,
-    remove_findings_from_deleted_finding_exclusions,
-    has_permission_to_reclassify_orphans
+    remove_findings_from_deleted_finding_exclusions
 )
 
 # Utils
@@ -38,7 +37,9 @@ import pandas as pd
 from openpyxl.styles import Font, PatternFill
 
 
-ORPHAN_PRODUCT_TYPE_NAME = "EVC - SIN DEFINIR"
+system_settings = System_Settings.objects.get()
+
+ORPHAN_PRODUCT_TYPE_NAME = system_settings.orphan_findings
 
 
 def finding_exclusions(request: HttpRequest):

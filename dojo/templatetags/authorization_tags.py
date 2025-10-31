@@ -12,6 +12,7 @@ from dojo.request_cache import cache_for_request
 import dojo.risk_acceptance.helper as helper_ra
 import dojo.finding.helper as helper_f
 import dojo.transfer_findings.helper as helper_tf
+from dojo.models import GeneralSettings
 
 register = template.Library()
 
@@ -125,8 +126,6 @@ def is_contacts_permission(product):
     user = crum.get_current_user()
     return user_is_contacts(user, product)
 
-
-
 @register.filter
 def is_tags_authorized_for_whitelist(finding):
     tags = finding.tags.all()
@@ -139,4 +138,20 @@ def is_tags_authorized_for_whitelist(finding):
             if tag.name in settings.FINDING_EXCLUSION_FILTER_TAGS:
                 return True
     
+    return False
+
+@register.filter
+def has_permission_to_reclassify_orphans(user) -> bool:
+    groups = GeneralSettings.get_value(
+        "GROUPS_TO_RECLASSIFY_ORPHANS",
+        settings.REVIEWER_GROUP_NAME
+    )
+
+    if user.is_superuser:
+        return True
+
+    for group_name in groups:
+        if is_in_group(user, group_name.strip()):
+            return True
+
     return False

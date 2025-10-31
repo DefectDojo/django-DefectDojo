@@ -556,7 +556,7 @@
                                                         {% trans "Vulnerability Black & White Lists" %}
                                                     </a>
                                                 </li>
-                                                {% if request.user|is_in_reviewer_group %}
+                                                {% if request.user|has_permission_to_reclassify_orphans %}
                                                     <li>
                                                         <a rel="noopener noreferrer" href="{% url 'orphans_reclassification' %}">
                                                             {% trans "Reclassify Orphan Products" %}

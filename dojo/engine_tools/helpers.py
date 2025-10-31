@@ -12,7 +12,7 @@ import boto3
 import pandas as pd
 
 # Dojo
-from dojo.models import Finding, Dojo_Group, Notes, Vulnerability_Id, GeneralSettings
+from dojo.models import Finding, Dojo_Group, Notes, Vulnerability_Id
 from dojo.group.queries import get_group_members_for_group
 from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
 from dojo.engine_tools.queries import tag_filter, priority_tag_filter
@@ -20,7 +20,6 @@ from dojo.celery import app
 from dojo.user.queries import get_user
 from dojo.notifications.helper import create_notification, EmailNotificationManger
 from dojo.utils import get_full_url
-from dojo.templatetags.authorization_tags import is_in_group
 
 
 logger = get_task_logger(__name__)
@@ -68,22 +67,6 @@ def has_valid_comments(finding_exclusion, user) -> bool:
         return True
     for comment in finding_exclusion.discussions.all():
         if comment.author == user:
-            return True
-
-    return False
-
-
-def has_permission_to_reclassify_orphans(user) -> bool:
-    groups = GeneralSettings.get_value(
-        "GROUPS_TO_RECLASSIFY_ORPHANS",
-        Constants.REVIEWERS_MAINTAINER_GROUP.value
-    ).split(",")
-
-    if user.is_superuser:
-        return True
-
-    for group_name in groups:
-        if is_in_group(user, group_name.strip()):
             return True
 
     return False

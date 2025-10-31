@@ -403,7 +403,6 @@
 
 <script>
     $(document).ready(function() {
-        console.log('[DEBUG] ✅ JavaScript loaded successfully!');
         
         let movedProducts = [];
         let processingInterval = null;
@@ -507,8 +506,6 @@
             toggleButton($('#move-right'), selectedCount === 0);
             toggleButton($('#move-left'), movedCount === 0);
             toggleButton($('#reclassify-btn'), movedCount === 0 || !productTypeSelected);
-            
-            console.log('[DEBUG] UI updated - Selected:', selectedCount, 'Moved:', movedCount, 'ProductType:', productTypeSelected);
         }
         
         $('#orphan-products-list').on('change', 'input[type="checkbox"]', function() {
@@ -525,11 +522,8 @@
         
         $('#move-right').on('click', function() {
             if ($(this).prop('disabled')) {
-                console.log('[DEBUG] Right button disabled');
                 return;
             }
-            
-            console.log('[DEBUG] Moving products to the right...');
             
             const checkboxes = $('input[name="products"]:checked:not(:disabled)');
             
@@ -548,7 +542,6 @@
                         name: productName,
                         code: productCode
                     });
-                    console.log('[DEBUG] Product moved:', productName);
     
                     $productItem.addClass('product-moved');
                     $checkbox.prop('disabled', true);
@@ -564,11 +557,8 @@
         
         $('#move-left').on('click', function() {
             if ($(this).prop('disabled')) {
-                console.log('[DEBUG] Left button disabled');
                 return;
             }
-            
-            console.log('[DEBUG] Returning products...');
             
             movedProducts.forEach(product => {
                 const $productItem = $(`.list-group-item[data-product-id="${product.id}"]`);
@@ -605,7 +595,6 @@
         }
         
         $('#product-type-select').on('change', function() {
-            console.log('[DEBUG] Product type changed:', $(this).val());
             updateUI();
         });
         
@@ -838,7 +827,6 @@
                 .addClass('label-default');
         });
         
-        console.log('[DEBUG] ✅ System ready!');
         updateUI();
     });
 </script>
