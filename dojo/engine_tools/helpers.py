@@ -10,6 +10,11 @@ from enum import Enum
 from io import BytesIO
 import boto3
 import pandas as pd
+import csv
+import datetime
+import gzip
+import io
+import requests
 
 # Dojo
 from dojo.models import Finding, Dojo_Group, Notes, Vulnerability_Id
@@ -37,6 +42,7 @@ class Constants(Enum):
     ENGINE_CONTAINER_TAG = settings.DD_CUSTOM_TAG_PARSER.get("twistlock")
     TAG_PRISMA = settings.FINDING_EXCLUSION_FILTER_TAGS.split(",")[0]
     TAG_TENABLE = settings.FINDING_EXCLUSION_FILTER_TAGS.split(",")[1]
+    TAG_HACKING = settings.PROVIDERS.split("//")[0]
 
 
 def get_reviewers_members():
@@ -372,11 +378,13 @@ def add_discussion_to_finding_exclusion(finding_exclusion) -> None:
 
 @app.task
 def update_finding_prioritization_per_cve(
-    vulnerability_id, cve_greater, severity, scan_type, priorization
+    vulnerability_id, cve_greater, severity, scan_type, priorization, epss_dict
 ) -> None:
     priority_cve_severity_filter = Q()
+    epss_score = None
+    epss_percentile = None
     if vulnerability_id:
-        if scan_type == "Tenable Scan":
+        if scan_type in ["Tenable Scan", "SARIF"]:
             ids = (
                 Vulnerability_Id.objects.filter(
                     vulnerability_id=cve_greater
@@ -389,10 +397,14 @@ def update_finding_prioritization_per_cve(
                 if ids
                 else (Q(severity=severity) & Q(cve=vulnerability_id) & ~Q(cve=None))
             )
+            epss_score = epss_dict.get(cve_greater, {}).get("epss", None)
+            epss_percentile = epss_dict.get(cve_greater, {}).get("percentil", None)
         else:
             priority_cve_severity_filter = (Q(cve=vulnerability_id) & ~Q(cve=None)) | (
                 Q(vuln_id_from_tool=vulnerability_id) & ~Q(vuln_id_from_tool=None)
             )
+            epss_score = epss_dict.get(vulnerability_id, {}).get("epss", None)
+            epss_percentile = epss_dict.get(vulnerability_id, {}).get("percentil", None)
     else:
         priority_cve_severity_filter = Q(severity=severity) & Q(cve=None)
 
@@ -402,9 +414,12 @@ def update_finding_prioritization_per_cve(
     for finding_update in findings:
         finding_update.priority = priorization
         finding_update.set_sla_expiration_date()
+        finding_update.epss_score = epss_score
+        finding_update.epss_percentile = epss_percentile
 
-    Finding.objects.bulk_update(findings, ["priority", "sla_expiration_date"], 1000)
-    return f"{vulnerability_id} with severity {severity} of {scan_type} with {findings.count()} findings updated with prioritization {priorization}"
+    Finding.objects.bulk_update(findings, ["priority", "sla_expiration_date", "epss_score", "epss_percentile"], 1000)
+    print(f"{vulnerability_id} with severity {severity} of {scan_type} with {findings.count()} findings updated with prioritization {priorization} and EPSS score {epss_score} and percentile {epss_percentile}")
+    return f"{vulnerability_id} with severity {severity} of {scan_type} with {findings.count()} findings updated with prioritization {priorization} and EPSS score {epss_score} and percentile {epss_percentile}"
 
 
 def identify_priority_vulnerabilities(findings) -> int:
@@ -439,11 +454,14 @@ def identify_priority_vulnerabilities(findings) -> int:
         logger.error(f"Error reading risk score file: {e}")
         df_risk_score = pd.DataFrame(columns=["cve", "prediction"])
 
+    # Get epss data
+    epss_dict = download_epss_data(backward_day=0, cve_cutoff="CVE-2002-1976")
+
     for finding in findings:
         cve_greater = None
         if not df_risk_score.empty and finding.cve:
             cve_greater = finding.cve
-            if Constants.TAG_TENABLE.value in finding.tags:
+            if Constants.TAG_TENABLE.value in finding.tags or Constants.TAG_HACKING.value in finding.tags:
                 vulnerabilities_id = finding.vulnerability_ids
                 priority = 0
                 for vuln_id in vulnerabilities_id:
@@ -467,8 +485,8 @@ def identify_priority_vulnerabilities(findings) -> int:
         else:
             priority = severity_risk_map.get(finding.severity, 0)
 
-        update_finding_prioritization_per_cve.apply_async(
-            args=(finding.cve, cve_greater, finding.severity, finding.test.scan_type, priority)
+        update_finding_prioritization_per_cve(
+            finding.cve, cve_greater, finding.severity, finding.test.scan_type, priority, epss_dict
         )
 
         if priority >= float(
@@ -507,6 +525,35 @@ def identify_priority_vulnerabilities(findings) -> int:
                     args=(fx.unique_id_from_tool, relative_url)
                 )
 
+def download_epss_data(backward_day, cve_cutoff):
+    base_url = "https://epss.empiricalsecurity.com/epss_scores-{}.csv.gz"
+    date = datetime.datetime.now() - datetime.timedelta(days=backward_day)
+    attempts = 0
+    while attempts < 2:
+        formatted_date = date.strftime("%Y-%m-%d")
+        url = base_url.format(formatted_date)
+        response = requests.get(url)
+        if response.status_code == 200:
+            with gzip.open(io.BytesIO(response.content), "rt") as f:
+                data = f.read()
+            print(f"{formatted_date} EPSS data downloaded.")
+            return format_data(data, cve_cutoff)
+        else:
+            print(f"Could not find {formatted_date} EPSS data.")
+            date -= datetime.timedelta(days=1)
+            attempts += 1
+    return None
+
+def format_data(epss_data, cve_cutoff):
+    if not epss_data:
+        return None
+    csv_reader = csv.reader(io.StringIO(epss_data))
+    next(csv_reader), next(csv_reader)
+    return {
+        row[0]: {"epss": row[1], "percentil": row[2]}
+        for row in csv_reader
+        if len(row) >= 3 and row[0] >= cve_cutoff
+    }
 
 @app.task
 def check_priorization():
