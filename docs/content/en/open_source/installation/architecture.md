@@ -21,7 +21,9 @@ dynamic content.
 ## Message Broker
 
 The application server sends tasks to a [Message Broker](https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/index.html)
-for asynchronous execution. Currently, only [Redis](https://github.com/redis/redis) is supported as a broker.
+for asynchronous execution. Currently, only [Valkey](https://valkey.io/) is supported as a broker in the docker compose setup.
+The Helm chart still uses [Redis](https://github.com/redis/redis) is supported as a broker, but will be migrated to Valkey shortly.
+
 
 ## Celery Worker
 
