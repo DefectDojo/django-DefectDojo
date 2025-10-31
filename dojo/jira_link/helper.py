@@ -787,7 +787,7 @@ def push_finding_group_to_jira(finding_group, *args, **kwargs):
         # Look for findings that have single ticket associations seperate from the group
         for finding in finding_group.findings.filter(jira_issue__isnull=False):
             update_jira_issue(finding, *args, **kwargs)
-        #Update the jira issue for the group
+        # Update the jira issue for the group
         return update_jira_issue(finding_group, *args, **kwargs)
     return add_jira_issue(finding_group, *args, **kwargs)
 
