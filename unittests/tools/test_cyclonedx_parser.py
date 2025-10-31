@@ -357,3 +357,17 @@ class TestCyclonedxParser(DojoTestCase):
                 self.assertIn(finding.severity, Finding.SEVERITIES)
                 finding.clean()
             self.assertEqual(1, len(findings))
+
+    def test_cyclonedx_no_severity(self):
+        """CycloneDX version 1.4 JSON format"""
+        with (get_unit_tests_scans_path("cyclonedx") / "no-severity.json").open(encoding="utf-8") as file:
+            parser = CycloneDXParser()
+            findings = parser.get_findings(file, Test())
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            # There is so little information in the vulnerability, that we cannot build a proper title
+            self.assertEqual("None:None | CVE-2021-44228", finding.title)
+            self.assertEqual("Critical", finding.severity)
+            # The score will be evaluated when the finding save method is ran
+            # self.assertEqual(10.0, finding.cvssv3_score)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
