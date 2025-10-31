@@ -59,4 +59,4 @@ Each Product can have a Prioritization Engine currently in use via the **Edit Pr
 
 ![image](images/priority_chooseengine.png)
 
-Note that when a Product's Prioritization Engine is changed, or a Prioritization Engine is updated, any Findings governed by that Finding will be "Locked"
+Note that when a Product's Prioritization Engine is changed, or a Prioritization Engine is updated, the Product's Prioritization Engine or the Prioritization Engine itself will be "Locked" until the prioritization calculation has completed.
