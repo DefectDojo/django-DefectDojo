@@ -124,7 +124,6 @@ logger = logging.getLogger(__name__)
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def engagement_calendar(request):
-
     if not get_system_setting("enable_calendar"):
         raise Resolver404
 
@@ -142,15 +141,17 @@ def engagement_calendar(request):
     engagements = engagements.select_related("lead")
     engagements = engagements.prefetch_related("product")
 
-    add_breadcrumb(
-        title="Engagement Calendar", top_level=True, request=request)
+    add_breadcrumb(title="Engagement Calendar", top_level=True, request=request)
     return render(
-        request, "dojo/calendar.html", {
+        request,
+        "dojo/calendar.html",
+        {
             "caltype": "engagements",
             "leads": request.GET.getlist("lead", ""),
             "engagements": engagements,
             "users": get_authorized_users(Permissions.Engagement_View),
-        })
+        },
+    )
 
 
 def get_filtered_engagements(request, view):
@@ -163,10 +164,8 @@ def get_filtered_engagements(request, view):
     if view == "active":
         engagements = engagements.filter(active=True)
 
-    engagements = (
-        engagements
-        .select_related("product", "product__prod_type")
-        .prefetch_related("lead", "tags", "product__tags")
+    engagements = engagements.select_related("product", "product__prod_type").prefetch_related(
+        "lead", "tags", "product__tags"
     )
 
     if System_Settings.objects.get().enable_jira:
@@ -176,7 +175,8 @@ def get_filtered_engagements(request, view):
         )
 
     test_count_subquery = build_count_subquery(
-        Test.objects.filter(engagement=OuterRef("pk")), group_field="engagement_id",
+        Test.objects.filter(engagement=OuterRef("pk")),
+        group_field="engagement_id",
     )
     engagements = engagements.annotate(test_count=Coalesce(test_count_subquery, Value(0)))
 
@@ -193,31 +193,34 @@ def engagements(request, view):
 
     engs = get_page_items(request, filtered_engagements.qs, 25)
     product_name_words = sorted(get_authorized_products(Permissions.Product_View).values_list("name", flat=True))
-    engagement_name_words = sorted(get_authorized_engagements(Permissions.Engagement_View).values_list("name", flat=True).distinct())
+    engagement_name_words = sorted(
+        get_authorized_engagements(Permissions.Engagement_View).values_list("name", flat=True).distinct()
+    )
 
-    add_breadcrumb(
-        title=f"{view.capitalize()} Engagements",
-        top_level=not len(request.GET),
-        request=request)
+    add_breadcrumb(title=f"{view.capitalize()} Engagements", top_level=not len(request.GET), request=request)
 
     return render(
-        request, "dojo/engagement.html", {
+        request,
+        "dojo/engagement.html",
+        {
             "engagements": engs,
             "filter_form": filtered_engagements.form,
             "product_name_words": product_name_words,
             "engagement_name_words": engagement_name_words,
             "view": view.capitalize(),
-        })
+        },
+    )
 
 
 def engagements_all(request):
-
     products_with_engagements = get_authorized_products(Permissions.Engagement_View)
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
     # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
     filter_string_matching = get_system_setting("filter_string_matching", False)
-    products_filter_class = ProductEngagementsFilterWithoutObjectLookups if filter_string_matching else ProductEngagementsFilter
+    products_filter_class = (
+        ProductEngagementsFilterWithoutObjectLookups if filter_string_matching else ProductEngagementsFilter
+    )
     test_count_subquery = build_count_subquery(
         Test.objects.filter(engagement=OuterRef("pk")),
         group_field="engagement_id",
@@ -249,19 +252,19 @@ def engagements_all(request):
     name_words = products_with_engagements.values_list("name", flat=True)
     eng_words = get_authorized_engagements(Permissions.Engagement_View).values_list("name", flat=True).distinct()
 
-    add_breadcrumb(
-        title="All Engagements",
-        top_level=not len(request.GET),
-        request=request)
+    add_breadcrumb(title="All Engagements", top_level=not len(request.GET), request=request)
 
     return render(
-        request, "dojo/engagements_all.html", {
+        request,
+        "dojo/engagements_all.html",
+        {
             "products": prods,
             "filter_form": filtered.form,
             "name_words": sorted(set(name_words)),
             "eng_words": sorted(set(eng_words)),
             "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
-        })
+        },
+    )
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
@@ -281,7 +284,7 @@ def edit_engagement(request, eid):
             new_status = form.cleaned_data.get("status")
             engagement.product = form.cleaned_data.get("product")
             engagement = form.save(commit=False)
-            if (new_status in {"Cancelled", "Completed"}):
+            if new_status in {"Cancelled", "Completed"}:
                 engagement.active = False
             else:
                 engagement.active = True
@@ -289,12 +292,12 @@ def edit_engagement(request, eid):
             form.save_m2m()
 
             messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Engagement updated successfully.",
-                extra_tags="alert-success")
+                request, messages.SUCCESS, "Engagement updated successfully.", extra_tags="alert-success"
+            )
 
-            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=jira_project, target="engagement", engagement=engagement, product=engagement.product)
+            success, jira_project_form = jira_helper.process_jira_project_form(
+                request, instance=jira_project, target="engagement", engagement=engagement, product=engagement.product
+            )
             error = not success
 
             success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)
@@ -302,15 +305,19 @@ def edit_engagement(request, eid):
 
             if not error:
                 if "_Add Tests" in request.POST:
-                    return HttpResponseRedirect(
-                        reverse("add_tests", args=(engagement.id, )))
-                return HttpResponseRedirect(
-                    reverse("view_engagement", args=(engagement.id, )))
+                    return HttpResponseRedirect(reverse("add_tests", args=(engagement.id,)))
+                return HttpResponseRedirect(reverse("view_engagement", args=(engagement.id,)))
         else:
             logger.debug(form.errors)
 
     else:
-        form = EngForm(initial={"product": engagement.product}, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
+        form = EngForm(
+            initial={"product": engagement.product},
+            instance=engagement,
+            cicd=is_ci_cd,
+            product=engagement.product,
+            user=request.user,
+        )
 
         jira_epic_form = None
         if get_system_setting("enable_jira"):
@@ -323,15 +330,19 @@ def edit_engagement(request, eid):
 
     product_tab = Product_Tab(engagement.product, title=title, tab="engagements")
     product_tab.setEngagement(engagement)
-    return render(request, "dojo/new_eng.html", {
-        "product_tab": product_tab,
-        "title": title,
-        "form": form,
-        "edit": True,
-        "jira_epic_form": jira_epic_form,
-        "jira_project_form": jira_project_form,
-        "engagement": engagement,
-    })
+    return render(
+        request,
+        "dojo/new_eng.html",
+        {
+            "product_tab": product_tab,
+            "title": title,
+            "form": form,
+            "edit": True,
+            "jira_epic_form": jira_epic_form,
+            "jira_project_form": jira_project_form,
+            "engagement": engagement,
+        },
+    )
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Delete, "eid")
@@ -352,12 +363,8 @@ def delete_engagement(request, eid):
                 else:
                     message = "Engagement and relationships removed."
                     engagement.delete()
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    message,
-                    extra_tags="alert-success")
-                return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
+                messages.add_message(request, messages.SUCCESS, message, extra_tags="alert-success")
+                return HttpResponseRedirect(reverse("view_engagements", args=(product.id,)))
 
     rels = ["Previewing the relationships has been disabled.", ""]
     display_preview = get_setting("DELETE_PREVIEW")
@@ -368,12 +375,16 @@ def delete_engagement(request, eid):
 
     product_tab = Product_Tab(product, title="Delete Engagement", tab="engagements")
     product_tab.setEngagement(engagement)
-    return render(request, "dojo/delete_engagement.html", {
-        "product_tab": product_tab,
-        "engagement": engagement,
-        "form": form,
-        "rels": rels,
-    })
+    return render(
+        request,
+        "dojo/delete_engagement.html",
+        {
+            "product_tab": product_tab,
+            "engagement": engagement,
+            "form": form,
+            "rels": rels,
+        },
+    )
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
@@ -388,36 +399,37 @@ def copy_engagement(request, eid):
             engagement_copy = engagement.copy()
             calculate_grade(product)
             messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Engagement Copied successfully.",
-                extra_tags="alert-success")
-            create_notification(event="engagement_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
-                                title=_("Copying of %s") % engagement.name,
-                                description=f'The engagement "{engagement.name}" was copied by {request.user}',
-                                product=product,
-                                url=request.build_absolute_uri(reverse("view_engagement", args=(engagement_copy.id, ))),
-                                recipients=[engagement.lead],
-                                icon="exclamation-triangle")
-            return redirect_to_return_url_or_else(request, reverse("view_engagements", args=(product.id, )))
+                request, messages.SUCCESS, "Engagement Copied successfully.", extra_tags="alert-success"
+            )
+            create_notification(
+                event="engagement_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+                title=_("Copying of %s") % engagement.name,
+                description=f'The engagement "{engagement.name}" was copied by {request.user}',
+                product=product,
+                url=request.build_absolute_uri(reverse("view_engagement", args=(engagement_copy.id,))),
+                recipients=[engagement.lead],
+                icon="exclamation-triangle",
+            )
+            return redirect_to_return_url_or_else(request, reverse("view_engagements", args=(product.id,)))
         messages.add_message(
-            request,
-            messages.ERROR,
-            "Unable to copy engagement, please try again.",
-            extra_tags="alert-danger")
+            request, messages.ERROR, "Unable to copy engagement, please try again.", extra_tags="alert-danger"
+        )
 
     product_tab = Product_Tab(product, title="Copy Engagement", tab="engagements")
-    return render(request, "dojo/copy_object.html", {
-        "source": engagement,
-        "source_label": "Engagement",
-        "destination_label": "Product",
-        "product_tab": product_tab,
-        "form": form,
-    })
+    return render(
+        request,
+        "dojo/copy_object.html",
+        {
+            "source": engagement,
+            "source_label": "Engagement",
+            "destination_label": "Product",
+            "product_tab": product_tab,
+            "form": form,
+        },
+    )
 
 
 class ViewEngagement(View):
-
     def get_template(self):
         return "dojo/view_eng.html"
 
@@ -426,8 +438,12 @@ class ViewEngagement(View):
             Finding.objects.filter(risk_acceptance=OuterRef("pk")),
             group_field="risk_acceptance",
         )
-        return eng.risk_acceptance.all().select_related("owner").annotate(
-            accepted_findings_count=Coalesce(accepted_findings_subquery, Value(0)),
+        return (
+            eng.risk_acceptance.all()
+            .select_related("owner")
+            .annotate(
+                accepted_findings_count=Coalesce(accepted_findings_subquery, Value(0)),
+            )
         )
 
     def get_filtered_tests(
@@ -473,10 +489,8 @@ class ViewEngagement(View):
         files = eng.files.all()
         form = TypedNoteForm(available_note_types=available_note_types) if note_type_activation else NoteForm()
 
-        creds = Cred_Mapping.objects.filter(
-            product=eng.product).select_related("cred_id").order_by("cred_id")
-        cred_eng = Cred_Mapping.objects.filter(
-            engagement=eng.id).select_related("cred_id").order_by("cred_id")
+        creds = Cred_Mapping.objects.filter(product=eng.product).select_related("cred_id").order_by("cred_id")
+        cred_eng = Cred_Mapping.objects.filter(engagement=eng.id).select_related("cred_id").order_by("cred_id")
 
         add_breadcrumb(parent=eng, top_level=False, request=request)
 
@@ -486,7 +500,9 @@ class ViewEngagement(View):
         product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
         product_tab.setEngagement(eng)
         return render(
-            request, self.get_template(), {
+            request,
+            self.get_template(),
+            {
                 "eng": eng,
                 "product_tab": product_tab,
                 "system_settings": system_settings,
@@ -504,7 +520,8 @@ class ViewEngagement(View):
                 "cred_eng": cred_eng,
                 "network": network,
                 "preset_test_type": preset_test_type,
-            })
+            },
+        )
 
     def post(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
@@ -556,14 +573,9 @@ class ViewEngagement(View):
             eng.notes.add(new_note)
             form = TypedNoteForm(available_note_types=available_note_types) if note_type_activation else NoteForm()
             title = f"Engagement: {eng.name} on {eng.product.name}"
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 "Note added successfully.",
-                                 extra_tags="alert-success")
-        creds = Cred_Mapping.objects.filter(
-            product=eng.product).select_related("cred_id").order_by("cred_id")
-        cred_eng = Cred_Mapping.objects.filter(
-            engagement=eng.id).select_related("cred_id").order_by("cred_id")
+            messages.add_message(request, messages.SUCCESS, "Note added successfully.", extra_tags="alert-success")
+        creds = Cred_Mapping.objects.filter(product=eng.product).select_related("cred_id").order_by("cred_id")
+        cred_eng = Cred_Mapping.objects.filter(engagement=eng.id).select_related("cred_id").order_by("cred_id")
 
         add_breadcrumb(parent=eng, top_level=False, request=request)
 
@@ -573,7 +585,9 @@ class ViewEngagement(View):
         product_tab = Product_Tab(prod, title="View" + title + " Engagement", tab="engagements")
         product_tab.setEngagement(eng)
         return render(
-            request, self.get_template(), {
+            request,
+            self.get_template(),
+            {
                 "eng": eng,
                 "product_tab": product_tab,
                 "system_settings": system_settings,
@@ -591,7 +605,8 @@ class ViewEngagement(View):
                 "cred_eng": cred_eng,
                 "network": network,
                 "preset_test_type": preset_test_type,
-            })
+            },
+        )
 
 
 def prefetch_for_view_tests(tests):
@@ -607,10 +622,12 @@ def prefetch_for_view_tests(tests):
         count_findings_test_all=Coalesce(count_subquery(base_findings), Value(0)),
         count_findings_test_active=Coalesce(count_subquery(base_findings.filter(active=True)), Value(0)),
         count_findings_test_active_verified=Coalesce(
-            count_subquery(base_findings.filter(active=True, verified=True)), Value(0),
+            count_subquery(base_findings.filter(active=True, verified=True)),
+            Value(0),
         ),
         count_findings_test_active_fix_available=Coalesce(
-            count_subquery(base_findings.filter(active=True, fix_available=True)), Value(0),
+            count_subquery(base_findings.filter(active=True, fix_available=True)),
+            Value(0),
         ),
         count_findings_test_mitigated=Coalesce(count_subquery(base_findings.filter(is_mitigated=True)), Value(0)),
         count_findings_test_dups=Coalesce(count_subquery(base_findings.filter(duplicate=True)), Value(0)),
@@ -625,14 +642,12 @@ def prefetch_for_view_tests(tests):
 def add_tests(request, eid):
     eng = Engagement.objects.get(id=eid)
     cred_form = CredMappingForm()
-    cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-        engagement=eng).order_by("cred_id")
+    cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=eng).order_by("cred_id")
 
     if request.method == "POST":
         form = TestForm(request.POST, engagement=eng)
         cred_form = CredMappingForm(request.POST)
-        cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-            engagement=eng).order_by("cred_id")
+        cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=eng).order_by("cred_id")
         if form.is_valid():
             new_test = form.save(commit=False)
             # set default scan_type as it's used in reimport
@@ -655,19 +670,15 @@ def add_tests(request, eid):
                 if cred_form.cleaned_data["cred_user"]:
                     # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
                     cred_user = Cred_Mapping.objects.filter(
-                        pk=cred_form.cleaned_data["cred_user"].id,
-                        engagement=eid).first()
+                        pk=cred_form.cleaned_data["cred_user"].id, engagement=eid
+                    ).first()
 
                     new_f = cred_form.save(commit=False)
                     new_f.test = new_test
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Test added successfully.",
-                extra_tags="alert-success")
+            messages.add_message(request, messages.SUCCESS, "Test added successfully.", extra_tags="alert-success")
 
             create_notification(
                 event="test_added",
@@ -680,30 +691,30 @@ def add_tests(request, eid):
             )
 
             if "_Add Another Test" in request.POST:
-                return HttpResponseRedirect(
-                    reverse("add_tests", args=(eng.id, )))
+                return HttpResponseRedirect(reverse("add_tests", args=(eng.id,)))
             if "_Add Findings" in request.POST:
-                return HttpResponseRedirect(
-                    reverse("add_findings", args=(new_test.id, )))
+                return HttpResponseRedirect(reverse("add_findings", args=(new_test.id,)))
             if "_Finished" in request.POST:
-                return HttpResponseRedirect(
-                    reverse("view_engagement", args=(eng.id, )))
+                return HttpResponseRedirect(reverse("view_engagement", args=(eng.id,)))
     else:
         form = TestForm(engagement=eng)
         form.initial["target_start"] = eng.target_start
         form.initial["target_end"] = eng.target_end
         form.initial["lead"] = request.user
-    add_breadcrumb(
-        parent=eng, title="Add Tests", top_level=False, request=request)
+    add_breadcrumb(parent=eng, title="Add Tests", top_level=False, request=request)
     product_tab = Product_Tab(eng.product, title="Add Tests", tab="engagements")
     product_tab.setEngagement(eng)
-    return render(request, "dojo/add_tests.html", {
-        "product_tab": product_tab,
-        "form": form,
-        "cred_form": cred_form,
-        "eid": eid,
-        "eng": eng,
-    })
+    return render(
+        request,
+        "dojo/add_tests.html",
+        {
+            "product_tab": product_tab,
+            "form": form,
+            "cred_form": cred_form,
+            "eid": eid,
+            "eng": eng,
+        },
+    )
 
 
 class ImportScanResultsView(View):
@@ -934,14 +945,16 @@ class ImportScanResultsView(View):
         """Attempt to import with all the supplied information"""
         try:
             importer_client = self.get_importer(context)
-            context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
+            context["test"], _, finding_count, closed_finding_count, _, _, _, _ = importer_client.process_scan(
                 context.pop("scan", None),
             )
             # Add a message to the view for the user to see the results
-            add_success_message_to_response(importer_client.construct_imported_message(
-                finding_count=finding_count,
-                closed_finding_count=closed_finding_count,
-            ))
+            add_success_message_to_response(
+                importer_client.construct_imported_message(
+                    finding_count=finding_count,
+                    closed_finding_count=closed_finding_count,
+                )
+            )
         except Exception as e:
             logger.exception("An exception error occurred during the report import")
             return f"An exception error occurred during the report import: {e}"
@@ -955,29 +968,33 @@ class ImportScanResultsView(View):
     ) -> str | None:
         """Process the form and manipulate the input in any way that is appropriate"""
         # Update the running context dict with cleaned form input
-        context.update({
-            "scan": request.FILES.get("file", None),
-            "scan_date": form.cleaned_data.get("scan_date"),
-            "minimum_severity": form.cleaned_data.get("minimum_severity"),
-            "active": None,
-            "verified": None,
-            "scan_type": request.POST.get("scan_type"),
-            "test_title": form.cleaned_data.get("test_title") or None,
-            "tags": form.cleaned_data.get("tags"),
-            "version": form.cleaned_data.get("version") or None,
-            "branch_tag": form.cleaned_data.get("branch_tag") or None,
-            "build_id": form.cleaned_data.get("build_id") or None,
-            "commit_hash": form.cleaned_data.get("commit_hash") or None,
-            "api_scan_configuration": form.cleaned_data.get("api_scan_configuration") or None,
-            "service": form.cleaned_data.get("service") or None,
-            "close_old_findings": form.cleaned_data.get("close_old_findings", None),
-            "apply_tags_to_findings": form.cleaned_data.get("apply_tags_to_findings", False),
-            "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
-            "close_old_findings_product_scope": form.cleaned_data.get("close_old_findings_product_scope", None),
-            "group_by": form.cleaned_data.get("group_by") or None,
-            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings", None),
-            "environment": self.get_development_environment(environment_name=form.cleaned_data.get("environment")),
-        })
+        context.update(
+            {
+                "scan": request.FILES.get("file", None),
+                "scan_date": form.cleaned_data.get("scan_date"),
+                "minimum_severity": form.cleaned_data.get("minimum_severity"),
+                "active": None,
+                "verified": None,
+                "scan_type": request.POST.get("scan_type"),
+                "test_title": form.cleaned_data.get("test_title"),
+                "tags": form.cleaned_data.get("tags"),
+                "version": form.cleaned_data.get("version"),
+                "branch_tag": form.cleaned_data.get("branch_tag", None),
+                "build_id": form.cleaned_data.get("build_id", None),
+                "commit_hash": form.cleaned_data.get("commit_hash", None),
+                "api_scan_configuration": form.cleaned_data.get("api_scan_configuration", None),
+                "service": form.cleaned_data.get("service", None),
+                "close_old_findings": form.cleaned_data.get("close_old_findings", None),
+                "apply_tags_to_findings": form.cleaned_data.get("apply_tags_to_findings", False),
+                "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
+                "close_old_findings_product_scope": form.cleaned_data.get("close_old_findings_product_scope", None),
+                "group_by": form.cleaned_data.get("group_by", None),
+                "create_finding_groups_for_all_findings": form.cleaned_data.get(
+                    "create_finding_groups_for_all_findings"
+                ),
+                "environment": self.get_development_environment(environment_name=form.cleaned_data.get("environment")),
+            }
+        )
         # Create the engagement if necessary
         self.create_engagement(context)
         # close_old_findings_product_scope is a modifier of close_old_findings.
@@ -1049,7 +1066,7 @@ class ImportScanResultsView(View):
         duration = time.perf_counter() - request._start_time
         LargeScanSizeProductAnnouncement(request=request, duration=duration)
         ScanTypeProductAnnouncement(request=request, scan_type=context.get("scan_type"))
-        return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
+        return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id,)))
 
     def failure_redirect(
         self,
@@ -1063,10 +1080,12 @@ class ImportScanResultsView(View):
         else:
             obj = context.get("product")
             url = "import_scan_results_prod"
-        return HttpResponseRedirect(reverse(
-            url,
-            args=(obj.id, ),
-        ))
+        return HttpResponseRedirect(
+            reverse(
+                url,
+                args=(obj.id,),
+            )
+        )
 
     def get(
         self,
@@ -1127,12 +1146,8 @@ class ImportScanResultsView(View):
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     close_engagement(eng)
-    messages.add_message(
-        request,
-        messages.SUCCESS,
-        "Engagement closed successfully.",
-        extra_tags="alert-success")
-    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+    messages.add_message(request, messages.SUCCESS, "Engagement closed successfully.", extra_tags="alert-success")
+    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id,)))
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
@@ -1173,12 +1188,8 @@ def unlink_jira(request, eid):
 def reopen_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     reopen_engagement(eng)
-    messages.add_message(
-        request,
-        messages.SUCCESS,
-        "Engagement reopened successfully.",
-        extra_tags="alert-success")
-    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+    messages.add_message(request, messages.SUCCESS, "Engagement reopened successfully.", extra_tags="alert-success")
+    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id,)))
 
 
 """
@@ -1196,11 +1207,7 @@ def complete_checklist(request, eid):
     except:
         checklist = None
 
-    add_breadcrumb(
-        parent=eng,
-        title="Complete checklist",
-        top_level=False,
-        request=request)
+    add_breadcrumb(parent=eng, title="Complete checklist", top_level=False, request=request)
     if request.method == "POST":
         tests = Test.objects.filter(engagement=eng)
         findings = Finding.objects.filter(test__in=tests).all()
@@ -1216,13 +1223,8 @@ def complete_checklist(request, eid):
                 cl.engagement = eng
                 cl.save()
                 form.save_m2m()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Checklist saved.",
-                extra_tags="alert-success")
-            return HttpResponseRedirect(
-                reverse("view_engagement", args=(eid, )))
+            messages.add_message(request, messages.SUCCESS, "Checklist saved.", extra_tags="alert-success")
+            return HttpResponseRedirect(reverse("view_engagement", args=(eid,)))
     else:
         tests = Test.objects.filter(engagement=eng)
         findings = Finding.objects.filter(test__in=tests).all()
@@ -1230,12 +1232,16 @@ def complete_checklist(request, eid):
 
     product_tab = Product_Tab(eng.product, title="Checklist", tab="engagements")
     product_tab.setEngagement(eng)
-    return render(request, "dojo/checklist.html", {
-        "form": form,
-        "product_tab": product_tab,
-        "eid": eng.id,
-        "findings": findings,
-    })
+    return render(
+        request,
+        "dojo/checklist.html",
+        {
+            "form": form,
+            "product_tab": product_tab,
+            "eid": eng.id,
+            "findings": findings,
+        },
+    )
 
 
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
@@ -1254,10 +1260,7 @@ def add_risk_acceptance(request, eid, fid=None):
             # first capture notes param as it cannot be saved directly as m2m
             notes = None
             if form.cleaned_data["notes"]:
-                notes = Notes(
-                    entry=form.cleaned_data["notes"],
-                    author=request.user,
-                    date=timezone.now())
+                notes = Notes(entry=form.cleaned_data["notes"], author=request.user, date=timezone.now())
                 notes.save()
 
             del form.cleaned_data["notes"]
@@ -1282,33 +1285,40 @@ def add_risk_acceptance(request, eid, fid=None):
 
             risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
 
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Risk acceptance saved.",
-                extra_tags="alert-success")
+            messages.add_message(request, messages.SUCCESS, "Risk acceptance saved.", extra_tags="alert-success")
 
-            return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(eid, )))
+            return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(eid,)))
     else:
         risk_acceptance_title_suggestion = f"Accept: {finding}"
         form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion})
 
-    finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).prefetch_related("test", "finding_group_set").order_by("test__id", "numerical_severity", "title")
+    finding_choices = (
+        Finding.objects.filter(duplicate=False, test__engagement=eng)
+        .filter(NOT_ACCEPTED_FINDINGS_QUERY)
+        .prefetch_related("test", "finding_group_set")
+        .order_by("test__id", "numerical_severity", "title")
+    )
 
     form.fields["accepted_findings"].queryset = finding_choices
     if fid:
         # Set the initial selected finding
         form.fields["accepted_findings"].initial = {fid}
         # Change the label for each finding in the dropdown
-        form.fields["accepted_findings"].label_from_instance = lambda obj: f"({obj.test.scan_type}) - ({obj.severity}) - {obj.title} - {obj.date} - {obj.status()} - {obj.finding_group})"
+        form.fields["accepted_findings"].label_from_instance = (
+            lambda obj: f"({obj.test.scan_type}) - ({obj.severity}) - {obj.title} - {obj.date} - {obj.status()} - {obj.finding_group})"
+        )
     product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
 
-    return render(request, "dojo/add_risk_acceptance.html", {
-                  "eng": eng,
-                  "product_tab": product_tab,
-                  "form": form,
-                  })
+    return render(
+        request,
+        "dojo/add_risk_acceptance.html",
+        {
+            "eng": eng,
+            "product_tab": product_tab,
+            "form": form,
+        },
+    )
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
@@ -1352,10 +1362,8 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                     ra_helper.reinstate(risk_acceptance, old_expiration_date)
 
                 messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    "Risk Acceptance saved successfully.",
-                    extra_tags="alert-success")
+                    request, messages.SUCCESS, "Risk Acceptance saved successfully.", extra_tags="alert-success"
+                )
 
         if "entry" in request.POST:
             note_form = NoteForm(request.POST)
@@ -1366,11 +1374,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                 new_note.date = timezone.now()
                 new_note.save()
                 risk_acceptance.notes.add(new_note)
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    "Note added successfully.",
-                    extra_tags="alert-success")
+                messages.add_message(request, messages.SUCCESS, "Note added successfully.", extra_tags="alert-success")
 
         if "delete_note" in request.POST:
             note = get_object_or_404(Notes, pk=request.POST["delete_note_id"])
@@ -1378,20 +1382,18 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                 risk_acceptance.notes.remove(note)
                 note.delete()
                 messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    "Note deleted successfully.",
-                    extra_tags="alert-success")
+                    request, messages.SUCCESS, "Note deleted successfully.", extra_tags="alert-success"
+                )
             else:
                 messages.add_message(
                     request,
                     messages.ERROR,
                     "Since you are not the note's author, it was not deleted.",
-                    extra_tags="alert-danger")
+                    extra_tags="alert-danger",
+                )
 
         if "remove_finding" in request.POST:
-            finding = get_object_or_404(
-                Finding, pk=request.POST["remove_finding_id"])
+            finding = get_object_or_404(Finding, pk=request.POST["remove_finding_id"])
 
             ra_helper.remove_finding_from_risk_acceptance(request.user, risk_acceptance, finding)
 
@@ -1399,27 +1401,24 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                 request,
                 messages.SUCCESS,
                 "Finding removed successfully from risk acceptance.",
-                extra_tags="alert-success")
+                extra_tags="alert-success",
+            )
 
         if "replace_file" in request.POST:
-            replace_form = ReplaceRiskAcceptanceProofForm(
-                request.POST, request.FILES, instance=risk_acceptance)
+            replace_form = ReplaceRiskAcceptanceProofForm(request.POST, request.FILES, instance=risk_acceptance)
 
             errors = errors or not replace_form.is_valid()
             if not errors:
                 replace_form.save()
 
                 messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    "New Proof uploaded successfully.",
-                    extra_tags="alert-success")
+                    request, messages.SUCCESS, "New Proof uploaded successfully.", extra_tags="alert-success"
+                )
             else:
                 logger.error(replace_form.errors)
 
         if "add_findings" in request.POST:
-            add_findings_form = AddFindingsRiskAcceptanceForm(
-                request.POST, request.FILES, instance=risk_acceptance)
+            add_findings_form = AddFindingsRiskAcceptanceForm(request.POST, request.FILES, instance=risk_acceptance)
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data["accepted_findings"]
@@ -1430,7 +1429,8 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                     request,
                     messages.SUCCESS,
                     f"Finding{'s' if len(findings) > 1 else ''} added successfully.",
-                    extra_tags="alert-success")
+                    extra_tags="alert-success",
+                )
         if not errors:
             logger.debug("redirecting to return_url")
             return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
@@ -1446,13 +1446,15 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
     accepted_findings = risk_acceptance.accepted_findings.order_by("numerical_severity")
     fpage = get_page_items(request, accepted_findings, 15)
 
-    unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
-        .exclude(id__in=accepted_findings).order_by("title")
+    unaccepted_findings = (
+        Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False)
+        .exclude(id__in=accepted_findings)
+        .order_by("title")
+    )
     add_fpage = get_page_items(request, unaccepted_findings, 25, "apage")
     # on this page we need to add unaccepted findings as possible findings to add as accepted
 
-    add_findings_form.fields[
-        "accepted_findings"].queryset = add_fpage.object_list
+    add_findings_form.fields["accepted_findings"].queryset = add_fpage.object_list
 
     add_findings_form.fields["accepted_findings"].widget.request = request
     add_findings_form.fields["accepted_findings"].widget.findings = unaccepted_findings
@@ -1461,7 +1463,9 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
     product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
     product_tab.setEngagement(eng)
     return render(
-        request, "dojo/view_risk_acceptance.html", {
+        request,
+        "dojo/view_risk_acceptance.html",
+        {
             "risk_acceptance": risk_acceptance,
             "engagement": eng,
             "product_tab": product_tab,
@@ -1478,7 +1482,8 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             "add_findings": add_fpage,
             "return_url": get_return_url(request),
             "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
-        })
+        },
+    )
 
 
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
@@ -1512,12 +1517,8 @@ def delete_risk_acceptance(request, eid, raid):
 
     ra_helper.delete(eng, risk_acceptance)
 
-    messages.add_message(
-        request,
-        messages.SUCCESS,
-        "Risk acceptance deleted successfully.",
-        extra_tags="alert-success")
-    return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
+    messages.add_message(request, messages.SUCCESS, "Risk acceptance deleted successfully.", extra_tags="alert-success")
+    return HttpResponseRedirect(reverse("view_engagement", args=(eng.id,)))
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
@@ -1528,8 +1529,8 @@ def download_risk_acceptance(request, eid, raid):
     if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
         raise PermissionDenied
     response = StreamingHttpResponse(
-        FileIterWrapper(
-            (Path(settings.MEDIA_ROOT) / "risk_acceptance.path.name").open(mode="rb")))
+        FileIterWrapper((Path(settings.MEDIA_ROOT) / "risk_acceptance.path.name").open(mode="rb"))
+    )
     response["Content-Disposition"] = f'attachment; filename="{risk_acceptance.filename()}"'
     mimetype, _encoding = mimetypes.guess_type(risk_acceptance.path.name)
     response["Content-Type"] = mimetype
@@ -1547,11 +1548,7 @@ under media folder
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def upload_threatmodel(request, eid):
     eng = Engagement.objects.get(id=eid)
-    add_breadcrumb(
-        parent=eng,
-        title="Upload a threat model",
-        top_level=False,
-        request=request)
+    add_breadcrumb(parent=eng, title="Upload a threat model", top_level=False, request=request)
 
     if request.method == "POST":
         form = UploadThreatForm(request.POST, request.FILES)
@@ -1560,21 +1557,20 @@ def upload_threatmodel(request, eid):
             eng.progress = "other"
             eng.threat_model = True
             eng.save()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Threat model saved.",
-                extra_tags="alert-success")
-            return HttpResponseRedirect(
-                reverse("view_engagement", args=(eid, )))
+            messages.add_message(request, messages.SUCCESS, "Threat model saved.", extra_tags="alert-success")
+            return HttpResponseRedirect(reverse("view_engagement", args=(eid,)))
     else:
         form = UploadThreatForm()
     product_tab = Product_Tab(eng.product, title="Upload Threat Model", tab="engagements")
-    return render(request, "dojo/up_threat.html", {
-        "form": form,
-        "product_tab": product_tab,
-        "eng": eng,
-    })
+    return render(
+        request,
+        "dojo/up_threat.html",
+        {
+            "form": form,
+            "product_tab": product_tab,
+            "eng": eng,
+        },
+    )
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
@@ -1599,7 +1595,7 @@ def engagement_ics(request, eid):
         f"Engagement: {eng.name} ({eng.product.name})",
         (
             f"Set aside for engagement {eng.name}, on product {eng.product.name}. "
-            f"Additional detail can be found at {request.build_absolute_uri(reverse('view_engagement', args=(eng.id, )))}"
+            f"Additional detail can be found at {request.build_absolute_uri(reverse('view_engagement', args=(eng.id,)))}"
         ),
         uid,
     )
@@ -1655,8 +1651,16 @@ def get_excludes():
 
 
 def get_foreign_keys():
-    return ["build_server", "lead", "orchestration_engine", "preset", "product",
-        "report_type", "requester", "source_code_management_server"]
+    return [
+        "build_server",
+        "lead",
+        "orchestration_engine",
+        "preset",
+        "product",
+        "report_type",
+        "requester",
+        "source_code_management_server",
+    ]
 
 
 def csv_export(request):
@@ -1671,8 +1675,11 @@ def csv_export(request):
     first_row = True
     for engagement in engagements:
         if first_row:
-            fields = [key for key in dir(engagement)
-                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith("_")]
+            fields = [
+                key
+                for key in dir(engagement)
+                if key not in get_excludes() and not callable(getattr(engagement, key)) and not key.startswith("_")
+            ]
             fields.append("tests")
 
             writer.writerow(fields)

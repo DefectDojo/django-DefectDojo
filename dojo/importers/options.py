@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 
 
 class ImporterOptions:
-
     """
     Converts the supplied kwargs into a class for global mutability
     as well as making it more clear which fields are used in each
@@ -48,7 +47,9 @@ class ImporterOptions:
         **kwargs: dict,
     ):
         self.active: bool = self.validate_active(*args, **kwargs)
-        self.api_scan_configuration: Product_API_Scan_Configuration | None = self.validate_api_scan_configuration(*args, **kwargs)
+        self.api_scan_configuration: Product_API_Scan_Configuration | None = self.validate_api_scan_configuration(
+            *args, **kwargs
+        )
         self.apply_tags_to_endpoints: bool = self.validate_apply_tags_to_endpoints(*args, **kwargs)
         self.apply_tags_to_findings: bool = self.validate_apply_tags_to_findings(*args, **kwargs)
         self.branch_tag: str = self.validate_branch_tag(*args, **kwargs)
@@ -56,8 +57,11 @@ class ImporterOptions:
         self.close_old_findings_toggle: bool = self.validate_close_old_findings(*args, **kwargs)
         self.close_old_findings_product_scope: bool = self.validate_close_old_findings_product_scope(*args, **kwargs)
         self.do_not_reactivate: bool = self.validate_do_not_reactivate(*args, **kwargs)
+        self.dry_run: bool = self.validate_dry_run(*args, **kwargs)
         self.commit_hash: str = self.validate_commit_hash(*args, **kwargs)
-        self.create_finding_groups_for_all_findings: bool = self.validate_create_finding_groups_for_all_findings(*args, **kwargs)
+        self.create_finding_groups_for_all_findings: bool = self.validate_create_finding_groups_for_all_findings(
+            *args, **kwargs
+        )
         self.endpoints_to_add: list[Endpoint] | None = self.validate_endpoints_to_add(*args, **kwargs)
         self.engagement: Engagement | None = self.validate_engagement(*args, **kwargs)
         self.environment: Development_Environment | None = self.validate_environment(*args, **kwargs)
@@ -102,6 +106,7 @@ class ImporterOptions:
         def inner_compress_function(*args, **kwargs):
             args[0].compress_options()
             return function(*args, **kwargs)
+
         return inner_compress_function
 
     @staticmethod
@@ -110,6 +115,7 @@ class ImporterOptions:
         def inner_decompress_function(*args, **kwargs):
             args[0].decompress_options()
             return function(*args, **kwargs)
+
         return inner_decompress_function
 
     def compress_options(self):
@@ -496,7 +502,7 @@ class ImporterOptions:
             **kwargs,
         )
         # Set an additional flag to indicate an override was made
-        self.scan_date_override = (self.now != value)
+        self.scan_date_override = self.now != value
         # Set the timezones appropriately
         if value is not None and not value.tzinfo:
             value = timezone.make_aware(value)
@@ -606,5 +612,18 @@ class ImporterOptions:
             expected_types=[str],
             required=False,
             default="",
+            **kwargs,
+        )
+
+    def validate_dry_run(
+        self,
+        *args: list,
+        **kwargs: dict,
+    ) -> bool:
+        return self.validate(
+            "dry_run",
+            expected_types=[bool],
+            required=False,
+            default=False,
             **kwargs,
         )

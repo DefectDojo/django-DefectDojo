@@ -99,7 +99,9 @@ class ViewTest(View):
         test_import_filter = TestImportFilter(request.GET, test_imports)
 
         paged_test_imports = get_page_items_and_count(request, test_import_filter.qs, 5, prefix="test_imports")
-        paged_test_imports.object_list = paged_test_imports.object_list.prefetch_related("test_import_finding_action_set")
+        paged_test_imports.object_list = paged_test_imports.object_list.prefetch_related(
+            "test_import_finding_action_set"
+        )
 
         return {
             "paged_test_imports": paged_test_imports,
@@ -177,12 +179,16 @@ class ViewTest(View):
             "person": request.user.username,
             "request": request,
             "show_re_upload": any(test.test_type.name in code for code in get_choices_sorted()),
-            "creds": Cred_Mapping.objects.filter(engagement=test.engagement).select_related("cred_id").order_by("cred_id"),
+            "creds": Cred_Mapping.objects.filter(engagement=test.engagement)
+            .select_related("cred_id")
+            .order_by("cred_id"),
             "cred_test": Cred_Mapping.objects.filter(test=test).select_related("cred_id").order_by("cred_id"),
             "jira_project": jira_helper.get_jira_project(test),
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
             "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
-            "finding_groups": test.finding_group_set.all().prefetch_related("findings", "jira_issue", "creator", "findings__vulnerability_id_set"),
+            "finding_groups": test.finding_group_set.all().prefetch_related(
+                "findings", "jira_issue", "creator", "findings__vulnerability_id_set"
+            ),
             "finding_group_by_options": Finding_Group.GROUP_BY_OPTIONS,
         }
         # Set the form using the context, and then update the context
@@ -207,11 +213,7 @@ class ViewTest(View):
             url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
             title = f"Test: {test.test_type.name} on {test.engagement.product.name}"
             process_tag_notifications(request, new_note, url, title)
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                _("Note added successfully."),
-                extra_tags="alert-success")
+            messages.add_message(request, messages.SUCCESS, _("Note added successfully."), extra_tags="alert-success")
 
             return request, True
         return request, False
@@ -269,10 +271,7 @@ def edit_test(request, tid):
         form = TestForm(request.POST, instance=test)
         if form.is_valid():
             form.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 _("Test saved."),
-                                 extra_tags="alert-success")
+            messages.add_message(request, messages.SUCCESS, _("Test saved."), extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_engagement", args=(test.engagement.id,)))
 
     form.initial["target_start"] = test.target_start.date()
@@ -281,11 +280,15 @@ def edit_test(request, tid):
 
     product_tab = Product_Tab(test.engagement.product, title=_("Edit Test"), tab="engagements")
     product_tab.setEngagement(test.engagement)
-    return render(request, "dojo/edit_test.html",
-                  {"test": test,
-                   "product_tab": product_tab,
-                   "form": form,
-                   })
+    return render(
+        request,
+        "dojo/edit_test.html",
+        {
+            "test": test,
+            "product_tab": product_tab,
+            "form": form,
+        },
+    )
 
 
 @user_is_authorized(Test, Permissions.Test_Delete, "tid")
@@ -305,10 +308,7 @@ def delete_test(request, tid):
                 else:
                     message = _("Test and relationships removed.")
                     test.delete()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     message,
-                                     extra_tags="alert-success")
+                messages.add_message(request, messages.SUCCESS, message, extra_tags="alert-success")
                 return HttpResponseRedirect(reverse("view_engagement", args=(eng.id,)))
 
     rels = ["Previewing the relationships has been disabled.", ""]
@@ -320,13 +320,17 @@ def delete_test(request, tid):
 
     product_tab = Product_Tab(test.engagement.product, title=_("Delete Test"), tab="engagements")
     product_tab.setEngagement(test.engagement)
-    return render(request, "dojo/delete_test.html",
-                  {"test": test,
-                   "product_tab": product_tab,
-                   "form": form,
-                   "rels": rels,
-                   "deletable_objects": rels,
-                   })
+    return render(
+        request,
+        "dojo/delete_test.html",
+        {
+            "test": test,
+            "product_tab": product_tab,
+            "form": form,
+            "rels": rels,
+            "deletable_objects": rels,
+        },
+    )
 
 
 @user_is_authorized(Test, Permissions.Test_Edit, "tid")
@@ -343,39 +347,38 @@ def copy_test(request, tid):
             product = test.engagement.product
             test_copy = test.copy(engagement=engagement)
             calculate_grade(product)
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Test Copied successfully.",
-                extra_tags="alert-success")
-            create_notification(event="test_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
-                                title=f"Copying of {test.title}",
-                                description=f'The test "{test.title}" was copied by {request.user} to {engagement.name}',
-                                product=product,
-                                url=request.build_absolute_uri(reverse("view_test", args=(test_copy.id,))),
-                                recipients=[test.engagement.lead],
-                                icon="exclamation-triangle")
-            return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(engagement.id, )))
+            messages.add_message(request, messages.SUCCESS, "Test Copied successfully.", extra_tags="alert-success")
+            create_notification(
+                event="test_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+                title=f"Copying of {test.title}",
+                description=f'The test "{test.title}" was copied by {request.user} to {engagement.name}',
+                product=product,
+                url=request.build_absolute_uri(reverse("view_test", args=(test_copy.id,))),
+                recipients=[test.engagement.lead],
+                icon="exclamation-triangle",
+            )
+            return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(engagement.id,)))
         messages.add_message(
-            request,
-            messages.ERROR,
-            "Unable to copy test, please try again.",
-            extra_tags="alert-danger")
+            request, messages.ERROR, "Unable to copy test, please try again.", extra_tags="alert-danger"
+        )
 
     product_tab = Product_Tab(product, title="Copy Test", tab="engagements")
-    return render(request, "dojo/copy_object.html", {
-        "source": test,
-        "source_label": "Test",
-        "destination_label": "Engagement",
-        "product_tab": product_tab,
-        "form": form,
-    })
+    return render(
+        request,
+        "dojo/copy_object.html",
+        {
+            "source": test,
+            "source_label": "Test",
+            "destination_label": "Engagement",
+            "product_tab": product_tab,
+            "form": form,
+        },
+    )
 
 
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def test_calendar(request):
-
     if not get_system_setting("enable_calendar"):
         raise Resolver404
 
@@ -393,11 +396,16 @@ def test_calendar(request):
     tests = tests.prefetch_related("test_type", "lead", "engagement__product")
 
     add_breadcrumb(title=_("Test Calendar"), top_level=True, request=request)
-    return render(request, "dojo/calendar.html", {
-        "caltype": "tests",
-        "leads": request.GET.getlist("lead", ""),
-        "tests": tests,
-        "users": get_authorized_users(Permissions.Test_View)})
+    return render(
+        request,
+        "dojo/calendar.html",
+        {
+            "caltype": "tests",
+            "leads": request.GET.getlist("lead", ""),
+            "tests": tests,
+            "users": get_authorized_users(Permissions.Test_View),
+        },
+    )
 
 
 @user_is_authorized(Test, Permissions.Test_View, "tid")
@@ -413,14 +421,15 @@ def test_ics(request, tid):
     cal = get_cal_event(
         start_date,
         end_date,
-        _("Test: %s (%s)") % (
+        _("Test: %s (%s)")
+        % (
             test.test_type.name,
             test.engagement.product.name,
         ),
         _(
-            "Set aside for test %s, on product %s. "
-            "Additional detail can be found at %s",
-        ) % (
+            "Set aside for test %s, on product %s. Additional detail can be found at %s",
+        )
+        % (
             test.test_type.name,
             test.engagement.product.name,
             request.build_absolute_uri(reverse("view_test", args=(test.id,))),
@@ -486,18 +495,19 @@ class AddFindingView(View):
         return None
 
     def validate_status_change(self, request: HttpRequest, context: dict):
-        if ((context["form"]["active"].value() is False
-             or context["form"]["false_p"].value())
-             and context["form"]["duplicate"].value() is False):
-
+        if (context["form"]["active"].value() is False or context["form"]["false_p"].value()) and context["form"][
+            "duplicate"
+        ].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
                 error_inactive = ValidationError(
                     _("Can not set a finding as inactive without adding all mandatory notes"),
-                    code="inactive_without_mandatory_notes")
+                    code="inactive_without_mandatory_notes",
+                )
                 error_false_p = ValidationError(
                     _("Can not set a finding as false positive without adding all mandatory notes"),
-                    code="false_p_without_mandatory_notes")
+                    code="false_p_without_mandatory_notes",
+                )
                 if context["form"]["active"].value() is False:
                     context["form"].add_error("active", error_inactive)
                 if context["form"]["false_p"].value():
@@ -506,7 +516,8 @@ class AddFindingView(View):
                     request,
                     messages.ERROR,
                     _("Can not set a finding as inactive or false positive without adding all mandatory notes"),
-                    extra_tags="alert-danger")
+                    extra_tags="alert-danger",
+                )
 
         return request
 
@@ -565,7 +576,10 @@ class AddFindingView(View):
             # Determine if a message should be added
             if jira_message:
                 messages.add_message(
-                    request, messages.SUCCESS, jira_message, extra_tags="alert-success",
+                    request,
+                    messages.SUCCESS,
+                    jira_message,
+                    extra_tags="alert-success",
                 )
 
             return request, True, push_to_jira
@@ -613,13 +627,12 @@ class AddFindingView(View):
                 finding=finding,
                 description=_('Finding "%s" was added by %s') % (finding.title, request.user),
                 url=reverse("view_finding", args=(finding.id,)),
-                icon="exclamation-triangle")
+                icon="exclamation-triangle",
+            )
             # Add a success message
             messages.add_message(
-                request,
-                messages.SUCCESS,
-                _("Finding added successfully."),
-                extra_tags="alert-success")
+                request, messages.SUCCESS, _("Finding added successfully."), extra_tags="alert-success"
+            )
 
         return finding, request, all_forms_valid
 
@@ -664,10 +677,14 @@ def add_temp_finding(request, tid, fid):
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
 
     if request.method == "POST":
-
         form = AddFindingForm(request.POST, req_resp=None, product=test.engagement.product)
         if jira_helper.get_jira_project(test):
-            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix="jiraform", jira_project=jira_helper.get_jira_project(test), finding_form=form)
+            jform = JIRAFindingForm(
+                push_all=jira_helper.is_push_all_issues(test),
+                prefix="jiraform",
+                jira_project=jira_helper.get_jira_project(test),
+                finding_form=form,
+            )
             logger.debug(f"jform valid: {jform.is_valid()}")
 
         if (form["active"].value() is False or form["false_p"].value()) and form["duplicate"].value() is False:
@@ -675,26 +692,29 @@ def add_temp_finding(request, tid, fid):
             if closing_disabled != 0:
                 error_inactive = ValidationError(
                     _("Can not set a finding as inactive without adding all mandatory notes"),
-                    code="not_active_or_false_p_true")
+                    code="not_active_or_false_p_true",
+                )
                 error_false_p = ValidationError(
                     _("Can not set a finding as false positive without adding all mandatory notes"),
-                    code="not_active_or_false_p_true")
+                    code="not_active_or_false_p_true",
+                )
                 if form["active"].value() is False:
                     form.add_error("active", error_inactive)
                 if form["false_p"].value():
                     form.add_error("false_p", error_false_p)
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     _("Can not set a finding as inactive or false positive without adding all mandatory notes"),
-                                     extra_tags="alert-danger")
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    _("Can not set a finding as inactive or false positive without adding all mandatory notes"),
+                    extra_tags="alert-danger",
+                )
         if form.is_valid():
             finding.last_used = timezone.now()
             finding.save()
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
-            new_finding.numerical_severity = Finding.get_numerical_severity(
-                new_finding.severity)
+            new_finding.numerical_severity = Finding.get_numerical_severity(new_finding.severity)
 
             new_finding.tags = form.cleaned_data["tags"]
             new_finding.cvssv3 = finding.cvssv3
@@ -709,7 +729,14 @@ def add_temp_finding(request, tid, fid):
 
             new_finding.save()
             if "jiraform-push_to_jira" in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix="jiraform", instance=new_finding, push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
+                jform = JIRAFindingForm(
+                    request.POST,
+                    prefix="jiraform",
+                    instance=new_finding,
+                    push_all=push_all_jira_issues,
+                    jira_project=jira_helper.get_jira_project(test),
+                    finding_form=form,
+                )
                 if jform.is_valid():
                     if jform.cleaned_data.get("push_to_jira"):
                         jira_helper.push_to_jira(new_finding)
@@ -723,48 +750,61 @@ def add_temp_finding(request, tid, fid):
                 )
                 burp_rr.clean()
                 burp_rr.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 _("Finding from template added successfully."),
-                                 extra_tags="alert-success")
+            messages.add_message(
+                request, messages.SUCCESS, _("Finding from template added successfully."), extra_tags="alert-success"
+            )
 
             return HttpResponseRedirect(reverse("view_test", args=(test.id,)))
-        messages.add_message(request,
-                             messages.ERROR,
-                             _("The form has errors, please correct them below."),
-                             extra_tags="alert-danger")
+        messages.add_message(
+            request, messages.ERROR, _("The form has errors, please correct them below."), extra_tags="alert-danger"
+        )
 
     else:
-        form = AddFindingForm(req_resp=None, product=test.engagement.product, initial={"active": False,
-                                    "date": timezone.now().date(),
-                                    "verified": False,
-                                    "false_p": False,
-                                    "duplicate": False,
-                                    "out_of_scope": False,
-                                    "title": finding.title,
-                                    "description": finding.description,
-                                    "cwe": finding.cwe,
-                                    "severity": finding.severity,
-                                    "mitigation": finding.mitigation,
-                                    "impact": finding.impact,
-                                    "references": finding.references,
-                                    "numerical_severity": finding.numerical_severity})
+        form = AddFindingForm(
+            req_resp=None,
+            product=test.engagement.product,
+            initial={
+                "active": False,
+                "date": timezone.now().date(),
+                "verified": False,
+                "false_p": False,
+                "duplicate": False,
+                "out_of_scope": False,
+                "title": finding.title,
+                "description": finding.description,
+                "cwe": finding.cwe,
+                "severity": finding.severity,
+                "mitigation": finding.mitigation,
+                "impact": finding.impact,
+                "references": finding.references,
+                "numerical_severity": finding.numerical_severity,
+            },
+        )
 
         if jira_helper.get_jira_project(test):
-            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix="jiraform", jira_project=jira_helper.get_jira_project(test), finding_form=form)
+            jform = JIRAFindingForm(
+                push_all=jira_helper.is_push_all_issues(test),
+                prefix="jiraform",
+                jira_project=jira_helper.get_jira_project(test),
+                finding_form=form,
+            )
 
     product_tab = Product_Tab(test.engagement.product, title=_("Add Finding"), tab="engagements")
     product_tab.setEngagement(test.engagement)
-    return render(request, "dojo/add_findings.html",
-                  {"form": form,
-                   "product_tab": product_tab,
-                   "jform": jform,
-                   "findings": findings,
-                   "temp": True,
-                   "fid": finding.id,
-                   "tid": test.id,
-                   "test": test,
-                   })
+    return render(
+        request,
+        "dojo/add_findings.html",
+        {
+            "form": form,
+            "product_tab": product_tab,
+            "jform": jform,
+            "findings": findings,
+            "temp": True,
+            "fid": finding.id,
+            "tid": test.id,
+            "test": test,
+        },
+    )
 
 
 @user_is_authorized(Test, Permissions.Test_View, "tid")
@@ -777,13 +817,17 @@ def search(request, tid):
     title_words = get_words_for_field(Finding_Template, "title")
 
     add_breadcrumb(parent=test, title=_("Add From Template"), top_level=False, request=request)
-    return render(request, "dojo/templates.html",
-                  {"templates": paged_templates,
-                   "filtered": templates,
-                   "title_words": title_words,
-                   "tid": tid,
-                   "add_from_template": True,
-                   })
+    return render(
+        request,
+        "dojo/templates.html",
+        {
+            "templates": paged_templates,
+            "filtered": templates,
+            "title_words": title_words,
+            "tid": tid,
+            "add_from_template": True,
+        },
+    )
 
 
 class ReImportScanResultsView(View):
@@ -855,7 +899,9 @@ class ReImportScanResultsView(View):
             test,
             endpoints=Endpoint.objects.filter(product__id=product_tab.product.id),
             api_scan_configuration=test.api_scan_configuration,
-            api_scan_configuration_queryset=Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id),
+            api_scan_configuration_queryset=Product_API_Scan_Configuration.objects.filter(
+                product__id=product_tab.product.id
+            ),
         )
         # Get the jira form
         jira_form, push_all_jira_issues = self.get_jira_form(request, test)
@@ -899,24 +945,28 @@ class ReImportScanResultsView(View):
     ) -> str | None:
         """Process the form and manipulate the input in any way that is appropriate"""
         # Update the running context dict with cleaned form input
-        context.update({
-            "scan": request.FILES.get("file", None),
-            "scan_date": form.cleaned_data.get("scan_date"),
-            "minimum_severity": form.cleaned_data.get("minimum_severity"),
-            "do_not_reactivate": form.cleaned_data.get("do_not_reactivate"),
-            "tags": form.cleaned_data.get("tags"),
-            "version": form.cleaned_data.get("version") or None,
-            "branch_tag": form.cleaned_data.get("branch_tag") or None,
-            "build_id": form.cleaned_data.get("build_id") or None,
-            "commit_hash": form.cleaned_data.get("commit_hash") or None,
-            "api_scan_configuration": form.cleaned_data.get("api_scan_configuration") or None,
-            "service": form.cleaned_data.get("service") or None,
-            "apply_tags_to_findings": form.cleaned_data.get("apply_tags_to_findings", False),
-            "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
-            "group_by": form.cleaned_data.get("group_by") or None,
-            "close_old_findings": form.cleaned_data.get("close_old_findings", None),
-            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings", None),
-        })
+        context.update(
+            {
+                "scan": request.FILES.get("file", None),
+                "scan_date": form.cleaned_data.get("scan_date"),
+                "minimum_severity": form.cleaned_data.get("minimum_severity"),
+                "do_not_reactivate": form.cleaned_data.get("do_not_reactivate"),
+                "tags": form.cleaned_data.get("tags"),
+                "version": form.cleaned_data.get("version"),
+                "branch_tag": form.cleaned_data.get("branch_tag", None),
+                "build_id": form.cleaned_data.get("build_id", None),
+                "commit_hash": form.cleaned_data.get("commit_hash", None),
+                "api_scan_configuration": form.cleaned_data.get("api_scan_configuration", None),
+                "service": form.cleaned_data.get("service", None),
+                "apply_tags_to_findings": form.cleaned_data.get("apply_tags_to_findings", False),
+                "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
+                "group_by": form.cleaned_data.get("group_by", None),
+                "close_old_findings": form.cleaned_data.get("close_old_findings", None),
+                "create_finding_groups_for_all_findings": form.cleaned_data.get(
+                    "create_finding_groups_for_all_findings"
+                ),
+            }
+        )
         # Override the form values of active and verified
         if activeChoice := form.cleaned_data.get("active", None):
             if activeChoice == "force_to_true":
@@ -971,17 +1021,20 @@ class ReImportScanResultsView(View):
                 reactivated_finding_count,
                 untouched_finding_count,
                 _,
+                _,  # findings_details (not used in UI view)
             ) = importer_client.process_scan(
                 context.pop("scan", None),
             )
             # Add a message to the view for the user to see the results
-            add_success_message_to_response(importer_client.construct_imported_message(
-                finding_count=finding_count,
-                new_finding_count=new_finding_count,
-                closed_finding_count=closed_finding_count,
-                reactivated_finding_count=reactivated_finding_count,
-                untouched_finding_count=untouched_finding_count,
-            ))
+            add_success_message_to_response(
+                importer_client.construct_imported_message(
+                    finding_count=finding_count,
+                    new_finding_count=new_finding_count,
+                    closed_finding_count=closed_finding_count,
+                    reactivated_finding_count=reactivated_finding_count,
+                    untouched_finding_count=untouched_finding_count,
+                )
+            )
         except Exception as e:
             logger.exception("An exception error occurred during the report import")
             return f"An exception error occurred during the report import: {e}"
@@ -996,7 +1049,7 @@ class ReImportScanResultsView(View):
         duration = time.perf_counter() - request._start_time
         LargeScanSizeProductAnnouncement(request=request, duration=duration)
         ScanTypeProductAnnouncement(request=request, scan_type=context.get("scan_type"))
-        return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
+        return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id,)))
 
     def failure_redirect(
         self,
@@ -1005,10 +1058,12 @@ class ReImportScanResultsView(View):
     ) -> HttpResponseRedirect:
         """Redirect the user to a place that indicates a failed import"""
         ErrorPageProductAnnouncement(request=request)
-        return HttpResponseRedirect(reverse(
-            "re_import_scan_results",
-            args=(context.get("test").id, ),
-        ))
+        return HttpResponseRedirect(
+            reverse(
+                "re_import_scan_results",
+                args=(context.get("test").id,),
+            )
+        )
 
     def get(
         self,
