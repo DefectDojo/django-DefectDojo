@@ -1,4 +1,4 @@
-{{- if and .Values.django.podDisruptionBudget.enabled (or (gt (int .Values.django.replicaCount) 1) .Values.django.autoscaling.enabled) }}
+{{- if and .Values.django.podDisruptionBudget.enabled (or (gt (int .Values.django.replicas) 1) .Values.django.autoscaling.enabled) }}
 {{- $fullName := include "defectdojo.fullname" . -}}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
