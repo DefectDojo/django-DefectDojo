@@ -378,11 +378,15 @@ def add_discussion_to_finding_exclusion(finding_exclusion) -> None:
 
 @app.task
 def update_finding_prioritization_per_cve(
-    vulnerability_id, cve_greater, severity, scan_type, priorization, epss_dict
+    vulnerability_id, cve_greater, severity, scan_type, priorization, epss_dict, kev_dict
 ) -> None:
     priority_cve_severity_filter = Q()
     epss_score = None
     epss_percentile = None
+    known_exploited = False
+    ransomware_used = False
+    kev_date_added = None
+
     if vulnerability_id:
         if scan_type in ["Tenable Scan", "SARIF"]:
             ids = (
@@ -399,12 +403,19 @@ def update_finding_prioritization_per_cve(
             )
             epss_score = epss_dict.get(cve_greater, {}).get("epss", None)
             epss_percentile = epss_dict.get(cve_greater, {}).get("percentil", None)
+            known_exploited = True if kev_dict.get(cve_greater, {}) else False
+            ransomware_used = kev_dict.get(cve_greater, {}).get("knownRansomwareCampaignUse", False)
+            kev_date_added = kev_dict.get(cve_greater, {}).get("dateAdded", None)
+            
         else:
             priority_cve_severity_filter = (Q(cve=vulnerability_id) & ~Q(cve=None)) | (
                 Q(vuln_id_from_tool=vulnerability_id) & ~Q(vuln_id_from_tool=None)
             )
             epss_score = epss_dict.get(vulnerability_id, {}).get("epss", None)
             epss_percentile = epss_dict.get(vulnerability_id, {}).get("percentil", None)
+            known_exploited = True if kev_dict.get(vulnerability_id, {}) else False
+            ransomware_used = kev_dict.get(vulnerability_id, {}).get("knownRansomwareCampaignUse", False)
+            kev_date_added = kev_dict.get(vulnerability_id, {}).get("dateAdded", None)
     else:
         priority_cve_severity_filter = Q(severity=severity) & Q(cve=None)
 
@@ -416,10 +427,15 @@ def update_finding_prioritization_per_cve(
         finding_update.set_sla_expiration_date()
         finding_update.epss_score = epss_score
         finding_update.epss_percentile = epss_percentile
+        finding_update.known_exploited = known_exploited
+        finding_update.ransomware_used = ransomware_used
+        finding_update.kev_date = kev_date_added
 
-    Finding.objects.bulk_update(findings, ["priority", "sla_expiration_date", "epss_score", "epss_percentile"], 1000)
-    print(f"{vulnerability_id} with severity {severity} of {scan_type} with {findings.count()} findings updated with prioritization {priorization} and EPSS score {epss_score} and percentile {epss_percentile}")
-    return f"{vulnerability_id} with severity {severity} of {scan_type} with {findings.count()} findings updated with prioritization {priorization} and EPSS score {epss_score} and percentile {epss_percentile}"
+    Finding.objects.bulk_update(findings, ["priority", "sla_expiration_date", "epss_score", "epss_percentile", "known_exploited", "ransomware_used", "kev_date"], 1000)
+    message = f"{vulnerability_id} with severity {severity} of {scan_type} with {findings.count()} findings updated with prioritization {priorization} and EPSS score {epss_score} and percentile {epss_percentile}"
+    if known_exploited:
+        message += f" (Known Exploited Vulnerability) - Ransomware_used {ransomware_used} - KEV Date Added {kev_date_added}"
+    return message
 
 
 def identify_priority_vulnerabilities(findings) -> int:
@@ -439,23 +455,24 @@ def identify_priority_vulnerabilities(findings) -> int:
     }
 
     try:
-
-        # Read the risk score file from the S3 bucket with boto3
-        s3 = boto3.client("s3")
-        response = s3.get_object(
-            Bucket=settings.BUCKET_NAME_RISK_SCORE, Key=settings.PATH_FILE_RISK_SCORE
+        risk_score_dataframes = list_and_read_parquet_files_from_s3(
+            bucket_name=settings.BUCKET_NAME_RISK_SCORE,
+            prefix_path=settings.PATH_FOLDER_RISK_SCORE
         )
-
-        # Get the parquet content
-        parquet_content = response["Body"].read()
-        df_risk_score = pd.read_parquet(BytesIO(parquet_content))
+        
+        if risk_score_dataframes:
+            df_risk_score = combine_parquet_dataframes(risk_score_dataframes)
+            logger.info(f"Loaded combined risk score data with {len(df_risk_score)} records")
+        else:
+            df_risk_score = pd.DataFrame(columns=["cve", "prediction"])
 
     except Exception as e:
-        logger.error(f"Error reading risk score file: {e}")
+        logger.error(f"Error reading risk score files: {e}")
         df_risk_score = pd.DataFrame(columns=["cve", "prediction"])
 
-    # Get epss data
-    epss_dict = download_epss_data(backward_day=0, cve_cutoff="CVE-2002-1976")
+    # Get epss data and kev data
+    epss_dict = download_epss_data(backward_day=0, cve_cutoff=settings.CVE_CUTOFF)
+    kev_dict = generate_cve_kev_dict()
 
     for finding in findings:
         cve_greater = None
@@ -485,8 +502,8 @@ def identify_priority_vulnerabilities(findings) -> int:
         else:
             priority = severity_risk_map.get(finding.severity, 0)
 
-        update_finding_prioritization_per_cve(
-            finding.cve, cve_greater, finding.severity, finding.test.scan_type, priority, epss_dict
+        update_finding_prioritization_per_cve.apply_async(
+            args=(finding.cve, cve_greater, finding.severity, finding.test.scan_type, priority, epss_dict, kev_dict)
         )
 
         if priority >= float(
@@ -525,6 +542,62 @@ def identify_priority_vulnerabilities(findings) -> int:
                     args=(fx.unique_id_from_tool, relative_url)
                 )
 
+def list_and_read_parquet_files_from_s3(bucket_name: str, prefix_path: str) -> list:
+    try:
+        s3 = boto3.client("s3")
+        
+        response = s3.list_objects_v2(
+            Bucket=bucket_name,
+            Prefix=prefix_path
+        )
+        
+        if 'Contents' not in response:
+            logger.warning(f"No files found in s3://{bucket_name}/{prefix_path}")
+            return []
+        
+        dataframes = []
+        parquet_files = [obj for obj in response['Contents'] 
+                        if obj['Key'].endswith('.parquet')]
+        
+        logger.info(f"Found {len(parquet_files)} parquet files in s3://{bucket_name}/{prefix_path}")
+        
+        for obj in parquet_files:
+            file_key = obj['Key']
+            try:
+                file_response = s3.get_object(Bucket=bucket_name, Key=file_key)
+                parquet_content = file_response["Body"].read()
+                df = pd.read_parquet(BytesIO(parquet_content))
+                
+                df.attrs['source_file'] = file_key
+                df.attrs['last_modified'] = obj['LastModified']
+                df.attrs['size'] = obj['Size']
+                
+                dataframes.append(df)
+                logger.info(f"Successfully read {file_key} - {len(df)} rows")
+                
+            except Exception as e:
+                logger.error(f"Error reading {file_key}: {str(e)}")
+                continue
+        
+        return dataframes
+        
+    except Exception as e:
+        logger.error(f"Error listing/reading parquet files from S3: {str(e)}")
+        return []
+    
+def combine_parquet_dataframes(dataframes: list) -> pd.DataFrame:
+    if not dataframes:
+        return pd.DataFrame()
+    
+    try:
+        combined_df = pd.concat(dataframes, ignore_index=True)
+        logger.info(f"Combined {len(dataframes)} DataFrames into one with {len(combined_df)} total rows")
+        return combined_df
+        
+    except Exception as e:
+        logger.error(f"Error combining DataFrames: {str(e)}")
+        return pd.DataFrame()
+
 def download_epss_data(backward_day, cve_cutoff):
     base_url = "https://epss.empiricalsecurity.com/epss_scores-{}.csv.gz"
     date = datetime.datetime.now() - datetime.timedelta(days=backward_day)
@@ -536,10 +609,10 @@ def download_epss_data(backward_day, cve_cutoff):
         if response.status_code == 200:
             with gzip.open(io.BytesIO(response.content), "rt") as f:
                 data = f.read()
-            print(f"{formatted_date} EPSS data downloaded.")
+            logger.info(f"{formatted_date} EPSS data downloaded.")
             return format_data(data, cve_cutoff)
         else:
-            print(f"Could not find {formatted_date} EPSS data.")
+            logger.warning(f"Could not find {formatted_date} EPSS data.")
             date -= datetime.timedelta(days=1)
             attempts += 1
     return None
@@ -554,6 +627,38 @@ def format_data(epss_data, cve_cutoff):
         for row in csv_reader
         if len(row) >= 3 and row[0] >= cve_cutoff
     }
+
+def generate_cve_kev_dict():
+    """
+    Generates a dictionary mapping CVEs to their KEV data.
+    Returns:
+        dict: {cve: {"dateAdded": "YYYY-MM-DD", "knownRansomwareCampaignUse": "True/False"}}
+    """
+    try:
+        url = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+        response = requests.get(url)
+        
+        if response.status_code != 200:
+            logger.error("Could not download KEV data for dictionary generation.")
+            return {}
+        
+        data = response.json()
+        logger.info("KEV data downloaded for dictionary generation - catalog version %s.", data.get("catalogVersion", "unknown"))
+        
+        cve_kev_dict = {}
+        for item in data.get("vulnerabilities", []):
+            cve_id = item.get("cveID")
+            if cve_id:
+                cve_kev_dict[cve_id] = {
+                    "dateAdded": item.get("dateAdded", ""),
+                    "knownRansomwareCampaignUse": True if item.get("knownRansomwareCampaignUse") == "Known" else False
+                }
+        
+        return cve_kev_dict
+        
+    except Exception as e:
+        logger.error(f"Error generating CVE-KEV dictionary: {str(e)}")
+        return {}
 
 @app.task
 def check_priorization():
