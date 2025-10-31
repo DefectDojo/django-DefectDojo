@@ -26,7 +26,7 @@ This checklist is for your information.
 - [ ] Bugfixes should be submitted against the `bugfix` branch.
 - [ ] Give a meaningful name to your PR, as it may end up being used in the release notes.
 - [ ] Your code is flake8 compliant.
-- [ ] Your code is python 3.13 compliant.
+- [ ] Your code is python 3.14 compliant.
 - [ ] If this is a new feature and not a bug fix, you've included the proper documentation in the docs at https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs as part of this PR.
 - [ ] Model changes must include the necessary migrations in the dojo/db_migrations folder.
 - [ ] Add applicable tests to the unit tests.
