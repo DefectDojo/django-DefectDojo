@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0244_pghistory_indices'),
+        ('dojo', '0246_endpoint_idx_ep_product_lower_host_and_more'),
     ]
 
     operations = [
