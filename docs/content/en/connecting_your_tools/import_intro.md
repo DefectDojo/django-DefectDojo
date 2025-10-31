@@ -29,7 +29,7 @@ There are two main ways that DefectDojo can upload Finding reports.
 
 |  | **UI Import** | **API** | **Connectors** <span style="background-color:rgba(242, 86, 29, 0.3)">(Pro)</span> | **Smart Upload**  <span style="background-color:rgba(242, 86, 29, 0.3)">(Pro)</span>|
 | --- | --- | --- | --- | --- |
-| **Supported Scan Types** | All: see [Supported Tools](/en/connecting_your_tools/parsers) | All: see [Supported Tools](/en/connecting_your_tools/parsers) | Snyk, Semgrep, Burp Suite, AWS Security Hub, Probely, Checkmarx, Tenable | Nexpose, NMap, OpenVas, Qualys, Tenable |
+| **Supported Scan Types** | All: see [Supported Tools](/supported_tools/) | All: see [Supported Tools](/supported_tools/) | Snyk, Semgrep, Burp Suite, AWS Security Hub, Probely, Checkmarx, Tenable | Nexpose, NMap, OpenVas, Qualys, Tenable |
 | **Automation?** | Available via API: `/reimport` `/import` endpoints | Triggered from [CLI Importer](../external_tools) or external code | Connectors is inherently automated | Available via API: `/smart_upload_import` endpoint |
 
 ### Product Hierarchy and organization

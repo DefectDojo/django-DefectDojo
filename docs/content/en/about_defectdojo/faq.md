@@ -12,9 +12,7 @@ Here are some frequently asked questions about working with DefectDojo - both in
 
 ### How should I organize my security testing in DefectDojo?
 
-DefectDojo can support any security testing or reporting environment, but to optimize your use of DefectDojo you'll need to make sure things are in the right place.
-
-There's no one-size-fits-all solution for DefectDojo, because everyone's security team and operations look different.  We have a very detailed article on [common use cases](/en/about_defectdojo/examples_of_use/) that has examples of how different organizations apply RBAC and the DefectDojo data model to support their needs.
+While DefectDojo can support any security or testing environment, everyone’s security team and operations look different, so there’s no one-size-fits-all approach to using it. We have a very detailed article on [common use cases](/en/about_defectdojo/examples_of_use) that has examples of how different organizations apply RBAC and the DefectDojo data model to support their needs.
 
 ### What are the recommended workflows for security testing in DefectDojo?
 
@@ -37,7 +35,7 @@ Role and permission assignment generally happens at the Product Type / Product l
 
 ### What tools are supported by DefectDojo?
 
-DefectDojo supports reports from over 200 security tools, both commercial and Open Source.  See our [Parser List](/en/connecting_your_tools/parsers/) for more information on these tools.
+DefectDojo supports reports from over 200 security tools, both commercial and Open Source.  See our [Parser List](/supported_tools/) for more information on these tools.
 
 If you're looking to add a new tool to your suite, we have a list of recommended Open Source tools which you can check out [here](https://defectdojo.com/blog/announcing-the-defectdojo-open-source-security-awards).
 
@@ -56,7 +54,7 @@ For more information on Reimport, see our [article](/en/connecting_your_tools/im
 
 ### How can I troubleshoot Import errors?
 
-DefectDojo supports a wide variety of tools.  If you're seeing inconsistent behavior when importing a report, we recommend checking to see if the file structure matches what the tool is expecting.  See our [Parser List](/en/connecting_your_tools/parsers/) to see if your tool is supported, and check to make sure that the file format matches what the tool expects.  You can also compare the structure to our Unit Tests.
+DefectDojo supports a wide variety of tools.  If you're seeing inconsistent behavior when importing a report, we recommend checking to see if the file structure matches what the tool is expecting.  See our [Parser List](/supported_tools/) to see if your tool is supported, and check to make sure that the file format matches what the tool expects.  You can also compare the structure to our Unit Tests.
 
 **DefectDojo Pro** has a Universal Parser import method which allows you to handle any JSON, CSV or XML file.  **DefectDojo OS** users can write custom parsers for the same purpose.
 
@@ -64,7 +62,7 @@ Finally, third-party report formats have been known to change without warning, a
 
 ### How should I handle large scan files?
 
-Importing a large report into DefectDojo can be a lengthy process.  Reports of 2MB contain substantial amounts of data which can take a long time to translate into Findings.  This depends on the security tool's report format itself
+Importing a large report into DefectDojo can be a lengthy process.  Reports of 2MB contain substantial amounts of data which can take a long time to translate into Findings.  This depends on the security tool's report format itself.
 
 Our recommended approach is to break a large report up before import - rather than ingesting a report of **all** a tool's vulnerabilities at once, split them up by software project, application or by another context.  This makes it much easier for DefectDojo to handle and categorize the data, and has the added benefit of proactively organizing your Findings, which makes for more relevant and faster report generation.
 
