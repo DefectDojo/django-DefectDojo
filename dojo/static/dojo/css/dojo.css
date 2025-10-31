@@ -1911,4 +1911,21 @@ input[type=number]::-webkit-outer-spin-button {
         color: ButtonText;
     }
  }
+
+.submenu-header {
+    font-weight: bold;
+    padding: 5px 15px;
+    color: #666;
+    background-color: #f5f5f5;
+}
+
+.submenu-divider {
+    border-top: 1px solid #ddd;
+    margin: 5px 0;
+}
+
+.nav-second-level li a:hover {
+    background-color: #e9ecef;
+    color: #000;
+}
     
