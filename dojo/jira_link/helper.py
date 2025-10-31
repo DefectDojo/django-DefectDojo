@@ -784,6 +784,10 @@ def push_finding_to_jira(finding, *args, **kwargs):
 @dojo_model_from_id(model=Finding_Group)
 def push_finding_group_to_jira(finding_group, *args, **kwargs):
     if finding_group.has_jira_issue:
+        # Look for findings that have single ticket associations seperate from the group
+        for finding in finding_group.findings.filter(jira_issue__isnull=False):
+            update_jira_issue(finding, *args, **kwargs)
+        # Update the jira issue for the group
         return update_jira_issue(finding_group, *args, **kwargs)
     return add_jira_issue(finding_group, *args, **kwargs)
 
