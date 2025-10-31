@@ -2,6 +2,7 @@ import datetime
 
 from dateutil.tz import UTC
 from django.test import override_settings
+from django.utils import timezone
 
 from dojo.models import Test
 from dojo.tools.veracode_sca.parser import VeracodeScaParser
@@ -108,4 +109,4 @@ class TestVeracodeScaScannerParser(DojoTestCase):
             self.assertEqual("CVE-2022-31159", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N", finding.cvssv3)
             self.assertEqual(22, finding.cwe)
-            self.assertEqual(datetime.date.today(), finding.mitigated.date())
+            self.assertEqual(timezone.now().date(), finding.mitigated.date())
