@@ -26,7 +26,7 @@ Select a factor by clicking the button, and adjust this slider allows you to con
 
 #### Finding-Level Multipliers
 
-* **Severity** - a Finding's Severity level (Info or Low-Critical)
+* **Severity** - a Finding's Severity level
 * **Exploitability** - a Finding's KEV and/or EPSS score
 * **Endpoints** - the amount of Endpoints associated with a Finding
 
