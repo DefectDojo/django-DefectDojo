@@ -4,6 +4,7 @@ import json
 import logging
 
 from dojo.models import Finding
+from dojo.tools.parser_test import ParserTest
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +73,61 @@ class OpenreportsParser:
 
         return findings
 
+    def get_tests(self, scan_type, handle):
+        try:
+            data = json.load(handle)
+        except Exception:
+            handle.seek(0)
+            scan_data = handle.read()
+            try:
+                data = json.loads(str(scan_data, "utf-8"))
+            except Exception:
+                data = json.loads(scan_data)
+
+        if data is None:
+            return []
+
+        # Handle both single report and list of reports
+        reports = []
+        if isinstance(data, dict):
+            if data.get("kind") == "List" and "items" in data:
+                reports = data["items"]
+            elif data.get("kind") == "Report":
+                reports = [data]
+        elif isinstance(data, list):
+            reports = data
+
+        # Find all unique sources across all reports
+        sources_found = set()
+        for report in reports:
+            if not isinstance(report, dict) or report.get("kind") != "Report":
+                continue
+            for result in report.get("results", []):
+                source = result.get("source", "OpenReports")
+                sources_found.add(source)
+
+        # Create a ParserTest for each source
+        tests = []
+        for source in sorted(sources_found):
+            test = ParserTest(
+                name=source,
+                parser_type=source,
+                version=None,
+            )
+            test.findings = []
+
+            # Parse all reports and filter findings by source
+            for report in reports:
+                if not isinstance(report, dict) or report.get("kind") != "Report":
+                    continue
+
+                findings = self._parse_report_for_source(test, report, source)
+                test.findings.extend(findings)
+
+            tests.append(test)
+
+        return tests
+
     def _parse_report(self, test, report):
         findings = []
 
@@ -97,6 +153,41 @@ class OpenreportsParser:
                 continue
 
             finding = self._create_finding_from_result(test, result, service_name, report_name, report_uid)
+            if finding:
+                findings.append(finding)
+
+        return findings
+
+    def _parse_report_for_source(self, test, report, source_filter):
+        findings = []
+
+        # Extract metadata
+        metadata = report.get("metadata", {})
+        report_name = metadata.get("name", "")
+        namespace = metadata.get("namespace", "")
+        report_uid = metadata.get("uid", "")
+
+        # Extract scope information
+        scope = report.get("scope", {})
+        scope_kind = scope.get("kind", "")
+        scope_name = scope.get("name", "")
+
+        # Create service identifier from scope and metadata
+        service_name = f"{namespace}/{scope_kind}/{scope_name}" if namespace else f"{scope_kind}/{scope_name}"
+
+        # Extract results
+        results = report.get("results", [])
+
+        for result in results:
+            if not isinstance(result, dict):
+                continue
+
+            # Filter by source
+            result_source = result.get("source", "OpenReports")
+            if result_source != source_filter:
+                continue
+
+            finding = self._create_finding_from_result(None, result, service_name, report_name, report_uid)
             if finding:
                 findings.append(finding)
 

@@ -35,7 +35,8 @@ class TestOpenreportsParser(DojoTestCase):
             self.assertEqual(1, len(finding1.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2025-9232", finding1.unsaved_vulnerability_ids[0])
             self.assertEqual(
-                "b1fcca57-2efd-44d3-89e9-949e29b61936:CVE-2025-9232:libcrypto3", finding1.unique_id_from_tool,
+                "b1fcca57-2efd-44d3-89e9-949e29b61936:CVE-2025-9232:libcrypto3",
+                finding1.unique_id_from_tool,
             )
             self.assertIn("vulnerability scan", finding1.tags)
             self.assertIn("image-scanner", finding1.tags)
@@ -72,7 +73,8 @@ class TestOpenreportsParser(DojoTestCase):
             # Non-CVE policies should not have vulnerability IDs
             self.assertIsNone(finding3.unsaved_vulnerability_ids)
             self.assertEqual(
-                "b1fcca57-2efd-44d3-89e9-949e29b61936:CIS-BENCH-001:web-server", finding3.unique_id_from_tool,
+                "b1fcca57-2efd-44d3-89e9-949e29b61936:CIS-BENCH-001:web-server",
+                finding3.unique_id_from_tool,
             )
             self.assertIn("compliance check", finding3.tags)
             self.assertIn("compliance-scanner", finding3.tags)
@@ -113,3 +115,56 @@ class TestOpenreportsParser(DojoTestCase):
 
         description = parser.get_description_for_scan_types("OpenReports")
         self.assertEqual("Import OpenReports JSON report.", description)
+
+    def test_get_tests_single_source(self):
+        with sample_path("openreports_single_report.json").open(encoding="utf-8") as test_file:
+            parser = OpenreportsParser()
+            tests = parser.get_tests("OpenReports", test_file)
+
+            # Should have two tests for the two sources
+            self.assertEqual(len(tests), 2)
+
+            # Verify test names
+            test_names = {test.name for test in tests}
+            self.assertIn("image-scanner", test_names)
+            self.assertIn("compliance-scanner", test_names)
+
+            # Find the image-scanner test
+            image_scanner_test = next(t for t in tests if t.name == "image-scanner")
+            self.assertEqual("image-scanner", image_scanner_test.type)
+            self.assertIsNone(image_scanner_test.version)
+            self.assertEqual(2, len(image_scanner_test.findings))
+
+            # Verify findings are properly created
+            finding1 = image_scanner_test.findings[0]
+            self.assertEqual("CVE-2025-9232 in libcrypto3", finding1.title)
+            self.assertEqual("Low", finding1.severity)
+            # Verify test is not set - check using hasattr to avoid RelatedObjectDoesNotExist
+            self.assertFalse(hasattr(finding1, "test") and finding1.test is not None)
+
+    def test_get_tests_multiple_sources(self):
+        with sample_path("openreports_list_format.json").open(encoding="utf-8") as test_file:
+            parser = OpenreportsParser()
+            tests = parser.get_tests("OpenReports", test_file)
+
+            # Should have two tests for the two different sources
+            self.assertEqual(len(tests), 2)
+
+            # Verify test names
+            test_names = {test.name for test in tests}
+            self.assertIn("policy-scanner", test_names)
+            self.assertIn("image-scanner", test_names)
+
+            # Find the image-scanner test
+            image_scanner_test = next(t for t in tests if t.name == "image-scanner")
+            self.assertEqual(2, len(image_scanner_test.findings))
+
+            # Find the policy-scanner test
+            policy_scanner_test = next(t for t in tests if t.name == "policy-scanner")
+            self.assertEqual(1, len(policy_scanner_test.findings))
+
+            # Verify findings have no test set
+            for test in tests:
+                for finding in test.findings:
+                    # Check using hasattr to avoid RelatedObjectDoesNotExist
+                    self.assertFalse(hasattr(finding, "test") and finding.test is not None)
