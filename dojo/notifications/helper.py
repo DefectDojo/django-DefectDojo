@@ -627,6 +627,10 @@ class NotificationManager(NotificationManagerHelpers):
     def create_notification(self, event: str | None = None, **kwargs: dict) -> None:
         # Process the notifications for a given list of recipients
         if kwargs.get("recipients") is not None:
+            recipients = kwargs.get("recipients", [])
+            if not recipients:
+                logger.debug("No recipients provided for event: %s", event)
+                return
             self._process_recipients(event=event, **kwargs)
         else:
             logger.debug("creating system notifications for event: %s", event)
