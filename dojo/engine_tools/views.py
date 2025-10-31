@@ -37,11 +37,6 @@ import pandas as pd
 from openpyxl.styles import Font, PatternFill
 
 
-system_settings = System_Settings.objects.get()
-
-ORPHAN_PRODUCT_TYPE_NAME = system_settings.orphan_findings
-
-
 def finding_exclusions(request: HttpRequest):
     finding_exclusions = FindingExclusion.objects.all().order_by("-create_date")
     finding_exclusions = FindingExclusionFilter(request.GET,
@@ -445,10 +440,13 @@ def delete_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
 
 
 def orphans_reclassification(request: HttpRequest) -> HttpResponse:
+    system_settings = System_Settings.objects.get()
+    orphan_product_type_name = system_settings.orphan_findings
+    
     if not has_permission_to_reclassify_orphans(request.user):
         raise PermissionDenied
     
-    orphans_product_type = Product_Type.objects.filter(name=ORPHAN_PRODUCT_TYPE_NAME).first()
+    orphans_product_type = Product_Type.objects.filter(name=orphan_product_type_name).first()
     
     search_query = request.GET.get('search', '').strip()
     
@@ -461,7 +459,7 @@ def orphans_reclassification(request: HttpRequest) -> HttpResponse:
     
     page_obj = get_page_items(request, orphan_products, 100)
     
-    product_types = Product_Type.objects.exclude(name=ORPHAN_PRODUCT_TYPE_NAME).order_by('name')
+    product_types = Product_Type.objects.exclude(name=orphan_product_type_name).order_by('name')
     
     context = {
         "orphan_products": page_obj,
@@ -475,6 +473,9 @@ def orphans_reclassification(request: HttpRequest) -> HttpResponse:
 
 
 def reclassify_orphan_products(request: HttpRequest) -> HttpResponse:
+    system_settings = System_Settings.objects.get()
+    orphan_product_type_name = system_settings.orphan_findings
+    
     if not has_permission_to_reclassify_orphans(request.user):
         raise PermissionDenied
 
@@ -485,7 +486,7 @@ def reclassify_orphan_products(request: HttpRequest) -> HttpResponse:
     product_type = get_object_or_404(Product_Type, pk=product_type_id)
 
     Product.objects.filter(
-        prod_type__name=ORPHAN_PRODUCT_TYPE_NAME,
+        prod_type__name=orphan_product_type_name,
         id__in=selected_orphan_products
     ).update(prod_type=product_type)
 
@@ -577,6 +578,9 @@ def get_processing_status(request):
 
 @csrf_exempt
 def process_batch(request):
+    system_settings = System_Settings.objects.get()
+    orphan_product_type_name = system_settings.orphan_findings
+    
     if not has_permission_to_reclassify_orphans(request.user):
         raise PermissionDenied
 
@@ -610,7 +614,7 @@ def process_batch(request):
 
         products_qs = Product.objects.filter(
             name__in=product_names,
-            prod_type__name=ORPHAN_PRODUCT_TYPE_NAME
+            prod_type__name=orphan_product_type_name
         ).select_related('prod_type')
 
         product_types_qs = Product_Type.objects.filter(name__in=product_type_names)
@@ -671,10 +675,13 @@ def process_batch(request):
 
 
 def export_orphan_products_simple(request):
+    system_settings = System_Settings.objects.get()
+    orphan_product_type_name = system_settings.orphan_findings
+    
     if not has_permission_to_reclassify_orphans(request.user):
         raise PermissionDenied
 
-    orphan_products = Product.objects.filter(prod_type__name=ORPHAN_PRODUCT_TYPE_NAME)
+    orphan_products = Product.objects.filter(prod_type__name=orphan_product_type_name)
     
     search_query = request.GET.get('search', '')
     if search_query:

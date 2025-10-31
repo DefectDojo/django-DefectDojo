@@ -1,5 +1,5 @@
 from .dojo_test_case import DojoTestCase
-from dojo.models import Dojo_User, Product, Product_Type
+from dojo.models import Dojo_User, Product, Product_Type, System_Settings
 from dojo.engine_tools.views import orphans_reclassification
 
 from django.urls import reverse
@@ -11,6 +11,10 @@ class OrphansReclassificationViewTests(DojoTestCase):
         self.user = Dojo_User.objects.create_superuser(
             username='testuser', password='testpass'
         )
+        
+        self.test_systems_settings = System_Settings.objects.get_or_create()[0]
+        self.test_systems_settings.orphan_findings = "EVC - SIN DEFINIR"
+        self.test_systems_settings.save()
 
         self.client.login(username='testuser', password='testpass')
 
