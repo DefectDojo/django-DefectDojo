@@ -936,7 +936,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dojo.middleware.LoginRequiredMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
-    "social_django.middleware.SocialAuthExceptionMiddleware",
+    "dojo.middleware.CustomSocialAuthExceptionMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.middleware.AuditlogMiddleware",
     "dojo.middleware.AsyncSearchContextMiddleware",
