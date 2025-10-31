@@ -23,6 +23,15 @@
     "commitMessageSuffix": "({{packageFile}})",
     "labels": ["dependencies"]
   }],
+  "customDatasources": {
+    "endoflife-oldest-maintained": {
+      "defaultRegistryUrlTemplate": "https://endoflife.date/api/v1/products/{{depName}}",
+      "format": "json",
+      "transformTemplates": [
+        "{ \"releases\": $.result.releases[?(@.isMaintained==true)].latest.{\"version\": name} }"
+      ]
+    }
+  },
   "customManagers": [
     {
       "customType": "regex",
@@ -35,6 +44,12 @@
         "\\w*:\\s(?<currentValue>\\S+)\\s#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
+    "logLevelRemap": [
+    {
+      "matchMessage": "/^Custom datasource/",
+      "newLogLevel": "info"
     }
   ]
 }
