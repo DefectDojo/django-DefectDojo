@@ -428,6 +428,7 @@ class TestNotificationWebhooks(DojoTestCase):
             super().run(result)
 
     def setUp(self):
+        self.system_settings(enable_webhooks_notifications=True)
         self.sys_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.url_base = "http://webhook.endpoint:8080"
 
@@ -831,7 +832,7 @@ class TestNotificationWebhooks(DojoTestCase):
                 scan_type="ZAP Scan",
             ).notify_scan_added(test, updated_count=0)
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added_empty")
-            self.maxDiff = None
+            self.maxDiff = 99999
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": "Event scan_added_empty has occurred.",
                 "title": "Created/Updated 0 findings for notif prod: notif eng: notif test (Acunetix Scan)",

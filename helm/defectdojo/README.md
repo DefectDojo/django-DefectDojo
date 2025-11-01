@@ -540,7 +540,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.beat.podAnnotations | object | `{}` | Annotations for the Celery beat pods. |
 | celery.beat.podSecurityContext | object | `{}` | Pod security context for the Celery beat pods. |
 | celery.beat.readinessProbe | object | `{}` | Enable readiness probe for Celery beat container. |
-| celery.beat.replicas | int | `1` |  |
+| celery.beat.replicas | int | `1` | Multiple replicas are not allowed (Beat is intended to be a singleton) because scaling to >1 will double-run schedules |
 | celery.beat.resources.limits.cpu | string | `"2000m"` |  |
 | celery.beat.resources.limits.memory | string | `"256Mi"` |  |
 | celery.beat.resources.requests.cpu | string | `"100m"` |  |
