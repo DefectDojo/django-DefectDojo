@@ -1,5 +1,4 @@
 
-import json
 
 from dojo.models import Test, Test_Type
 from dojo.tools.n0s1.parser import N0s1Parser
@@ -19,12 +18,14 @@ class TestN0s1Parser(DojoTestCase):
             self.assertEqual(finding.title, "AWS")
             self.assertIsNotNone(finding.description)
             self.assertTrue(finding.dynamic_finding)
-            self.assertEqual(test.test_type.name, "n0s1 Confluence")
-            self.assertEqual(test.description, "Scan from n0s1 Confluence")
+            self.assertEqual(test.test_type.name, "n0s1 Scanner")
 
     def test_detect_subscanner_returns_correct_type(self):
         with (get_unit_tests_scans_path("n0s1") / "many_findings.json").open(encoding="utf-8") as testfile:
             parser = N0s1Parser()
-            data = json.load(testfile)
-            subscanner = parser.detect_subscanner(data)
-            self.assertEqual("n0s1 Confluence", subscanner)
+            tests = parser.get_tests("n0s1 Scanner", testfile)
+            self.assertEqual(1, len(tests))
+            test = tests[0]
+            self.assertEqual("n0s1 Confluence", test.name)
+            self.assertEqual("Scan from n0s1 Confluence", test.description)
+            self.assertEqual(17, len(test.findings))

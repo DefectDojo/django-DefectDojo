@@ -2,6 +2,7 @@
 import json
 
 from dojo.models import Finding
+from dojo.tools.parser_test import ParserTest
 
 
 class N0s1Parser:
@@ -14,6 +15,22 @@ class N0s1Parser:
     def get_description_for_scan_types(self, scan_type):
         return "JSON output from the n0s1 scanner."
 
+    def get_tests(self, scan_type, handle):
+        data = json.load(handle)
+        subscanner = self.detect_subscanner(data)
+        test = ParserTest(
+            name=subscanner,
+            parser_type=subscanner,
+            version=data.get("tool", {}).get("version", ""),
+            description=f"Scan from {subscanner}",
+        )
+        test.findings = self.get_findings_from_data(data)
+        return [test]
+
+    def get_findings(self, scan_file, test):
+        data = json.load(scan_file)
+        return self.get_findings_from_data(data)
+
     def detect_subscanner(self, data):
         platforms = {f.get("details", {}).get("platform", "") for f in data.get("findings", {}).values()}
         if "Confluence" in platforms:
@@ -23,14 +40,6 @@ class N0s1Parser:
         if "GitLab" in platforms:
             return "n0s1 GitLab"
         return "n0s1"
-
-    def get_findings(self, scan_file, test):
-        data = json.load(scan_file)
-        subscanner = self.detect_subscanner(data)
-        if hasattr(test, "test_type") and test.test_type:
-            test.test_type.name = subscanner
-        test.description = f"Scan from {subscanner}"
-        return self.get_findings_from_data(data)
 
     def get_findings_from_data(self, data):
         dupes = {}
