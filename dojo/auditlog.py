@@ -18,6 +18,11 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
+# FindingReviewers proxy model will be created lazily in register_django_pghistory_models()
+# Cannot be defined at module level because Finding.reviewers.through requires
+# Django's app registry to be ready (AppRegistryNotReady error)
+# The function is called from DojoAppConfig.ready() which guarantees the registry is ready
+
 
 def _flush_models_in_batches(models_to_flush, timestamp_field: str, retention_period: int, batch_size: int, max_batches: int, *, dry_run: bool = False) -> tuple[int, int, bool]:
     """
@@ -339,25 +344,41 @@ def register_django_pghistory_models():
     # https://django-pghistory.readthedocs.io/en/2.4.2/tutorial.html#tracking-many-to-many-events
     # Note: For auto-generated through models, we don't specify obj_fk/obj_field
     # as Django doesn't allow foreign keys to auto-generated through models
-    reviewers_through = Finding._meta.get_field("reviewers").remote_field.through
+    #
+    # We must create the proxy model here (not at module level) because:
+    # 1. Finding.reviewers.through requires Django's app registry to be ready
+    # 2. This function is called from DojoAppConfig.ready() which guarantees registry is ready
+    # 3. We check if it already exists to avoid re-registration warnings
+    #
+    # Note: This pattern is not explicitly documented in Django's official documentation.
+    # Django docs mention AppRegistryNotReady and AppConfig.ready() in general terms, but
+    # don't specifically cover proxy models for auto-generated ManyToMany through tables.
+    # This is a common pattern used by libraries like django-pghistory and is necessary
+    # because accessing Model.field.through at module import time triggers AppRegistryNotReady.
+    try:
+        FindingReviewers = apps.get_model("dojo", "FindingReviewers")
+    except LookupError:
+        # Model doesn't exist yet, create it
+        # Note: Finding is imported above, and apps registry is ready when this runs
+        reviewers_through = Finding._meta.get_field("reviewers").remote_field.through
 
-    class FindingReviewers(reviewers_through):
-        class Meta:
-            proxy = True
+        class FindingReviewers(reviewers_through):
+            class Meta:
+                proxy = True
 
-    pghistory.track(
-        pghistory.InsertEvent(),
-        pghistory.DeleteEvent(),
-        pghistory.ManualEvent(label="initial_import"),
-        meta={
-            "db_table": "dojo_finding_reviewersevent",
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
-        },
-    )(FindingReviewers)
+        pghistory.track(
+            pghistory.InsertEvent(),
+            pghistory.DeleteEvent(),
+            pghistory.ManualEvent(label="initial_import"),
+            meta={
+                "db_table": "dojo_finding_reviewersevent",
+                "indexes": [
+                    models.Index(fields=["pgh_created_at"]),
+                    models.Index(fields=["pgh_label"]),
+                    models.Index(fields=["pgh_context_id"]),
+                ],
+            },
+        )(FindingReviewers)
 
     # Only log during actual application startup, not during shell commands
     if "shell" not in sys.argv:
