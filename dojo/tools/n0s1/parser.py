@@ -2,7 +2,6 @@
 import json
 
 from dojo.models import Finding
-from dojo.tools.parser_test import ParserTest
 
 
 class N0s1Parser:
@@ -15,45 +14,34 @@ class N0s1Parser:
     def get_description_for_scan_types(self, scan_type):
         return "JSON output from the n0s1 scanner."
 
-    def get_tests(self, scan_type, handle):
-        data = json.load(handle)
-        tests = []
-
-        # Determine sub-scanner type based on platform or regex_config
-        subscanner = "n0s1"
-        findings = data.get("findings", {})
-        platforms = {f.get("details", {}).get("platform", "") for f in findings.values()}
+    def detect_subscanner(self, data):
+        platforms = {f.get("details", {}).get("platform", "") for f in data.get("findings", {}).values()}
         if "Confluence" in platforms:
-            subscanner = "n0s1 Confluence"
-        elif "GitHub" in platforms:
-            subscanner = "n0s1 GitHub"
-        elif "GitLab" in platforms:
-            subscanner = "n0s1 GitLab"
-        # Add more platform checks as needed
+            return "n0s1 Confluence"
+        if "GitHub" in platforms:
+            return "n0s1 GitHub"
+        if "GitLab" in platforms:
+            return "n0s1 GitLab"
+        return "n0s1"
 
-        test = ParserTest(
-            name=subscanner,
-            parser_type=subscanner,
-            version=data.get("tool", {}).get("version", ""),
-            description=f"Scan from {subscanner}",
-        )
+    def get_findings(self, scan_file, test):
+        data = json.load(scan_file)
+        subscanner = self.detect_subscanner(data)
+        if hasattr(test, "test_type") and test.test_type:
+            test.test_type.name = subscanner
+        test.description = f"Scan from {subscanner}"
+        return self.get_findings_from_data(data)
 
-        test.findings = self.get_findings_from_data(data, test)
-        tests.append(test)
-        return tests
-
-    def get_findings_from_data(self, data, test):
+    def get_findings_from_data(self, data):
         dupes = {}
         regex_configs = {}
         if "regex_config" in data and "rules" in data["regex_config"]:
             for rule in data["regex_config"]["rules"]:
                 regex_configs[rule["id"]] = rule
-
         for finding_id, finding_data in data.get("findings", {}).items():
             details = finding_data.get("details", {})
             regex_ref = details.get("matched_regex_config", {})
             regex_id = regex_ref.get("id")
-
             regex_info = regex_configs.get(regex_id, {})
             merged_regex = {
                 "id": regex_id,
@@ -79,7 +67,6 @@ class N0s1Parser:
                 continue
             finding = Finding(
                 title=title,
-                test=test,
                 description=description,
                 severity="High",
                 dynamic_finding=True,
