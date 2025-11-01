@@ -554,6 +554,12 @@
                 {% if finding.component_version %}
                 <th>Component Version</th>
                 {% endif %}
+                {% if finding.fix_available %}
+                <th>Fix Available</th>
+                {% endif %}
+                {% if finding.fix_version %}
+                <th>Fixed Version</th>
+                {% endif %}
                 {% if finding.has_jira_configured or finding.jira_issue %}
                 <th>JIRA</th>
                 <th>JIRA Change</th>
@@ -608,6 +614,20 @@
                 <td>
                     <span>
                         {{ finding.component_version }}
+                    </span>
+                </td>
+                {% endif %}
+                {% if finding.fix_available %}
+                <td>
+                    <span>
+                        {{ finding.fix_available }}
+                    </span>
+                </td>
+                {% endif %}
+                {% if finding.fix_version %}
+                <td>
+                    <span>
+                        {{ finding.fix_version }}
                     </span>
                 </td>
                 {% endif %}

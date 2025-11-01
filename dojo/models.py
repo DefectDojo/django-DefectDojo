@@ -2434,6 +2434,11 @@ class Finding(models.Model):
                                         default=None,
                                         verbose_name=_("Fix Available"),
                                         help_text=_("Denotes if there is a fix available for this flaw."))
+    fix_version = models.CharField(null=True,
+                                         blank=True,
+                                         max_length=100,
+                                         verbose_name=_("Fix version"),
+                                         help_text=_("Version of the affected component in which the flaw is fixed."))
     impact = models.TextField(verbose_name=_("Impact"),
                                 null=True,
                                 blank=True,
