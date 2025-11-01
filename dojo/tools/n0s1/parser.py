@@ -1,4 +1,5 @@
 import json
+
 from dojo.models import Finding
 
 
@@ -39,7 +40,7 @@ class N0s1Parser:
                 "description": regex_ref.get("description", regex_info.get("description", "N/A")),
                 "regex": regex_ref.get("regex", regex_info.get("regex", "N/A")),
                 "keywords": regex_info.get("keywords", []),
-                "tags": regex_info.get("tags", [])
+                "tags": regex_info.get("tags", []),
             }
 
             title = merged_regex["id"] or "n0s1 Finding"
@@ -56,7 +57,7 @@ class N0s1Parser:
                 description += f"**Tags:** {', '.join(merged_regex['tags'])}\n"
             dupe_key = finding_data.get("id", finding_id)
             if dupe_key in dupes:
-                continue 
+                continue
             finding = Finding(
                 title=title,
                 test=test,
