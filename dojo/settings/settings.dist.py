@@ -31,7 +31,7 @@ env = environ.FileAwareEnv(
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
     DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
-    # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
+    # django-jsonfield-backport raises a warning that can be ignored,
     # see https://github.com/laymonage/django-jsonfield-backport
     # debug_toolbar.E001 is raised when running tests in dev mode via run-unittests.sh
     DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001"]),
@@ -321,12 +321,9 @@ env = environ.FileAwareEnv(
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ""),
     # Dictates whether cloud banner is created or not
     DD_CREATE_CLOUD_BANNER=(bool, True),
-    # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Procuts, ...)
-    # If you run big import you may want to disable this because the way django-auditlog currently works, there's
-    # a big performance hit. Especially during (re-)imports.
+    # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Products, ...)
+    # If you run big import you may want to disable this because there's a performance hit during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
-    # Audit logging system: "django-auditlog" (default) or "django-pghistory"
-    DD_AUDITLOG_TYPE=(str, "django-auditlog"),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
@@ -943,7 +940,6 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.AdditionalHeaderMiddleware",
     "social_django.middleware.SocialAuthExceptionMiddleware",
     "crum.CurrentRequestUserMiddleware",
-    "dojo.middleware.AuditlogMiddleware",
     "dojo.middleware.AsyncSearchContextMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
     "dojo.middleware.LongRunningRequestAlertMiddleware",
@@ -1948,9 +1944,6 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
 ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
-AUDITLOG_TYPE = env("DD_AUDITLOG_TYPE")
-AUDITLOG_TWO_STEP_MIGRATION = False
-AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
 AUDITLOG_FLUSH_BATCH_SIZE = env("DD_AUDITLOG_FLUSH_BATCH_SIZE")
 AUDITLOG_FLUSH_MAX_BATCHES = env("DD_AUDITLOG_FLUSH_MAX_BATCHES")
 
@@ -2046,12 +2039,8 @@ if ENABLE_AUDITLOG:
     middleware_list = list(MIDDLEWARE)
     crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
 
-    if AUDITLOG_TYPE == "django-auditlog":
-        # Insert AuditlogMiddleware before CurrentRequestUserMiddleware
-        middleware_list.insert(crum_index, "dojo.middleware.AuditlogMiddleware")
-    elif AUDITLOG_TYPE == "django-pghistory":
-        # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
-        middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
+    # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
+    middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
 
     MIDDLEWARE = middleware_list
 
