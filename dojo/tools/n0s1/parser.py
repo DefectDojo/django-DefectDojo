@@ -1,6 +1,4 @@
-
 import json
-
 from dojo.models import Finding
 
 
@@ -15,7 +13,7 @@ class N0s1Parser:
         return "JSON output from the n0s1 scanner."
 
     def get_findings(self, filename, test):
-        findings = []
+        dupes = {}
         tree = filename.read()
         try:
             data = json.loads(str(tree, "utf-8"))
@@ -41,7 +39,7 @@ class N0s1Parser:
                 "description": regex_ref.get("description", regex_info.get("description", "N/A")),
                 "regex": regex_ref.get("regex", regex_info.get("regex", "N/A")),
                 "keywords": regex_info.get("keywords", []),
-                "tags": regex_info.get("tags", []),
+                "tags": regex_info.get("tags", [])
             }
 
             title = merged_regex["id"] or "n0s1 Finding"
@@ -56,16 +54,17 @@ class N0s1Parser:
                 description += f"**Keywords:** {', '.join(merged_regex['keywords'])}\n"
             if merged_regex["tags"]:
                 description += f"**Tags:** {', '.join(merged_regex['tags'])}\n"
-
-            find = Finding(
+            dupe_key = finding_data.get("id", finding_id)
+            if dupe_key in dupes:
+                continue 
+            finding = Finding(
                 title=title,
                 test=test,
                 description=description,
-                severity="High",  # You can adjust this based on your logic
+                severity="High",  # Adjust if needed
                 dynamic_finding=True,
                 static_finding=False,
-                unique_id_from_tool=finding_data.get("id", finding_id),
+                unique_id_from_tool=dupe_key,
             )
-            findings.append(find)
-
-        return findings
+            dupes[dupe_key] = finding
+        return list(dupes.values())
