@@ -5,6 +5,7 @@ Tests the flush_auditlog management command and task that removes old audit log 
 """
 import logging
 from datetime import UTC, datetime
+
 from dateutil.relativedelta import relativedelta
 from django.apps import apps
 from django.test import override_settings
