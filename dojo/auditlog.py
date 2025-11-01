@@ -220,26 +220,6 @@ def register_django_pghistory_models():
         },
     )(Finding)
 
-    # # Track the reviewers ManyToMany relationship through table
-    # # This tracks additions/removals of reviewers from findings
-    # reviewers_through = Finding._meta.get_field("reviewers").remote_field.through
-    # if reviewers_through:
-    #     logger.info(f"Tracking reviewers M2M through table: {reviewers_through} (db_table: {reviewers_through._meta.db_table})")
-    #     pghistory.track(
-    #         pghistory.InsertEvent(),
-    #         pghistory.DeleteEvent(),
-    #         meta={
-    #             "indexes": [
-    #                 models.Index(fields=["pgh_created_at"]),
-    #                 models.Index(fields=["pgh_label"]),
-    #                 models.Index(fields=["pgh_context_id"]),
-    #             ],
-    #         },
-    #     )(reviewers_through)
-    #     logger.info("Successfully registered pghistory tracking for reviewers through table")
-    # else:
-    #     logger.warning("Could not find reviewers through table for Finding model!")
-
     pghistory.track(
         pghistory.InsertEvent(),
         pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
@@ -353,6 +333,31 @@ def register_django_pghistory_models():
             ],
         },
     )(Notification_Webhooks)
+
+    # Track Finding.reviewers ManyToMany relationship
+    # Create a proxy model for the through table as per pghistory docs:
+    # https://django-pghistory.readthedocs.io/en/2.4.2/tutorial.html#tracking-many-to-many-events
+    # Note: For auto-generated through models, we don't specify obj_fk/obj_field
+    # as Django doesn't allow foreign keys to auto-generated through models
+    reviewers_through = Finding._meta.get_field("reviewers").remote_field.through
+
+    class FindingReviewers(reviewers_through):
+        class Meta:
+            proxy = True
+
+    pghistory.track(
+        pghistory.InsertEvent(),
+        pghistory.DeleteEvent(),
+        pghistory.ManualEvent(label="initial_import"),
+        meta={
+            "db_table": "dojo_finding_reviewersevent",
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
+    )(FindingReviewers)
 
     # Only log during actual application startup, not during shell commands
     if "shell" not in sys.argv:

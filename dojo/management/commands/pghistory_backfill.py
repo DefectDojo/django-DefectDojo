@@ -164,6 +164,7 @@ class Command(BaseCommand):
             "Dojo_User", "Endpoint", "Engagement", "Finding", "Finding_Group",
             "Product_Type", "Product", "Test", "Risk_Acceptance",
             "Finding_Template", "Cred_User", "Notification_Webhooks",
+            "FindingReviewers",  # M2M through table for Finding.reviewers
         ]
 
         specific_model = options.get("model")
