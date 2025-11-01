@@ -15,3 +15,15 @@ class TestN0s1Parser(DojoTestCase):
             self.assertEqual(finding.title, "AWS")
             self.assertIsNotNone(finding.description)
             self.assertTrue(finding.dynamic_finding)
+
+    def test_n0s1_get_tests_returns_correct_subscanner(self):
+        with (get_unit_tests_scans_path("n0s1") / "many_findings.json").open(encoding="utf-8") as testfile:
+            parser = N0s1Parser()
+            tests = parser.get_tests("n0s1 Scanner", testfile)
+            self.assertEqual(1, len(tests))
+            test = tests[0]
+            self.assertEqual("n0s1 Confluence", test.name)
+            self.assertEqual("n0s1 Confluence", test.parser_type)
+            self.assertEqual("Scan from n0s1 Confluence", test.description)
+            self.assertEqual(17, len(test.findings))
+            self.assertTrue(all(f.dynamic_finding for f in test.findings))
