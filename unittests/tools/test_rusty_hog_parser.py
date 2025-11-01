@@ -1,3 +1,4 @@
+from dojo.models import Test, Test_Type
 from dojo.tools.rusty_hog.parser import RustyhogParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
@@ -20,6 +21,15 @@ class TestRustyhogParser(DojoTestCase):
             parser = RustyhogParser()
             findings = parser.get_findings(testfile, "Choctaw Hog")
             self.assertEqual(13, len(findings))
+
+    def test_parse_file_with_multiple_vuln_test_type(self):
+        with (get_unit_tests_scans_path("rusty_hog") / "choctawhog_many_vulns.json").open(encoding="utf-8") as testfile:
+            test_type = Test_Type(name="Rusty Hog")
+            test = Test(test_type=test_type)
+            self.assertEqual("Rusty Hog", test.test_type.name)
+            parser = RustyhogParser()
+            tests = parser.get_tests("Rusty Hog", testfile)
+            self.assertEqual("Rusty Hog", tests[0].name)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding_choctawhog_content(self):
         with (get_unit_tests_scans_path("rusty_hog") / "choctawhog_many_vulns.json").open(encoding="utf-8") as testfile:

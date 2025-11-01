@@ -1,0 +1,1375 @@
+{
+  "tool": {
+    "name": "n0s1",
+    "version": "1.0.30",
+    "author": "Spark 1 Security",
+    "scan_arguments": {
+      "scan_comment": true,
+      "post_comment": false,
+      "secret_manager": "a secret manager tool",
+      "contact_help": "contact@spark1.us",
+      "label": "n0s1bot_auto_comment_e869dd5fa15ca0749a350aac758c7f56f56ad9be1",
+      "report_format": "json",
+      "debug": false,
+      "show_matched_secret_on_logs": false,
+      "scan_target": "confluence_scan",
+      "timeout": null,
+      "limit": null,
+      "scan_scope": ""
+    }
+  },
+  "scan_date": {
+    "timestamp": 1761751223.023414,
+    "date_utc": "2025-10-29T15:20:23"
+  },
+  "regex_config": {
+    "title": "n0s1 config 20231115 v002",
+    "rules": [
+      {
+        "id": "gitlab_personal_access_token",
+        "description": "GitLab Personal Access Token",
+        "regex": "\\bglpat-[0-9a-zA-Z_\\-]{20}\\b",
+        "tags": [
+          "gitlab",
+          "revocation_type"
+        ],
+        "keywords": [
+          "glpat"
+        ]
+      },
+      {
+        "id": "gitlab_pipeline_trigger_token",
+        "description": "GitLab Pipeline Trigger Token",
+        "regex": "\\bglptt-[0-9a-zA-Z_\\-]{20}\\b",
+        "tags": [
+          "gitlab"
+        ],
+        "keywords": [
+          "glptt"
+        ]
+      },
+      {
+        "id": "gitlab_runner_registration_token",
+        "description": "GitLab Runner Registration Token",
+        "regex": "\\bGR1348941[0-9a-zA-Z_\\-]{20}\\b",
+        "tags": [
+          "gitlab"
+        ],
+        "keywords": [
+          "GR1348941"
+        ]
+      },
+      {
+        "id": "gitlab_runner_auth_token",
+        "description": "GitLab Runner Authentication Token",
+        "regex": "\\bglrt-[0-9a-zA-Z_\\-]{20}\\b",
+        "tags": [
+          "gitlab"
+        ],
+        "keywords": [
+          "glrt"
+        ]
+      },
+      {
+        "id": "gitlab_feed_token",
+        "description": "GitLab Feed Token",
+        "regex": "\\bfeed_token=[0-9a-zA-Z_\\-]{20}\\b",
+        "tags": [
+          "gitlab"
+        ],
+        "keywords": [
+          "feed_token"
+        ]
+      },
+      {
+        "id": "gitlab_oauth_app_secret",
+        "description": "GitLab OAuth Application Secrets",
+        "regex": "\\bgloas-[0-9a-zA-Z_\\-]{64}\\b",
+        "tags": [
+          "gitlab"
+        ],
+        "keywords": [
+          "gloas"
+        ]
+      },
+      {
+        "id": "gitlab_feed_token_v2",
+        "description": "GitLab Feed token",
+        "regex": "\\bglft-[0-9a-zA-Z_\\-]{20}\\b",
+        "tags": [
+          "gitlab"
+        ],
+        "keywords": [
+          "glft"
+        ]
+      },
+      {
+        "id": "gitlab_kubernetes_agent_token",
+        "description": "GitLab Agent for Kubernetes token",
+        "regex": "\\bglagent-[0-9a-zA-Z_\\-]{50}\\b",
+        "tags": [
+          "gitlab"
+        ],
+        "keywords": [
+          "glagent"
+        ]
+      },
+      {
+        "id": "gitlab_incoming_email_token",
+        "description": "GitLab Incoming email token",
+        "regex": "\\bglimt-[0-9a-zA-Z_\\-]{25}\\b",
+        "tags": [
+          "gitlab"
+        ],
+        "keywords": [
+          "glimt"
+        ]
+      },
+      {
+        "id": "AWS",
+        "description": "AWS Access Token",
+        "regex": "\\bAKIA[0-9A-Z]{16}\\b",
+        "tags": [
+          "aws",
+          "revocation_type"
+        ],
+        "keywords": [
+          "AKIA"
+        ]
+      },
+      {
+        "id": "PKCS8 private key",
+        "description": "PKCS8 private key",
+        "regex": "-----BEGIN PRIVATE KEY-----",
+        "keywords": [
+          "-----BEGIN PRIVATE KEY-----"
+        ]
+      },
+      {
+        "id": "RSA private key",
+        "description": "RSA private key",
+        "regex": "-----BEGIN RSA PRIVATE KEY-----",
+        "keywords": [
+          "-----BEGIN RSA PRIVATE KEY-----"
+        ]
+      },
+      {
+        "id": "SSH private key",
+        "description": "SSH private key",
+        "regex": "-----BEGIN OPENSSH PRIVATE KEY-----",
+        "keywords": [
+          "-----BEGIN OPENSSH PRIVATE KEY-----"
+        ]
+      },
+      {
+        "id": "PGP private key",
+        "description": "PGP private key",
+        "regex": "-----BEGIN PGP PRIVATE KEY BLOCK-----",
+        "keywords": [
+          "-----BEGIN PGP PRIVATE KEY BLOCK-----"
+        ]
+      },
+      {
+        "description": "systemd machine-id",
+        "id": "systemd-machine-id",
+        "path": "^machine-id$",
+        "regex": "^[0-9a-f]{32}\\n$",
+        "entropy": 3.5
+      },
+      {
+        "id": "Github Personal Access Token",
+        "description": "Github Personal Access Token",
+        "regex": "ghp_[0-9a-zA-Z]{36}",
+        "keywords": [
+          "ghp_"
+        ]
+      },
+      {
+        "id": "Github OAuth Access Token",
+        "description": "Github OAuth Access Token",
+        "regex": "gho_[0-9a-zA-Z]{36}",
+        "keywords": [
+          "gho_"
+        ]
+      },
+      {
+        "id": "SSH (DSA) private key",
+        "description": "SSH (DSA) private key",
+        "regex": "-----BEGIN DSA PRIVATE KEY-----",
+        "keywords": [
+          "-----BEGIN DSA PRIVATE KEY-----"
+        ]
+      },
+      {
+        "id": "SSH (EC) private key",
+        "description": "SSH (EC) private key",
+        "regex": "-----BEGIN EC PRIVATE KEY-----",
+        "keywords": [
+          "-----BEGIN EC PRIVATE KEY-----"
+        ]
+      },
+      {
+        "id": "Github App Token",
+        "description": "Github App Token",
+        "regex": "(ghu|ghs)_[0-9a-zA-Z]{36}",
+        "keywords": [
+          "ghu_",
+          "ghs_"
+        ]
+      },
+      {
+        "id": "Github Refresh Token",
+        "description": "Github Refresh Token",
+        "regex": "ghr_[0-9a-zA-Z]{76}",
+        "keywords": [
+          "ghr_"
+        ]
+      },
+      {
+        "id": "Shopify shared secret",
+        "description": "Shopify shared secret",
+        "regex": "shpss_[a-fA-F0-9]{32}",
+        "keywords": [
+          "shpss_"
+        ]
+      },
+      {
+        "id": "Shopify access token",
+        "description": "Shopify access token",
+        "regex": "shpat_[a-fA-F0-9]{32}",
+        "keywords": [
+          "shpat_"
+        ]
+      },
+      {
+        "id": "Shopify custom app access token",
+        "description": "Shopify custom app access token",
+        "regex": "shpca_[a-fA-F0-9]{32}",
+        "keywords": [
+          "shpca_"
+        ]
+      },
+      {
+        "id": "Shopify private app access token",
+        "description": "Shopify private app access token",
+        "regex": "shppa_[a-fA-F0-9]{32}",
+        "keywords": [
+          "shppa_"
+        ]
+      },
+      {
+        "id": "Slack token",
+        "description": "Slack token",
+        "regex": "xox[baprs]-([0-9a-zA-Z]{10,48})?",
+        "keywords": [
+          "xoxb",
+          "xoxa",
+          "xoxp",
+          "xoxr",
+          "xoxs"
+        ]
+      },
+      {
+        "id": "Stripe",
+        "description": "Stripe",
+        "regex": "(?i)(sk|pk)_(test|live)_[0-9a-z]{10,32}",
+        "keywords": [
+          "sk_test",
+          "pk_test",
+          "sk_live",
+          "pk_live"
+        ]
+      },
+      {
+        "id": "PyPI upload token",
+        "description": "PyPI upload token",
+        "regex": "pypi-AgEIcHlwaS5vcmc[A-Za-z0-9-_]{50,1000}",
+        "tags": [
+          "pypi",
+          "revocation_type"
+        ],
+        "keywords": [
+          "pypi-AgEIcHlwaS5vcmc"
+        ]
+      },
+      {
+        "id": "Google (GCP) Service-account",
+        "description": "Google (GCP) Service-account",
+        "tags": [
+          "gitlab_partner_token",
+          "revocation_type"
+        ],
+        "regex": "\\\"private_key\\\":\\s*\\\"-{5}BEGIN PRIVATE KEY-{5}[\\s\\S]*?\",",
+        "keywords": [
+          "service_account"
+        ]
+      },
+      {
+        "id": "GCP API key",
+        "description": "GCP API keys can be misused to gain API quota from billed projects",
+        "tags": [
+          "gitlab_partner_token",
+          "revocation_type"
+        ],
+        "regex": "(?i)\\b(AIza[0-9A-Za-z-_]{35})(?:['|\\\"|\\n|\\r|\\s|\\x60|;]|$)",
+        "secretGroup": 1,
+        "keywords": [
+          "AIza"
+        ]
+      },
+      {
+        "id": "GCP OAuth client secret",
+        "description": "GCP OAuth client secrets can be misused to spoof your application",
+        "tags": [
+          "gitlab_partner_token",
+          "revocation_type"
+        ],
+        "regex": "GOCSPX-[a-zA-Z0-9_-]{28}",
+        "keywords": [
+          "GOCSPX-"
+        ]
+      },
+      {
+        "id": "Password in URL",
+        "description": "Password in URL",
+        "regex": "[a-zA-Z]{3,10}:\\/\\/[^$][^:@\\/\\n]{3,20}:[^$][^:@\\n\\/]{3,40}@.{1,100}"
+      },
+      {
+        "id": "Heroku API Key",
+        "description": "Heroku API Key",
+        "regex": "(?i)(?:heroku)(?:[0-9a-z\\-_\\t .]{0,20})(?:[\\s|']|[\\s|\"]){0,3}(?:=|>|:=|\\|\\|:|<=|=>|:)(?:'|\\\"|\\s|=|\\x60){0,5}([0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12})(?:['|\\\"|\\n|\\r|\\s|\\x60]|$)",
+        "secretGroup": 1,
+        "keywords": [
+          "heroku"
+        ]
+      },
+      {
+        "id": "Slack Webhook",
+        "description": "Slack Webhook",
+        "regex": "https://hooks.slack.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8,12}/[a-zA-Z0-9_]{24}",
+        "keywords": [
+          "https://hooks.slack.com/services"
+        ]
+      },
+      {
+        "id": "Twilio API Key",
+        "description": "Twilio API Key",
+        "regex": "SK[0-9a-fA-F]{32}",
+        "keywords": [
+          "SK",
+          "twilio"
+        ]
+      },
+      {
+        "id": "Age secret key",
+        "description": "Age secret key",
+        "regex": "AGE-SECRET-KEY-1[QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]{58}",
+        "keywords": [
+          "AGE-SECRET-KEY-1"
+        ]
+      },
+      {
+        "id": "Facebook token",
+        "description": "Facebook token",
+        "regex": "(?i)(facebook[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-f0-9]{32})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "facebook"
+        ]
+      },
+      {
+        "id": "Twitter token",
+        "description": "Twitter token",
+        "regex": "(?i)(twitter[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-f0-9]{35,44})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "twitter"
+        ]
+      },
+      {
+        "id": "Adobe Client ID (Oauth Web)",
+        "description": "Adobe Client ID (Oauth Web)",
+        "regex": "(?i)(adobe[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-f0-9]{32})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "adobe"
+        ]
+      },
+      {
+        "id": "Adobe Client Secret",
+        "description": "Adobe Client Secret",
+        "regex": "(p8e-)(?i)[a-z0-9]{32}",
+        "keywords": [
+          "adobe",
+          "p8e-,"
+        ]
+      },
+      {
+        "id": "Alibaba AccessKey ID",
+        "description": "Alibaba AccessKey ID",
+        "regex": "(LTAI)(?i)[a-z0-9]{20}",
+        "keywords": [
+          "LTAI"
+        ]
+      },
+      {
+        "id": "Alibaba Secret Key",
+        "description": "Alibaba Secret Key",
+        "regex": "(?i)(alibaba[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9]{30})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "alibaba"
+        ]
+      },
+      {
+        "id": "Asana Client ID",
+        "description": "Asana Client ID",
+        "regex": "(?i)(asana[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([0-9]{16})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "asana"
+        ]
+      },
+      {
+        "id": "Asana Client Secret",
+        "description": "Asana Client Secret",
+        "regex": "(?i)(asana[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9]{32})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "asana"
+        ]
+      },
+      {
+        "id": "Atlassian API token",
+        "description": "Atlassian API token",
+        "regex": "(?i)(atlassian[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9]{24})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "atlassian"
+        ]
+      },
+      {
+        "id": "Bitbucket client ID",
+        "description": "Bitbucket client ID",
+        "regex": "(?i)(bitbucket[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9]{32})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "bitbucket"
+        ]
+      },
+      {
+        "id": "Bitbucket client secret",
+        "description": "Bitbucket client secret",
+        "regex": "(?i)(bitbucket[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9_\\-]{64})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "bitbucket"
+        ]
+      },
+      {
+        "id": "Beamer API token",
+        "description": "Beamer API token",
+        "regex": "(?i)(beamer[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"](b_[a-z0-9=_\\-]{44})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "beamer"
+        ]
+      },
+      {
+        "id": "Clojars API token",
+        "description": "Clojars API token",
+        "regex": "(CLOJARS_)(?i)[a-z0-9]{60}",
+        "keywords": [
+          "CLOJARS_"
+        ]
+      },
+      {
+        "id": "Contentful delivery API token",
+        "description": "Contentful delivery API token",
+        "regex": "(?i)(contentful[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9\\-=_]{43})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "contentful"
+        ]
+      },
+      {
+        "id": "Contentful preview API token",
+        "description": "Contentful preview API token",
+        "regex": "(?i)(contentful[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9\\-=_]{43})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "contentful"
+        ]
+      },
+      {
+        "id": "Databricks API token",
+        "description": "Databricks API token",
+        "regex": "dapi[a-h0-9]{32}",
+        "keywords": [
+          "dapi",
+          "databricks"
+        ]
+      },
+      {
+        "description": "DigitalOcean OAuth Access Token",
+        "id": "digitalocean-access-token",
+        "regex": "(?i)\\b(doo_v1_[a-f0-9]{64})(?:['|\\\"|\\n|\\r|\\s|\\x60|;]|$)",
+        "secretGroup": 1,
+        "keywords": [
+          "doo_v1_"
+        ]
+      },
+      {
+        "description": "DigitalOcean Personal Access Token",
+        "id": "digitalocean-pat",
+        "regex": "(?i)\\b(dop_v1_[a-f0-9]{64})(?:['|\\\"|\\n|\\r|\\s|\\x60|;]|$)",
+        "secretGroup": 1,
+        "keywords": [
+          "dop_v1_"
+        ]
+      },
+      {
+        "description": "DigitalOcean OAuth Refresh Token",
+        "id": "digitalocean-refresh-token",
+        "regex": "(?i)\\b(dor_v1_[a-f0-9]{64})(?:['|\\\"|\\n|\\r|\\s|\\x60|;]|$)",
+        "secretGroup": 1,
+        "keywords": [
+          "dor_v1_"
+        ]
+      },
+      {
+        "id": "Discord API key",
+        "description": "Discord API key",
+        "regex": "(?i)(discord[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-h0-9]{64})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "discord"
+        ]
+      },
+      {
+        "id": "Discord client ID",
+        "description": "Discord client ID",
+        "regex": "(?i)(discord[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([0-9]{18})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "discord"
+        ]
+      },
+      {
+        "id": "Discord client secret",
+        "description": "Discord client secret",
+        "regex": "(?i)(discord[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9=_\\-]{32})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "discord"
+        ]
+      },
+      {
+        "id": "Doppler API token",
+        "description": "Doppler API token",
+        "regex": "['\\\"](dp\\.pt\\.)(?i)[a-z0-9]{43}['\\\"]",
+        "keywords": [
+          "doppler"
+        ]
+      },
+      {
+        "id": "Dropbox API secret/key",
+        "description": "Dropbox API secret/key",
+        "regex": "(?i)(dropbox[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9]{15})['\\\"]",
+        "keywords": [
+          "dropbox"
+        ]
+      },
+      {
+        "id": "Dropbox short lived API token",
+        "description": "Dropbox short lived API token",
+        "regex": "(?i)(dropbox[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"](sl\\.[a-z0-9\\-=_]{135})['\\\"]",
+        "keywords": [
+          "dropbox"
+        ]
+      },
+      {
+        "id": "Dropbox long lived API token",
+        "description": "Dropbox long lived API token",
+        "regex": "(?i)(dropbox[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"][a-z0-9]{11}(AAAAAAAAAA)[a-z0-9\\-_=]{43}['\\\"]",
+        "keywords": [
+          "dropbox"
+        ]
+      },
+      {
+        "id": "Duffel API token",
+        "description": "Duffel API token",
+        "regex": "['\\\"]duffel_(test|live)_(?i)[a-z0-9_-]{43}['\\\"]",
+        "keywords": [
+          "duffel"
+        ]
+      },
+      {
+        "id": "Dynatrace API token",
+        "description": "Dynatrace API token",
+        "regex": "['\\\"]dt0c01\\.(?i)[a-z0-9]{24}\\.[a-z0-9]{64}['\\\"]",
+        "keywords": [
+          "dt0c01"
+        ]
+      },
+      {
+        "id": "EasyPost API token",
+        "description": "EasyPost API token",
+        "regex": "['\\\"]EZAK(?i)[a-z0-9]{54}['\\\"]",
+        "keywords": [
+          "EZAK"
+        ]
+      },
+      {
+        "id": "EasyPost test API token",
+        "description": "EasyPost test API token",
+        "regex": "['\\\"]EZTK(?i)[a-z0-9]{54}['\\\"]",
+        "keywords": [
+          "EZTK"
+        ]
+      },
+      {
+        "id": "Fastly API token",
+        "description": "Fastly API token",
+        "regex": "(?i)(fastly[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9\\-=_]{32})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "fastly"
+        ]
+      },
+      {
+        "id": "Finicity client secret",
+        "description": "Finicity client secret",
+        "regex": "(?i)(finicity[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9]{20})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "finicity"
+        ]
+      },
+      {
+        "id": "Finicity API token",
+        "description": "Finicity API token",
+        "regex": "(?i)(finicity[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-f0-9]{32})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "finicity"
+        ]
+      },
+      {
+        "id": "Flutterwave public key",
+        "description": "Flutterwave public key",
+        "regex": "FLWPUBK_TEST-(?i)[a-h0-9]{32}-X",
+        "keywords": [
+          "FLWPUBK_TEST"
+        ]
+      },
+      {
+        "id": "Flutterwave secret key",
+        "description": "Flutterwave secret key",
+        "regex": "FLWSECK_TEST-(?i)[a-h0-9]{32}-X",
+        "keywords": [
+          "FLWSECK_TEST"
+        ]
+      },
+      {
+        "id": "Flutterwave encrypted key",
+        "description": "Flutterwave encrypted key",
+        "regex": "FLWSECK_TEST[a-h0-9]{12}",
+        "keywords": [
+          "FLWSECK_TEST"
+        ]
+      },
+      {
+        "id": "Frame.io API token",
+        "description": "Frame.io API token",
+        "regex": "fio-u-(?i)[a-z0-9-_=]{64}",
+        "keywords": [
+          "fio-u-"
+        ]
+      },
+      {
+        "id": "GoCardless API token",
+        "description": "GoCardless API token",
+        "regex": "['\\\"]live_(?i)[a-z0-9-_=]{40}['\\\"]",
+        "keywords": [
+          "gocardless"
+        ]
+      },
+      {
+        "id": "Grafana API token",
+        "description": "Grafana API token",
+        "regex": "['\\\"]eyJrIjoi(?i)[a-z0-9-_=]{72,92}['\\\"]",
+        "keywords": [
+          "grafana"
+        ]
+      },
+      {
+        "id": "Hashicorp Terraform user/org API token",
+        "description": "Hashicorp Terraform user/org API token",
+        "regex": "['\\\"](?i)[a-z0-9]{14}\\.atlasv1\\.[a-z0-9-_=]{60,70}['\\\"]",
+        "keywords": [
+          "atlasv1",
+          "hashicorp",
+          "terraform"
+        ]
+      },
+      {
+        "id": "Hashicorp Vault batch token",
+        "description": "Hashicorp Vault batch token",
+        "regex": "b\\.AAAAAQ[0-9a-zA-Z_-]{156}",
+        "keywords": [
+          "hashicorp",
+          "AAAAAQ",
+          "vault"
+        ]
+      },
+      {
+        "id": "Hubspot API token",
+        "description": "Hubspot API token",
+        "regex": "(?i)(hubspot[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "hubspot"
+        ]
+      },
+      {
+        "id": "Intercom API token",
+        "description": "Intercom API token",
+        "regex": "(?i)(intercom[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9=_]{60})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "intercom"
+        ]
+      },
+      {
+        "id": "Intercom client secret/ID",
+        "description": "Intercom client secret/ID",
+        "regex": "(?i)(intercom[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "intercom"
+        ]
+      },
+      {
+        "id": "Ionic API token",
+        "description": "Ionic API token",
+        "regex": "ion_(?i)[a-z0-9]{42}",
+        "keywords": [
+          "ion_"
+        ]
+      },
+      {
+        "id": "Linear API token",
+        "description": "Linear API token",
+        "regex": "lin_api_(?i)[a-z0-9]{40}",
+        "keywords": [
+          "lin_api_"
+        ]
+      },
+      {
+        "id": "Linear client secret/ID",
+        "description": "Linear client secret/ID",
+        "regex": "(?i)(linear[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-f0-9]{32})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "linear"
+        ]
+      },
+      {
+        "id": "Lob API Key",
+        "description": "Lob API Key",
+        "regex": "(?i)(lob[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]((live|test)_[a-f0-9]{35})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "lob"
+        ]
+      },
+      {
+        "id": "Lob Publishable API Key",
+        "description": "Lob Publishable API Key",
+        "regex": "(?i)(lob[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]((test|live)_pub_[a-f0-9]{31})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "lob"
+        ]
+      },
+      {
+        "id": "Mailchimp API key",
+        "description": "Mailchimp API key",
+        "regex": "(?i)(mailchimp[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-f0-9]{32}-us20)['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "mailchimp"
+        ]
+      },
+      {
+        "id": "Mailgun private API token",
+        "description": "Mailgun private API token",
+        "regex": "(?i)(mailgun[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"](key-[a-f0-9]{32})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "mailgun"
+        ]
+      },
+      {
+        "id": "Mailgun public validation key",
+        "description": "Mailgun public validation key",
+        "regex": "(?i)(mailgun[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"](pubkey-[a-f0-9]{32})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "mailgun"
+        ]
+      },
+      {
+        "id": "Mailgun webhook signing key",
+        "description": "Mailgun webhook signing key",
+        "regex": "(?i)(mailgun[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-h0-9]{32}-[a-h0-9]{8}-[a-h0-9]{8})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "mailgun"
+        ]
+      },
+      {
+        "id": "Mapbox API token",
+        "description": "Mapbox API token",
+        "regex": "(?i)(pk\\.[a-z0-9]{60}\\.[a-z0-9]{22})",
+        "keywords": [
+          "mapbox"
+        ]
+      },
+      {
+        "id": "messagebird-api-token",
+        "description": "MessageBird API token",
+        "regex": "(?i)(messagebird[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9]{25})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "messagebird"
+        ]
+      },
+      {
+        "id": "MessageBird API client ID",
+        "description": "MessageBird API client ID",
+        "regex": "(?i)(messagebird[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-h0-9]{8}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{4}-[a-h0-9]{12})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "messagebird"
+        ]
+      },
+      {
+        "id": "New Relic user API Key",
+        "description": "New Relic user API Key",
+        "regex": "['\\\"](NRAK-[A-Z0-9]{27})['\\\"]",
+        "keywords": [
+          "NRAK"
+        ]
+      },
+      {
+        "id": "New Relic user API ID",
+        "description": "New Relic user API ID",
+        "regex": "(?i)(newrelic[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([A-Z0-9]{64})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "newrelic"
+        ]
+      },
+      {
+        "id": "New Relic ingest browser API token",
+        "description": "New Relic ingest browser API token",
+        "regex": "['\\\"](NRJS-[a-f0-9]{19})['\\\"]",
+        "keywords": [
+          "NRJS"
+        ]
+      },
+      {
+        "id": "npm access token",
+        "description": "npm access token",
+        "regex": "['\\\"](npm_(?i)[a-z0-9]{36})['\\\"]",
+        "keywords": [
+          "npm_"
+        ]
+      },
+      {
+        "id": "Planetscale password",
+        "description": "Planetscale password",
+        "regex": "pscale_pw_(?i)[a-z0-9\\-_\\.]{43}",
+        "keywords": [
+          "pscale_pw_"
+        ]
+      },
+      {
+        "id": "Planetscale API token",
+        "description": "Planetscale API token",
+        "regex": "pscale_tkn_(?i)[a-z0-9\\-_\\.]{43}",
+        "keywords": [
+          "pscale_tkn_"
+        ]
+      },
+      {
+        "id": "Postman API token",
+        "description": "Postman API token",
+        "regex": "PMAK-(?i)[a-f0-9]{24}\\-[a-f0-9]{34}",
+        "keywords": [
+          "PMAK-"
+        ]
+      },
+      {
+        "id": "Pulumi API token",
+        "description": "Pulumi API token",
+        "regex": "pul-[a-f0-9]{40}",
+        "keywords": [
+          "pul-"
+        ]
+      },
+      {
+        "id": "Rubygem API token",
+        "description": "Rubygem API token",
+        "regex": "rubygems_[a-f0-9]{48}",
+        "keywords": [
+          "rubygems_"
+        ]
+      },
+      {
+        "id": "Segment Public API token",
+        "description": "Segment Public API token",
+        "regex": "sgp_[a-zA-Z0-9]{64}",
+        "keywords": [
+          "sgp_"
+        ]
+      },
+      {
+        "id": "Sendgrid API token",
+        "description": "Sendgrid API token",
+        "regex": "SG\\.(?i)[a-z0-9_\\-\\.]{66}",
+        "keywords": [
+          "sendgrid"
+        ]
+      },
+      {
+        "id": "Sendinblue API token",
+        "description": "Sendinblue API token",
+        "regex": "xkeysib-[a-f0-9]{64}\\-(?i)[a-z0-9]{16}",
+        "keywords": [
+          "xkeysib-"
+        ]
+      },
+      {
+        "id": "Sendinblue SMTP token",
+        "description": "Sendinblue SMTP token",
+        "regex": "xsmtpsib-[a-f0-9]{64}\\-(?i)[a-z0-9]{16}",
+        "keywords": [
+          "xsmtpsib-"
+        ]
+      },
+      {
+        "id": "Shippo API token",
+        "description": "Shippo API token",
+        "regex": "shippo_(live|test)_[a-f0-9]{40}",
+        "keywords": [
+          "shippo_"
+        ]
+      },
+      {
+        "id": "Linkedin Client secret",
+        "description": "Linkedin Client secret",
+        "regex": "(?i)(linkedin[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z]{16})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "linkedin"
+        ]
+      },
+      {
+        "id": "Linkedin Client ID",
+        "description": "Linkedin Client ID",
+        "regex": "(?i)(linkedin[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9]{14})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "linkedin"
+        ]
+      },
+      {
+        "id": "Twitch API token",
+        "description": "Twitch API token",
+        "regex": "(?i)(twitch[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}['\\\"]([a-z0-9]{30})['\\\"]",
+        "secretGroup": 3,
+        "keywords": [
+          "twitch"
+        ]
+      },
+      {
+        "id": "Typeform API token",
+        "description": "Typeform API token",
+        "regex": "(?i)(typeform[a-z0-9_ .\\-,]{0,25})(=|>|:=|\\|\\|:|<=|=>|:).{0,5}(tfp_[a-z0-9\\-_\\.=]{59})",
+        "secretGroup": 3,
+        "keywords": [
+          "typeform"
+        ]
+      },
+      {
+        "id": "Yandex.Cloud IAM Cookie v1 - 1",
+        "description": "Yandex.Cloud IAM Cookie v1",
+        "regex": "\\bc1\\.[A-Z0-9a-z_-]+[=]{0,2}\\.[A-Z0-9a-z_-]{86}[=]{0,2}['|\\\"|\\n|\\r|\\s|\\x60]",
+        "keywords": [
+          "yandex"
+        ]
+      },
+      {
+        "id": "Yandex.Cloud IAM Cookie v1 - 2",
+        "description": "Yandex.Cloud IAM Token v1",
+        "regex": "\\bt1\\.[A-Z0-9a-z_-]+[=]{0,2}\\.[A-Z0-9a-z_-]{86}[=]{0,2}['|\\\"|\\n|\\r|\\s|\\x60]",
+        "keywords": [
+          "yandex"
+        ]
+      },
+      {
+        "id": "Yandex.Cloud IAM Cookie v1 - 3",
+        "description": "Yandex.Cloud IAM API key v1",
+        "regex": "\\bAQVN[A-Za-z0-9_\\-]{35,38}['|\\\"|\\n|\\r|\\s|\\x60]",
+        "keywords": [
+          "yandex"
+        ]
+      },
+      {
+        "id": "Yandex.Cloud AWS API compatible Access Secret",
+        "description": "Yandex.Cloud AWS API compatible Access Secret",
+        "regex": "\\bYC[a-zA-Z0-9_\\-]{38}['|\\\"|\\n|\\r|\\s|\\x60]",
+        "keywords": [
+          "yandex"
+        ]
+      },
+      {
+        "id": "Meta access token",
+        "description": "Meta access token",
+        "regex": "\\bEA[a-zA-Z0-9]{90,400}['|\\\"|\\n|\\r|\\s|\\x60]",
+        "keywords": [
+          "EA"
+        ]
+      },
+      {
+        "id": "Oculus access token",
+        "description": "Oculus access token",
+        "regex": "\\bOC[a-zA-Z0-9]{90,400}['|\\\"|\\n|\\r|\\s|\\x60]",
+        "keywords": [
+          "OC"
+        ]
+      },
+      {
+        "id": "Instagram access token",
+        "description": "Instagram access token",
+        "regex": "\\bIG[a-zA-Z0-9]{90,400}['|\\\"|\\n|\\r|\\s|\\x60]",
+        "keywords": [
+          "IG"
+        ]
+      },
+      {
+        "id": "CircleCI access tokens",
+        "description": "CircleCI access tokens",
+        "regex": "\\bCCI(?:PAT|PRJ)_[a-zA-Z0-9]{22}_[a-f0-9]{40}",
+        "keywords": [
+          "CircleCI"
+        ]
+      },
+      {
+        "description": "Open AI API key",
+        "id": "open ai token",
+        "regex": "\\bsk-[a-zA-Z0-9]{48}\\b",
+        "keywords": [
+          "sk-"
+        ]
+      },
+      {
+        "id": "Tailscale key",
+        "description": "Tailscale keys",
+        "regex": "\\btskey-\\w+-\\w+-\\w+\\b",
+        "keywords": [
+          "tskey-"
+        ]
+      }
+    ]
+  },
+  "findings": {
+    "49757d656e182f9732f85b94d8131b351dc7cddcf4038b338064af51450986f1": {
+      "id": "49757d656e182f9732f85b94d8131b351dc7cddcf4038b338064af51450986f1",
+      "url": "https://testing.atlassian.net/wiki/spaces/CS/pages/19968862/007-3.3+Configuration",
+      "secret": "##\naws.access.keyId=<REDACTED>\naws.access.secretKe",
+      "details": {
+        "matched_regex_config": {
+          "id": "AWS",
+          "description": "AWS Access Token",
+          "regex": "\\bAKIA[0-9A-Z]{16}\\b",
+          "tags": [
+            "aws",
+            "revocation_type"
+          ],
+          "keywords": [
+            "AKIA"
+          ]
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "05610c1c48395ed79b7b4b4dbce7407a4bfb8bdbb8d3edce785d172ac2a68e18": {
+      "id": "05610c1c48395ed79b7b4b4dbce7407a4bfb8bdbb8d3edce785d172ac2a68e18",
+      "url": "https://testing.atlassian.net/wiki/spaces/DAT/pages/25002228/Atlas+DB+Connector",
+      "secret": "ostgres url\n\nurl = \"<REDACTED>\nengine = sqlalchemy",
+      "details": {
+        "matched_regex_config": {
+          "id": "Password in URL",
+          "description": "Password in URL",
+          "regex": "[a-zA-Z]{3,10}:\\/\\/[^$][^:@\\/\\n]{3,20}:[^$][^:@\\n\\/]{3,40}@.{1,100}"
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "d2e4247f2926ba8fec40a059cca536748af3c2011fce265f0f15e5cfd9bb552b": {
+      "id": "d2e4247f2926ba8fec40a059cca536748af3c2011fce265f0f15e5cfd9bb552b",
+      "url": "https://testing.atlassian.net/wiki/spaces/DS/pages/21540885/Safeguard+-+other+DB+engines+for+the+audio+hashes",
+      "secret": "ONNECTION_STRING = '<REDACTED>\nclient = MongoClien",
+      "details": {
+        "matched_regex_config": {
+          "id": "Password in URL",
+          "description": "Password in URL",
+          "regex": "[a-zA-Z]{3,10}:\\/\\/[^$][^:@\\/\\n]{3,20}:[^$][^:@\\n\\/]{3,40}@.{1,100}"
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "bf2e6402fd0d051f87682f0fd2c83fc30737c17657f436ba6c8ce2508af6f623": {
+      "id": "bf2e6402fd0d051f87682f0fd2c83fc30737c17657f436ba6c8ce2508af6f623",
+      "url": "https://testing.atlassian.net/wiki/spaces/DMP/pages/1288474/SSH+Tunnel+to+Cloud+SQL",
+      "secret": "hemy.create_engine('<REDACTED>\n\tSession = sessionm",
+      "details": {
+        "matched_regex_config": {
+          "id": "Password in URL",
+          "description": "Password in URL",
+          "regex": "[a-zA-Z]{3,10}:\\/\\/[^$][^:@\\/\\n]{3,20}:[^$][^:@\\n\\/]{3,40}@.{1,100}"
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "e1343d4d60f2a5eb87ec4472c331c7c2ef7da737b0376bd199067fc4377b5e0c": {
+      "id": "e1343d4d60f2a5eb87ec4472c331c7c2ef7da737b0376bd199067fc4377b5e0c",
+      "url": "https://testing.atlassian.net/wiki/spaces/PROBILLER/pages/29948310/Adding+a+new+support+site+BE",
+      "secret": "olspan=\"1\"><a href=\"<REDACTED>><td colspan=\"1\" sty",
+      "details": {
+        "matched_regex_config": {
+          "id": "Password in URL",
+          "description": "Password in URL",
+          "regex": "[a-zA-Z]{3,10}:\\/\\/[^$][^:@\\/\\n]{3,20}:[^$][^:@\\n\\/]{3,40}@.{1,100}"
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "406b2a3d6d972c87cdda4bdde11deac66a08ea775e9999c6ebb217b3b2ab5304": {
+      "id": "406b2a3d6d972c87cdda4bdde11deac66a08ea775e9999c6ebb217b3b2ab5304",
+      "url": "https://testing.atlassian.net/wiki/spaces/PROBILLER/pages/30125648/Mysoftbill+QA+-+Analysis",
+      "secret": "lt\",\n\t\"publicKey\": \"<REDACTED>\"\n\t}\n}]]></ac:plain-",
+      "details": {
+        "matched_regex_config": {
+          "id": "Stripe",
+          "description": "Stripe",
+          "regex": "(?i)(sk|pk)_(test|live)_[0-9a-z]{10,32}",
+          "keywords": [
+            "sk_test",
+            "pk_test",
+            "sk_live",
+            "pk_live"
+          ]
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "336895dec22bf107ab8fa06db8d05cdb25d6decae4429d80bc5afe79fbcdfc0a": {
+      "id": "336895dec22bf107ab8fa06db8d05cdb25d6decae4429d80bc5afe79fbcdfc0a",
+      "url": "https://testing.atlassian.net/wiki/spaces/PROBILLER/pages/30129091/SCOPE-18602+MySoftBill+UAT",
+      "secret": "licKey&quot;: &quot;<REDACTED>&quot;<br />&nbsp; &",
+      "details": {
+        "matched_regex_config": {
+          "id": "Stripe",
+          "description": "Stripe",
+          "regex": "(?i)(sk|pk)_(test|live)_[0-9a-z]{10,32}",
+          "keywords": [
+            "sk_test",
+            "pk_test",
+            "sk_live",
+            "pk_live"
+          ]
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "8e01b92cb297f9b6041964559ddeed1bcfe61599310dab067f2f09fb7531281b": {
+      "id": "8e01b92cb297f9b6041964559ddeed1bcfe61599310dab067f2f09fb7531281b",
+      "url": "https://testing.atlassian.net/wiki/spaces/PROBILLER/pages/30154330/TODO+NOTE+FOR+Request",
+      "secret": "olspan=\"1\"><a href=\"<REDACTED>o</td><td colspan=\"1",
+      "details": {
+        "matched_regex_config": {
+          "id": "Password in URL",
+          "description": "Password in URL",
+          "regex": "[a-zA-Z]{3,10}:\\/\\/[^$][^:@\\/\\n]{3,20}:[^$][^:@\\n\\/]{3,40}@.{1,100}"
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "e0d9829b7968c43c42c6341dcf25de334d074e37b7bf64b0f97394f04aed2467": {
+      "id": "e0d9829b7968c43c42c6341dcf25de334d074e37b7bf64b0f97394f04aed2467",
+      "url": "https://testing.atlassian.net/wiki/spaces/PROBILLER/pages/30154381/Google+Experiment+configuration",
+      "secret": ",\n  \"private_key\": \"<REDACTED>\\nMIIEvgIBADANBgkqhk",
+      "details": {
+        "matched_regex_config": {
+          "id": "PKCS8 private key",
+          "description": "PKCS8 private key",
+          "regex": "-----BEGIN PRIVATE KEY-----",
+          "keywords": [
+            "-----BEGIN PRIVATE KEY-----"
+          ]
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "8c6469ccd4deab89a9f6c6317f84c7deec651210136c3d0462cae45808224e88": {
+      "id": "8c6469ccd4deab89a9f6c6317f84c7deec651210136c3d0462cae45808224e88",
+      "url": "https://testing.atlassian.net/wiki/spaces/PROBILLER/pages/30154387/List+of+Google+Experiments",
+      "secret": "te_key&quot;: &quot;<REDACTED>\\nMIIEvgIBADANBgkqhk",
+      "details": {
+        "matched_regex_config": {
+          "id": "PKCS8 private key",
+          "description": "PKCS8 private key",
+          "regex": "-----BEGIN PRIVATE KEY-----",
+          "keywords": [
+            "-----BEGIN PRIVATE KEY-----"
+          ]
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "db44576aaaf05a1dd3337c4c55739d1c981346b4745615814f2543575a7e0a4f": {
+      "id": "db44576aaaf05a1dd3337c4c55739d1c981346b4745615814f2543575a7e0a4f",
+      "url": "https://testing.atlassian.net/wiki/spaces/INFSEC/pages/43549424/Legal+Workflows",
+      "secret": "xy_auth = '<a href=\"<REDACTED>otating.proxyrack.ne",
+      "details": {
+        "matched_regex_config": {
+          "id": "Password in URL",
+          "description": "Password in URL",
+          "regex": "[a-zA-Z]{3,10}:\\/\\/[^$][^:@\\/\\n]{3,20}:[^$][^:@\\n\\/]{3,40}@.{1,100}"
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "95313351d245a509fdceca3c8c0b7549d078f915c75bfc423cab13c706ba0006": {
+      "id": "95313351d245a509fdceca3c8c0b7549d078f915c75bfc423cab13c706ba0006",
+      "url": "https://testing.atlassian.net/wiki/spaces/MGNUT/pages/23112821/Postman",
+      "secret": "-header 'X-Api-Key: <REDACTED>'<br /><br />2. Base",
+      "details": {
+        "matched_regex_config": {
+          "id": "Postman API token",
+          "description": "Postman API token",
+          "regex": "PMAK-(?i)[a-f0-9]{24}\\-[a-f0-9]{34}",
+          "keywords": [
+            "PMAK-"
+          ]
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "f98f3c10baeb90fed6e138c82b697c99d7c89dbf30958b4ad971da89b8fd13df": {
+      "id": "f98f3c10baeb90fed6e138c82b697c99d7c89dbf30958b4ad971da89b8fd13df",
+      "url": "https://testing.atlassian.net/wiki/spaces/mobi/pages/15569913/Useful+commands",
+      "secret": "[CDATA[curl -IL -x \"<REDACTED>\n\nOR\n\ncurl -IL -x vi",
+      "details": {
+        "matched_regex_config": {
+          "id": "Password in URL",
+          "description": "Password in URL",
+          "regex": "[a-zA-Z]{3,10}:\\/\\/[^$][^:@\\/\\n]{3,20}:[^$][^:@\\n\\/]{3,40}@.{1,100}"
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "3a07f81938c833cf5ba2af471965a5204343cb2013371a5a897fd9298e37ad65": {
+      "id": "3a07f81938c833cf5ba2af471965a5204343cb2013371a5a897fd9298e37ad65",
+      "url": "https://testing.atlassian.net/wiki/spaces/NIC/pages/7604505/Distributions+Environments",
+      "secret": "    \"current_key\": \"<REDACTED>\n        }\n      ],\n",
+      "details": {
+        "matched_regex_config": {
+          "id": "GCP API key",
+          "description": "GCP API keys can be misused to gain API quota from billed projects",
+          "tags": [
+            "gitlab_partner_token",
+            "revocation_type"
+          ],
+          "regex": "(?i)\\b(AIza[0-9A-Za-z-_]{35})(?:['|\\\"|\\n|\\r|\\s|\\x60|;]|$)",
+          "secretGroup": 1,
+          "keywords": [
+            "AIza"
+          ]
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "b9dcabfcbfada43276938c2a20cfc6850f66b03c8dba12ed23e1bb04a57f9e2c": {
+      "id": "b9dcabfcbfada43276938c2a20cfc6850f66b03c8dba12ed23e1bb04a57f9e2c",
+      "url": "https://testing.atlassian.net/wiki/spaces/NIC/pages/7663554/Compliance+Operations",
+      "secret": "56&X-Amz-Credential=<REDACTED>%2F20210713%2Fus-eas",
+      "details": {
+        "matched_regex_config": {
+          "id": "AWS",
+          "description": "AWS Access Token",
+          "regex": "\\bAKIA[0-9A-Z]{16}\\b",
+          "tags": [
+            "aws",
+            "revocation_type"
+          ],
+          "keywords": [
+            "AKIA"
+          ]
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "f052f9155e7489bf779a45ec416e5d23a4c63e26ea5527486290b1ea29cffa65": {
+      "id": "f052f9155e7489bf779a45ec416e5d23a4c63e26ea5527486290b1ea29cffa65",
+      "url": "https://testing.atlassian.net/wiki/spaces/paysites/pages/30531725/Cron+Job+List",
+      "secret": "et -m -r -np -t inf <REDACTED>\ncd /home/dbimport/2",
+      "details": {
+        "matched_regex_config": {
+          "id": "Password in URL",
+          "description": "Password in URL",
+          "regex": "[a-zA-Z]{3,10}:\\/\\/[^$][^:@\\/\\n]{3,20}:[^$][^:@\\n\\/]{3,40}@.{1,100}"
+        },
+        "platform": "Confluence",
+        "ticket_field": "description"
+      }
+    },
+    "f7d257a57274f1aaa0418ea694fd2b3784b34f8b5d0fb797a9c2f1a1297388ce": {
+      "id": "f7d257a57274f1aaa0418ea694fd2b3784b34f8b5d0fb797a9c2f1a1297388ce",
+      "url": "https://testing.atlassian.net/wiki/spaces/PE/pages/41207424/Troubleshooting",
+      "secret": "e contained within '<REDACTED>' and '-----END PRIV",
+      "details": {
+        "matched_regex_config": {
+          "id": "PKCS8 private key",
+          "description": "PKCS8 private key",
+          "regex": "-----BEGIN PRIVATE KEY-----",
+          "keywords": [
+            "-----BEGIN PRIVATE KEY-----"
+          ]
+        },
+        "platform": "Confluence",
+        "ticket_field": "comments"
+      }
+    }
+  }
+}
