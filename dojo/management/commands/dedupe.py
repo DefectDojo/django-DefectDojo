@@ -2,11 +2,13 @@ import logging
 
 from django.core.management.base import BaseCommand
 
+from dojo.finding.deduplication import (
+    do_dedupe_finding,
+    do_dedupe_finding_task,
+)
 from dojo.models import Finding, Product
 from dojo.utils import (
     calculate_grade,
-    do_dedupe_finding,
-    do_dedupe_finding_task,
     get_system_setting,
     mass_model_updater,
 )
