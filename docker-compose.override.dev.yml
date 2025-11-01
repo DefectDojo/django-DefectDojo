@@ -60,4 +60,4 @@ services:
         protocol: tcp
         mode: host
   "webhook.endpoint":
-    image: mccutchen/go-httpbin:2.18.3@sha256:3992f3763e9ce5a4307eae0a869a78b4df3931dc8feba74ab823dd2444af6a6b
+    image: mccutchen/go-httpbin:2.19.0@sha256:be41c6c3772393c097e15f9f8ac381de4ce9e9841c545556af98fbe2e707c619
