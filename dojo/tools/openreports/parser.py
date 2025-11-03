@@ -261,7 +261,7 @@ class OpenreportsParser:
                 static_finding=True,
                 dynamic_finding=False,
                 fix_available=fix_available,
-                tags=tags,
+                unsaved_tags=tags,
             )
 
             # Add vulnerability ID if it's a CVE
