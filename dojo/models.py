@@ -25,7 +25,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
 from django.db import connection, models
-from django.db.models import Count, JSONField, Q
+from django.db.models import Count, F, JSONField, Q
 from django.db.models.expressions import Case, When
 from django.db.models.functions import Lower
 from django.urls import reverse
@@ -129,7 +129,7 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
             obj.tags.set(cleaned_tag_list)
 
 
-def _copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
+def copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
     if exclude_fields is None:
         exclude_fields = []
     new_model_instance = model_in_database.__class__()
@@ -231,15 +231,15 @@ class Dojo_User(User):
     def force_password_reset(user):
         return hasattr(user, "usercontactinfo") and user.usercontactinfo.force_password_reset
 
-    def disable_force_password_reset(user):
-        if hasattr(user, "usercontactinfo"):
-            user.usercontactinfo.force_password_reset = False
-            user.usercontactinfo.save()
+    def disable_force_password_reset(self):
+        if hasattr(self, "usercontactinfo"):
+            self.usercontactinfo.force_password_reset = False
+            self.usercontactinfo.save()
 
-    def enable_force_password_reset(user):
-        if hasattr(user, "usercontactinfo"):
-            user.usercontactinfo.force_password_reset = True
-            user.usercontactinfo.save()
+    def enable_force_password_reset(self):
+        if hasattr(self, "usercontactinfo"):
+            self.usercontactinfo.force_password_reset = True
+            self.usercontactinfo.save()
 
     @staticmethod
     def generate_full_name(user):
@@ -750,7 +750,7 @@ class NoteHistory(models.Model):
     current_editor = models.ForeignKey(Dojo_User, editable=False, null=True, on_delete=models.CASCADE)
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         copy.save()
         return copy
 
@@ -776,7 +776,7 @@ class Notes(models.Model):
         return self.entry
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_history = list(self.history.all())
         # Save the object before setting any ManyToMany relationships
@@ -801,7 +801,7 @@ class FileUpload(models.Model):
             storage.delete(path)
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Add unique modifier to file name
         copy.title = f"{self.title} - clone-{str(uuid4())[:8]}"
         # Create new unique file name
@@ -1581,7 +1581,7 @@ class Engagement(models.Model):
         return reverse("view_engagement", args=[str(self.id)])
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
@@ -1690,6 +1690,17 @@ class Endpoint_Status(models.Model):
         indexes = [
             models.Index(fields=["finding", "mitigated"]),
             models.Index(fields=["endpoint", "mitigated"]),
+            # Optimize frequent lookups of "active" statuses (mitigated/flags all False)
+            models.Index(
+                name="idx_eps_active_by_endpoint",
+                fields=["endpoint"],
+                condition=Q(mitigated=False, false_positive=False, out_of_scope=False, risk_accepted=False),
+            ),
+            models.Index(
+                name="idx_eps_active_by_finding",
+                fields=["finding"],
+                condition=Q(mitigated=False, false_positive=False, out_of_scope=False, risk_accepted=False),
+            ),
         ]
         constraints = [
             models.UniqueConstraint(fields=["finding", "endpoint"], name="endpoint-finding relation"),
@@ -1699,7 +1710,7 @@ class Endpoint_Status(models.Model):
         return f"'{self.finding}' on '{self.endpoint}'"
 
     def copy(self, finding=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         current_endpoint = self.endpoint
         if finding:
             copy.finding = finding
@@ -1749,6 +1760,12 @@ class Endpoint(models.Model):
         ordering = ["product", "host", "protocol", "port", "userinfo", "path", "query", "fragment"]
         indexes = [
             models.Index(fields=["product"]),
+            # Fast case-insensitive equality on host within product scope
+            models.Index(
+                F("product"),
+                Lower("host"),
+                name="idx_ep_product_lower_host",
+            ),
         ]
 
     def __hash__(self):
@@ -2161,7 +2178,7 @@ class Test(models.Model):
         return bc
 
     def copy(self, engagement=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
@@ -2829,7 +2846,7 @@ class Finding(models.Model):
         return reverse("view_finding", args=[str(self.id)])
 
     def copy(self, test=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
@@ -3010,6 +3027,7 @@ class Finding(models.Model):
         if hasattr(settings, "HASH_CODE_FIELDS_ALWAYS"):
             for field in settings.HASH_CODE_FIELDS_ALWAYS:
                 if getattr(self, field):
+                    deduplicationLogger.debug("adding HASH_CODE_FIELDS_ALWAYSfield %s to hash_fields: %s", field, getattr(self, field))
                     fields_to_hash += str(getattr(self, field))
 
         logger.debug("fields_to_hash      : %s", fields_to_hash)
@@ -3813,7 +3831,7 @@ class Risk_Acceptance(models.Model):
         return None
 
     def copy(self, engagement=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
@@ -3962,7 +3980,7 @@ class JIRA_Instance(models.Model):
     high_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: High"))
     critical_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: Critical"))
     finding_text = models.TextField(null=True, blank=True, help_text=_("Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information."))
-    accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, verbose_name="Risk Accepted resolution mapping", help_text=_("JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. This Risk Acceptance will not have an expiration date. This mapping is not used when Findings are pushed to JIRA. In that case the Risk Accepted Findings are closed in JIRA and JIRA sets the default resolution."))
+    accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, verbose_name="Risk Accepted resolution mapping", help_text=_('JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. The expiration time for this Risk Acceptance will be determined by the "Risk acceptance form default days" in "System Settings". This mapping is not used when Findings are pushed to JIRA. In that case the Risk Accepted Findings are closed in JIRA and JIRA sets the default resolution.'))
     false_positive_mapping_resolution = models.CharField(null=True, blank=True, verbose_name="False Positive resolution mapping", max_length=300, help_text=_("JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding being marked as False Positive Defect Dojo. This mapping is not used when Findings are pushed to JIRA. In that case the Finding is closed in JIRA and JIRA sets the default resolution."))
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
     finding_jira_sync = models.BooleanField(default=False, blank=False, verbose_name=_("Automatically sync Findings with JIRA?"), help_text=_("If enabled, this will sync changes to a Finding automatically to JIRA"))
