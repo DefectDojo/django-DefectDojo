@@ -31,6 +31,7 @@ class EndpointManager:
         self.clean_unsaved_endpoints(endpoints)
         for endpoint in endpoints:
             ep = None
+            eps = []
             try:
                 ep, _ = endpoint_get_or_create(
                     protocol=endpoint.protocol,
@@ -41,6 +42,7 @@ class EndpointManager:
                     query=endpoint.query,
                     fragment=endpoint.fragment,
                     product=finding.test.engagement.product)
+                eps.append(ep)
             except (MultipleObjectsReturned):
                 msg = (
                     f"Endpoints in your database are broken. "
@@ -48,10 +50,12 @@ class EndpointManager:
                 )
                 raise Exception(msg)
 
-            Endpoint_Status.objects.get_or_create(
-                finding=finding,
-                endpoint=ep,
-                defaults={"date": finding.date})
+            # bulk_create will translate to INSERT WITH IGNORE CONFLICTS
+            # much faster than get_or_create which issues two queries per endpoint
+            # bulk_create will not trigger endpoint_status.save and signals which is fine for now
+            rows = [Endpoint_Status(finding=finding, endpoint=e, date=finding.date) for e in eps]
+            Endpoint_Status.objects.bulk_create(rows, ignore_conflicts=True, batch_size=1000)
+
         logger.debug(f"IMPORT_SCAN: {len(endpoints)} endpoints imported")
 
     @dojo_async_task
