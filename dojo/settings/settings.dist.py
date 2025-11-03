@@ -113,6 +113,7 @@ env = environ.FileAwareEnv(
     DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
     DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
     DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
+    DD_SOCIAL_AUTH_CREATE_USER_MAPPING=(str, "username"),  # could also be email or fullname
     DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED=(bool, False),
@@ -576,6 +577,7 @@ PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 SHOW_LOGIN_FORM = env("DD_SOCIAL_AUTH_SHOW_LOGIN_FORM")
 SOCIAL_LOGIN_AUTO_REDIRECT = env("DD_SOCIAL_LOGIN_AUTO_REDIRECT")
 SOCIAL_AUTH_CREATE_USER = env("DD_SOCIAL_AUTH_CREATE_USER")
+SOCIAL_AUTH_CREATE_USER_MAPPING = env("DD_SOCIAL_AUTH_CREATE_USER_MAPPING")
 
 SOCIAL_AUTH_STRATEGY = "social_django.strategy.DjangoStrategy"
 SOCIAL_AUTH_STORAGE = "social_django.models.DjangoStorage"
@@ -941,7 +943,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dojo.middleware.LoginRequiredMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
-    "social_django.middleware.SocialAuthExceptionMiddleware",
+    "dojo.middleware.CustomSocialAuthExceptionMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.middleware.AuditlogMiddleware",
     "dojo.middleware.AsyncSearchContextMiddleware",
@@ -1895,6 +1897,7 @@ VULNERABILITY_URLS = {
     "KB": "https://support.hcl-software.com/csm?id=kb_article&sysparm_article=",  # e.g. https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0108401
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
     "LEN-": "https://support.lenovo.com/cl/de/product_security/",  # e.g. https://support.lenovo.com/cl/de/product_security/LEN-94953
+    "MAL-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/mal-2025-49305
     "MGAA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGAA-2013-0054.html
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
     "MSRC_": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/msrc_cve-2025-59200
