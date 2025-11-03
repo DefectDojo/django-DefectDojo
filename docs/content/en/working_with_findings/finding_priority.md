@@ -58,8 +58,9 @@ High. Criticality is a subjective field, so when assigning this field, consider 
 Product compares to other Products in your organization.
 * **User Records** is a numerical estimation of user records in a database (or a system
 that can access that database).
-* **Revenue** is a numerical estimation of annual revenue for the Product. It is not
-possible to set a currency type in DefectDojo, so make sure that all of your Revenue
+* **Revenue** is a numerical estimation of annual revenue for the Product. To calculate Priority, DefectDojo will calculate a percentage by comparing this Product's revenue to the sum of all Products within the Product Type.
+
+It is not possible to set a currency type in DefectDojo, so make sure that all of your Revenue
 estimations have the same currency denomination. (“50000” could mean $50,000
 US Dollars or ¥50,000 Japanese Yen - the denomination does not matter as long as
 all of your Products have revenue calculated in the same currency).
@@ -85,9 +86,6 @@ Findings within a Product can have additional metadata which can further adjust 
 * Whether the Finding is in the KEV (Known Exploited Vulnerabilities) database, which is checked by DefectDojo on a regular basis
 * The tool-reported Severity of a Finding (Info, Low, Medium, High, Critical)
 
-Currently, Priority calculation and the underlying formula cannot be adjusted. These
-numbers are meant as a reference only - your team’s actual priority for remediation
-may vary from the DefectDojo calculation.
 
 ## Finding Risk Calculation
 

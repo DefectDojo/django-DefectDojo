@@ -94,6 +94,11 @@ class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
         if isinstance(exception, AuthForbidden):
             messages.error(request, "You are not authorized to log in via this method. Please contact support or use the standard login.")
             return redirect("/login?force_login_form")
+        if isinstance(exception, TypeError) and "'NoneType' object is not iterable" in str(exception):
+            logger.warning("OIDC login error: NoneType is not iterable")
+            messages.error(request, "An unexpected error occurred during social login. Please use the standard login.")
+            return redirect("/login?force_login_form")
+        logger.error(f"Unhandled exception during social login: {exception}")
         return super().process_exception(request, exception)
 
 
