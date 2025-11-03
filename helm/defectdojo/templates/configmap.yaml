@@ -1,5 +1,5 @@
 {{- $fullName := include "defectdojo.fullname" . -}}
-{{- $defaultBrokerParams := ternary "ssl_cert_reqs=optional" "" .Values.redis.tls.enabled -}}
+{{- $defaultBrokerParams := ternary "ssl_cert_reqs=optional" "" .Values.valkey.tls.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -26,10 +26,10 @@ data:
   DD_ADMIN_LAST_NAME: {{ .Values.admin.LastName | default "User" }}
   DD_ALLOWED_HOSTS: {{ include "django.allowed_hosts" . }}
   DD_SITE_URL: {{ .Values.siteUrl | default "http://localhost:8080" }}
-  DD_CELERY_BROKER_SCHEME: {{ if eq .Values.celery.broker "redis" }}{{ template "redis.scheme" . }}{{ end }}
+  DD_CELERY_BROKER_SCHEME: {{ template "redis.scheme" . }}
   DD_CELERY_BROKER_USER: ''
-  DD_CELERY_BROKER_HOST: {{ if eq .Values.celery.broker "redis" }}{{ template "redis.hostname" . }}{{ end }}
-  DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "redis" }}{{- if ( hasKey .Values.redis "master" ) -}}{{ .Values.redis.master.service.ports.redis }}{{ else }}6379{{ end }}{{- end -}}'
+  DD_CELERY_BROKER_HOST: {{ template "redis.hostname" . }}
+  DD_CELERY_BROKER_PORT: '{{ .Values.valkey.service.port }}'
   DD_CELERY_BROKER_PARAMS: '{{ .Values.redisParams | default $defaultBrokerParams }}'
   DD_CELERY_BROKER_PATH: '{{ .Values.celery.path | default "//" }}'
   DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}

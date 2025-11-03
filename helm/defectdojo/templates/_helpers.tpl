@@ -58,12 +58,10 @@
 {{- end -}}
 
 {{- define "redis.hostname" -}}
-{{- if eq .Values.celery.broker "redis" -}}
-{{- if .Values.redis.enabled -}}
-{{- printf "%s-%s" .Release.Name "redis-master" | trunc 63 | trimSuffix "-" -}}
+{{- if .Values.valkey.enabled -}}
+{{- printf "%s-%s" .Release.Name "valkey" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- .Values.redisServer | default "127.0.0.1" | quote -}}
-{{- end -}}
 {{- end -}}
 {{- end -}}
 
@@ -71,14 +69,12 @@
   Determine the protocol to use for Redis.
 */}}
 {{- define "redis.scheme" -}}
-{{- if eq .Values.celery.broker "redis" -}}
-{{- if .Values.redis.tls.enabled -}}
+{{- if .Values.valkey.tls.enabled -}}
 {{- printf "rediss" -}}
-{{- else if .Values.redis.sentinel.enabled -}}
+{{- else if .Values.valkey.sentinel.enabled -}}
 {{- printf "sentinel" -}}
 {{- else -}}
 {{- printf "redis" -}}
-{{- end -}}
 {{- end -}}
 {{- end -}}
 
