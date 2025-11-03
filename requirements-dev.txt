@@ -2,7 +2,7 @@
 # These are only needed during development and testing
 
 # Debug toolbar for development
-django-debug-toolbar==6.0.0
+django-debug-toolbar==6.1.0
 django-debug-toolbar-request-history==0.1.4
 
 # Testing dependencies
