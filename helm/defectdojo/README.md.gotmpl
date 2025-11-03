@@ -94,7 +94,7 @@ helm install \
   --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
   --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 ```
 
@@ -280,10 +280,10 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 
-# For high availability deploy multiple instances of Django, Celery and Redis
+# For high availability deploy multiple instances of Django, Celery and Valkey
 helm install \
   defectdojo \
   ./helm/defectdojo \
@@ -292,9 +292,10 @@ helm install \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
   --set celery.worker.replicas=3 \
-  --set redis.replicas=3 \
+  --set valkey.architecture=replication \
+  --set valkey.replicaCount=3 \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 
 # Run highly available PostgreSQL cluster
@@ -306,13 +307,14 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.replicas=3 \
   --set celery.worker.replicas=3 \
-  --set redis.replicas=3 \
+  --set valkey.architecture=replication \
+  --set valkey.replicaCount=3 \
   --set django.ingress.secretName="minikube-tls" \
   --set postgresql.enabled=true \
   --set postgresql.replication.enabled=true \
   --set postgresql.replication.slaveReplicas=3 \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 
 # Note: If you run `helm install defectdojo before, you will get an error
@@ -359,16 +361,13 @@ You will still need to set a host value as well.
 
 If you want to use a redis-sentinel setup as the Celery broker, you will need to set the following.
 
-1. Set redis.scheme to "sentinel" in values.yaml
+1. Set valkey.scheme to "sentinel" in values.yaml
 2. Set two additional extraEnv vars specifying the sentinel master name and port in values.yaml
 
 ```yaml
-celery:
-  broker: 'redis'
-
-redis:
-  redisServer: 'PutYourRedisSentinelAddress'
+valkey:
   scheme: 'sentinel'
+redisServer: 'PutYourRedisSentinelAddress'
 
 extraEnv:
   - name: DD_CELERY_BROKER_TRANSPORT_OPTIONS
@@ -451,10 +450,10 @@ extraEnv:
 
 #### Step 4: Deploy DefectDojo
 
-After modifying the `values.yaml` file as needed, deploy DefectDojo using Helm. This command also generates the required secrets for the DefectDojo admin UI and Redis:
+After modifying the `values.yaml` file as needed, deploy DefectDojo using Helm. This command also generates the required secrets for the DefectDojo admin UI and Valkey:
 
 ```bash
-helm install defectdojo defectdojo -f values.yaml -n defectdojo --set createSecret=true --set createRedisSecret=true
+helm install defectdojo defectdojo -f values.yaml -n defectdojo --set createSecret=true --set createValkeySecret=true
 ```
 
 
