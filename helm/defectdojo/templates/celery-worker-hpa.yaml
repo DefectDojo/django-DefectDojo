@@ -45,7 +45,7 @@ spec:
           averageUtilization: {{ . }}
           type: Utilization
     {{- end }}
-  {{- if .Values.celery.worker.autoscaling.autoscaleBehavior }}
-  behavior: {{ toYaml .Values.celery.worker.autoscaling.autoscaleBehavior | nindent 4 }}
+  {{- with .Values.celery.worker.autoscaling.behavior }}
+  behavior: {{ toYaml .Values.celery.worker.autoscaling.behavior | nindent 4 }}
   {{- end }}
 {{- end }}

@@ -282,7 +282,7 @@ celery:
       maxReplicas: 5
       targetCPUUtilizationPercentage: 80
       targetMemoryUtilizationPercentage: 80
-      autoscaleBehavior: {}
+      behavior: {}
     automountServiceAccountToken: false
     # -- Annotations for the Celery worker deployment.
     annotations: {}
@@ -352,7 +352,7 @@ django:
     maxReplicas: 5
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
-    autoscaleBehavior: {}
+    behavior: {}
   automountServiceAccountToken: false
   annotations: {}
   service:

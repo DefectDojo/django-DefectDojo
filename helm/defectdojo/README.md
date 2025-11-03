@@ -553,7 +553,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.annotations | object | `{}` | Annotations for the Celery worker deployment. |
 | celery.worker.appSettings.poolType | string | `"solo"` | Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops) poolType: prefork autoscaleMin: 2 autoscaleMax: 8 concurrency: 8 prefetchMultiplier: 128 |
 | celery.worker.automountServiceAccountToken | bool | `false` |  |
-| celery.worker.autoscaling | object | `{"autoscaleBehavior":{},"enabled":false,"maxReplicas":5,"minReplicas":2,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":80}` | Autoscaling configuration for Celery worker deployment. |
+| celery.worker.autoscaling | object | `{"behavior":{},"enabled":false,"maxReplicas":5,"minReplicas":2,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":80}` | Autoscaling configuration for Celery worker deployment. |
 | celery.worker.containerSecurityContext | object | `{}` | Container security context for the Celery worker containers. |
 | celery.worker.extraEnv | list | `[]` | Additional environment variables injected to Celery worker containers. |
 | celery.worker.extraInitContainers | list | `[]` | A list of additional initContainers to run before celery worker containers. |
@@ -598,7 +598,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.affinity | object | `{}` |  |
 | django.annotations | object | `{}` |  |
 | django.automountServiceAccountToken | bool | `false` |  |
-| django.autoscaling | object | `{"autoscaleBehavior":{},"enabled":false,"maxReplicas":5,"minReplicas":2,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":80}` | Autoscaling configuration for the Django deployment. |
+| django.autoscaling | object | `{"behavior":{},"enabled":false,"maxReplicas":5,"minReplicas":2,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":80}` | Autoscaling configuration for the Django deployment. |
 | django.extraEnv | list | `[]` | Additional environment variables injected to all Django containers and initContainers. |
 | django.extraInitContainers | list | `[]` | A list of additional initContainers to run before the uwsgi and nginx containers. |
 | django.extraVolumeMounts | list | `[]` | Array of additional volume mount points common to all containers and initContainers. |

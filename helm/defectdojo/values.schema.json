@@ -185,7 +185,7 @@
                             "description": "Autoscaling configuration for Celery worker deployment.",
                             "type": "object",
                             "properties": {
-                                "autoscaleBehavior": {
+                                "behavior": {
                                     "type": "object"
                                 },
                                 "enabled": {
@@ -478,7 +478,7 @@
                     "description": "Autoscaling configuration for the Django deployment.",
                     "type": "object",
                     "properties": {
-                        "autoscaleBehavior": {
+                        "behavior": {
                             "type": "object"
                         },
                         "enabled": {

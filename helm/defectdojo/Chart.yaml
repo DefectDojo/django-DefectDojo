@@ -45,3 +45,5 @@ annotations:
       description: Testing on the oldest officially supported k8s
     - kind: added
       description: Checker for maximal number of celery beats
+    - kind: added
+      description: Added HPA and PDB for celery worker and Django

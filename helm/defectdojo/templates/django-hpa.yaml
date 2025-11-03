@@ -44,7 +44,7 @@ spec:
           averageUtilization: {{ . }}
           type: Utilization
     {{- end }}
-  {{- if .Values.django.autoscaling.autoscaleBehavior }}
-  behavior: {{ toYaml .Values.django.autoscaling.autoscaleBehavior | nindent 4 }}
+  {{- with .Values.django.autoscaling.behavior }}
+  behavior: {{ toYaml .Values.django.autoscaling.behavior | nindent 4 }}
   {{- end }}
 {{- end }}
