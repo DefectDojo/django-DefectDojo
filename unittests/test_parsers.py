@@ -29,7 +29,7 @@ class TestParsers(DojoTestCase):
                 "sysdig_common",  # common classes for sysdig parsers
             }:
                 with self.subTest(parser=parser_dir.name, category="docs"):
-                    doc_file = Path(basedir) / "docs" / "content" / "en" / "connecting_your_tools" / "parsers" / category / f"{doc_name}.md"
+                    doc_file = Path(basedir) / "docs" / "content" / "supported_tools" / "parsers" / category / f"{doc_name}.md"
                     self.assertTrue(
                         Path(doc_file).is_file(),
                         f"Documentation file '{doc_file}' is missing or using different name",
