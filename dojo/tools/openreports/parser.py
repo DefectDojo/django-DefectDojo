@@ -268,12 +268,9 @@ class OpenreportsParser:
             if policy.startswith("CVE-"):
                 finding.unsaved_vulnerability_ids = [policy]
 
-            # Create unique_id_from_tool for deduplication
-            # Use the report UID if available (from metadata.uid), otherwise fall back to service_name
-            # Format: report_uid:policy:package_name (preferred) or policy:package_name:service_name (fallback)
-            # This uses the stable UID from the OpenReports API that won't change on reimport
-            unique_id_components = [report_uid, policy, pkg_name] if report_uid else [policy, pkg_name, service_name]
-            finding.unique_id_from_tool = ":".join(unique_id_components)
+            # Set vuln_id_from_tool to the policy field for deduplication
+            # This allows using DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
+            finding.vuln_id_from_tool = policy
 
             return finding  # noqa: TRY300 - This is intentional
 

@@ -34,10 +34,7 @@ class TestOpenreportsParser(DojoTestCase):
             self.assertTrue(finding1.fix_available)
             self.assertEqual(1, len(finding1.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2025-9232", finding1.unsaved_vulnerability_ids[0])
-            self.assertEqual(
-                "b1fcca57-2efd-44d3-89e9-949e29b61936:CVE-2025-9232:libcrypto3",
-                finding1.unique_id_from_tool,
-            )
+            self.assertEqual("CVE-2025-9232", finding1.vuln_id_from_tool)
             self.assertIn("vulnerability scan", finding1.tags)
             self.assertIn("image-scanner", finding1.tags)
             self.assertIn("Deployment", finding1.tags)
@@ -56,7 +53,7 @@ class TestOpenreportsParser(DojoTestCase):
             self.assertTrue(finding2.fix_available)
             self.assertEqual(1, len(finding2.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2025-47907", finding2.unsaved_vulnerability_ids[0])
-            self.assertEqual("b1fcca57-2efd-44d3-89e9-949e29b61936:CVE-2025-47907:stdlib", finding2.unique_id_from_tool)
+            self.assertEqual("CVE-2025-47907", finding2.vuln_id_from_tool)
 
             # Test third finding (non-CVE policy, fail/low severity)
             finding3 = findings[2]
@@ -72,10 +69,7 @@ class TestOpenreportsParser(DojoTestCase):
             self.assertTrue(finding3.fix_available)
             # Non-CVE policies should not have vulnerability IDs
             self.assertIsNone(finding3.unsaved_vulnerability_ids)
-            self.assertEqual(
-                "b1fcca57-2efd-44d3-89e9-949e29b61936:CIS-BENCH-001:web-server",
-                finding3.unique_id_from_tool,
-            )
+            self.assertEqual("CIS-BENCH-001", finding3.vuln_id_from_tool)
             self.assertIn("compliance check", finding3.tags)
             self.assertIn("compliance-scanner", finding3.tags)
             self.assertIn("Deployment", finding3.tags)
