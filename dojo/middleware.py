@@ -96,7 +96,7 @@ class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
             return redirect("/login?force_login_form")
         if isinstance(exception, TypeError) and "'NoneType' object is not iterable" in str(exception):
             logger.warning("OIDC login error: NoneType is not iterable")
-            messages.error(request, "An unexpected error occurred during social login. Please use the standard login.")
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE["DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE"])
             return redirect("/login?force_login_form")
         logger.error(f"Unhandled exception during social login: {exception}")
         return super().process_exception(request, exception)

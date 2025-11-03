@@ -178,6 +178,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED=(str, "Social login was canceled. Please try again or use the standard login."),
     DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED=(str, "Social login failed. Please try again or use the standard login."),
     DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN=(str, "You are not authorized to log in via this method. Please contact support or use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE=(str, "An unexpected error occurred during social login. Please use the standard login."),
     DD_SAML2_ENABLED=(bool, False),
     # Allows to override default SAML authentication backend. Check https://djangosaml2.readthedocs.io/contents/setup.html#custom-user-attributes-processing
     DD_SAML2_AUTHENTICATION_BACKENDS=(str, "djangosaml2.backends.Saml2Backend"),
@@ -654,6 +655,7 @@ SOCIAL_AUTH_EXCEPTION_MESSAGE = {
     "SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED": env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED"),
     "SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED": env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED"),
     "SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN": env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN"),
+    "SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE": env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE"),
     }
 
 AUTH0_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED")
