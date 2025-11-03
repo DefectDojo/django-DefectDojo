@@ -16,7 +16,7 @@ jobs:
           # databases, broker and k8s are independent, so we don't need to test each combination
           # lastest k8s version (https://kubernetes.io/releases/) and the oldest officially supported version
           # are tested (https://kubernetes.io/releases/)
-          - k8s: 'v1.34.1' # renovate: datasource=github-releases depName=kubernetes/kubernetes versioning=loose
+          - k8s: 'v1.34.0' # renovate: datasource=github-releases depName=kubernetes/kubernetes versioning=loose
             os: debian
           - k8s: 'v1.31.13' # Do not track with renovate as we likely want to rev this manually
             os: debian
