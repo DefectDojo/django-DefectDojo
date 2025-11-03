@@ -17,6 +17,14 @@ usage() {
   echo "You must specify a test case (arg)!"
   echo "Any additional arguments will be passed to the test command."
   echo
+  echo "Make sure you run this script in dev mode."
+  echo "You can enter dev mode using the following command:"
+  echo "./docker/setEnv.sh dev"
+  echo
+  echo "Lastly, make sure the application is running by using the following docker commands:"
+  echo "docker compose build"
+  echo "docker compose up"
+  echo
   echo "Example commands:"
   echo "./run-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser"
   echo "./run-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser -v3 --failfast"
