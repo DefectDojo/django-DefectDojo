@@ -9,7 +9,7 @@
             </p>
             <p>
               {% blocktranslate trimmed %}
-                User {{ user }} jotted a note on {{ section }}:<br/>
+                User {{ requested_by }} jotted a note on {{ section }}:<br/>
                 <br/>
                 {{ note }}<br/>
                 <br/>

@@ -49,6 +49,7 @@ class Parser:
     and is purely for the sake of type hinting
     """
 
+    @staticmethod
     def get_findings(scan_type: str, test: Test) -> list[Finding]:
         """
         Stub function to make the hinting happier. The actual class

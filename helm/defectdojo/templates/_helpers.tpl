@@ -1,15 +1,15 @@
-{{/* vim: set filetype=mustache: */}}
-{{/*
-Expand the name of the chart.
+{{- /* vim: set filetype=mustache: */}}
+{{- /*
+  Expand the name of the chart.
 */}}
 {{- define "defectdojo.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
+{{- /*
+  Create a default fully qualified app name.
+  We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+  If release name contains chart name it will be used as a full name.
 */}}
 {{- define "defectdojo.fullname" -}}
 {{- if .Values.fullnameOverride -}}
@@ -24,15 +24,15 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 {{- end -}}
 
-{{/*
-Create chart name and version as used by the chart label.
+{{- /*
+  Create chart name and version as used by the chart label.
 */}}
 {{- define "defectdojo.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{/*
-Create the name of the service account to use
+{{- /*
+  Create the name of the service account to use
 */}}
 {{- define "defectdojo.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
@@ -42,7 +42,7 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Determine the hostname to use for PostgreSQL/Redis.
 */}}
 {{- define "postgresql.hostname" -}}
@@ -67,7 +67,7 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Determine the protocol to use for Redis.
 */}}
 {{- define "redis.scheme" -}}
@@ -82,23 +82,67 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Builds the repository names for use with local or private registries
 */}}
-{{- define "celery.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-django
+{{- define "celery.beat.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.celery.beat.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
 {{- end -}}
 
-{{- define "django.nginx.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-nginx
+{{- define "celery.worker.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.celery.worker.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
 {{- end -}}
 
-{{- define "django.uwsgi.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-django
+{{- define "django.nginx.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.django.nginx.image .Values.images.nginx.image) "global" .Values.global "chart" .Chart ) }}
 {{- end -}}
 
-{{- define "initializer.repository" -}}
-{{- printf "%s" .Values.repositoryPrefix -}}/defectdojo-django
+{{- define "django.uwsgi.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.django.uwsgi.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
+{{- end -}}
+
+{{- define "initializer.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.initializer.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
+{{- end -}}
+
+{{- define "dbMigrationChecker.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.dbMigrationChecker.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
+{{- end -}}
+
+{{- define "unitTests.image" -}}
+{{ include "images.image" (dict "imageRoot" (merge .Values.tests.unitTests.image .Values.images.django.image) "global" .Values.global "chart" .Chart ) }}
+{{- end -}}
+
+{{- define "monitoring.prometheus.image" -}}
+{{ include "images.image" (dict "imageRoot" .Values.monitoring.prometheus.image "global" .Values.global ) }}
+{{- end -}}
+
+{{- /*
+Return the proper image name.
+If image tag and digest are not defined, termination fallbacks to chart appVersion.
+{{ include "images.image" ( dict "imageRoot" .Values.path.to.the.image "global" .Values.global "chart" .Chart ) }}
+Inspired by Bitnami Common Chart v2.31.7
+*/}}
+{{- define "images.image" -}}
+{{- $registryName := default .imageRoot.registry ((.global).imageRegistry) -}}
+{{- $repositoryName := .imageRoot.repository -}}
+{{- $separator := ":" -}}
+{{- $termination := .imageRoot.tag | toString -}}
+
+{{- if not .imageRoot.tag }}
+  {{- if .chart }}
+    {{- $termination = .chart.AppVersion | toString -}}
+  {{- end -}}
+{{- end -}}
+{{- if .imageRoot.digest }}
+    {{- $separator = "@" -}}
+    {{- $termination = .imageRoot.digest | toString -}}
+{{- end -}}
+{{- if $registryName }}
+    {{- printf "%s/%s%s%s" $registryName $repositoryName $separator $termination -}}
+{{- else -}}
+    {{- printf "%s%s%s"  $repositoryName $separator $termination -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "initializer.jobname" -}}
@@ -109,7 +153,7 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Creates the array for DD_ALLOWED_HOSTS in configmap
 */}}
 {{- define "django.allowed_hosts" -}}
@@ -121,7 +165,7 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Creates the persistentVolumeName
 */}}
 {{- define "django.pvc_name" -}}
@@ -132,7 +176,7 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
+{{- /*
   Define db-migration-checker
 */}}
 {{- define "dbMigrationChecker" -}}
@@ -141,11 +185,15 @@ Create the name of the service account to use
   - sh
   - -c
   - while ! /app/manage.py migrate --check; do echo "Database is not migrated to the latest state yet"; sleep 5; done; echo "Database is migrated to the latest state";
-  image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
+  image: '{{ template "dbMigrationChecker.image" . }}'
   imagePullPolicy: {{ .Values.imagePullPolicy }}
   {{- if .Values.securityContext.enabled }}
   securityContext:
-    {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 4 }}
+    {{- include "helpers.securityContext" (list
+    .Values
+    "securityContext.containerSecurityContext"
+    "dbMigrationChecker.containerSecurityContext"
+  ) | nindent 4 }}
   {{- end }}
   envFrom:
   - configMapRef:
@@ -163,9 +211,101 @@ Create the name of the service account to use
       secretKeyRef:
         name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
         key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
-  {{- if .Values.extraEnv }}
-  {{- toYaml .Values.extraEnv | nindent 2 }}
+  {{- with .Values.extraEnv }}
+    {{- toYaml . | nindent 2 }}
+  {{- end }}
+  {{- with.Values.dbMigrationChecker.extraEnv }}
+    {{- toYaml . | nindent 2 }}
   {{- end }}
   resources:
     {{- toYaml .Values.dbMigrationChecker.resources | nindent 4 }}
+  {{- with .Values.dbMigrationChecker.extraVolumeMounts }}
+  volumeMounts:
+    {{- . | toYaml | nindent 4 }}
+  {{- end }}
+{{- end -}}
+
+{{- /*
+  Define cloudsql-proxy
+*/}}
+{{- define "cloudsqlProxy" -}}
+- name: cloudsql-proxy
+  image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+  imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+  {{- with .Values.cloudsql.extraEnv }}
+  env: {{- . | toYaml | nindent 4 }}
+  {{- end }}
+  {{- with .Values.cloudsql.resources }}
+  resources: {{- . | toYaml | nindent 4 }}
+  {{- end }}
+  restartPolicy: Always
+  {{- if .Values.securityContext.enabled }}
+  securityContext:
+    {{- include "helpers.securityContext" (list
+      .Values
+      "securityContext.containerSecurityContext"
+      "cloudsql.containerSecurityContext"
+    ) | nindent 4 }}
+  {{- end }}
+  command: ["/cloud_sql_proxy"]
+  args:
+  - "-verbose={{ .Values.cloudsql.verbose }}"
+  - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
+  {{- if .Values.cloudsql.enable_iam_login }}
+  - "-enable_iam_login"
+  {{- end }}
+  {{- if .Values.cloudsql.use_private_ip }}
+  - "-ip_address_types=PRIVATE"
+  {{- end }}
+  {{- with .Values.cloudsql.extraVolumeMounts }}
+  volumeMounts: {{ . | toYaml | nindent 4 }}
+  {{- end }}
+{{- end -}}
+
+{{- /*
+Returns the JSON representation of the value for a dot-notation path
+from a given context.
+  Args:
+    0: context (e.g., .Values)
+    1: path (e.g., "foo.bar")
+*/}}
+{{- define "helpers.getValue" -}}
+  {{- $ctx := merge dict (index . 0) -}}
+  {{- $path := index . 1 -}}
+  {{- $parts := splitList "." $path -}}
+  {{- $value := $ctx -}}
+  {{- range $idx, $part := $parts -}}
+    {{- if kindIs "map" $value -}}
+      {{- $value = index $value $part -}}
+    {{- else -}}
+      {{- $value = "" -}}
+      {{- /* Exit early by setting to last iteration */}}
+      {{- $idx = sub (len $parts) 1 -}}
+    {{- end -}}
+  {{- end -}}
+  {{- toJson $value -}}
+{{- end -}}
+
+{{- /*
+  Build the security context.
+  Args:
+    0: values context (.Values)
+    1: the default security context key (e.g. "securityContext.containerSecurityContext")
+    2: the key under the context with security context (e.g., "foo.bar")
+*/}}
+{{- define "helpers.securityContext" -}}
+{{- $values := merge dict (index . 0) -}}
+{{- $defaultSecurityContextKey := index . 1 -}}
+{{- $securityContextKey := index . 2 -}}
+{{- $securityContext := dict -}}
+{{- with $values }}
+  {{- $securityContext = (merge
+    $securityContext
+    (include "helpers.getValue" (list $values $defaultSecurityContextKey) | fromJson)
+    (include "helpers.getValue" (list $values $securityContextKey) | fromJson)
+  ) -}}
+{{- end -}}
+{{- with $securityContext -}}
+{{- . | toYaml | nindent 2 -}}
+{{- end -}}
 {{- end -}}

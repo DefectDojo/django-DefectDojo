@@ -22,7 +22,7 @@ from dojo.models import (
     Test_Import,
     Test_Import_Finding_Action,
     User,
-    _copy_model_util,
+    copy_model_util,
 )
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -1215,56 +1215,136 @@ class TestDuplicationLogic(DojoTestCase):
         # expect not duplicate as the mathcing finding is from another test_type, hash_code is also different
         self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
 
-    def test_identical_different_endpoints_unique_id_or_hash_code(self):
+    def test_identical_different_endpoints_unique_id_or_hash_code_dynamic(self):
         # create identical copy, so unique id is the same
-        finding_new, finding_224 = self.copy_and_reset_finding(find_id=224)
+        finding_new1, finding_224 = self.copy_and_reset_finding(find_id=224)
 
-        finding_new.save(dedupe_option=False)
-        ep1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="myhost.com", protocol="https")
+        finding_new1.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new1.test.engagement.product, finding=finding_new1, host="myhost.com", protocol="https")
         ep1.save()
-        finding_new.endpoints.add(ep1)
-        finding_new.save()
+        finding_new1.endpoints.add(ep1)
+        finding_new1.save()
 
         if settings.DEDUPE_ALGO_ENDPOINT_FIELDS == []:
             # expect duplicate, as endpoints shouldn't affect dedupe and hash_code due to unique_id
-            self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+            self.assert_finding(finding_new1, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
         else:
-            self.assert_finding(finding_new, not_pk=224, duplicate=False, duplicate_finding_id=None, hash_code=finding_224.hash_code)
+            # endpoints don't match with 224, so not a duplicate
+            self.assert_finding(finding_new1, not_pk=224, duplicate=False, duplicate_finding_id=None, hash_code=finding_224.hash_code)
+
+        # remove the finding to prevent it from being duplicated by the next finding we create
+        finding_new1.delete()
 
         # same scenario, now with different uid. and different endpoints, but hash will be different due the endpoints because we set dynamic_finding to True
-        finding_new, finding_224 = self.copy_and_reset_finding(find_id=224)
+        finding_new2, finding_224 = self.copy_and_reset_finding(find_id=224)
 
-        finding_new.save(dedupe_option=False)
-        ep1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="myhost.com", protocol="https")
+        finding_new2.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new1.test.engagement.product, finding=finding_new2, host="myhost.com", protocol="https")
         ep1.save()
-        finding_new.endpoints.add(ep1)
-        finding_new.unique_id_from_tool = 1
-        finding_new.dynamic_finding = True
-        finding_new.save()
+        finding_new2.endpoints.add(ep1)
+        finding_new2.unique_id_from_tool = 1
+        finding_new2.dynamic_finding = True
+        finding_new2.save()
 
         if settings.DEDUPE_ALGO_ENDPOINT_FIELDS == []:
             # different uid. and different endpoints, but endpoints not used for hash anymore -> duplicate
-            self.assert_finding(finding_new, not_pk=224, duplicate=True, hash_code=finding_224.hash_code)
+            self.assert_finding(finding_new2, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
         else:
-            # this only works right now because of a bug in the deduplication code: https://github.com/DefectDojo/django-DefectDojo/issues/13497
-            self.assert_finding(finding_new, not_pk=224, duplicate=False, hash_code=finding_224.hash_code)
+            # endpoints do not match with 224
+            self.assert_finding(finding_new1, not_pk=224, duplicate=False, duplicate_finding_id=None, hash_code=finding_224.hash_code)
+
+    def test_identical_different_endpoints_unique_id_or_hash_code_static(self):
+        # create identical copy, so unique id is the same
+        finding_new1, finding_224 = self.copy_and_reset_finding(find_id=224)
+
+        finding_new1.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new1.test.engagement.product, finding=finding_new1, host="myhost.com", protocol="https")
+        ep1.save()
+        finding_new1.endpoints.add(ep1)
+        finding_new1.save()
+
+        if settings.DEDUPE_ALGO_ENDPOINT_FIELDS == []:
+            # expect duplicate, as endpoints shouldn't affect dedupe and hash_code due to unique_id
+            self.assert_finding(finding_new1, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+        else:
+            # endpoints don't match with 224, so not a duplicate
+            self.assert_finding(finding_new1, not_pk=224, duplicate=False, duplicate_finding_id=None, hash_code=finding_224.hash_code)
+
+        # remove the finding to prevent it from being duplicated by the next finding we create
+        finding_new1.delete()
 
         # same scenario, now with different uid. and different endpoints
-        finding_new, finding_224 = self.copy_and_reset_finding(find_id=224)
+        finding_new3, finding_224 = self.copy_and_reset_finding(find_id=224)
 
-        finding_new.save(dedupe_option=False)
-        ep1 = Endpoint(product=finding_new.test.engagement.product, finding=finding_new, host="myhost.com", protocol="https")
+        finding_new3.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new3.test.engagement.product, finding=finding_new3, host="myhost.com", protocol="https")
         ep1.save()
-        finding_new.endpoints.add(ep1)
-        finding_new.unique_id_from_tool = 1
-        finding_new.dynamic_finding = False
-        finding_new.save()
+        finding_new3.endpoints.add(ep1)
+        finding_new3.unique_id_from_tool = 1
+        finding_new3.dynamic_finding = False
+        finding_new3.save()
 
         if settings.DEDUPE_ALGO_ENDPOINT_FIELDS == []:
             # different uid. and different endpoints, dynamic_finding is set to False hash_code still not affected by endpoints
-            self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+            self.assert_finding(finding_new3, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
         else:
-            self.assert_finding(finding_new, not_pk=224, duplicate=False, duplicate_finding_id=None, hash_code=finding_224.hash_code)
+            # endpoints do not match with 224
+            self.assert_finding(finding_new1, not_pk=224, duplicate=False, duplicate_finding_id=None, hash_code=finding_224.hash_code)
+
+    def test_identical_different_endpoints_unique_id_or_hash_code_multiple(self):
+        # create identical copy, so unique id is the same
+        finding_new1, finding_224 = self.copy_and_reset_finding(find_id=224)
+
+        finding_new1.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new1.test.engagement.product, finding=finding_new1, host="myhost.com", protocol="https")
+        ep1.save()
+        finding_new1.endpoints.add(ep1)
+        finding_new1.save()
+
+        if settings.DEDUPE_ALGO_ENDPOINT_FIELDS == []:
+            # expect duplicate, as endpoints shouldn't affect dedupe and hash_code due to unique_id
+            self.assert_finding(finding_new1, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+        else:
+            # endpoints don't match with 224, so not a duplicate
+            self.assert_finding(finding_new1, not_pk=224, duplicate=False, duplicate_finding_id=None, hash_code=finding_224.hash_code)
+
+        # same scenario, now with different uid. and different endpoints, but hash will be different due the endpoints because we set dynamic_finding to True
+        finding_new2, finding_224 = self.copy_and_reset_finding(find_id=224)
+
+        finding_new2.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new1.test.engagement.product, finding=finding_new2, host="myhost.com", protocol="https")
+        ep1.save()
+        finding_new2.endpoints.add(ep1)
+        finding_new2.unique_id_from_tool = 1
+        finding_new2.dynamic_finding = True
+        finding_new2.save()
+
+        if settings.DEDUPE_ALGO_ENDPOINT_FIELDS == []:
+            # different uid. and different endpoints, but endpoints not used for hash anymore -> duplicate
+            self.assert_finding(finding_new2, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+        else:
+            # endpoints do not match with 224, but they do match with the finding just created. this proves that the dedupe algo considers more than only the first
+            # candidate https://github.com/DefectDojo/django-DefectDojo/issues/13497
+            self.assert_finding(finding_new2, not_pk=224, duplicate=True, duplicate_finding_id=finding_new1.pk, hash_code=finding_224.hash_code)
+
+        # same scenario, now with different uid. and different endpoints
+        finding_new3, finding_224 = self.copy_and_reset_finding(find_id=224)
+
+        finding_new3.save(dedupe_option=False)
+        ep1 = Endpoint(product=finding_new3.test.engagement.product, finding=finding_new3, host="myhost.com", protocol="https")
+        ep1.save()
+        finding_new3.endpoints.add(ep1)
+        finding_new3.unique_id_from_tool = 1
+        finding_new3.dynamic_finding = False
+        finding_new3.save()
+
+        if settings.DEDUPE_ALGO_ENDPOINT_FIELDS == []:
+            # different uid. and different endpoints, dynamic_finding is set to False hash_code still not affected by endpoints
+            self.assert_finding(finding_new3, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
+        else:
+            # endpoints do not match with 224, but they do match with the finding just created. this proves that the dedupe algo considers more than only the first
+            # candidate https://github.com/DefectDojo/django-DefectDojo/issues/13497
+            self.assert_finding(finding_new3, not_pk=224, duplicate=True, duplicate_finding_id=finding_new1.pk, hash_code=finding_224.hash_code)
 
     # # some extra tests
 
@@ -1476,7 +1556,7 @@ class TestDuplicationLogic(DojoTestCase):
 
     def copy_and_reset_finding(self, find_id):
         org = Finding.objects.get(id=find_id)
-        new = _copy_model_util(org)
+        new = copy_model_util(org)
         new.duplicate = False
         new.duplicate_finding = None
         new.active = True
@@ -1513,13 +1593,13 @@ class TestDuplicationLogic(DojoTestCase):
 
     def copy_and_reset_test(self, test_id):
         org = Test.objects.get(id=test_id)
-        new = _copy_model_util(org)
+        new = copy_model_util(org)
         # return unsaved new finding and reloaded existing finding
         return new, Test.objects.get(id=test_id)
 
     def copy_and_reset_engagement(self, eng_id):
         org = Engagement.objects.get(id=eng_id)
-        new = _copy_model_util(org)
+        new = copy_model_util(org)
         # return unsaved new finding and reloaded existing finding
         return new, Engagement.objects.get(id=eng_id)
 

@@ -93,7 +93,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         parser = self.get_parser()
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
-        parsed_findings = self.parse_findings(scan, parser)
+        parsed_findings = self.parse_findings(scan, parser) or []
         # process the findings in the foreground or background
         (
             new_findings,
@@ -170,7 +170,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # we need to make sure there are no side effects such as closing findings
         # for findings with a different service value
         # https://github.com/DefectDojo/django-DefectDojo/issues/12754
-        original_findings = self.test.finding_set.all().filter(service=self.service)
+        if self.service is not None:
+            original_findings = self.test.finding_set.all().filter(service=self.service)
+        else:
+            original_findings = self.test.finding_set.all().filter(Q(service__isnull=True) | Q(service__exact=""))
+
         logger.debug(f"original_findings_qyer: {original_findings.query}")
         self.original_items = list(original_findings)
         logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")

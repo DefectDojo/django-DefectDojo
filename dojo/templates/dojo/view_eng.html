@@ -826,13 +826,18 @@
                                 </td>
                             </tr>
                             {% if jissue and jira_project %}
-                                <tr>
-                                    <td><strong>Jira</strong></td>
-                                    <td><a href="{{ eng | jira_issue_url }}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> {{ eng | jira_key }}
+                            <tr>
+                                <td><strong>Jira</strong></td>
+                                <td>
+                                    <a href="{{ eng | jira_issue_url }}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> {{ eng | jira_key }}
                                         <small>(epic)</small>
-                                        </a>
-                                    </td>
-                                </tr>
+                                    </a>
+                                    {% if eng|has_object_permission:"Engagement_Edit" %}
+                                        &nbsp;
+                                        <i id="unlink_eng_jira" class="fa-solid fa-trash" title="Unlink JIRA epic from this engagement."></i>
+                                    {% endif %}
+                                </td>
+                            </tr>
                             {% elif jira_project %}
                                 <tr>
                                     <td><strong>JIRA</strong></td>
@@ -1088,6 +1093,28 @@
             var host = slashes.concat(window.location.host);
             modal.find('p#questionnaireURL').text('Questionnaire URL: ' + host + path)
             })
+
+            function jira_action(elem, url) {
+                $(elem).removeClass().addClass('fa-solid fa-spin fa-spinner')
+
+                $.ajax({
+                    type: "post",
+                    dataType:'json',
+                    data: '',
+                    context: this,
+                    url: url,
+                    beforeSend: function (jqXHR, settings) {
+                        jqXHR.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                    },
+                    complete: function(e) {
+                        location.reload()
+                    }
+                });
+            }
+
+            $("#unlink_eng_jira").on('click', function(e) {
+                jira_action(this,'{% url 'engagement_unlink_jira' eng.id %}')
+            });
         });
 
         {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}

@@ -399,7 +399,8 @@ class EndpointStatusViewSet(
 # @extend_schema_view(**schema_with_prefetch())
 # Nested models with prefetch make the response schema too long for Swagger UI
 class EngagementViewSet(
-    PrefetchDojoModelViewSet,
+    # PrefetchDojoModelViewSet,
+    DojoModelViewSet,
     ra_api.AcceptedRisksMixin,
 ):
     serializer_class = serializers.EngagementSerializer

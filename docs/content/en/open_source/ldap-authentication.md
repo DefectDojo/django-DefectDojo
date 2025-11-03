@@ -7,12 +7,12 @@ weight: 4
 
 ## LDAP Authentication
 
-Out of the box Defect Dojo does not support LDAP authentication.
+Out of the box DefectDojo does not support LDAP authentication.
 
-*However*, since Defect Dojo is built using Django, it isn't too difficult to add support for LDAP.
+*However*, since DefectDojo is built using Django, it isn't too difficult to add support for LDAP.
 So long as you don't mind building your own Docker images...
 
-We will need to modify a grand total of 4-5 files, depending on how you want to pass Dojo your LDAP secrets.
+We will need to modify a grand total of 4-5 files, depending on how you want to pass DefectDojo your LDAP secrets.
 
  - Dockerfile.django-*
  - Dockerfile.nginx-*
@@ -23,7 +23,14 @@ We will need to modify a grand total of 4-5 files, depending on how you want to 
 
 #### Dockerfile modifications
 
-In both Dockerfile.django and Dockerfile.nginx, you want to add the following lines to the apt-get install layers:
+In both `Dockerfile.django-alpine` and `Dockerfile.nginx-alpine`, you need to add the following lines to the `apk add` layers:
+
+```bash
+openldap-dev \
+cyrus-sasl-dev \
+```
+
+Also, in `Dockerfile.django-debian`, you need to add the following lines to the `apt-get install` layers:
 
 ```bash
 libldap2-dev \
@@ -42,8 +49,8 @@ Please check for the latest version of these requirements at the time of impleme
 Otherwise add the following to requirements.txt:
 
 ```python
-python-ldap==3.4.2
-django-auth-ldap==4.1.0
+python-ldap==3.4.5
+django-auth-ldap==5.2.0
 ```
 
 
@@ -55,14 +62,17 @@ At the top of the file:
 ```python
 import ldap
 from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
+import environ
 ```
 
 Then further down add LDAP settings to the env dict:
 ```python
 # LDAP
-DD_LDAP_SERVER_URI=(str, 'ldap://ldap.example.com'),
-DD_LDAP_BIND_DN=(str, ''),
-DD_LDAP_BIND_PASSWORD=(str, ''),
+env = environ.FileAwareEnv(
+    DD_LDAP_SERVER_URI=(str, 'ldap://ldap.example.com'),
+    DD_LDAP_BIND_DN=(str, ''),
+    DD_LDAP_BIND_PASSWORD=(str, ''),
+)
 ```
 
 Then under the env dict add:
@@ -70,6 +80,7 @@ Then under the env dict add:
 AUTH_LDAP_SERVER_URI = env('DD_LDAP_SERVER_URI')
 AUTH_LDAP_BIND_DN = env('DD_LDAP_BIND_DN')
 AUTH_LDAP_BIND_PASSWORD = env('DD_LDAP_BIND_PASSWORD')
+
 AUTH_LDAP_USER_SEARCH = LDAPSearch(
     "ou=Groups,dc=example,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
 )
@@ -116,7 +127,7 @@ Read the docs for Django Authentication with LDAP here: https://django-auth-ldap
 
 #### docker-compose.yml
 
-In order to pass the variables to the local_settings.py file via docker, it's a good idea to add these to the docker compose file.
+In order to pass the variables to the `local_settings.py` file via docker, it's a good idea to add these to the `docker-compose.yml` file.
 
 You can do this by adding the following variables to the environment section for the uwsgi image:
 ```yaml
@@ -125,4 +136,4 @@ DD_LDAP_BIND_DN: "${DD_LDAP_BIND_DN:-}"
 DD_LDAP_BIND_PASSWORD: "${DD_LDAP_BIND_PASSWORD:-}"
 ```
 
-Alternatively you can set these values in a local_settings.py file.
+Alternatively you can set these values in a `local_settings.py` file.
