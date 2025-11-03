@@ -36,7 +36,10 @@ class CycloneDXJSONParser:
             # better than always 'Medium'
             ratings = vulnerability.get("ratings")
             if ratings:
-                severity = ratings[0]["severity"]
+                # Determine if we can use the severity field
+                # In some cases, the severity field is missing, so we can rely on either the Medium severity
+                # or the CVSS vector (retrieved further down below) to determine the severity:
+                severity = ratings[0].get("severity", "Medium")
                 severity = Cyclonedxhelper().fix_severity(severity)
             else:
                 severity = "Medium"

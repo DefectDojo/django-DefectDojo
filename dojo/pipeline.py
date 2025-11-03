@@ -183,5 +183,6 @@ def sanitize_username(username):
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if not settings.SOCIAL_AUTH_CREATE_USER:
         return None
-    details["username"] = sanitize_username(details.get("username"))
+    username = details.get(settings.SOCIAL_AUTH_CREATE_USER_MAPPING)
+    details["username"] = sanitize_username(username)
     return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)

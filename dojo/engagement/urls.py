@@ -30,6 +30,8 @@ urlpatterns = [
         name="close_engagement"),
     re_path(r"^engagement/(?P<eid>\d+)/reopen$", views.reopen_eng,
         name="reopen_engagement"),
+    re_path(r"^engagement/(?P<eid>\d+)/jira/unlink$", views.unlink_jira,
+        name="engagement_unlink_jira"),
     re_path(r"^engagement/(?P<eid>\d+)/complete_checklist$",
         views.complete_checklist, name="complete_checklist"),
     re_path(r"^engagement/(?P<eid>\d+)/risk_acceptance/add$",

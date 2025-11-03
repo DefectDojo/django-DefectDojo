@@ -399,7 +399,8 @@ class EndpointStatusViewSet(
 # @extend_schema_view(**schema_with_prefetch())
 # Nested models with prefetch make the response schema too long for Swagger UI
 class EngagementViewSet(
-    PrefetchDojoModelViewSet,
+    # PrefetchDojoModelViewSet,
+    DojoModelViewSet,
     ra_api.AcceptedRisksMixin,
 ):
     serializer_class = serializers.EngagementSerializer
@@ -933,6 +934,8 @@ class FindingViewSet(
                 context={"request": request},
             )
             if finding_close.is_valid():
+                # Remove the prefetched tags to avoid issues with delegating to celery
+                finding.tags._remove_prefetched_objects()
                 # Use shared helper to perform close operations
                 finding_helper.close_finding(
                     finding=finding,
