@@ -83,6 +83,16 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
         storage = list(messages.get_messages(request))
         self.assertTrue(any("You are not authorized to log in via this method." in str(msg) for msg in storage))
 
+    def test_type_error_none_type_iterable_redirect(self):
+        """Ensure middleware catches 'NoneType' object is not iterable TypeError and redirects."""
+        request = self._prepare_request("/login/oidc/")
+        exception = TypeError("'NoneType' object is not iterable")
+        response = self.middleware.process_exception(request, exception)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/login?force_login_form")
+        storage = list(messages.get_messages(request))
+        self.assertTrue(any("An unexpected error occurred during social login." in str(msg) for msg in storage))
+
 
 @override_settings(
     AUTHENTICATION_BACKENDS=(
