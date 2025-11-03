@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "2.52.0-dev"
+appVersion: "2.52.0"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.8.0-dev
+version: 1.8.0
 icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
 maintainers:
   - name: madchap
@@ -33,7 +33,7 @@ dependencies:
 #   - kind: security
 #     description: Critical bug
 annotations:
-  artifacthub.io/prerelease: "true"
+  artifacthub.io/prerelease: "false"
   artifacthub.io/changes: |
     - kind: changed
       description: DRY cloudsql-proxy
@@ -45,3 +45,5 @@ annotations:
       description: Testing on the oldest officially supported k8s
     - kind: added
       description: Checker for maximal number of celery beats
+    - kind: changed
+      description: Bump DefectDojo to 2.52.0
