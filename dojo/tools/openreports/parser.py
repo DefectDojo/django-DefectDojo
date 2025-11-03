@@ -268,8 +268,7 @@ class OpenreportsParser:
             if policy.startswith("CVE-"):
                 finding.unsaved_vulnerability_ids = [policy]
 
-            # Set vuln_id_from_tool to the policy field for deduplication
-            # This allows using DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
+            # Set vuln_id_from_tool to policy field for display
             finding.vuln_id_from_tool = policy
 
             return finding  # noqa: TRY300 - This is intentional
