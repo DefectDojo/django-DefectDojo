@@ -4,7 +4,7 @@ import mimetypes
 import operator
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import partial, reduce
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -141,6 +141,9 @@ def engagement_calendar(request):
     engagements = engagements.select_related("lead")
     engagements = engagements.prefetch_related("product")
 
+    for e in engagements:
+        if e.target_end:
+            e.target_end += timedelta(days=1)
     add_breadcrumb(
         title="Engagement Calendar", top_level=True, request=request)
     return render(
