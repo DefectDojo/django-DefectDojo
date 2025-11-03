@@ -93,7 +93,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
-    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 100),
+    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 10),
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
@@ -113,6 +113,7 @@ env = environ.FileAwareEnv(
     DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
     DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
     DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
+    DD_SOCIAL_AUTH_CREATE_USER_MAPPING=(str, "username"),  # could also be email or fullname
     DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED=(bool, False),
@@ -214,6 +215,8 @@ env = environ.FileAwareEnv(
     # `RemoteUser` is usually used behind AuthN proxy and users should not know about this mechanism from Swagger because it is not usable by users.
     # It should be hidden by default.
     DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER=(bool, False),
+    # Some security policies require allowing users to have only one active session
+    DD_SINGLE_USER_SESSION=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
     DD_DOCUMENTATION_URL=(str, "https://documentation.defectdojo.com"),
     # merging findings doesn't always work well with dedupe and reimport etc.
@@ -574,6 +577,7 @@ PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 SHOW_LOGIN_FORM = env("DD_SOCIAL_AUTH_SHOW_LOGIN_FORM")
 SOCIAL_LOGIN_AUTO_REDIRECT = env("DD_SOCIAL_LOGIN_AUTO_REDIRECT")
 SOCIAL_AUTH_CREATE_USER = env("DD_SOCIAL_AUTH_CREATE_USER")
+SOCIAL_AUTH_CREATE_USER_MAPPING = env("DD_SOCIAL_AUTH_CREATE_USER_MAPPING")
 
 SOCIAL_AUTH_STRATEGY = "social_django.strategy.DjangoStrategy"
 SOCIAL_AUTH_STORAGE = "social_django.models.DjangoStorage"
@@ -622,6 +626,8 @@ SOCIAL_AUTH_OIDC_OIDC_ENDPOINT = env("DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
 SOCIAL_AUTH_OIDC_KEY = env("DD_SOCIAL_AUTH_OIDC_KEY")
 SOCIAL_AUTH_OIDC_SECRET = env("DD_SOCIAL_AUTH_OIDC_SECRET")
 # Optional settings
+if value := env("DD_LOGIN_REDIRECT_URL"):
+    SOCIAL_AUTH_LOGIN_REDIRECT_URL = value
 if value := env("DD_SOCIAL_AUTH_OIDC_ID_KEY"):
     SOCIAL_AUTH_OIDC_ID_KEY = value
 if value := env("DD_SOCIAL_AUTH_OIDC_USERNAME_KEY"):
@@ -919,6 +925,7 @@ INSTALLED_APPS = (
     "auditlog",
     "pgtrigger",
     "pghistory",
+    "single_session",
 )
 
 # ------------------------------------------------------------------------------
@@ -1150,6 +1157,13 @@ if AUTH_REMOTEUSER_ENABLED:
         REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"]
 
 # ------------------------------------------------------------------------------
+# SINGLE_USER_SESSION
+# ------------------------------------------------------------------------------
+
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SINGLE_USER_SESSION = env("DD_SINGLE_USER_SESSION")
+
+# ------------------------------------------------------------------------------
 # CELERY
 # ------------------------------------------------------------------------------
 
@@ -1325,6 +1339,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
+    "Github SAST Scan": ["vuln_id_from_tool", "severity", "file_path", "line"],
     "Github Vulnerability Scan": ["title", "severity", "component_name", "vulnerability_ids", "file_path"],
     "Github Secrets Detection Report": ["title", "file_path", "line"],
     "Solar Appscreener Scan": ["title", "file_path", "line", "severity"],
@@ -1357,7 +1372,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "HCLAppScan XML": ["title", "description"],
     "HCL AppScan on Cloud SAST XML": ["title", "file_path", "line", "severity"],
     "KICS Scan": ["file_path", "line", "severity", "description", "title"],
-    "MobSF Scan": ["title", "description", "severity"],
+    "MobSF Scan": ["title", "description", "severity", "file_path"],
     "MobSF Scorecard Scan": ["title", "description", "severity"],
     "OSV Scan": ["title", "description", "severity"],
     "Snyk Code Scan": ["vuln_id_from_tool", "file_path"],
@@ -1571,6 +1586,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
+    "Github SAST Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Secrets Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1881,6 +1897,7 @@ VULNERABILITY_URLS = {
     "KB": "https://support.hcl-software.com/csm?id=kb_article&sysparm_article=",  # e.g. https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0108401
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
     "LEN-": "https://support.lenovo.com/cl/de/product_security/",  # e.g. https://support.lenovo.com/cl/de/product_security/LEN-94953
+    "MAL-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/mal-2025-49305
     "MGAA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGAA-2013-0054.html
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
     "MSRC_": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/msrc_cve-2025-59200

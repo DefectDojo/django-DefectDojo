@@ -3,21 +3,22 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ $fullName }}-networkpolicy
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.networkPolicy.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
   labels:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
-    {{- with .Values.extraLabels }}
-      {{- toYaml . | nindent 4 }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
     {{- end }}
-{{- if .Values.networkPolicy.annotations }}
-  annotations:
-{{- with .Values.networkPolicy.annotations }}
-  {{- toYaml . | nindent 4 }}
-{{- end }}
-{{- end }}
+  name: {{ $fullName }}-networkpolicy
+  namespace: {{ .Release.Namespace }}
 spec:
   podSelector:
     matchLabels:
@@ -43,15 +44,22 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ $fullName }}-networkpolicy-django
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.networkPolicy.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
   labels:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
-{{- with .Values.extraLabels }}
-  {{- toYaml . | nindent 4 }}
-{{- end }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  name: {{ $fullName }}-networkpolicy-django
+  namespace: {{ .Release.Namespace }}
 spec:
   podSelector:
     matchLabels:
