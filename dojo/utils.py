@@ -510,7 +510,7 @@ def deduplicate_uid_or_hash_code(new_finding):
                 id=new_finding.id).exclude(
                         duplicate=True).order_by("id")
     deduplicationLogger.debug("Found "
-        + str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
+        + str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code: " + str([find.id for find in existing_findings]))
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
             deduplicationLogger.debug(
@@ -519,10 +519,10 @@ def deduplicate_uid_or_hash_code(new_finding):
         try:
             if are_endpoints_duplicates(new_finding, find):
                 set_duplicate(new_finding, find)
+                break
         except Exception as e:
             deduplicationLogger.debug(str(e))
             continue
-        break
 
 
 def set_duplicate(new_finding, existing_finding):
@@ -1463,7 +1463,8 @@ def process_tag_notifications(request, note, parent_url, parent_title):
         title=f"{request.user} jotted a note",
         url=parent_url,
         icon="commenting",
-        recipients=users_to_notify)
+        recipients=users_to_notify,
+        requested_by=get_current_user())
 
 
 def encrypt(key, iv, plaintext):
