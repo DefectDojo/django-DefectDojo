@@ -2431,6 +2431,7 @@ class Finding(models.Model):
                       ('Risk Rejected', 'Risk Rejected'),
                       ('Risk Expired', 'Risk Expired'),
                       ('Risk Accepted', 'Risk Accepted'),
+                      ('Risk Reviewed', 'Risk Reviewed'),
                       ('Risk Active', 'Risk Active'),
                       ('On Whitelist', 'On Whitelist'),
                       ('On Blacklist', 'On Blacklist'),
@@ -2647,6 +2648,12 @@ class Finding(models.Model):
                                    blank=True,
                                    verbose_name=_('Accepted By'),
                                    help_text=_("The person that accepts the risk, can be outside of DefectDojo."))
+    reviewed_by = models.CharField(max_length=200,
+                                   default="",
+                                   null=True,
+                                   blank=True,
+                                   verbose_name=_('Reviewed By'),
+                                   help_text=_("The person that reviews the risk acceptance for acceptance long term."))
     reporter = models.ForeignKey(Dojo_User,
                                  editable=False,
                                  default=1,
@@ -3250,6 +3257,8 @@ class Finding(models.Model):
             status += ["Transfer Rejected"]
         if self.risk_status == "Risk Pending":
             status += ["Risk Pending"]
+        if self.risk_status == "Risk Reviewed":
+            status += ["Risk Reviewed"]
         if self.risk_status == "Risk Rejected":
             status += ["Risk Rejected"]
         if self.risk_status == "On Whitelist":
@@ -4113,6 +4122,7 @@ class Risk_Acceptance(models.Model):
     decision_details = models.TextField(default=None, blank=True, null=True, help_text=_("If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s)."))
 
     accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name=_("Accepted By"), help_text=_("The person that accepts the risk, can be outside of DefectDojo."))
+    reviewed_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name=_("Reviewed By"), help_text=_("The person that reviews the risk acceptance for acceptance long term"))
     path = models.FileField(upload_to="risk/%Y/%m/%d",
                             editable=True, null=True,
                             blank=True, verbose_name=_("Proof"))

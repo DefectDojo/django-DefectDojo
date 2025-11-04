@@ -36,6 +36,91 @@
         justify-content: center;
         height: 100%;
     }
+    {% comment %} hoal {% endcomment %}
+     .tooltip-inner {
+        max-width: 650px;
+    }
+    .process-timeline-horizontal {
+        margin-top: 20px;
+        margin-left: 10px;
+    }
+    .timeline-row {
+        position: relative;
+        display: flex;
+    }
+    .timeline-step {
+        position: relative;
+        text-align: center;
+        padding: 20px;
+        background-color: #f4f4f4;
+        opacity: 0.5;
+        border-right: 1px solid #ddd;
+        width: 33.3%;
+    }
+    .timeline-step:last-child {
+        border-right: none;
+    }
+    .timeline-step.active {
+        opacity: 1;
+        background-color: #e9ecef;
+    }
+    .timeline-step.danger {
+        opacity: 1;
+        background-color: #e9ecef;
+    }
+    .timeline-step::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 20px;
+        background-color: #6c757d;
+        border-radius: 50%;
+    }
+    .timeline-step.active::before {
+        background-color: #28a745;
+    }
+    .timeline-step.danger::before {
+        background-color: #d11d38;
+    }
+    .timeline-content {
+        position: relative;
+        z-index: 1;
+    }
+    .discussion-item {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .discussion-right {
+        align-self: flex-end;
+        text-align: end;
+        background-color: #e6f2ff;
+        border-radius: 10px;
+        padding: 10px;
+        width: 300px;
+        margin-left: auto; /* This will push it to the right */
+    }
+    
+    .discussion-left {
+        align-self: flex-start;
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        padding: 10px;
+        width: 300px;
+        margin-right: auto; /* This will keep it on the left */
+    }
+    .sticky-form {
+        position: sticky;
+        bottom: 0;
+        background-color: white;
+        padding: 15px;
+        border-top: 1px solid #ddd;
+        z-index: 1000;
+    }
 {% endblock %}
 {% block add_css %}
     {{ block.super }}
@@ -118,6 +203,9 @@
                     <tr>
                         <th>Date</th>
                         <th>Recommended Acceptors</th>
+                        {% if risk_acceptance.long_term_acceptance%}
+                        <th>Recommended reviewers</th>
+                        {% endif %}
                         <th>Name</th>
                         <th>Decision</th>
                         <th>Long-Term</th>
@@ -138,10 +226,17 @@
                     <tr>
                         <td>{{ risk_acceptance.created|date }}</td>
                         <td>
-                            {% for accepted_by in risk_acceptance.accepted_by_user%}
-                            👤 {{accepted_by}}</br>
-                            {% endfor %}
+                            {% if risk_acceptance.accepted_by_user %}
+                                {% for accepted_by in risk_acceptance.accepted_by_user%}
+                                👤 {{accepted_by}}</br>
+                                {% endfor %}
+                            {% else %}
+                                Not defined
+                            {% endif %}
                         </td>
+                        {% if risk_acceptance.long_term_acceptance%}
+                            <td> 👤 {{risk_acceptance.reviewed_by}}</br></td>
+                        {% endif %}
 
                         <td>{{ risk_acceptance.name }}</td>
                         <td>{{ risk_acceptance.get_decision_display|default_if_none:"" }}</td>
@@ -230,6 +325,56 @@
             {% endif%}
         </div>
     {% endif %}
+    <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Process <span class="pull-right"><a rel="noopener noreferrer" data-toggle="collapse" href="#vuln_procs"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_procs" class="panel-body finding-description collapse in">
+                {% if risk_acceptance.long_term_acceptance %}
+                <div class="container-fluid process-timeline-horizontal">
+                    <div class="row timeline-row">
+                        <div class="col-4 timeline-step active">
+                            <div class="timeline-content">
+                                <strong>Created</strong>
+                                <p>
+                                    {{ risk_acceptance.created|date:"d M Y H:i" }}
+                                    <br>
+                                    <strong>By:</strong> {{ risk_acceptance.owner.username}}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 timeline-step active">
+                            <div class="timeline-content">
+                                <strong>Reviewed</strong>
+                                <p>
+                                    {% if risk_acceptance.reviewed_by %}
+                                        {{ risk_acceptance.created|date:"d M Y H:i" }}
+                                        <br>
+                                        <strong>By:</strong> {{ risk_acceptance.reviewed_by }}
+                                    {% else %}
+                                        Pending review by DevSecOps team
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 timeline-step">
+                            <div class="timeline-content">
+                                <strong>Final Status</strong>
+                                <p>
+                                            <strong>Pending</strong>
+                                            <br>
+                                            {{ finding_exclusion.status_updated_at|date:"d M Y H:i" }}
+                                            <br>
+                                            <strong>By:</strong> {{ finding_exclusion.accepted_by.username }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
     <div id="risk_acceptance" class="panel panel-default table-responsive">
         <div class="panel-heading tight">
             <div class="clearfix">
@@ -260,8 +405,8 @@
                     <th>Vulnerability Id</th>
                     <th>Name</th>
                     <th>Date</th>
-                    <th>Active</th>
                     <th>Status</th>
+                    <th>Reviewed by</th>
                     <th>Accepted by</th>
                     <th>Actions</th>
                 </thead>
@@ -302,8 +447,8 @@
                         <td><a rel="noopener noreferrer" href="{% url 'view_finding' finding.id %}"
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
-                        <td>{{ finding.active }}</td>
                         <td>{{ finding|finding_display_status}}</td>
+                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_reviewed_by|safe}}</td>
                         <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_accepted_by|safe}}</td>
                         <td>
                             {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}
@@ -386,7 +531,7 @@
                         <a rel="noopener noreferrer" href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a>
                     </td>
                     <td>
-                        {{ risk_acceptance.created }}
+                        {{ Risk_acceptance.created }}
                     </td>
                     <td>
                         {% if engagement|has_object_permission:"Risk_Acceptance" %}

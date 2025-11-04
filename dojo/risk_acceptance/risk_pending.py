@@ -46,8 +46,9 @@ def risk_acceptance_decline(
     if finding.risk_status == "Risk Rejected":
         status = "Failed"
         message = "Risk is already rejected"
-    if finding.risk_status in ["Risk Accepted", "Risk Pending"]:
+    if finding.risk_status in ["Risk Accepted", "Risk Pending", "Risk Reviewed"]:
         finding.accepted_by = ""
+        finding.reviewed_by = ""
         finding.active = True
         finding.risk_accepted = False
         finding.risk_status = "Risk Rejected"
@@ -146,12 +147,12 @@ def get_user_with_permission_key(permission_key=None, raise_exception=True) -> D
     logger.debug(f"User {user} with Permmission key ****")
     return user
     
-
-def rules_for_direct_acceptance(finding: Finding,
-                                           product_type: Product_Type,
-                                           user: Dojo_User,
-                                           product: Product,
-                                           risk_acceptance: Risk_Acceptance):
+def rules_for_direct_acceptance(
+        finding: Finding,
+        product_type: Product_Type,
+        user: Dojo_User,
+        product: Product,
+        risk_acceptance: Risk_Acceptance):
     """Validate if user has permission on risk_acceptance
 
     Args:
@@ -179,7 +180,6 @@ def rules_for_direct_acceptance(finding: Finding,
     if (
         user.is_superuser is True
         or role_has_exclusive_permissions(user)
-        or user_has_permission_long_risk_acceptance(user, risk_acceptance)
         or number_of_acceptors_required == 0
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
         or (finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK)
@@ -214,29 +214,36 @@ def risk_acceptante_pending(eng: Engagement,
 
         confirmed_acceptances = get_confirmed_acceptors(finding)
         if is_permissions_risk_acceptance(eng, finding, user, product, product_type):
-            if user.username in confirmed_acceptances:
-                message = "The user has already accepted the risk"
-                status_permission["status"] = "Failed"
-                return Response(status=status_permission["status"], message=message)
-            if len(confirmed_acceptances) < status_permission.get("number_of_acceptors_required"):
-                if finding.accepted_by is None or finding.accepted_by == "":
-                    finding.accepted_by = user.username
-                else:
-                    finding.accepted_by += ", " + user.username
-                if finding.risk_status == "Risk Rejected":
-                    finding.risk_status = "Risk Pending"
+            if risk_acceptance.long_term_acceptance:
+                finding.risk_status = "Risk Reviewed"
+                finding.reviewed_by = user.username
                 finding.save()
-                if status_permission.get("number_of_acceptors_required") == len(
-                    get_confirmed_acceptors(finding)
-                ):
-                    risk_accepted_succesfully(finding, risk_acceptance)
-                message = "Finding Accept successfully from risk acceptance."
+                message = "Finding has been marked as reviewed"
                 status_permission["status"] = "OK"
             else:
-                raise ValueError(
-                    f"""Error number of acceptors {len(confirmed_acceptances)} > number of acceptors required
-                     {status_permission.get("number_of_acceptors_required")}"""
-                )
+                if user.username in confirmed_acceptances:
+                    message = "The user has already accepted the risk"
+                    status_permission["status"] = "Failed"
+                    return Response(status=status_permission["status"], message=message)
+                if len(confirmed_acceptances) < status_permission.get("number_of_acceptors_required"):
+                    if finding.accepted_by is None or finding.accepted_by == "":
+                        finding.accepted_by = user.username
+                    else:
+                        finding.accepted_by += ", " + user.username
+                    if finding.risk_status == "Risk Rejected":
+                        finding.risk_status = "Risk Pending"
+                    finding.save()
+                    if status_permission.get("number_of_acceptors_required") == len(
+                        get_confirmed_acceptors(finding)
+                    ):
+                        risk_accepted_succesfully(finding, risk_acceptance)
+                    message = "Finding Accept successfully from risk acceptance."
+                    status_permission["status"] = "OK"
+                else:
+                    raise ValueError(
+                        f"""Error number of acceptors {len(confirmed_acceptances)} > number of acceptors required
+                        {status_permission.get("number_of_acceptors_required")}"""
+                    )
         else:
             raise ApiError.unauthorized(detail="No permissions")
     else:
@@ -321,8 +328,12 @@ def rule_risk_acceptance_according_to_critical(severity, user, product: Product,
 
 def limit_assumption_of_vulnerability(**kwargs):
     # "LAV"  - (Limit Assumption of Vulnerability).
-    number_of_acceptances_by_finding = Risk_Acceptance.objects.filter(accepted_findings=kwargs["finding_id"], decision=Risk_Acceptance.TREATMENT_ACCEPT).count()
     result = {}
+    if "is_long_term_acceptance" in kwargs and kwargs["is_long_term_acceptance"] in ["True", True]:
+        result["status"] = True
+        result["message"] = ""
+        return result
+    number_of_acceptances_by_finding = Risk_Acceptance.objects.filter(accepted_findings=kwargs["finding_id"], decision=Risk_Acceptance.TREATMENT_ACCEPT).count()
     if number_of_acceptances_by_finding < settings.LIMIT_ASSUMPTION_OF_VULNERABILITY:
         result["status"] = True
         result["message"] = ""
@@ -332,7 +343,13 @@ def limit_assumption_of_vulnerability(**kwargs):
     return result
 
 
-def abuse_control(user, finding: Finding, product: Product, product_type: Product_Type):
+def abuse_control(
+        user,
+        finding: Finding,
+        product: Product,
+        product_type: Product_Type,
+        is_long_term_acceptance: str
+    ):
     result = {}
     result["status"] = True
     result["message"] = ""
@@ -345,7 +362,12 @@ def abuse_control(user, finding: Finding, product: Product, product_type: Produc
     }
     result_dict = {}
     for key, rule in rule_abuse_control.items():
-        result_dict[key] = rule(finding_id=finding.id, product_id=product.id, result=result)
+        result_dict[key] = rule(
+            finding_id=finding.id,
+            product_id=product.id,
+            result=result,
+            is_long_term_acceptance=is_long_term_acceptance
+        )
     return result_dict
 
 

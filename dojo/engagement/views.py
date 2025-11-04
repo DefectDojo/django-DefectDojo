@@ -1312,7 +1312,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             active=True,
             severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         if form.cleaned_data['long_term_acceptance'] == "True":
-            form.fields["approvers"].widget.attrs['value'] = form.cleaned_data["approvers_long_acceptance"].username
+            form.fields["approvers"].widget.attrs['value'] = "" 
         else:
             form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
 
@@ -1334,8 +1334,13 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 return render(request, "dojo/add_risk_acceptance.html", {"form": form})
 
             abuse_control_result = rp_helper.abuse_control(
-                request.user, finding, product, product_type
+                request.user,
+                finding,
+                product,
+                product_type,
+                is_long_term_acceptance=form.cleaned_data["long_term_acceptance"]
             )
+            #TODO: modificar el campo accepted_dy a vacio para los caos donde el fiding ya tiena un aceptador
             for abuse_control, result in abuse_control_result.items():
                 if not abuse_control_result[abuse_control]["status"]:
                     messages.add_message(
@@ -1823,7 +1828,13 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                             return redirect_to_return_url_or_else(
                                 request, reverse("view_risk_acceptance", args=(eid, raid))
                             )
-                        abuse_control_result = rp_helper.abuse_control(request.user, finding, product, product_type)
+                        abuse_control_result = rp_helper.abuse_control(
+                            request.user,
+                            finding,
+                            product,
+                            product_type,
+                            is_long_term_acceptance=risk_acceptance.long_term_acceptance
+                        )
                         for abuse_control, result in abuse_control_result.items():
                             if not abuse_control_result[abuse_control]["status"]:
                                 messages.add_message(

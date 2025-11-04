@@ -1118,11 +1118,10 @@ class RiskPendingForm(forms.ModelForm):
         widget=forms.widgets.SelectMultiple(attrs={'disabled':'disabled'}),
         required=False,
     )
-    approvers_long_acceptance = forms.ModelChoiceField(
-        queryset=Dojo_User.objects.none(),
+    reviewed_by = forms.ChoiceField(
         widget=forms.widgets.Select(attrs={'size': 1}),
         required=False,
-        help_text=("Selection el user what to aprroved to solicuted")
+        help_text=("Selection el user what reviewed the risk acceptance")
     )
     path = forms.FileField(
         label="Proof",
@@ -1145,7 +1144,7 @@ class RiskPendingForm(forms.ModelForm):
                   "expiration_date",
                   "recommendation_details",
                   "path", "accepted_by",
-                  "approvers", "path", "owner"]
+                  "approvers","reviewed_by","path", "owner"]
 
     def __init__(self, *args, **kwargs):
         self.severity = kwargs.pop("severity", None)
@@ -1166,8 +1165,8 @@ class RiskPendingForm(forms.ModelForm):
         queryset_permissions = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['accepted_findings'].queryset = queryset_permissions
         if value :=  GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_risk"):
-            self.fields['approvers_long_acceptance'].queryset = get_users_for_group_by_role(value, "Risk")
-            self.fields['approvers_long_acceptance'].initial = self.fields['approvers_long_acceptance'].queryset.last()
+            reviewed_user = get_users_for_group_by_role(value, "Risk")
+            self.fields['reviewed_by'].choices = [(user.username, user.username) for user in reviewed_user] 
         self.fields['accepted_by'].queryset = get_authorized_contacts_for_product_type(self.severity, product, product_type)
         owner_username = self.fields['owner'].queryset.first().username
         if (category and category in settings.COMPLIANCE_FILTER_RISK) and not self.fields['accepted_by'].queryset.filter(username=owner_username).exists():
@@ -1183,25 +1182,24 @@ class RiskPendingForm(forms.ModelForm):
         data = self.cleaned_data
         long_term_acceptance = data.get("long_term_acceptance", None)
         expiration_date = data["expiration_date"]
+        if long_term_acceptance == "True":
+            return data
         if expiration_date and expiration_date.date() < datetime.today().date():
             msg = "The date cannot be in the past!"
             raise forms.ValidationError(msg)
-        if long_term_acceptance == "False":
+        else:
             sla = sla_expiration_risk_acceptance("RiskAcceptanceExpiration")
             date_sla = timezone.now().date() + relativedelta(days=sla.get(self.severity.lower()))
-            data["expiration_date"] != date_sla  # secure assignment of the expiration date
-        if data["long_term_acceptance"] == "True":
-            user_approver = data["approvers_long_acceptance"]
-            data["accepted_by"] = [user_approver.username]
-            if not data['approvers_long_acceptance']:
-                data['approvers_long_acceptance'] = self.fields['approvers_long_acceptance'].queryset.last()
-        elif "accepted_by" in data.keys():
+            data["expiration_date"] = date_sla  # secure assignment of the expiration date
+
+        if "accepted_by" in data.keys():
             accepted_by = data["accepted_by"]
             contacts = accepted_by.values()
             contact = [contact["username"] for contact in contacts]
             data["accepted_by"] = contact
         else:
             raise ValidationError("Accepted_by key no found")
+
         return data
     
     def clean_path(self):

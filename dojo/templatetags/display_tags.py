@@ -56,13 +56,15 @@ class StatusColor(Enum):
     RED = "#b50500"
     GREEN = "#006b00"
     ORANGE = "#d77500"
+    BLUE = "#104dbe"
 
     @classmethod
     def get_color(cls, status):
         dict_color = {
             "Red": cls.RED.value,
             "Green": cls.GREEN.value,
-            "Orange": cls.ORANGE.value
+            "Orange": cls.ORANGE.value,
+            "Blue": cls.BLUE.value
         }
         return dict_color.get(status, cls.RED.value)
 
@@ -1027,11 +1029,12 @@ def status_style_color(status: str):
         "Risk Active": f'<span style="color:gray">{status}</span>',
         "Risk Pending": f'<span style="color:blue">{status}</span>',
         "Risk Accepted": f'<span style="color:green">{status}</span>',
+        "Risk Reviewed": f'<span style="color:#blue">{status}</span>',
         "Risk Rejected": f'<span style="color:red">{status}</span>',
         "Risk Expired": f'<span style="color:#D93E14">{status}</span>',
         "Transfer Pending": f'<span style="color:blue">{status}</span>',
         "Transfer Accepted": f'<span style="color:green">{status}</span>',
-        "Transfer Expired": f'<span style="color:#D93E14">{status}</span>',
+        "Transfer Expired": f'<span style="color:green">{status}</span>',
         "Transfer Rejected": f'<span style="color:red">{status}</span>',
     }
     html_contect = dict_style_color.get(status, status)
@@ -1219,6 +1222,15 @@ def enable_like_status(finding):
                 if like_status is False:
                     response = "Dislike"
     return response
+
+@register.filter()
+def render_risk_acceptance_reviewed_by(finding):
+    if finding.reviewed_by is None:
+        return "" 
+    if finding.reviewed_by:
+        return f"👤 {finding.reviewed_by} ✅"
+    return f"👤 {finding.risk_acceptance.reviewed_by}⏳"
+    
 
 
 @register.filter()
