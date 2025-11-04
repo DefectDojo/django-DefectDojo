@@ -3547,6 +3547,7 @@ def generate_token_generative_ia(request, fid):
     response = requests.request("GET",
                                 url=f"{url}/devsecops/recommendation-process/{fid}",
                                 headers=headers,
+                                timeout=300
                                 )
     if response.status_code != 200:
         logger.error(" IA RECOMMENDATIONE: error getting IA RECOMMENDATION: %s", response.text)
