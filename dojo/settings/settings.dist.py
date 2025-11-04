@@ -1397,6 +1397,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Cycognito Scan": ["title", "severity"],
     "OpenVAS Parser v2": ["title", "severity", "vuln_id_from_tool", "endpoints"],
     "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
+    "n0s1 Scanner": ["description"],
 }
 
 # Override the hardcoded settings here via the env var
