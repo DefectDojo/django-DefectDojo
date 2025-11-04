@@ -104,7 +104,7 @@ pyarrow==22.0.0
 azure-core==1.36.0
 protobuf==6.33.0
 billiard==4.2.1
-botocore==1.40.63
+botocore==1.40.65
 et_xmlfile==2.0.0
 inflection==0.5.1
 requests-toolbelt==1.0.0
