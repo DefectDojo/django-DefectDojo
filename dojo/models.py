@@ -3146,6 +3146,11 @@ class Finding(models.Model):
         return self.test.engagement.product.sla_configuration
 
     def get_sla_period(self):
+        # Determine which method to use to calculate the SLA
+        from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
+        if method := get_custom_method("FINDING_SLA_EXPIRATION_DATE"):
+            return method(self)
+        # Run the default method
         sla_configuration = self.get_sla_configuration()
         sla_period = getattr(sla_configuration, self.severity.lower(), None)
         enforce_period = getattr(sla_configuration, str("enforce_" + self.severity.lower()), None)
