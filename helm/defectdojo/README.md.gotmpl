@@ -13,49 +13,75 @@ this [guide](https://helm.sh/docs/using_helm/#installing-helm).
 
 The tests cover the deployment on the lastest [kubernetes version](https://kubernetes.io/releases/) and [the oldest officially supported version](https://kubernetes.io/releases/). The assumption is that version in between do not have significant differences. Current tested versions can looks up in the [github k8s workflow](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/k8s-tests.yml).
 
-## Helm chart
+## Installing
+
+To install the chart with the release name `my-defectdojo`:
+
+```sh
+helm repo add defectdojo 'https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/helm-charts'
+helm repo update
+# prepare my-values.yaml
+helm install my-defectdojo -f my-values.yaml
+```
+
+## Uninstalling the Chart
+
+```sh
+helm uninstall my-defectdojo
+```
+
+## General information about chart values
+
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+## Additional information
 
 Starting with version 1.14.0, a helm chart will be pushed onto the `helm-charts` branch during the release process. Don't look for a chart museum, we're leveraging the "raw" capabilities of GitHub at this time.
 
-To use it, you can add our repo.
+After adding DefectDojo Helm chart (`helm repo add defectdojo ...` see [above](#installing)), you can check all available releases:
 
-```
-$ helm repo add defectdojo 'https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/helm-charts'
-
-$ helm repo update
-```
-
-You should now be able to see the chart.
-
-```
-$ helm search repo defectdojo
-NAME                      	CHART VERSION	APP VERSION	DESCRIPTION
-defectdojo/defectdojo   1.6.153         2.39.0          A Helm chart for Kubernetes to install DefectDojo
+```sh
+$ helm search repo defectdojo --versions      
+NAME                            CHART VERSION   APP VERSION     DESCRIPTION                                      
+defectdojo/defectdojo           1.8.0           2.52.0          A Helm chart for Kubernetes to install DefectDojo
+defectdojo/defectdojo           1.7.3           2.51.3          A Helm chart for Kubernetes to install DefectDojo
+defectdojo/defectdojo           1.7.2           2.51.2          A Helm chart for Kubernetes to install DefectDojo
+defectdojo/defectdojo           1.7.1           2.51.1          A Helm chart for Kubernetes to install DefectDojo
+defectdojo/defectdojo           1.7.0           2.51.0          A Helm chart for Kubernetes to install DefectDojo
+defectdojo/defectdojo           1.6.209         2.50.4          A Helm chart for Kubernetes to install DefectDojo
+...
 ```
 
-## Kubernetes Local Quickstart
+## Examples
 
 Requirements:
 
 1. Helm installed locally
 2. Minikube installed locally
-3. Latest cloned copy of DefectDojo
+3. Latest Helm repo of DefectDojo (see [_Installing_](#installing))
+
+
+
 
 ```zsh
-git clone https://github.com/DefectDojo/django-DefectDojo
-cd django-DefectDojo
-
 minikube start
 minikube addons enable ingress
 ```
-
-Helm >= v3
-
-Then pull the dependent charts:
-
-```zsh
-helm dependency update ./helm/defectdojo
-```
+`
 
 Now, install the helm chart into minikube.
 
@@ -85,12 +111,10 @@ DJANGO_INGRESS_ACTIVATE_TLS=false
 
 Warning: Use the `createSecret*=true` flags only upon first install. For re-installs, see `§Re-install the chart`
 
-Helm >= v3:
-
 ```zsh
 helm install \
+  my-defectdojo \
   defectdojo \
-  ./helm/defectdojo \
   --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
   --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
   --set createSecret=true \
@@ -176,7 +200,7 @@ If you want to change kubernetes configuration of use an updated docker image (e
 
 ```
 kubectl delete job defectdojo-initializer
-helm upgrade  defectdojo ./helm/defectdojo/ \
+helm upgrade my-defectdojo defectdojo \
    --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
    --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
 ```
@@ -189,10 +213,10 @@ In case of issue or in any other situation where you need to re-install the char
 
 ```zsh
 # helm 3
-helm uninstall defectdojo
+helm uninstall my-defectdojo
 helm install \
+  my-defectdojo \
   defectdojo \
-  ./helm/defectdojo \
   --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
   --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
 ```
@@ -274,8 +298,8 @@ Theses fields are required to get the stack running.
 ```zsh
 # Install Helm chart. Choose a host name that matches the certificate above
 helm install \
+  my-defectdojo \
   defectdojo \
-  ./helm/defectdojo \
   --namespace="${K8S_NAMESPACE}" \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
@@ -285,8 +309,8 @@ helm install \
 
 # For high availability deploy multiple instances of Django, Celery and Redis
 helm install \
+  my-defectdojo \
   defectdojo \
-  ./helm/defectdojo \
   --namespace="${K8S_NAMESPACE}" \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
@@ -300,8 +324,8 @@ helm install \
 # Run highly available PostgreSQL cluster
 # for production environment.
 helm install \
+  my-defectdojo \
   defectdojo \
-  ./helm/defectdojo \
   --namespace="${K8S_NAMESPACE}" \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.replicas=3 \
@@ -367,8 +391,8 @@ celery:
   broker: 'redis'
 
 redis:
-  redisServer: 'PutYourRedisSentinelAddress'
   scheme: 'sentinel'
+redisServer: 'PutYourRedisSentinelAddress'
 
 extraEnv:
   - name: DD_CELERY_BROKER_TRANSPORT_OPTIONS
@@ -430,7 +454,6 @@ Before installing the DefectDojo Helm chart, it's important to customize the `va
 ```yaml
 postgresql:
   enabled: false # Disable the creation of the database in the cluster
-  postgresServer: "127.0.0.1" # Required to skip certain tests not useful on external instances
   auth:
     username: defectdojo # your database user
     database: defectdojo # your database name
@@ -439,6 +462,7 @@ postgresql:
       userPasswordKey: password # the name of the field containing the password value
       replicationPasswordKey: password # the name of the field containing the password value
     existingSecret: defectdojo-postgresql-specific # the secret containing your database password
+postgresServer: "127.0.0.1" # Required to skip certain tests not useful on external instances
 
 extraEnv:
 # Overwrite the database endpoint
@@ -454,7 +478,7 @@ extraEnv:
 After modifying the `values.yaml` file as needed, deploy DefectDojo using Helm. This command also generates the required secrets for the DefectDojo admin UI and Redis:
 
 ```bash
-helm install defectdojo defectdojo -f values.yaml -n defectdojo --set createSecret=true --set createRedisSecret=true
+helm install my-defectdojo defectdojo -f values.yaml -n defectdojo --set createSecret=true --set createRedisSecret=true
 ```
 
 
@@ -481,10 +505,8 @@ kubectl exec -it $(kubectl get pod --selector=defectdojo.org/component=${POD} \
 
 ### Clean up Kubernetes
 
-Helm >= v3
-
 ```
-helm uninstall defectdojo
+helm uninstall my-defectdojo
 ```
 
 To remove persistent objects not removed by uninstall (this will remove any database):
@@ -495,23 +517,5 @@ kubectl delete serviceAccount defectdojo
 kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 ```
 
-
-# General information about chart values
-
-{{ template "chart.deprecationWarning" . }}
-
-{{ template "chart.badgesSection" . }}
-
-{{ template "chart.description" . }}
-
-{{ template "chart.homepageLine" . }}
-
-{{ template "chart.maintainersSection" . }}
-
-{{ template "chart.sourcesSection" . }}
-
-{{ template "chart.requirementsSection" . }}
-
-{{ template "chart.valuesSection" . }}
 
 {{ template "helm-docs.versionFooter" . }}
