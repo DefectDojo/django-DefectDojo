@@ -513,7 +513,7 @@ GET parameter starts with `http://` instead of
 `https://` you need to add
 `SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` to Docker environment variables, or to your `local_settings.py` file.
 You can also setup SOCIAL_AUTH_REDIRECT_IS_HTTPS by adding the DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS var to extraConfigs
-section of your Helm yaml file, when deploying with Helm.
+section of your Helm value yaml file, when deploying with Helm.
 
 2. Restart DefectDojo, and 'Login With Okta' should appear on the login screen.
 
