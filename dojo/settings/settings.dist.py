@@ -531,7 +531,7 @@ env = environ.FileAwareEnv(
     DD_CLIENT_SECRET_IA=(str, ""),
 
     # Regex Validation Name
-    DD_REGEX_VALIDATION_NAME=(str, "^[a-zA-Z0-9\\_\\-\\.\\s]+$"),
+    DD_REGEX_VALIDATION_NAME=(str, "*"),
     # Redis
     DD_USE_CACHE_REDIS=(bool, False),
     DD_CACHE_PAGE_TIME=(int, 60 * 5),  # 5 minutes
