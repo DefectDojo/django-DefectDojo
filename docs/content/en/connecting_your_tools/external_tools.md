@@ -921,4 +921,4 @@ If you encounter any issues with these tools, please check the following:
 - Ensure you're using the correct binary for your operating system and CPU architecture.
 - Verify that the API key is set correctly in your environment variables.
 - Check that the DefectDojo URL is correct and accessible.
-- When importing, confirm that the report file exists and is in the supported format for the specified scan type.  You can review the supported scanners for DefectDojo on our [supported tools list](../parsers). 
+- When importing, confirm that the report file exists and is in the supported format for the specified scan type.  You can review the supported scanners for DefectDojo on our [supported tools list](/supported_tools). 
