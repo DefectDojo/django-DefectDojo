@@ -934,6 +934,8 @@ class FindingViewSet(
                 context={"request": request},
             )
             if finding_close.is_valid():
+                # Remove the prefetched tags to avoid issues with delegating to celery
+                finding.tags._remove_prefetched_objects()
                 # Use shared helper to perform close operations
                 finding_helper.close_finding(
                     finding=finding,
