@@ -1256,7 +1256,7 @@ class Product(models.Model):
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
                 from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
-                async_update_sla_expiration_dates_sla_config_sync(sla_config, [self])
+                async_update_sla_expiration_dates_sla_config_sync(sla_config, Product.objects.filter(id=self.id))
 
     def get_absolute_url(self):
         return reverse("view_product", args=[str(self.id)])
