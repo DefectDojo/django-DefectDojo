@@ -346,7 +346,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         testfile.close()
         self.assertEqual(7, len(findings))
 
-    def test_parse_file_with_another_report(self):
+    def test_parse_file_issue_13628(self):
         testfile = (get_unit_tests_scans_path("jfrog_xray_unified") / "issue_13628.json").open(encoding="utf-8")
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
