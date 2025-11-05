@@ -65,15 +65,17 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     without making any database changes. This allows users to preview what would
     happen during a real reimport.
 
+    The dry_run mode uses in-memory tracking to accurately simulate deduplication,
+    including matches between findings within the same scan report. This means that
+    if finding 100 and 101 in the report have the same hash_code, finding 101 will
+    correctly be identified as a duplicate of finding 100, just as in a real import.
+
     Known Limitations in Dry Run Mode:
-    - Finding matching within the same report: If two findings in the same scan report
-      have the same hash_code, the second finding will NOT be matched against the first
-      in dry_run mode (since the first is never saved to the database). In a real import,
-      this match would occur. This means dry_run statistics may show slightly more "new"
-      findings than would actually be created.
     - Endpoint updates are not simulated
     - Finding groups are not processed
     - JIRA integration is skipped
+    - No notifications are sent
+    - Test/engagement timestamps are not updated
     """
 
     def __init__(self, *args, **kwargs):
@@ -260,6 +262,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.reactivated_items = []
         self.unchanged_items = []
         self.group_names_to_findings_dict = {}
+        # In dry_run mode, track new findings in-memory to enable proper deduplication
+        # within the same scan report (e.g., if finding 100 and 101 have same hash_code)
+        self.dry_run_new_findings = [] if self.dry_run else None
         # Progressive batching for chord execution
         post_processing_task_signatures = []
         current_batch_number = 1
@@ -339,6 +344,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if self.dry_run:
                     # In dry_run mode, just add to new_items without saving
                     self.new_items.append(unsaved_finding)
+                    # Track in-memory for deduplication within the same scan report
+                    self.dry_run_new_findings.append(unsaved_finding)
                     finding = unsaved_finding
                 else:
                     finding = self.process_finding_that_was_not_matched(unsaved_finding)
@@ -482,10 +489,31 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> list[Finding]:
-        """Matches a single new finding to N existing findings and then returns those matches"""
+        """
+        Matches a single new finding to N existing findings and returns those matches.
+        In dry_run mode, also checks against in-memory findings to simulate proper deduplication
+        within the same scan report.
+        """
         # This code should match the logic used for deduplication out of the re-import feature.
         # See utils.py deduplicate_* functions
         deduplicationLogger.debug("return findings bases on algorithm: %s", self.deduplication_algorithm)
+
+        # Get matches from database
+        db_matches = self._get_db_matches(unsaved_finding)
+
+        # In dry_run mode, also check in-memory findings from current scan
+        if self.dry_run and self.dry_run_new_findings:
+            in_memory_matches = self._get_in_memory_matches(unsaved_finding)
+            # Combine matches: in-memory findings should come first (they would have lower IDs)
+            if in_memory_matches:
+                deduplicationLogger.debug(f"Found {len(in_memory_matches)} in-memory matches in dry_run mode")
+                # Return in-memory match (simulates what would happen if it was saved)
+                return [in_memory_matches[0]]
+
+        return db_matches
+
+    def _get_db_matches(self, unsaved_finding: Finding) -> list[Finding]:
+        """Get matches from the database based on deduplication algorithm"""
         if self.deduplication_algorithm == "hash_code":
             return (
                 Finding.objects.filter(
@@ -531,6 +559,36 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             ).order_by("id")
         logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
         return None
+
+    def _get_in_memory_matches(self, unsaved_finding: Finding) -> list[Finding]:
+        """
+        Check in-memory findings for matches (used in dry_run mode).
+        This simulates the deduplication that would occur within the same scan report.
+        """
+        matches = []
+        for in_memory_finding in self.dry_run_new_findings:
+            if self.deduplication_algorithm == "hash_code":
+                if in_memory_finding.hash_code and in_memory_finding.hash_code == unsaved_finding.hash_code:
+                    matches.append(in_memory_finding)
+            elif self.deduplication_algorithm == "unique_id_from_tool":
+                if (
+                    in_memory_finding.unique_id_from_tool
+                    and in_memory_finding.unique_id_from_tool == unsaved_finding.unique_id_from_tool
+                ):
+                    matches.append(in_memory_finding)
+            elif self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+                if (in_memory_finding.hash_code and in_memory_finding.hash_code == unsaved_finding.hash_code) or (
+                    in_memory_finding.unique_id_from_tool
+                    and in_memory_finding.unique_id_from_tool == unsaved_finding.unique_id_from_tool
+                ):
+                    matches.append(in_memory_finding)
+            elif self.deduplication_algorithm == "legacy":
+                if (
+                    in_memory_finding.title.lower() == unsaved_finding.title.lower()
+                    and in_memory_finding.severity == unsaved_finding.severity
+                ):
+                    matches.append(in_memory_finding)
+        return matches
 
     def categorize_matched_finding_for_dry_run(
         self,
