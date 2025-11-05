@@ -1093,8 +1093,8 @@ class SLA_Configuration(models.Model):
                     product.async_updating = True
                     super(Product, product).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async  # noqa: I001, PLC0415 circular import
-                update_sla_expiration_dates_sla_config_async(self, products, tuple(severities))
+                from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
+                async_update_sla_expiration_dates_sla_config_sync(self, products, severities=severities)
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -1255,8 +1255,8 @@ class Product(models.Model):
                     sla_config.async_updating = True
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_product_async  # noqa: I001, PLC0415 circular import
-                update_sla_expiration_dates_product_async(self, sla_config)
+                from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
+                async_update_sla_expiration_dates_sla_config_sync(sla_config, [self])
 
     def get_absolute_url(self):
         return reverse("view_product", args=[str(self.id)])
@@ -3148,7 +3148,7 @@ class Finding(models.Model):
     def get_sla_period(self):
         # Determine which method to use to calculate the SLA
         from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
-        if method := get_custom_method("FINDING_SLA_EXPIRATION_DATE"):
+        if method := get_custom_method("FINDING_SLA_PERIOD_METHOD"):
             return method(self)
         # Run the default method
         sla_configuration = self.get_sla_configuration()
@@ -3157,10 +3157,14 @@ class Finding(models.Model):
         return sla_period, enforce_period
 
     def set_sla_expiration_date(self):
+        # First check if SLA is enabled globally
         system_settings = System_Settings.objects.get()
         if not system_settings.enable_finding_sla:
             return
+        # Call the internal method to set the sla expiration date
+        self._set_sla_expiration_date()
 
+    def _set_sla_expiration_date(self):
         # some parsers provide date as a `str` instead of a `date` in which case we need to parse it #12299 on GitHub
         sla_start_date = self.get_sla_start_date()
         if sla_start_date and isinstance(sla_start_date, str):
