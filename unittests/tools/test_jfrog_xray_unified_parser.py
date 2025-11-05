@@ -345,3 +345,12 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(7, len(findings))
+
+    def test_parse_file_with_another_report(self):
+        testfile = (get_unit_tests_scans_path("jfrog_xray_unified") / "issue_13628.json").open(encoding="utf-8")
+        parser = JFrogXrayUnifiedParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        self.assertEqual("Critical", findings[0].severity)
+        self.assertEqual("XRAY-123 - The ip package before 1.1.9 for Node.js might allow SSRF because some IP addresses (such as 0x7f.1) are improperly categorized as globally routable via isPublic.", findings[0].title)
