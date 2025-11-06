@@ -32,7 +32,7 @@ jobs:
              helm dependency update ./helm/defectdojo
 
       - name: Set up chart-testing
-        uses: helm/chart-testing-action@0d28d3144d3a25ea2cc349d6e59901c4ff469b3b # v2.7.0
+        uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # v2.8.0
         with:
           yamale_version: 6.0.0 # renovate: datasource=pypi depName=yamale versioning=semver
           yamllint_version: 1.37.1 # renovate: datasource=pypi depName=yamllint versioning=semver
@@ -107,12 +107,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      
+  
+      - name: Update values in HELM chart
+        if: startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')
+        run: |
+          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: ${{ github.event.pull_request.title }}\n"' helm/defectdojo/Chart.yaml
+
+      - name: Run helm-docs (update)
+        uses: losisin/helm-docs-github-action@a57fae5676e4c55a228ea654a1bcaec8dd3cf5b5 # v1.6.2
+        if: startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')
+        with:
+          chart-search-root: "helm/defectdojo"
+          git-push: true
+
       # Documentation provided in the README file needs to contain the latest information from `values.yaml` and all other related assets.
       # If this step fails, install https://github.com/norwoodj/helm-docs and run locally `helm-docs --chart-search-root helm/defectdojo` before committing your changes.
       # The helm-docs documentation will be generated for you.
-      - name: Run helm-docs
+      - name: Run helm-docs (check)
         uses: losisin/helm-docs-github-action@a57fae5676e4c55a228ea654a1bcaec8dd3cf5b5 # v1.6.2
+        if: ! startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')
         with:
           fail-on-diff: true
           chart-search-root: "helm/defectdojo"

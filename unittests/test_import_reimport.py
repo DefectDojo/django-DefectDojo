@@ -100,6 +100,8 @@ class ImportReimportMixin:
         self.scan_type_gitlab_dast = "GitLab DAST Report"
 
         self.anchore_grype_file_name = get_unit_tests_scans_path("anchore_grype") / "check_all_fields.json"
+        self.anchore_grype_file_name_fix_not_available = get_unit_tests_scans_path("anchore_grype") / "fix_not_available.json"
+        self.anchore_grype_file_name_fix_available = get_unit_tests_scans_path("anchore_grype") / "fix_available.json"
         self.anchore_grype_scan_type = "Anchore Grype"
 
         self.checkmarx_one_open_and_false_positive = get_unit_tests_scans_path("checkmarx_one") / "one-open-one-false-positive.json"
@@ -1690,6 +1692,30 @@ class ImportReimportMixin:
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual("GHSA-v6rh-hp5x-86rv", findings[3].vulnerability_ids[0])
         self.assertEqual("CVE-2021-44420", findings[3].vulnerability_ids[1])
+
+    def test_import_reimport_fix_available(self):
+        import0 = self.import_scan_with_params(self.anchore_grype_file_name_fix_not_available, scan_type=self.anchore_grype_scan_type)
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        findings = Finding.objects.filter(test=test)
+        self.assertEqual(1, len(findings))
+        self.assertEqual(False, findings[0].fix_available)
+        self.assertEqual(None, findings[0].fix_version)
+
+        test_type = Test_Type.objects.get(name=self.anchore_grype_scan_type)
+        reimport_test = Test(
+            engagement=test.engagement,
+            test_type=test_type,
+            scan_type=self.anchore_grype_scan_type,
+            target_start=datetime.now(timezone.get_current_timezone()),
+            target_end=datetime.now(timezone.get_current_timezone()),
+        )
+        reimport_test.save()
+        self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name_fix_available, scan_type=self.anchore_grype_scan_type)
+        findings = Finding.objects.filter(test=reimport_test)
+        self.assertEqual(1, len(findings))
+        self.assertEqual(True, findings[0].fix_available)
+        self.assertEqual("1.2.3", findings[0].fix_version)
 
     def test_import_history_reactivated_and_untouched_findings_do_not_mix(self):
         import0 = self.import_scan_with_params(self.generic_import_1, scan_type=self.scan_type_generic)
