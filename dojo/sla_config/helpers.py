@@ -44,13 +44,8 @@ def update_sla_expiration_dates_sla_config_sync(sla_config: SLA_Configuration, p
     mass_model_updater(Finding, findings, lambda f: f.set_sla_expiration_date(), fields=["sla_expiration_date"])
 
     # reset the async updating flag to false for all products using this sla config
-    # TODO: It would be faster to use update. Especially since we likely dont want signals to fire here
+    # use update as we don't want save() and signals to be triggered
     products.update(async_updating=False)
-    # for product in products:
-    #     product.async_updating = False
-    #     super(Product, product).save()
-    #     # TODO: I cannot see a reason why we need to calculate the grade here again
-    #     calculate_grade(product)
 
     # reset the async updating flag to false for this sla config
     sla_config.async_updating = False
