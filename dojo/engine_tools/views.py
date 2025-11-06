@@ -1,10 +1,11 @@
 # Dojo
-from dojo.templatetags.authorization_tags import is_in_group
+from dojo.templatetags.authorization_tags import is_in_group, has_permission_to_reclassify_orphans
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification
 from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm, EditFindingExclusionForm
+from dojo.models import Product, Product_Type, System_Settings
 from dojo.engine_tools.helpers import (
     add_findings_to_whitelist, 
     get_reviewers_members, 
@@ -21,12 +22,19 @@ from datetime import datetime, timedelta
 from django.contrib import messages
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
-from django.http.response import HttpResponseRedirect
+from django.http.response import HttpResponseRedirect, JsonResponse
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
+from django.db.models import Q
+import json
+import pandas as pd
+from openpyxl.styles import Font, PatternFill
 
 
 def finding_exclusions(request: HttpRequest):
@@ -429,3 +437,275 @@ def delete_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
             extra_tags="alert-success")
     
     return redirect('finding_exclusions')
+
+
+def orphans_reclassification(request: HttpRequest) -> HttpResponse:
+    system_settings = System_Settings.objects.get()
+    orphan_product_type_name = system_settings.orphan_findings
+    
+    if not has_permission_to_reclassify_orphans(request.user):
+        raise PermissionDenied
+    
+    orphans_product_type = Product_Type.objects.filter(name=orphan_product_type_name).first()
+    
+    search_query = request.GET.get('search', '').strip()
+    
+    orphan_products = Product.objects.filter(
+        prod_type=orphans_product_type
+    ).order_by('name')
+    
+    if search_query:
+        orphan_products = orphan_products.filter(name__icontains=search_query)
+    
+    page_obj = get_page_items(request, orphan_products, 100)
+    
+    product_types = Product_Type.objects.exclude(name=orphan_product_type_name).order_by('name')
+    
+    context = {
+        "orphan_products": page_obj,
+        "product_types": product_types,
+        "name": "Reclassification of Orphans",
+        "page_obj": page_obj,
+    }
+    
+    add_breadcrumb(title="Reclassification of Orphans", top_level=True, request=request)
+    return render(request, "dojo/views_orphans_reclassification.html", context)
+
+
+def reclassify_orphan_products(request: HttpRequest) -> HttpResponse:
+    system_settings = System_Settings.objects.get()
+    orphan_product_type_name = system_settings.orphan_findings
+    
+    if not has_permission_to_reclassify_orphans(request.user):
+        raise PermissionDenied
+
+    data = request.POST
+    product_type_id = data.get('product_type')
+    selected_orphan_products = data.getlist('selected_products')
+
+    product_type = get_object_or_404(Product_Type, pk=product_type_id)
+
+    Product.objects.filter(
+        prod_type__name=orphan_product_type_name,
+        id__in=selected_orphan_products
+    ).update(prod_type=product_type)
+
+    products = Product.objects.filter(id__in=selected_orphan_products)
+    for p in products:
+        current_tags = list(p.tags.get_tag_list())
+        if 'identified_by_orphan_reclassification' not in current_tags:
+            current_tags.append('identified_by_orphan_reclassification')
+            p.tags.set(current_tags)
+            p.save()
+
+    messages.add_message(
+        request,
+        messages.SUCCESS,
+        f"{len(selected_orphan_products)} products reclassified to '{product_type.name}'.",
+        extra_tags="alert-success"
+    )
+
+    return redirect('orphans_reclassification')
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ExcelReclassificationView(View):
+    def post(self, request: HttpRequest) -> HttpResponse:
+        if request.FILES.get('excel_file'):
+            return self.process_excel_file(request)
+        return redirect('orphans_reclassification')
+    
+    def process_excel_file(self, request):
+        excel_file = request.FILES['excel_file']
+        
+        try:
+            df = pd.read_excel(excel_file, usecols=['Product', 'ProductType'])
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f"Error reading Excel file: {e}"
+            })
+        
+        if 'Product' not in df.columns or 'ProductType' not in df.columns:
+            return JsonResponse({
+                'status': 'error',
+                'message': "Excel file must contain 'Product' and 'ProductType' columns."
+            })
+        
+        max_records = 100000
+        if len(df) > max_records:
+            df = df.head(max_records)
+        
+        df = df.dropna().drop_duplicates()
+        
+        session_key = f"excel_processing_{request.session.session_key}"
+        products_to_process = []
+        
+        for _, row in df.iterrows():
+            products_to_process.append({
+                'product_name': str(row['Product']).strip(),
+                'product_type_name': str(row['ProductType']).strip(),
+                'status': 'pending'
+            })
+        
+        request.session[session_key] = {
+            'total': len(products_to_process),
+            'processed': 0,
+            'successful': 0,
+            'failed': 0,
+            'products': products_to_process
+        }
+        
+        return JsonResponse({
+            'status': 'started',
+            'total': len(products_to_process),
+            'session_key': session_key,
+            'message': f'Processing started for {len(products_to_process)} products.'
+        })
+
+
+def get_processing_status(request):
+    if not has_permission_to_reclassify_orphans(request.user):
+        raise PermissionDenied
+
+    session_key = request.GET.get('session_key')
+    if not session_key or session_key not in request.session:
+        return JsonResponse({'status': 'not_found'})
+    
+    progress_data = request.session[session_key]
+    return JsonResponse(progress_data)
+
+
+@csrf_exempt
+def process_batch(request):
+    system_settings = System_Settings.objects.get()
+    orphan_product_type_name = system_settings.orphan_findings
+    
+    if not has_permission_to_reclassify_orphans(request.user):
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        session_key = data.get('session_key')
+        batch_size = data.get('batch_size', 100)
+
+        if not session_key or session_key not in request.session:
+            return JsonResponse({'status': 'error', 'message': 'Session not found'})
+
+        progress_data = request.session[session_key]
+
+        start_index = progress_data['processed']
+        end_index = min(start_index + batch_size, progress_data['total'])
+
+        if start_index >= end_index:
+            return JsonResponse({
+                'status': 'completed',
+                'processed': progress_data['processed'],
+                'total': progress_data['total'],
+                'successful': progress_data['successful'],
+                'failed': progress_data['failed'],
+                'completed': True
+            })
+
+        batch_products = progress_data['products'][start_index:end_index]
+
+        product_names = [p['product_name'] for p in batch_products]
+        product_type_names = list(set([p['product_type_name'] for p in batch_products]))
+
+        products_qs = Product.objects.filter(
+            name__in=product_names,
+            prod_type__name=orphan_product_type_name
+        ).select_related('prod_type')
+
+        product_types_qs = Product_Type.objects.filter(name__in=product_type_names)
+
+        products_dict = {p.name: p for p in products_qs}
+        product_types_dict = {pt.name: pt for pt in product_types_qs}
+
+        products_to_update = []
+        successful_updates = 0
+
+        for product_data in batch_products:
+            product_name = product_data['product_name']
+            product_type_name = product_data['product_type_name']
+
+            product = products_dict.get(product_name)
+            product_type = product_types_dict.get(product_type_name)
+
+            if product and product_type:
+                product.prod_type = product_type
+                products_to_update.append(product)
+
+                product_data['status'] = 'success'
+                successful_updates += 1
+            else:
+                product_data['status'] = 'failed'
+                if not product:
+                    product_data['error'] = "Product not found or not an orphan"
+                else:
+                    product_data['error'] = "ProductType not found"
+
+        if products_to_update:
+            Product.objects.bulk_update(products_to_update, ['prod_type'])
+
+            for product in products_to_update:
+                current_tags = set(product.tags.get_tag_list())
+                if 'identified_by_orphan_reclassification' not in current_tags:
+                    product.tags.add('identified_by_orphan_reclassification')
+
+                product.save()
+
+        failed_updates = len(batch_products) - successful_updates
+        progress_data['processed'] = end_index
+        progress_data['successful'] += successful_updates
+        progress_data['failed'] += failed_updates
+
+        request.session[session_key] = progress_data
+        request.session.modified = True
+
+        return JsonResponse({
+            'status': 'processing',
+            'processed': progress_data['processed'],
+            'total': progress_data['total'],
+            'successful': progress_data['successful'],
+            'failed': progress_data['failed'],
+            'completed': progress_data['processed'] >= progress_data['total'],
+            'batch_size': len(batch_products)
+        })
+
+
+def export_orphan_products_simple(request):
+    system_settings = System_Settings.objects.get()
+    orphan_product_type_name = system_settings.orphan_findings
+    
+    if not has_permission_to_reclassify_orphans(request.user):
+        raise PermissionDenied
+
+    orphan_products = Product.objects.filter(prod_type__name=orphan_product_type_name)
+    
+    search_query = request.GET.get('search', '')
+    if search_query:
+        orphan_products = orphan_products.filter(
+            Q(name__icontains=search_query) | 
+            Q(code__icontains=search_query)
+        )
+    
+    data = [{'Product': product.name, 'ProductType': ''} for product in orphan_products]
+    
+    df = pd.DataFrame(data) 
+    
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="plantilla_reclasificacion.xlsx"'
+    
+    with pd.ExcelWriter(response, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name='Plantilla', index=False)
+        
+        worksheet = writer.sheets['Plantilla']
+        worksheet.column_dimensions['A'].width = 50
+        worksheet.column_dimensions['B'].width = 30
+        
+        for cell in worksheet[1]:
+            cell.font = Font(bold=True)
+            cell.fill = PatternFill(start_color="E6E6E6", end_color="E6E6E6", fill_type="solid")
+    
+    return response

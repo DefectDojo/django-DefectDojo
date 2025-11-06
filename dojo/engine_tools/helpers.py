@@ -563,3 +563,4 @@ def remove_findings_from_deleted_finding_exclusions(
         logger.error(
             f"Error processing deleted exclusion {unique_id_from_tool}: {str(e)}"
         )
+
