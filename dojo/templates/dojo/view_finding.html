@@ -1730,6 +1730,7 @@
             $.ajax({
                 url: "/finding/" + finding_id + "/generative_ia/token",
                 type: "GET",
+                timeout: 300000,
                 headers: { 
                   "X-CSRFToken": csrftoken,
                   "Content-Type": "application/json"

@@ -2167,9 +2167,21 @@ class CommonImportScanSerializer(serializers.Serializer):
         required=False,
         validators=[ImporterFileExtensionValidator()],
     )
-    product_type_name = serializers.CharField(required=False)
-    product_name = serializers.CharField(required=False)
-    engagement_name = serializers.CharField(required=False)
+    product_type_name = serializers.CharField(
+        required=False,
+        validators=[validators.valid_chars_validator],
+        max_length=255
+    )
+    product_name = serializers.CharField(
+        required=False,
+        validators=[validators.valid_chars_validator],
+        max_length=255
+    )
+    engagement_name = serializers.CharField(
+        required=False,
+        validators=[validators.valid_chars_validator],
+        max_length=255
+    )
     engagement_end_date = serializers.DateField(
         required=False,
         help_text="End Date for Engagement. Default is current time + 365 days. Required format year-month-day",
@@ -2180,7 +2192,11 @@ class CommonImportScanSerializer(serializers.Serializer):
         help_text="Resource link to source code",
     )
 
-    test_title = serializers.CharField(required=False)
+    test_title = serializers.CharField(
+        required=False,
+        validators=[validators.valid_chars_validator],
+        max_length=255
+    )
     auto_create_context = serializers.BooleanField(required=False)
     deduplication_on_engagement = serializers.BooleanField(required=False)
     lead = serializers.PrimaryKeyRelatedField(
@@ -2190,12 +2206,18 @@ class CommonImportScanSerializer(serializers.Serializer):
     environment = serializers.CharField(required=False)
     build_id = serializers.CharField(
         required=False, help_text="ID of the build that was scanned.",
+        validators=[validators.valid_chars_validator],
+        max_length=255
     )
     branch_tag = serializers.CharField(
         required=False, help_text="Branch or Tag that was scanned.",
+        validators=[validators.valid_chars_validator],
+        max_length=255
     )
     commit_hash = serializers.CharField(
         required=False, help_text="Commit that was scanned.",
+        validators=[validators.valid_chars_validator],
+        max_length=255
     )
     api_scan_configuration = serializers.PrimaryKeyRelatedField(
         allow_null=True,
@@ -2204,6 +2226,8 @@ class CommonImportScanSerializer(serializers.Serializer):
     )
     service = serializers.CharField(
         required=False,
+        validators=[validators.valid_chars_validator],
+        max_length=255,
         help_text="A service is a self-contained piece of functionality within a Product. "
         "This is an optional field which is used in deduplication and closing of old findings when set. "
         "This affects the whole engagement/product depending on your deduplication scope.",
