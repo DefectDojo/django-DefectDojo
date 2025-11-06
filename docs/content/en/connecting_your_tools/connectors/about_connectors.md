@@ -63,7 +63,7 @@ When you're ready to add more tools to DefectDojo, you can easily rearrange your
 
 ## My Connector isn't supported
 
-Fortunately, DefectDojo can still handle manual import for a wide range of security tools. Please see our [Supported Tool List](../../parsers/), as well as our guide to Importing data.
+Fortunately, DefectDojo can still handle manual import for a wide range of security tools. Please see our [Supported Tool List](/supported_tools), as well as our guide to Importing data.
 
 # **Next Steps**
 
