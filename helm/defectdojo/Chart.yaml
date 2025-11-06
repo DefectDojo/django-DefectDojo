@@ -37,3 +37,5 @@ annotations:
   artifacthub.io/changes: |
     - kind: fixed
       description: Broken rendering of media PVC
+    - kind: fixed
+      description: Typo in description of digests
