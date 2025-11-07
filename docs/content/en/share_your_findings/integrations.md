@@ -9,7 +9,7 @@ Supported Integrations:
 - [Azure Devops](/en/share_your_findings/integrations_toolreference/#azure-devops-boards)
 - [GitHub](/en/share_your_findings/integrations_toolreference/#github)
 - [GitLab Boards](/en/share_your_findings/integrations_toolreference/#gitlab)
-- ServiceNow (Coming Soon)
+- [ServiceNow](/en/share_your_findings/integrations_toolreference/#servicenow)
 
 ## Opening the Integrations page
 
