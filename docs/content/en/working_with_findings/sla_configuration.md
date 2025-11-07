@@ -1,7 +1,7 @@
 ---
 title: "SLA Configuration"
 description: "Configure Service Level Agreements for different Products"
-weight: 3
+weight: 2
 ---
 
 Each Product in DefectDojo can have its own Service Level Agreement (SLA) configuration, which represents the days your organization has to remediate or otherwise manage a Finding.
