@@ -17,6 +17,7 @@ class TagTests(DojoAPITestCase):
         self.login_as_admin()
         self.zap_sample5_filename = get_unit_tests_scans_path("zap") / "5_zap_sample_one.xml"
         self.generic_sample_with_tags_filename = get_unit_tests_scans_path("generic") / "generic_report1.json"
+        self.generic_sample_with_more_tags_filename = get_unit_tests_scans_path("generic") / "generic_report1_more_tags.json"
 
     def test_create_product_with_tags(self, expected_status_code: int = 201):
         product_id = Product.objects.all().first().id
@@ -300,6 +301,12 @@ class TagTests(DojoAPITestCase):
         findings = response["results"]
         # Make sure we have what we are looking for
         assert_tags_in_findings(findings, 2, ["security", "network"])
+        # Reimport with a different report that has more tags
+        self.reimport_scan_with_params(test_id, self.generic_sample_with_more_tags_filename, scan_type="Generic Findings Import")
+        response = self.get_test_findings_api(test_id)
+        findings = response["results"]
+        # Make sure we have what we are looking for
+        assert_tags_in_findings(findings, 2, ["security", "network", "hardened"])
 
 
 class InheritedTagsTests(DojoAPITestCase):
