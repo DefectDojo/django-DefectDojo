@@ -518,6 +518,12 @@ def dedupe_batch_of_findings(findings):
     # sort findings by id to ensure deduplication is deterministic/reproducible
     findings = sorted(findings, key=attrgetter("id"))
 
+    from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
+    if dedupe_method := get_custom_method("FINDING_DEDUPE_METHOD"):
+        for finding in findings:
+            dedupe_method(finding)
+        return
+
     test = findings[0].test
     dedup_alg = test.deduplication_algorithm
 
