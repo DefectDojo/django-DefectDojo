@@ -15,8 +15,8 @@ class TagTests(DojoAPITestCase):
     def setUp(self, *args, **kwargs):
         super().setUp()
         self.login_as_admin()
-        self.scans_path = get_unit_tests_scans_path("zap")
-        self.zap_sample5_filename = self.scans_path / "5_zap_sample_one.xml"
+        self.zap_sample5_filename = get_unit_tests_scans_path("zap") / "5_zap_sample_one.xml"
+        self.generic_sample_with_tags_filename = get_unit_tests_scans_path("generic") / "generic_report1.json"
 
     def test_create_product_with_tags(self, expected_status_code: int = 201):
         product_id = Product.objects.all().first().id
@@ -284,6 +284,22 @@ class TagTests(DojoAPITestCase):
             self.assertEqual(len(success_tags), len(response.get("tags")))
             for tag in success_tags:
                 self.assertIn(tag, response["tags"])
+
+    def test_import_report_with_tags(self):
+        def assert_tags_in_findings(findings: list[dict], expected_finding_count: int, desired_tags: list[str]) -> None:
+            self.assertEqual(expected_finding_count, len(findings))
+            for finding in findings:
+                self.assertEqual(len(desired_tags), len(finding.get("tags")))
+                for tag in desired_tags:
+                    self.assertIn(tag, finding["tags"])
+
+        # Import a report with findings that have tags
+        import0 = self.import_scan_with_params(self.generic_sample_with_tags_filename, scan_type="Generic Findings Import")
+        test_id = import0["test"]
+        response = self.get_test_findings_api(test_id)
+        findings = response["results"]
+        # Make sure we have what we are looking for
+        assert_tags_in_findings(findings, 2, ["security", "network"])
 
 
 class InheritedTagsTests(DojoAPITestCase):
