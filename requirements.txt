@@ -1,7 +1,7 @@
 # requirements.txt for DefectDojo using Python 3.x
 py==1.11.0
 decorator==5.2.1
-asteval==1.0.6
+asteval==1.0.7
 beautifulsoup4==4.14.0
 bleach==6.3.0
 bleach[css]
