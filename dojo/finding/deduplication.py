@@ -130,10 +130,11 @@ def set_duplicate_reopen(new_finding, existing_finding):
 
 def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     if new_finding.test.engagement != to_duplicate_finding.test.engagement:
-        return (
-            new_finding.test.engagement.deduplication_on_engagement
+        deduplication_mismatch = new_finding.test.engagement.deduplication_on_engagement \
             or to_duplicate_finding.test.engagement.deduplication_on_engagement
-        )
+        if deduplication_mismatch:
+            deduplicationLogger.debug(f"deduplication_mismatch: {deduplication_mismatch} for new_finding {new_finding.id} and to_duplicate_finding {to_duplicate_finding.id} with test.engagement {new_finding.test.engagement.id} and {to_duplicate_finding.test.engagement.id}")
+        return deduplication_mismatch
     return False
 
 
@@ -170,6 +171,8 @@ def are_endpoints_duplicates(new_finding, to_duplicate_finding):
         for l2 in list2:
             if are_urls_equal(l1, l2, fields):
                 return True
+
+    deduplicationLogger.debug(f"endpoints are not duplicates: {new_finding.id} and {to_duplicate_finding.id}")
     return False
 
 
@@ -311,7 +314,10 @@ def find_candidates_for_deduplication_legacy(test, findings):
 
 def _is_candidate_older(new_finding, candidate):
     # Ensure the newer finding is marked as duplicate of the older finding
-    return candidate.id < new_finding.id
+    is_older = candidate.id < new_finding.id
+    if not is_older:
+        deduplicationLogger.debug(f"candidate is newer than new finding: {new_finding.id} and candidate {candidate.id}")
+    return is_older
 
 
 def match_hash_candidate(new_finding, candidates_by_hash):
