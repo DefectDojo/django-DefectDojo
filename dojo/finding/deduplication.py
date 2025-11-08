@@ -31,6 +31,7 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
     except System_Settings.DoesNotExist:
         logger.warning("system settings not found")
         enabled = False
+
     if enabled:
         deduplicationLogger.debug("dedupe for: " + str(new_finding.id)
                     + ":" + str(new_finding.title))
@@ -511,31 +512,38 @@ def _dedupe_batch_legacy(findings):
                 deduplicationLogger.debug(str(e))
 
 
-def dedupe_batch_of_findings(findings):
+def dedupe_batch_of_findings(findings, *args, **kwargs):
     if not findings:
         return
 
-    # sort findings by id to ensure deduplication is deterministic/reproducible
-    findings = sorted(findings, key=attrgetter("id"))
+    try:
+        enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
+    except System_Settings.DoesNotExist:
+        logger.warning("system settings not found")
+        enabled = False
 
-    from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
-    if dedupe_method := get_custom_method("FINDING_DEDUPE_METHOD"):
-        for finding in findings:
-            dedupe_method(finding)
-        return
+    if enabled:
+        # sort findings by id to ensure deduplication is deterministic/reproducible
+        findings = sorted(findings, key=attrgetter("id"))
 
-    test = findings[0].test
-    dedup_alg = test.deduplication_algorithm
+        from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
+        if batch_dedupe_method := get_custom_method("FINDING_DEDUPE_BATCH_METHOD"):
+            batch_dedupe_method(findings, *args, **kwargs)
 
-    if dedup_alg == settings.DEDUPE_ALGO_HASH_CODE:
-        logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_HASH_CODE - {len(findings)} findings")
-        _dedupe_batch_hash_code(findings)
-    elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
-        logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL - {len(findings)} findings")
-        _dedupe_batch_unique_id(findings)
-    elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
-        logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE - {len(findings)} findings")
-        _dedupe_batch_uid_or_hash(findings)
+        test = findings[0].test
+        dedup_alg = test.deduplication_algorithm
+
+        if dedup_alg == settings.DEDUPE_ALGO_HASH_CODE:
+            logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_HASH_CODE - {len(findings)} findings")
+            _dedupe_batch_hash_code(findings)
+        elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
+            logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL - {len(findings)} findings")
+            _dedupe_batch_unique_id(findings)
+        elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
+            logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE - {len(findings)} findings")
+            _dedupe_batch_uid_or_hash(findings)
+        else:
+            logger.debug(f"deduplicating finding batch with LEGACY - {len(findings)} findings")
+            _dedupe_batch_legacy(findings)
     else:
-        logger.debug(f"deduplicating finding batch with LEGACY - {len(findings)} findings")
-        _dedupe_batch_legacy(findings)
+        deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
