@@ -516,11 +516,7 @@ def dedupe_batch_of_findings(findings, *args, **kwargs):
     if not findings:
         return
 
-    try:
-        enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
-    except System_Settings.DoesNotExist:
-        logger.warning("system settings not found")
-        enabled = False
+    enabled = System_Settings.objects.get().enable_deduplication
 
     if enabled:
         # sort findings by id to ensure deduplication is deterministic/reproducible
