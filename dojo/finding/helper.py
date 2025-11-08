@@ -498,6 +498,14 @@ def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_op
     if dedupe_option and system_settings.enable_deduplication:
         dedupe_batch_of_findings(findings)
 
+    if system_settings.false_positive_history:
+        # Only perform false positive history if deduplication is disabled
+        if system_settings.enable_deduplication:
+            deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
+        else:
+            for finding in findings:
+                do_false_positive_history(finding, *args, **kwargs)
+
     # Non-status changing tasks
     if issue_updater_option:
         for finding in findings:
