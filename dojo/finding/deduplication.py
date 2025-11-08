@@ -317,7 +317,7 @@ def _is_candidate_older(new_finding, candidate):
     # Ensure the newer finding is marked as duplicate of the older finding
     is_older = candidate.id < new_finding.id
     if not is_older:
-        deduplicationLogger.debug(f"candidate is newer than new finding: {new_finding.id} and candidate {candidate.id}")
+        deduplicationLogger.debug(f"candidate is newer than or identical to new finding: {new_finding.id} and candidate {candidate.id}")
     return is_older
 
 
