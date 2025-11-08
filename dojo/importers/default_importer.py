@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import serialize
 from django.db.models.query_utils import Q
@@ -159,7 +160,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
     ) -> list[Finding]:
         # Batched post-processing (no chord): dispatch a task per 1000 findings or on final finding
         batch_finding_ids: list[int] = []
-        batch_max_size = 1000
+        batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
 
         """
         Saves findings in memory that were parsed from the scan report into the database.
