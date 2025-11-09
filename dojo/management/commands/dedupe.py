@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models import Prefetch
 
@@ -116,37 +117,51 @@ class Command(BaseCommand):
 
     def _dedupe_batch_mode(self, findings_queryset, *, dedupe_sync: bool = True):
         """
-        Deduplicate findings in batches, grouped by test (similar to import process).
+        Deduplicate findings in batches of max 1000 per test (similar to import process).
         This is more efficient than processing findings one-by-one.
         Can run synchronously or asynchronously.
         """
         mode_str = "synchronous" if dedupe_sync else "asynchronous"
         logger.info(f"######## Deduplicating in batch mode ({mode_str}) ########")
 
-        # Group findings by test_id to process them in batches
-        # We need to get test_ids first to group properly
+        batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
+        total_findings = findings_queryset.count()
+        logger.info(f"Processing {total_findings} findings in batches of max {batch_max_size} per test ({mode_str})")
+
+        # Group findings by test_id to process them in batches per test
         test_ids = findings_queryset.values_list("test_id", flat=True).distinct()
         total_tests = len(test_ids)
-        logger.info(f"Processing {total_tests} tests in batch mode ({mode_str})")
+        total_processed = 0
 
-        processed_count = 0
         for test_id in test_ids:
             # Get finding IDs for this test (exclude duplicates to avoid reprocessing)
             test_finding_ids = list(findings_queryset.filter(test_id=test_id).exclude(duplicate=True).values_list("id", flat=True))
 
-            if test_finding_ids:
-                if dedupe_sync:
-                    # Synchronous: load findings and process immediately
-                    test_findings = get_finding_models_for_deduplication(test_finding_ids)
-                    logger.debug(f"Deduplicating batch of {len(test_findings)} findings for test {test_id}")
-                    dedupe_batch_of_findings(test_findings)
-                else:
-                    # Asynchronous: submit task with finding IDs
-                    logger.debug(f"Submitting async batch task for {len(test_finding_ids)} findings for test {test_id}")
-                    do_dedupe_batch_task(test_finding_ids)
+            if not test_finding_ids:
+                continue
 
-                processed_count += 1
-                if processed_count % 10 == 0:
-                    logger.info(f"Processed {processed_count}/{total_tests} tests")
+            # Process findings for this test in batches of max batch_max_size
+            batch_finding_ids = []
+            for idx, finding_id in enumerate(test_finding_ids):
+                is_final_finding_for_test = idx == len(test_finding_ids) - 1
+                batch_finding_ids.append(finding_id)
 
-        logger.info(f"######## Completed batch deduplication for {processed_count} tests ({mode_str}) ########")
+                # If batch is full or we're at the end of this test's findings, process the batch
+                if len(batch_finding_ids) >= batch_max_size or is_final_finding_for_test:
+                    if dedupe_sync:
+                        # Synchronous: load findings and process immediately
+                        batch_findings = get_finding_models_for_deduplication(batch_finding_ids)
+                        logger.debug(f"Deduplicating batch of {len(batch_findings)} findings for test {test_id}")
+                        dedupe_batch_of_findings(batch_findings)
+                    else:
+                        # Asynchronous: submit task with finding IDs
+                        logger.debug(f"Submitting async batch task for {len(batch_finding_ids)} findings for test {test_id}")
+                        do_dedupe_batch_task(batch_finding_ids)
+
+                    total_processed += len(batch_finding_ids)
+                    batch_finding_ids = []
+
+            if total_processed % (batch_max_size * 10) == 0:
+                logger.info(f"Processed {total_processed}/{total_findings} findings")
+
+        logger.info(f"######## Completed batch deduplication for {total_processed} findings across {total_tests} tests ({mode_str}) ########")
