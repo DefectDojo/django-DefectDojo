@@ -13,6 +13,39 @@ class TestDeepfenceThreatmapperParser(DojoTestCase):
             self.assertEqual(findings[0].title, "Threatmapper_Compliance_Report-gdpr_3.6")
             self.assertEqual(findings[0].severity, "Info")
 
+    def test_parse_file_ComplianceScanReport(self):
+        with (get_unit_tests_scans_path("deepfence_threatmapper") / "ComplianceScanReport.xlsx").open("rb") as testfile:
+            parser = DeepfenceThreatmapperParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(66, len(findings))
+            self.assertEqual(findings[0].title, "Threatmapper_Compliance_Report-gdpr_3.4")
+            self.assertEqual(findings[0].severity, "Info")
+
+    def test_parse_file_MalwareScanReport(self):
+        with (get_unit_tests_scans_path("deepfence_threatmapper") / "MalwareScanReport.xlsx").open("rb") as testfile:
+            parser = DeepfenceThreatmapperParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(66, len(findings))
+            self.assertEqual(findings[0].title, "spyeye")
+            self.assertEqual(findings[0].severity, "High")
+
+    def test_parse_file_SecretScanReport(self):
+        with (get_unit_tests_scans_path("deepfence_threatmapper") / "SecretScanReport.xlsx").open("rb") as testfile:
+            parser = DeepfenceThreatmapperParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(15, len(findings))
+            self.assertEqual(findings[0].title, "index-username_and_password_in_uri in /var/lib/host-containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/1/fs/usr/lib64/python2.7/urllib2.py")
+            self.assertEqual(findings[0].severity, "High")
+
+    def test_parse_file_VulnerabilityScanReport(self):
+        with (get_unit_tests_scans_path("deepfence_threatmapper") / "VulnerabilityScanReport.xlsx").open("rb") as testfile:
+            parser = DeepfenceThreatmapperParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(254, len(findings))
+            self.assertEqual(findings[0].title, "Threatmapper_Vuln_Report-CVE-2005-2541")
+            self.assertEqual(findings[0].severity, "Critical")
+            self.assertEqual(findings[0].cve, "CVE-2005-2541")
+
     def test_parse_file_malware_report(self):
         with (get_unit_tests_scans_path("deepfence_threatmapper") / "malware_report.xlsx").open("rb") as testfile:
             parser = DeepfenceThreatmapperParser()
