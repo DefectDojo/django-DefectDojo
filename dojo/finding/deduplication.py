@@ -3,6 +3,7 @@ from operator import attrgetter
 
 import hyperlink
 from django.conf import settings
+from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
 from dojo.celery import app
@@ -11,6 +12,35 @@ from dojo.models import Finding, System_Settings
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+
+def get_finding_models_for_deduplication(finding_ids):
+    """
+    Load findings with optimal prefetching for deduplication operations.
+    This avoids N+1 queries when accessing test, engagement, product, endpoints, and original_finding.
+
+    Args:
+        finding_ids: A list of Finding IDs
+
+    Returns:
+        A list of Finding models with related objects prefetched
+
+    """
+    if not finding_ids:
+        return []
+
+    return list(
+        Finding.objects.filter(id__in=finding_ids)
+        .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
+        .prefetch_related(
+            "endpoints",
+            # Prefetch duplicates of each finding to avoid N+1 when set_duplicate iterates
+            Prefetch(
+                "original_finding",
+                queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
+            ),
+        ),
+    )
 
 
 @dojo_model_to_id
@@ -28,24 +58,8 @@ def do_dedupe_batch_task(finding_ids, *args, **kwargs):
     Async task to deduplicate a batch of findings. The findings are assumed to be in the same test.
     Similar to post_process_findings_batch but focused only on deduplication.
     """
-    if not finding_ids:
-        return
-
-    from django.db.models import Prefetch  # noqa: PLC0415
-
     # Load findings with proper prefetching
-    findings = list(
-        Finding.objects.filter(id__in=finding_ids)
-        .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
-        .prefetch_related(
-            "endpoints",
-            # Prefetch duplicates of each finding to avoid N+1 when set_duplicate iterates
-            Prefetch(
-                "original_finding",
-                queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
-            ),
-        ),
-    )
+    findings = get_finding_models_for_deduplication(finding_ids)
 
     if not findings:
         logger.debug(f"no findings found for batch deduplication with IDs: {finding_ids}")

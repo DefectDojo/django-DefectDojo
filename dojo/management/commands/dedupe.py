@@ -8,6 +8,7 @@ from dojo.finding.deduplication import (
     do_dedupe_batch_task,
     do_dedupe_finding,
     do_dedupe_finding_task,
+    get_finding_models_for_deduplication,
 )
 from dojo.models import Finding, Product
 from dojo.utils import (
@@ -71,13 +72,22 @@ class Command(BaseCommand):
             findings = Finding.objects.all().filter(id__gt=0).exclude(duplicate=True)
             logger.info("######## Will process the full database with %d findings ########", findings.count())
 
+        # Prefetch related objects for synchronous deduplication
+        findings = findings.select_related(
+            "test", "test__engagement", "test__engagement__product", "test__test_type",
+        ).prefetch_related(
+            "endpoints",
+            Prefetch(
+                "original_finding",
+                queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
+            ),
+        )
+
         # Phase 1: update hash_codes without deduplicating
         if not dedupe_only:
             logger.info("######## Start Updating Hashcodes (foreground) ########")
 
-            # only prefetch here for hash_code calculation
-            finds = findings.prefetch_related("endpoints", "test__test_type")
-            mass_model_updater(Finding, finds, generate_hash_code, fields=["hash_code"], order="asc", log_prefix="hash_code computation ")
+            mass_model_updater(Finding, findings, generate_hash_code, fields=["hash_code"], order="asc", log_prefix="hash_code computation ")
 
             logger.info("######## Done Updating Hashcodes########")
 
@@ -127,19 +137,7 @@ class Command(BaseCommand):
             if test_finding_ids:
                 if dedupe_sync:
                     # Synchronous: load findings and process immediately
-                    test_findings = list(
-                        findings_queryset.filter(test_id=test_id)
-                        .exclude(duplicate=True)
-                        .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
-                        .prefetch_related(
-                            "endpoints",
-                            # Prefetch duplicates of each finding to avoid N+1 when set_duplicate iterates
-                            Prefetch(
-                                "original_finding",
-                                queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
-                            ),
-                        ),
-                    )
+                    test_findings = get_finding_models_for_deduplication(test_finding_ids)
                     logger.debug(f"Deduplicating batch of {len(test_findings)} findings for test {test_id}")
                     dedupe_batch_of_findings(test_findings)
                 else:
