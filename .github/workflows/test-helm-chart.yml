@@ -107,6 +107,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
   
       - name: Update values in HELM chart
         if: startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')
