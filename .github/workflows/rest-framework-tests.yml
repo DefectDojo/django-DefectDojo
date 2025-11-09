@@ -6,16 +6,11 @@ on:
         platform:
           type: string
           default: "linux/amd64"
-        auditlog_type:
-          type: string
-          default: "django-auditlog"
 
 jobs:
   unit_tests:
     name: Rest Framework Unit Tests
     runs-on: ${{ inputs.platform ==  'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    env:
-      AUDITLOG_TYPE: ${{ inputs.auditlog_type }}
 
     strategy:
       matrix:
