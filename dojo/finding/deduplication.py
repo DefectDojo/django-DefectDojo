@@ -359,7 +359,7 @@ def match_hash_candidate(new_finding, candidates_by_hash):
     if new_finding.hash_code is None:
         return None
     possible_matches = candidates_by_hash.get(new_finding.hash_code, [])
-    deduplicationLogger.debug(f"Found {len(possible_matches)} findings with same hash_code, ids={[(c.id, c.hash_code) for c in possible_matches]}")
+    deduplicationLogger.debug(f"Finding {new_finding.id}: Found {len(possible_matches)} findings with same hash_code, ids={[(c.id, c.hash_code) for c in possible_matches]}")
 
     for candidate in possible_matches:
         if not _is_candidate_older(new_finding, candidate):
@@ -377,7 +377,7 @@ def match_unique_id_candidate(new_finding, candidates_by_uid):
         return None
 
     possible_matches = candidates_by_uid.get(new_finding.unique_id_from_tool, [])
-    deduplicationLogger.debug(f"Found {len(possible_matches)} findings with same unique_id_from_tool, ids={[(c.id, c.unique_id_from_tool) for c in possible_matches]}")
+    deduplicationLogger.debug(f"Finding {new_finding.id}: Found {len(possible_matches)} findings with same unique_id_from_tool, ids={[(c.id, c.unique_id_from_tool) for c in possible_matches]}")
     for candidate in possible_matches:
         if not _is_candidate_older(new_finding, candidate):
             deduplicationLogger.debug("UID: newer candidate, skipping dedupe.")
@@ -393,11 +393,11 @@ def match_uid_or_hash_candidate(new_finding, candidates_by_uid, candidates_by_ha
     # Combine UID and hash candidates and walk oldest-first
     uid_list = candidates_by_uid.get(new_finding.unique_id_from_tool, []) if new_finding.unique_id_from_tool is not None else []
     hash_list = candidates_by_hash.get(new_finding.hash_code, []) if new_finding.hash_code is not None else []
-    deduplicationLogger.debug("UID_OR_HASH: uid_list ids=%s hash_list ids=%s", [c.id for c in uid_list], [c.id for c in hash_list])
+    deduplicationLogger.debug("Finding %s: UID_OR_HASH: uid_list ids=%s hash_list ids=%s", new_finding.id, [c.id for c in uid_list], [c.id for c in hash_list])
     combined_by_id = {c.id: c for c in uid_list}
     for c in hash_list:
         combined_by_id.setdefault(c.id, c)
-    deduplicationLogger.debug("UID_OR_HASH: combined candidate ids (sorted)=%s", sorted(combined_by_id.keys()))
+    deduplicationLogger.debug("Finding %s: UID_OR_HASH: combined candidate ids (sorted)=%s", new_finding.id, sorted(combined_by_id.keys()))
     for candidate_id in sorted(combined_by_id.keys()):
         candidate = combined_by_id[candidate_id]
         if not _is_candidate_older(new_finding, candidate):
