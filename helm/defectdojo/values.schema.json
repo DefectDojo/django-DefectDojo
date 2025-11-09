@@ -865,7 +865,7 @@
                             "type": "object",
                             "properties": {
                                 "digest": {
-                                    "description": "Prefix \"sha@\" is expected in this place",
+                                    "description": "Prefix \"sha256:\" is expected in this place",
                                     "type": "string"
                                 },
                                 "registry": {
@@ -889,7 +889,7 @@
                             "type": "object",
                             "properties": {
                                 "digest": {
-                                    "description": "Prefix \"sha@\" is expected in this place",
+                                    "description": "Prefix \"sha256:\" is expected in this place",
                                     "type": "string"
                                 },
                                 "registry": {

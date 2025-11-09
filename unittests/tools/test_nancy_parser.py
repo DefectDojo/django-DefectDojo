@@ -35,3 +35,14 @@ class TestNancyParser(DojoTestCase):
                 self.assertEqual(0, finding.cwe)
                 self.assertIsNotNone(finding.description)
                 self.assertGreater(len(finding.description), 0)
+
+    def test_nancy_issue_12860(self):
+        with (get_unit_tests_scans_path("nancy") / "issue_12860.json").open(encoding="utf-8") as testfile:
+            parser = NancyParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(5, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("[CVE-2025-58058] CWE-770: Allocation of Resources Without Limits or Throttling", finding.title)
+                finding = findings[3]
+                self.assertEqual("[CVE-2024-45337] CWE-863: Incorrect Authorization", finding.title)
