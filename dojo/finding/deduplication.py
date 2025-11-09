@@ -21,6 +21,40 @@ def do_dedupe_finding_task(new_finding, *args, **kwargs):
     return do_dedupe_finding(new_finding, *args, **kwargs)
 
 
+@dojo_async_task
+@app.task
+def do_dedupe_batch_task(finding_ids, *args, **kwargs):
+    """
+    Async task to deduplicate a batch of findings. The findings are assumed to be in the same test.
+    Similar to post_process_findings_batch but focused only on deduplication.
+    """
+    if not finding_ids:
+        return
+
+    from django.db.models import Prefetch  # noqa: PLC0415
+
+    # Load findings with proper prefetching
+    findings = list(
+        Finding.objects.filter(id__in=finding_ids)
+        .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
+        .prefetch_related(
+            "endpoints",
+            # Prefetch duplicates of each finding to avoid N+1 when set_duplicate iterates
+            Prefetch(
+                "original_finding",
+                queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
+            ),
+        ),
+    )
+
+    if not findings:
+        logger.debug(f"no findings found for batch deduplication with IDs: {finding_ids}")
+        return
+
+    # Batch dedupe
+    dedupe_batch_of_findings(findings)
+
+
 def do_dedupe_finding(new_finding, *args, **kwargs):
     from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
     if dedupe_method := get_custom_method("FINDING_DEDUPE_METHOD"):
@@ -317,7 +351,7 @@ def _is_candidate_older(new_finding, candidate):
     # Ensure the newer finding is marked as duplicate of the older finding
     is_older = candidate.id < new_finding.id
     if not is_older:
-        deduplicationLogger.debug(f"candidate is newer than or identical to new finding: {new_finding.id} and candidate {candidate.id}")
+        deduplicationLogger.debug(f"candidate is newer than or equal to new finding: {new_finding.id} and candidate {candidate.id}")
     return is_older
 
 
@@ -513,6 +547,7 @@ def _dedupe_batch_legacy(findings):
 
 
 def dedupe_batch_of_findings(findings, *args, **kwargs):
+    """Batch deduplicate a list of findings. The findings are assumed to be in the same test."""
     if not findings:
         return
 
