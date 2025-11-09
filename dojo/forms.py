@@ -1131,6 +1131,18 @@ class TestForm(forms.ModelForm):
         else:
             self.fields["lead"].queryset = get_authorized_users(Permissions.Test_View).filter(is_active=True)
 
+    def is_valid(self):
+        valid = super().is_valid()
+
+        # we're done now if not valid
+        if not valid:
+            return valid
+        if self.cleaned_data["target_start"] > self.cleaned_data["target_end"]:
+            self.add_error("target_start", "Your target start date exceeds your target end date")
+            self.add_error("target_end", "Your target start date exceeds your target end date")
+            return False
+        return True
+
     class Meta:
         model = Test
         fields = ["title", "test_type", "target_start", "target_end", "description",
