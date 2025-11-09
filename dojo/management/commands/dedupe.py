@@ -48,14 +48,19 @@ class Command(BaseCommand):
         parser.add_argument("--hash_code_only", action="store_true", help="Only compute hash codes")
         parser.add_argument("--dedupe_only", action="store_true", help="Only run deduplication")
         parser.add_argument("--dedupe_sync", action="store_true", help="Run dedupe in the foreground, default false")
-        parser.add_argument("--dedupe_batch_mode", action="store_true", help="Deduplicate in batches (similar to import), works with both sync and async modes")
+        parser.add_argument(
+            "--dedupe_batch_mode",
+            action="store_true",
+            default=True,
+            help="Deduplicate in batches (similar to import), works with both sync and async modes (default: True)",
+        )
 
     def handle(self, *args, **options):
         restrict_to_parsers = options["parser"]
         hash_code_only = options["hash_code_only"]
         dedupe_only = options["dedupe_only"]
         dedupe_sync = options["dedupe_sync"]
-        dedupe_batch_mode = options["dedupe_batch_mode"]
+        dedupe_batch_mode = options.get("dedupe_batch_mode", True)  # Default to True (batch mode enabled)
 
         if restrict_to_parsers is not None:
             findings = Finding.objects.filter(test__test_type__name__in=restrict_to_parsers)
