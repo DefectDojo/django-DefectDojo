@@ -480,6 +480,7 @@ def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_op
     findings = list(
         Finding.objects.filter(id__in=finding_ids)
         .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
+        .exclude(duplicate=True)
         .prefetch_related(
             "endpoints",
             # Prefetch duplicates of each new finding to avoid N+1 when set_duplicate iterates

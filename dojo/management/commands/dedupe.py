@@ -63,11 +63,12 @@ class Command(BaseCommand):
         dedupe_batch_mode = options.get("dedupe_batch_mode", True)  # Default to True (batch mode enabled)
 
         if restrict_to_parsers is not None:
-            findings = Finding.objects.filter(test__test_type__name__in=restrict_to_parsers)
+            findings = Finding.objects.filter(test__test_type__name__in=restrict_to_parsers).exclude(duplicate=True)
             logger.info("######## Will process only parsers %s and %d findings ########", *restrict_to_parsers, findings.count())
         else:
             # add filter on id to make counts not slow on mysql
-            findings = Finding.objects.all().filter(id__gt=0)
+            # exclude duplicates to avoid reprocessing findings that are already marked as duplicates
+            findings = Finding.objects.all().filter(id__gt=0).exclude(duplicate=True)
             logger.info("######## Will process the full database with %d findings ########", findings.count())
 
         # Phase 1: update hash_codes without deduplicating
@@ -120,14 +121,15 @@ class Command(BaseCommand):
 
         processed_count = 0
         for test_id in test_ids:
-            # Get finding IDs for this test
-            test_finding_ids = list(findings_queryset.filter(test_id=test_id).values_list("id", flat=True))
+            # Get finding IDs for this test (exclude duplicates to avoid reprocessing)
+            test_finding_ids = list(findings_queryset.filter(test_id=test_id).exclude(duplicate=True).values_list("id", flat=True))
 
             if test_finding_ids:
                 if dedupe_sync:
                     # Synchronous: load findings and process immediately
                     test_findings = list(
                         findings_queryset.filter(test_id=test_id)
+                        .exclude(duplicate=True)
                         .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
                         .prefetch_related(
                             "endpoints",
