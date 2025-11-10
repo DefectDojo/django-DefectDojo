@@ -495,7 +495,7 @@ kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 
 # General information about chart values
 
-![Version: 1.8.0](https://img.shields.io/badge/Version-1.8.0-informational?style=flat-square) ![AppVersion: 2.52.0](https://img.shields.io/badge/AppVersion-2.52.0-informational?style=flat-square)
+![Version: 1.8.1](https://img.shields.io/badge/Version-1.8.1-informational?style=flat-square) ![AppVersion: 2.52.1](https://img.shields.io/badge/AppVersion-2.52.1-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -674,11 +674,11 @@ A Helm chart for Kubernetes to install DefectDojo
 | host | string | `"defectdojo.default.minikube.local"` | Primary hostname of instance |
 | imagePullPolicy | string | `"Always"` |  |
 | imagePullSecrets | string | `nil` | When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project) Create secrets as: kubectl create secret docker-registry defectdojoregistrykey --docker-username=registry_username --docker-password=registry_password --docker-server='https://index.docker.io/v1/' |
-| images.django.image.digest | string | `""` | Prefix "sha@" is expected in this place |
+| images.django.image.digest | string | `""` | Prefix "sha256:" is expected in this place |
 | images.django.image.registry | string | `""` |  |
 | images.django.image.repository | string | `"defectdojo/defectdojo-django"` |  |
 | images.django.image.tag | string | `""` | If empty, use appVersion. Another possible values are: latest, X.X.X, X.X.X-debian, X.X.X-alpine (where X.X.X is version of DD). For dev builds (only for testing purposes): nightly-dev, nightly-dev-debian, nightly-dev-alpine. To see all, check https://hub.docker.com/r/defectdojo/defectdojo-django/tags. |
-| images.nginx.image.digest | string | `""` | Prefix "sha@" is expected in this place |
+| images.nginx.image.digest | string | `""` | Prefix "sha256:" is expected in this place |
 | images.nginx.image.registry | string | `""` |  |
 | images.nginx.image.repository | string | `"defectdojo/defectdojo-nginx"` |  |
 | images.nginx.image.tag | string | `""` | If empty, use appVersion. Another possible values are: latest, X.X.X, X.X.X-alpine (where X.X.X is version of DD). For dev builds (only for testing purposes): nightly-dev, nightly-dev-alpine. To see all, check https://hub.docker.com/r/defectdojo/defectdojo-nginx/tags. |
