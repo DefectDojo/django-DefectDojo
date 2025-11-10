@@ -511,7 +511,7 @@ If during the login process you get the following error: *The
 in the client app settings.* and the `redirect_uri` HTTP
 GET parameter starts with `http://` instead of
 `https://` you need to add
-`SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` to Docker environment variables, or to your `local_settings.py` file.
+`DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` to Docker Compose environment variables, or `SOCIAL_AUTH_REDIRECT_IS_HTTPS` to your `local_settings.py` file.
 
 2. Restart DefectDojo, and 'Login With Okta' should appear on the login screen.
 

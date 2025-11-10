@@ -483,6 +483,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         to cover circumstances where mitigation timestamps are different, and
         decide which one to honor
         """
+        if existing_finding.fix_available != unsaved_finding.fix_available:
+            existing_finding.fix_available = unsaved_finding.fix_available
+            existing_finding.fix_version = unsaved_finding.fix_version
+
         # if the reimported item has a mitigation time, we can compare
         if unsaved_finding.is_mitigated:
             # The new finding is already mitigated, so nothing to change on the
@@ -592,6 +596,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # First check that the existing finding is definitely not mitigated
         if not (existing_finding.mitigated and existing_finding.is_mitigated):
             logger.debug("Reimported item matches a finding that is currently open.")
+            if existing_finding.fix_available != unsaved_finding.fix_available:
+                existing_finding.fix_available = unsaved_finding.fix_available
+                existing_finding.fix_version = unsaved_finding.fix_version
             if unsaved_finding.is_mitigated:
                 logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
                 # TODO: Implement a date comparison for opened defectdojo findings before closing them by reimporting,
