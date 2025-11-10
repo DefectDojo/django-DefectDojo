@@ -276,39 +276,6 @@ def find_candidates_for_deduplication_unique_id(test, findings):
     return existing_by_uid
 
 
-def deduplicate_uid_or_hash_code_old(new_finding):
-    if new_finding.test.engagement.deduplication_on_engagement:
-        existing_findings = Finding.objects.filter(
-            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code))
-            # unique_id_from_tool can only apply to the same test_type because it is parser dependent
-            | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
-            test__engagement=new_finding.test.engagement).exclude(
-                id=new_finding.id).exclude(
-                        duplicate=True).order_by("id")
-    else:
-        # same without "test__engagement=new_finding.test.engagement" condition
-        existing_findings = Finding.objects.filter(
-            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code))
-            | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
-            test__engagement__product=new_finding.test.engagement.product).exclude(
-                id=new_finding.id).exclude(
-                        duplicate=True).order_by("id")
-    deduplicationLogger.debug("Found "
-        + str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
-    for find in existing_findings:
-        if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug(
-                "deduplication_on_engagement_mismatch, skipping dedupe.")
-            continue
-        try:
-            if are_endpoints_duplicates(new_finding, find):
-                set_duplicate(new_finding, find)
-                break
-        except Exception as e:
-            deduplicationLogger.debug(str(e))
-            continue
-
-
 def find_candidates_for_deduplication_uid_or_hash(test, findings):
     base_queryset = build_dedupe_scope_queryset(test)
     hash_codes = {f.hash_code for f in findings if getattr(f, "hash_code", None) is not None}
