@@ -30,7 +30,6 @@ class DawnScannerParser:
                 if item["message"][0:2] != "b,"
                 else item["message"][0:-1]
             )
-
             finding = Finding(
                 title=item["name"],
                 test=test,
@@ -42,6 +41,10 @@ class DawnScannerParser:
                 static_finding=True,
                 dynamic_finding=False,
             )
+            if item.get("remediation") and item.get("remediation") != "":
+                finding.fix_available = True
+            else:
+                finding.fix_available = False
 
             if self.CVE_REGEX.match(item["name"]):
                 finding.unsaved_vulnerability_ids = [
