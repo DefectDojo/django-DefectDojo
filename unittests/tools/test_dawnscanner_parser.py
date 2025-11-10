@@ -21,7 +21,10 @@ class TestDawnScannerParser(DojoTestCase):
                 self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
                 self.assertEqual("CVE-2016-6316", finding.unsaved_vulnerability_ids[0])
                 self.assertEqual(finding.description, 'Text declared as "HTML safe" when passed as an attribute value to a tag helper will not have quotes escaped which can lead to an XSS attack.')
-                self.assertEqual(datetime.datetime(2019, 4, 1, 21, 14, 32, tzinfo=datetime.timezone(datetime.timedelta(seconds=0))),finding.date)  # 2019-04-01 21:14:32 +0000
+                self.assertEqual(datetime.datetime(2019, 4, 1, 21, 14, 32, tzinfo=datetime.timezone(datetime.timedelta(seconds=0))), finding.date)  # 2019-04-01 21:14:32 +0000
+            with self.subTest(i=2):
+                finding = findings[2]
+                self.assertEqual(False, finding.fix_available)
             with self.subTest(i=3):
                 finding = findings[3]
                 self.assertEqual("Owasp Ror CheatSheet: Security Related Headers", finding.title)

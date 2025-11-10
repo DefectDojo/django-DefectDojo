@@ -41,7 +41,7 @@ class DawnScannerParser:
                 static_finding=True,
                 dynamic_finding=False,
             )
-            if item.get("remediation") and item.get("remediation") != "":
+            if item.get("remediation"):
                 finding.fix_available = True
             else:
                 finding.fix_available = False
