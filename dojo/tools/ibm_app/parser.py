@@ -107,9 +107,9 @@ class IbmAppParser:
                                 vulnerability_id,
                             ]
                         if recommendation_data:
-                            finding.fix_available = False
-                        else:
                             finding.fix_available = True
+                        else:
+                            finding.fix_available = False
                         finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
 
