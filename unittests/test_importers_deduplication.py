@@ -18,9 +18,8 @@ from dojo.models import (
 
 from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.DEBUG)
 
 STACK_HAWK_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings.json"
 STACK_HAWK_SUBSET_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings_subset.json"
