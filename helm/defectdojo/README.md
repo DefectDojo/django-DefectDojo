@@ -711,7 +711,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | monitoring.prometheus.image.digest | string | `""` |  |
 | monitoring.prometheus.image.registry | string | `""` |  |
 | monitoring.prometheus.image.repository | string | `"nginx/nginx-prometheus-exporter"` |  |
-| monitoring.prometheus.image.tag | string | `"1.4.2"` |  |
+| monitoring.prometheus.image.tag | string | `"1.5.1"` |  |
 | monitoring.prometheus.imagePullPolicy | string | `"IfNotPresent"` |  |
 | monitoring.prometheus.resources | object | `{}` | Optional: add resource requests/limits for the nginx prometheus exporter container |
 | networkPolicy | object | `{"annotations":{},"egress":[],"enabled":false,"ingress":[],"ingressExtend":[]}` | Enables application network policy For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/ |
