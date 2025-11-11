@@ -132,7 +132,7 @@ jsonschema==4.25.1
 jmespath==1.0.1
 python3-openid==3.2.0
 certifi==2025.10.5
-PyNaCl==1.6.0
+PyNaCl==1.6.1
 charset-normalizer==3.4.4
 xmlschema==2.5.1
 sqlparse==0.5.3
