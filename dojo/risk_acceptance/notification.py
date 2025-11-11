@@ -203,28 +203,3 @@ class Notification:
                 ),
             ),
         )
-    
-    @staticmethod
-    def risk_acceptance_request_long_term(*args, **kwargs):
-        risk_pending = kwargs["risk_pending"]
-        product = risk_pending.engagement.product
-        product_type = product.prod_type
-        enable_acceptance_risk_for_email= kwargs["enable_acceptance_risk_for_email"]
-        permission_keys = kwargs.get("permission_keys", None)
-        title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
-        long_term = risk_pending.expiration_date - timezone.now().date()
-        description=f"requested acceptance <b>long-term</b> of {long_term.days} days for the findings that are part of <b>{product_type}</b> of aplication <b>{product}</b>",
-        create_notification(event='risk_acceptance_long_term_request',
-                        title=title, risk_acceptance=risk_pending,
-                        subject=f"🙋‍♂️Request of aceptance long term of risk {risk_pending.id}🙏",
-                        accepted_findings=risk_pending.accepted_findings.all(),
-                        reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
-                        product=risk_pending.engagement.product,
-                        description=description,
-                        permission_keys=permission_keys,
-                        enable_acceptance_risk_for_email=enable_acceptance_risk_for_email,
-                        recipients=risk_pending.accepted_by_user,
-                        icon="bell",
-                        owner=risk_pending.owner,
-                        color_icon="#1B30DE",
-                        url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))

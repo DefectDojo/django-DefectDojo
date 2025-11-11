@@ -386,13 +386,17 @@ class EmailNotificationManger(NotificationManagerHelpers):
         try:
             kwargs["system_settings"] = self.system_settings
             if settings.AWS_SES_EMAIL:
-                ses_email.aws_ses(email=address,
-                                email_from_address=f"{self.system_settings.team_name} <{self.system_settings.email_from}>",
-                                html_contect=self._create_notification_message(event, user, "mail", kwargs),
-                                template_name=event,
-                                subject=kwargs.get("subject", event),
-                                text=event
-                                )
+                ses_email.aws_ses(
+                    email=address,
+                    email_from_address=f"{self.system_settings.team_name} <{self.system_settings.email_from}>",
+                    html_contect=self._create_notification_message(event, user, "mail", kwargs),
+                    template_name=event,
+                    subject=kwargs.get("subject", event),
+                    text=event,
+                    attachment=kwargs.get("attachment_data", None),
+                    attachment_filename=kwargs.get("attachment_name", None),
+                    attachment_mimetype=kwargs.get("attachment_content_type", None)
+                )
             else:
                 subject = f"{self.system_settings.team_name} notification"
                 if (title := kwargs.get("title")) is not None:

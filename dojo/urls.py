@@ -122,6 +122,7 @@ from dojo.api_v2.manager_cache.urls import urlpatterns as manager_cache_urls
 from dojo.api_v2.metrics.urls import urlpatterns as metrics_general_urls
 from dojo.api_v2.security_posture.urls import urlpatterns as security_posture_urls
 from dojo.security_posture.urls import urlpatterns as security_posture_urls_view
+from dojo.api_v2.notifications.urls import urlpatterns as notifications_email_urls
 
 from dojo.utils import get_system_setting
 
@@ -285,6 +286,7 @@ urlpatterns += manager_cache_urls
 urlpatterns += metrics_general_urls
 urlpatterns += security_posture_urls
 urlpatterns += security_posture_urls_view
+urlpatterns += notifications_email_urls
 urlpatterns += api_v2_urls
 urlpatterns += survey_urls
 

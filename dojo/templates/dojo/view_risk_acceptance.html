@@ -129,6 +129,7 @@
 {% block content %}
     {{ block.super }}
     {% include 'dojo/modal/modal_loading.html' %}
+    {% include 'dojo/modal/send_email.html'%}
     <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -202,10 +203,10 @@
                 <table class="table-striped table table-condensed table-hover centered">
                     <tr>
                         <th>Date</th>
-                        <th>Recommended Acceptors</th>
                         {% if risk_acceptance.long_term_acceptance%}
                         <th>Recommended reviewers</th>
                         {% endif %}
+                        <th>Recommended Acceptors</th>
                         <th>Name</th>
                         <th>Decision</th>
                         <th>Long-Term</th>
@@ -225,19 +226,18 @@
                     </tr>
                     <tr>
                         <td>{{ risk_acceptance.created|date }}</td>
+                        {% if risk_acceptance.long_term_acceptance%}
+                            <td> 👤 {{risk_acceptance.reviewed_by}}</br></td>
+                        {% endif %}
                         <td>
                             {% if risk_acceptance.accepted_by_user %}
                                 {% for accepted_by in risk_acceptance.accepted_by_user%}
                                 👤 {{accepted_by}}</br>
                                 {% endfor %}
                             {% else %}
-                                Not defined
+                                Undefined
                             {% endif %}
                         </td>
-                        {% if risk_acceptance.long_term_acceptance%}
-                            <td> 👤 {{risk_acceptance.reviewed_by}}</br></td>
-                        {% endif %}
-
                         <td>{{ risk_acceptance.name }}</td>
                         <td>{{ risk_acceptance.get_decision_display|default_if_none:"" }}</td>
                         <td>{{ risk_acceptance.long_term_acceptance}}
@@ -448,8 +448,8 @@
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
                         <td>{{ finding|finding_display_status}}</td>
-                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_reviewed_by|safe}}</td>
-                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_accepted_by|safe}}</td>
+                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_reviewed_by:risk_acceptance}}</td>
+                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_accepted_by:risk_acceptance}}</td>
                         <td>
                             {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}
                             <form method="post">
@@ -708,20 +708,9 @@
                 console.log(response)
             })
         });
-        // Trigger change event risk acceptance button
-        $("#id_risk_accept_pending").click(function(e) {
-            let alert = localStorage.getItem('raExpirationDateAlerta');
-            if(!alert){
-                e.preventDefault();
-                let ms = confirm("Are you sure you want to accept this risk with date expiration " + $("#id_expiration_date").val() + "?");
-                if (ms){
-                    localStorage.setItem('raExpirationDateAlerta', 'true');
-                    return; 
-                } else {
-                    console.log("The risk acceptance was cancelled.");
-                    return; // exit function
-                }
-            }
+        $('#send-email-risk-acceptance-id').on('click', function() {
+            console.log("se le dio  click")
+            $('#modal_send_email_id').modal('show');
         });
     });
 
@@ -787,5 +776,122 @@
             }, 0);
         {% endif %}
     });
+</script>
+<script type="module">
+    import {MAX_RETRY, RETRY_INTERVAL} from '{% static "dojo/js/settings.js" %}'
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+async function sendEmail() {
+    console.log("desde la funcion")
+    const form = document.getElementById('email-form');
+    const submitBtn = document.getElementById('send-email-btn');
+    
+    //if (!form.checkValidity()) {
+     //   form.reportValidity();
+     //   return;
+    //}
+    
+    console.log("desde la funcion2")
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending...';
+    
+    const formData = new FormData(form);
+    
+    formData.append('enable_acceptance_risk_for_email', true);  // Si necesitas el ID
+    formData.append('permission_keys', 'aijfdoajfdadf');  // Si necesitas el ID
+    formData.append('risk_acceptance_id', {{ risk_acceptance.id }});  // Si necesitas el ID
+    formData.append('is_async', false);  // Si necesitas el ID
+    formData.append('template', 'risk_acceptance_request');  // Si necesitas el ID
+
+    
+    // Enviar con Ajax
+    try {
+        const response = await $.ajax({
+            url: "/api/v2/notifications_email",
+            type: "POST",
+            data: formData, // ✅ Enviar FormData directamente
+            processData: false, // ✅ Importante para archivos
+            contentType: false, // ✅ Importante para archivos
+            headers: { "X-CSRFToken": csrftoken },
+            retry: MAX_RETRY,
+            retryInterval: RETRY_INTERVAL,
+        });
+        console.log("desde la funcion4", response)
+        return response;
+    } catch (error) {
+        throw error;
+    }
+  }
+
+// Función para obtener CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Funciones para mostrar mensajes (usando alertas o notificaciones)
+function showSuccessMessage(message) {
+    // Opción 1: Alerta simple
+    alert('✅ ' + message);
+    
+    // Opción 2: Bootstrap alert (si quieres algo más elegante)
+    /*
+    $('body').append(`
+        <div class="alert alert-success alert-dismissible" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>Success!</strong> ${message}
+        </div>
+    `);
+    setTimeout(() => $('.alert').fadeOut(), 3000);
+    */
+}
+
+function showErrorMessage(message) {
+    // Opción 1: Alerta simple
+    alert('❌ ' + message);
+    
+    // Opción 2: Bootstrap alert
+    /*
+    $('body').append(`
+        <div class="alert alert-danger alert-dismissible" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>Error!</strong> ${message}
+        </div>
+    `);
+    setTimeout(() => $('.alert').fadeOut(), 5000);
+    */
+}
+
+// Event listener opcional: enviar con Enter en el textarea
+$(document).ready(function() {
+    $('#send-email-btn').on('click', function(event)
+    {
+        event.preventDefault();
+        sendEmail().then(response => {
+            showSuccessMessage('Email sent successfully.');
+            $('#modal_send_email_id').modal('hide');
+        }).catch(error => {
+            showErrorMessage('Failed to send email. Please try again.');
+        }).finally(() => {
+                const submitBtn = document.getElementById('send-email-btn');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Send Email';
+        });
+    });
+});
+
+// Limpiar formulario al cerrar modal
+$('#modal_send_email_id').on('hidden.bs.modal', function () {
+    document.getElementById('email-form').reset();
+});
 </script>
 {% endblock %}

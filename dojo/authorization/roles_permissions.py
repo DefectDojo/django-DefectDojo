@@ -70,6 +70,7 @@ class Permissions(IntEnum):
     Risk_Acceptance_Bulk = 1215
     Risk_Acceptance_Refresh_Permission_key = 1216
     Risk_Acceptance_Expire_Date_Edit = 1217
+    Risk_Acceptance_Send_Email = 1218
     
     Test_View = 1302
     Test_Add = 1303
@@ -197,6 +198,7 @@ class Permissions(IntEnum):
             Permissions.Risk_Acceptance_Expire_Date_Edit,
             Permissions.Risk_Acceptance_Bulk,
             Permissions.Risk_Acceptance_Refresh_Permission_key,
+            Permissions.Risk_Acceptance_Send_Email,
             Permissions.Risk_Unaccept,
             Permissions.Test_Add,
             Permissions.Import_Scan_Result,
@@ -476,6 +478,7 @@ def get_roles_with_permissions():
             Permissions.Risk_Unaccept,
             Permissions.Risk_Acceptance_Expire,
             Permissions.Risk_Acceptance_Refresh_Permission_key,
+            Permissions.Risk_Acceptance_Send_Email,
             Permissions.Test_View,
             Permissions.Test_Add,
             Permissions.Test_Edit,
@@ -743,8 +746,6 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_View,
             Permissions.Transfer_Finding_Finding_View,
             Permissions.Transfer_Finding_Finding_Add,
-            Permissions.Risk_Acceptance_Refresh_Permission_key,
-            Permissions.Finding_Add_Recommendation,
         },
         Roles.Risk: {
             Permissions.Product_Type_View,
@@ -769,8 +770,7 @@ def get_roles_with_permissions():
             Permissions.Risk_Acceptance_Bulk,
             Permissions.Metrics_Panel_Admin,
             Permissions.Metrics_Scan_Cycle,
-            Permissions.Risk_Acceptance,
-            Permissions.Risk_Acceptance_Bulk,
+            Permissions.Risk_Acceptance_Send_Email,
         },
     }
 

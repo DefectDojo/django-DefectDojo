@@ -1188,3 +1188,15 @@ class UserHasPermissionMetrics(permissions.BasePermission):
                     request.user,
                     Permissions.Metrics_DevSecOps,)
         return False
+
+class UserHasPermissionSendEmail(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+
+        if hasattr(request.user, 'global_role'):
+            if request.user.global_role:
+                return user_has_global_permission(
+                    request.user,
+                    Permissions.Risk_Acceptance_Send_Email,)
+        return False

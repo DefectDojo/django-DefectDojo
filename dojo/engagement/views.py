@@ -1915,6 +1915,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             "note_form": note_form,
             "replace_form": replace_form,
             "add_findings_form": add_findings_form,
+            "user_acceptances": get_users_for_group("Approvers_Risk"),
             # 'show_add_findings_form': len(unaccepted_findings),
             "request": request,
             "add_findings": add_fpage,

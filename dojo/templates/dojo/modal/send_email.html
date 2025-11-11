@@ -1,0 +1,49 @@
+<div class="modal fade" id="modal_send_email_id" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="exampleModalLabel">Approval request</h4>
+      </div>
+      <div class="modal-body">
+        <form id="email-form">
+            <div class="input-group">
+                <span class="input-group-addon">Receiver</span>
+                <select class="form-control" id="recipient-email" name="recipients" multiple required>
+                  <option value="">Select recipients...</option>
+                  {% for user in user_acceptances %}
+                      <option value="{{user.email}}">{{user.username}} ({{user.email}})</option>
+                  {% endfor %}
+                </select>
+            </div><br>
+            
+            <div class="input-group">
+                <span class="input-group-addon">Copy (CC)</span>
+                <input type="email" class="form-control" id="copy-email" name="copy" placeholder="CC Email (optional)">
+            </div><br>
+            
+            <div class="input-group">
+                <span class="input-group-addon">Subject</span>
+                <input type="text" class="form-control" id="subject-text" name="subject" placeholder="Email Subject" required>
+            </div><br>
+            
+            <div class="form-group">
+                <label for="message-text">Email message</label>
+                <textarea class="form-control" id="message-text" name="message" placeholder="Type your message here..." rows="4" required></textarea>
+            </div><br>
+            
+            <div class="form-group">
+                <label for="attachment-file">Attach file (optional)</label>
+                <input type="file" class="form-control" id="attachment-file" name="attachment" accept=".pdf,.doc,.docx,.txt,.jpg,.png">
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="send-email-btn">
+            <i class="fa fa-paper-plane"></i> Send email
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

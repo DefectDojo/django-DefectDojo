@@ -43,7 +43,8 @@ from dojo.models import (
     Product,
     System_Settings,
     ExclusivePermission,
-    GeneralSettings)
+    GeneralSettings,
+    Risk_Acceptance,)
 
 from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view, calculate_severity_priority
 
@@ -1224,23 +1225,21 @@ def enable_like_status(finding):
     return response
 
 @register.filter()
-def render_risk_acceptance_reviewed_by(finding):
-    if finding.reviewed_by is None:
-        return "" 
+def render_risk_acceptance_reviewed_by(finding: Finding, risk_acceptance: Risk_Acceptance):
     if finding.reviewed_by:
         return f"👤 {finding.reviewed_by} ✅"
-    return f"👤 {finding.risk_acceptance.reviewed_by}⏳"
+    return f"👤 {risk_acceptance.reviewed_by}⏳"
     
 
 
 @register.filter()
-def render_risk_acceptance_accepted_by(finding: Finding):
+def render_risk_acceptance_accepted_by(finding: Finding, risk_acceptance: Risk_Acceptance):
     accepted_by = finding.accepted_by
     if finding.accepted_by is None:
         accepted_by = ""
-    accepted_by_user = ""
-    if finding.risk_acceptance.accepted_by:
-        accepted_by_recommendation_ra = finding.risk_acceptance.accepted_by_user
+    accepted_by_user = "Undefined"
+    if risk_acceptance.accepted_by:
+        accepted_by_recommendation_ra = risk_acceptance.accepted_by_user
         for user in accepted_by_recommendation_ra:
             status = "⏳"
             name_parts = re.findall(r'[A-Z][a-z]*', user)
