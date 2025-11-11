@@ -2,6 +2,32 @@ apiVersion: v1
 entries:
   defectdojo:
   - annotations:
+      artifacthub.io/changes: ""
+      artifacthub.io/prerelease: "true"
+    apiVersion: v2
+    appVersion: 2.53.0-dev
+    created: "2025-11-11T05:17:23.691267672Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: ~16.7.0
+    - condition: redis.enabled
+      name: redis
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: ~19.6.4
+    description: A Helm chart for Kubernetes to install DefectDojo
+    digest: 79a7d979e29e71bc4ef9f4227b36324d1237db54bf1bed95169f00a62f50fe9b
+    icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
+    maintainers:
+    - email: defectdojo-project@owasp.org
+      name: madchap
+      url: https://github.com/DefectDojo/django-DefectDojo
+    name: defectdojo
+    urls:
+    - https://github.com/DefectDojo/django-DefectDojo/releases/download/nightly-dev/defectdojo-1.8.2-dev.tgz
+    version: 1.8.2-dev
+  - annotations:
       artifacthub.io/changes: |
         - kind: fixed
           description: Broken rendering of media PVC
@@ -6960,4 +6986,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2025-11-10T17:06:45.479430702Z"
+generated: "2025-11-11T05:17:23.680038386Z"
