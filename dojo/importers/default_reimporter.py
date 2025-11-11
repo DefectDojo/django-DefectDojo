@@ -779,4 +779,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> str:
+        # this is overridden in Pro, but will still call this via super()
+        deduplicationLogger.debug("Calculating hash code for unsaved finding")
         return unsaved_finding.compute_hash_code()
