@@ -104,7 +104,8 @@ def get_item(vulnerability, test):
     else:
         title = vulnerability["summary"]
 
-    references = "\n".join(vulnerability["references"])
+    references_str = vulnerability.get("references")
+    references = "\n".join(references_str) if isinstance(references_str, list) else (references_str if isinstance(references_str, str) else "")
 
     scan_time = datetime.strptime(
         vulnerability["artifact_scan_time"], "%Y-%m-%dT%H:%M:%S%z",
@@ -118,7 +119,10 @@ def get_item(vulnerability, test):
     # remove package type from component name
     component_name = component_name.split("://", 1)[1]
 
-    tags = ["packagetype_" + vulnerability["package_type"]]
+    tags = []
+    package_type = vulnerability.get("package_type")
+    if package_type:
+        tags.append("packagetype_" + package_type)
 
     # create the finding object
     finding = Finding(
@@ -126,7 +130,7 @@ def get_item(vulnerability, test):
         test=test,
         severity=severity,
         description=(
-            vulnerability["description"] + "\n\n" + extra_desc
+            vulnerability.get("description", vulnerability.get("summary")) + "\n\n" + extra_desc
         ).strip(),
         mitigation=mitigation,
         component_name=component_name,

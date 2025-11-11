@@ -226,7 +226,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # Process any endpoints on the endpoint, or added on the form
             self.process_endpoints(finding, self.endpoints_to_add)
             # Parsers must use unsaved_tags to store tags, so we can clean them
-            finding.tags = clean_tags(finding.unsaved_tags)
+            cleaned_tags = clean_tags(finding.unsaved_tags)
+            if isinstance(cleaned_tags, list):
+                finding.tags.set(cleaned_tags)
+            elif isinstance(cleaned_tags, str):
+                finding.tags.set([cleaned_tags])
             # Process any files
             self.process_files(finding)
             # Process vulnerability IDs
