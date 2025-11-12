@@ -14,9 +14,6 @@ from dojo.api_v2 import (
 )
 logger = logging.getLogger(__name__)
 
-
-logger = logging.getLogger(__name__)
-
 class NotificationEmailApiView(GenericAPIView):
     """
     Endpoint for sending risk acceptance emails asynchronously
