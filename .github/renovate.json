@@ -22,6 +22,11 @@
     "commitMessageExtra": "from {{currentVersion}} to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}",
     "commitMessageSuffix": "({{packageFile}})",
     "labels": ["dependencies"]
+  },{
+    "description": "Update renovate weekly (sundays) - They are releasing new versions too often, so it is a bit noisy, and keeping renovating a bit older does not create vulnerabilities in DD",
+    "matchDatasources": "github-releases",
+    "matchPackageNames": "renovatebot/renovate",
+    "schedule": ["* * * * 0"]
   }],
   "customDatasources": {
     "endoflife-oldest-maintained": {
