@@ -1,19 +1,11 @@
 import logging
-from collections import OrderedDict
 from rest_framework.generics import GenericAPIView
 from dojo.api_v2.utils import http_response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.pagination import LimitOffsetPagination
 from django.core.cache import cache
+from dojo.risk_acceptance.helper import update_or_create_url_risk_acceptance
 from dojo.api_v2.notifications.serializers import SerializerEmailNotificationRiskAcceptance
-from dojo.api_v2.api_error import ApiError
-from dojo.api_v2.metrics.helper import (
-    get_metrics_ia_recommendation,
-    apply_filter)
-from dojo.models import Finding
 from drf_spectacular.utils import (
     extend_schema,
 )
@@ -56,7 +48,6 @@ class NotificationEmailApiView(GenericAPIView):
             is_async = serializer.validated_data.get('is_async')
             risk_acceptance_id = serializer.validated_data.get('risk_acceptance_id')
             enable_acceptance_risk_for_email = serializer.validated_data.get('enable_acceptance_risk_for_email')
-            permission_keys = serializer.validated_data.get('permission_keys')
             attachment = request.FILES.get('attachment')
         else:
             return http_response.bad_request(serializer.errors)
@@ -69,6 +60,8 @@ class NotificationEmailApiView(GenericAPIView):
             attachment_data = attachment.read()
             attachment_name = attachment.name
             attachment_content_type = attachment.content_type
+        
+
 
         if is_async:
             logger.info(f"Sending risk acceptance emails asynchronously to {recipients}")
@@ -76,10 +69,6 @@ class NotificationEmailApiView(GenericAPIView):
             from dojo.api_v2.notifications.helper import send_risk_acceptance_email_task
             task = send_risk_acceptance_email_task.apply_async(
                 args=(recipients,subject,message,copy_email,attachment_data,attachment_name,attachment_content_type),
-                kwargs={
-                    'permission_keys': permission_keys,
-                    'template': template,
-                }
             )
             
             return http_response.ok(
@@ -99,7 +88,6 @@ class NotificationEmailApiView(GenericAPIView):
                 attachment_content_type=attachment_content_type,
                 risk_acceptance_id=risk_acceptance_id,
                 enable_acceptance_risk_for_email=enable_acceptance_risk_for_email,
-                permission_keys=permission_keys,
                 template=template,
             )
             

@@ -8,6 +8,7 @@ from django.conf import settings
 from dojo.models import Risk_Acceptance
 from dojo.aws import ses_email
 from dojo.models import System_Settings
+from dojo.risk_acceptance.helper import update_or_create_url_risk_acceptance
 from dojo.risk_acceptance.notification import Notification as ra_notification
 import logging
 
@@ -25,12 +26,13 @@ def send_risk_acceptance_email_task(
         attachment_content_type,
         risk_acceptance_id,
         enable_acceptance_risk_for_email,
-        permission_keys,
         template,
     ):
     
     try:
         risk_pending = Risk_Acceptance.objects.get(id=risk_acceptance_id)
+        risk_pending.accepted_by = recipients
+        risk_pending.save()
     except Risk_Acceptance.DoesNotExist:
         logger.error(f"Risk Acceptance with id {risk_acceptance_id} does not exist.")
         return ApiError.bad_request(f"Risk Acceptance with id {risk_acceptance_id} does not exist.") 
@@ -40,6 +42,11 @@ def send_risk_acceptance_email_task(
     title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
     long_term = risk_pending.expiration_date.date() - timezone.now().date()
     description=f"requested acceptance <b>long-term</b> of {long_term.days} days for the findings that are part of <b>{product_type}</b> of aplication <b>{product}</b>",
+    # Generate Permission Key
+    permission_keys = update_or_create_url_risk_acceptance(
+        risk_pending,
+        send_notification=False)
+
     create_notification(
         event=template,
         title=title, risk_acceptance=risk_pending,

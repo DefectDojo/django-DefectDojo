@@ -334,7 +334,7 @@
                 {% if risk_acceptance.long_term_acceptance %}
                 <div class="container-fluid process-timeline-horizontal">
                     <div class="row timeline-row">
-                        <div class="col-4 timeline-step active">
+                        <div class="col-4 timeline-step {% if risk_acceptance.created %}active{% endif %}">
                             <div class="timeline-content">
                                 <strong>Created</strong>
                                 <p>
@@ -344,29 +344,35 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="col-4 timeline-step active">
+                        <div class="col-4 timeline-step {% if risk_acceptance.reviewed_date %}active{% endif %}">
                             <div class="timeline-content">
                                 <strong>Reviewed</strong>
                                 <p>
-                                    {% if risk_acceptance.reviewed_by %}
-                                        {{ risk_acceptance.created|date:"d M Y H:i" }}
+                                    {% if risk_acceptance.reviewed_date %}
+                                        {{ risk_acceptance.reviewed_date|date:"d M Y H:i" }}
                                         <br>
                                         <strong>By:</strong> {{ risk_acceptance.reviewed_by }}
                                     {% else %}
-                                        Pending review by DevSecOps team
+                                        Pending review by Risk team
                                     {% endif %}
                                 </p>
                             </div>
                         </div>
-                        <div class="col-4 timeline-step">
+                        <div class="col-4 timeline-step {% if risk_acceptance.accepted_date %}active{% endif %}">
                             <div class="timeline-content">
                                 <strong>Final Status</strong>
                                 <p>
-                                            <strong>Pending</strong>
-                                            <br>
-                                            {{ finding_exclusion.status_updated_at|date:"d M Y H:i" }}
-                                            <br>
-                                            <strong>By:</strong> {{ finding_exclusion.accepted_by.username }}
+                                    {% if risk_acceptance.accepted_date %}
+                                        {{ risk_acceptance.accepted_date|date:"d M Y H:i" }}
+                                        <br>
+                                        <strong>By:</strong> {{ finding_exclusion.accepted_by.username }}
+                                        {% for accepted_by in risk_acceptance.accepted_by_user %}
+                                            {{ accepted_by }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        Awaiting acceptance by Risk approvers
+                                    {% endif %}
+                                    {{ finding_exclusion.status_updated_at|date:"d M Y H:i" }}
                                 </p>
                             </div>
                         </div>
@@ -448,8 +454,8 @@
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
                         <td>{{ finding|finding_display_status}}</td>
-                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_reviewed_by:risk_acceptance}}</td>
-                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_accepted_by:risk_acceptance}}</td>
+                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_reviewed_by:risk_acceptance|safe}}</td>
+                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_accepted_by:risk_acceptance|safe}}</td>
                         <td>
                             {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}
                             <form method="post">
@@ -666,7 +672,6 @@
     </script>
 {% endif %}
 <script type="module">
-    // cookies token
     import {MAX_RETRY, RETRY_INTERVAL} from '{% static "dojo/js/settings.js" %}'
      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     
@@ -709,7 +714,6 @@
             })
         });
         $('#send-email-risk-acceptance-id').on('click', function() {
-            console.log("se le dio  click")
             $('#modal_send_email_id').modal('show');
         });
     });
@@ -781,48 +785,37 @@
     import {MAX_RETRY, RETRY_INTERVAL} from '{% static "dojo/js/settings.js" %}'
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 async function sendEmail() {
-    console.log("desde la funcion")
     const form = document.getElementById('email-form');
     const submitBtn = document.getElementById('send-email-btn');
     
-    //if (!form.checkValidity()) {
-     //   form.reportValidity();
-     //   return;
-    //}
-    
-    console.log("desde la funcion2")
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending...';
     
     const formData = new FormData(form);
     
-    formData.append('enable_acceptance_risk_for_email', true);  // Si necesitas el ID
-    formData.append('permission_keys', 'aijfdoajfdadf');  // Si necesitas el ID
-    formData.append('risk_acceptance_id', {{ risk_acceptance.id }});  // Si necesitas el ID
-    formData.append('is_async', false);  // Si necesitas el ID
-    formData.append('template', 'risk_acceptance_request');  // Si necesitas el ID
+    formData.append('enable_acceptance_risk_for_email', true);
+    formData.append('risk_acceptance_id', {{ risk_acceptance.id }});
+    formData.append('is_async', false);
+    formData.append('template', 'risk_acceptance_request');
 
     
-    // Enviar con Ajax
     try {
         const response = await $.ajax({
             url: "/api/v2/notifications_email",
             type: "POST",
-            data: formData, // ✅ Enviar FormData directamente
-            processData: false, // ✅ Importante para archivos
-            contentType: false, // ✅ Importante para archivos
+            data: formData,
+            processData: false,
+            contentType: false,
             headers: { "X-CSRFToken": csrftoken },
             retry: MAX_RETRY,
             retryInterval: RETRY_INTERVAL,
         });
-        console.log("desde la funcion4", response)
         return response;
     } catch (error) {
         throw error;
     }
   }
 
-// Función para obtener CSRF token
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -838,40 +831,14 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Funciones para mostrar mensajes (usando alertas o notificaciones)
 function showSuccessMessage(message) {
-    // Opción 1: Alerta simple
     alert('✅ ' + message);
-    
-    // Opción 2: Bootstrap alert (si quieres algo más elegante)
-    /*
-    $('body').append(`
-        <div class="alert alert-success alert-dismissible" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            <strong>Success!</strong> ${message}
-        </div>
-    `);
-    setTimeout(() => $('.alert').fadeOut(), 3000);
-    */
 }
 
 function showErrorMessage(message) {
-    // Opción 1: Alerta simple
     alert('❌ ' + message);
-    
-    // Opción 2: Bootstrap alert
-    /*
-    $('body').append(`
-        <div class="alert alert-danger alert-dismissible" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            <strong>Error!</strong> ${message}
-        </div>
-    `);
-    setTimeout(() => $('.alert').fadeOut(), 5000);
-    */
 }
 
-// Event listener opcional: enviar con Enter en el textarea
 $(document).ready(function() {
     $('#send-email-btn').on('click', function(event)
     {
@@ -889,7 +856,6 @@ $(document).ready(function() {
     });
 });
 
-// Limpiar formulario al cerrar modal
 $('#modal_send_email_id').on('hidden.bs.modal', function () {
     document.getElementById('email-form').reset();
 });

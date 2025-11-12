@@ -4128,6 +4128,8 @@ class Risk_Acceptance(models.Model):
                             blank=True, verbose_name=_("Proof"))
     owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.RESTRICT, help_text=_("User in DefectDojo owning this acceptance. Only the owner and staff users can edit the risk acceptance."))
 
+    reviewed_date = models.DateTimeField(default=None, null=True, blank=True, help_text=_("When the risk acceptance is reviewed"))
+    accepted_date = models.DateTimeField(default=None, null=True, blank=True, help_text=_("When the risk acceptance is accepted"))
     expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text=_("When the risk acceptance expires, the findings will be reactivated (unless disabled below)."))
     expiration_date_warned = models.DateTimeField(default=None, null=True, blank=True, help_text=_("(readonly) Date at which notice about the risk acceptance expiration was sent."))
     expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text=_("(readonly) When the risk acceptance expiration was handled (manually or by the daily job)."))
@@ -4193,8 +4195,8 @@ class Risk_Acceptance(models.Model):
         if self.accepted_by:
             pattern = r"^\[\s*'(?:[^']*)'(?:\s*,\s*'(?:[^']*)')*\s*\]$"
             try:
-                if re.match(pattern, self.accepted_by):
-                    usernames = ast.literal_eval(self.accepted_by)
+                if re.match(pattern, str(self.accepted_by)):
+                    usernames = ast.literal_eval(str(self.accepted_by))
             except Exception as e:
                 logger.error(f"Error evaluating accepted_by: {e}")
         return usernames

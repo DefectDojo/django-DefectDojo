@@ -94,6 +94,7 @@ def risk_accepted_succesfully(
     if risk_acceptance.long_term_acceptance:
         finding.tags.add("long_term_risk_acceptance")
     finding.risk_status = "Risk Accepted"
+    finding.accepted_date = timezone.now()
     finding.risk_accepted = True
     finding.active = False
     acceptance_days, __, __ = update_expiration_risk_accepted(finding,
@@ -207,7 +208,7 @@ def risk_acceptante_pending(eng: Engagement,
                                                     risk_acceptance)
     message = ""
     if (
-        finding.risk_status in ["Risk Pending", "Risk Rejected"]
+        finding.risk_status in ["Risk Pending", "Risk Rejected", "Risk Reviewed"]
         and finding.active is True
         and finding.mitigated is None
     ):
@@ -215,11 +216,20 @@ def risk_acceptante_pending(eng: Engagement,
         confirmed_acceptances = get_confirmed_acceptors(finding)
         if is_permissions_risk_acceptance(eng, finding, user, product, product_type):
             if risk_acceptance.long_term_acceptance:
-                finding.risk_status = "Risk Reviewed"
-                finding.reviewed_by = user.username
-                finding.save()
-                message = "Finding has been marked as reviewed"
-                status_permission["status"] = "OK"
+                if finding.risk_status == "Risk Pending":
+                    finding.risk_status = "Risk Reviewed"
+                    finding.reviewed_by = user.username
+                    finding.reviewed_date = timezone.now()
+                    finding.save()
+                    message = "Finding has been marked as reviewed"
+                    status_permission["status"] = "OK"
+                elif finding.risk_status == "Risk Reviewed" and user_has_permission_long_risk_acceptance(user, risk_acceptance):
+                    finding.accepted_by = user.username
+                    risk_accepted_succesfully(finding, risk_acceptance)
+                    message = "Finding Accept successfully from risk acceptance."
+                    status_permission["status"] = "OK"
+
+
             else:
                 if user.username in confirmed_acceptances:
                     message = "The user has already accepted the risk"
@@ -269,7 +279,12 @@ def is_permissions_risk_acceptance(
         return False
 
     # Validate whether the user has permission to accept a risk based on their group membership.
-    group_name =  GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_risk")
+    group_name =  GeneralSettings.get_value("GROUP_REVIEWER_LONGTERM_ACCEPTANCE", "Reviewer_Risk")
+    users = get_users_for_group_by_role(group_name, "Risk")
+    if user in users and finding.risk_accepted is False:
+        return True
+
+    group_name =  GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_Risk")
     users = get_users_for_group_by_role(group_name, "Risk")
     if user in users and finding.risk_accepted is False:
         return True

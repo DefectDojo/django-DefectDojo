@@ -1237,7 +1237,7 @@ def render_risk_acceptance_accepted_by(finding: Finding, risk_acceptance: Risk_A
     accepted_by = finding.accepted_by
     if finding.accepted_by is None:
         accepted_by = ""
-    accepted_by_user = "Undefined"
+    accepted_by_user = ""
     if risk_acceptance.accepted_by:
         accepted_by_recommendation_ra = risk_acceptance.accepted_by_user
         for user in accepted_by_recommendation_ra:

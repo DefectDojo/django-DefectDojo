@@ -12,7 +12,7 @@
                 <select class="form-control" id="recipient-email" name="recipients" multiple required>
                   <option value="">Select recipients...</option>
                   {% for user in user_acceptances %}
-                      <option value="{{user.email}}">{{user.username}} ({{user.email}})</option>
+                      <option value="{{user.username}}">{{user.username}} ({{user.email}})</option>
                   {% endfor %}
                 </select>
             </div><br>

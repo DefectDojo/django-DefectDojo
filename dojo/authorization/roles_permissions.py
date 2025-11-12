@@ -771,6 +771,7 @@ def get_roles_with_permissions():
             Permissions.Metrics_Panel_Admin,
             Permissions.Metrics_Scan_Cycle,
             Permissions.Risk_Acceptance_Send_Email,
+            Permissions.Risk_Acceptance_Refresh_Permission_key
         },
     }
 
