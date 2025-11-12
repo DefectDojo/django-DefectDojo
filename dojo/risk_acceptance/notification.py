@@ -80,6 +80,7 @@ class Notification:
     @staticmethod
     def risk_acceptance_request(*args, **kwargs):
         risk_pending = kwargs["risk_pending"]
+        recipients = risk_pending.accepted_by_user
         product = risk_pending.engagement.product
         product_type = product.prod_type
         enable_acceptance_risk_for_email= kwargs["enable_acceptance_risk_for_email"]
@@ -88,9 +89,12 @@ class Notification:
         subject = f"🙋‍♂️Request of aceptance of risk {risk_pending.id}🙏"
         description=f"requested acceptance of the risks <b>{risk_pending.name}</b> for the findings that are part of <b>{product_type}</b> of aplication <b>{product}</b>",
         if risk_pending.long_term_acceptance:
+            recipients = [risk_pending.reviewed_by]
             long_term = risk_pending.expiration_date.date() - timezone.now().date()
             description = f"requested acceptance <b>long-term</b> of {long_term.days} days for the findings that are part of <b>{product_type}</b> of aplication <b>{product}</b>",
             subject = f"🙋‍♂️Request of aceptance long term of risk {risk_pending.id}  🙏"
+            enable_acceptance_risk_for_email=False
+
         create_notification(event='risk_acceptance_request',
                         title=title, risk_acceptance=risk_pending,
                         subject=subject,
@@ -100,10 +104,10 @@ class Notification:
                         description=description,
                         permission_keys=permission_keys,
                         enable_acceptance_risk_for_email=enable_acceptance_risk_for_email,
-                        recipients=risk_pending.accepted_by_user,
+                        recipients=recipients,
                         icon="bell",
                         owner=risk_pending.owner,
-                        color_icon="#1B30DE",
+                        color_icon="#104dbe",
                         url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
 
     @staticmethod

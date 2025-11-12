@@ -94,7 +94,6 @@ def risk_accepted_succesfully(
     if risk_acceptance.long_term_acceptance:
         finding.tags.add("long_term_risk_acceptance")
     finding.risk_status = "Risk Accepted"
-    finding.accepted_date = timezone.now()
     finding.risk_accepted = True
     finding.active = False
     acceptance_days, __, __ = update_expiration_risk_accepted(finding,
@@ -219,12 +218,15 @@ def risk_acceptante_pending(eng: Engagement,
                 if finding.risk_status == "Risk Pending":
                     finding.risk_status = "Risk Reviewed"
                     finding.reviewed_by = user.username
-                    finding.reviewed_date = timezone.now()
+                    risk_acceptance.reviewed_date = timezone.now()
+                    risk_acceptance.save()
                     finding.save()
                     message = "Finding has been marked as reviewed"
                     status_permission["status"] = "OK"
                 elif finding.risk_status == "Risk Reviewed" and user_has_permission_long_risk_acceptance(user, risk_acceptance):
                     finding.accepted_by = user.username
+                    risk_acceptance.accepted_date = timezone.now()
+                    risk_acceptance.save()
                     risk_accepted_succesfully(finding, risk_acceptance)
                     message = "Finding Accept successfully from risk acceptance."
                     status_permission["status"] = "OK"

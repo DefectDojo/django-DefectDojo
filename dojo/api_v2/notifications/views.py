@@ -56,7 +56,7 @@ class NotificationEmailApiView(GenericAPIView):
         attachment_name = None
         attachment_content_type = None
         
-        if is_async is not None:
+        if is_async and attachment:
             attachment_data = attachment.read()
             attachment_name = attachment.name
             attachment_content_type = attachment.content_type

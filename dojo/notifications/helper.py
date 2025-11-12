@@ -666,6 +666,9 @@ class NotificationManager(NotificationManagerHelpers):
     def _process_recipients(self, event: str | None = None, **kwargs: dict) -> None:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug("creating notifications for recipients: %s", kwargs["recipients"])
+        if isinstance(kwargs["recipients"], str):
+            raise Exception("recipients cannot be a string, must be a list of usernames or Dojo_User objects")
+
         for recipient_notifications in Notifications.objects.filter(
             user__username__in=kwargs["recipients"],
             user__is_active=True,
