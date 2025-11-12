@@ -28,6 +28,15 @@
     "matchPackageNames": "renovatebot/renovate",
     "schedule": ["* * * * 0"]
   }],
+  "customDatasources": {
+    "endoflife-oldest-maintained": {
+      "defaultRegistryUrlTemplate": "https://endoflife.date/api/v1/products/{{packageName}}",
+      "format": "json",
+      "transformTemplates": [
+        "{ \"releases\": [$.result.releases[isMaintained = true]^(<eolFrom)[0].latest.{\"version\": name, \"releaseTimestamp\": date, \"changelogUrl\": link}], \"sourceUrl\": \"https://github.com/kubernetes/kubernetes\", \"homepage\": \"https://kubernetes.io/\" }"
+      ]
+    }
+  },
   "customManagers": [
     {
       "customType": "regex",
