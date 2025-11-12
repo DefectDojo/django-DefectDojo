@@ -95,6 +95,7 @@ class TestEndpointManager(TestCase):
             description="Test finding for endpoint manager tests",
             severity="High",
             test=cls.test,
+            reporter=cls.user,
             date=timezone.now().date(),
         )
 
@@ -175,12 +176,11 @@ class TestEndpointManager(TestCase):
         endpoints = [valid_endpoint, invalid_endpoint]
 
         # Mock the clean method to raise ValidationError for invalid endpoint
-        with patch.object(Endpoint, "clean") as mock_clean:
-            def side_effect_clean(self_endpoint):
-                if not self_endpoint.host:
-                    raise ValidationError("Host cannot be empty")
-            mock_clean.side_effect = side_effect_clean
-
+        def mock_clean_method(self):
+            if not self.host:
+                raise ValidationError("Host cannot be empty")
+        
+        with patch.object(Endpoint, "clean", mock_clean_method):
             # Should not raise exception, but log warning
             self.endpoint_manager.add_endpoints_to_unsaved_finding(
                 self.finding,
@@ -269,10 +269,12 @@ class TestEndpointManager(TestCase):
                 str(context.exception),
                 "Error message should mention broken endpoints",
             )
+            # The actual error message uses reverse('endpoint_migrate') which may vary
+            # Just verify the core message is present
             self.assertIn(
-                "endpoint_migrate",
+                "migrate them to new format",
                 str(context.exception),
-                "Error message should reference migration endpoint",
+                "Error message should reference migration",
             )
 
     def test_mitigate_endpoint_status_success(self):
