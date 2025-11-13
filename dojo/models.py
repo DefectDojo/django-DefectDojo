@@ -3363,7 +3363,7 @@ class Finding(models.Model):
 
         sla_period, enforce_period = self.get_sla_period()
         if sla_period is not None and enforce_period:
-            if self.tags and any(tag in self.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")[:3]):
+            if self.tags and any(tag in self.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")[:2]):
                 self.sla_expiration_date = sla_start_date + relativedelta(days=sla_period) + timedelta(days=settings.SLA_FREEZE_DAYS)
             else:
                 self.sla_expiration_date = sla_start_date + relativedelta(days=sla_period)

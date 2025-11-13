@@ -1,7 +1,7 @@
 # requirements.txt for DefectDojo using Python 3.x
 py==1.11.0
 decorator==5.2.1
-asteval==1.0.6
+asteval==1.0.7
 beautifulsoup4==4.14.0
 bleach==6.3.0
 bleach[css]
@@ -10,14 +10,14 @@ defusedxml==0.7.1
 django_celery_results==2.6.0
 django-cors-headers==4.9.0
 django-auditlog==3.3.0
-django-dbbackup==4.3.0
+django-dbbackup==5.0.1
 django-csp==4.0
 django-environ==0.12.0
 django-filter==25.1
 django-imagekit==6.0.0
 django-multiselectfield==1.0.1
 django-polymorphic==4.1.0
-django-crispy-forms==2.4
+django-crispy-forms==2.5
 django_extensions==4.1
 django-slack==5.19.0
 # This library is very outdated and not directly. It is used solely for migration
@@ -26,7 +26,7 @@ django-slack==5.19.0
 git+https://github.com/DefectDojo/django-tagging@develop#egg=django-tagging
 django-watson==1.6.3
 django-prometheus==2.4.1
-Django==5.1.13
+Django==5.1.14
 djangorestframework==3.16.1
 html2text==2025.4.15
 humanize==4.14.0
@@ -75,7 +75,7 @@ django-ratelimit==4.1.0
 argon2-cffi==25.1.0
 blackduck==1.1.3
 pycurl==7.45.7  # Required for Celery Broker AWS (SQS) support
-boto3==1.40.65  # Required for Celery Broker AWS (SQS) support
+boto3==1.40.70  # Required for Celery Broker AWS (SQS) support
 retry==0.9.2
 netaddr==1.3.0
 vulners==3.1.1
@@ -104,7 +104,7 @@ pyarrow==22.0.0
 azure-core==1.36.0
 protobuf==6.33.0
 billiard==4.2.1
-botocore==1.40.65
+botocore==1.40.70
 et_xmlfile==2.0.0
 inflection==0.5.1
 requests-toolbelt==1.0.0
@@ -126,13 +126,13 @@ webencodings==0.5.1
 uritemplate==4.2.0
 pilkit==3.0
 yarl==1.22.0
-django-appconf==1.1.0
+django-appconf==1.2.0
 click==8.3.0
 jsonschema==4.25.1
 jmespath==1.0.1
 python3-openid==3.2.0
 certifi==2025.10.5
-PyNaCl==1.6.0
+PyNaCl==1.6.1
 charset-normalizer==3.4.4
 xmlschema==2.5.1
 sqlparse==0.5.3
@@ -157,7 +157,7 @@ setuptools==80.9.0
 referencing==0.37.0
 tzdata==2025.2
 jsonschema-specifications==2025.9.1
-googleapis-common-protos==1.71.0
+googleapis-common-protos==1.72.0
 grpcio==1.76.0
 zipp==3.23.0
 prompt_toolkit==3.0.52
@@ -167,4 +167,4 @@ propcache==0.4.1
 py==1.11.0
 soupsieve==2.8
 hashids==1.3.1
-pikepdf==10.0.0
+pikepdf==10.0.2
