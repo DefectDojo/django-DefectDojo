@@ -34,14 +34,24 @@ class NancyParser:
 
         return findings
 
+    def convert_cvss_score(self, raw_value):
+        if raw_value is None:
+            return "Info"
+        val = float(raw_value)
+        if val == 0.0:
+            return "Info"
+        if val < 4.0:
+            return "Low"
+        if val < 7.0:
+            return "Medium"
+        if val < 9.0:
+            return "High"
+        return "Critical"
+
     def get_items(self, vulnerable, test):
         findings = []
         for vuln in vulnerable:
             finding = None
-            severity = "Info"
-            # the tool does not define severity, however it
-            # provides CVSSv3 vector which will calculate
-            # severity dynamically on save()
             references = []
             if vuln["Vulnerabilities"]:
                 comp_name = vuln["Coordinates"].split(":")[1].split("@")[0]
@@ -57,7 +67,7 @@ class NancyParser:
                         title=associated_vuln["Title"],
                         description=associated_vuln["Description"],
                         test=test,
-                        severity=severity,
+                        severity=self.convert_cvss_score(associated_vuln["CvssScore"]),
                         component_name=comp_name,
                         component_version=comp_version,
                         false_p=False,
