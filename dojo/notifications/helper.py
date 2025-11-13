@@ -386,6 +386,9 @@ class EmailNotificationManger(NotificationManagerHelpers):
         try:
             kwargs["system_settings"] = self.system_settings
             if settings.AWS_SES_EMAIL:
+                copy_email = kwargs.get("copy_email", None)
+                if copy_email:
+                    copy_email = copy_email.split(",")
                 ses_email.aws_ses(
                     email=address,
                     email_from_address=f"{self.system_settings.team_name} <{self.system_settings.email_from}>",
@@ -395,7 +398,8 @@ class EmailNotificationManger(NotificationManagerHelpers):
                     text=event,
                     attachment=kwargs.get("attachment_data", None),
                     attachment_filename=kwargs.get("attachment_name", None),
-                    attachment_mimetype=kwargs.get("attachment_content_type", None)
+                    attachment_mimetype=kwargs.get("attachment_content_type", None),
+                    copy_email=copy_email
                 )
             else:
                 subject = f"{self.system_settings.team_name} notification"

@@ -70,18 +70,28 @@ class SesMailSender:
             return message_id
 
 
-def send_email(ses_mail_sender, email_from_address, email, subject, message_text, message_html):
+def send_email(
+        ses_mail_sender,
+        email_from_address,
+        email,
+        subject,
+        message_text,
+        message_html,
+        copy_email=[],
+    ):
     logger.debug("send email")
-    
+    if not isinstance(copy_email, list):
+        raise Exception("copy_email must be a list")
+
     if isinstance(email, list):
         email_list = email
     else:
         email_list = [email]
-        
+    
     
     ses_mail_sender.send_email(
         email_from_address,
-        SesDestination(email_list),
+        SesDestination(email_list, ccs=copy_email),
         subject,
         message_text,
         message_html,
@@ -112,7 +122,8 @@ def aws_ses(
         text,
         attachment,
         attachment_filename,
-        attachment_mimetype
+        attachment_mimetype,
+        copy_email
     ):
     template = get_template(html_contect, name=template_name, subject=subject, text=text)
     try:
@@ -137,7 +148,8 @@ def aws_ses(
                 email=email,
                 subject=subject,
                 message_text=text,
-                message_html=template["html"]
+                message_html=template["html"],
+                copy_email=copy_email
             )
         logger.info("Send Email template")
     except Exception as e:
