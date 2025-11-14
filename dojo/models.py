@@ -2234,6 +2234,7 @@ class Test(models.Model):
 
     @property
     def hash_code_fields(self):
+        """Retrieve OS HASH_CODE_FIELDS_PER_SCANNER settings. Be aware when calling this to make sure Pro doesn't use these OS seetings"""
         hashCodeFields = None
 
         if hasattr(settings, "HASHCODE_FIELDS_PER_SCANNER"):
@@ -2913,6 +2914,11 @@ class Finding(models.Model):
         return None
 
     def compute_hash_code(self):
+        # Allow Pro to overwrite compute hash_code which gets dedupe settings from a database instead of django.settings
+        from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
+        if compute_hash_code_method := get_custom_method("FINDING_COMPUTE_HASH_METHOD"):
+            deduplicationLogger.debug("using custom FINDING_COMPUTE_HASH_METHOD method")
+            return compute_hash_code_method(self)
 
         # Check if all needed settings are defined
         if not hasattr(settings, "HASHCODE_FIELDS_PER_SCANNER") or not hasattr(settings, "HASHCODE_ALLOWS_NULL_CWE") or not hasattr(settings, "HASHCODE_ALLOWED_FIELDS"):
