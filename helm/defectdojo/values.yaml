@@ -275,6 +275,14 @@ celery:
       repository: ""
       tag: ""
       digest: ""
+    # -- Autoscaling configuration for Celery worker deployment.
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+      behavior: {}
     automountServiceAccountToken: false
     # -- Annotations for the Celery worker deployment.
     annotations: {}
@@ -303,8 +311,13 @@ celery:
     # ```
     livenessProbe: {}
     nodeSelector: {}
-    # -- Annotations for the Celery beat pods.
+    # -- Annotations for the Celery worker pods.
     podAnnotations: {}
+    # -- Configure pod disruption budgets for Celery worker ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget
+    podDisruptionBudget:
+      enabled: false
+      minAvailable: 50%
+      unhealthyPodEvictionPolicy: AlwaysAllow
     # -- Pod security context for the Celery worker pods.
     podSecurityContext: {}
     # -- Enable readiness probe for Celery worker container.
@@ -319,6 +332,8 @@ celery:
         memory: 512Mi
     # -- Enable startup probe for Celery worker container.
     startupProbe: {}
+    #  -- Termination grace period seconds for Celery worker pods.
+    terminationGracePeriodSeconds: 300
     tolerations: []
     appSettings:
       # -- Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops)
@@ -330,6 +345,14 @@ celery:
       poolType: solo
 
 django:
+  # -- Autoscaling configuration for the Django deployment.
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+    behavior: {}
   automountServiceAccountToken: false
   annotations: {}
   service:
@@ -382,8 +405,15 @@ django:
         cpu: 2000m
         memory: 256Mi
   nodeSelector: {}
+  # -- Configure pod disruption budgets for django ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 50%
+    unhealthyPodEvictionPolicy: AlwaysAllow
   replicas: 1
   strategy: {}
+  #  -- Termination grace period seconds for django pods.
+  terminationGracePeriodSeconds: 60
   tolerations: []
   uwsgi:
     # -- If empty, uses values from images.django.image

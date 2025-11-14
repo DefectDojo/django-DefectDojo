@@ -1,0 +1,51 @@
+{{- if .Values.celery.worker.autoscaling.enabled -}}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.celery.annotations .Values.celery.worker.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
+  name: {{ $fullName }}-celery-worker
+  namespace: {{ .Release.Namespace }}
+  labels:
+    defectdojo.org/component: celery
+    defectdojo.org/subcomponent: worker
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: "Deployment"
+    name: {{ $fullName }}-celery-worker
+  minReplicas: {{ .Values.celery.worker.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.celery.worker.autoscaling.maxReplicas }}
+  metrics:
+    {{- with .Values.celery.worker.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          averageUtilization: {{ . }}
+          type: Utilization
+    {{- end }}
+    {{- with .Values.celery.worker.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          averageUtilization: {{ . }}
+          type: Utilization
+    {{- end }}
+  {{- with .Values.celery.worker.autoscaling.behavior }}
+  behavior: {{ toYaml .Values.celery.worker.autoscaling.behavior | nindent 4 }}
+  {{- end }}
+{{- end }}

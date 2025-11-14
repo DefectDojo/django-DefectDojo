@@ -1,0 +1,50 @@
+{{- if .Values.django.autoscaling.enabled -}}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.django.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
+  name: {{ $fullName }}-django
+  namespace: {{ .Release.Namespace }}
+  labels:
+    defectdojo.org/component: django
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: "Deployment"
+    name: {{ $fullName }}-django
+  minReplicas: {{ .Values.django.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.django.autoscaling.maxReplicas }}
+  metrics:
+    {{- with .Values.django.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          averageUtilization: {{ . }}
+          type: Utilization
+    {{- end }}
+    {{- with .Values.django.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          averageUtilization: {{ . }}
+          type: Utilization
+    {{- end }}
+  {{- with .Values.django.autoscaling.behavior }}
+  behavior: {{ toYaml .Values.django.autoscaling.behavior | nindent 4 }}
+  {{- end }}
+{{- end }}
