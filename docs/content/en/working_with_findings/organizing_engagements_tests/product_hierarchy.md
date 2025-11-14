@@ -116,7 +116,7 @@ Tests always have:
 * an associated test **Environment**
 * an associated **Engagement**
 
-Tests can be created in different ways.  Tests can be automatically created when scan data is imported directly into to an Engagement, resulting in a new Test containing the scan data. Tests can also be created in anticipation of planning future engagements, or for manually entered security findings requiring tracking and remediation.
+Tests can be created in different ways.  Tests can be automatically created when scan data is imported directly into an Engagement, resulting in a new Test containing the scan data. Tests can also be created in anticipation of planning future engagements, or for manually entered security findings requiring tracking and remediation.
 
 ### **Test Types**
 
@@ -124,8 +124,9 @@ DefectDojo supports two categories of Test Types:
 
 1. **Parser-based Test Types**: These correspond to specific security scanners that produce output in formats like XML, JSON, or CSV. When importing scan results, DefectDojo uses specialized parsers to convert the scanner output into Findings.
 
-2. **Non-parser Test Types**: These are used for manually created findings not imported from a scan files. 
-The following Test Types appear in the "Scan Type" dropdown when creating a new test, but will not appear when selecting "Import Scan":
+2. **Non-parser Test Types**: These are used for manually created Findings not imported from scan files.  These Test Types use the [Generic Findings Import](/supported_tools/parsers/generic_findings_import/) method to render Findings and metadata.
+
+The following Test Types appear in the "Scan Type" dropdown when creating a new test.
    * API Test
    * Static Check
    * Pen Test
