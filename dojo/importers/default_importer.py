@@ -157,6 +157,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> list[Finding]:
+        sync_requested = kwargs.get("sync", True)
         # Progressive batching for chord execution
         post_processing_task_signatures = []
         current_batch_number = 1
@@ -253,7 +254,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             post_processing_task_signatures.append(post_processing_task_signature)
 
             # Check if we should launch a chord (batch full or end of findings)
-            if we_want_async(async_user=self.user) and post_processing_task_signatures:
+            if we_want_async(async_user=self.user, sync=sync_requested) and post_processing_task_signatures:
                 post_processing_task_signatures, current_batch_number, _ = self.maybe_launch_post_processing_chord(
                     post_processing_task_signatures,
                     current_batch_number,
@@ -283,8 +284,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Always perform an initial grading, even though it might get overwritten later.
         perform_product_grading(self.test.engagement.product)
 
-        sync = kwargs.get("sync", True)
-        if not sync:
+        if not sync_requested:
             return [serialize("json", [finding]) for finding in new_findings]
         return new_findings
 

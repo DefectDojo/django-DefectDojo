@@ -164,6 +164,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         the finding may be appended to a new or existing group based upon user selection
         at import time
         """
+        sync_requested = kwargs.get("sync", True)
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         # Only process findings with the same service value (or None)
         # Even though the service values is used in the hash_code calculation,
@@ -271,7 +272,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 post_processing_task_signatures.append(post_processing_task_signature)
 
             # Check if we should launch a chord (batch full or end of findings)
-            if we_want_async(async_user=self.user) and post_processing_task_signatures:
+            if we_want_async(async_user=self.user, sync=sync_requested) and post_processing_task_signatures:
                 post_processing_task_signatures, current_batch_number, _ = self.maybe_launch_post_processing_chord(
                     post_processing_task_signatures,
                     current_batch_number,
@@ -772,6 +773,4 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> str:
-        # this is overridden in Pro, but will still call this via super()
-        deduplicationLogger.debug("Calculating hash code for unsaved finding")
         return unsaved_finding.compute_hash_code()
