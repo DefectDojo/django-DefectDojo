@@ -529,18 +529,21 @@ def _dedupe_batch_legacy(findings):
 
 def dedupe_batch_of_findings(findings, *args, **kwargs):
     """Batch deduplicate a list of findings. The findings are assumed to be in the same test."""
+
+    # Pro has customer implementation which will call the Pro dedupe methods, but also the normal OS dedupe methods.
+    from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
+    if batch_dedupe_method := get_custom_method("FINDING_DEDUPE_BATCH_METHOD"):
+        deduplicationLogger.debug(f"Using custom deduplication method: {batch_dedupe_method.__name__}")
+        return batch_dedupe_method(findings, *args, **kwargs)
+
     if not findings:
-        return
+        return None
 
     enabled = System_Settings.objects.get().enable_deduplication
 
     if enabled:
         # sort findings by id to ensure deduplication is deterministic/reproducible
         findings = sorted(findings, key=attrgetter("id"))
-
-        from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
-        if batch_dedupe_method := get_custom_method("FINDING_DEDUPE_BATCH_METHOD"):
-            batch_dedupe_method(findings, *args, **kwargs)
 
         test = findings[0].test
         dedup_alg = test.deduplication_algorithm
@@ -559,3 +562,4 @@ def dedupe_batch_of_findings(findings, *args, **kwargs):
             _dedupe_batch_legacy(findings)
     else:
         deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
+    return None
