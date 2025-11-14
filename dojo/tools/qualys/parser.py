@@ -313,20 +313,28 @@ def parse_finding(host, tree):
                         temp["CVSS_vector"] = None
 
             # CVE and LINKS
-            temp_cve_details = vuln_item.iterfind("CVE_ID_LIST/CVE_ID")
+            temp_cve_details = list(vuln_item.iterfind("CVE_ID_LIST/CVE_ID"))
             if temp_cve_details:
-                cl = {
-                    cve_detail.findtext("ID"): cve_detail.findtext("URL")
-                    for cve_detail in temp_cve_details
-                }
-                temp["cve"] = "\n".join(list(cl.keys()))
-                temp["links"] = "\n".join(list(cl.values()))
+                cve_list = []
+                link_list = []
+                for cve_detail in temp_cve_details:
+                    cve_id = cve_detail.findtext("ID")
+                    cve_url = cve_detail.findtext("URL")
+                    if cve_id:
+                        cve_list.append(cve_id)
+                    if cve_url:
+                        link_list.append(cve_url)
+
+                temp["cve_list"] = cve_list       # list of CVE strings
+                temp["links"] = "\n".join(link_list)
+            else:
+                temp["cve_list"] = []
 
         # Generate severity from number in XML's 'SEVERITY' field, if not present default to 'Informational'
         sev = get_severity(vuln_item.findtext("SEVERITY"))
         finding = None
         if temp_cve_details:
-            refs = "\n".join(list(cl.values()))
+            refs = temp.get("links", "")
             finding = Finding(
                 title="QID-" + gid[4:] + " | " + temp["vuln_name"],
                 mitigation=temp["solution"],
@@ -363,6 +371,7 @@ def parse_finding(host, tree):
         finding.verified = True
         finding.unsaved_endpoints = []
         finding.unsaved_endpoints.append(ep)
+        finding.unsaved_vulnerability_ids = temp.get("cve_list", [])
         ret_rows.append(finding)
     return ret_rows
 

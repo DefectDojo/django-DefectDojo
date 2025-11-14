@@ -151,10 +151,38 @@ class TestQualysParser(DojoTestCase):
             for finding in findings:
                 if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                     finding_cvssv3_score = finding
+                    self.assertEqual(
+                        finding.unsaved_vulnerability_ids,
+                        [
+                            "CVE-2018-8930",
+                            "CVE-2018-8931",
+                            "CVE-2018-8932",
+                            "CVE-2018-8933",
+                            "CVE-2018-8934",
+                            "CVE-2018-8935",
+                            "CVE-2018-8936",
+                        ],
+                    )
                 if finding.unsaved_endpoints[0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                     finding_no_cvssv3_at_detection = finding
+                    self.assertEqual(
+                        finding.unsaved_vulnerability_ids,
+                        [
+                            "CVE-2018-8930",
+                            "CVE-2018-8931",
+                            "CVE-2018-8932",
+                            "CVE-2018-8933",
+                            "CVE-2018-8934",
+                            "CVE-2018-8935",
+                            "CVE-2018-8936",
+                        ],
+                    )
                 if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == 'QID-121695 | NTP "monlist"  Feature Denial of Service Vulnerability':
                     finding_no_cvssv3 = finding
+                    self.assertEqual(
+                        finding.unsaved_vulnerability_ids,
+                        ["CVE-2013-5211"],
+                    )
             # The CVSS Vector is not used from the Knowledgebase
             self.assertEqual(
                 # CVSS_FINAL is defined without a cvssv3 vector
