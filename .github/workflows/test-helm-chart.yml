@@ -125,15 +125,17 @@ jobs:
           chart-search-root: "helm/defectdojo"
           git-push: true
 
-      # Documentation provided in the README file needs to contain the latest information from `values.yaml` and all other related assets.
-      # If this step fails, install https://github.com/norwoodj/helm-docs and run locally `helm-docs --chart-search-root helm/defectdojo` before committing your changes.
-      # The helm-docs documentation will be generated for you.
       - name: Run helm-docs (check)
         uses: losisin/helm-docs-github-action@a57fae5676e4c55a228ea654a1bcaec8dd3cf5b5 # v1.6.2
         if: ${{ !(startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')) }}
         with:
           fail-on-diff: true
           chart-search-root: "helm/defectdojo"
+
+      - name: Failed Information
+        if: failure()
+        run: |-
+          echo "Your HELM chart changed but you haven't adjusted documentation. Check https://github.com/defectdojo/django-DefectDojo/tree/master/helm/defectdojo#helm-docs-update for more information."
 
   generate_schema:
     name: Update schema
@@ -142,10 +144,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      # The HELM structure supports the existence of a `values.schema.json` file. This file is used to validate all values provided by the user before Helm starts rendering templates.
-      # The chart needs to have a `values.schema.json` file that is compatible with the default `values.yaml` file.
-      # If this step fails, install https://github.com/losisin/helm-values-schema-json and run locally `helm schema --use-helm-docs` in `helm/defectdojo` before committing your changes.
-      # The helm schema will be generated for you.
       - name: Generate values schema json
         uses: losisin/helm-values-schema-json-action@660c441a4a507436a294fc55227e1df54aca5407 # v2.3.1
         with:
@@ -153,6 +151,11 @@ jobs:
           working-directory: "helm/defectdojo"
           useHelmDocs: true
           values: values.yaml
+
+      - name: Failed Information
+        if: failure()
+        run: |-
+          echo "Your HELM chart changed but you haven't adjusted schema. Check https://github.com/defectdojo/django-DefectDojo/tree/master/helm/defectdojo#helm-schema-update for more information."
 
   lint_format:
     name: Lint chart (format)
