@@ -144,10 +144,8 @@ spec:
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
-            {{- if eq .Values.celery.broker "redis" }}
-              name: {{ .Values.redis.auth.existingSecret | default "defectdojo-redis-specific" }}
-              key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
-            {{- end }}
+              name: {{ .Values.valkey.auth.existingSecret | default "defectdojo-valkey-specific" }}
+              key: {{ .Values.valkey.auth.existingSecretPasswordKey | default "valkey-password" }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
