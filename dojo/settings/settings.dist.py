@@ -274,6 +274,8 @@ env = environ.FileAwareEnv(
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
+    # Batch size for import/reimport deduplication processing
+    DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=(int, 1000),
     # Delete Auditlogs older than x month; -1 to keep all logs
     DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
     # Batch size for flushing audit logs per task run
@@ -1696,6 +1698,7 @@ DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 
 TRACK_IMPORT_HISTORY = env("DD_TRACK_IMPORT_HISTORY")
+IMPORT_REIMPORT_DEDUPE_BATCH_SIZE = env("DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE")
 
 # ------------------------------------------------------------------------------
 # JIRA
