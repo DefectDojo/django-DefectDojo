@@ -52,13 +52,30 @@ class DefaultReImporterOptions(ImporterOptions):
 
 
 class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
-
     """
     The classic reimporter process used by DefectDojo
 
     This importer is intended to be used when mitigation of
     vulnerabilities is the ultimate tool for getting a current
     point time view of security of a given product
+
+    Dry Run Mode:
+    -------------
+    When dry_run=True, the importer performs a simulation of the reimport process
+    without making any database changes. This allows users to preview what would
+    happen during a real reimport.
+
+    The dry_run mode uses in-memory tracking to accurately simulate deduplication,
+    including matches between findings within the same scan report. This means that
+    if finding 100 and 101 in the report have the same hash_code, finding 101 will
+    correctly be identified as a duplicate of finding 100, just as in a real import.
+
+    Known Limitations in Dry Run Mode:
+    - Endpoint updates are not simulated
+    - Finding groups are not processed
+    - JIRA integration is skipped
+    - No notifications are sent
+    - Test/engagement timestamps are not updated
     """
 
     def __init__(self, *args, **kwargs):
@@ -69,24 +86,76 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             **kwargs,
         )
 
+    def _serialize_findings_for_dry_run(self, findings: list, is_new: bool = False) -> list:
+        """
+        Serialize finding objects to dictionaries for dry run response.
+
+        Args:
+            findings: List of Finding objects (saved or unsaved)
+            is_new: Whether these are new findings (not yet in DB)
+
+        Returns:
+            List of dictionaries with finding details
+        """
+        serialized = []
+        for finding in findings:
+            finding_dict = {
+                "title": finding.title,
+                "severity": finding.severity,
+                "description": finding.description if hasattr(finding, "description") else None,
+                "cwe": finding.cwe if hasattr(finding, "cwe") else None,
+                "cve": finding.cve if hasattr(finding, "cve") else None,
+                "cvssv3": finding.cvssv3 if hasattr(finding, "cvssv3") else None,
+                "numerical_severity": finding.numerical_severity if hasattr(finding, "numerical_severity") else None,
+            }
+
+            # Add ID for existing findings
+            if not is_new and hasattr(finding, "id") and finding.id:
+                finding_dict["id"] = finding.id
+
+            # Add additional fields if available
+            if hasattr(finding, "component_name") and finding.component_name:
+                finding_dict["component_name"] = finding.component_name
+            if hasattr(finding, "component_version") and finding.component_version:
+                finding_dict["component_version"] = finding.component_version
+            if hasattr(finding, "file_path") and finding.file_path:
+                finding_dict["file_path"] = finding.file_path
+            if hasattr(finding, "line") and finding.line:
+                finding_dict["line"] = finding.line
+            if hasattr(finding, "unique_id_from_tool") and finding.unique_id_from_tool:
+                finding_dict["unique_id_from_tool"] = finding.unique_id_from_tool
+
+            serialized.append(finding_dict)
+
+        return serialized
+
     def process_scan(
         self,
         scan: TemporaryUploadedFile,
         *args: list,
         **kwargs: dict,
-    ) -> tuple[Test, int, int, int, int, int, Test_Import]:
+    ) -> tuple[Test, int, int, int, int, int, Test_Import, dict]:
         """
         The full step process of taking a scan report, and converting it to
-        findings in the database. This entails the the following actions:
+        findings in the database. This entails the following actions:
         - Verify the API scan configuration (if supplied)
-        - Parser the findings
+        - Parse the findings
         - Process the findings
-        - Update the timestamps on the test
-        - Update/Create import history objects
-        - Send out notifications
-        - Update the test progress
+        - Update the timestamps on the test (skipped in dry_run)
+        - Update/Create import history objects (skipped in dry_run)
+        - Send out notifications (skipped in dry_run)
+        - Update the test progress (skipped in dry_run)
+
+        In dry_run mode, only parsing and matching logic runs, with no database writes.
+
+        Returns:
+            Tuple containing test, counts, test_import, and optional findings_details dict
         """
         logger.debug(f"REIMPORT_SCAN: parameters: {locals()}")
+
+        if self.dry_run:
+            logger.info("REIMPORT_SCAN: Running in dry-run mode - no database changes will be made")
+
         # Validate the Tool_Configuration
         self.verify_tool_configuration_from_test()
         # Fetch the parser based upon the string version of the scan type
@@ -100,47 +169,51 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             reactivated_findings,
             findings_to_mitigate,
             untouched_findings,
+            findings_details,
         ) = self.determine_process_method(parsed_findings, **kwargs)
-        # Close any old findings in the processed list if the the user specified for that
-        # to occur in the form that is then passed to the kwargs
+
+        # Close any old findings in the processed list (skipped in dry_run)
         closed_findings = self.close_old_findings(findings_to_mitigate, **kwargs)
-        # Update the timestamps of the test object by looking at the findings imported
-        logger.debug("REIMPORT_SCAN: Updating test/engagement timestamps")
-        # Update the timestamps of the test object by looking at the findings imported
-        self.update_timestamps()
-        # Update the test meta
-        self.update_test_meta()
-        # Update the test tags
-        self.update_test_tags()
-        # Save the test and engagement for changes to take affect
-        self.test.save()
-        self.test.engagement.save()
-        logger.debug("REIMPORT_SCAN: Updating test tags")
-        # Create a test import history object to record the flags sent to the importer
-        # This operation will return None if the user does not have the import history
-        # feature enabled
-        test_import_history = self.update_import_history(
-            new_findings=new_findings,
-            closed_findings=closed_findings,
-            reactivated_findings=reactivated_findings,
-            untouched_findings=untouched_findings,
-        )
-        # Send out som notifications to the user
-        logger.debug("REIMPORT_SCAN: Generating notifications")
-        updated_count = (
-            len(closed_findings) + len(reactivated_findings) + len(new_findings)
-        )
-        self.notify_scan_added(
-            self.test,
-            updated_count,
-            new_findings=new_findings,
-            findings_reactivated=reactivated_findings,
-            findings_mitigated=closed_findings,
-            findings_untouched=untouched_findings,
-        )
-        # Update the test progress to reflect that the import has completed
-        logger.debug("REIMPORT_SCAN: Updating Test progress")
-        self.update_test_progress()
+
+        # Skip database updates in dry_run mode
+        if not self.dry_run:
+            # Update the timestamps of the test object by looking at the findings imported
+            logger.debug("REIMPORT_SCAN: Updating test/engagement timestamps")
+            self.update_timestamps()
+            # Update the test meta
+            self.update_test_meta()
+            # Update the test tags
+            self.update_test_tags()
+            # Save the test and engagement for changes to take affect
+            self.test.save()
+            self.test.engagement.save()
+
+            # Create a test import history object
+            test_import_history = self.update_import_history(
+                new_findings=new_findings,
+                closed_findings=closed_findings,
+                reactivated_findings=reactivated_findings,
+                untouched_findings=untouched_findings,
+            )
+
+            # Send out notifications to the user
+            logger.debug("REIMPORT_SCAN: Generating notifications")
+            updated_count = len(closed_findings) + len(reactivated_findings) + len(new_findings)
+            self.notify_scan_added(
+                self.test,
+                updated_count,
+                new_findings=new_findings,
+                findings_reactivated=reactivated_findings,
+                findings_mitigated=closed_findings,
+                findings_untouched=untouched_findings,
+            )
+            # Update the test progress to reflect that the import has completed
+            logger.debug("REIMPORT_SCAN: Updating Test progress")
+            self.update_test_progress()
+        else:
+            test_import_history = None
+            updated_count = len(new_findings) + len(reactivated_findings) + len(closed_findings)
+
         logger.debug("REIMPORT_SCAN: Done")
         return (
             self.test,
@@ -150,19 +223,26 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             len(reactivated_findings),
             len(untouched_findings),
             test_import_history,
+            findings_details,
         )
 
     def process_findings(
         self,
         parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding], dict]:
         """
-        Saves findings in memory that were parsed from the scan report into the database.
+        Processes findings from the scan report. In normal mode, saves findings to the database.
+        In dry_run mode, only performs matching logic without any database writes.
+
         This process involves first saving associated objects such as endpoints, files,
         vulnerability IDs, and request response pairs. Once all that has been completed,
         the finding may be appended to a new or existing group based upon user selection
-        at import time
+        at import time.
+
+        Returns:
+            Tuple containing (new_findings, reactivated_findings, to_mitigate, untouched, findings_details)
+            - findings_details is a dict populated in dry_run mode with serialized finding information
         """
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         # Only process findings with the same service value (or None)
@@ -182,14 +262,21 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.reactivated_items = []
         self.unchanged_items = []
         self.group_names_to_findings_dict = {}
+        # In dry_run mode, track new findings in-memory to enable proper deduplication
+        # within the same scan report (e.g., if finding 100 and 101 have same hash_code)
+        self.dry_run_new_findings = [] if self.dry_run else None
         # Progressive batching for chord execution
         post_processing_task_signatures = []
         current_batch_number = 1
         max_batch_size = 1024
 
         logger.debug(f"starting reimport of {len(parsed_findings) if parsed_findings else 0} items.")
-        logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
-        deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
+        logger.debug(
+            "STEP 1: looping over findings from the reimported report and trying to match them to existing findings"
+        )
+        deduplicationLogger.debug(
+            f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}"
+        )
 
         # Pre-sanitize and filter by minimum severity to avoid loop control pitfalls
         cleaned_findings = []
@@ -228,15 +315,22 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # Determine how to proceed based on whether matches were found or not
             if matched_findings:
                 existing_finding = matched_findings[0]
-                finding, force_continue = self.process_matched_finding(
-                    unsaved_finding,
-                    existing_finding,
-                )
+                if self.dry_run:
+                    # In dry_run mode, skip database writes and just categorize the finding
+                    finding, force_continue = self.categorize_matched_finding_for_dry_run(
+                        unsaved_finding,
+                        existing_finding,
+                    )
+                else:
+                    finding, force_continue = self.process_matched_finding(
+                        unsaved_finding,
+                        existing_finding,
+                    )
                 # Determine if we should skip the rest of the loop
                 if force_continue:
                     continue
-                # Update endpoints on the existing finding with those on the new finding
-                if finding.dynamic_finding:
+                # Update endpoints on the existing finding with those on the new finding (skip in dry_run)
+                if not self.dry_run and finding.dynamic_finding:
                     logger.debug(
                         "Re-import found an existing dynamic finding for this new "
                         "finding. Checking the status of endpoints",
@@ -247,55 +341,70 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         self.user,
                     )
             else:
-                finding = self.process_finding_that_was_not_matched(unsaved_finding)
-            # This condition __appears__ to always be true, but am afraid to remove it
-            if finding:
-                # Process the rest of the items on the finding
-                finding = self.finding_post_processing(
-                    finding,
-                    unsaved_finding,
-                )
-                # all data is already saved on the finding, we only need to trigger post processing
+                if self.dry_run:
+                    # In dry_run mode, just add to new_items without saving
+                    self.new_items.append(unsaved_finding)
+                    # Track in-memory for deduplication within the same scan report
+                    self.dry_run_new_findings.append(unsaved_finding)
+                    finding = unsaved_finding
+                else:
+                    finding = self.process_finding_that_was_not_matched(unsaved_finding)
 
-                # Execute post-processing task immediately if async, otherwise execute synchronously
-                push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+            # Skip post-processing and database writes in dry_run mode
+            if not self.dry_run:
+                # This condition __appears__ to always be true, but am afraid to remove it
+                if finding:
+                    # Process the rest of the items on the finding
+                    finding = self.finding_post_processing(
+                        finding,
+                        unsaved_finding,
+                    )
+                    # all data is already saved on the finding, we only need to trigger post processing
 
-                post_processing_task_signature = finding_helper.post_process_finding_save_signature(
-                    finding,
-                    dedupe_option=True,
-                    rules_option=True,
-                    product_grading_option=False,
-                    issue_updater_option=True,
-                    push_to_jira=push_to_jira,
-                )
-                post_processing_task_signatures.append(post_processing_task_signature)
+                    # Execute post-processing task immediately if async, otherwise execute synchronously
+                    push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
 
-            # Check if we should launch a chord (batch full or end of findings)
-            if we_want_async(async_user=self.user) and post_processing_task_signatures:
-                post_processing_task_signatures, current_batch_number, _ = self.maybe_launch_post_processing_chord(
-                    post_processing_task_signatures,
-                    current_batch_number,
-                    max_batch_size,
-                    is_final,
-                )
-            else:
-                post_processing_task_signature()
+                    post_processing_task_signature = finding_helper.post_process_finding_save_signature(
+                        finding,
+                        dedupe_option=True,
+                        rules_option=True,
+                        product_grading_option=False,
+                        issue_updater_option=True,
+                        push_to_jira=push_to_jira,
+                    )
+                    post_processing_task_signatures.append(post_processing_task_signature)
 
-        self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
+                # Check if we should launch a chord (batch full or end of findings)
+                if we_want_async(async_user=self.user) and post_processing_task_signatures:
+                    post_processing_task_signatures, current_batch_number, _ = self.maybe_launch_post_processing_chord(
+                        post_processing_task_signatures,
+                        current_batch_number,
+                        max_batch_size,
+                        is_final,
+                    )
+                else:
+                    post_processing_task_signature()
+
+        self.to_mitigate = set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items)
         # due to #3958 we can have duplicates inside the same report
         # this could mean that a new finding is created and right after
         # that it is detected as the 'matched existing finding' for a
         # following finding in the same report
         # this means untouched can have this finding inside it,
         # while it is in fact a new finding. So we subtract new_items
-        self.untouched = set(self.unchanged_items) - set(self.to_mitigate) - set(self.new_items) - set(self.reactivated_items)
-        # Process groups
-        self.process_groups_for_all_findings(**kwargs)
+        self.untouched = (
+            set(self.unchanged_items) - set(self.to_mitigate) - set(self.new_items) - set(self.reactivated_items)
+        )
 
-        # Note: All chord batching is now handled within the loop above
+        # Skip database updates in dry_run mode
+        if not self.dry_run:
+            # Process groups
+            self.process_groups_for_all_findings(**kwargs)
 
-        # Synchronous tasks were already executed during processing, just calculate grade
-        perform_product_grading(self.test.engagement.product)
+            # Note: All chord batching is now handled within the loop above
+
+            # Synchronous tasks were already executed during processing, just calculate grade
+            perform_product_grading(self.test.engagement.product)
 
         # Process the results and return them back
         return self.process_results(**kwargs)
@@ -307,11 +416,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     ) -> list[Finding]:
         """
         Updates the status of findings that were detected as "old" by the reimport
-        process findings methods
+        process findings methods. In dry_run mode, returns the list without making changes.
         """
         # First check if close old findings is desired
         if self.close_old_findings_toggle is False:
             return []
+
+        # In dry_run mode, just return the findings list without making changes
+        if self.dry_run:
+            return list(findings)
+
         logger.debug("REIMPORT_SCAN: Closing findings no longer present in scan report")
         # Determine if pushing to jira or if the finding groups are enabled
         mitigated_findings = []
@@ -375,21 +489,50 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> list[Finding]:
-        """Matches a single new finding to N existing findings and then returns those matches"""
+        """
+        Matches a single new finding to N existing findings and returns those matches.
+        In dry_run mode, also checks against in-memory findings to simulate proper deduplication
+        within the same scan report.
+        """
         # This code should match the logic used for deduplication out of the re-import feature.
         # See utils.py deduplicate_* functions
         deduplicationLogger.debug("return findings bases on algorithm: %s", self.deduplication_algorithm)
+
+        # Get matches from database
+        db_matches = self._get_db_matches(unsaved_finding)
+
+        # In dry_run mode, also check in-memory findings from current scan
+        if self.dry_run and self.dry_run_new_findings:
+            in_memory_matches = self._get_in_memory_matches(unsaved_finding)
+            # Combine matches: in-memory findings should come first (they would have lower IDs)
+            if in_memory_matches:
+                deduplicationLogger.debug(f"Found {len(in_memory_matches)} in-memory matches in dry_run mode")
+                # Return in-memory match (simulates what would happen if it was saved)
+                return [in_memory_matches[0]]
+
+        return db_matches
+
+    def _get_db_matches(self, unsaved_finding: Finding) -> list[Finding]:
+        """Get matches from the database based on deduplication algorithm"""
         if self.deduplication_algorithm == "hash_code":
-            return Finding.objects.filter(
-                test=self.test,
-                hash_code=unsaved_finding.hash_code,
-            ).exclude(hash_code=None).order_by("id")
+            return (
+                Finding.objects.filter(
+                    test=self.test,
+                    hash_code=unsaved_finding.hash_code,
+                )
+                .exclude(hash_code=None)
+                .order_by("id")
+            )
         if self.deduplication_algorithm == "unique_id_from_tool":
             deduplicationLogger.debug(f"unique_id_from_tool: {unsaved_finding.unique_id_from_tool}")
-            return Finding.objects.filter(
-                test=self.test,
-                unique_id_from_tool=unsaved_finding.unique_id_from_tool,
-            ).exclude(unique_id_from_tool=None).order_by("id")
+            return (
+                Finding.objects.filter(
+                    test=self.test,
+                    unique_id_from_tool=unsaved_finding.unique_id_from_tool,
+                )
+                .exclude(unique_id_from_tool=None)
+                .order_by("id")
+            )
         if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
             deduplicationLogger.debug(f"unique_id_from_tool: {unsaved_finding.unique_id_from_tool}")
             deduplicationLogger.debug(f"hash_code: {unsaved_finding.hash_code}")
@@ -405,14 +548,96 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # this is left as is for simplicity.
             # Re-writing the legacy deduplication here would be complicated and counter-productive.
             # If you have use cases going through this section, you're advised to create a deduplication configuration for your parser
-            logger.warning("Legacy reimport. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
+            logger.warning(
+                "Legacy reimport. In case of issue, you're advised to create a deduplication configuration in order not to go through this section"
+            )
             return Finding.objects.filter(
-                    title__iexact=unsaved_finding.title,
-                    test=self.test,
-                    severity=unsaved_finding.severity,
-                    numerical_severity=Finding.get_numerical_severity(unsaved_finding.severity)).order_by("id")
+                title__iexact=unsaved_finding.title,
+                test=self.test,
+                severity=unsaved_finding.severity,
+                numerical_severity=Finding.get_numerical_severity(unsaved_finding.severity),
+            ).order_by("id")
         logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
         return None
+
+    def _get_in_memory_matches(self, unsaved_finding: Finding) -> list[Finding]:
+        """
+        Check in-memory findings for matches (used in dry_run mode).
+        This simulates the deduplication that would occur within the same scan report.
+        """
+        matches = []
+        for in_memory_finding in self.dry_run_new_findings:
+            if self.deduplication_algorithm == "hash_code":
+                if in_memory_finding.hash_code and in_memory_finding.hash_code == unsaved_finding.hash_code:
+                    matches.append(in_memory_finding)
+            elif self.deduplication_algorithm == "unique_id_from_tool":
+                if (
+                    in_memory_finding.unique_id_from_tool
+                    and in_memory_finding.unique_id_from_tool == unsaved_finding.unique_id_from_tool
+                ):
+                    matches.append(in_memory_finding)
+            elif self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+                if (in_memory_finding.hash_code and in_memory_finding.hash_code == unsaved_finding.hash_code) or (
+                    in_memory_finding.unique_id_from_tool
+                    and in_memory_finding.unique_id_from_tool == unsaved_finding.unique_id_from_tool
+                ):
+                    matches.append(in_memory_finding)
+            elif self.deduplication_algorithm == "legacy":
+                if (
+                    in_memory_finding.title.lower() == unsaved_finding.title.lower()
+                    and in_memory_finding.severity == unsaved_finding.severity
+                ):
+                    matches.append(in_memory_finding)
+        return matches
+
+    def categorize_matched_finding_for_dry_run(
+        self,
+        unsaved_finding: Finding,
+        existing_finding: Finding,
+    ) -> tuple[Finding, bool]:
+        """
+        Categorizes a matched finding for dry_run mode without making any database changes.
+        Determines whether the finding would be reactivated, unchanged, etc.
+
+        Returns:
+            Tuple of (finding, force_continue) where force_continue indicates
+            whether to skip further processing of this finding
+        """
+        # Check if special status (false positive, out of scope, risk accepted)
+        if existing_finding.false_p or existing_finding.out_of_scope or existing_finding.risk_accepted:
+            # Check if statuses match exactly
+            if (
+                existing_finding.false_p == unsaved_finding.false_p
+                and existing_finding.out_of_scope == unsaved_finding.out_of_scope
+                and existing_finding.risk_accepted == unsaved_finding.risk_accepted
+            ):
+                self.unchanged_items.append(existing_finding)
+                return existing_finding, True
+            # Risk accepted and inactive - don't sync status from scanner
+            if existing_finding.risk_accepted and not existing_finding.active:
+                self.unchanged_items.append(existing_finding)
+                return existing_finding, False
+            # Status mismatch but still considered unchanged for dry run purposes
+            self.unchanged_items.append(existing_finding)
+            return existing_finding, False
+
+        # Check if currently mitigated
+        if existing_finding.mitigated and existing_finding.is_mitigated:
+            # Check if new finding is also mitigated
+            if unsaved_finding.is_mitigated:
+                self.unchanged_items.append(existing_finding)
+                return existing_finding, True
+            # Would be reactivated (unless do_not_reactivate is set)
+            if self.do_not_reactivate:
+                self.unchanged_items.append(existing_finding)
+                return existing_finding, True
+            # Would be reactivated
+            self.reactivated_items.append(existing_finding)
+            return existing_finding, False
+
+        # Active finding matched - would remain unchanged
+        self.unchanged_items.append(existing_finding)
+        return existing_finding, False
 
     def process_matched_finding(
         self,
@@ -566,9 +791,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
         note.save()
         endpoint_statuses = existing_finding.status_finding.exclude(
-            Q(false_positive=True)
-            | Q(out_of_scope=True)
-            | Q(risk_accepted=True),
+            Q(false_positive=True) | Q(out_of_scope=True) | Q(risk_accepted=True),
         )
         self.endpoint_manager.chunk_endpoints_and_reactivate(endpoint_statuses)
         existing_finding.notes.add(note)
@@ -724,7 +947,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         Add findings to a group that may or may not exist, based upon the users
         selection at import time
         """
-        for (group_name, findings) in self.group_names_to_findings_dict.items():
+        for group_name, findings in self.group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
                 group_name,
                 findings,
@@ -740,40 +963,44 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {
-                    finding.finding_group
-                    for finding in self.reactivated_items + self.unchanged_items
-                    if finding.finding_group is not None and not finding.is_mitigated
+                finding.finding_group
+                for finding in self.reactivated_items + self.unchanged_items
+                if finding.finding_group is not None and not finding.is_mitigated
             }:
                 jira_helper.push_to_jira(finding_group)
 
     def process_results(
         self,
         **kwargs: dict,
-    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding], dict]:
         """
-        Determine how to to return the results based on whether the process was
-        ran asynchronous or not
+        Determine how to return the results based on whether the process was
+        ran asynchronous or not. Also builds findings_details for dry_run mode.
         """
+        # Build findings_details for dry_run mode
+        if self.dry_run:
+            findings_details = {
+                "new_findings": self._serialize_findings_for_dry_run(self.new_items, is_new=True),
+                "reactivated_findings": self._serialize_findings_for_dry_run(self.reactivated_items),
+                "closed_findings": self._serialize_findings_for_dry_run(list(self.to_mitigate)),
+                "untouched_findings": self._serialize_findings_for_dry_run(list(self.untouched)),
+            }
+        else:
+            findings_details = {}
+
         if not kwargs.get("sync"):
-            serialized_new_items = [
-                serialize("json", [finding]) for finding in self.new_items
-            ]
-            serialized_reactivated_items = [
-                serialize("json", [finding]) for finding in self.reactivated_items
-            ]
-            serialized_to_mitigate = [
-                serialize("json", [finding]) for finding in self.to_mitigate
-            ]
-            serialized_untouched = [
-                serialize("json", [finding]) for finding in self.untouched
-            ]
+            serialized_new_items = [serialize("json", [finding]) for finding in self.new_items]
+            serialized_reactivated_items = [serialize("json", [finding]) for finding in self.reactivated_items]
+            serialized_to_mitigate = [serialize("json", [finding]) for finding in self.to_mitigate]
+            serialized_untouched = [serialize("json", [finding]) for finding in self.untouched]
             return (
                 serialized_new_items,
                 serialized_reactivated_items,
                 serialized_to_mitigate,
                 serialized_untouched,
+                findings_details,
             )
-        return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
+        return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched, findings_details
 
     def calculate_unsaved_finding_hash_code(
         self,

@@ -40,7 +40,6 @@ class DefaultImporterOptions(ImporterOptions):
 
 
 class DefaultImporter(BaseImporter, DefaultImporterOptions):
-
     """
     The classic importer process used by DefectDojo
 
@@ -89,7 +88,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         scan: TemporaryUploadedFile,
         *args: list,
         **kwargs: dict,
-    ) -> tuple[Test, int, int, int, int, int, Test_Import]:
+    ) -> tuple[Test, int, int, int, int, int, Test_Import, dict]:
         """
         The full step process of taking a scan report, and converting it to
         findings in the database. This entails the the following actions:
@@ -150,7 +149,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("IMPORT_SCAN: Updating Test progress")
         self.update_test_progress()
         logger.debug("IMPORT_SCAN: Done")
-        return self.test, 0, len(new_findings), len(closed_findings), 0, 0, test_import_history
+        return self.test, 0, len(new_findings), len(closed_findings), 0, 0, test_import_history, {}
 
     def process_findings(
         self,
@@ -178,7 +177,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         for raw_finding in parsed_findings or []:
             sanitized = self.sanitize_severity(raw_finding)
             if Finding.SEVERITIES[sanitized.severity] > Finding.SEVERITIES[self.minimum_severity]:
-                logger.debug("skipping finding due to minimum severity filter (finding=%s severity=%s min=%s)", sanitized.title, sanitized.severity, self.minimum_severity)
+                logger.debug(
+                    "skipping finding due to minimum severity filter (finding=%s severity=%s min=%s)",
+                    sanitized.title,
+                    sanitized.severity,
+                    self.minimum_severity,
+                )
                 continue
             cleaned_findings.append(sanitized)
 
@@ -194,7 +198,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             unsaved_finding.reporter = self.user
             unsaved_finding.last_reviewed_by = self.user
             unsaved_finding.last_reviewed = self.now
-            logger.debug("process_parsed_finding: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", unsaved_finding.unique_id_from_tool, unsaved_finding.hash_code, unsaved_finding.active, unsaved_finding.verified)
+            logger.debug(
+                "process_parsed_finding: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s",
+                unsaved_finding.unique_id_from_tool,
+                unsaved_finding.hash_code,
+                unsaved_finding.active,
+                unsaved_finding.verified,
+            )
             # indicates an override. Otherwise, do not change the value of unsaved_finding.active
             if self.active is not None:
                 unsaved_finding.active = self.active
@@ -264,7 +274,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 # Execute task immediately for synchronous processing
                 post_processing_task_signature()
 
-        for (group_name, findings) in group_names_to_findings_dict.items():
+        for group_name, findings in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
                 group_name,
                 findings,
@@ -336,10 +346,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
             old_findings = old_findings.exclude(
                 (Q(hash_code__isnull=False) & Q(hash_code__in=new_hash_codes))
-                | (
-                    Q(unique_id_from_tool__isnull=False)
-                    & Q(unique_id_from_tool__in=new_unique_ids_from_tool)
-                ),
+                | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool__in=new_unique_ids_from_tool)),
             )
         # Accommodate for product scope or engagement scope
         if self.close_old_findings_product_scope:
@@ -355,16 +362,15 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         for old_finding in old_findings:
             self.mitigate_finding(
                 old_finding,
-                (
-                    "This finding has been automatically closed "
-                    "as it is not present anymore in recent scans."
-                ),
+                ("This finding has been automatically closed as it is not present anymore in recent scans."),
                 finding_groups_enabled=self.findings_groups_enabled,
                 product_grading_option=False,
             )
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:
-            for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
+            for finding_group in {
+                finding.finding_group for finding in old_findings if finding.finding_group is not None
+            }:
                 jira_helper.push_to_jira(finding_group)
 
         # Calculate grade once after all findings have been closed
