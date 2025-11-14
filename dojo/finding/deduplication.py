@@ -529,7 +529,6 @@ def _dedupe_batch_legacy(findings):
 
 def dedupe_batch_of_findings(findings, *args, **kwargs):
     """Batch deduplicate a list of findings. The findings are assumed to be in the same test."""
-
     # Pro has customer implementation which will call the Pro dedupe methods, but also the normal OS dedupe methods.
     from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
     if batch_dedupe_method := get_custom_method("FINDING_DEDUPE_BATCH_METHOD"):
