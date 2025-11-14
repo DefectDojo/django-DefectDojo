@@ -1,14 +1,102 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from crum import impersonate
+from django.utils.timezone import is_naive, now
 
-from dojo.models import DojoMeta, Engagement, Finding, Test, User
+from dojo.finding.helper import close_finding
+from dojo.models import (
+    DojoMeta,
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Finding,
+    Note_Type,
+    Notes,
+    Product,
+    Product_Type,
+    Test,
+    Test_Type,
+    User,
+)
 
 from .dojo_test_case import DojoTestCase
 
 
 class TestFindingModel(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.user = User.objects.first()  # Use a user from fixtures
+        self.product_type = Product_Type.objects.create(name="Test Product Type")
+        self.product = Product.objects.create(name="Test Product", prod_type=self.product_type)
+        self.engagement = Engagement.objects.create(
+            name="Test Engagement",
+            product=self.product,
+            target_start=now(),
+            target_end=now(),
+        )
+        self.test_type = Test_Type.objects.create(name="Unit Test Type")
+        self.test = Test.objects.create(
+            engagement=self.engagement,
+            test_type=self.test_type,
+            title="Test for Finding",
+            target_start=now(),
+            target_end=now(),
+        )
+        self.finding = Finding.objects.create(title="Close Finding Test", active=True, test=self.test)
+        self.endpoint = Endpoint.objects.create(host="test.local")
+        self.endpoint_status = Endpoint_Status.objects.create(finding=self.finding, endpoint=self.endpoint)
+        self.finding.status_finding.add(self.endpoint_status)
+
+    def test_close_finding_with_naive_date(self):
+        note_type_obj = Note_Type.objects.create(name="General")
+        naive_date = date.today()  # No timezone
+        close_finding(
+            finding=self.finding,
+            user=self.user,
+            is_mitigated=True,
+            mitigated=naive_date,
+            mitigated_by=None,
+            false_p=False,
+            out_of_scope=False,
+            duplicate=False,
+            note_entry="Mitigation note",
+            note_type=note_type_obj,
+        )
+        self.assertFalse(is_naive(self.finding.mitigated))
+        note = Notes.objects.filter(finding=self.finding).first()
+        self.assertIsNotNone(note)
+        self.assertFalse(is_naive(note.date))
+        status = Endpoint_Status.objects.filter(finding=self.finding).first()
+        self.assertTrue(status.mitigated)
+        self.assertFalse(is_naive(status.mitigated_time))
+
+    def test_close_finding_with_naive_datetime(self):
+        naive_datetime = datetime(2025, 11, 12, 0, 0, 0)
+        close_finding(
+            finding=self.finding,
+            user=self.user,
+            is_mitigated=True,
+            mitigated=naive_datetime,
+            mitigated_by=None,
+            false_p=False,
+            out_of_scope=False,
+            duplicate=False,
+        )
+        self.assertFalse(is_naive(self.finding.mitigated))
+
+    def test_close_finding_with_none_mitigated(self):
+        close_finding(
+            finding=self.finding,
+            user=self.user,
+            is_mitigated=True,
+            mitigated=None,
+            mitigated_by=None,
+            false_p=False,
+            out_of_scope=False,
+            duplicate=False,
+        )
+        self.assertFalse(is_naive(self.finding.mitigated))
 
     def test_get_sast_source_file_path_with_link_no_file_path(self):
         finding = Finding()
