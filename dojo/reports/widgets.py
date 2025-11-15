@@ -20,6 +20,7 @@ from dojo.filters import (
 from dojo.forms import CustomReportOptionsForm
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
+from dojo.labels import get_labels
 from dojo.models import Endpoint, Finding
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
 from dojo.settings import settings
@@ -30,6 +31,8 @@ from dojo.utils import get_page_items, get_system_setting, get_words_for_field
 Widgets are content sections that can be included on reports.  The report builder will allow any number of widgets
  to be included.  Each widget will provide a set of options, reporesented by form elements, to be included.
 """
+
+labels = get_labels()
 
 
 class CustomReportJsonForm(forms.Form):
@@ -304,6 +307,7 @@ class FindingList(Widget):
                                  "request": self.request,
                                  "title": self.title,
                                  "extra_help": self.extra_help,
+                                 "asset_label": labels.ASSET_LABEL,
                                  })
         return mark_safe(html)
 

@@ -22,6 +22,7 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import UserFilter
 from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
+from dojo.labels import get_labels
 from dojo.metrics.utils import (
     endpoint_queries,
     finding_queries,
@@ -32,7 +33,7 @@ from dojo.metrics.utils import (
     identify_view,
     severity_count,
 )
-from dojo.models import Dojo_User, Finding, Product, Product_Type, Risk_Acceptance
+from dojo.models import Dojo_User, Finding, Product_Type, Risk_Acceptance
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.utils import (
@@ -49,6 +50,9 @@ from dojo.utils import (
 logger = logging.getLogger(__name__)
 
 
+labels = get_labels()
+
+
 """
 Greg, Jay
 status: in production
@@ -58,7 +62,7 @@ generic metrics method
 
 def critical_product_metrics(request, mtype):
     template = "dojo/metrics.html"
-    page_name = _("Critical Product Metrics")
+    page_name = str(labels.ASSET_METRICS_CRITICAL_LABEL)
     critical_products = get_authorized_product_types(Permissions.Product_Type_View)
     critical_products = critical_products.filter(critical_product=True)
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
@@ -94,11 +98,11 @@ def metrics(request, mtype):
 
     filters = {}
     if view == "Finding":
-        page_name = _("Product Type Metrics by Findings")
+        page_name = str(labels.ORG_METRICS_BY_FINDINGS_LABEL)
         filters = finding_queries(prod_type, request)
     # TODO: Delete this after the move to Locations
     elif view == "Endpoint":
-        page_name = _("Product Type Metrics by Affected Endpoints")
+        page_name = str(labels.ORG_METRICS_BY_ENDPOINTS_LABEL)
         filters = endpoint_queries(prod_type, request)
 
     all_findings = findings_queryset(queryset_check(filters["all"]))
@@ -352,15 +356,20 @@ def product_type_counts(request):
                     "reporter").order_by(
                     "numerical_severity")
 
-                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                                engagement__test__finding__verified=True,
-                                                engagement__test__finding__false_p=False,
-                                                engagement__test__finding__duplicate=False,
-                                                engagement__test__finding__out_of_scope=False,
-                                                engagement__test__finding__mitigated__isnull=True,
-                                                engagement__test__finding__severity__in=(
-                                                    "Critical", "High", "Medium", "Low"),
-                                                prod_type=pt)
+                # Build Top 10 from Findings for this product type
+                top_ten = Finding.objects.filter(
+                    date__lte=end_date,
+                    verified=True,
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    mitigated__isnull=True,
+                    severity__in=("Critical", "High", "Medium", "Low"),
+                    test__engagement__product__prod_type=pt,
+                ).values(
+                    name=F("test__engagement__product__name"),
+                )
+                top_ten = severity_count(top_ten, "annotate", "severity").order_by("-critical", "-high", "-medium", "-low")[:10]
             else:
                 overall_in_pt = Finding.objects.filter(date__lt=end_date,
                                                     false_p=False,
@@ -397,16 +406,20 @@ def product_type_counts(request):
                     "reporter").order_by(
                     "numerical_severity")
 
-                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                                engagement__test__finding__false_p=False,
-                                                engagement__test__finding__duplicate=False,
-                                                engagement__test__finding__out_of_scope=False,
-                                                engagement__test__finding__mitigated__isnull=True,
-                                                engagement__test__finding__severity__in=(
-                                                    "Critical", "High", "Medium", "Low"),
-                                                prod_type=pt)
+                top_ten = Finding.objects.filter(
+                    date__lte=end_date,
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    mitigated__isnull=True,
+                    severity__in=("Critical", "High", "Medium", "Low"),
+                    test__engagement__product__prod_type=pt,
+                ).values(
+                    name=F("test__engagement__product__name"),
+                )
+                top_ten = severity_count(top_ten, "annotate", "severity").order_by("-critical", "-high", "-medium", "-low")[:10]
 
-            top_ten = severity_count(top_ten, "annotate", "engagement__test__finding__severity").order_by("-critical", "-high", "-medium", "-low")[:10]
+            # top_ten already annotated above using Findings-based grouping
 
             cip = {"S0": 0,
                    "S1": 0,
@@ -426,7 +439,7 @@ def product_type_counts(request):
             for o in overall_in_pt:
                 aip[o["numerical_severity"]] = o["numerical_severity__count"]
         else:
-            messages.add_message(request, messages.ERROR, _("Please choose month and year and the Product Type."),
+            messages.add_message(request, messages.ERROR, labels.ORG_METRICS_TYPE_COUNTS_ERROR_MESSAGE,
                                  extra_tags="alert-danger")
 
     add_breadcrumb(title=_("Bi-Weekly Metrics"), top_level=True, request=request)
@@ -554,15 +567,21 @@ def product_tag_counts(request):
                     "reporter").order_by(
                     "numerical_severity")
 
-                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                                engagement__test__finding__verified=True,
-                                                engagement__test__finding__false_p=False,
-                                                engagement__test__finding__duplicate=False,
-                                                engagement__test__finding__out_of_scope=False,
-                                                engagement__test__finding__mitigated__isnull=True,
-                                                engagement__test__finding__severity__in=(
-                                                    "Critical", "High", "Medium", "Low"),
-                                                tags__name=pt, engagement__product__in=prods)
+                # Build Top 10 from Findings for this product tag
+                top_ten = Finding.objects.filter(
+                    date__lte=end_date,
+                    verified=True,
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    mitigated__isnull=True,
+                    severity__in=("Critical", "High", "Medium", "Low"),
+                    test__engagement__product__tags__name=pt,
+                    test__engagement__product__in=prods,
+                ).values(
+                    name=F("test__engagement__product__name"),
+                )
+                top_ten = severity_count(top_ten, "annotate", "severity").order_by("-critical", "-high", "-medium", "-low")[:10]
             else:
                 overall_in_pt = Finding.objects.filter(date__lt=end_date,
                                                     false_p=False,
@@ -602,16 +621,21 @@ def product_tag_counts(request):
                     "reporter").order_by(
                     "numerical_severity")
 
-                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                                engagement__test__finding__false_p=False,
-                                                engagement__test__finding__duplicate=False,
-                                                engagement__test__finding__out_of_scope=False,
-                                                engagement__test__finding__mitigated__isnull=True,
-                                                engagement__test__finding__severity__in=(
-                                                    "Critical", "High", "Medium", "Low"),
-                                                tags__name=pt, engagement__product__in=prods)
+                top_ten = Finding.objects.filter(
+                    date__lte=end_date,
+                    false_p=False,
+                    duplicate=False,
+                    out_of_scope=False,
+                    mitigated__isnull=True,
+                    severity__in=("Critical", "High", "Medium", "Low"),
+                    test__engagement__product__tags__name=pt,
+                    test__engagement__product__in=prods,
+                ).values(
+                    name=F("test__engagement__product__name"),
+                )
+                top_ten = severity_count(top_ten, "annotate", "severity").order_by("-critical", "-high", "-medium", "-low")[:10]
 
-            top_ten = severity_count(top_ten, "annotate", "engagement__test__finding__severity").order_by("-critical", "-high", "-medium", "-low")[:10]
+            # top_ten already annotated above using Findings-based grouping
 
             cip = {"S0": 0,
                    "S1": 0,
@@ -631,8 +655,7 @@ def product_tag_counts(request):
             for o in overall_in_pt:
                 aip[o["numerical_severity"]] = o["numerical_severity__count"]
         else:
-            messages.add_message(request, messages.ERROR, _("Please choose month and year and the Product Tag."),
-                                 extra_tags="alert-danger")
+            messages.add_message(request, messages.ERROR, labels.ASSET_METRICS_TAG_COUNTS_ERROR_MESSAGE, extra_tags="alert-danger")
 
     add_breadcrumb(title=_("Bi-Weekly Metrics"), top_level=True, request=request)
 

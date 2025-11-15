@@ -10,10 +10,7 @@ from dojo.models import Finding, Test, Test_Type
 
 class ScanImportOptionsTest(APITestCase):
 
-    """
-    Test the options `skip_duplicates` and `close_old_findings` for the scan
-    import APIv2 endpoint with ZAP
-    """
+    """Test uploading empty reports or no report at all"""
 
     fixtures = ["dojo_testdata.json"]
     EMPTY_ZAP_SCAN = """<?xml version="1.0"?>

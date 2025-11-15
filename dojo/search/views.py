@@ -17,6 +17,7 @@ from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.finding.queries import get_authorized_findings, get_authorized_vulnerability_ids, prefetch_for_findings
 from dojo.forms import SimpleSearchForm
 from dojo.location.queries import get_authorized_locations, prefetch_for_locations
+from dojo.forms import FindingBulkUpdateForm, SimpleSearchForm
 from dojo.models import Engagement, Finding, Finding_Template, Languages, Product, Test
 from dojo.product.queries import get_authorized_app_analysis, get_authorized_products
 from dojo.test.queries import get_authorized_tests
@@ -398,7 +399,9 @@ def simple_search(request):
         "form": form,
         "activetab": activetab,
         "show_product_column": True,
-        "generic": generic})
+        "generic": generic,
+        "bulk_edit_form": FindingBulkUpdateForm(request.GET),
+        })
 
     if cookie:
         response.set_cookie("highlight", value=keywords_query,

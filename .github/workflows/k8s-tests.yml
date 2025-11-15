@@ -5,15 +5,6 @@ on:
 
 env:
   DD_HOSTNAME: defectdojo.default.minikube.local
-  HELM_REDIS_BROKER_SETTINGS: " \
-    --set redis.enabled=true \
-    --set celery.broker=redis \
-    --set createRedisSecret=true \
-    "
-  HELM_PG_DATABASE_SETTINGS: " \
-    --set postgresql.enabled=true \
-    --set createPostgresqlSecret=true \
-   "
 jobs:
   setting_minikube_cluster:
     name: Kubernetes Deployment
@@ -23,11 +14,11 @@ jobs:
       matrix:
         include:
           # databases, broker and k8s are independent, so we don't need to test each combination
-          # lastest k8s version (https://kubernetes.io/releases/) and oldest supported version from aws
-          # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
-          - databases: pgsql
-            brokers: redis
-            k8s: 'v1.34.1'
+          # lastest k8s version (https://kubernetes.io/releases/) and the oldest officially supported version
+          # are tested (https://kubernetes.io/releases/)
+          - k8s: 'v1.34.2' # renovate: datasource=github-releases depName=kubernetes/kubernetes versioning=loose
+            os: debian
+          - k8s: 'v1.31.13' # renovate: datasource=custom.endoflife-oldest-maintained depName=kubernetes
             os: debian
     steps:
       - name: Checkout
@@ -36,7 +27,7 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@b589f2d61bf96695c546929c72b38563e856059d # v2.14.0
         with:
-          minikube version: 'v1.37.0'
+          minikube version: 'v1.37.0' # renovate: datasource=github-releases depName=kubernetes/minikube
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress --cni calico'
@@ -47,7 +38,7 @@ jobs:
           minikube status
 
       - name: Load images from artifacts
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           path: built-docker-image
           pattern: built-docker-image-*
@@ -68,12 +59,6 @@ jobs:
              helm dependency list ./helm/defectdojo
              helm dependency update ./helm/defectdojo
 
-      - name: Set confings into Outputs
-        id: set
-        run: |-
-              echo "pgsql=${{ env.HELM_PG_DATABASE_SETTINGS }}" >> $GITHUB_ENV
-              echo "redis=${{ env.HELM_REDIS_BROKER_SETTINGS }}" >> $GITHUB_ENV
-
       - name: Deploying Django application with ${{ matrix.databases }} ${{ matrix.brokers }}
         timeout-minutes: 15
         run: |-
@@ -84,10 +69,14 @@ jobs:
                defectdojo \
                ./helm/defectdojo \
                --set django.ingress.enabled=true \
+               --set images.django.image.tag=latest \
+               --set images.nginx.image.tag=latest \
                --set imagePullPolicy=Never \
                --set initializer.keepSeconds="-1" \
-               ${{ env[matrix.databases] }} \
-               ${{ env[matrix.brokers] }} \
+               --set redis.enabled=true \
+               --set createRedisSecret=true \
+               --set postgresql.enabled=true \
+               --set createPostgresqlSecret=true \
                --set createSecret=true
 
       - name: Check deployment status

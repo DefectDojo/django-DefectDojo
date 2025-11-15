@@ -36,7 +36,7 @@
                             id="dropdownMenu1"
                             data-toggle="dropdown"
                             aria-expanded="true"
-                            aria-label="Test options"        
+                            aria-label="Test options"
                             >
                         <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
@@ -697,7 +697,7 @@
                                 <input id="id_bulk_planned_remediation_version"
                                     name="planned_remediation_version"
                                     style="font-size: 100%; border: 1px solid #ccc;"/>
-                                <br/>        
+                                <br/>
                                 <label>
                                     <b>{% trans "Status" %}</b>
                                     <input id="id_bulk_status"
@@ -1238,7 +1238,7 @@
                                             {{ finding.reporter }}
                                         {% endif %}
                                     </td>
-                                    <td class="nowrap">
+                                    <td class="nowrap" title="unique_id_from_tool: {{ finding.unique_id_from_tool }}, hash_code: {{ finding.hash_code }}">
                                         {{ finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}
                                     </td>
                                     {% if system_settings.enable_jira %}

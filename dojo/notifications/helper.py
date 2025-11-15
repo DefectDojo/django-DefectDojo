@@ -19,6 +19,7 @@ from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
+from dojo.labels import get_labels
 from dojo.models import (
     Alerts,
     Dojo_User,
@@ -39,6 +40,9 @@ from dojo.user.queries import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+labels = get_labels()
 
 
 def create_notification(
@@ -120,9 +124,9 @@ class NotificationManagerHelpers:
     def _create_description(self, event: str, kwargs: dict) -> str:
         if kwargs.get("description") is None:
             if event == "product_added":
-                kwargs["description"] = _("Product %s has been created successfully.") % kwargs["title"]
+                kwargs["description"] = labels.ASSET_NOTIFICATION_WITH_NAME_CREATED_MESSAGE % {"name": kwargs["title"]}
             elif event == "product_type_added":
-                kwargs["description"] = _("Product Type %s has been created successfully.") % kwargs["title"]
+                kwargs["description"] = labels.ORG_NOTIFICATION_WITH_NAME_CREATED_MESSAGE % {"name": kwargs["title"]}
             else:
                 kwargs["description"] = _("Event %s has occurred.") % str(event)
 
@@ -623,6 +627,10 @@ class NotificationManager(NotificationManagerHelpers):
     def create_notification(self, event: str | None = None, **kwargs: dict) -> None:
         # Process the notifications for a given list of recipients
         if kwargs.get("recipients") is not None:
+            recipients = kwargs.get("recipients", [])
+            if not recipients:
+                logger.debug("No recipients provided for event: %s", event)
+                return
             self._process_recipients(event=event, **kwargs)
         else:
             logger.debug("creating system notifications for event: %s", event)

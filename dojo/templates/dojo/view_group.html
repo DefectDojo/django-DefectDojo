@@ -116,7 +116,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">Product Types this Group can access</h4>
+                    <h4 class="pull-left">{{ labels.ORG_GROUPS_LABEL }}</h4>
                     &nbsp;
                     <a href="https://docs.defectdojo.com/en/customize_dojo/user_management/create_user_group/#add-product-roles-or-product-type-roles-for-a-group" target="_blank">
                         <i class="fa-solid fa-circle-question"></i></a>
@@ -130,7 +130,7 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu2">
                             <li role="presentation">
                                 <a id="addProductTypeGroup" href="{% url 'add_product_type_group_group' group.id %}">
-                                    <i class="fa-solid fa-plus"></i> Add Product Types
+                                    <i class="fa-solid fa-plus"></i> {{ labels.ORG_GROUPS_ADD_ORGANIZATIONS_LABEL }}
                                 </a>
                             </li>
                         </ul>
@@ -144,7 +144,7 @@
                     <thead>
                     <tr>
                         <th></th>
-                        <th>Product Type</th>
+                        <th>{{ labels.ORG_LABEL }}</th>
                         <th>Role</th>
                     </tr>
                     </thead>
@@ -182,7 +182,7 @@
             </div>
             {% else %}
             <div class="panel-body">
-                <small class="text-muted"><em>This Group cannot access any Product Types.</em></small>
+                <small class="text-muted"><em>{{ labels.ORG_GROUPS_NO_ACCESS_MESSAGE }}</em></small>
             </div>
             {% endif %}
         </div>
@@ -190,7 +190,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">Products this Group can access</h4>
+                    <h4 class="pull-left">{{ labels.ASSET_GROUPS_ACCESS_LABEL }}</h4>
                     &nbsp;
                     <a href="https://docs.defectdojo.com/en/customize_dojo/user_management/create_user_group/#add-product-roles-or-product-type-roles-for-a-group" target="_blank">
                         <i class="fa-solid fa-circle-question"></i></a>
@@ -204,7 +204,7 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu3">
                             <li role="presentation">
                                 <a id="addProductGroup" href="{% url 'add_product_group_group' group.id %}">
-                                    <i class="fa-solid fa-plus"></i> Add Products
+                                    <i class="fa-solid fa-plus"></i> {{ labels.ASSET_GROUPS_ADD_ASSETS_LABEL }}
                                 </a>
                             </li>
                         </ul>
@@ -218,7 +218,7 @@
                     <thead>
                     <tr>
                         <th></th>
-                        <th>Product</th>
+                        <th>{{ labels.ASSET_LABEL }}</th>
                         <th>Role</th>
                     </tr>
                     </thead>
@@ -256,7 +256,7 @@
             </div>
             {% else %}
             <div class="panel-body">
-                <small class="text-muted"><em>This Group cannot access any Products.</em></small>
+                <small class="text-muted"><em>{{ labels.ASSET_GROUPS_NO_ACCESS_MESSAGE }}</em></small>
             </div>
             {% endif %}
         </div>
@@ -279,13 +279,13 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="width: 200px;"><strong>Number of Product Types</strong></td>
+                                <td style="width: 200px;"><strong>{{ labels.ORG_GROUPS_NUM_ORGANIZATIONS_LABEL }}</strong></td>
                                 <td>
                                     {{ product_types|length }}
                                 </td>
                             </tr>
                             <tr>
-                                <td style="width: 200px;"><strong>Number of Products</strong></td>
+                                <td style="width: 200px;"><strong>{{ labels.ASSET_GROUPS_NUM_ASSETS_LABEL }}</strong></td>
                                 <td>
                                     {{ products|length }}
                                 </td>

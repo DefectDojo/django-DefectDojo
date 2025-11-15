@@ -3,9 +3,9 @@ import logging
 from crum import impersonate
 from django.test.utils import override_settings
 
+from dojo.finding.deduplication import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
-from dojo.models import Engagement, Finding, Product, User, _copy_model_util
-from dojo.utils import set_duplicate
+from dojo.models import Engagement, Finding, Product, User, copy_model_util
 
 from .dojo_test_case import DojoTestCase
 
@@ -27,19 +27,19 @@ class TestDuplicationLoops(DojoTestCase):
             super().run(result)
 
     def setUp(self):
-        self.finding_a = _copy_model_util(Finding.objects.get(id=2), exclude_fields=["duplicate_finding"])
+        self.finding_a = copy_model_util(Finding.objects.get(id=2), exclude_fields=["duplicate_finding"])
         self.finding_a.title = "A: " + self.finding_a.title
         self.finding_a.duplicate = False
         self.finding_a.hash_code = None
         self.finding_a.save()
 
-        self.finding_b = _copy_model_util(Finding.objects.get(id=3), exclude_fields=["duplicate_finding"])
+        self.finding_b = copy_model_util(Finding.objects.get(id=3), exclude_fields=["duplicate_finding"])
         self.finding_b.title = "B: " + self.finding_b.title
         self.finding_b.duplicate = False
         self.finding_b.hash_code = None
         self.finding_b.save()
 
-        self.finding_c = _copy_model_util(Finding.objects.get(id=4), exclude_fields=["duplicate_finding"])
+        self.finding_c = copy_model_util(Finding.objects.get(id=4), exclude_fields=["duplicate_finding"])
         self.finding_c.pk = None
         self.finding_c.title = "C: " + self.finding_c.title
         self.finding_c.duplicate = False
@@ -262,7 +262,7 @@ class TestDuplicationLoops(DojoTestCase):
 
     # Another loop-test for 4 findings
     def test_loop_relations_for_four(self):
-        self.finding_d = _copy_model_util(Finding.objects.get(id=4), exclude_fields=["duplicate_finding"])
+        self.finding_d = copy_model_util(Finding.objects.get(id=4), exclude_fields=["duplicate_finding"])
         self.finding_d.duplicate = False
         self.finding_d.save()
 

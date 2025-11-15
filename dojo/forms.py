@@ -37,6 +37,7 @@ from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validat
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
+from dojo.labels import get_labels
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
     SEVERITY_CHOICES,
@@ -117,6 +118,8 @@ from dojo.validators import ImporterFileExtensionValidator, tag_validator
 from dojo.widgets import TableCheckboxWidget
 
 logger = logging.getLogger(__name__)
+
+labels = get_labels()
 
 RE_DATE = re.compile(r"(\d{4})-(\d\d?)-(\d\d?)$")
 
@@ -244,6 +247,11 @@ class Product_TypeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["critical_product"].label = labels.ORG_CRITICAL_PRODUCT_LABEL
+        self.fields["key_product"].label = labels.ORG_KEY_PRODUCT_LABEL
+
     class Meta:
         model = Product_Type
         fields = ["name", "description", "critical_product", "key_product"]
@@ -280,6 +288,7 @@ class Add_Product_Type_MemberForm(forms.ModelForm):
         self.fields["users"].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True)
             | Q(id__in=current_members)).exclude(is_active=False).order_by("first_name", "last_name")
+        self.fields["product_type"].label = labels.ORG_LABEL
         self.fields["product_type"].disabled = True
 
     class Meta:
@@ -288,7 +297,8 @@ class Add_Product_Type_MemberForm(forms.ModelForm):
 
 
 class Add_Product_Type_Member_UserForm(forms.ModelForm):
-    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True, label="Product Types")
+    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True,
+                                                   label=labels.ORG_PLURAL_LABEL)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -306,6 +316,7 @@ class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["role"].disabled = True
+        self.fields["product_type"].label = labels.ORG_LABEL
 
 
 class Test_TypeForm(forms.ModelForm):
@@ -331,7 +342,7 @@ class ProductForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=True)
 
-    prod_type = forms.ModelChoiceField(label="Product Type",
+    prod_type = forms.ModelChoiceField(label=labels.ORG_LABEL,
                                        queryset=Product_Type.objects.none(),
                                        required=True)
 
@@ -340,17 +351,16 @@ class ProductForm(forms.ModelForm):
                                         required=True,
                                         initial="Default")
 
-    product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by("first_name", "last_name"), required=False)
+    product_manager = forms.ModelChoiceField(label=labels.ASSET_MANAGER_LABEL,
+                                             queryset=Dojo_User.objects.exclude(is_active=False).order_by("first_name", "last_name"), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by("first_name", "last_name"), required=False)
     team_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by("first_name", "last_name"), required=False)
-    tags = TagField(
-        required=False,
-        help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.",
-    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
+        self.fields["enable_product_tag_inheritance"].label = labels.ASSET_TAG_INHERITANCE_ENABLE_LABEL
+        self.fields["enable_product_tag_inheritance"].help_text = labels.ASSET_TAG_INHERITANCE_ENABLE_HELP
         if prod_type_id := kwargs.get("instance", Product()).prod_type_id:  # we are editing existing instance
             self.fields["prod_type"].queryset |= Product_Type.objects.filter(pk=prod_type_id)  # even if user does not have permission for any other ProdType we need to add at least assign ProdType to make form submittable (otherwise empty list was here which generated invalid form)
 
@@ -419,6 +429,7 @@ class Edit_Product_MemberForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["product"].disabled = True
+        self.fields["product"].label = labels.ASSET_LABEL
         self.fields["user"].queryset = Dojo_User.objects.order_by("first_name", "last_name")
         self.fields["user"].disabled = True
 
@@ -433,6 +444,7 @@ class Add_Product_MemberForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["product"].disabled = True
+        self.fields["product"].label = labels.ASSET_LABEL
         current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list("user", flat=True)
         self.fields["users"].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True)
@@ -444,7 +456,8 @@ class Add_Product_MemberForm(forms.ModelForm):
 
 
 class Add_Product_Member_UserForm(forms.ModelForm):
-    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True, label="Products")
+    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True,
+                                              label=labels.ASSET_PLURAL_LABEL)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -529,6 +542,8 @@ class ImportScanForm(forms.Form):
     active_verified_choices = [("not_specified", "Not specified (default)"),
                                ("force_to_true", "Force to True"),
                                ("force_to_false", "Force to False")]
+    test_title = forms.CharField(max_length=255, required=False, label="Test Title",
+                                 help_text="Optional title for the Test to be created. If empty, the scan type is used.")
     scan_date = forms.DateTimeField(
         required=False,
         label="Scan Completion Date",
@@ -581,11 +596,8 @@ class ImportScanForm(forms.Form):
                                             label="Close old findings",
                                             required=False,
                                             initial=False)
-    close_old_findings_product_scope = forms.BooleanField(help_text="Old findings no longer present in the new report get closed as mitigated when importing. "
-                                                        "If service has been set, only the findings for this service will be closed; "
-                                                        "if no service is set, only findings without a service will be closed. "
-                                                        "This affects findings within the same product.",
-                                            label="Close old findings within this product",
+    close_old_findings_product_scope = forms.BooleanField(help_text=labels.ASSET_FINDINGS_CLOSE_HELP,
+                                            label=labels.ASSET_FINDINGS_CLOSE_LABEL,
                                             required=False,
                                             initial=False)
     apply_tags_to_findings = forms.BooleanField(
@@ -1019,9 +1031,9 @@ class EngForm(forms.ModelForm):
         ))
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
-    product = forms.ModelChoiceField(label="Product",
-                                       queryset=Product.objects.none(),
-                                       required=True)
+    product = forms.ModelChoiceField(label=labels.ASSET_LABEL,
+                                     queryset=Product.objects.none(),
+                                     required=True)
     target_start = forms.DateField(widget=forms.TextInput(
         attrs={"class": "datepicker", "autocomplete": "off"}))
     target_end = forms.DateField(widget=forms.TextInput(
@@ -1030,10 +1042,6 @@ class EngForm(forms.ModelForm):
         queryset=None,
         required=True, label="Testing Lead")
     test_strategy = forms.URLField(required=False, label="Test Strategy URL")
-    tags = TagField(
-        required=False,
-        help_text="Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add.",
-    )
 
     def __init__(self, *args, **kwargs):
         cicd = False
@@ -1116,10 +1124,6 @@ class TestForm(forms.ModelForm):
     lead = forms.ModelChoiceField(
         queryset=None,
         required=False, label="Testing Lead")
-    tags = TagField(
-        required=False,
-        help_text="Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add.",
-    )
 
     def __init__(self, *args, **kwargs):
         obj = None
@@ -1138,6 +1142,18 @@ class TestForm(forms.ModelForm):
             self.fields["api_scan_configuration"].queryset = Product_API_Scan_Configuration.objects.filter(product=product)
         else:
             self.fields["lead"].queryset = get_authorized_users(Permissions.Test_View).filter(is_active=True)
+
+    def is_valid(self):
+        valid = super().is_valid()
+
+        # we're done now if not valid
+        if not valid:
+            return valid
+        if self.cleaned_data["target_start"] > self.cleaned_data["target_end"]:
+            self.add_error("target_start", "Your target start date exceeds your target end date")
+            self.add_error("target_end", "Your target start date exceeds your target end date")
+            return False
+        return True
 
     class Meta:
         model = Test
@@ -1476,10 +1492,6 @@ class FindingForm(forms.ModelForm):
         choices=EFFORT_FOR_FIXING_CHOICES,
         error_messages={
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
-    tags = TagField(
-        required=False,
-        help_text="Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.",
-    )
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3",
@@ -1498,7 +1510,7 @@ class FindingForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields["endpoints"].queryset = Endpoint.objects.filter(product=self.instance.test.engagement.product)
-        self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Test_Edit)
+        self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
         # if checked, always show to allow unaccept also with full risk acceptance enabled
@@ -1751,11 +1763,6 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
 
 class EditEndpointForm(forms.ModelForm):
-    tags = TagField(
-        required=False,
-        help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.",
-    )
-
     class Meta:
         model = Endpoint
         exclude = ["product", "inherited_tags"]
@@ -1810,8 +1817,8 @@ class AddEndpointForm(forms.Form):
                                          "Each must be valid.",
                                widget=forms.widgets.Textarea(attrs={"rows": "15", "cols": "400"}))
     product = forms.CharField(required=True,
-                              widget=forms.widgets.HiddenInput(), help_text="The product this endpoint should be "
-                                                                            "associated with.")
+                              label=labels.ASSET_LABEL, help_text=labels.ASSET_ENDPOINT_HELP,
+                              widget=forms.widgets.HiddenInput())
     tags = TagField(required=False,
                     help_text="Add tags that help describe this endpoint.  "
                               "Choose from the list or add new tags. Press Enter key to add.")
@@ -1821,7 +1828,10 @@ class AddEndpointForm(forms.Form):
         if "product" in kwargs:
             product = kwargs.pop("product")
         super().__init__(*args, **kwargs)
-        self.fields["product"] = forms.ModelChoiceField(queryset=get_authorized_products(Permissions.Location_Add))
+        self.fields["product"] = forms.ModelChoiceField(
+            queryset=get_authorized_products(Permissions.Location_Add),
+            label=labels.ASSET_LABEL,
+            help_text=labels.ASSET_ENDPOINT_HELP)
         if product is not None:
             self.fields["product"].initial = product.id
 
@@ -1931,17 +1941,17 @@ class CloseFindingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop("missing_note_types")
+        # must pop custom kwargs before calling parent __init__ to avoid unexpected kwarg errors
+        self.can_edit_mitigated_data = kwargs.pop("can_edit_mitigated_data") if "can_edit_mitigated_data" in kwargs \
+            else False
         super().__init__(*args, **kwargs)
         if len(queryset) == 0:
             self.fields["note_type"].widget = forms.HiddenInput()
         else:
             self.fields["note_type"] = forms.ModelChoiceField(queryset=queryset, label="Note Type", required=True)
 
-        self.can_edit_mitigated_data = kwargs.pop("can_edit_mitigated_data") if "can_edit_mitigated_data" in kwargs \
-            else False
-
         if self.can_edit_mitigated_data:
-            self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Test_Edit)
+            self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)
             self.fields["mitigated"].initial = self.instance.mitigated
             self.fields["mitigated_by"].initial = self.instance.mitigated_by
         if disclaimer := get_system_setting("disclaimer_notes"):
@@ -2228,6 +2238,7 @@ class Add_Product_GroupForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["product"].disabled = True
+        self.fields["product"].label = labels.ASSET_LABEL
         current_groups = Product_Group.objects.filter(product=self.initial["product"]).values_list("group", flat=True)
         authorized_groups = get_authorized_groups(Permissions.Group_View)
         authorized_groups = authorized_groups.exclude(id__in=current_groups)
@@ -2239,7 +2250,8 @@ class Add_Product_GroupForm(forms.ModelForm):
 
 
 class Add_Product_Group_GroupForm(forms.ModelForm):
-    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True, label="Products")
+    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True,
+                                              label=labels.ASSET_PLURAL_LABEL)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -2258,6 +2270,7 @@ class Edit_Product_Group_Form(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["product"].disabled = True
+        self.fields["product"].label = labels.ASSET_LABEL
         self.fields["group"].disabled = True
 
     class Meta:
@@ -2281,6 +2294,7 @@ class Add_Product_Type_GroupForm(forms.ModelForm):
         authorized_groups = authorized_groups.exclude(id__in=current_groups)
         self.fields["groups"].queryset = authorized_groups
         self.fields["product_type"].disabled = True
+        self.fields["product_type"].label = labels.ORG_LABEL
 
     class Meta:
         model = Product_Type_Group
@@ -2288,7 +2302,8 @@ class Add_Product_Type_GroupForm(forms.ModelForm):
 
 
 class Add_Product_Type_Group_GroupForm(forms.ModelForm):
-    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True, label="Product Types")
+    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True,
+                                                   label=labels.ORG_PLURAL_LABEL)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -2307,6 +2322,7 @@ class Edit_Product_Type_Group_Form(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["product_type"].disabled = True
+        self.fields["product_type"].label = labels.ORG_LABEL
         self.fields["group"].disabled = True
 
     class Meta:
@@ -2447,6 +2463,7 @@ class GlobalRoleForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         current_user = get_current_user()
+        self.fields["role"].help_text = labels.ASSET_GLOBAL_ROLE_HELP
         if not current_user.is_superuser:
             self.fields["role"].disabled = True
 
@@ -2466,6 +2483,7 @@ class ProductCountsFormBase(forms.Form):
 class ProductTypeCountsForm(ProductCountsFormBase):
     product_type = forms.ModelChoiceField(required=True,
                                           queryset=Product_Type.objects.none(),
+                                          label=labels.ORG_LABEL,
                                           error_messages={
                                               "required": "*"})
 
@@ -2477,6 +2495,7 @@ class ProductTypeCountsForm(ProductCountsFormBase):
 class ProductTagCountsForm(ProductCountsFormBase):
     product_tag = forms.ModelChoiceField(required=True,
                                          queryset=Product.tags.tag_model.objects.none().order_by("name"),
+                                         label=labels.ASSET_TAG_LABEL,
                                          error_messages={
                                              "required": "*"})
 
@@ -2964,6 +2983,20 @@ class SystemSettingsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["default_group_role"].queryset = get_group_member_roles()
+
+        self.fields["enable_product_tracking_files"].label = labels.SETTINGS_TRACKED_FILES_ENABLE_LABEL
+        self.fields["enable_product_tracking_files"].help_text = labels.SETTINGS_TRACKED_FILES_ENABLE_HELP
+
+        self.fields[
+            "enforce_verified_status_product_grading"].label = labels.SETTINGS_ASSET_GRADING_ENFORCE_VERIFIED_LABEL
+        self.fields[
+            "enforce_verified_status_product_grading"].help_text = labels.SETTINGS_ASSET_GRADING_ENFORCE_VERIFIED_HELP
+
+        self.fields["enable_product_grade"].label = labels.SETTINGS_ASSET_GRADING_ENABLE_LABEL
+        self.fields["enable_product_grade"].help_text = labels.SETTINGS_ASSET_GRADING_ENABLE_HELP
+
+        self.fields["enable_product_tag_inheritance"].label = labels.SETTINGS_ASSET_TAG_INHERITANCE_ENABLE_LABEL
+        self.fields["enable_product_tag_inheritance"].help_text = labels.SETTINGS_ASSET_TAG_INHERITANCE_ENABLE_HELP
 
     def clean(self):
         cleaned_data = super().clean()

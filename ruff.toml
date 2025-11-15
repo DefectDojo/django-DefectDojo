@@ -1,5 +1,5 @@
-# Always generate Python 3.12-compatible code.
-target-version = "py312"
+# Always generate Python 3.13-compatible code.
+target-version = "py313"
 
 # Same as Black.
 line-length = 120
@@ -36,9 +36,9 @@ select = [
    "FAST",
    "YTT",
    "ASYNC",
-   "S1", "S2", "S302", "S303", "S304", "S305", "S306", "S307", "S31", "S321", "S323", "S324", "S401", "S402", "S406", "S407", "S408", "S409", "S41", "S5", "S601", "S602", "S604", "S605", "S606", "S607", "S609", "S61", "S7",
+   "S1", "S2", "S302", "S303", "S304", "S305", "S306", "S307", "S31", "S32", "S401", "S402", "S406", "S407", "S408", "S409", "S41", "S5", "S601", "S602", "S604", "S605", "S606", "S607", "S609", "S61", "S7",
    "FBT",
-   "B00", "B010", "B011", "B012", "B013", "B014", "B015", "B016", "B017", "B018", "B019", "B020", "B021", "B022", "B023", "B025", "B028", "B029", "B03", "B901", "B903", "B905", "B911",
+   "B00", "B01", "B020", "B021", "B022", "B023", "B025", "B027", "B028", "B029", "B03", "B901", "B903", "B905", "B911",
    "A",
    "COM",
    "C4",
@@ -58,7 +58,7 @@ select = [
    "PIE",
    "T20",
    "PYI",
-   "PT001", "PT002", "PT003", "PT006", "PT007", "PT008", "PT01", "PT020", "PT021", "PT022", "PT023", "PT024", "PT025", "PT026", "PT028", "PT029", "PT03",
+   "PT",
    "Q",
    "RSE",
    "RET",
@@ -74,7 +74,7 @@ select = [
    "C90",
    "NPY",
    "PD",
-   "N803", "N804", "N811", "N812", "N813", "N814", "N817", "N818", "N999",
+   "N803", "N804", "N805", "N811", "N812", "N813", "N814", "N817", "N818", "N999",
    "PERF1", "PERF2", "PERF401", "PERF403",
    "E",
    "W",
@@ -82,7 +82,7 @@ select = [
    "D2", "D3", "D402", "D403", "D405", "D406", "D407", "D408", "D409", "D410", "D411", "D412", "D413", "D414", "D416",
    "F",
    "PGH",
-   "PLC0", "PLC1", "PLC24", "PLC28", "PLC3",
+   "PLC",
    "PLE",
    "PLR01", "PLR02", "PLR04", "PLR0915", "PLR1711", "PLR1704", "PLR1714", "PLR1716", "PLR172", "PLR173", "PLR2044", "PLR5", "PLR6104", "PLR6201", 
    "PLW",
@@ -101,6 +101,8 @@ ignore = [
     "FIX002",  # TODOs need some love but we will probably not get of them
     "D211",  # `one-blank-line-before-class` (D203) and `no-blank-line-before-class` (D211) are incompatible.
     "D212",  # `multi-line-summary-first-line` (D212) and `multi-line-summary-second-line` (D213) are incompatible.
+    "PT009",  # We are using a different style of tests (official Django tests), so it does not make sense to try to fix it
+    "PT027",  # Same ^
 ]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
@@ -112,6 +114,9 @@ preview = true
 "unittests/**" = [
     "S105",  # hardcoded passwords in tests are fine
     "S108",  # tmp paths mentioned in tests are fine
+]
+"dojo/filters.py" = [
+    "A003",  # ruff upgrade to 0.13.3
 ]
 
 [lint.flake8-boolean-trap]

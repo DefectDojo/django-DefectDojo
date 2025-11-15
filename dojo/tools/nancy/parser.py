@@ -1,6 +1,7 @@
 import json
 
 from cvss.cvss3 import CVSS3
+from cvss.cvss4 import CVSS4
 
 from dojo.models import Finding
 
@@ -64,17 +65,18 @@ class NancyParser:
                         out_of_scope=False,
                         static_finding=True,
                         dynamic_finding=False,
-                        vuln_id_from_tool=associated_vuln["Id"],
+                        vuln_id_from_tool=associated_vuln.get("Id", associated_vuln.get("ID")),
                         references="\n".join(references),
                     )
-
                     finding.unsaved_vulnerability_ids = vulnerability_ids
-
+                    cvss_vector = associated_vuln["CvssVector"]
                     # CVSSv3 vector
-                    if associated_vuln["CvssVector"]:
+                    if cvss_vector and cvss_vector.startswith("CVSS:3."):
                         finding.cvssv3 = CVSS3(
                             associated_vuln["CvssVector"]).clean_vector()
-
+                    elif cvss_vector and cvss_vector.startswith("CVSS:4."):
+                        finding.cvssv4 = CVSS4(
+                            associated_vuln["CvssVector"]).clean_vector()
                     # do we have a CWE?
                     if associated_vuln["Title"].startswith("CWE-"):
                         cwe = (associated_vuln["Title"]
