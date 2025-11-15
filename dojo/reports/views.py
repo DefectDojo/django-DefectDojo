@@ -27,9 +27,9 @@ from dojo.filters import (
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
+from dojo.labels import get_labels
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
-from dojo.labels import get_labels
 from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
 from dojo.reports.widgets import (
