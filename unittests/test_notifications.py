@@ -2,6 +2,7 @@ import datetime
 import logging
 from unittest.mock import Mock, patch
 
+import pghistory
 from auditlog.context import set_actor
 from crum import impersonate
 from django.test import override_settings
@@ -212,7 +213,7 @@ class TestNotificationTriggers(DojoTestCase):
 
         last_count = mock.call_count
         with self.subTest("product_type_added"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 prod_type = Product_Type.objects.create(name="notif prod type")
             self.assertEqual(mock.call_count, last_count + 4)
             self.assertEqual(mock.call_args_list[-1].args[0], "product_type_added")
@@ -220,7 +221,7 @@ class TestNotificationTriggers(DojoTestCase):
 
         last_count = mock.call_count
         with self.subTest("product_type_deleted"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 prod_type.delete()
             self.assertEqual(mock.call_count, last_count + 1)
             self.assertEqual(mock.call_args_list[-1].args[0], "product_type_deleted")
@@ -232,7 +233,7 @@ class TestNotificationTriggers(DojoTestCase):
 
         last_count = mock.call_count
         with self.subTest("product_added"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 prod_type = Product_Type.objects.first()
                 prod, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name")
             self.assertEqual(mock.call_count, last_count + 5)
@@ -241,7 +242,7 @@ class TestNotificationTriggers(DojoTestCase):
 
         last_count = mock.call_count
         with self.subTest("product_deleted"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 prod.delete()
             self.assertEqual(mock.call_count, last_count + 2)
             self.assertEqual(mock.call_args_list[-1].args[0], "product_deleted")
@@ -253,7 +254,7 @@ class TestNotificationTriggers(DojoTestCase):
 
         last_count = mock.call_count
         with self.subTest("engagement_added"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 prod = Product.objects.first()
                 eng = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
             self.assertEqual(mock.call_count, last_count + 5)
@@ -262,7 +263,7 @@ class TestNotificationTriggers(DojoTestCase):
 
         last_count = mock.call_count
         with self.subTest("close_engagement"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 eng.status = "Completed"
                 eng.save()
             self.assertEqual(mock.call_count, last_count + 5)
@@ -271,7 +272,7 @@ class TestNotificationTriggers(DojoTestCase):
 
         last_count = mock.call_count
         with self.subTest("reopen_engagement"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 eng.status = "In Progress"
                 eng.save()
             self.assertEqual(mock.call_count, last_count + 5)
@@ -282,7 +283,7 @@ class TestNotificationTriggers(DojoTestCase):
         eng.save()
         last_count = mock.call_count
         with self.subTest("no reopen_engagement from not started"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 eng.status = "In Progress"
                 eng.save()
             self.assertEqual(mock.call_count, last_count)
@@ -294,14 +295,14 @@ class TestNotificationTriggers(DojoTestCase):
         eng2 = Engagement.objects.create(product=prod2, name="Testing engagement", target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username="admin"))
 
         with self.subTest("engagement_deleted by product"):  # in case of product removal, we are not notifying about removal
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 prod1.delete()
             for call in mock.call_args_list:
                 self.assertNotEqual(call.args[0], "engagement_deleted")
 
         last_count = mock.call_count
         with self.subTest("engagement_deleted itself"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 eng2.delete()
             self.assertEqual(mock.call_count, last_count + 1)
             self.assertEqual(mock.call_args_list[-1].args[0], "engagement_deleted")
@@ -317,14 +318,14 @@ class TestNotificationTriggers(DojoTestCase):
         endpoint2, _ = Endpoint.objects.get_or_create(product=prod2, host="host2")
 
         with self.subTest("endpoint_deleted by product"):  # in case of product removal, we are not notifying about removal
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 prod1.delete()
             for call in mock.call_args_list:
                 self.assertNotEqual(call.args[0], "endpoint_deleted")
 
         last_count = mock.call_count
         with self.subTest("endpoint_deleted itself"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 endpoint2.delete()
             self.assertEqual(mock.call_count, last_count + 2)
             self.assertEqual(mock.call_args_list[-1].args[0], "endpoint_deleted")
@@ -341,14 +342,14 @@ class TestNotificationTriggers(DojoTestCase):
         test2 = Test.objects.create(engagement=eng2, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
 
         with self.subTest("test_deleted by engagement"):  # in case of engagement removal, we are not notifying about removal
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 eng1.delete()
             for call in mock.call_args_list:
                 self.assertNotEqual(call.args[0], "test_deleted")
 
         last_count = mock.call_count
         with self.subTest("test_deleted itself"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 test2.delete()
             self.assertEqual(mock.call_count, last_count + 1)
             self.assertEqual(mock.call_args_list[-1].args[0], "test_deleted")
@@ -366,14 +367,14 @@ class TestNotificationTriggers(DojoTestCase):
         fg2, _ = Finding_Group.objects.get_or_create(test=test2, name="fg test", creator=User.objects.get(username="admin"))
 
         with self.subTest("test_deleted by engagement"):  # in case of engagement removal, we are not notifying about removal
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 test1.delete()
             for call in mock.call_args_list:
                 self.assertNotEqual(call.args[0], "finding_group_deleted")
 
         last_count = mock.call_count
         with self.subTest("test_deleted itself"):
-            with set_actor(self.notification_tester):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 fg2.delete()
             self.assertEqual(mock.call_count, last_count + 5)
             self.assertEqual(mock.call_args_list[-1].args[0], "finding_group_deleted")
@@ -384,7 +385,7 @@ class TestNotificationTriggers(DojoTestCase):
     @override_settings(ENABLE_AUDITLOG=True)
     def test_auditlog_on(self, mock):
         prod_type = Product_Type.objects.create(name="notif prod type")
-        with set_actor(self.notification_tester):
+        with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
             prod_type.delete()
         self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The product type "notif prod type" was deleted by admin')
 
@@ -392,7 +393,7 @@ class TestNotificationTriggers(DojoTestCase):
     @override_settings(ENABLE_AUDITLOG=False)
     def test_auditlog_off(self, mock):
         prod_type = Product_Type.objects.create(name="notif prod type")
-        with set_actor(self.notification_tester):
+        with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
             prod_type.delete()
         self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The product type "notif prod type" was deleted')
 
@@ -406,7 +407,6 @@ class TestNotificationTriggersApi(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
     @patch("dojo.notifications.helper.NotificationManager._process_notifications")
-    @override_settings(ENABLE_AUDITLOG=True)
     def test_auditlog_on(self, mock):
         prod_type = Product_Type.objects.create(name="notif prod type API")
         self.client.delete(reverse("product_type-detail", args=(prod_type.pk,)), format="json")
@@ -428,6 +428,7 @@ class TestNotificationWebhooks(DojoTestCase):
             super().run(result)
 
     def setUp(self):
+        self.system_settings(enable_webhooks_notifications=True)
         self.sys_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.url_base = "http://webhook.endpoint:8080"
 
@@ -831,7 +832,7 @@ class TestNotificationWebhooks(DojoTestCase):
                 scan_type="ZAP Scan",
             ).notify_scan_added(test, updated_count=0)
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added_empty")
-            self.maxDiff = None
+            self.maxDiff = 99999
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": "Event scan_added_empty has occurred.",
                 "title": "Created/Updated 0 findings for notif prod: notif eng: notif test (Acunetix Scan)",
@@ -872,6 +873,11 @@ class TestNotificationWebhooks(DojoTestCase):
             })
 
         with self.subTest("scan_added"):
+            new_finding = Finding.objects.create(test=test, title="New Finding", severity="Critical")
+            mitigated_finding = Finding.objects.create(test=test, title="Mitigated Finding", severity="Medium")
+            reactivated_finding = Finding.objects.create(test=test, title="Reactivated Finding", severity="Low")
+            untouched_finding = Finding.objects.create(test=test, title="Untouched Finding", severity="Info")
+
             BaseImporter(
                 environment=Development_Environment.objects.get_or_create(name="Development")[0],
                 scan_type="ZAP Scan",
@@ -879,52 +885,57 @@ class TestNotificationWebhooks(DojoTestCase):
                 test,
                 updated_count=4,
                 new_findings=[
-                    Finding.objects.create(test=test, title="New Finding", severity="Critical"),
+                    new_finding,
                 ],
                 findings_mitigated=[
-                    Finding.objects.create(test=test, title="Mitigated Finding", severity="Medium"),
+                    mitigated_finding,
                 ],
                 findings_reactivated=[
-                    Finding.objects.create(test=test, title="Reactivated Finding", severity="Low"),
+                    reactivated_finding,
                 ],
                 findings_untouched=[
-                    Finding.objects.create(test=test, title="Untouched Finding", severity="Info"),
+                    untouched_finding,
                 ],
             )
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added")
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"]["findings"], {
                 "new": [{
-                    "id": 232,
+                    "id": new_finding.id,
                     "title": "New Finding",
                     "severity": "Critical",
-                    "url_api": "http://localhost:8080/api/v2/findings/232/",
-                    "url_ui": "http://localhost:8080/finding/232",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{new_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{new_finding.id}",
                 }],
                 "mitigated": [{
-                    "id": 233,
+                    "id": mitigated_finding.id,
                     "title": "Mitigated Finding",
                     "severity": "Medium",
-                    "url_api": "http://localhost:8080/api/v2/findings/233/",
-                    "url_ui": "http://localhost:8080/finding/233",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{mitigated_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{mitigated_finding.id}",
                 }],
                 "reactivated": [{
-                    "id": 234,
+                    "id": reactivated_finding.id,
                     "title": "Reactivated Finding",
                     "severity": "Low",
-                    "url_api": "http://localhost:8080/api/v2/findings/234/",
-                    "url_ui": "http://localhost:8080/finding/234",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{reactivated_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{reactivated_finding.id}",
                 }],
                 "untouched": [{
-                    "id": 235,
+                    "id": untouched_finding.id,
                     "title": "Untouched Finding",
                     "severity": "Info",
-                    "url_api": "http://localhost:8080/api/v2/findings/235/",
-                    "url_ui": "http://localhost:8080/finding/235",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{untouched_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{untouched_finding.id}",
                 }],
             })
 
         with self.subTest("scan_added problematic titles"):
+            colon_new_finding = Finding.objects.create(test=test, title="Colon: New Finding", severity="Critical")
+            brackets_mitigated_finding = Finding.objects.create(test=test, title="[Brackets] Mitigated Finding", severity="Medium")
+            quotation1_reactivated_finding = Finding.objects.create(test=test, title='"Quotation1" Reactivated Finding', severity="Low")
+            quotation2_untouched_finding = Finding.objects.create(test=test, title="'Quotation2' Untouched Finding", severity="Info")
+
             BaseImporter(
                 environment=Development_Environment.objects.get_or_create(name="Development")[0],
                 scan_type="ZAP Scan",
@@ -932,48 +943,48 @@ class TestNotificationWebhooks(DojoTestCase):
                 test,
                 updated_count=4,
                 new_findings=[
-                    Finding.objects.create(test=test, title="Colon: New Finding", severity="Critical"),
+                    colon_new_finding,
                 ],
                 findings_mitigated=[
-                    Finding.objects.create(test=test, title="[Brackets] Mitigated Finding", severity="Medium"),
+                    brackets_mitigated_finding,
                 ],
                 findings_reactivated=[
-                    Finding.objects.create(test=test, title='"Quotation1" Reactivated Finding', severity="Low"),
+                    quotation1_reactivated_finding,
                 ],
                 findings_untouched=[
-                    Finding.objects.create(test=test, title="'Quotation2' Untouched Finding", severity="Info"),
+                    quotation2_untouched_finding,
                 ],
             )
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added")
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"]["findings"], {
                 "new": [{
-                    "id": 236,
+                    "id": colon_new_finding.id,
                     "title": "Colon: New Finding",
                     "severity": "Critical",
-                    "url_api": "http://localhost:8080/api/v2/findings/236/",
-                    "url_ui": "http://localhost:8080/finding/236",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{colon_new_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{colon_new_finding.id}",
                 }],
                 "mitigated": [{
-                    "id": 237,
+                    "id": brackets_mitigated_finding.id,
                     "title": "[Brackets] Mitigated Finding",
                     "severity": "Medium",
-                    "url_api": "http://localhost:8080/api/v2/findings/237/",
-                    "url_ui": "http://localhost:8080/finding/237",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{brackets_mitigated_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{brackets_mitigated_finding.id}",
                 }],
                 "reactivated": [{
-                    "id": 238,
+                    "id": quotation1_reactivated_finding.id,
                     "title": '"Quotation1" Reactivated Finding',
                     "severity": "Low",
-                    "url_api": "http://localhost:8080/api/v2/findings/238/",
-                    "url_ui": "http://localhost:8080/finding/238",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{quotation1_reactivated_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{quotation1_reactivated_finding.id}",
                 }],
                 "untouched": [{
-                    "id": 239,
+                    "id": quotation2_untouched_finding.id,
                     "title": "'Quotation2' Untouched Finding",
                     "severity": "Info",
-                    "url_api": "http://localhost:8080/api/v2/findings/239/",
-                    "url_ui": "http://localhost:8080/finding/239",
+                    "url_api": f"http://localhost:8080/api/v2/findings/{quotation2_untouched_finding.id}/",
+                    "url_ui": f"http://localhost:8080/finding/{quotation2_untouched_finding.id}",
                 }],
             })
 

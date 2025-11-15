@@ -4,6 +4,7 @@ import time
 # import the settings file
 from django.conf import settings
 
+from dojo.labels import get_labels
 from dojo.models import Alerts, System_Settings, UserAnnouncement
 
 
@@ -76,3 +77,9 @@ def session_expiry_notification(request):
         return {
             "session_notify_time": notify_time,
         }
+
+
+def labels(request):
+    return {
+        "labels": get_labels(),
+    }

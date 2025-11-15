@@ -29,6 +29,7 @@ from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
+from dojo.labels import get_labels
 from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
 from dojo.reports.widgets import (
@@ -54,6 +55,10 @@ from dojo.utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+labels = get_labels()
+
 
 EXCEL_CHAR_LIMIT = 32767
 
@@ -201,6 +206,7 @@ def report_findings(request):
                    "title_words": title_words,
                     "component_words": component_words,
                    "title": "finding-list",
+                   "asset_label": labels.ASSET_LABEL,
                    })
 
 
@@ -390,8 +396,8 @@ def generate_report(request, obj, *, host_view=False):
     if isinstance(obj, Product_Type):
         product_type = obj
         template = "dojo/product_type_pdf_report.html"
-        report_name = "Product Type Report: " + str(product_type)
-        report_title = "Product Type Report"
+        report_name = labels.ORG_REPORT_WITH_NAME_TITLE % {"name": str(product_type)}
+        report_title = labels.ORG_REPORT_LABEL
         findings = report_finding_filter_class(request.GET, prod_type=product_type, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
             test__engagement__product__prod_type=product_type)))
         products = Product.objects.filter(prod_type=product_type,
@@ -440,8 +446,8 @@ def generate_report(request, obj, *, host_view=False):
     elif isinstance(obj, Product):
         product = obj
         template = "dojo/product_pdf_report.html"
-        report_name = "Product Report: " + str(product)
-        report_title = "Product Report"
+        report_name = labels.ASSET_REPORT_WITH_NAME_TITLE % {"name": str(product)}
+        report_title = labels.ASSET_REPORT_LABEL
         findings = report_finding_filter_class(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
             test__engagement__product=product)))
         ids = findings.qs.values_list("id", flat=True)
@@ -657,7 +663,7 @@ def generate_report(request, obj, *, host_view=False):
         product_tab = Product_Tab(test.engagement.product, title="Test Report", tab="engagements")
         product_tab.setEngagement(test.engagement)
     elif product:
-        product_tab = Product_Tab(product, title="Product Report", tab="findings")
+        product_tab = Product_Tab(product, title=str(labels.ASSET_REPORT_LABEL), tab="findings")
     elif endpoints:
         # TODO: Delete this after the move to Locations
         if not settings.V3_FEATURE_LOCATIONS:

@@ -6,6 +6,7 @@ from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
+from dojo.decorators import we_want_async
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -15,6 +16,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.utils import perform_product_grading
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -91,7 +93,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         parser = self.get_parser()
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
-        parsed_findings = self.parse_findings(scan, parser)
+        parsed_findings = self.parse_findings(scan, parser) or []
         # process the findings in the foreground or background
         (
             new_findings,
@@ -168,7 +170,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # we need to make sure there are no side effects such as closing findings
         # for findings with a different service value
         # https://github.com/DefectDojo/django-DefectDojo/issues/12754
-        original_findings = self.test.finding_set.all().filter(service=self.service)
+        if self.service is not None:
+            original_findings = self.test.finding_set.all().filter(service=self.service)
+        else:
+            original_findings = self.test.finding_set.all().filter(Q(service__isnull=True) | Q(service__exact=""))
+
         logger.debug(f"original_findings_qyer: {original_findings.query}")
         self.original_items = list(original_findings)
         logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
@@ -176,18 +182,32 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.reactivated_items = []
         self.unchanged_items = []
         self.group_names_to_findings_dict = {}
+        # Progressive batching for chord execution
+        # No chord: we dispatch per 1000 findings or on the final finding
 
         logger.debug(f"starting reimport of {len(parsed_findings) if parsed_findings else 0} items.")
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
         deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
 
-        for non_clean_unsaved_finding in parsed_findings:
-            # make sure the severity is something is digestible
-            unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
-            # Filter on minimum severity if applicable
-            if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
-                # finding's severity is below the configured threshold : ignoring the finding
+        # Pre-sanitize and filter by minimum severity to avoid loop control pitfalls
+        cleaned_findings = []
+        for raw_finding in parsed_findings or []:
+            sanitized = self.sanitize_severity(raw_finding)
+            if Finding.SEVERITIES[sanitized.severity] > Finding.SEVERITIES[self.minimum_severity]:
+                logger.debug(
+                    "skipping finding due to minimum severity filter (finding=%s severity=%s min=%s)",
+                    getattr(sanitized, "title", "<no-title>"),
+                    sanitized.severity,
+                    self.minimum_severity,
+                )
                 continue
+            cleaned_findings.append(sanitized)
+
+        batch_finding_ids: list[int] = []
+        batch_max_size = 1000
+
+        for idx, unsaved_finding in enumerate(cleaned_findings):
+            is_final = idx == len(cleaned_findings) - 1
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
             if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
@@ -236,11 +256,34 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     unsaved_finding,
                 )
-                # all data is already saved on the finding, we only need to trigger post processing
-
-                # to avoid pushing a finding group multiple times, we push those outside of the loop
+                # all data is already saved on the finding, we only need to trigger post processing in batches
                 push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
-                finding_helper.post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True, issue_updater_option=True, push_to_jira=push_to_jira)
+                batch_finding_ids.append(finding.id)
+
+                # If batch is full or we're at the end, dispatch one batched task
+                if len(batch_finding_ids) >= batch_max_size or is_final:
+                    finding_ids_batch = list(batch_finding_ids)
+                    batch_finding_ids.clear()
+                    if we_want_async(async_user=self.user):
+                        finding_helper.post_process_findings_batch_signature(
+                            finding_ids_batch,
+                            dedupe_option=True,
+                            rules_option=True,
+                            product_grading_option=True,
+                            issue_updater_option=True,
+                            push_to_jira=push_to_jira,
+                        )()
+                    else:
+                        finding_helper.post_process_findings_batch(
+                            finding_ids_batch,
+                            dedupe_option=True,
+                            rules_option=True,
+                            product_grading_option=True,
+                            issue_updater_option=True,
+                            push_to_jira=push_to_jira,
+                        )
+
+            # No chord: tasks are dispatched immediately above per batch
 
         self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
         # due to #3958 we can have duplicates inside the same report
@@ -252,6 +295,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.untouched = set(self.unchanged_items) - set(self.to_mitigate) - set(self.new_items) - set(self.reactivated_items)
         # Process groups
         self.process_groups_for_all_findings(**kwargs)
+
+        # Note: All chord batching is now handled within the loop above
+
+        # Synchronous tasks were already executed during processing, just calculate grade
+        perform_product_grading(self.test.engagement.product)
+
         # Process the results and return them back
         return self.process_results(**kwargs)
 
@@ -286,12 +335,17 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     f"Mitigated by {self.test.test_type} re-upload.",
                     finding_groups_enabled=self.findings_groups_enabled,
+                    product_grading_option=False,
                 )
                 mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in findings if finding.finding_group is not None}:
                 jira_helper.push_to_jira(finding_group)
+
+        # Calculate grade once after all findings have been closed
+        if mitigated_findings:
+            perform_product_grading(self.test.engagement.product)
 
         return mitigated_findings
 
@@ -433,6 +487,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         to cover circumstances where mitigation timestamps are different, and
         decide which one to honor
         """
+        if existing_finding.fix_available != unsaved_finding.fix_available:
+            existing_finding.fix_available = unsaved_finding.fix_available
+            existing_finding.fix_version = unsaved_finding.fix_version
+
         # if the reimported item has a mitigation time, we can compare
         if unsaved_finding.is_mitigated:
             # The new finding is already mitigated, so nothing to change on the
@@ -542,6 +600,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # First check that the existing finding is definitely not mitigated
         if not (existing_finding.mitigated and existing_finding.is_mitigated):
             logger.debug("Reimported item matches a finding that is currently open.")
+            if existing_finding.fix_available != unsaved_finding.fix_available:
+                existing_finding.fix_available = unsaved_finding.fix_available
+                existing_finding.fix_version = unsaved_finding.fix_version
             if unsaved_finding.is_mitigated:
                 logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
                 # TODO: Implement a date comparison for opened defectdojo findings before closing them by reimporting,
@@ -643,8 +704,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if len(self.endpoints_to_add) > 0:
             self.endpoint_manager.chunk_endpoints_and_disperse(finding, self.endpoints_to_add)
         # Parsers must use unsaved_tags to store tags, so we can clean them
-        if finding.unsaved_tags:
-            finding.tags = clean_tags(finding.unsaved_tags)
+        if finding_from_report.unsaved_tags:
+            cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
+            if isinstance(cleaned_tags, list):
+                finding.tags.set(cleaned_tags)
+            elif isinstance(cleaned_tags, str):
+                finding.tags.set([cleaned_tags])
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files
@@ -718,4 +783,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> str:
+        # this is overridden in Pro, but will still call this via super()
+        deduplicationLogger.debug("Calculating hash code for unsaved finding")
         return unsaved_finding.compute_hash_code()

@@ -166,6 +166,17 @@ Good example:
        finding.cwe = data["mykey"]
 ```
 
+```python
+   finding.cwe = data.get("mykey", 123)
+```
+
+```python
+   some_list = data.get("key_of_the_list") or []
+```
+
+The finale example guards against cases where `key_of_the_list` is present, but `null`.
+
+
 ### Parsing of CVSS vectors
 
 Data can have `CVSS` vectors or scores. Defect Dojo use the `cvss` module provided by RedHat Security.

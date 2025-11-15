@@ -12,13 +12,14 @@ metadata:
     helm.sh/hook: test-success
 spec:
   serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
+  automountServiceAccountToken: {{ .Values.tests.unitTests.automountServiceAccountToken }}
   {{- with .Values.imagePullSecrets }}
   imagePullSecrets:
     - name: {{ . }}
   {{- end }}
   containers:
     - name: unit-tests
-      image: '{{ .Values.repositoryPrefix }}/defectdojo-django:{{ .Values.tag }}'
+      image: '{{ template "unitTests.image" . }}'
       imagePullPolicy: {{ .Values.imagePullPolicy }}
       {{- if .Values.securityContext.enabled }}
       securityContext:

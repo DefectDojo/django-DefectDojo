@@ -3,7 +3,7 @@ import re
 
 from cvss import CVSS3
 from defusedxml import ElementTree
-from hyperlink._url import SCHEME_PORT_MAP
+from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
 from dojo.models import Endpoint, Finding, Test
 
@@ -239,8 +239,11 @@ class TenableXMLParser:
                     cwe_element_text = self.safely_get_element_text(
                         item.find("cwe"),
                     )
+
                     if cwe_element_text is not None:
-                        cwe = cwe_element_text
+                        match = re.search(r"\d+", cwe_element_text)
+                        if match:
+                            cwe = int(match.group())
 
                     # parsing and storing the CWE would affect dedupe/hash_codes, commentint out for now
                     # if not cwe:
