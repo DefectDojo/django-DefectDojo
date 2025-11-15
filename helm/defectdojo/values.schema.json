@@ -914,9 +914,6 @@
                 "affinity": {
                     "type": "object"
                 },
-                "annotations": {
-                    "type": "object"
-                },
                 "automountServiceAccountToken": {
                     "type": "boolean"
                 },
@@ -965,6 +962,9 @@
                     "type": "object"
                 },
                 "nodeSelector": {
+                    "type": "object"
+                },
+                "podAnnotations": {
                     "type": "object"
                 },
                 "podSecurityContext": {
