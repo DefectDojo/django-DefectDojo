@@ -1414,6 +1414,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Cycognito Scan": ["title", "severity"],
     "OpenVAS Parser v2": ["title", "severity", "vuln_id_from_tool", "endpoints"],
     "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
+    "OpenReports": ["vulnerability_ids", "component_name", "component_version", "severity"],
     "n0s1 Scanner": ["description"],
 }
 
@@ -1487,6 +1488,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "AWS Inspector2 Scan": True,
     "Cyberwatch scan (Galeax)": True,
     "OpenVAS Parser v2": True,
+    "OpenReports": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1677,6 +1679,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
     "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
     "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
+    "OpenReports": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
