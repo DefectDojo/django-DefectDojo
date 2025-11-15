@@ -18,9 +18,9 @@ from dojo.filters import (
     ReportFindingFilterWithoutObjectLookups,
 )
 from dojo.forms import CustomReportOptionsForm
+from dojo.labels import get_labels
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
-from dojo.labels import get_labels
 from dojo.models import Endpoint, Finding
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
 from dojo.settings import settings

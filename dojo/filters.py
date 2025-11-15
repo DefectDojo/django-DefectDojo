@@ -54,8 +54,8 @@ from dojo.finding.helper import (
 )
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding_group.queries import get_authorized_finding_groups
-from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.labels import get_labels
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
     ENGAGEMENT_STATUS_CHOICES,

@@ -50,9 +50,9 @@ from dojo.github import (
     reopen_external_issue_github,
     update_external_issue_github,
 )
+from dojo.labels import get_labels
 from dojo.location.models import Location
 from dojo.location.status import ProductLocationStatus
-from dojo.labels import get_labels
 from dojo.models import (
     NOTIFICATION_CHOICES,
     Benchmark_Type,
