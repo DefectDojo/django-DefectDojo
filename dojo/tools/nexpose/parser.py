@@ -63,7 +63,7 @@ class NexposeParser:
                 ret += "<li>" + str(node.text).strip() + "</li>"
         if tag == "orderedlist":
             i = 1
-            for item in list(node):
+            for i, item in enumerate(node):
                 ret += (
                     "<ol>"
                     + str(i)
@@ -71,7 +71,6 @@ class NexposeParser:
                     + self.parse_html_type(item)
                     + "</ol>"
                 )
-                i += 1
         if tag == "paragraph":
             if len(list(node)) > 0:
                 for child in list(node):
