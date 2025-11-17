@@ -20,9 +20,11 @@
     {% if engagement|has_object_permission:"Risk_Acceptance_Refresh_Permission_key" %}
         <li role="separator" class="divider"></li>
             <li role="presentation">
-                <a class="bg-info refresh-risk-acceptance-url" title="Send New Url of acceptation to Leader" href="{% url 'refresh_url' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
+                {% if not risk_acceptance.long_term_acceptance %}
+                 <a class="bg-info refresh-risk-acceptance-url" title="Send New Url of acceptation to Leader" href="{% url 'refresh_url' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
                     <i class="fa fa-rotate-right"></i> Refresh URL
                 </a>
+                {% endif %}
             </li>
     {% endif %}
      {% if engagement|has_object_permission:"Risk_Acceptance_Send_Email" %}

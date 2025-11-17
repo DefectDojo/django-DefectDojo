@@ -121,6 +121,14 @@
         border-top: 1px solid #ddd;
         z-index: 1000;
     }
+    .modal-header .close {
+        margin-top: -26px;
+    }
+    .modal-header{
+        padding: 8px;
+        background-color:#20a6d8bf;
+        border-button:#20a6d8bf;
+    }
 {% endblock %}
 {% block add_css %}
     {{ block.super }}
@@ -857,6 +865,7 @@ $(document).ready(function() {
 });
 
 $('#modal_send_email_id').on('hidden.bs.modal', function () {
+    $('#recipient-email').val(""); 
     document.getElementById('email-form').reset();
 });
 </script>

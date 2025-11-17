@@ -41,7 +41,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from dojo.endpoint.utils import save_endpoints_to_add
-from dojo.group.queries import get_users_for_group
+from dojo.group.queries import users_with_permissions_to_approve_long_term_findings
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import (
@@ -1915,7 +1915,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             "note_form": note_form,
             "replace_form": replace_form,
             "add_findings_form": add_findings_form,
-            "user_acceptances": get_users_for_group("Approvers_Risk"),
+            "user_acceptances": users_with_permissions_to_approve_long_term_findings("Approvers_Risk", "Risk", product),
             # 'show_add_findings_form': len(unaccepted_findings),
             "request": request,
             "add_findings": add_fpage,

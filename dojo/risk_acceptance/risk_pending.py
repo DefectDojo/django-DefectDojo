@@ -119,7 +119,7 @@ def risk_accepted_succesfully(
 def user_has_permission_long_risk_acceptance(user, risk_acceptance):
     if risk_acceptance and risk_acceptance.long_term_acceptance:
         users = get_users_for_group_by_role(
-            GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_risk"),
+            GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_Risk"),
             "Risk" 
         )
         if user in users:

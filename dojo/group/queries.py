@@ -63,3 +63,12 @@ def get_users_for_group(group_name):
 def get_users_for_group_by_role(group_name, role):
     group_members = Dojo_Group_Member.objects.filter(group__name=group_name, role__name=role).values_list("user", flat=True).filter(role__name=role)
     return Dojo_User.objects.filter(id__in=group_members)
+
+def users_with_permissions_to_approve_long_term_findings(group_name, role_with_permission, product):
+    from dojo.product_type.helper import get_contacts_product_type_and_product
+    users_group = get_users_for_group_by_role(group_name, role_with_permission)
+    user_dict = get_contacts_product_type_and_product(product)
+    user_ids = ([user.id for user in user_dict.values() if user is not None])
+    user_contacts = Dojo_User.objects.filter(id__in=user_ids)
+    users = users_group.union(user_contacts)
+    return users 

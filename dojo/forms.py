@@ -1164,7 +1164,7 @@ class RiskPendingForm(forms.ModelForm):
 
         queryset_permissions = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['accepted_findings'].queryset = queryset_permissions
-        if value :=  GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_risk"):
+        if value :=  GeneralSettings.get_value("GROUP_REVIEWER_LONGTERM_ACCEPTANCE", "Reviewer_Risk"):
             reviewed_user = get_users_for_group_by_role(value, "Risk")
             self.fields['reviewed_by'].choices = [(user.username, user.username) for user in reviewed_user] 
         self.fields['accepted_by'].queryset = get_authorized_contacts_for_product_type(self.severity, product, product_type)

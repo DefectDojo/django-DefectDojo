@@ -9,8 +9,8 @@
         <form id="email-form">
             <div class="input-group">
                 <span class="input-group-addon">Receiver</span>
-                <select class="form-control" id="recipient-email" name="recipients" multiple required>
-                  <option value="">Select recipients...</option>
+                <select class="form-control" id="recipient-email" name="recipients" required>
+                   <option value="" disabled selected>Select recipients...</option>
                   {% for user in user_acceptances %}
                       <option value="{{user.username}}">{{user.username}} ({{user.email}})</option>
                   {% endfor %}
