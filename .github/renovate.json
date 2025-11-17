@@ -27,6 +27,17 @@
     "matchDatasources": "github-releases",
     "matchPackageNames": "renovatebot/renovate",
     "schedule": ["* * * * 0"]
+  },{
+    "description": "Minikube does not like freshly released k8s. We need to wait some time so it will be adopted",
+    "matchDatasources": [
+      "custom.endoflife-oldest-maintained",
+      "github-releases"
+    ],
+    "matchPackageNames": [
+      "kubernetes",
+      "kubernetes/kubernetes"
+    ],
+    "minimumReleaseAge": "2 days"
   }],
   "customDatasources": {
     "endoflife-oldest-maintained": {
