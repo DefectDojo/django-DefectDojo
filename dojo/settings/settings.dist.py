@@ -1943,6 +1943,7 @@ VULNERABILITY_URLS = {
     "TS-": """https://tailscale.com/security-bulletins#""",  # e.g. https://tailscale.com/security-bulletins or https://tailscale.com/security-bulletins#ts-2022-001-1243
     "TYPO3-": "https://typo3.org/security/advisory/",  # e.g. https://typo3.org/security/advisory/typo3-core-sa-2025-010
     "USN-": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
+    "VA-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/va-25-282-01
     "VAR-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/var-201801-0152
     "VNS": "https://vulners.com/",
     "WID-SEC-W-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/wid-sec-w-2025-1468
