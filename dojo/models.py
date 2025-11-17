@@ -4695,6 +4695,7 @@ class Answered_Survey(models.Model):
 def default_expiration():
     return timezone.now() + timedelta(days=7)
 
+
 class General_Survey(models.Model):
     survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
     num_responses = models.IntegerField(default=0)
