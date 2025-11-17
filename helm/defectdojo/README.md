@@ -493,9 +493,26 @@ kubectl delete serviceAccount defectdojo
 kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 ```
 
+## Development/contribution
+
+In case you decide to help with the improvement of the HELM chart, keep in mind that values/descriptions might need to be adjusted in multiple places (see below).
+
+### HELM Docs update
+
+Documentation provided in the README file needs to contain the latest information from `values.yaml` and all other related assets.
+If GitHub Action _Lint Helm chart / Update documentation_ step fails, install https://github.com/norwoodj/helm-docs and run locally `helm-docs --chart-search-root helm/deeefectdojo` before committing your changes.
+The helm-docs documentation will be generated for you.
+     
+### HELM Schema update
+
+The HELM structure supports the existence of a `values.schema.json` file. This file is used to validate all values provided by the user before Helm starts rendering templates.
+The chart needs to have a `values.schema.json` file that is compatible with the default `values.yaml` file.
+If GitHub Action _Lint Helm chart / Update schema_ step fails, install https://github.com/losisin/helm-values-schema-json and run locally `helm schema --use-helm-docs` in `helm/defectdojo` before committing your changes.
+The HELM schema will be generated for you.
+
 # General information about chart values
 
-![Version: 1.8.2-dev](https://img.shields.io/badge/Version-1.8.2--dev-informational?style=flat-square) ![AppVersion: 2.53.0-dev](https://img.shields.io/badge/AppVersion-2.53.0--dev-informational?style=flat-square)
+![Version: 1.9.0-dev](https://img.shields.io/badge/Version-1.9.0--dev-informational?style=flat-square) ![AppVersion: 2.53.0-dev](https://img.shields.io/badge/AppVersion-2.53.0--dev-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -683,7 +700,6 @@ A Helm chart for Kubernetes to install DefectDojo
 | images.nginx.image.repository | string | `"defectdojo/defectdojo-nginx"` |  |
 | images.nginx.image.tag | string | `""` | If empty, use appVersion. Another possible values are: latest, X.X.X, X.X.X-alpine (where X.X.X is version of DD). For dev builds (only for testing purposes): nightly-dev, nightly-dev-alpine. To see all, check https://hub.docker.com/r/defectdojo/defectdojo-nginx/tags. |
 | initializer.affinity | object | `{}` |  |
-| initializer.annotations | object | `{}` |  |
 | initializer.automountServiceAccountToken | bool | `false` |  |
 | initializer.containerSecurityContext | object | `{}` | Container security context for the initializer Job container |
 | initializer.extraEnv | list | `[]` | Additional environment variables injected to the initializer job pods. |
@@ -694,6 +710,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | initializer.keepSeconds | int | `60` | A positive integer will keep this Job and Pod deployed for the specified number of seconds, after which they will be removed. For all other values, the Job and Pod will remain deployed. |
 | initializer.labels | object | `{}` |  |
 | initializer.nodeSelector | object | `{}` |  |
+| initializer.podAnnotations | object | `{}` |  |
 | initializer.podSecurityContext | object | `{}` | Pod security context for the initializer Job |
 | initializer.resources.limits.cpu | string | `"2000m"` |  |
 | initializer.resources.limits.memory | string | `"512Mi"` |  |
