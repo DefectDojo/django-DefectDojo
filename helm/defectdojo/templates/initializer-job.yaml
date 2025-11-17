@@ -36,9 +36,11 @@ spec:
         {{- with .Values.initializer.labels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- with mergeOverwrite dict .Values.extraAnnotations .Values.initializer.podAnnotations }}
       annotations:
-      {{- with .Values.initializer.annotations }}
-        {{- toYaml . | nindent 8 }}
+        {{- range $key, $value := . }}
+        {{ $key }}: {{ quote $value }}
+        {{- end }}
       {{- end }}
     spec:
       {{- if .Values.securityContext.enabled }}
