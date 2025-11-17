@@ -1,5 +1,6 @@
 import logging
 from contextlib import suppress
+from datetime import datetime
 from time import strftime
 
 from django.conf import settings
@@ -9,6 +10,7 @@ from django.db.utils import IntegrityError
 from django.dispatch.dispatcher import receiver
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.timezone import is_naive, make_aware, now
 from fieldsignals import pre_save_changed
 
 import dojo.jira_link.helper as jira_helper
@@ -797,6 +799,17 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
         finding_template.cve = None
 
 
+def normalize_datetime(value):
+    """Ensure value is timezone-aware datetime."""
+    if value:
+        if not isinstance(value, datetime):
+            value = datetime.combine(value, datetime.min.time())
+        # Make timezone-aware if naive
+        if is_naive(value):
+            value = make_aware(value)
+    return value
+
+
 def close_finding(
     *,
     finding,
@@ -818,15 +831,16 @@ def close_finding(
     """
     # Core status updates
     finding.is_mitigated = is_mitigated
-    now = timezone.now()
-    finding.mitigated = mitigated or now
+    current_time = now()
+    mitigated_date = normalize_datetime(mitigated) or current_time
+    finding.mitigated = mitigated_date
     finding.mitigated_by = mitigated_by or user
     finding.active = False
     finding.false_p = bool(false_p)
     finding.out_of_scope = bool(out_of_scope)
     finding.duplicate = bool(duplicate)
     finding.under_review = False
-    finding.last_reviewed = finding.mitigated
+    finding.last_reviewed = mitigated_date
     finding.last_reviewed_by = user
 
     # Create note if provided
@@ -836,16 +850,16 @@ def close_finding(
             entry=note_entry,
             author=user,
             note_type=note_type,
-            date=finding.mitigated,
+            date=mitigated_date,
         )
         finding.notes.add(new_note)
 
     # Endpoint statuses
     for status in finding.status_finding.all():
         status.mitigated_by = finding.mitigated_by
-        status.mitigated_time = finding.mitigated
+        status.mitigated_time = mitigated_date
         status.mitigated = True
-        status.last_modified = timezone.now()
+        status.last_modified = current_time
         status.save()
 
     # Risk acceptance
