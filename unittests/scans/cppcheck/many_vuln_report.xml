@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="2.18.0"/>
+    <errors>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/blast/blast.c">
+            <location file="contrib/blast/blast.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/infback9/infback9.c">
+            <location file="contrib/infback9/infback9.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/infback9/inftree9.c">
+            <location file="contrib/infback9/inftree9.c" line="0" column="0"/>
+        </error>
+        <error id="nullPointer" severity="warning" msg="Possible null pointer dereference: in" verbose="Possible null pointer dereference: in" cwe="476" file0="contrib/blast/blast.c">
+            <location file="contrib/blast/blast.c" line="394" column="17" info="Null pointer dereference"/>
+            <location file="contrib/blast/blast.c" line="453" column="50" info="Calling function &apos;blast&apos;, 6th argument &apos;NULL&apos; value is 0"/>
+            <symbol>in</symbol>
+        </error>
+        <error id="returnDanglingLifetime" severity="error" msg="Returning object that will be invalid when returning." verbose="Returning object that will be invalid when returning." cwe="562" file0="contrib/iostream/test.cpp">
+            <location file="contrib/iostream/zfstream.h" line="120" column="23"/>
+            <location file="contrib/iostream/zfstream.h" line="120" column="24" info="Passed to constructor of &apos;gzomanip &lt; int &gt;&apos;."/>
+        </error>
+        <error id="returnDanglingLifetime" severity="error" msg="Returning object that will be invalid when returning." verbose="Returning object that will be invalid when returning." cwe="562" file0="contrib/iostream/test.cpp">
+            <location file="contrib/iostream/zfstream.h" line="125" column="23"/>
+            <location file="contrib/iostream/zfstream.h" line="125" column="24" info="Passed to constructor of &apos;gzomanip &lt; int &gt;&apos;."/>
+        </error>
+        <error id="returnTempReference" severity="error" msg="Reference to temporary returned." verbose="Reference to temporary returned." cwe="562" file0="contrib/iostream2/zstream_test.cpp">
+            <location file="contrib/iostream2/zstream.h" line="294" column="15"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/iostream3/zfstream.cc">
+            <location file="contrib/iostream3/zfstream.cc" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/minizip/miniunz.c">
+            <location file="contrib/minizip/miniunz.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/minizip/minizip.c">
+            <location file="contrib/minizip/minizip.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/minizip/mztools.c">
+            <location file="contrib/minizip/mztools.c" line="0" column="0"/>
+        </error>
+        <error id="uninitvar" severity="warning" msg="Uninitialized variable: fin" verbose="Uninitialized variable: fin" cwe="457" file0="contrib/minizip/minizip.c">
+            <location file="contrib/minizip/minizip.c" line="495" column="21"/>
+            <location file="contrib/minizip/minizip.c" line="459" column="25" info="Assuming condition is true"/>
+            <symbol>fin</symbol>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/minizip/unzip.c">
+            <location file="contrib/minizip/unzip.c" line="0" column="0"/>
+        </error>
+        <error id="uninitvar" severity="warning" msg="Uninitialized variable: *pzlib_filefunc64_32_def.zopen32_file" verbose="Uninitialized variable: *pzlib_filefunc64_32_def.zopen32_file" cwe="457" file0="contrib/minizip/unzip.c">
+            <location file="contrib/minizip/unzip.c" line="611" column="25"/>
+            <location file="contrib/minizip/unzip.c" line="787" column="38" info="Calling function &apos;unzOpenInternal&apos;, 2nd argument &apos;&amp;zlib_filefunc64_32_def_fill&apos; value is &lt;Uninit&gt;"/>
+            <symbol>*pzlib_filefunc64_32_def</symbol>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/minizip/zip.c">
+            <location file="contrib/minizip/zip.c" line="0" column="0"/>
+        </error>
+        <error id="uninitvar" severity="warning" msg="Uninitialized variable: *pzlib_filefunc64_32_def.zopen32_file" verbose="Uninitialized variable: *pzlib_filefunc64_32_def.zopen32_file" cwe="457" file0="contrib/minizip/zip.c">
+            <location file="contrib/minizip/zip.c" line="860" column="29"/>
+            <location file="contrib/minizip/zip.c" line="940" column="58" info="Calling function &apos;zipOpen3&apos;, 4th argument &apos;&amp;zlib_filefunc64_32_def_fill&apos; value is &lt;Uninit&gt;"/>
+            <symbol>*pzlib_filefunc64_32_def</symbol>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/puff/puff.c">
+            <location file="contrib/puff/puff.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/puff/pufftest.c">
+            <location file="contrib/puff/pufftest.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/testzlib/testzlib.c">
+            <location file="contrib/testzlib/testzlib.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="contrib/untgz/untgz.c">
+            <location file="contrib/untgz/untgz.c" line="0" column="0"/>
+        </error>
+        <error id="nullPointerOutOfMemory" severity="warning" msg="If memory allocation fails, then there is a possible null pointer dereference: buffer" verbose="If memory allocation fails, then there is a possible null pointer dereference: buffer" cwe="476" file0="contrib/untgz/untgz.c">
+            <location file="contrib/untgz/untgz.c" line="332" column="21" info="Null pointer dereference"/>
+            <location file="contrib/untgz/untgz.c" line="330" column="24" info="Assignment &apos;buffer=strdup(newdir)&apos;, assigned value is 0"/>
+            <location file="contrib/untgz/untgz.c" line="330" column="24" info="Assuming allocation function fails"/>
+            <symbol>buffer</symbol>
+        </error>
+        <error id="nullPointerOutOfMemory" severity="warning" msg="If memory allocation fails, then there is a possible null pointer dereference: buffer" verbose="If memory allocation fails, then there is a possible null pointer dereference: buffer" cwe="476" file0="contrib/untgz/untgz.c">
+            <location file="contrib/untgz/untgz.c" line="338" column="7" info="Null pointer dereference"/>
+            <location file="contrib/untgz/untgz.c" line="334" column="11" info="Assuming condition is false"/>
+            <location file="contrib/untgz/untgz.c" line="330" column="24" info="Assignment &apos;buffer=strdup(newdir)&apos;, assigned value is 0"/>
+            <location file="contrib/untgz/untgz.c" line="330" column="24" info="Assuming allocation function fails"/>
+            <symbol>buffer</symbol>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="deflate.c">
+            <location file="deflate.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="crc32.c">
+            <location file="crc32.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="examples/enough.c">
+            <location file="examples/enough.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="examples/fitblk.c">
+            <location file="examples/fitblk.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="examples/gun.c">
+            <location file="examples/gun.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="examples/gzappend.c">
+            <location file="examples/gzappend.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="examples/gzjoin.c">
+            <location file="examples/gzjoin.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="examples/gzlog.c">
+            <location file="examples/gzlog.c" line="0" column="0"/>
+        </error>
+        <error id="memleak" severity="error" msg="Memory leak: data" verbose="Memory leak: data" cwe="401" file0="examples/gzlog.c">
+            <location file="examples/gzlog.c" line="760" column="17"/>
+            <symbol>data</symbol>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="gzlib.c">
+            <location file="gzlib.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="gzread.c">
+            <location file="gzread.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="gzwrite.c">
+            <location file="gzwrite.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="infback.c">
+            <location file="infback.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="inflate.c">
+            <location file="inflate.c" line="0" column="0"/>
+        </error>
+        <error id="uninitvar" severity="warning" msg="Uninitialized variable: buf" verbose="Uninitialized variable: buf" cwe="457" file0="inflate.c">
+            <location file="inflate.c" line="1425" column="36"/>
+            <location file="inflate.c" line="1419" column="28" info="Assuming condition is false"/>
+            <symbol>buf</symbol>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="inffast.c">
+            <location file="inffast.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="inftrees.c">
+            <location file="inftrees.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="test/example.c">
+            <location file="test/example.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="test/minigzip.c">
+            <location file="test/minigzip.c" line="0" column="0"/>
+        </error>
+        <error id="uninitvar" severity="error" msg="Uninitialized variable: msgbuf" verbose="Uninitialized variable: msgbuf" cwe="457" file0="test/minigzip.c">
+            <location file="test/minigzip.c" line="92" column="18"/>
+            <symbol>msgbuf</symbol>
+        </error>
+        <error id="uninitvar" severity="error" msg="Uninitialized variable: out" verbose="Uninitialized variable: out" cwe="457" file0="test/minigzip.c">
+            <location file="test/minigzip.c" line="253" column="16"/>
+            <symbol>out</symbol>
+        </error>
+        <error id="uninitvar" severity="error" msg="Uninitialized variable: out" verbose="Uninitialized variable: out" cwe="457" file0="test/minigzip.c">
+            <location file="test/minigzip.c" line="313" column="20"/>
+            <symbol>out</symbol>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="trees.c">
+            <location file="trees.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="uncompr.c">
+            <location file="uncompr.c" line="0" column="0"/>
+        </error>
+        <error id="nullPointerOutOfResources" severity="warning" msg="If resource allocation fails, then there is a possible null pointer dereference: header" verbose="If resource allocation fails, then there is a possible null pointer dereference: header" cwe="476" file0="trees.c">
+            <location file="trees.c" line="332" column="13" info="Null pointer dereference"/>
+            <location file="trees.c" line="328" column="25" info="Assignment &apos;header=fopen(&quot;trees.h&quot;,&quot;w&quot;)&apos;, assigned value is 0"/>
+            <location file="trees.c" line="328" column="25" info="Assuming allocation function fails"/>
+            <symbol>header</symbol>
+        </error>
+        <error id="nullPointerOutOfResources" severity="warning" msg="If resource allocation fails, then there is a possible null pointer dereference: header" verbose="If resource allocation fails, then there is a possible null pointer dereference: header" cwe="476" file0="trees.c">
+            <location file="trees.c" line="335" column="13" info="Null pointer dereference"/>
+            <location file="trees.c" line="328" column="25" info="Assignment &apos;header=fopen(&quot;trees.h&quot;,&quot;w&quot;)&apos;, assigned value is 0"/>
+            <location file="trees.c" line="328" column="25" info="Assuming allocation function fails"/>
+            <symbol>header</symbol>
+        </error>
+        <error id="nullPointerOutOfResources" severity="warning" msg="If resource allocation fails, then there is a possible null pointer dereference: header" verbose="If resource allocation fails, then there is a possible null pointer dereference: header" cwe="476" file0="trees.c">
+            <location file="trees.c" line="337" column="17" info="Null pointer dereference"/>
+            <location file="trees.c" line="328" column="25" info="Assignment &apos;header=fopen(&quot;trees.h&quot;,&quot;w&quot;)&apos;, assigned value is 0"/>
+            <location file="trees.c" line="328" column="25" info="Assuming allocation function fails"/>
+            <symbol>header</symbol>
+        </error>
+        <error id="nullPointerOutOfResources" severity="warning" msg="If resource allocation fails, then there is a possible null pointer dereference: header" verbose="If resource allocation fails, then there is a possible null pointer dereference: header" cwe="476" file0="trees.c">
+            <location file="trees.c" line="341" column="13" info="Null pointer dereference"/>
+            <location file="trees.c" line="328" column="25" info="Assignment &apos;header=fopen(&quot;trees.h&quot;,&quot;w&quot;)&apos;, assigned value is 0"/>
+            <location file="trees.c" line="328" column="25" info="Assuming allocation function fails"/>
+            <symbol>header</symbol>
+        </error>
+        <error id="nullPointerOutOfResources" severity="warning" msg="If resource allocation fails, then there is a possible null pointer dereference: header" verbose="If resource allocation fails, then there is a possible null pointer dereference: header" cwe="476" file0="trees.c">
+            <location file="trees.c" line="343" column="17" info="Null pointer dereference"/>
+            <location file="trees.c" line="328" column="25" info="Assignment &apos;header=fopen(&quot;trees.h&quot;,&quot;w&quot;)&apos;, assigned value is 0"/>
+            <location file="trees.c" line="328" column="25" info="Assuming allocation function fails"/>
+            <symbol>header</symbol>
+        </error>
+        <error id="nullPointerOutOfResources" severity="warning" msg="If resource allocation fails, then there is a possible null pointer dereference: header" verbose="If resource allocation fails, then there is a possible null pointer dereference: header" cwe="476" file0="trees.c">
+            <location file="trees.c" line="347" column="13" info="Null pointer dereference"/>
+            <location file="trees.c" line="328" column="25" info="Assignment &apos;header=fopen(&quot;trees.h&quot;,&quot;w&quot;)&apos;, assigned value is 0"/>
+            <location file="trees.c" line="328" column="25" info="Assuming allocation function fails"/>
+            <symbol>header</symbol>
+        </error>
+        <error id="nullPointerOutOfResources" severity="warning" msg="If resource allocation fails, then there is a possible null pointer dereference: header" verbose="If resource allocation fails, then there is a possible null pointer dereference: header" cwe="476" file0="trees.c">
+            <location file="trees.c" line="349" column="17" info="Null pointer dereference"/>
+            <location file="trees.c" line="328" column="25" info="Assignment &apos;header=fopen(&quot;trees.h&quot;,&quot;w&quot;)&apos;, assigned value is 0"/>
+            <location file="trees.c" line="328" column="25" info="Assuming allocation function fails"/>
+            <symbol>header</symbol>
+        </error>
+        <error id="nullPointerOutOfResources" severity="warning" msg="If resource allocation fails, then there is a possible null pointer dereference: header" verbose="If resource allocation fails, then there is a possible null pointer dereference: header" cwe="476" file0="trees.c">
+            <location file="trees.c" line="353" column="13" info="Null pointer dereference"/>
+            <location file="trees.c" line="328" column="25" info="Assignment &apos;header=fopen(&quot;trees.h&quot;,&quot;w&quot;)&apos;, assigned value is 0"/>
+            <location file="trees.c" line="328" column="25" info="Assuming allocation function fails"/>
+            <symbol>header</symbol>
+        </error>
+        <error id="nullPointerOutOfResources" severity="warning" msg="If resource allocation fails, then there is a possible null pointer dereference: header" verbose="If resource allocation fails, then there is a possible null pointer dereference: header" cwe="476" file0="trees.c">
+            <location file="trees.c" line="356" column="17" info="Null pointer dereference"/>
+            <location file="trees.c" line="328" column="25" info="Assignment &apos;header=fopen(&quot;trees.h&quot;,&quot;w&quot;)&apos;, assigned value is 0"/>
+            <location file="trees.c" line="328" column="25" info="Assuming allocation function fails"/>
+            <symbol>header</symbol>
+        </error>
+        <error id="nullPointerOutOfResources" severity="warning" msg="If resource allocation fails, then there is a possible null pointer dereference: header" verbose="If resource allocation fails, then there is a possible null pointer dereference: header" cwe="476" file0="trees.c">
+            <location file="trees.c" line="360" column="13" info="Null pointer dereference"/>
+            <location file="trees.c" line="328" column="25" info="Assignment &apos;header=fopen(&quot;trees.h&quot;,&quot;w&quot;)&apos;, assigned value is 0"/>
+            <location file="trees.c" line="328" column="25" info="Assuming allocation function fails"/>
+            <symbol>header</symbol>
+        </error>
+    </errors>
+</results>
