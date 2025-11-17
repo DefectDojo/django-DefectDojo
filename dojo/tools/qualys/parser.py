@@ -311,24 +311,10 @@ def parse_finding(host, tree):
                         split_cvss(cvss2, temp)
                         # DefectDojo does not support cvssv2
                         temp["CVSS_vector"] = None
-
             # CVE and LINKS
-            temp_cve_details = list(vuln_item.iterfind("CVE_ID_LIST/CVE_ID"))
-            if temp_cve_details:
-                cve_list = []
-                link_list = []
-                for cve_detail in temp_cve_details:
-                    cve_id = cve_detail.findtext("ID")
-                    cve_url = cve_detail.findtext("URL")
-                    if cve_id:
-                        cve_list.append(cve_id)
-                    if cve_url:
-                        link_list.append(cve_url)
-
-                temp["cve_list"] = cve_list       # list of CVE strings
-                temp["links"] = "\n".join(link_list)
-            else:
-                temp["cve_list"] = []
+            temp_cve_details = [(cve.findtext("ID"), cve.findtext("URL")) for cve in vuln_item.iterfind("CVE_ID_LIST/CVE_ID")]
+            temp["cve_list"] = [cve_id for cve_id, _ in temp_cve_details if cve_id]
+            temp["links"] = [url for _, url in temp_cve_details if url]
 
         # Generate severity from number in XML's 'SEVERITY' field, if not present default to 'Informational'
         sev = get_severity(vuln_item.findtext("SEVERITY"))
