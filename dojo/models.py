@@ -1772,6 +1772,12 @@ class Endpoint(models.Model):
             ),
         ]
 
+    def __init__(self, *args, **kwargs):
+        if settings.V3_FEATURE_LOCATIONS:
+            msg = "Endpoint model is deprecated when V3_FEATURE_LOCATIONS is enabled"
+            raise NotImplementedError(msg)
+        super().__init__(*args, **kwargs)
+
     def __hash__(self):
         return self.__str__().__hash__()
 
