@@ -311,22 +311,16 @@ def parse_finding(host, tree):
                         split_cvss(cvss2, temp)
                         # DefectDojo does not support cvssv2
                         temp["CVSS_vector"] = None
-
             # CVE and LINKS
-            temp_cve_details = vuln_item.iterfind("CVE_ID_LIST/CVE_ID")
-            if temp_cve_details:
-                cl = {
-                    cve_detail.findtext("ID"): cve_detail.findtext("URL")
-                    for cve_detail in temp_cve_details
-                }
-                temp["cve"] = "\n".join(list(cl.keys()))
-                temp["links"] = "\n".join(list(cl.values()))
+            temp_cve_details = [(cve.findtext("ID"), cve.findtext("URL")) for cve in vuln_item.iterfind("CVE_ID_LIST/CVE_ID")]
+            temp["cve_list"] = [cve_id for cve_id, _ in temp_cve_details if cve_id]
+            temp["links"] = [url for _, url in temp_cve_details if url]
 
         # Generate severity from number in XML's 'SEVERITY' field, if not present default to 'Informational'
         sev = get_severity(vuln_item.findtext("SEVERITY"))
         finding = None
         if temp_cve_details:
-            refs = "\n".join(list(cl.values()))
+            refs = temp.get("links", "")
             finding = Finding(
                 title="QID-" + gid[4:] + " | " + temp["vuln_name"],
                 mitigation=temp["solution"],
@@ -363,6 +357,7 @@ def parse_finding(host, tree):
         finding.verified = True
         finding.unsaved_endpoints = []
         finding.unsaved_endpoints.append(ep)
+        finding.unsaved_vulnerability_ids = temp.get("cve_list", [])
         ret_rows.append(finding)
     return ret_rows
 

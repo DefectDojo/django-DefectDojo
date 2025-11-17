@@ -1145,12 +1145,14 @@ def close_finding(request, fid):
     note_type_activation = Note_Type.objects.filter(is_active=True)
     missing_note_types = get_missing_mandatory_notetypes(finding) if len(note_type_activation) else note_type_activation
     form = CloseFindingForm(
+        instance=finding,
         missing_note_types=missing_note_types,
         can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user),
     )
     if request.method == "POST":
         form = CloseFindingForm(
             request.POST,
+            instance=finding,
             missing_note_types=missing_note_types,
             can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user),
         )
