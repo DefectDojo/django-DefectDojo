@@ -24,6 +24,7 @@ class TestPWNSASTParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)
             self.assertEqual(3, len(findings))
+            self.assertEqual(True, findings[0].fix_available)
 
     def test_one_dup_finding(self):
         with (get_unit_tests_scans_path("pwn_sast") / "one_dup_finding.json").open(encoding="utf-8") as testfile:

@@ -115,6 +115,10 @@ class PWNSASTParser:
                             file_path=offending_file,
                             unique_id_from_tool=unique_finding_key,
                         )
+                        if mitigation:
+                            finding.fix_available = True
+                        else:
+                            finding.fix_available = False
                         findings[unique_finding_key] = finding
 
             return list(findings.values())
