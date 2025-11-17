@@ -4692,11 +4692,14 @@ class Answered_Survey(models.Model):
         return self.survey.name
 
 
+def default_expiration():
+    return timezone.now() + timedelta(days=7)
+
 class General_Survey(models.Model):
     survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
     num_responses = models.IntegerField(default=0)
     generated = models.DateTimeField(auto_now_add=True, null=True)
-    expiration = models.DateTimeField(default=timezone.now() + timedelta(days=7))
+    expiration = models.DateTimeField(default=default_expiration)
 
     class Meta:
         verbose_name = _("General Engagement Survey")
