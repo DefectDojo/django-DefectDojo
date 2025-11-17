@@ -512,7 +512,7 @@ The HELM schema will be generated for you.
 
 # General information about chart values
 
-![Version: 1.8.3-dev](https://img.shields.io/badge/Version-1.8.3--dev-informational?style=flat-square) ![AppVersion: 2.53.0-dev](https://img.shields.io/badge/AppVersion-2.53.0--dev-informational?style=flat-square)
+![Version: 1.9.0-dev](https://img.shields.io/badge/Version-1.9.0--dev-informational?style=flat-square) ![AppVersion: 2.53.0-dev](https://img.shields.io/badge/AppVersion-2.53.0--dev-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -700,7 +700,6 @@ A Helm chart for Kubernetes to install DefectDojo
 | images.nginx.image.repository | string | `"defectdojo/defectdojo-nginx"` |  |
 | images.nginx.image.tag | string | `""` | If empty, use appVersion. Another possible values are: latest, X.X.X, X.X.X-alpine (where X.X.X is version of DD). For dev builds (only for testing purposes): nightly-dev, nightly-dev-alpine. To see all, check https://hub.docker.com/r/defectdojo/defectdojo-nginx/tags. |
 | initializer.affinity | object | `{}` |  |
-| initializer.annotations | object | `{}` |  |
 | initializer.automountServiceAccountToken | bool | `false` |  |
 | initializer.containerSecurityContext | object | `{}` | Container security context for the initializer Job container |
 | initializer.extraEnv | list | `[]` | Additional environment variables injected to the initializer job pods. |
@@ -711,6 +710,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | initializer.keepSeconds | int | `60` | A positive integer will keep this Job and Pod deployed for the specified number of seconds, after which they will be removed. For all other values, the Job and Pod will remain deployed. |
 | initializer.labels | object | `{}` |  |
 | initializer.nodeSelector | object | `{}` |  |
+| initializer.podAnnotations | object | `{}` |  |
 | initializer.podSecurityContext | object | `{}` | Pod security context for the initializer Job |
 | initializer.resources.limits.cpu | string | `"2000m"` |  |
 | initializer.resources.limits.memory | string | `"512Mi"` |  |
