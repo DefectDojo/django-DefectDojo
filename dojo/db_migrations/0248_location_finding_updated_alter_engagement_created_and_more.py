@@ -12,7 +12,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0242_file_upload_cleanup'),
+        ('dojo', '0247_remove_finding_insert_insert_and_more'),
     ]
 
     operations = [
