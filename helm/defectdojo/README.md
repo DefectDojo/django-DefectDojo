@@ -493,9 +493,26 @@ kubectl delete serviceAccount defectdojo
 kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 ```
 
+## Development/contribution
+
+In case you decide to help with the improvement of the HELM chart, keep in mind that values/descriptions might need to be adjusted in multiple places (see below).
+
+### HELM Docs update
+
+Documentation provided in the README file needs to contain the latest information from `values.yaml` and all other related assets.
+If GitHub Action _Lint Helm chart / Update documentation_ step fails, install https://github.com/norwoodj/helm-docs and run locally `helm-docs --chart-search-root helm/deeefectdojo` before committing your changes.
+The helm-docs documentation will be generated for you.
+     
+### HELM Schema update
+
+The HELM structure supports the existence of a `values.schema.json` file. This file is used to validate all values provided by the user before Helm starts rendering templates.
+The chart needs to have a `values.schema.json` file that is compatible with the default `values.yaml` file.
+If GitHub Action _Lint Helm chart / Update schema_ step fails, install https://github.com/losisin/helm-values-schema-json and run locally `helm schema --use-helm-docs` in `helm/defectdojo` before committing your changes.
+The HELM schema will be generated for you.
+
 # General information about chart values
 
-![Version: 1.8.1](https://img.shields.io/badge/Version-1.8.1-informational?style=flat-square) ![AppVersion: 2.52.1](https://img.shields.io/badge/AppVersion-2.52.1-informational?style=flat-square)
+![Version: 1.8.2](https://img.shields.io/badge/Version-1.8.2-informational?style=flat-square) ![AppVersion: 2.52.2](https://img.shields.io/badge/AppVersion-2.52.2-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 

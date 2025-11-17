@@ -81,5 +81,9 @@ class KubeAuditParser:
                 static_finding=True,
                 dynamic_finding=False,
             )
+            if msg:
+                finding.fix_available = True
+            else:
+                finding.fix_available = False
             findings.append(finding)
         return findings

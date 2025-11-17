@@ -27,7 +27,27 @@
     "matchDatasources": "github-releases",
     "matchPackageNames": "renovatebot/renovate",
     "schedule": ["* * * * 0"]
+  },{
+    "description": "Minikube does not like freshly released k8s. We need to wait some time so it will be adopted",
+    "matchDatasources": [
+      "custom.endoflife-oldest-maintained",
+      "github-releases"
+    ],
+    "matchPackageNames": [
+      "kubernetes",
+      "kubernetes/kubernetes"
+    ],
+    "minimumReleaseAge": "2 days"
   }],
+  "customDatasources": {
+    "endoflife-oldest-maintained": {
+      "defaultRegistryUrlTemplate": "https://endoflife.date/api/v1/products/{{packageName}}",
+      "format": "json",
+      "transformTemplates": [
+        "{ \"releases\": [$.result.releases[isMaintained = true]^(<eolFrom)[0].latest.{\"version\": name, \"releaseTimestamp\": date, \"changelogUrl\": link}], \"sourceUrl\": \"https://github.com/kubernetes/kubernetes\", \"homepage\": \"https://kubernetes.io/\" }"
+      ]
+    }
+  },
   "customManagers": [
     {
       "customType": "regex",
