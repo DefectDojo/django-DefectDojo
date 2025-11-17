@@ -4696,7 +4696,7 @@ class General_Survey(models.Model):
     survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
     num_responses = models.IntegerField(default=0)
     generated = models.DateTimeField(auto_now_add=True, null=True)
-    expiration = models.DateTimeField(null=False, blank=False)
+    expiration = models.DateTimeField(default=timezone.now() + timedelta(days=7))
 
     class Meta:
         verbose_name = _("General Engagement Survey")
@@ -4704,6 +4704,10 @@ class General_Survey(models.Model):
 
     def __str__(self):
         return self.survey.name
+
+    def clean(self):
+        if self.expiration and timezone.is_naive(self.expiration):
+            self.expiration = timezone.make_aware(self.expiration)
 
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
