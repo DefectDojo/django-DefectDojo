@@ -127,7 +127,7 @@ uritemplate==4.2.0
 pilkit==3.0
 yarl==1.22.0
 django-appconf==1.2.0
-click==8.3.0
+click==8.3.1
 jsonschema==4.25.1
 jmespath==1.0.1
 python3-openid==3.2.0
