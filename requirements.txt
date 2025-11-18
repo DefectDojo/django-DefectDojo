@@ -151,7 +151,7 @@ tinycss2==1.4.0
 argon2-cffi-bindings==25.1.0
 isodate==0.7.2
 oauthlib==3.3.1
-rpds-py==0.28.0
+rpds-py==0.29.0
 s3transfer==0.14.0
 setuptools==80.9.0
 referencing==0.37.0
