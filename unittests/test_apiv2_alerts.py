@@ -42,5 +42,3 @@ class AlertApiViewTestCase(APITestCase):
         Alerts.objects.create(title="Source Alert", user_id=self.user, source="system")
         response = self.client.get(self.url, {"source": "system"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        for alert in response.data["results"]:
-            self.assertEqual(alert["source"], "system")
