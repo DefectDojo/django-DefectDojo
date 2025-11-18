@@ -1069,7 +1069,7 @@ class FindingCreateNotificationAPITest(DojoAPITestCase):
         self.assertEqual(call_args[1]["title"], "Addition of Finding With Auto-Assigned Reporter Notification")
         self.assertEqual(
             call_args[1]["description"],
-            f'Finding "Finding With Auto-Assigned Reporter Notification" was added by {self.admin}'
+            f'Finding "Finding With Auto-Assigned Reporter Notification" was added by {self.admin}',
         )
         self.assertEqual(call_args[1]["icon"], "exclamation-triangle")        # Verify the finding was created successfully
         created_id = response.data.get("id")
@@ -1098,7 +1098,7 @@ class FindingCreateNotificationAPITest(DojoAPITestCase):
         self.assertEqual(call_args[1]["title"], "Addition of Finding With Explicit Reporter Notification")
         self.assertEqual(
             call_args[1]["description"],
-            f'Finding "Finding With Explicit Reporter Notification" was added by {explicit_reporter}'
+            f'Finding "Finding With Explicit Reporter Notification" was added by {explicit_reporter}',
         )
         self.assertEqual(call_args[1]["icon"], "exclamation-triangle")
 
@@ -1129,7 +1129,7 @@ class FindingCreateNotificationAPITest(DojoAPITestCase):
         self.assertEqual(call_args[1]["title"], "Addition of Test Finding for Parameter Validation")
         self.assertEqual(
             call_args[1]["description"],
-            f'Finding "Test Finding for Parameter Validation" was added by {self.admin}'
+            f'Finding "Test Finding for Parameter Validation" was added by {self.admin}',
         )
         self.assertEqual(call_args[1]["url"], f"/finding/{created_finding.id}")
         self.assertEqual(call_args[1]["icon"], "exclamation-triangle")
