@@ -1,11 +1,12 @@
 import logging
+from django.conf import settings
 from rest_framework.generics import GenericAPIView
 from dojo.api_v2.utils import http_response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from django.core.cache import cache
-from dojo.risk_acceptance.helper import update_or_create_url_risk_acceptance
+from dojo.user.queries import get_user
 from dojo.api_v2.notifications.serializers import SerializerEmailNotificationRiskAcceptance
+from dojo.models import Risk_Acceptance
 from drf_spectacular.utils import (
     extend_schema,
 )
@@ -70,6 +71,13 @@ class NotificationEmailApiView(GenericAPIView):
             enable_acceptance_risk_for_email=enable_acceptance_risk_for_email,
             template=template,
         )
-        
+
+        risk_acceptance = Risk_Acceptance.objects.get(id=risk_acceptance_id)
+        system_user = get_user(settings.SYSTEM_USER)
+        risk_acceptance.add_note(
+            f"Email notification send to {recipients} successfully, Message: " + (message if message else "No message provided"),
+            author=system_user
+        )
+
         return http_response.ok(
             message="Risk acceptance email sent successfully")

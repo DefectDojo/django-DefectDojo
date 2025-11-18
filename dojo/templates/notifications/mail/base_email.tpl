@@ -237,6 +237,11 @@
 	</head>
 	<body class="proton-body">
 		<div class="proton-wrapper">
+			{% if risk_acceptance.long_term_acceptance and message %}
+			<div style="padding: 15px; background-color: #fff3cd; border-left: 5px solid #00ab46; margin-bottom: 20px; font-weight: bold;">
+				🔔 {{message}}
+			</div>
+			{% endif %}
 			<table class="proton-table">
 				<tbody>
 					<tr class="proton-tr">
