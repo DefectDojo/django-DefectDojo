@@ -1019,6 +1019,123 @@ class FindingCreateUpdateMitigatedFieldsAPITest(DojoAPITestCase):
             self.assertEqual(updated.mitigated_by, self.admin)
 
 
+class FindingCreateNotificationAPITest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        testuser = User.objects.get(username="admin")
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.admin = testuser
+        self.base_url = "/api/v2/findings/"
+
+    def _minimal_create_payload(self, title: str):
+        return {
+            "test": 3,
+            "found_by": [],
+            "title": title,
+            "date": "2020-05-20",
+            "cwe": 1,
+            "severity": "High",
+            "description": "TEST finding for notification",
+            "mitigation": "MITIGATION",
+            "impact": "HIGH",
+            "references": "",
+            "active": True,
+            "verified": False,
+            "false_p": False,
+            "duplicate": False,
+            "out_of_scope": False,
+            "under_review": False,
+            "under_defect_review": False,
+            "numerical_severity": "S0",
+        }
+
+    @patch("dojo.api_v2.serializers.create_notification")
+    def test_create_calls_notification_with_auto_assigned_reporter(self, mock_create_notification):
+        """Test that create_notification is called when creating a finding without explicit reporter."""
+        payload = self._minimal_create_payload("Finding with auto-assigned reporter notification")
+
+        response = self.client.post(self.base_url, payload, format="json")
+        self.assertEqual(201, response.status_code, response.content[:1000])
+
+        # Verify notification was called
+        mock_create_notification.assert_called_once()
+        call_args = mock_create_notification.call_args
+
+        # Check the notification parameters
+        self.assertEqual(call_args[1]["event"], "finding_added")
+        self.assertEqual(call_args[1]["title"], "Addition of Finding With Auto-Assigned Reporter Notification")
+        self.assertEqual(
+            call_args[1]["description"],
+            f'Finding "Finding With Auto-Assigned Reporter Notification" was added by {self.admin}'
+        )
+        self.assertEqual(call_args[1]["icon"], "exclamation-triangle")        # Verify the finding was created successfully
+        created_id = response.data.get("id")
+        self.assertIsNotNone(created_id)
+        created_finding = Finding.objects.get(id=created_id)
+        self.assertEqual(created_finding.reporter, self.admin)
+
+    @patch("dojo.api_v2.serializers.create_notification")
+    def test_create_calls_notification_with_explicit_reporter(self, mock_create_notification):
+        """Test that create_notification is called when creating a finding with explicit reporter."""
+        # Create another user to use as explicit reporter
+        explicit_reporter = User.objects.create(username="explicit_reporter", email="reporter@test.com")
+
+        payload = self._minimal_create_payload("Finding with explicit reporter notification")
+        payload["reporter"] = explicit_reporter.id
+
+        response = self.client.post(self.base_url, payload, format="json")
+        self.assertEqual(201, response.status_code, response.content[:1000])
+
+        # Verify notification was called
+        mock_create_notification.assert_called_once()
+        call_args = mock_create_notification.call_args
+
+        # Check the notification parameters
+        self.assertEqual(call_args[1]["event"], "finding_added")
+        self.assertEqual(call_args[1]["title"], "Addition of Finding With Explicit Reporter Notification")
+        self.assertEqual(
+            call_args[1]["description"],
+            f'Finding "Finding With Explicit Reporter Notification" was added by {explicit_reporter}'
+        )
+        self.assertEqual(call_args[1]["icon"], "exclamation-triangle")
+
+        # Verify the finding was created with explicit reporter
+        created_id = response.data.get("id")
+        self.assertIsNotNone(created_id)
+        created_finding = Finding.objects.get(id=created_id)
+        self.assertEqual(created_finding.reporter, explicit_reporter)
+
+    @patch("dojo.api_v2.serializers.create_notification")
+    def test_notification_parameters_are_correct(self, mock_create_notification):
+        """Test that all notification parameters are properly formatted and passed."""
+        payload = self._minimal_create_payload("Test Finding for Parameter Validation")
+
+        response = self.client.post(self.base_url, payload, format="json")
+        self.assertEqual(201, response.status_code, response.content[:1000])
+
+        # Get the created finding to verify URL formation
+        created_id = response.data.get("id")
+        created_finding = Finding.objects.get(id=created_id)
+
+        # Verify notification was called with correct parameters
+        mock_create_notification.assert_called_once()
+        call_args = mock_create_notification.call_args
+
+        # Verify all required parameters exist
+        self.assertEqual(call_args[1]["event"], "finding_added")
+        self.assertEqual(call_args[1]["title"], "Addition of Test Finding for Parameter Validation")
+        self.assertEqual(
+            call_args[1]["description"],
+            f'Finding "Test Finding for Parameter Validation" was added by {self.admin}'
+        )
+        self.assertEqual(call_args[1]["url"], f"/finding/{created_finding.id}")
+        self.assertEqual(call_args[1]["icon"], "exclamation-triangle")
+        self.assertEqual(call_args[1]["finding"], created_finding)
+
+
 class EndpointStatusTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
