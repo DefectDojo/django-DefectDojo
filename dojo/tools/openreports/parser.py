@@ -25,7 +25,6 @@ DESCRIPTION_TEMPLATE = """{message}
 **Source:** {source}
 **Package Name:** {pkg_name}
 **Installed Version:** {installed_version}
-**Fixed Version:** {fixed_version}
 **Primary URL:** {primary_url}
 """
 
@@ -225,7 +224,6 @@ class OpenreportsParser:
                 source=source,
                 pkg_name=pkg_name,
                 installed_version=installed_version,
-                fixed_version=fixed_version,
                 primary_url=primary_url,
             )
 
@@ -244,7 +242,8 @@ class OpenreportsParser:
 
             # Create tags
             tags = [category, source]
-            if scope_kind := service_name.split("/")[1] if "/" in service_name else "":
+            scope_kind = service_name.split("/")[1] if "/" in service_name else ""
+            if scope_kind:
                 tags.append(scope_kind)
             finding = Finding(
                 test=test,
@@ -261,6 +260,7 @@ class OpenreportsParser:
                 static_finding=True,
                 dynamic_finding=False,
                 fix_available=fix_available,
+                fix_version=fixed_version or None,
                 unsaved_tags=tags,
             )
 
