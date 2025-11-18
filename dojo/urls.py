@@ -81,6 +81,7 @@ from dojo.api_v2.views import (
 )
 from dojo.api_v2.general_settings.views import GeneralSettingsViewSet
 from dojo.api_v2.manager_cache.views import ManagerCacheApiView
+from dojo.api_v2.alerts.views import AlertViewSet
 from dojo.exclusive_permission.view import ExclusivePermissionViewSet
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.banner.urls import urlpatterns as banner_urls
@@ -122,6 +123,7 @@ from dojo.api_v2.manager_cache.urls import urlpatterns as manager_cache_urls
 from dojo.api_v2.metrics.urls import urlpatterns as metrics_general_urls
 from dojo.api_v2.security_posture.urls import urlpatterns as security_posture_urls
 from dojo.security_posture.urls import urlpatterns as security_posture_urls_view
+from dojo.api_v2.alerts.urls import urlpatterns as alert_urls
 
 from dojo.utils import get_system_setting
 
@@ -203,6 +205,7 @@ v2_api.register(r"transfer_finding", TransferFindingViewSet, basename="transfer_
 v2_api.register(r"transfer_finding_findings", TransferFindingFindingsViewSet, basename="transfer_finding_findings")
 v2_api.register(r"finding_exclusions", FindingExclusionViewSet, basename="finding_exclusions")
 v2_api.register(r"general_settings", GeneralSettingsViewSet, basename="general_settings")
+v2_api.register(r"alerts", AlertViewSet, basename="alerts")
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls
@@ -287,6 +290,7 @@ urlpatterns += security_posture_urls
 urlpatterns += security_posture_urls_view
 urlpatterns += api_v2_urls
 urlpatterns += survey_urls
+urlpatterns += alert_urls 
 
 if hasattr(settings, "DJANGO_METRICS_ENABLED"):
     if settings.DJANGO_METRICS_ENABLED:
