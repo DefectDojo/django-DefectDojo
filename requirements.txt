@@ -103,7 +103,7 @@ pyarrow==22.0.0
 # Pinning Dependencies
 azure-core==1.36.0
 protobuf==6.33.0
-billiard==4.2.1
+billiard==4.2.3
 botocore==1.40.75
 et_xmlfile==2.0.0
 inflection==0.5.1
@@ -127,7 +127,7 @@ uritemplate==4.2.0
 pilkit==3.0
 yarl==1.22.0
 django-appconf==1.2.0
-click==8.3.0
+click==8.3.1
 jsonschema==4.25.1
 jmespath==1.0.1
 python3-openid==3.2.0
@@ -151,7 +151,7 @@ tinycss2==1.4.0
 argon2-cffi-bindings==25.1.0
 isodate==0.7.2
 oauthlib==3.3.1
-rpds-py==0.28.0
+rpds-py==0.29.0
 s3transfer==0.14.0
 setuptools==80.9.0
 referencing==0.37.0
