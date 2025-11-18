@@ -115,6 +115,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
     DD_SOCIAL_AUTH_CREATE_USER_MAPPING=(str, "username"),  # could also be email or fullname
     DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
+    DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS=(bool, False),  # If true, the redirect after login will use the HTTPS protocol
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT=(str, ""),
@@ -174,6 +175,12 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ""),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ""),
     DD_SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL=(bool, True),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION=(str, "Please use the standard login below."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED=(str, "Social login was canceled. Please try again or use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED=(str, "Social login failed. Please try again or use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN=(str, "You are not authorized to log in via this method. Please contact support or use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE=(str, "An unexpected error occurred during social login. Please use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR=(str, "Social login failed due to an invalid or expired token. Please try again or use the standard login."),
     DD_SAML2_ENABLED=(bool, False),
     # Allows to override default SAML authentication backend. Check https://djangosaml2.readthedocs.io/contents/setup.html#custom-user-attributes-processing
     DD_SAML2_AUTHENTICATION_BACKENDS=(str, "djangosaml2.backends.Saml2Backend"),
@@ -267,6 +274,8 @@ env = environ.FileAwareEnv(
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
+    # Batch size for import/reimport deduplication processing
+    DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=(int, 1000),
     # Delete Auditlogs older than x month; -1 to keep all logs
     DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
     # Batch size for flushing audit logs per task run
@@ -576,6 +585,7 @@ PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
 SHOW_LOGIN_FORM = env("DD_SOCIAL_AUTH_SHOW_LOGIN_FORM")
 SOCIAL_LOGIN_AUTO_REDIRECT = env("DD_SOCIAL_LOGIN_AUTO_REDIRECT")
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = env("DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS")
 SOCIAL_AUTH_CREATE_USER = env("DD_SOCIAL_AUTH_CREATE_USER")
 SOCIAL_AUTH_CREATE_USER_MAPPING = env("DD_SOCIAL_AUTH_CREATE_USER_MAPPING")
 
@@ -648,6 +658,13 @@ if value := env("DD_SOCIAL_AUTH_OIDC_JWKS_URI"):
     SOCIAL_AUTH_OIDC_JWKS_URI = value
 if value := env("DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT"):
     SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT = value
+
+SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR")
 
 AUTH0_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED")
 SOCIAL_AUTH_AUTH0_KEY = env("DD_SOCIAL_AUTH_AUTH0_KEY")
@@ -1684,6 +1701,7 @@ DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 
 TRACK_IMPORT_HISTORY = env("DD_TRACK_IMPORT_HISTORY")
+IMPORT_REIMPORT_DEDUPE_BATCH_SIZE = env("DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE")
 
 # ------------------------------------------------------------------------------
 # JIRA
@@ -1934,6 +1952,7 @@ VULNERABILITY_URLS = {
     "TS-": """https://tailscale.com/security-bulletins#""",  # e.g. https://tailscale.com/security-bulletins or https://tailscale.com/security-bulletins#ts-2022-001-1243
     "TYPO3-": "https://typo3.org/security/advisory/",  # e.g. https://typo3.org/security/advisory/typo3-core-sa-2025-010
     "USN-": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
+    "VA-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/va-25-282-01
     "VAR-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/var-201801-0152
     "VNS": "https://vulners.com/",
     "WID-SEC-W-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/wid-sec-w-2025-1468

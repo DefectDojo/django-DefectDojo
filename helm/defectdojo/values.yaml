@@ -37,7 +37,7 @@ images:
       # For dev builds (only for testing purposes): nightly-dev, nightly-dev-debian, nightly-dev-alpine.
       # To see all, check https://hub.docker.com/r/defectdojo/defectdojo-django/tags.
       tag: ""
-      # -- Prefix "sha@" is expected in this place
+      # -- Prefix "sha256:" is expected in this place
       digest: ""
   nginx:
     image:
@@ -48,7 +48,7 @@ images:
       # For dev builds (only for testing purposes): nightly-dev, nightly-dev-alpine.
       # To see all, check https://hub.docker.com/r/defectdojo/defectdojo-nginx/tags.
       tag: ""
-      # -- Prefix "sha@" is expected in this place
+      # -- Prefix "sha256:" is expected in this place
       digest: ""
 
 # -- Enables application network policy
@@ -486,7 +486,7 @@ initializer:
   run: true
   automountServiceAccountToken: false
   jobAnnotations: {}
-  annotations: {}
+  podAnnotations: {}
   labels: {}
   # -- A positive integer will keep this Job and Pod deployed for the specified number of seconds, after which they will be removed. For all other values, the Job and Pod will remain deployed.
   keepSeconds: 60
