@@ -70,3 +70,4 @@ PyYAML==6.0.3
 pyopenssl==25.3.0
 parameterized==0.9.0
 setuptools==80.9.0
+python-logstash==0.4.8 # Required to configure logstash logging to elk
