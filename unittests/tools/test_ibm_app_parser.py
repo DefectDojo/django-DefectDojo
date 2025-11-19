@@ -23,3 +23,4 @@ class TestIbmAppParser(DojoTestCase):
 
         finding = findings[1]
         self.assertEqual("Info", finding.severity)
+        self.assertEqual(True, finding.fix_available)
