@@ -321,6 +321,7 @@ Number  Content
                 self.assertEqual(7.5, finding.cvssv3_score)
 
     def test_severity_prio(self):
+        # this tests issue #13647. The unittest file is just a copy of cvss_severity_source.json with edited severities
         with sample_path("severity_prio.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
