@@ -35,9 +35,9 @@ class TestOpenreportsParser(DojoTestCase):
             self.assertEqual(1, len(finding1.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2025-9232", finding1.unsaved_vulnerability_ids[0])
             self.assertEqual("CVE-2025-9232", finding1.vuln_id_from_tool)
-            self.assertIn("vulnerability scan", finding1.tags)
-            self.assertIn("image-scanner", finding1.tags)
-            self.assertIn("Deployment", finding1.tags)
+            self.assertIn("vulnerability scan", finding1.unsaved_tags)
+            self.assertIn("image-scanner", finding1.unsaved_tags)
+            self.assertIn("Deployment", finding1.unsaved_tags)
 
             # Test second finding (fail/high severity)
             finding2 = findings[1]
@@ -70,9 +70,9 @@ class TestOpenreportsParser(DojoTestCase):
             # Non-CVE policies should not have vulnerability IDs
             self.assertIsNone(finding3.unsaved_vulnerability_ids)
             self.assertEqual("CIS-BENCH-001", finding3.vuln_id_from_tool)
-            self.assertIn("compliance check", finding3.tags)
-            self.assertIn("compliance-scanner", finding3.tags)
-            self.assertIn("Deployment", finding3.tags)
+            self.assertIn("compliance check", finding3.unsaved_tags)
+            self.assertIn("compliance-scanner", finding3.unsaved_tags)
+            self.assertIn("Deployment", finding3.unsaved_tags)
 
     def test_list_format(self):
         with sample_path("openreports_list_format.json").open(encoding="utf-8") as test_file:
