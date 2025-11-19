@@ -3632,13 +3632,14 @@ class AddGeneralQuestionnaireForm(forms.ModelForm):
             if expiration < today:
                 msg = "The expiration cannot be in the past"
                 raise forms.ValidationError(msg)
-            if expiration.day == today.day:
+            if expiration == today:
                 msg = "The expiration cannot be today"
                 raise forms.ValidationError(msg)
-        else:
-            msg = "An expiration for the survey must be supplied"
-            raise forms.ValidationError(msg)
-        return expiration
+            return timezone.make_aware(
+                datetime.combine(expiration, datetime.min.time()),
+            )
+        msg = "An expiration for the survey must be supplied"
+        raise forms.ValidationError(msg)
 
 
 class Delete_Questionnaire_Form(forms.ModelForm):
