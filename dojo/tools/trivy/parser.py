@@ -255,26 +255,30 @@ class TrivyParser:
                     cvssclass = None
                     cvssv3 = None
                     cvssv3_score = None
-                    # Iterate over the possible severity sources tom find the first match
-                    for severity_source in [detected_severity_source, *CVSS_SEVERITY_SOURCES]:
-                        cvssclass = cvss.get(severity_source, None)
+                    # Use severity field if present, otherwise fallback to CVSS
+                    if vuln.get("Severity"):
+                        severity = TRIVY_SEVERITIES[vuln["Severity"]]
+                    else:
+                        # Iterate over the possible severity sources to find the first match
+                        for severity_source in [detected_severity_source, *CVSS_SEVERITY_SOURCES]:
+                            cvssclass = cvss.get(severity_source, None)
+                            if cvssclass is not None:
+                                break
+                        # Parse the CVSS class if it is not None
                         if cvssclass is not None:
-                            break
-                    # Parse the CVSS class if it is not None
-                    if cvssclass is not None:
-                        if cvss_data := parse_cvss_data(cvssclass.get("V3Vector", "")):
-                            cvssv3 = cvss_data.get("cvssv3")
-                            cvssv3_score = cvss_data.get("cvssv3_score")
-                            severity = cvss_data.get("severity")
-                        elif (cvss_v3_score := cvssclass.get("V3Score")) is not None:
-                            cvssv3_score = cvss_v3_score
-                            severity = self.convert_cvss_score(cvss_v3_score)
-                        elif (cvss_v2_score := cvssclass.get("V2Score")) is not None:
-                            severity = self.convert_cvss_score(cvss_v2_score)
+                            if cvss_data := parse_cvss_data(cvssclass.get("V3Vector", "")):
+                                cvssv3 = cvss_data.get("cvssv3")
+                                cvssv3_score = cvss_data.get("cvssv3_score")
+                                severity = cvss_data.get("severity")
+                            elif (cvss_v3_score := cvssclass.get("V3Score")) is not None:
+                                cvssv3_score = cvss_v3_score
+                                severity = self.convert_cvss_score(cvss_v3_score)
+                            elif (cvss_v2_score := cvssclass.get("V2Score")) is not None:
+                                severity = self.convert_cvss_score(cvss_v2_score)
+                            else:
+                                severity = self.convert_cvss_score(None)
                         else:
                             severity = self.convert_cvss_score(None)
-                    else:
-                        severity = TRIVY_SEVERITIES[vuln["Severity"]]
                     if target_class in {"os-pkgs", "lang-pkgs"}:
                         file_path = vuln.get("PkgPath")
                         if file_path is None:
