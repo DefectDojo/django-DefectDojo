@@ -456,7 +456,7 @@ class TestNotificationTriggersApi(APITestCase):
             f'Finding "Finding With Auto-Assigned Reporter Notification" was added by {self.admin}',
         )
         self.assertEqual(call_args[1]["icon"], "exclamation-triangle")
-        
+
         # Verify the finding was created successfully
         created_id = response.data.get("id")
         self.assertIsNotNone(created_id)
