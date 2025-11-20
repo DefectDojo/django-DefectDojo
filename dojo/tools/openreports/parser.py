@@ -240,11 +240,7 @@ class OpenreportsParser:
             active = result_status not in {"skip", "pass"}
             verified = result_status in {"fail", "warn"}
 
-            # Create tags
-            tags = [category, source]
-            scope_kind = service_name.split("/")[1] if "/" in service_name else ""
-            if scope_kind:
-                tags.append(scope_kind)
+            # Create finding
             finding = Finding(
                 test=test,
                 title=title,
@@ -261,8 +257,16 @@ class OpenreportsParser:
                 dynamic_finding=False,
                 fix_available=fix_available,
                 fix_version=fixed_version or None,
-                unsaved_tags=tags,
             )
+
+            # Create tags
+            tags = [category, source]
+            scope_kind = service_name.split("/")[1] if "/" in service_name else ""
+            if scope_kind:
+                tags.append(scope_kind)
+
+            # Set unsaved_tags attribute
+            finding.unsaved_tags = tags
 
             # Add vulnerability ID if it's a CVE
             if policy.startswith("CVE-"):
