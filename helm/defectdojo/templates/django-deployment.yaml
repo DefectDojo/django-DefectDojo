@@ -372,6 +372,10 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+    {{- with .Values.django.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
     {{- with .Values.django.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}

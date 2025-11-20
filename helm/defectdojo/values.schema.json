@@ -181,6 +181,30 @@
                         "automountServiceAccountToken": {
                             "type": "boolean"
                         },
+                        "autoscaling": {
+                            "description": "Autoscaling configuration for Celery worker deployment.",
+                            "type": "object",
+                            "properties": {
+                                "behavior": {
+                                    "type": "object"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "maxReplicas": {
+                                    "type": "integer"
+                                },
+                                "minReplicas": {
+                                    "type": "integer"
+                                },
+                                "targetCPUUtilizationPercentage": {
+                                    "type": "integer"
+                                },
+                                "targetMemoryUtilizationPercentage": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
                         "containerSecurityContext": {
                             "description": "Container security context for the Celery worker containers.",
                             "type": "object"
@@ -227,8 +251,23 @@
                             "type": "object"
                         },
                         "podAnnotations": {
-                            "description": "Annotations for the Celery beat pods.",
+                            "description": "Annotations for the Celery worker pods.",
                             "type": "object"
+                        },
+                        "podDisruptionBudget": {
+                            "description": "Configure pod disruption budgets for Celery worker ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget",
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "minAvailable": {
+                                    "type": "string"
+                                },
+                                "unhealthyPodEvictionPolicy": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "podSecurityContext": {
                             "description": "Pod security context for the Celery worker pods.",
@@ -271,6 +310,10 @@
                         "startupProbe": {
                             "description": "Enable startup probe for Celery worker container.",
                             "type": "object"
+                        },
+                        "terminationGracePeriodSeconds": {
+                            "description": "Termination grace period seconds for Celery worker pods.",
+                            "type": "integer"
                         },
                         "tolerations": {
                             "type": "array"
@@ -430,6 +473,30 @@
                 },
                 "automountServiceAccountToken": {
                     "type": "boolean"
+                },
+                "autoscaling": {
+                    "description": "Autoscaling configuration for the Django deployment.",
+                    "type": "object",
+                    "properties": {
+                        "behavior": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "maxReplicas": {
+                            "type": "integer"
+                        },
+                        "minReplicas": {
+                            "type": "integer"
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "integer"
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "integer"
+                        }
+                    }
                 },
                 "extraEnv": {
                     "description": "Additional environment variables injected to all Django containers and initContainers.",
@@ -596,6 +663,21 @@
                 "nodeSelector": {
                     "type": "object"
                 },
+                "podDisruptionBudget": {
+                    "description": "Configure pod disruption budgets for django ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget",
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "minAvailable": {
+                            "type": "string"
+                        },
+                        "unhealthyPodEvictionPolicy": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "podSecurityContext": {
                     "description": "Pod security context for the Django pods.",
                     "type": "object",
@@ -621,6 +703,10 @@
                 },
                 "strategy": {
                     "type": "object"
+                },
+                "terminationGracePeriodSeconds": {
+                    "description": "Termination grace period seconds for django pods.",
+                    "type": "integer"
                 },
                 "tolerations": {
                     "type": "array"
