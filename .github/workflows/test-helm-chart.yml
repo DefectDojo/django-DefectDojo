@@ -34,7 +34,7 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # v2.8.0
         with:
-          yamale_version: 6.0.0 # renovate: datasource=pypi depName=yamale versioning=semver
+          yamale_version: 6.1.0 # renovate: datasource=pypi depName=yamale versioning=semver
           yamllint_version: 1.37.1 # renovate: datasource=pypi depName=yamllint versioning=semver
 
       - name: Determine target branch
