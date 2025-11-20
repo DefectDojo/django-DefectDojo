@@ -1,10 +1,7 @@
 
 import csv
-import logging
 
 from dojo.models import Finding, Test
-
-logger = logging.getLogger(__name__)
 
 
 class ZoraParser:
@@ -26,8 +23,6 @@ class ZoraParser:
         for row in reader:
             title = row.get("title")
             severity = row.get("severity", "Info").capitalize()
-
-            # Build description using correct headers
             description = f"**Source**: {row.get('source')}\n"
             description += f"**Image**: {row.get('image')}\n"
             description += f"**ID**: {row.get('id')}\n"
@@ -42,21 +37,20 @@ class ZoraParser:
             status = row.get("status", "").upper()
             is_mitigated = status in {"PASS", "OK", "FIXED"}
 
-            # Determine if fix is available
-            fix_available = bool(row.get("fixVersion"))
-
-            findings.append(
-                Finding(
-                    title=title,
-                    description=description,
-                    severity=severity,
-                    mitigation=mitigation,
-                    static_finding=False,
-                    dynamic_finding=True,
-                    unique_id_from_tool=unique_id,
-                    test=test,
-                    is_mitigated=is_mitigated,
-                    fix_available=fix_available,
-                ),
+            finding = Finding(
+                title=title,
+                description=description,
+                severity=severity,
+                mitigation=mitigation,
+                static_finding=False,
+                dynamic_finding=True,
+                unique_id_from_tool=unique_id,
+                test=test,
+                is_mitigated=is_mitigated,
             )
+            vuln_id = row.get("id")
+            if vuln_id:
+                finding.unsaved_vulnerability_ids = [vuln_id]
+            findings.append(finding)
+
         return findings
