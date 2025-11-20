@@ -1090,9 +1090,8 @@ class EditRiskAcceptanceForm(forms.ModelForm):
 
 class RiskPendingForm(forms.ModelForm):
     YES_NO_CHOICES = [
-        (None, "--- Select an option ---"),
-        (True, "Yes"),
         (False, "No"),
+        (True, "Yes"),
     ]
 
     name = forms.CharField(max_length=255, required=True)
@@ -1105,7 +1104,7 @@ class RiskPendingForm(forms.ModelForm):
         choices=YES_NO_CHOICES,
         widget=forms.widgets.Select(attrs={'size': 1}),
         required=True,
-        initial="",
+        initial=False,
         help_text=("You can request long-term acceptance for this vulnerability. For more information, please review documentation"),
         label="Do you want to submit this request as a long-term acceptance?")
     accepted_by = forms.ModelMultipleChoiceField(

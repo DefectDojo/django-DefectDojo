@@ -234,7 +234,7 @@
                     </tr>
                     <tr>
                         <td>{{ risk_acceptance.created|date }}</td>
-                        {% if risk_acceptance.long_term_acceptance%}
+                        {% if risk_acceptance.long_term_acceptance %}
                             <td> 👤 {{risk_acceptance.reviewed_by}}</br></td>
                         {% endif %}
                         <td>
@@ -420,7 +420,9 @@
                     <th>Name</th>
                     <th>Date</th>
                     <th>Status</th>
-                    <th>Reviewed by</th>
+                    {% if risk_acceptance.long_term_acceptance %}
+                        <th>Reviewed by</th>
+                    {% endif %}
                     <th>Accepted by</th>
                     <th>Actions</th>
                 </thead>
@@ -462,7 +464,9 @@
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
                         <td>{{ finding|finding_display_status}}</td>
-                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_reviewed_by:risk_acceptance|safe}}</td>
+                        {% if risk_acceptance.long_term_acceptance %}
+                            <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_reviewed_by:risk_acceptance|safe}}</td>
+                        {% endif %}
                         <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_accepted_by:risk_acceptance|safe}}</td>
                         <td>
                             {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}

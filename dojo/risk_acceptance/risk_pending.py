@@ -24,6 +24,7 @@ from dojo.models import (
 from dojo.api_v2.api_error import ApiError
 from dojo.risk_acceptance.helper import post_jira_comments, get_product_type_prefix_key
 from dojo.product_type.helper import get_contacts_product_type_and_product_by_serverity
+from dojo.group.queries import users_with_permissions_to_approve_long_term_findings
 from dojo.risk_acceptance.notification import Notification
 from dojo.user.queries import get_role_members, get_user
 from dojo.group.queries import get_users_for_group_by_role
@@ -116,15 +117,14 @@ def risk_accepted_succesfully(
             risk_acceptance=risk_acceptance,
             finding=finding) 
 
-def user_has_permission_long_risk_acceptance(user, risk_acceptance):
+def user_has_permission_long_risk_acceptance(user, risk_acceptance, product):
     if risk_acceptance and risk_acceptance.long_term_acceptance:
-        users = get_users_for_group_by_role(
-            GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_Risk"),
-            "Risk" 
-        )
-        if user in users:
-            return True
-    return False
+        users = users_with_permissions_to_approve_long_term_findings("Approvers_Risk", "Risk", product),
+        try:
+            users.get(id=user.id)
+        except Dojo_User.DoesNotExist:
+            return False
+    return True
 
 
 def role_has_exclusive_permissions(user):
@@ -223,7 +223,7 @@ def risk_acceptante_pending(eng: Engagement,
                     finding.save()
                     message = "Finding has been marked as reviewed"
                     status_permission["status"] = "OK"
-                elif finding.risk_status == "Risk Reviewed" and user_has_permission_long_risk_acceptance(user, risk_acceptance):
+                elif finding.risk_status == "Risk Reviewed" and user_has_permission_long_risk_acceptance(user, risk_acceptance, product):
                     finding.accepted_by = user.username
                     risk_acceptance.accepted_date = timezone.now()
                     risk_acceptance.save()
