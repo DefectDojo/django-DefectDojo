@@ -15,6 +15,7 @@ from email.utils import getaddresses
 from pathlib import Path
 
 import environ
+import pghistory
 from celery.schedules import crontab
 from netaddr import IPNetwork, IPSet
 
@@ -30,6 +31,10 @@ env = environ.FileAwareEnv(
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
     DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
+    # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
+    # see https://github.com/laymonage/django-jsonfield-backport
+    # debug_toolbar.E001 is raised when running tests in dev mode via run-unittests.sh
+    DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001"]),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
@@ -86,13 +91,12 @@ env = environ.FileAwareEnv(
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
+    DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
-    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 100),
+    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 10),
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
-    DD_FORCE_LOWERCASE_TAGS=(bool, True),
-    DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
     DD_DATABASE_HOST=(str, "postgres"),
     DD_DATABASE_NAME=(str, "defectdojo"),
@@ -109,7 +113,9 @@ env = environ.FileAwareEnv(
     DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
     DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
     DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
+    DD_SOCIAL_AUTH_CREATE_USER_MAPPING=(str, "username"),  # could also be email or fullname
     DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
+    DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS=(bool, False),  # If true, the redirect after login will use the HTTPS protocol
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT=(str, ""),
@@ -168,6 +174,13 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL=(str, ""),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ""),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ""),
+    DD_SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL=(bool, True),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION=(str, "Please use the standard login below."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED=(str, "Social login was canceled. Please try again or use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED=(str, "Social login failed. Please try again or use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN=(str, "You are not authorized to log in via this method. Please contact support or use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE=(str, "An unexpected error occurred during social login. Please use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR=(str, "Social login failed due to an invalid or expired token. Please try again or use the standard login."),
     DD_SAML2_ENABLED=(bool, False),
     # Allows to override default SAML authentication backend. Check https://djangosaml2.readthedocs.io/contents/setup.html#custom-user-attributes-processing
     DD_SAML2_AUTHENTICATION_BACKENDS=(str, "djangosaml2.backends.Saml2Backend"),
@@ -209,6 +222,8 @@ env = environ.FileAwareEnv(
     # `RemoteUser` is usually used behind AuthN proxy and users should not know about this mechanism from Swagger because it is not usable by users.
     # It should be hidden by default.
     DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER=(bool, False),
+    # Some security policies require allowing users to have only one active session
+    DD_SINGLE_USER_SESSION=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
     DD_DOCUMENTATION_URL=(str, "https://documentation.defectdojo.com"),
     # merging findings doesn't always work well with dedupe and reimport etc.
@@ -259,8 +274,14 @@ env = environ.FileAwareEnv(
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
+    # Batch size for import/reimport deduplication processing
+    DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=(int, 1000),
     # Delete Auditlogs older than x month; -1 to keep all logs
     DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
+    # Batch size for flushing audit logs per task run
+    DD_AUDITLOG_FLUSH_BATCH_SIZE=(int, 1000),
+    # Maximum number of batches to process per task run
+    DD_AUDITLOG_FLUSH_MAX_BATCHES=(int, 100),
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
@@ -314,6 +335,8 @@ env = environ.FileAwareEnv(
     # If you run big import you may want to disable this because the way django-auditlog currently works, there's
     # a big performance hit. Especially during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
+    # Audit logging system: "django-auditlog" (default) or "django-pghistory"
+    DD_AUDITLOG_TYPE=(str, "django-auditlog"),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
@@ -326,6 +349,8 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+    # Dictates if v3 org/asset relabeling (+url routing) will be enabled
+    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
 )
 
 
@@ -398,6 +423,9 @@ DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
 MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
 
 TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
+# Tag bulk add batch size (used by dojo.tag_utils.bulk_add_tag_to_instances)
+TAG_BULK_ADD_BATCH_SIZE = env("DD_TAG_BULK_ADD_BATCH_SIZE")
+
 
 # ------------------------------------------------------------------------------
 # DATABASE
@@ -557,12 +585,14 @@ PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
 SHOW_LOGIN_FORM = env("DD_SOCIAL_AUTH_SHOW_LOGIN_FORM")
 SOCIAL_LOGIN_AUTO_REDIRECT = env("DD_SOCIAL_LOGIN_AUTO_REDIRECT")
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = env("DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS")
 SOCIAL_AUTH_CREATE_USER = env("DD_SOCIAL_AUTH_CREATE_USER")
+SOCIAL_AUTH_CREATE_USER_MAPPING = env("DD_SOCIAL_AUTH_CREATE_USER_MAPPING")
 
 SOCIAL_AUTH_STRATEGY = "social_django.strategy.DjangoStrategy"
 SOCIAL_AUTH_STORAGE = "social_django.models.DjangoStorage"
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ["username", "first_name", "last_name", "email"]
-SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
+SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = env("DD_SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL")
 
 GOOGLE_OAUTH_ENABLED = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED")
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
@@ -606,6 +636,8 @@ SOCIAL_AUTH_OIDC_OIDC_ENDPOINT = env("DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
 SOCIAL_AUTH_OIDC_KEY = env("DD_SOCIAL_AUTH_OIDC_KEY")
 SOCIAL_AUTH_OIDC_SECRET = env("DD_SOCIAL_AUTH_OIDC_SECRET")
 # Optional settings
+if value := env("DD_LOGIN_REDIRECT_URL"):
+    SOCIAL_AUTH_LOGIN_REDIRECT_URL = value
 if value := env("DD_SOCIAL_AUTH_OIDC_ID_KEY"):
     SOCIAL_AUTH_OIDC_ID_KEY = value
 if value := env("DD_SOCIAL_AUTH_OIDC_USERNAME_KEY"):
@@ -626,6 +658,13 @@ if value := env("DD_SOCIAL_AUTH_OIDC_JWKS_URI"):
     SOCIAL_AUTH_OIDC_JWKS_URI = value
 if value := env("DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT"):
     SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT = value
+
+SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR")
 
 AUTH0_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED")
 SOCIAL_AUTH_AUTH0_KEY = env("DD_SOCIAL_AUTH_AUTH0_KEY")
@@ -742,6 +781,7 @@ SESSION_COOKIE_SAMESITE = env("DD_SESSION_COOKIE_SAMESITE")
 # Override default Django behavior for incorrect URLs
 APPEND_SLASH = env("DD_APPEND_SLASH")
 
+
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
 CSRF_COOKIE_SAMESITE = env("DD_CSRF_COOKIE_SAMESITE")
@@ -771,6 +811,8 @@ SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
 # DEFECTDOJO SPECIFIC
 # ------------------------------------------------------------------------------
 
+ENABLE_V3_ORGANIZATION_ASSET_RELABEL = env("DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL")
+
 # Credential Key
 CREDENTIAL_AES_256_KEY = env("DD_CREDENTIAL_AES_256_KEY")
 DB_KEY = env("DD_CREDENTIAL_AES_256_KEY")
@@ -780,11 +822,6 @@ TEAM_NAME = env("DD_TEAM_NAME")
 
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
-
-# Django-tagging settings
-FORCE_LOWERCASE_TAGS = env("DD_FORCE_LOWERCASE_TAGS")
-MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
-
 
 # ------------------------------------------------------------------------------
 # ADMIN
@@ -868,6 +905,7 @@ TEMPLATES = [
                 "dojo.context_processors.bind_alert_count",
                 "dojo.context_processors.bind_announcement",
                 "dojo.context_processors.session_expiry_notification",
+                "dojo.context_processors.labels",
             ],
         },
     },
@@ -887,10 +925,8 @@ INSTALLED_APPS = (
     "polymorphic",  # provides admin templates
     "django.contrib.admin",
     "django.contrib.humanize",
-    "auditlog",
     "dojo",
     "watson",
-    "tagging",  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
     "imagekit",
     "multiselectfield",
     "rest_framework",
@@ -903,6 +939,10 @@ INSTALLED_APPS = (
     "tagulous",
     "fontawesomefree",
     "django_filters",
+    "auditlog",
+    "pgtrigger",
+    "pghistory",
+    "single_session",
 )
 
 # ------------------------------------------------------------------------------
@@ -920,7 +960,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dojo.middleware.LoginRequiredMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
-    "social_django.middleware.SocialAuthExceptionMiddleware",
+    "dojo.middleware.CustomSocialAuthExceptionMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.middleware.AuditlogMiddleware",
     "dojo.middleware.AsyncSearchContextMiddleware",
@@ -1134,6 +1174,13 @@ if AUTH_REMOTEUSER_ENABLED:
         REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"]
 
 # ------------------------------------------------------------------------------
+# SINGLE_USER_SESSION
+# ------------------------------------------------------------------------------
+
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SINGLE_USER_SESSION = env("DD_SINGLE_USER_SESSION")
+
+# ------------------------------------------------------------------------------
 # CELERY
 # ------------------------------------------------------------------------------
 
@@ -1309,7 +1356,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
+    "Github SAST Scan": ["vuln_id_from_tool", "severity", "file_path", "line"],
     "Github Vulnerability Scan": ["title", "severity", "component_name", "vulnerability_ids", "file_path"],
+    "Github Secrets Detection Report": ["title", "file_path", "line"],
     "Solar Appscreener Scan": ["title", "file_path", "line", "severity"],
     "pip-audit Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "Rubocop Scan": ["vuln_id_from_tool", "file_path", "line"],
@@ -1340,7 +1389,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "HCLAppScan XML": ["title", "description"],
     "HCL AppScan on Cloud SAST XML": ["title", "file_path", "line", "severity"],
     "KICS Scan": ["file_path", "line", "severity", "description", "title"],
-    "MobSF Scan": ["title", "description", "severity"],
+    "MobSF Scan": ["title", "description", "severity", "file_path"],
     "MobSF Scorecard Scan": ["title", "description", "severity"],
     "OSV Scan": ["title", "description", "severity"],
     "Snyk Code Scan": ["vuln_id_from_tool", "file_path"],
@@ -1363,6 +1412,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
     "Cyberwatch scan (Galeax)": ["title", "description", "severity"],
     "Cycognito Scan": ["title", "severity"],
+    "OpenVAS Parser v2": ["title", "severity", "vuln_id_from_tool", "endpoints"],
+    "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
+    "n0s1 Scanner": ["description"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1434,6 +1486,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "HCL AppScan on Cloud SAST XML": True,
     "AWS Inspector2 Scan": True,
     "Cyberwatch scan (Galeax)": True,
+    "OpenVAS Parser v2": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1551,7 +1604,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
+    "Github SAST Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
+    "Github Secrets Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
     "SARIF": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Azure Security Center Recommendations Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
@@ -1620,6 +1675,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
     "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
+    "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
+    "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1641,6 +1698,7 @@ DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 
 TRACK_IMPORT_HISTORY = env("DD_TRACK_IMPORT_HISTORY")
+IMPORT_REIMPORT_DEDUPE_BATCH_SIZE = env("DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE")
 
 # ------------------------------------------------------------------------------
 # JIRA
@@ -1819,9 +1877,7 @@ ASYNC_OBEJECT_DELETE_CHUNK_SIZE = env("DD_ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
 # for very large objects
 DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
 
-# django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
-# see https://github.com/laymonage/django-jsonfield-backport
-SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
+SILENCED_SYSTEM_CHECKS = env("DD_SILENCED_SYSTEM_CHECKS")
 
 VULNERABILITY_URLS = {
     "ALAS": "https://alas.aws.amazon.com/AL2/&&.html",  # e.g. https://alas.aws.amazon.com/alas2.html
@@ -1832,6 +1888,7 @@ VULNERABILITY_URLS = {
     "ALSA-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALSA-2024:0827
     "ASA-": "https://security.archlinux.org/",  # e.g. https://security.archlinux.org/ASA-202003-8
     "AVD": "https://avd.aquasec.com/misconfig/",  # e.g. https://avd.aquasec.com/misconfig/avd-ksv-01010
+    "AWS-": "https://aws.amazon.com/security/security-bulletins/",  # e.g. https://aws.amazon.com/security/security-bulletins/AWS-2025-001
     "BAM-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BAM-25498
     "BSERV-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BSERV-19020
     "C-": "https://hub.armosec.io/docs/",  # e.g. https://hub.armosec.io/docs/c-0085
@@ -1859,9 +1916,12 @@ VULNERABILITY_URLS = {
     "KB": "https://support.hcl-software.com/csm?id=kb_article&sysparm_article=",  # e.g. https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0108401
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
     "LEN-": "https://support.lenovo.com/cl/de/product_security/",  # e.g. https://support.lenovo.com/cl/de/product_security/LEN-94953
+    "MAL-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/mal-2025-49305
     "MGAA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGAA-2013-0054.html
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
+    "MSRC_": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/msrc_cve-2025-59200
     "NCSC-": "https://advisories.ncsc.nl/advisory?id=",  # e.g. https://advisories.ncsc.nl/advisory?id=NCSC-2025-0191
+    "NN-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/NN-2021:2-01
     "NTAP-": "https://security.netapp.com/advisory/",  # e.g. https://security.netapp.com/advisory/ntap-20250328-0007
     "OPENSUSE-SU-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/openSUSE-SU-2025:14898-1
     "OSV-": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/OSV-2024-1330
@@ -1889,6 +1949,7 @@ VULNERABILITY_URLS = {
     "TS-": """https://tailscale.com/security-bulletins#""",  # e.g. https://tailscale.com/security-bulletins or https://tailscale.com/security-bulletins#ts-2022-001-1243
     "TYPO3-": "https://typo3.org/security/advisory/",  # e.g. https://typo3.org/security/advisory/typo3-core-sa-2025-010
     "USN-": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
+    "VA-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/va-25-282-01
     "VAR-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/var-201801-0152
     "VNS": "https://vulners.com/",
     "WID-SEC-W-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/wid-sec-w-2025-1468
@@ -1910,8 +1971,11 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
 ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
+AUDITLOG_TYPE = env("DD_AUDITLOG_TYPE")
 AUDITLOG_TWO_STEP_MIGRATION = False
 AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
+AUDITLOG_FLUSH_BATCH_SIZE = env("DD_AUDITLOG_FLUSH_BATCH_SIZE")
+AUDITLOG_FLUSH_MAX_BATCHES = env("DD_AUDITLOG_FLUSH_MAX_BATCHES")
 
 USE_FIRST_SEEN = env("DD_USE_FIRST_SEEN")
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
@@ -1996,3 +2060,28 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
         "debug_toolbar.panels.profiling.ProfilingPanel",
         # 'cachalot.panels.CachalotPanel',
     ]
+
+#########################################################################################################
+# Auditlog configuration                                                                                #
+#########################################################################################################
+
+if ENABLE_AUDITLOG:
+    middleware_list = list(MIDDLEWARE)
+    crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
+
+    if AUDITLOG_TYPE == "django-auditlog":
+        # Insert AuditlogMiddleware before CurrentRequestUserMiddleware
+        middleware_list.insert(crum_index, "dojo.middleware.AuditlogMiddleware")
+    elif AUDITLOG_TYPE == "django-pghistory":
+        # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
+        middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
+
+    MIDDLEWARE = middleware_list
+
+PGHISTORY_FOREIGN_KEY_FIELD = pghistory.ForeignKey(db_index=False)
+PGHISTORY_CONTEXT_FIELD = pghistory.ContextForeignKey(db_index=True)
+PGHISTORY_OBJ_FIELD = pghistory.ObjForeignKey(db_index=True)
+
+#########################################################################################################
+# End of Auditlog configuration                                                                          #
+#########################################################################################################

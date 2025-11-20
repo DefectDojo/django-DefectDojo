@@ -46,7 +46,7 @@ Whether you're a Pro or an Open-Source user, we have many resources that can hel
 
 - Our [New User Checklist](../new_user_checklist) covers the fundamentals of setting up your DefectDojo environment and setting up your import, triage and reporting workflows.
 
-- We support a large amount of [security tool integrations](/en/connecting_your_tools/parsers/) to help fit DefectDojo in your DevSecOps program.
+- We support a large amount of [security tool integrations](/supported_tools/) to help fit DefectDojo in your DevSecOps program.
 
 - Our team maintains a [YouTube Channel](https://www.youtube.com/@defectdojo) which hosts tutorials, archived Office Hours events and other content. New subscribers are always welcome!
 
@@ -66,6 +66,8 @@ Other guides for working with an Open-Source install:
 - [Running In Production](/en/open_source/installation/running-in-production/) provides system requirements, performance tweaks and maintenance processes for running DefectDojo on a production server.  Note that this guide strictly covers Docker Compose installs, not Kubernetes.
 
 If you run into trouble with an Open Source install, we highly recommend asking questions on the [OWASP Slack](https://owasp.org/slack/invite). Our community members are active on the **# defectdojo** channel and can help you with issues you’re facing.
+
+Looking for cool DefectDojo laptop stickers? As a thank you for being a part of the DefectDojo community, you can sign up to get some free DefectDojo stickers.  For more information, check out [this link](https://defectdojo.com/defectdojo-sticker-request).
 
 ### Online Demo
 

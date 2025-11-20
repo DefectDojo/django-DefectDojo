@@ -61,14 +61,14 @@
                   {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
                   <li role="presentation">
                     <a class="" href="{% url 'new_object' prod.id %}">
-                        <i class="fa-solid fa-plus"></i>{% trans "Add Product Tracking Files" %}
+                        <i class="fa-solid fa-plus"></i> {% trans "Add Tracked Files" %}
                     </a>
                   </li>
                   {% endif %}
                   {% if prod|has_object_permission:"Product_Tracking_Files_View" %}
                   <li role="presentation">
                     <a href="{% url 'view_objects' prod.id %}">
-                        <i class="fa-solid fa-rectangle-list"></i>{% trans "View Product Tracking Files" %}
+                        <i class="fa-solid fa-rectangle-list"></i> {% trans "View Tracked Files" %}
                     </a>
                   </li>
                   {% endif %}
@@ -76,7 +76,7 @@
                 <li role="separator" class="divider"></li>
                 <li role="presentation">
                   <a href="{% url 'product_report' prod.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
-                      <i class="fa-solid fa-file-lines"></i>{% trans "Product Report" %}
+                      <i class="fa-solid fa-file-lines"></i> {{ labels.ASSET_REPORT_LABEL }}
                   </a>
                 </li>
                 {% if prod|has_object_permission:"Benchmark_Edit" %}
@@ -333,7 +333,7 @@
                                 </ul>
                             </td>
                             <td name="member_user">{{ member.user.get_full_name }}</td>
-                            <td>{% trans "Product member" %}</td>
+                            <td>{{ labels.ASSET_USERS_MEMBER_LABEL }}</td>
                             <td name="member_role">{{ member.role }}</td>
                         </tr>
                     {% endfor %}
@@ -344,7 +344,7 @@
                             <td>{{ member.user.get_full_name }}</td>
                             <td>
                                 <a class="" href="{% url 'view_product_type' member.product_type.id %}">
-                                    Product type: {{ member.product_type }}
+                                    {{ labels.ORG_LABEL }}: {{ member.product_type }}
                                 </a>
                             </td>
                             <td>{{ member.role }}</td>
@@ -430,7 +430,7 @@
                           </ul>
                       </td>
                       <td name="group_name">{{ group.group.name }}</td>
-                      <td name="group_source">{% trans "Product Group" %}</td>
+                      <td name="group_source">{{ labels.ASSET_GROUPS_MEMBER_LABEL }}</td>
                       <td name="group_role">{{ group.role }}</td>
                   </tr>
                   {% endfor %}
@@ -479,8 +479,8 @@
             <td>{{ prod.get_business_criticality_display|notspecified }}</td>
           </tr>
           <tr>
-            <td><strong>{% trans "Product Type" %}</strong></td>
-            <td><a title="{% trans "Product Type" %}" href="{% url 'view_product_type' prod.prod_type.id %}">{{ prod.prod_type }}</a></td>
+            <td><strong>{{ labels.ORG_LABEL }}</strong></td>
+            <td><a title="{{ labels.ORG_LABEL }}" href="{% url 'view_product_type' prod.prod_type.id %}">{{ prod.prod_type }}</a></td>
           </tr>
           <tr>
             <td><strong>{% trans "Platform" %}</strong></td>
@@ -645,7 +645,7 @@
             <td>{% if prod.team_manager != "0" %}{{ prod.team_manager | default:"Unknown" }}{% endif %}</td>
           </tr>
           <tr>
-            <td><strong>{% trans "Product Manager" %}</strong></td>
+            <td><strong>{{ labels.ASSET_MANAGER_LABEL }}</strong></td>
             <td>{% if prod.product_manager != "0" %}{{ prod.product_manager | default:"Unknown" }}{% endif %}</td>
           </tr>
           <tr>
@@ -662,7 +662,7 @@
   <div class="panel-heading">
     {% url 'notifications' as notifications_url %}
     <h3 class="panel-title"><span class="fa-solid fa-users fa-fw" aria-hidden="true"></span>{% trans "Notifications" %}
-      <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="{% trans "These are your personal settings for this product." %}" data-placement="right" data-container="body"></i>
+      <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="{{ labels.ASSET_NOTIFICATIONS_HELP }}" %}" data-placement="right" data-container="body"></i>
     </h3>
   </div>
   <form id="edit_notifications_form" class="form-horizontal" method="post" action="{% url 'edit_notifications' prod.id %}">{% csrf_token %}

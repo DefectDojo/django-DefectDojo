@@ -79,25 +79,34 @@ def we_want_async(*args, func=None, **kwargs):
 
 # Defect Dojo performs all tasks asynchrnonously using celery
 # *unless* the user initiating the task has set block_execution to True in their usercontactinfo profile
-def dojo_async_task(func):
-    @wraps(func)
-    def __wrapper__(*args, **kwargs):
-        from dojo.utils import get_current_user  # noqa: PLC0415 circular import
-        user = get_current_user()
-        kwargs["async_user"] = user
+def dojo_async_task(func=None, *, signature=False):
+    def decorator(func):
+        @wraps(func)
+        def __wrapper__(*args, **kwargs):
+            from dojo.utils import get_current_user  # noqa: PLC0415 circular import
+            user = get_current_user()
+            kwargs["async_user"] = user
 
-        dojo_async_task_counter.incr(
-            func.__name__,
-            args=args,
-            kwargs=kwargs,
-        )
+            dojo_async_task_counter.incr(
+                func.__name__,
+                args=args,
+                kwargs=kwargs,
+            )
 
-        countdown = kwargs.pop("countdown", 0)
-        if we_want_async(*args, func=func, **kwargs):
-            return func.apply_async(args=args, kwargs=kwargs, countdown=countdown)
-        return func(*args, **kwargs)
+            if signature:
+                return func.si(*args, **kwargs)
 
-    return __wrapper__
+            countdown = kwargs.pop("countdown", 0)
+            if we_want_async(*args, func=func, **kwargs):
+                # Return a signature for use in chord/group if requested
+                # Execute the task
+                return func.apply_async(args=args, kwargs=kwargs, countdown=countdown)
+            return func(*args, **kwargs)
+        return __wrapper__
+
+    if func is None:
+        return decorator
+    return decorator(func)
 
 
 # decorator with parameters needs another wrapper layer
@@ -213,7 +222,7 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
                     if username:
                         dojo_user = Dojo_User.objects.filter(username=username).first()
                         if dojo_user:
-                            Dojo_User.enable_force_password_reset(dojo_user)
+                            dojo_user.enable_force_password_reset()
                 raise Ratelimited
             return fn(request, *args, **kw)
         return _wrapped

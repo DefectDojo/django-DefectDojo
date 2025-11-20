@@ -22,6 +22,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.fields import DictField, MultipleChoiceField
 
+import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission
@@ -113,6 +114,7 @@ from dojo.models import (
     Vulnerability_Id_Template,
     get_current_date,
 )
+from dojo.notifications.helper import create_notification
 from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
@@ -122,6 +124,7 @@ from dojo.tools.factory import (
     requires_file,
     requires_tool_type,
 )
+from dojo.user.queries import get_authorized_users
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import is_scan_file_too_large
 from dojo.validators import ImporterFileExtensionValidator, tag_validator
@@ -534,13 +537,13 @@ class UserSerializer(serializers.ModelSerializer):
         return ret
 
     def update(self, instance, validated_data):
+        permissions_in_payload = None
         new_configuration_permissions = None
         if (
             "user_permissions" in validated_data
         ):  # This field was renamed from "configuration_permissions" in the meantime
-            new_configuration_permissions = set(
-                validated_data.pop("user_permissions"),
-            )
+            permissions_in_payload = validated_data.pop("user_permissions")
+            new_configuration_permissions = set(permissions_in_payload)
 
         instance = super().update(instance, validated_data)
 
@@ -560,6 +563,10 @@ class UserSerializer(serializers.ModelSerializer):
                 new_configuration_permissions,
             )
             instance.user_permissions.set(new_permissions)
+
+        # Clear all configuration permissions if an empty list is provided
+        if isinstance(permissions_in_payload, list) and len(permissions_in_payload) == 0:
+            instance.user_permissions.clear()
 
         return instance
 
@@ -693,14 +700,14 @@ class DojoGroupSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
+        permissions_in_payload = None
         new_configuration_permissions = None
         if (
             "auth_group" in validated_data
             and "permissions" in validated_data["auth_group"]
         ):  # This field was renamed from "configuration_permissions" in the meantime
-            new_configuration_permissions = set(
-                validated_data.pop("auth_group")["permissions"],
-            )
+            permissions_in_payload = validated_data.pop("auth_group")["permissions"]
+            new_configuration_permissions = set(permissions_in_payload)
 
         instance = super().update(instance, validated_data)
 
@@ -720,6 +727,10 @@ class DojoGroupSerializer(serializers.ModelSerializer):
                 new_configuration_permissions,
             )
             instance.auth_group.permissions.set(new_permissions)
+
+        # Clear all configuration permissions if an empty list is provided
+        if isinstance(permissions_in_payload, list) and len(permissions_in_payload) == 0:
+            instance.auth_group.permissions.clear()
 
         return instance
 
@@ -1674,12 +1685,17 @@ class VulnerabilityIdSerializer(serializers.ModelSerializer):
 
 
 class FindingSerializer(serializers.ModelSerializer):
+    mitigated = serializers.DateTimeField(required=False, allow_null=True)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(
         many=True, read_only=True, source="risk_acceptance_set",
     )
     push_to_jira = serializers.BooleanField(default=False)
+    found_by = serializers.PrimaryKeyRelatedField(
+        queryset=Test_Type.objects.all(), many=True,
+    )
     age = serializers.IntegerField(read_only=True)
     sla_days_remaining = serializers.IntegerField(read_only=True, allow_null=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
@@ -1757,12 +1773,24 @@ class FindingSerializer(serializers.ModelSerializer):
         if reporter_id := validated_data.get("reporter"):
             instance.reporter = reporter_id
 
+        # Persist vulnerability IDs first so model save computes hash including them (if there is no hash yet)
+        # we can't pass unsaved_vulnerabilitiy_ids to super.update()
+        if parsed_vulnerability_ids:
+            save_vulnerability_ids(instance, parsed_vulnerability_ids)
+
+        # Get found_by from validated_data
+        found_by = validated_data.pop("found_by", None)
+        # Handle updates to found_by data
+        if found_by:
+            instance.found_by.set(found_by)
+        # If there is no argument entered for found_by, the user would like to clear out the values on the Finding's found_by field
+        # Findings still maintain original found_by value associated with their test
+        # In the event the user does not supply the found_by field at all, we do not modify it
+        elif isinstance(found_by, list) and len(found_by) == 0:
+            instance.found_by.clear()
         instance = super().update(
             instance, validated_data,
         )
-
-        if parsed_vulnerability_ids:
-            save_vulnerability_ids(instance, parsed_vulnerability_ids)
 
         if push_to_jira:
             jira_helper.push_to_jira(instance)
@@ -1770,6 +1798,21 @@ class FindingSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, data):
+        # Enforce mitigated metadata editability (only when non-null values are provided)
+        attempting_to_set_mitigated = any(
+            (field in data) and (data.get(field) is not None)
+            for field in ["mitigated", "mitigated_by"]
+        )
+        user = getattr(self.context.get("request", None), "user", None)
+        if attempting_to_set_mitigated and not finding_helper.can_edit_mitigated_data(user):
+            errors = {}
+            if ("mitigated" in data) and (data.get("mitigated") is not None):
+                errors["mitigated"] = ["Editing mitigated timestamp is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if ("mitigated_by" in data) and (data.get("mitigated_by") is not None):
+                errors["mitigated_by"] = ["Editing mitigated_by is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if errors:
+                raise serializers.ValidationError(errors)
+
         if self.context["request"].method == "PATCH":
             is_active = data.get("active", self.instance.active)
             is_verified = data.get("verified", self.instance.verified)
@@ -1839,6 +1882,8 @@ class FindingSerializer(serializers.ModelSerializer):
 
 
 class FindingCreateSerializer(serializers.ModelSerializer):
+    mitigated = serializers.DateTimeField(required=False, allow_null=True)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True, allow_null=True, required=False, many=True,
     )
@@ -1880,11 +1925,15 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
             logger.debug("VULNERABILITY_ID_SET: %s", vulnerability_ids)
             parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
+            logger.debug("PARSED_VULNERABILITY_IDST: %s", parsed_vulnerability_ids)
             logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
             validated_data["cve"] = parsed_vulnerability_ids[0]
+            # validated_data["unsaved_vulnerability_ids"] = parsed_vulnerability_ids
 
-        new_finding = super().create(
-            validated_data)
+        # super.create() doesn't accept unsaved_vulnerability_ids or dedupe_option=False, so call save directly.
+        new_finding = Finding(**validated_data)
+        new_finding.unsaved_vulnerability_ids = parsed_vulnerability_ids or []
+        new_finding.save()
 
         logger.debug(f"New finding CVE: {new_finding.cve}")
 
@@ -1897,16 +1946,38 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
-            # can we avoid this extra save? the cve has already been set above in validated_data. but there are no tests for this
-            # on finding update nothing is done # with vulnerability_ids?
-            # new_finding.save()
 
         if push_to_jira:
             jira_helper.push_to_jira(new_finding)
 
+        # Create a notification
+        create_notification(
+            event="finding_added",
+            title=_("Addition of %s") % new_finding.title,
+            finding=new_finding,
+            description=_('Finding "%s" was added by %s') % (new_finding.title, new_finding.reporter),
+            url=reverse("view_finding", args=(new_finding.id,)),
+            icon="exclamation-triangle",
+        )
+
         return new_finding
 
     def validate(self, data):
+        # Ensure mitigated fields are only set when editable is enabled (ignore nulls)
+        attempting_to_set_mitigated = any(
+            (field in data) and (data.get(field) is not None)
+            for field in ["mitigated", "mitigated_by"]
+        )
+        user = getattr(getattr(self.context, "request", None), "user", None)
+        if attempting_to_set_mitigated and not finding_helper.can_edit_mitigated_data(user):
+            errors = {}
+            if ("mitigated" in data) and (data.get("mitigated") is not None):
+                errors["mitigated"] = ["Editing mitigated timestamp is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if ("mitigated_by" in data) and (data.get("mitigated_by") is not None):
+                errors["mitigated_by"] = ["Editing mitigated_by is disabled (EDITABLE_MITIGATED_DATA=false)"]
+            if errors:
+                raise serializers.ValidationError(errors)
+
         if "reporter" not in data:
             request = self.context["request"]
             data["reporter"] = request.user
@@ -2102,8 +2173,14 @@ class CommonImportScanSerializer(serializers.Serializer):
         required=False,
         validators=[ImporterFileExtensionValidator()],
     )
-    product_type_name = serializers.CharField(required=False)
-    product_name = serializers.CharField(required=False)
+    product_type_name = serializers.CharField(
+        required=False,
+        help_text=_("Also referred to as 'Organization' name."),
+    )
+    product_name = serializers.CharField(
+        required=False,
+        help_text=_("Also referred to as 'Asset' name."),
+    )
     engagement_name = serializers.CharField(required=False)
     engagement_end_date = serializers.DateField(
         required=False,
@@ -2158,8 +2235,14 @@ class CommonImportScanSerializer(serializers.Serializer):
     # confused
     test_id = serializers.IntegerField(read_only=True)
     engagement_id = serializers.IntegerField(read_only=True)
-    product_id = serializers.IntegerField(read_only=True)
-    product_type_id = serializers.IntegerField(read_only=True)
+    product_id = serializers.IntegerField(
+        read_only=True,
+        help_text=_("Also referred to as 'Asset' ID."),
+    )
+    product_type_id = serializers.IntegerField(
+        read_only=True,
+        help_text=_("Also referred to as 'Organization' ID."),
+    )
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
     pro = serializers.ListField(read_only=True, required=False)
     apply_tags_to_findings = serializers.BooleanField(
@@ -2697,6 +2780,9 @@ class FindingCloseSerializer(serializers.ModelSerializer):
     false_p = serializers.BooleanField(required=False)
     out_of_scope = serializers.BooleanField(required=False)
     duplicate = serializers.BooleanField(required=False)
+    mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Dojo_User.objects.all())
+    note = serializers.CharField(required=False, allow_blank=True)
+    note_type = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Note_Type.objects.all())
 
     class Meta:
         model = Finding
@@ -2706,7 +2792,33 @@ class FindingCloseSerializer(serializers.ModelSerializer):
             "false_p",
             "out_of_scope",
             "duplicate",
+            "mitigated_by",
+            "note",
+            "note_type",
         )
+
+    def validate(self, data):
+        request = self.context.get("request")
+        request_user = getattr(request, "user", None)
+
+        mitigated_by_user = data.get("mitigated_by")
+        if mitigated_by_user is not None:
+            # Require permission to edit mitigated metadata
+            if not (request_user and finding_helper.can_edit_mitigated_data(request_user)):
+                raise serializers.ValidationError({
+                    "mitigated_by": ["Not allowed to set mitigated_by."],
+                })
+
+            # Ensure selected user is authorized (Finding_Edit)
+            authorized_users = get_authorized_users(Permissions.Finding_Edit, user=request_user)
+            if not authorized_users.filter(id=mitigated_by_user.id).exists():
+                raise serializers.ValidationError({
+                    "mitigated_by": [
+                        "Selected user is not authorized to be set as mitigated_by.",
+                    ],
+                })
+
+        return data
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):

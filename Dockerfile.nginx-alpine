@@ -5,7 +5,7 @@
 # Dockerfile.django-alpine to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.12.11-alpine3.22@sha256:02a73ead8397e904cea6d17e18516f1df3590e05dc8823bd5b1c7f849227d272 AS base
+FROM python:3.13.7-alpine3.22@sha256:9ba6d8cbebf0fb6546ae71f2a1c14f6ffd2fdab83af7fa5669734ef30ad48844 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -30,12 +30,11 @@ COPY requirements.txt requirements-dev.txt ./
 # CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
 # https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
 RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
-# needed for static files collection, didn't find a way to make this dependant on the COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC argument
+# needed for static files debug toolbar
 RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements-dev.txt
 
 
 FROM build AS collectstatic
-ARG COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC=false
 RUN apk add nodejs npm
 RUN npm install -g yarn --force
 
@@ -47,7 +46,7 @@ RUN pip3 install \
   --find-links=/tmp/wheels \
 	-r ./requirements.txt
 
-# needed for static files collection, didn't find a way to make this dependant on the COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC argument
+# needed for static files debug toolbar
 RUN pip3 install \
 	--no-cache-dir \
 	--no-index \
@@ -61,9 +60,10 @@ RUN \
   yarn
 COPY manage.py ./
 COPY dojo/ ./dojo/
-RUN env DD_SECRET_KEY='.' DD_DJANGO_DEBUG_TOOLBAR_ENABLED=${COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC} python3 manage.py collectstatic --noinput --verbosity=2 && true
+# always collect static for debug toolbar as we can't make it dependant on env variables or build arguments without breaking docker layer caching
+RUN env DD_SECRET_KEY='.' DD_DJANGO_DEBUG_TOOLBAR_ENABLED=True python3 manage.py collectstatic --noinput --verbosity=2 && true
 
-FROM nginx:1.29.1-alpine3.22@sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8
+FROM nginx:1.29.3-alpine3.22@sha256:b3c656d55d7ad751196f21b7fd2e8d4da9cb430e32f646adcf92441b72f82b14
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/

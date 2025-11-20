@@ -12,7 +12,7 @@ from dojo.models import (
     System_Settings,
     Test,
     User,
-    _copy_model_util,
+    copy_model_util,
 )
 
 from .dojo_test_case import DojoTestCase
@@ -1719,7 +1719,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def copy_and_reset_finding(self, find_id):
         org = Finding.objects.get(id=find_id)
-        new = _copy_model_util(org)
+        new = copy_model_util(org)
         new.duplicate = False
         new.duplicate_finding = None
         new.false_p = False
@@ -1730,19 +1730,19 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def copy_and_reset_test(self, test_id):
         org = Test.objects.get(id=test_id)
-        new = _copy_model_util(org)
+        new = copy_model_util(org)
         # return unsaved new test and reloaded existing test
         return new, Test.objects.get(id=test_id)
 
     def copy_and_reset_engagement(self, eng_id):
         org = Engagement.objects.get(id=eng_id)
-        new = _copy_model_util(org)
+        new = copy_model_util(org)
         # return unsaved new engagement and reloaded existing engagement
         return new, Engagement.objects.get(id=eng_id)
 
     def copy_and_reset_product(self, prod_id):
         org = Product.objects.get(id=prod_id)
-        new = _copy_model_util(org)
+        new = copy_model_util(org)
         new.name = f"{org.name} (Copy {datetime.now()})"
         # return unsaved new product and reloaded existing product
         return new, Product.objects.get(id=prod_id)
@@ -1825,7 +1825,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def set_dedupe_inside_engagement(self, deduplication_on_engagement):
         for eng in Engagement.objects.all():
-            logger.debug("setting deduplication_on_engagment to %s for %i", str(deduplication_on_engagement), eng.id)
+            logger.debug("setting deduplication_on_engagment to %s for %i", deduplication_on_engagement, eng.id)
             eng.deduplication_on_engagement = deduplication_on_engagement
             eng.save()
 

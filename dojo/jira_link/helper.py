@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.template import TemplateDoesNotExist
@@ -782,7 +783,11 @@ def push_finding_to_jira(finding, *args, **kwargs):
 @app.task
 @dojo_model_from_id(model=Finding_Group)
 def push_finding_group_to_jira(finding_group, *args, **kwargs):
+    # Look for findings that have single ticket associations separate from the group
+    for finding in finding_group.findings.filter(jira_issue__isnull=False):
+        update_jira_issue(finding, *args, **kwargs)
     if finding_group.has_jira_issue:
+        # Update the jira issue for the group
         return update_jira_issue(finding_group, *args, **kwargs)
     return add_jira_issue(finding_group, *args, **kwargs)
 
@@ -1401,14 +1406,16 @@ def update_epic(engagement, **kwargs):
             jira = get_jira_connection(jira_instance)
             j_issue = get_jira_issue(engagement)
             issue = jira.issue(j_issue.jira_id)
-
             epic_name = kwargs.get("epic_name")
             if not epic_name:
                 epic_name = engagement.name
-
+            description = epic_name
+            branch_tag = engagement.branch_tag
+            if branch_tag:
+                description += "\nBranch: " + branch_tag
             jira_issue_update_kwargs = {
                 "summary": epic_name,
-                "description": epic_name,
+                "description": description,
             }
             if (epic_priority := kwargs.get("epic_priority")) is not None:
                 jira_issue_update_kwargs["priority"] = {"name": epic_priority}
@@ -1443,12 +1450,16 @@ def add_epic(engagement, **kwargs):
         epic_issue_type_name = getattr(jira_project, "epic_issue_type_name", "Epic")
         if not epic_name:
             epic_name = engagement.name
+        description = epic_name
+        branch_tag = engagement.branch_tag
+        if branch_tag:
+            description += "\nBranch: " + branch_tag
         issue_dict = {
             "project": {
                 "key": jira_project.project_key,
             },
             "summary": epic_name,
-            "description": epic_name,
+            "description": description,
             "issuetype": {
                 "name": epic_issue_type_name,
             },
@@ -1649,7 +1660,7 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
     # jform = JIRAProjectForm(request.POST, instance=instance if instance else JIRA_Project(), product=product)
     jform = JIRAProjectForm(request.POST, instance=instance, target=target, product=product, engagement=engagement)
     # logging has_changed because it sometimes doesn't do what we expect
-    logger.debug("jform has changed: %s", str(jform.has_changed()))
+    logger.debug("jform has changed: %s", jform.has_changed())
 
     if jform.has_changed():  # if no data was changed, no need to do anything!
         logger.debug("jform changed_data: %s", jform.changed_data)
@@ -1796,9 +1807,14 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
 
                 if finding.test.engagement.product.enable_full_risk_acceptance:
                     logger.debug(f"Creating risk acceptance for finding linked to {jira_issue.jira_key}.")
+                    # loads the expiration from the system setting "Risk acceptance form default days" as otherwise
+                    # the acceptance will never expire
+                    risk_acceptance_form_default_days = get_system_setting("risk_acceptance_form_default_days", 90)
+                    expiration_date_from_system_settings = timezone.now() + relativedelta(days=risk_acceptance_form_default_days)
                     ra = Risk_Acceptance.objects.create(
                         accepted_by=assignee_name,
                         owner=finding.reporter,
+                        expiration_date=expiration_date_from_system_settings,
                         decision_details=f"Risk Acceptance automatically created from JIRA issue {jira_issue.jira_key} with resolution {resolution_name}",
                     )
                     finding.test.engagement.risk_acceptance.add(ra)

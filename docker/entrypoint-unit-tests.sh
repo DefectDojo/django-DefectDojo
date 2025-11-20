@@ -80,9 +80,16 @@ echo "Unit Tests"
 echo "------------------------------------------------------------"
 
 # Removing parallel and shuffle for now to maintain stability
-python3 manage.py test unittests --keepdb --no-input --exclude-tag="non-parallel" || {
+python3 manage.py test unittests --keepdb --no-input --exclude-tag="non-parallel" --exclude-tag="transactional" || {
     exit 1;
 }
 python3 manage.py test unittests --keepdb --no-input --tag="non-parallel" || {
+    exit 1;
+}
+# Running one unit tests that inherits from TransactionTestCase somehow changes the behaviour of how Django loads fixtures into the database.
+# Meaning any test after this one would fail to load our dojo_testdata.json fixture. In a way this makes sense as it contains some data integrity problems.
+# I tried to fix these in https://github.com/DefectDojo/django-DefectDojo/pull/13217.
+# For now here we run the only TranscationTestCase at the end to avoid the problem.
+python3 manage.py test unittests --keepdb --no-input --tag="transactional" || {
     exit 1;
 }

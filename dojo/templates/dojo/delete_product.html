@@ -1,11 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
     {{ block.super }}
-    <h3> Delete Product {{ product }}</h3>
-    <p>
-        Deleting this Product will remove any related objects associated
-        with it. These relationships are listed below:
-    </p>
+    <h3>{{ label_delete_with_name }}</h3>
+    <p>{{ labels.ASSET_DELETE_CONFIRM_MESSAGE }}</p>
     <div class="danger-zone panel panel-danger">
         <div class="panel-heading">
             <h3>Danger Zone</h3>
@@ -20,7 +17,7 @@
             {{ form }}
 
             <div class="form-group">
-                <button class="btn btn-danger" type="submit" name="delete_name" value="delete_test">Delete Product</button>
+                <button class="btn btn-danger" type="submit" name="delete_name" value="delete_test">{{ labels.ASSET_DELETE_LABEL }}</button>
             </div>
         </form>
     </div>

@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from dateutil import parser as date_parser
 
 from dojo.models import Endpoint, Finding
+from dojo.utils import parse_cvss_data
 
 
 class AWSInspector2Parser:
@@ -40,6 +41,8 @@ class AWSInspector2Parser:
             else:
                 msg = "Incorrect Inspector2 report format"
                 raise TypeError(msg)
+            # Attempt to get CVSS details
+            finding = self.get_cvss_details(finding, raw_finding)
             # process the endpoints
             finding = self.process_endpoints(finding, raw_finding)
             findings.append(finding)
@@ -94,6 +97,16 @@ class AWSInspector2Parser:
         finding.mitigated = mitigated
         # EPSS
         finding.epss_score = raw_finding.get("epss", {}).get("score", None)
+
+        return finding
+
+    def get_cvss_details(self, finding: Finding, raw_finding: dict) -> Finding:
+        cvss_details = raw_finding.get("inspectorScoreDetails", {}).get("adjustedCvss", {})
+        if cvss_vector := cvss_details.get("scoringVector"):
+            if cvss_data := parse_cvss_data(cvss_vector):
+                finding.cvssv2 = cvss_data.get("cvssv2")
+                finding.cvssv3 = cvss_data.get("cvssv3")
+                finding.cvssv4 = cvss_data.get("cvssv4")
 
         return finding
 

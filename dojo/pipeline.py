@@ -114,18 +114,18 @@ def assign_user_to_groups(user, group_names, social_provider):
     for group_name in group_names:
         group, created_group = Dojo_Group.objects.get_or_create(name=group_name, social_provider=social_provider)
         if created_group:
-            logger.debug("Group %s for social provider %s was created", str(group), social_provider)
+            logger.debug("Group %s for social provider %s was created", group, social_provider)
         _group_member, is_member_created = Dojo_Group_Member.objects.get_or_create(group=group, user=user, defaults={
             "role": Role.objects.get(id=Roles.Maintainer)})
         if is_member_created:
-            logger.debug("User %s become member of group %s (social provider: %s)", user, str(group), social_provider)
+            logger.debug("User %s become member of group %s (social provider: %s)", user, group, social_provider)
 
 
 def cleanup_old_groups_for_user(user, group_names):
     for group_member in Dojo_Group_Member.objects.select_related("group").filter(user=user):
         group = group_member.group
         if str(group) not in group_names:
-            logger.debug("Deleting membership of user %s from %s group %s", user, group.social_provider, str(group))
+            logger.debug("Deleting membership of user %s from %s group %s", user, group.social_provider, group)
             group_member.delete()
 
 
@@ -183,5 +183,6 @@ def sanitize_username(username):
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if not settings.SOCIAL_AUTH_CREATE_USER:
         return None
-    details["username"] = sanitize_username(details.get("username"))
+    username = details.get(settings.SOCIAL_AUTH_CREATE_USER_MAPPING)
+    details["username"] = sanitize_username(username)
     return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)

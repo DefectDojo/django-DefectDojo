@@ -5,13 +5,19 @@ from contextlib import suppress
 from threading import local
 from urllib.parse import quote
 
+import pghistory.middleware
+import requests
 from auditlog.context import set_actor
 from auditlog.middleware import AuditlogMiddleware as _AuditlogMiddleware
 from django.conf import settings
+from django.contrib import messages
 from django.db import models
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.functional import SimpleLazyObject
+from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden, AuthTokenError
+from social_django.middleware import SocialAuthExceptionMiddleware
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
 
@@ -62,7 +68,7 @@ class LoginRequiredMiddleware:
                 return HttpResponseRedirect(fullURL)
 
         if request.user.is_authenticated:
-            logger.debug("Authenticated user: %s", str(request.user))
+            logger.debug("Authenticated user: %s", request.user)
             with suppress(ModuleNotFoundError):  # to avoid unittests to fail
                 uwsgi = __import__("uwsgi", globals(), locals(), ["set_logvar"], 0)
                 # this populates dd_user log var, so can appear in the uwsgi logs
@@ -72,6 +78,31 @@ class LoginRequiredMiddleware:
                 return HttpResponseRedirect(reverse("change_password"))
 
         return self.get_response(request)
+
+
+class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
+    def process_exception(self, request, exception):
+        if isinstance(exception, requests.exceptions.RequestException):
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION)
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthCanceled):
+            messages.warning(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED)
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthFailed):
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED)
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthForbidden):
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN)
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthTokenError):
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR)
+            return redirect("/login?force_login_form")
+        if isinstance(exception, TypeError) and "'NoneType' object is not iterable" in str(exception):
+            logger.warning("OIDC login error: NoneType is not iterable")
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE)
+            return redirect("/login?force_login_form")
+        logger.error(f"Unhandled exception during social login: {exception}")
+        return super().process_exception(request, exception)
 
 
 class DojoSytemSettingsMiddleware:
@@ -193,6 +224,26 @@ class AuditlogMiddleware(_AuditlogMiddleware):
             return self.get_response(request)
 
 
+class PgHistoryMiddleware(pghistory.middleware.HistoryMiddleware):
+
+    """
+    Custom pghistory middleware for DefectDojo that extends the built-in HistoryMiddleware
+    to add remote_addr context following the pattern from:
+    https://django-pghistory.readthedocs.io/en/3.8.1/context/#middleware
+    """
+
+    def get_context(self, request):
+        context = super().get_context(request)
+
+        # Add remote address with proxy support
+        remote_addr = request.META.get("HTTP_X_FORWARDED_FOR")
+        # Get the first IP if there are multiple (proxy chain), or fall back to REMOTE_ADDR
+        remote_addr = remote_addr.split(",")[0].strip() if remote_addr else request.META.get("REMOTE_ADDR")
+
+        context["remote_addr"] = remote_addr
+        return context
+
+
 class LongRunningRequestAlertMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -233,17 +284,19 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
             total_instances = sum(len(pk_list) for pk_list in captured_tasks.values())
             threshold = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_THRESHOLD", 100)
 
-            # If threshold is below 0, async updating is disabled
-            if threshold < 0:
-                logger.debug(f"AsyncSearchContextMiddleware: Async updating disabled (threshold={threshold}), using synchronous update")
-            elif total_instances > threshold:
-                logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances > {threshold} threshold, triggering async update")
-                self._trigger_async_index_update(captured_tasks)
-                # Invalidate to prevent synchronous index update by super()._close_search_context()
-                search_context_manager.invalidate()
-            else:
-                logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances <= {threshold} threshold, using synchronous update")
-                # Let watson handle synchronous update for small numbers
+            # only needed when at least one model instance is updated
+            if total_instances > 0:
+                # If threshold is below 0, async updating is disabled
+                if threshold < 0:
+                    logger.debug(f"AsyncSearchContextMiddleware: Async updating disabled (threshold={threshold}), using synchronous update")
+                elif total_instances > threshold:
+                    logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances > {threshold} threshold, triggering async update")
+                    self._trigger_async_index_update(captured_tasks)
+                    # Invalidate to prevent synchronous index update by super()._close_search_context()
+                    search_context_manager.invalidate()
+                else:
+                    logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances <= {threshold} threshold, using synchronous update")
+                    # Let watson handle synchronous update for small numbers
 
         super()._close_search_context(request)
 

@@ -9,7 +9,7 @@ DefectDojo\'s API is created using [Django Rest
 Framework](http://www.django-rest-framework.org/). The documentation of
 each endpoint is available within each DefectDojo installation at
 [`/api/v2/oa3/swagger-ui`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/) and can be accessed by choosing the API v2
-Docs link on the user drop down menu in the header. 
+Docs link on the user drop down menu in the header.
 
 ![image](images/api_v2_1.png)
 
@@ -155,7 +155,6 @@ Example for importing a scan result:
     tags:test
     scan_type:ZAP Scan
     minimum_severity:Info
-    skip_duplicates:true
     close_old_findings:false
 
 -   Body tab

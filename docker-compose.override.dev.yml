@@ -11,7 +11,7 @@ services:
     environment:
       PYTHONWARNINGS: error  # We are strict about Warnings during development
       DD_DEBUG: 'True'
-      DD_DJANGO_DEBUG_TOOLBAR_ENABLED: 'True'
+      DD_DJANGO_DEBUG_TOOLBAR_ENABLED: "${DD_DJANGO_DEBUG_TOOLBAR_ENABLED:-False}"
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
@@ -38,11 +38,6 @@ services:
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
   nginx:
-    build:
-      args:
-        COLLECT_DJANGO_DEBUG_TOOLBAR_STATIC: 'True'
-    environment:
-      DD_DJANGO_DEBUG_TOOLBAR_ENABLED: 'True'
     volumes:
       - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
   postgres:
@@ -65,4 +60,4 @@ services:
         protocol: tcp
         mode: host
   "webhook.endpoint":
-    image: mccutchen/go-httpbin:2.18.3@sha256:3992f3763e9ce5a4307eae0a869a78b4df3931dc8feba74ab823dd2444af6a6b
+    image: mccutchen/go-httpbin:2.19.0@sha256:be41c6c3772393c097e15f9f8ac381de4ce9e9841c545556af98fbe2e707c619
