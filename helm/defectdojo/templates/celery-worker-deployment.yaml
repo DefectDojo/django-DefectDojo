@@ -170,6 +170,10 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+    {{- with .Values.celery.worker.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
     {{- with .Values.celery.worker.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}

@@ -35,5 +35,7 @@ dependencies:
 annotations:
   artifacthub.io/prerelease: "true"
   artifacthub.io/changes: |
+    - kind: added
+      description: Added HPA and PDB for celery worker and Django
     - kind: fixed
       description: extraAnnotations spec doesn't affect initializer job
