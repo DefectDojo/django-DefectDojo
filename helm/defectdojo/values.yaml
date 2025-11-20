@@ -9,8 +9,8 @@ securityContext:
 
 # -- create defectdojo specific secret
 createSecret: false
-# -- create redis secret in defectdojo chart, outside of redis chart
-createRedisSecret: false
+# -- create valkey secret in defectdojo chart, outside of valkey chart
+createValkeySecret: false
 # -- create postgresql secret in defectdojo chart, outside of postgresql chart
 createPostgresqlSecret: false
 # -- Track configuration (trackConfig): will automatically respin application pods in case of config changes detection
@@ -210,7 +210,6 @@ secrets:
 
 # Components
 celery:
-  broker: redis
   logLevel: INFO
   # -- Common annotations to worker and beat deployments and pods.
   annotations: {}
@@ -602,20 +601,17 @@ gke:
   # Only works with serviceAccount.create = true
   workloadIdentityEmail: ""
 
-# -- For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/redis
-redis:
-  # -- To use an external instance, switch enabled to `false`` and set the address in `redisServer` below
+# -- For more advance options check the bitnami chart documentation: https://artifacthub.io/packages/helm/cloudpirates-valkey/valkey
+valkey:
+  # -- To use an external instance, switch enabled to `false` and set the address in `redisServer` below
   enabled: true
   auth:
-    existingSecret: defectdojo-redis-specific
-    existingSecretPasswordKey: redis-password
+    existingSecret: defectdojo-valkey-specific
+    existingSecretPasswordKey: valkey-password
     password: ""
-  architecture: standalone
-  # To use a different port for Redis (default: 6379) add a port number and uncomment the lines below:
-  # master:
-  #   service:
-  #     ports:
-  #       redis: xxxx
+  # -- To use a different port for Redis (default: 6379)
+  service:
+    port: 6379
   # Sentinel configuration parameters
   sentinel:
     enabled: false
@@ -676,7 +672,7 @@ localsettingspy: ""
 # @schema type:[string, null]
 # -- To use an external Redis instance, set `redis.enabled` to false and set the address here:
 redisServer: ~
-# -- Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `redis.tls.enabled`
+# -- Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `valkey.tls.enabled`
 redisParams: ""
 #
 # @schema type:[string, null]

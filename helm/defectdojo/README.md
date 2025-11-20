@@ -94,7 +94,7 @@ helm install \
   --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
   --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 ```
 
@@ -280,10 +280,10 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 
-# For high availability deploy multiple instances of Django, Celery and Redis
+# For high availability deploy multiple instances of Django, Celery and Valkey
 helm install \
   defectdojo \
   ./helm/defectdojo \
@@ -292,9 +292,10 @@ helm install \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
   --set celery.worker.replicas=3 \
-  --set redis.replicas=3 \
+  --set valkey.architecture=replication \
+  --set valkey.replicaCount=3 \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 
 # Run highly available PostgreSQL cluster
@@ -306,13 +307,14 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.replicas=3 \
   --set celery.worker.replicas=3 \
-  --set redis.replicas=3 \
+  --set valkey.architecture=replication \
+  --set valkey.replicaCount=3 \
   --set django.ingress.secretName="minikube-tls" \
   --set postgresql.enabled=true \
   --set postgresql.replication.enabled=true \
   --set postgresql.replication.slaveReplicas=3 \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 
 # Note: If you run `helm install defectdojo before, you will get an error
@@ -359,16 +361,13 @@ You will still need to set a host value as well.
 
 If you want to use a redis-sentinel setup as the Celery broker, you will need to set the following.
 
-1. Set redis.scheme to "sentinel" in values.yaml
+1. Set valkey.scheme to "sentinel" in values.yaml
 2. Set two additional extraEnv vars specifying the sentinel master name and port in values.yaml
 
 ```yaml
-celery:
-  broker: 'redis'
-
-redis:
-  redisServer: 'PutYourRedisSentinelAddress'
+valkey:
   scheme: 'sentinel'
+redisServer: 'PutYourRedisSentinelAddress'
 
 extraEnv:
   - name: DD_CELERY_BROKER_TRANSPORT_OPTIONS
@@ -451,10 +450,10 @@ extraEnv:
 
 #### Step 4: Deploy DefectDojo
 
-After modifying the `values.yaml` file as needed, deploy DefectDojo using Helm. This command also generates the required secrets for the DefectDojo admin UI and Redis:
+After modifying the `values.yaml` file as needed, deploy DefectDojo using Helm. This command also generates the required secrets for the DefectDojo admin UI and Valkey:
 
 ```bash
-helm install defectdojo defectdojo -f values.yaml -n defectdojo --set createSecret=true --set createRedisSecret=true
+helm install defectdojo defectdojo -f values.yaml -n defectdojo --set createSecret=true --set createValkeySecret=true
 ```
 
 **NOTE**: It is important to highlight that this setup can also be utilized for achieving high availability (HA) in PostgreSQL. By placing a load balancer in front of the PostgreSQL cluster, read and write requests can be efficiently routed to the appropriate primary or standby servers as needed.
@@ -526,8 +525,8 @@ A Helm chart for Kubernetes to install DefectDojo
 
 | Repository | Name | Version |
 |------------|------|---------|
+| oci://registry-1.docker.io/cloudpirates | valkey | ~0.10.0 |
 | oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | postgresql | ~16.7.0 |
-| oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | redis | ~19.6.4 |
 
 ## Values
 
@@ -564,7 +563,6 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.beat.resources.requests.memory | string | `"128Mi"` |  |
 | celery.beat.startupProbe | object | `{}` | Enable startup probe for Celery beat container. |
 | celery.beat.tolerations | list | `[]` |  |
-| celery.broker | string | `"redis"` |  |
 | celery.logLevel | string | `"INFO"` |  |
 | celery.worker.affinity | object | `{}` |  |
 | celery.worker.annotations | object | `{}` | Annotations for the Celery worker deployment. |
@@ -600,8 +598,8 @@ A Helm chart for Kubernetes to install DefectDojo
 | cloudsql.use_private_ip | bool | `false` | whether to use a private IP to connect to the database |
 | cloudsql.verbose | bool | `true` | By default, the proxy has verbose logging. Set this to false to make it less verbose |
 | createPostgresqlSecret | bool | `false` | create postgresql secret in defectdojo chart, outside of postgresql chart |
-| createRedisSecret | bool | `false` | create redis secret in defectdojo chart, outside of redis chart |
 | createSecret | bool | `false` | create defectdojo specific secret |
+| createValkeySecret | bool | `false` | create valkey secret in defectdojo chart, outside of valkey chart |
 | dbMigrationChecker.containerSecurityContext | object | `{}` | Container security context for the DB migration checker. |
 | dbMigrationChecker.enabled | bool | `true` | Enable/disable the DB migration checker. |
 | dbMigrationChecker.extraEnv | list | `[]` | Additional environment variables for DB migration checker. |
@@ -744,10 +742,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | postgresql.primary.podSecurityContext.enabled | bool | `true` | Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC |
 | postgresql.primary.podSecurityContext.fsGroup | int | `1001` | fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully. |
 | postgresql.volumePermissions.containerSecurityContext | object | `{"runAsUser":1001}` | if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above |
-| redis | object | `{"architecture":"standalone","auth":{"existingSecret":"defectdojo-redis-specific","existingSecretPasswordKey":"redis-password","password":""},"enabled":true,"sentinel":{"enabled":false},"tls":{"enabled":false}}` | For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/redis |
-| redis.enabled | bool | `true` | To use an external instance, switch enabled to `false`` and set the address in `redisServer` below |
-| redis.tls.enabled | bool | `false` | If TLS is enabled, the Redis broker will use the redis:// and optionally mount the certificates from an existing secret. |
-| redisParams | string | `""` | Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `redis.tls.enabled` |
+| redisParams | string | `""` | Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `valkey.tls.enabled` |
 | redisServer | string | `nil` | To use an external Redis instance, set `redis.enabled` to false and set the address here: |
 | revisionHistoryLimit | int | `10` | Allow overriding of revisionHistoryLimit across all deployments. |
 | secrets.annotations | object | `{}` | Add annotations for secret resources |
@@ -764,6 +759,10 @@ A Helm chart for Kubernetes to install DefectDojo
 | tests.unitTests.resources.requests.cpu | string | `"100m"` |  |
 | tests.unitTests.resources.requests.memory | string | `"128Mi"` |  |
 | trackConfig | string | `"disabled"` | Track configuration (trackConfig): will automatically respin application pods in case of config changes detection can be: 1. disabled (default) 2. enabled, enables tracking configuration changes based on SHA256 |
+| valkey | object | `{"auth":{"existingSecret":"defectdojo-valkey-specific","existingSecretPasswordKey":"valkey-password","password":""},"enabled":true,"sentinel":{"enabled":false},"service":{"port":6379},"tls":{"enabled":false}}` | For more advance options check the bitnami chart documentation: https://artifacthub.io/packages/helm/cloudpirates-valkey/valkey |
+| valkey.enabled | bool | `true` | To use an external instance, switch enabled to `false` and set the address in `redisServer` below |
+| valkey.service | object | `{"port":6379}` | To use a different port for Redis (default: 6379) |
+| valkey.tls.enabled | bool | `false` | If TLS is enabled, the Redis broker will use the redis:// and optionally mount the certificates from an existing secret. |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

@@ -153,9 +153,6 @@
                         }
                     }
                 },
-                "broker": {
-                    "type": "string"
-                },
                 "logLevel": {
                     "type": "string"
                 },
@@ -340,12 +337,12 @@
             "description": "create postgresql secret in defectdojo chart, outside of postgresql chart",
             "type": "boolean"
         },
-        "createRedisSecret": {
-            "description": "create redis secret in defectdojo chart, outside of redis chart",
-            "type": "boolean"
-        },
         "createSecret": {
             "description": "create defectdojo specific secret",
+            "type": "boolean"
+        },
+        "createValkeySecret": {
+            "description": "create valkey secret in defectdojo chart, outside of valkey chart",
             "type": "boolean"
         },
         "dbMigrationChecker": {
@@ -1237,52 +1234,8 @@
                 }
             }
         },
-        "redis": {
-            "description": "For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/redis",
-            "type": "object",
-            "properties": {
-                "architecture": {
-                    "type": "string"
-                },
-                "auth": {
-                    "type": "object",
-                    "properties": {
-                        "existingSecret": {
-                            "type": "string"
-                        },
-                        "existingSecretPasswordKey": {
-                            "type": "string"
-                        },
-                        "password": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "enabled": {
-                    "description": "To use an external instance, switch enabled to `false`` and set the address in `redisServer` below",
-                    "type": "boolean"
-                },
-                "sentinel": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        }
-                    }
-                },
-                "tls": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "description": "If TLS is enabled, the Redis broker will use the redis:// and optionally mount the certificates from an existing secret.",
-                            "type": "boolean"
-                        }
-                    }
-                }
-            }
-        },
         "redisParams": {
-            "description": "Parameters attached to the redis connection string, defaults to \"ssl_cert_reqs=optional\" if `redis.tls.enabled`",
+            "description": "Parameters attached to the redis connection string, defaults to \"ssl_cert_reqs=optional\" if `valkey.tls.enabled`",
             "type": "string"
         },
         "redisServer": {
@@ -1416,6 +1369,56 @@
         "trackConfig": {
             "description": "Track configuration (trackConfig): will automatically respin application pods in case of config changes detection can be: 1. disabled (default) 2. enabled, enables tracking configuration changes based on SHA256",
             "type": "string"
+        },
+        "valkey": {
+            "description": "For more advance options check the bitnami chart documentation: https://artifacthub.io/packages/helm/cloudpirates-valkey/valkey",
+            "type": "object",
+            "properties": {
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretPasswordKey": {
+                            "type": "string"
+                        },
+                        "password": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "enabled": {
+                    "description": "To use an external instance, switch enabled to `false` and set the address in `redisServer` below",
+                    "type": "boolean"
+                },
+                "sentinel": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "service": {
+                    "description": "To use a different port for Redis (default: 6379)",
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "tls": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "If TLS is enabled, the Redis broker will use the redis:// and optionally mount the certificates from an existing secret.",
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
         }
     }
 }
