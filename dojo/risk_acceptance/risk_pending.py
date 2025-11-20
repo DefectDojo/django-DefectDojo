@@ -120,11 +120,10 @@ def risk_accepted_succesfully(
 def user_has_permission_long_risk_acceptance(user, risk_acceptance, product):
     if risk_acceptance and risk_acceptance.long_term_acceptance:
         users = users_with_permissions_to_approve_long_term_findings("Approvers_Risk", "Risk", product),
-        try:
-            users.get(id=user.id)
-        except Dojo_User.DoesNotExist:
-            return False
-    return True
+        users_ids = [user.id for user in users[0]] 
+        if user.id in users_ids:
+            return True
+        return False
 
 
 def role_has_exclusive_permissions(user):
