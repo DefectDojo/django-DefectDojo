@@ -168,7 +168,7 @@
                                         {% endif %}
                                         {% if finding.test.engagement.product.enable_full_risk_acceptance %}
                                         <li role="presentation">
-                                            <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                            <a href ="{% url 'add_risk_acceptance' prod.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                 <i class="fa-solid fa-circle-exclamation"></i> Add Risk Acceptance...
                                             </a>
                                         </li>
@@ -322,7 +322,7 @@
                         {% if finding.risk_acceptance_set.all %}
                             <td>
                                 {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
-                                    <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                    <a href="{% url 'view_risk_acceptance' ra.id %}"
                                     class="fa-solid fa-circle-exclamation fa-lg has-popover {% if ra.is_expired %}lightgrey{% endif%}"
                                     data-trigger="hover" data-placement="right"
                                     data-content="{{ ra.name_and_expiration_info }}"

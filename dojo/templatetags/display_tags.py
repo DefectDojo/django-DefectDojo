@@ -736,7 +736,7 @@ def finding_display_status(finding):
     if "Risk Accepted" in display_status:
         ra = finding.risk_acceptance
         if ra:
-            url = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id))
+            url = reverse("view_risk_acceptance", args=(ra.id,))
             info = ra.name_and_expiration_info
             link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
             display_status = display_status.replace("Risk Accepted", link)
