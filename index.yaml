@@ -3,12 +3,14 @@ entries:
   defectdojo:
   - annotations:
       artifacthub.io/changes: |
+        - kind: added
+          description: Added HPA and PDB for celery worker and Django
         - kind: fixed
           description: extraAnnotations spec doesn't affect initializer job
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 2.53.0-dev
-    created: "2025-11-20T05:08:03.333786292Z"
+    created: "2025-11-21T05:10:57.960757024Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -19,7 +21,7 @@ entries:
       repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
       version: ~19.6.4
     description: A Helm chart for Kubernetes to install DefectDojo
-    digest: 080eff4d93bc60155d4aa8ed0f2814cfce10beb350ed0c84638f366fe423d603
+    digest: 12455df264ef6458c19127eccbfa96a7d95b470c595a9694165e0ab79072c29b
     icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
     maintainers:
     - email: defectdojo-project@owasp.org
@@ -7044,4 +7046,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2025-11-20T05:08:03.321369684Z"
+generated: "2025-11-21T05:10:57.948934837Z"
