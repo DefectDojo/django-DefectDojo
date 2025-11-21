@@ -50,9 +50,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.system_settings(enable_jira=True)
         self.client.force_login(self.get_test_admin())
 
-    def add_risk_acceptance(self, eid, data_risk_accceptance, fid=None):
+    def add_risk_acceptance(self, pid, data_risk_accceptance, fid=None):
 
-        args = (eid, fid) if fid else (eid,)
+        args = (pid, fid) if fid else (pid,)
 
         response = self.client.post(reverse("add_risk_acceptance", args=args), data_risk_accceptance)
         self.assertEqual(302, response.status_code, response.content[:1000])
@@ -74,7 +74,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data["accepted_findings"] = [2]
         ra_data["return_url"] = reverse("view_finding", args=(2, ))
-        response = self.add_risk_acceptance(1, ra_data, 2)
+        response = self.add_risk_acceptance(2, ra_data, 2)  # product_id=2
         self.assertEqual("/finding/2", response.url)
         ra = Risk_Acceptance.objects.last()
         self.assert_all_active_not_risk_accepted(ra.accepted_findings.all())
@@ -82,8 +82,8 @@ class RiskAcceptanceTestUI(DojoTestCase):
     def test_add_risk_acceptance_multiple_findings_accepted(self):
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data["accepted_findings"] = [2, 3]
-        response = self.add_risk_acceptance(1, ra_data)
-        self.assertEqual("/engagement/1", response.url)
+        response = self.add_risk_acceptance(2, ra_data)  # product_id=2
+        self.assertEqual("/product/2", response.url)
         ra = Risk_Acceptance.objects.last()
         self.assert_all_active_not_risk_accepted(ra.accepted_findings.all())
 
@@ -97,7 +97,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
             "accepted_findings": [4, 5],
         }
 
-        response = self.client.post(reverse("view_risk_acceptance", args=(1, ra.id)),
+        response = self.client.post(reverse("view_risk_acceptance", args=(ra.id,)),
                     urlencode(MultiValueDict(data_add_findings_to_ra), doseq=True),
                     content_type="application/x-www-form-urlencoded")
 
@@ -111,7 +111,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
         data = copy.copy(self.data_remove_finding_from_ra)
         data["remove_finding_id"] = 2
         ra = Risk_Acceptance.objects.last()
-        response = self.client.post(reverse("view_risk_acceptance", args=(1, ra.id)), data)
+        response = self.client.post(reverse("view_risk_acceptance", args=(ra.id,)), data)
         self.assertEqual(302, response.status_code, response.content[:1000])
         self.assert_all_active_not_risk_accepted(Finding.objects.filter(id=2))
         self.assert_all_inactive_risk_accepted(Finding.objects.filter(id=3))
@@ -124,7 +124,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {"id": ra.id}
 
-        self.client.post(reverse("delete_risk_acceptance", args=(1, ra.id)), data)
+        self.client.post(reverse("delete_risk_acceptance", args=(ra.id,)), data)
 
         self.assert_all_active_not_risk_accepted(findings)
         self.assert_all_active_not_risk_accepted(Finding.objects.filter(test__engagement=1))
@@ -139,7 +139,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {"id": ra.id}
 
-        self.client.post(reverse("expire_risk_acceptance", args=(1, ra.id)), data)
+        self.client.post(reverse("expire_risk_acceptance", args=(ra.id,)), data)
 
         ra.refresh_from_db()
         self.assert_all_active_not_risk_accepted(findings)
@@ -161,7 +161,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {"id": ra.id}
 
-        self.client.post(reverse("expire_risk_acceptance", args=(1, ra.id)), data)
+        self.client.post(reverse("expire_risk_acceptance", args=(ra.id,)), data)
 
         ra.refresh_from_db()
         # no reactivation on expiry
@@ -184,7 +184,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {"id": ra.id}
 
-        self.client.post(reverse("expire_risk_acceptance", args=(1, ra.id)), data)
+        self.client.post(reverse("expire_risk_acceptance", args=(ra.id,)), data)
 
         ra.refresh_from_db()
 
@@ -200,7 +200,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {"id": ra.id}
 
-        self.client.post(reverse("expire_risk_acceptance", args=(1, ra.id)), data)
+        self.client.post(reverse("expire_risk_acceptance", args=(ra.id,)), data)
 
         ra.refresh_from_db()
 
@@ -215,7 +215,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {"id": ra.id}
 
-        self.client.post(reverse("reinstate_risk_acceptance", args=(1, ra.id)), data)
+        self.client.post(reverse("reinstate_risk_acceptance", args=(ra.id,)), data)
 
         ra.refresh_from_db()
         expiration_delta_days = get_system_setting("risk_acceptance_form_default_days", 90)
@@ -233,19 +233,19 @@ class RiskAcceptanceTestUI(DojoTestCase):
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data["accepted_findings"] = [2]
         ra_data["return_url"] = reverse("view_finding", args=(2, ))
-        self.add_risk_acceptance(1, ra_data, 2)
+        self.add_risk_acceptance(2, ra_data, 2)  # product_id=2
         ra1 = Risk_Acceptance.objects.last()
 
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data["accepted_findings"] = [7]
         ra_data["return_url"] = reverse("view_finding", args=(7, ))
-        self.add_risk_acceptance(1, ra_data, 7)
+        self.add_risk_acceptance(2, ra_data, 7)  # product_id=2
         ra2 = Risk_Acceptance.objects.last()
 
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data["accepted_findings"] = [22]
         ra_data["return_url"] = reverse("view_finding", args=(22, ))
-        self.add_risk_acceptance(3, ra_data, 22)
+        self.add_risk_acceptance(2, ra_data, 22)  # product_id=2 (engagement 3 is also in product 2)
         ra3 = Risk_Acceptance.objects.last()
 
         return ra1, ra2, ra3

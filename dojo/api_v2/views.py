@@ -431,7 +431,7 @@ class EngagementViewSet(
     def get_queryset(self):
         return (
             get_authorized_engagements(Permissions.Engagement_View)
-            .prefetch_related("notes", "risk_acceptance", "files")
+            .prefetch_related("notes", "files")
             .distinct()
         )
 
@@ -722,7 +722,7 @@ class RiskAcceptanceViewSet(
         return (
             get_authorized_risk_acceptances(Permissions.Risk_Acceptance)
             .prefetch_related(
-                "notes", "engagement_set", "owner", "accepted_findings",
+                "notes", "product", "owner", "accepted_findings",
             )
             .distinct()
         )
@@ -1735,7 +1735,7 @@ class ProductViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_products(Permissions.Product_View).distinct()
+        return get_authorized_products(Permissions.Product_View).prefetch_related("risk_acceptances").distinct()  # TODO: Test this, and is it needed?
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

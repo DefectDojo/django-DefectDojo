@@ -161,7 +161,7 @@
                         {% endfor %}
                     </p>
                 {% endif %}
-                {% if engagement.risk_acceptance.count > 0 %}
+                {% if engagement.product.risk_acceptances.count > 0 %}
                     <h3 id="risk_acceptance">Risk Accepted Findings</h3>
                     <table style="width: 100%;max-width: 100%;margin-bottom: 20px;margin-top:0;border: 1px solid #DDDDDD;">
                         <tr>
@@ -175,7 +175,7 @@
                                 Severity
                             </th>
                         </tr>
-                        {% for risk in engagement.risk_acceptance.all %}
+                        {% for risk in engagement.product.risk_acceptances.all %}
                             {% for finding in risk.accepted_findings.all %}
                                 <tr>
                                     <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.title }}</td>

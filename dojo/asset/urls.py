@@ -24,6 +24,11 @@ if settings.ENABLE_V3_ORGANIZATION_ASSET_RELABEL:
             name="view_product_components",
         ),
         re_path(
+            r"^asset/(?P<pid>\d+)/risk_acceptance$",
+            views.view_product_risk_acceptances,
+            name="view_product_risk_acceptances",
+        ),
+        re_path(
             r"^asset/(?P<pid>\d+)/engagements$",
             views.view_engagements,
             name="view_engagements",
@@ -177,6 +182,7 @@ if settings.ENABLE_V3_ORGANIZATION_ASSET_RELABEL:
         re_path(r"^product$", redirect_view("product")),
         re_path(r"^product/(?P<pid>\d+)$", redirect_view("view_product")),
         re_path(r"^product/(?P<pid>\d+)/components$", redirect_view("view_product_components")),
+        re_path(r"^product/(?P<pid>\d+)/risk_acceptance$", redirect_view("view_product_risk_acceptances")),
         re_path(r"^product/(?P<pid>\d+)/engagements$", redirect_view("view_engagements")),
         re_path(r"^product/(?P<product_id>\d+)/import_scan_results$", redirect_view("import_scan_results_prod")),
         re_path(r"^product/(?P<pid>\d+)/metrics$", redirect_view("view_product_metrics")),
@@ -214,6 +220,8 @@ else:
                 name="view_product"),
         re_path(r"^product/(?P<pid>\d+)/components$", views.view_product_components,
                 name="view_product_components"),
+        re_path(r"^product/(?P<pid>\d+)/risk_acceptance$", views.view_product_risk_acceptances,
+                name="view_product_risk_acceptances"),
         re_path(r"^product/(?P<pid>\d+)/engagements$", views.view_engagements,
                 name="view_engagements"),
         re_path(
@@ -283,6 +291,7 @@ else:
         re_path(r"^asset$", redirect_view("product")),
         re_path(r"^asset/(?P<pid>\d+)$", redirect_view("view_product")),
         re_path(r"^asset/(?P<pid>\d+)/components$", redirect_view("view_product_components")),
+        re_path(r"^asset/(?P<pid>\d+)/risk_acceptance$", redirect_view("view_product_risk_acceptances")),
         re_path(r"^asset/(?P<pid>\d+)/engagements$", redirect_view("view_engagements")),
         re_path(r"^asset/(?P<product_id>\d+)/import_scan_results$", redirect_view("import_scan_results_prod")),
         re_path(r"^asset/(?P<pid>\d+)/metrics$", redirect_view("view_product_metrics")),
