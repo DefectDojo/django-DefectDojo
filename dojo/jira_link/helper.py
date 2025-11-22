@@ -1816,8 +1816,8 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                         owner=finding.reporter,
                         expiration_date=expiration_date_from_system_settings,
                         decision_details=f"Risk Acceptance automatically created from JIRA issue {jira_issue.jira_key} with resolution {resolution_name}",
+                        engagement=finding.test.engagement,
                     )
-                    finding.test.engagement.risk_acceptance.add(ra)
                     ra_helper.add_findings_to_risk_acceptance(User.objects.get_or_create(username="JIRA")[0], ra, [finding])
                 status_changed = True
         elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
