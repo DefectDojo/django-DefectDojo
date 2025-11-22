@@ -5,6 +5,8 @@ set -e  # needed to handle "exit" correctly
 . /secret-file-loader.sh
 . /reach_database.sh
 
+returncode=0
+
 initialize_data()
 {
     # Test types shall be initialized every time by the initializer, to make sure test types are complete
@@ -59,7 +61,7 @@ umask 0002
 if [ "${DD_INITIALIZE}" = false ]
 then
   echo "Echo initialization skipped. Exiting."
-  exit
+  exit $returncode
 fi
 echo "Initializing."
 
@@ -102,7 +104,8 @@ EOD
 then
   echo "You have set 'enable_auditlog' to False in the past. It is not possible to manage auditlog in System settings anymore. If you would like to keep auditlog disabled, you need to set environmental variable DD_ENABLE_AUDITLOG to False for all Django containers (uwsgi, celeryworker & initializer)."
   echo "Or there is some other error in checking script. Check logs of this container."
-  exit 47
+  returncode=47
+  exit $returncode
 fi
 
 
@@ -129,6 +132,7 @@ docker compose exec uwsgi bash -c 'python manage.py makemigrations -v2'
 
 EOF
     echo "WARNING: Continuing startup despite missing migrations..."
+    returncode=52
 }
 
 echo "Migrating"
@@ -150,7 +154,7 @@ then
     echo "$ docker compose exec uwsgi /bin/bash -c 'python manage.py createsuperuser'"
     create_announcement_banner
     initialize_data
-    exit
+    exit $returncode
 fi
 
 if [ -z "${DD_ADMIN_PASSWORD}" ]
@@ -175,3 +179,5 @@ then
   create_announcement_banner
   initialize_data
 fi
+
+exit $returncode
