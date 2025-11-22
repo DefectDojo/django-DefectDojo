@@ -1,4 +1,6 @@
-from datetime import date, datetime
+from datetime import datetime
+
+from django.utils import timezone
 
 from dojo.models import Finding, Test
 from dojo.tools.hydra.parser import HydraParser
@@ -55,7 +57,7 @@ class TestHydraParser(DojoTestCase):
 
             self.__assertFindingEquals(
                 finding,
-                date.today(),
+                timezone.now().date(),
                 "127.0.0.1",
                 "9999",
                 "bill@example.com",

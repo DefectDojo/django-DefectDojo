@@ -1,9 +1,10 @@
 import logging
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 
 from auditlog.models import LogEntry
 from dateutil.relativedelta import relativedelta
 from django.test import override_settings
+from django.utils import timezone
 
 from dojo.models import Finding
 from dojo.tasks import flush_auditlog
@@ -25,9 +26,9 @@ class TestFlushAuditlog(DojoTestCase):
 
     @override_settings(AUDITLOG_FLUSH_RETENTION_PERIOD=0)
     def test_delete_all_entries(self):
-        entries_before = LogEntry.objects.filter(timestamp__date__lt=date.today()).count()
+        entries_before = LogEntry.objects.filter(timestamp__date__lt=timezone.now().date()).count()
         flush_auditlog()
-        entries_after = LogEntry.objects.filter(timestamp__date__lt=date.today()).count()
+        entries_after = LogEntry.objects.filter(timestamp__date__lt=timezone.now().date()).count()
         # we have three old log entries in our testdata
         self.assertEqual(entries_before - 3, entries_after)
 
