@@ -39,3 +39,5 @@ annotations:
       description: Added HPA and PDB for celery worker and Django
     - kind: fixed
       description: extraAnnotations spec doesn't affect initializer job
+    - kind: changed
+      description: chore(deps): update nginx/nginx-prometheus-exporter docker tag from 1.4.2 to v1.5.1 (helm/defectdojo/values.yaml)
