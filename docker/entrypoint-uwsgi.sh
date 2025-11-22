@@ -27,7 +27,7 @@ python3 manage.py check
 
 DD_UWSGI_LOGFORMAT_DEFAULT='[pid: %(pid)|app: -|req: -/-] %(addr) (%(dd_user)) {%(vars) vars in %(pktsize) bytes} [%(ctime)] %(method) %(uri) => generated %(rsize) bytes in %(msecs) msecs (%(proto) %(status)) %(headers) headers in %(hsize) bytes (%(switches) switches on core %(core))'
 
-EXTRA_ARGS=""
+EXTRA_ARGS="${EXTRA_ARGS:-}"
 if [ -n "${DD_UWSGI_MAX_FD}" ]; then
     EXTRA_ARGS="${EXTRA_ARGS} --max-fd ${DD_UWSGI_MAX_FD}"
 fi
