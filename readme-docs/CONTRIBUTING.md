@@ -56,7 +56,7 @@ Please use [these test scripts](../tests) to test your changes. These are the sc
 For changes that require additional settings, you can now use local_settings.py file. See the logging section below for more information.
 
 ## Python3 Version
-For compatibility reasons, the code in dev branch should be python3.13 compliant.
+For compatibility reasons, the code in dev branch should be python3.14 compliant.
 
 ## Database migrations
 When changes are made to the database model, a database migration is needed. This migration can be generated using something like
@@ -82,7 +82,7 @@ DefectDojo.
 
 0. Pull requests should be submitted to the `dev` or `bugfix` branch.
 
-0. In dev branch, the code should be python 3.13 compliant.
+0. In dev branch, the code should be python 3.14 compliant.
 
 [dojo_settings]: /dojo/settings/settings.dist.py "DefectDojo settings file"
 [pep8]: https://www.python.org/dev/peps/pep-0008/ "PEP8"
