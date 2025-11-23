@@ -79,7 +79,7 @@ def has_valid_comments(finding_exclusion, user) -> bool:
 
 
 @app.task
-def add_findings_to_whitelist(unique_id_from_tool, relative_url):
+def add_findings_to_whitelist(unique_id_from_tool, relative_url, engagement_ids=[]):
     findings_to_update = (
         Finding.objects.filter(
             Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
@@ -88,6 +88,9 @@ def add_findings_to_whitelist(unique_id_from_tool, relative_url):
         .exclude(risk_status=Constants.ON_WHITELIST.value)
         .filter(tag_filter)
     )
+
+    if engagement_ids:
+        findings_to_update = findings_to_update.filter(test__engagement__in=engagement_ids)
 
     if findings_to_update.exists():
         finding_exclusion_url = get_full_url(relative_url)
@@ -119,10 +122,12 @@ def accept_finding_exclusion_inmediately(finding_exclusion: FindingExclusion) ->
     finding_exclusion.save()
 
     relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
+    engagement_ids = finding_exclusion.engagements.values_list('id', flat=True)
     add_findings_to_whitelist.apply_async(
         args=(
             finding_exclusion.unique_id_from_tool,
             str(relative_url),
+            list(engagement_ids)
         )
     )
 
@@ -255,6 +260,13 @@ def expire_finding_exclusion(expired_fex_id: str) -> None:
                 risk_status=risk_status,
             ).prefetch_related("tags", "notes")
 
+            engagement_ids = expired_fex.engagements.values_list("id", flat=True)
+
+            if engagement_ids:
+                findings = findings.filter(
+                    test__engagement__in=list(engagement_ids)
+                )
+
             findings_to_update = []
 
             for finding in findings:
@@ -305,10 +317,12 @@ def check_new_findings_to_exclusion_list():
     for finding_exclusion in finding_exclusions:
         relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
         if finding_exclusion.type == "white_list":
+            engagement_ids = finding_exclusion.engagements.values_list('id', flat=True)
             add_findings_to_whitelist.apply_async(
                 args=(
                     finding_exclusion.unique_id_from_tool,
                     relative_url,
+                    list(engagement_ids)
                 )
             )
         else:
@@ -677,7 +691,7 @@ def check_priorization():
 
 @app.task
 def remove_findings_from_deleted_finding_exclusions(
-    unique_id_from_tool: str, fx_type: str
+    unique_id_from_tool: str, fx_type: str, engagement_ids: list
 ) -> None:
     try:
         with transaction.atomic():
@@ -699,6 +713,9 @@ def remove_findings_from_deleted_finding_exclusions(
                 active=is_active,
                 risk_status=risk_status,
             ).prefetch_related("tags", "notes")
+
+            if engagement_ids:
+                findings = findings.filter(test__engagement__in=engagement_ids)
 
             findings_to_update = []
 

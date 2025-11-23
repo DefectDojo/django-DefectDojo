@@ -90,6 +90,25 @@
         border-top: 1px solid #ddd;
         z-index: 1000;
     }
+    .cli-log-container {
+        font-family: monospace;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .cli-log-line {
+        margin-bottom: 2px;
+    }
+    .log-date {
+        color: #6c757d;
+    }
+    .log-user {
+        color: #212529;
+    }
+    .log-status {
+        padding: 2px 5px;
+        border-radius: 3px;
+        color: white;
+    }
 {% endblock %}
 
 {% block content %}
@@ -167,6 +186,15 @@
                                     </a>
                                 </li>
                             {% endif %}
+                            {% if request.user|is_in_reviewer_group %}
+                                {% if finding_exclusion.status == 'Rejected' or finding_exclusion.status == 'Expired' %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'reopen_finding_exclusion' finding_exclusion.uuid %}">
+                                        <i class="fa-solid fa-circle-check"></i> Reopen Finding Exclusion
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endif %}
                         </ul>  
                     </div>
             </div>
@@ -222,6 +250,14 @@
             </div>
             <div id="vuln_desc" class="panel-body finding-description collapse in">
               <pre>{{ finding_exclusion.reason }}</pre>
+              {% if finding_exclusion.engagements %}
+                <strong>This applies to the following engagements:</strong>
+                <ul>
+                {% for engagement in finding_exclusion.engagements.all %}
+                  <li><code>{{ engagement.name }}</code></li>
+                {% endfor %}
+                </ul>
+              {% endif %}
             </div>
         </div>
 
@@ -285,6 +321,33 @@
                     </div>
                 </div>
                 {% endif %}
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Change History <span class="pull-right"><a rel="noopener noreferrer" data-toggle="collapse" href="#vuln_history"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_history" class="panel-body finding-description collapse in">
+                <div class="cli-log-container">
+                    {% for log in finding_exclusion.logs.all %}
+                        <div class="cli-log-line">
+                            <span class="log-date">[{{ log.changed_at|date:"d M Y H:i" }}]</span>
+                            <span class="log-user">{{ log.changed_by.username }}:</span>
+                            Status changed from
+                            <span class="log-status" style="background-color: {% if log.previous_status == 'Pending' %}#1B30DE{% elif log.previous_status == 'Accepted' %}#096C11{% elif log.previous_status == 'Rejected' %}#d11d38{% elif log.previous_status == 'Expired' %}#d11d38{% elif log.previous_status == 'Reviewed' %}#b97a0c{% else %}#6c757d{% endif %};">
+                                {{ log.previous_status }}
+                            </span>
+                            to
+                            <span class="log-status" style="background-color: {% if log.current_status == 'Pending' %}#1B30DE{% elif log.current_status == 'Accepted' %}#096C11{% elif log.current_status == 'Rejected' %}#d11d38{% elif log.current_status == 'Expired' %}#d11d38{% elif log.current_status == 'Reviewed' %}#b97a0c{% else %}#6c757d{% endif %};">
+                                {{ log.current_status }}
+                            </span>
+                        </div>
+                    {% empty %}
+                        <div class="cli-log-line">No history found.</div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 

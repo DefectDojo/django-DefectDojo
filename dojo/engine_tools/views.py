@@ -2,7 +2,7 @@
 from dojo.templatetags.authorization_tags import is_in_group, has_permission_to_reclassify_orphans
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification
-from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
+from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion, FindingExclusionLog
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm, EditFindingExclusionForm
 from dojo.models import Product, Product_Type, System_Settings
@@ -59,6 +59,7 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     
     duplicate_finding_exclusions = FindingExclusion.objects.filter(
             unique_id_from_tool__in=[default_unique_id],
+            engagements__isnull=True
     ).exclude(status__in=["Rejected"]).first()
     
     if duplicate_finding_exclusions:
@@ -69,7 +70,14 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
                 f"There is already a request in status '{duplicate_finding_exclusions.status}' for this CVE, This will be whitelisted.",
                 extra_tags="alert-success")
             relative_url = reverse("finding_exclusion", args=[str(duplicate_finding_exclusions.pk)])
-            add_findings_to_whitelist.apply_async(args=(duplicate_finding_exclusions.unique_id_from_tool, relative_url,))
+            engagement_ids = duplicate_finding_exclusions.engagements.values_list('id', flat=True)
+            add_findings_to_whitelist.apply_async(
+                args=(
+                    duplicate_finding_exclusions.unique_id_from_tool,
+                    relative_url,
+                    list(engagement_ids)
+                )
+            )
             
         else:
             messages.add_message(
@@ -98,6 +106,8 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
             if list_type == "black_list":
                 if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
                     raise PermissionDenied
+                
+                previous_status = exclusion.status
                 exclusion.status = "Accepted"
                 exclusion.final_status = "Accepted"
                 exclusion.accepted_at = timezone.now()
@@ -105,10 +115,19 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
                 exclusion.status_updated_at = timezone.now()
                 exclusion.status_updated_by = request.user
                 exclusion.save()
+                
+                FindingExclusionLog.objects.create(
+                    finding_exclusion=exclusion,
+                    changed_by=request.user,
+                    previous_status=previous_status,
+                    current_status="Accepted"
+                )
+                
                 relative_url = reverse("finding_exclusion", args=[str(exclusion.pk)])
                 add_findings_to_blacklist.apply_async(args=(exclusion.unique_id_from_tool, relative_url,))
             else:  
                 exclusion.save()
+                form.save_m2m()
                 
                 cve = request.POST.get(key="unique_id_from_tool")
                 
@@ -242,12 +261,20 @@ def review_finding_exclusion_request(
             extra_tags="alert-danger")
         return redirect('finding_exclusion', fxid=fxid)
     
+    previous_status = finding_exclusion.status
     finding_exclusion.status = "Reviewed"
     finding_exclusion.reviewed_at = datetime.now()
     finding_exclusion.reviewed_by = request.user
     finding_exclusion.status_updated_at = datetime.now()
     finding_exclusion.status_updated_by = request.user
     finding_exclusion.save()
+    
+    FindingExclusionLog.objects.create(
+        finding_exclusion=finding_exclusion,
+        changed_by=request.user,
+        previous_status=previous_status,
+        current_status="Reviewed"
+    )
     
     create_notification(event="finding_exclusion_request",
                         subject=f"✅Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}",
@@ -286,6 +313,7 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                     extra_tags="alert-danger")
                 return redirect('finding_exclusion', fxid=fxid)
             
+            previous_status = finding_exclusion.status
             finding_exclusion.status = "Accepted"
             finding_exclusion.final_status = "Accepted"
             finding_exclusion.accepted_at = timezone.now()
@@ -295,8 +323,22 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
             finding_exclusion.expiration_date = timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS))
             finding_exclusion.save()
             
+            FindingExclusionLog.objects.create(
+                finding_exclusion=finding_exclusion,
+                changed_by=request.user,
+                previous_status=previous_status,
+                current_status="Accepted"
+            )
+            
             relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
-            add_findings_to_whitelist.apply_async(args=(finding_exclusion.unique_id_from_tool, str(relative_url),))
+            engagement_ids = finding_exclusion.engagements.values_list('id', flat=True)
+            add_findings_to_whitelist.apply_async(
+                args=(
+                    finding_exclusion.unique_id_from_tool,
+                    str(relative_url),
+                    list(engagement_ids)
+                )
+            )
                     
     except Exception as e:
         messages.add_message(
@@ -340,6 +382,7 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
             extra_tags="alert-danger")
         return redirect('finding_exclusion', fxid=fxid)
     
+    previous_status = finding_exclusion.status
     finding_exclusion.status = "Rejected"
     finding_exclusion.final_status = "Rejected"
     finding_exclusion.rejected_by = request.user
@@ -351,6 +394,13 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
         finding_exclusion.reviewed_at = datetime.now()
         finding_exclusion.reviewed_by = request.user
     finding_exclusion.save()
+    
+    FindingExclusionLog.objects.create(
+        finding_exclusion=finding_exclusion,
+        changed_by=request.user,
+        previous_status=previous_status,
+        current_status="Rejected"
+    )
     
     create_notification(
         event="finding_exclusion_rejected",
@@ -437,6 +487,37 @@ def delete_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
             extra_tags="alert-success")
     
     return redirect('finding_exclusions')
+
+
+def reopen_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
+    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
+        raise PermissionDenied
+    
+    finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+    
+    previous_status = finding_exclusion.status
+    finding_exclusion.status = "Pending"
+    finding_exclusion.final_status = None
+    finding_exclusion.status_updated_at = datetime.now()
+    finding_exclusion.status_updated_by = request.user
+    finding_exclusion.reviewed_at = None
+    finding_exclusion.reviewed_by = None
+    finding_exclusion.save()
+    
+    FindingExclusionLog.objects.create(
+        finding_exclusion=finding_exclusion,
+        changed_by=request.user,
+        previous_status=previous_status,
+        current_status="Pending"
+    )
+    
+    messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Finding Exclusion reopened.",
+            extra_tags="alert-success")
+        
+    return redirect('finding_exclusion', fxid=fxid)
 
 
 def orphans_reclassification(request: HttpRequest) -> HttpResponse:
@@ -686,7 +767,7 @@ def export_orphan_products_simple(request):
     search_query = request.GET.get('search', '')
     if search_query:
         orphan_products = orphan_products.filter(
-            Q(name__icontains=search_query) | 
+            Q(name__icontains=search_query) |
             Q(code__icontains=search_query)
         )
     
