@@ -114,6 +114,7 @@ from dojo.models import (
     Vulnerability_Id_Template,
     get_current_date,
 )
+from dojo.notifications.helper import create_notification
 from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
@@ -1948,6 +1949,16 @@ class FindingCreateSerializer(serializers.ModelSerializer):
 
         if push_to_jira:
             jira_helper.push_to_jira(new_finding)
+
+        # Create a notification
+        create_notification(
+            event="finding_added",
+            title=_("Addition of %s") % new_finding.title,
+            finding=new_finding,
+            description=_('Finding "%s" was added by %s') % (new_finding.title, new_finding.reporter),
+            url=reverse("view_finding", args=(new_finding.id,)),
+            icon="exclamation-triangle",
+        )
 
         return new_finding
 

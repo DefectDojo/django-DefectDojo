@@ -512,7 +512,7 @@ The HELM schema will be generated for you.
 
 # General information about chart values
 
-![Version: 1.8.4-dev](https://img.shields.io/badge/Version-1.8.4--dev-informational?style=flat-square) ![AppVersion: 2.53.0-dev](https://img.shields.io/badge/AppVersion-2.53.0--dev-informational?style=flat-square)
+![Version: 1.9.0-dev](https://img.shields.io/badge/Version-1.9.0--dev-informational?style=flat-square) ![AppVersion: 2.53.0-dev](https://img.shields.io/badge/AppVersion-2.53.0--dev-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -570,6 +570,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.annotations | object | `{}` | Annotations for the Celery worker deployment. |
 | celery.worker.appSettings.poolType | string | `"solo"` | Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops) poolType: prefork autoscaleMin: 2 autoscaleMax: 8 concurrency: 8 prefetchMultiplier: 128 |
 | celery.worker.automountServiceAccountToken | bool | `false` |  |
+| celery.worker.autoscaling | object | `{"behavior":{},"enabled":false,"maxReplicas":5,"minReplicas":2,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":80}` | Autoscaling configuration for Celery worker deployment. |
 | celery.worker.containerSecurityContext | object | `{}` | Container security context for the Celery worker containers. |
 | celery.worker.extraEnv | list | `[]` | Additional environment variables injected to Celery worker containers. |
 | celery.worker.extraInitContainers | list | `[]` | A list of additional initContainers to run before celery worker containers. |
@@ -578,7 +579,8 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | If empty, uses values from images.django.image |
 | celery.worker.livenessProbe | object | `{}` | Enable liveness probe for Celery worker containers. ``` exec:   command:     - bash     - -c     - celery -A dojo inspect ping -t 5 initialDelaySeconds: 30 periodSeconds: 60 timeoutSeconds: 10 ``` |
 | celery.worker.nodeSelector | object | `{}` |  |
-| celery.worker.podAnnotations | object | `{}` | Annotations for the Celery beat pods. |
+| celery.worker.podAnnotations | object | `{}` | Annotations for the Celery worker pods. |
+| celery.worker.podDisruptionBudget | object | `{"enabled":false,"minAvailable":"50%","unhealthyPodEvictionPolicy":"AlwaysAllow"}` | Configure pod disruption budgets for Celery worker ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget |
 | celery.worker.podSecurityContext | object | `{}` | Pod security context for the Celery worker pods. |
 | celery.worker.readinessProbe | object | `{}` | Enable readiness probe for Celery worker container. |
 | celery.worker.replicas | int | `1` |  |
@@ -587,6 +589,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.resources.requests.cpu | string | `"100m"` |  |
 | celery.worker.resources.requests.memory | string | `"128Mi"` |  |
 | celery.worker.startupProbe | object | `{}` | Enable startup probe for Celery worker container. |
+| celery.worker.terminationGracePeriodSeconds | int | `300` |  |
 | celery.worker.tolerations | list | `[]` |  |
 | cloudsql | object | `{"containerSecurityContext":{},"enable_iam_login":false,"enabled":false,"extraEnv":[],"extraVolumeMounts":[],"image":{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.9"},"instance":"","resources":{},"use_private_ip":false,"verbose":true}` | Google CloudSQL support in GKE via gce-proxy |
 | cloudsql.containerSecurityContext | object | `{}` | Optional: security context for the CloudSQL proxy container. |
@@ -612,6 +615,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.affinity | object | `{}` |  |
 | django.annotations | object | `{}` |  |
 | django.automountServiceAccountToken | bool | `false` |  |
+| django.autoscaling | object | `{"behavior":{},"enabled":false,"maxReplicas":5,"minReplicas":2,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":80}` | Autoscaling configuration for the Django deployment. |
 | django.extraEnv | list | `[]` | Additional environment variables injected to all Django containers and initContainers. |
 | django.extraInitContainers | list | `[]` | A list of additional initContainers to run before the uwsgi and nginx containers. |
 | django.extraVolumeMounts | list | `[]` | Array of additional volume mount points common to all containers and initContainers. |
@@ -639,11 +643,13 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.nginx.tls.enabled | bool | `false` |  |
 | django.nginx.tls.generateCertificate | bool | `false` |  |
 | django.nodeSelector | object | `{}` |  |
+| django.podDisruptionBudget | object | `{"enabled":false,"minAvailable":"50%","unhealthyPodEvictionPolicy":"AlwaysAllow"}` | Configure pod disruption budgets for django ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget |
 | django.podSecurityContext | object | `{"fsGroup":1001}` | Pod security context for the Django pods. |
 | django.replicas | int | `1` |  |
 | django.service.annotations | object | `{}` |  |
 | django.service.type | string | `""` |  |
 | django.strategy | object | `{}` |  |
+| django.terminationGracePeriodSeconds | int | `60` |  |
 | django.tolerations | list | `[]` |  |
 | django.uwsgi.appSettings.maxFd | int | `0` | Use this value to set the maximum number of file descriptors. If set to 0 will be detected by uwsgi e.g. 102400 |
 | django.uwsgi.appSettings.processes | int | `4` |  |
@@ -700,7 +706,6 @@ A Helm chart for Kubernetes to install DefectDojo
 | images.nginx.image.repository | string | `"defectdojo/defectdojo-nginx"` |  |
 | images.nginx.image.tag | string | `""` | If empty, use appVersion. Another possible values are: latest, X.X.X, X.X.X-alpine (where X.X.X is version of DD). For dev builds (only for testing purposes): nightly-dev, nightly-dev-alpine. To see all, check https://hub.docker.com/r/defectdojo/defectdojo-nginx/tags. |
 | initializer.affinity | object | `{}` |  |
-| initializer.annotations | object | `{}` |  |
 | initializer.automountServiceAccountToken | bool | `false` |  |
 | initializer.containerSecurityContext | object | `{}` | Container security context for the initializer Job container |
 | initializer.extraEnv | list | `[]` | Additional environment variables injected to the initializer job pods. |
@@ -711,6 +716,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | initializer.keepSeconds | int | `60` | A positive integer will keep this Job and Pod deployed for the specified number of seconds, after which they will be removed. For all other values, the Job and Pod will remain deployed. |
 | initializer.labels | object | `{}` |  |
 | initializer.nodeSelector | object | `{}` |  |
+| initializer.podAnnotations | object | `{}` |  |
 | initializer.podSecurityContext | object | `{}` | Pod security context for the initializer Job |
 | initializer.resources.limits.cpu | string | `"2000m"` |  |
 | initializer.resources.limits.memory | string | `"512Mi"` |  |
