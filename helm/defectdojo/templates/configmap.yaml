@@ -1,5 +1,6 @@
 {{- $fullName := include "defectdojo.fullname" . -}}
-{{- $defaultBrokerParams := ternary "ssl_cert_reqs=optional" "" .Values.valkey.tls.enabled -}}
+{{- $redisScheme := include "redis.scheme" . -}}
+{{- $defaultBrokerParams := ternary "ssl_cert_reqs=optional" "" (eq "rediss" $redisScheme) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:

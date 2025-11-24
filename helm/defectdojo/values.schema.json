@@ -1321,7 +1321,11 @@
             }
         },
         "redisParams": {
-            "description": "Parameters attached to the redis connection string, defaults to \"ssl_cert_reqs=optional\" if `valkey.tls.enabled`",
+            "description": "Parameters attached to the redis connection string, defaults to \"ssl_cert_reqs=optional\" if `redisScheme` is `rediss`",
+            "type": "string"
+        },
+        "redisScheme": {
+            "description": "Define the protocol to use with the external Redis instance",
             "type": "string"
         },
         "redisServer": {
@@ -1505,6 +1509,10 @@
                     }
                 }
             }
+        },
+        "valkeyParams": {
+            "description": "Parameters attached to the valkey connection string, defaults to \"ssl_cert_reqs=optional\" if `valkey.tls.enabled`",
+            "type": "string"
         }
     }
 }

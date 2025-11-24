@@ -699,11 +699,18 @@ localsettingspy: ""
 #
 # External database support.
 #
+# -- Parameters attached to the valkey connection string, defaults to "ssl_cert_reqs=optional" if `valkey.tls.enabled`
+valkeyParams: ""
+#
+# External database support.
+#
 # @schema type:[string, null]
 # -- To use an external Redis instance, set `redis.enabled` to false and set the address here:
 redisServer: ~
-# -- Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `valkey.tls.enabled`
+# -- Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `redisScheme` is `rediss`
 redisParams: ""
+# -- Define the protocol to use with the external Redis instance
+redisScheme: redis
 #
 # @schema type:[string, null]
 # -- To use an external PostgreSQL instance (like CloudSQL), set `postgresql.enabled` to false,

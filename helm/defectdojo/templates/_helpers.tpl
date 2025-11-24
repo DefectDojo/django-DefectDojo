@@ -66,15 +66,32 @@
 {{- end -}}
 
 {{- /*
+  Determine the default params to use for Redis.
+*/}}
+{{- define "redis.params" -}}
+{{- $redisScheme := include "redis.scheme" . -}}
+{{- $defaultBrokerParams := ternary "ssl_cert_reqs=optional" "" (eq "rediss" $redisScheme) -}}
+{{- if .Values.valkey.enabled -}}
+{{- default $defaultBrokerParams .Values.valkeyParams -}}
+{{- else -}}
+{{- default $defaultBrokerParams .Values.redisParams -}}
+{{- end -}}
+{{- end -}}
+
+{{- /*
   Determine the protocol to use for Redis.
 */}}
 {{- define "redis.scheme" -}}
+{{- if .Values.valkey.enabled -}}
 {{- if .Values.valkey.tls.enabled -}}
-{{- printf "rediss" -}}
+rediss
 {{- else if .Values.valkey.sentinel.enabled -}}
-{{- printf "sentinel" -}}
+sentinel
 {{- else -}}
-{{- printf "redis" -}}
+redis
+{{- end -}}
+{{- else -}}
+{{- .Values.redisScheme -}}
 {{- end -}}
 {{- end -}}
 
