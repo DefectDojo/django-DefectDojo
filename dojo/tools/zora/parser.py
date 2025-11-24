@@ -58,7 +58,7 @@ class ZoraParser:
                 test=test,
                 is_mitigated=is_mitigated,
             )
-            if row.get("fixVersion") and row.get("fixVersion") != "":
+            if row.get("fixVersion"):
                 finding.fix_available = True
             else:
                 finding.fix_available = False
