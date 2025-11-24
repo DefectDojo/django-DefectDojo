@@ -4,11 +4,11 @@ description: "Work with the Jira integration"
 weight: 1
 ---
 
-DefectDojo's Jira integration can be used to push Finding data to one or more Jira Projects.  By doing so, you can integrate DefectDojo into your standard development workflow.  Here are some examples of how this can work:
+DefectDojo's Jira integration can be used to push Finding data to one or more Jira Spaces.  By doing so, you can integrate DefectDojo into your standard development workflow.  Here are some examples of how this can work:
 
-* The AppSec team can selectively push Findings to a Jira Project used by developers, so that issue remediation can be appropriately prioritized alongside regular development.  Developers on this board don't need to access DefectDojo - they can keep all their work in one place.
-* DefectDojo can push ALL Findings to a bidirectional Jira Project which the AppSec team uses, which allows them to split up issue validation.  This board keeps in sync with DefectDojo and allows for complex remediation workflows.
-* DefectDojo can selectively push Findings from separate Products &/or Engagements to separate Jira Projects, to keep things in their proper context.
+* The AppSec team can selectively push Findings to a Jira Space used by developers, so that issue remediation can be appropriately prioritized alongside regular development.  Developers on this board don't need to access DefectDojo - they can keep all their work in one place.
+* DefectDojo can push ALL Findings to a bidirectional Jira Space which the AppSec team uses, which allows them to split up issue validation.  This board keeps in sync with DefectDojo and allows for complex remediation workflows.
+* DefectDojo can selectively push Findings from separate Products &/or Engagements to separate Jira Spaces, to keep things in their proper context.
 
 # Setting Up Jira
 Setting Up Jira requires the following steps:
@@ -40,7 +40,7 @@ Optionally, you can map:
 * Jira Transitions to trigger Re-Opening and Closing Findings
 * Jira Resolutions which can apply Risk Acceptance and False Positive statuses to Findings (optional)
 
-Multiple Jira Projects can be handled by a single Jira Instance connection, as long as the Jira account / token used by DefectDojo has permission to create Issues in the associated Jira Project.
+Multiple Jira Spaces can be handled by a single Jira Instance connection, as long as the Jira account / token used by DefectDojo has permission to create Issues in the associated Jira Space.
 
 ### Add a Jira Instance (Pro UI)
 
@@ -62,7 +62,7 @@ Multiple Jira Projects can be handled by a single Jira Instance connection, as l
 Note that the user associated with this connection have permission to create Issues and access data in your Jira instance.
 
 6. You will need to provide values for an Epic Name ID, Re-open Transition ID and Close Transition ID.  These values can be changed later.  While logged into Jira, you can access these values from the following URLs:
-- **Epic Name ID**: visit `https://<YOUR JIRA URL>/rest/api/2/field` and search for Epic Name. Copy the number out of `number` and paste it here.
+- **Epic Name ID**: visit `https://<YOUR JIRA URL>/rest/api/2/field` and search for Epic Name. Copy the number out of `number` and paste it here.  If you do not have an Epic Name ID associated with your Space in Jira (due to using a Team-Managed Space, for example), enter 0 on this field.
 - **Re-open Transition ID**: visit `https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand-transitions.fields` to find the ID for your Jira instance. Paste it in the Reopen Transition ID field.
 - **Close Transition ID**: Visit `https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand-transitions.fields` to find the ID for your Jira instance. Paste it in the Close Transition ID field.
 
@@ -88,11 +88,11 @@ The form can be submitted from here.  If you wish, you can further customize you
 ​
 ![image](images/Connect_DefectDojo_to_Jira.png)
 
-3. You will see a list of all currently configured Jira Projects which are linked to DefectDojo. To add a new Project Configuration, click the wrench icon and choose either the **Add Jira Configuration (Express)** or **Add Jira Configuration** options.
+3. You will see a list of all currently configured Jira Spaces which are linked to DefectDojo. To add a new Project Configuration, click the wrench icon and choose either the **Add Jira Configuration (Express)** or **Add Jira Configuration** options.
 
 #### Add Jira Configuration (Express)
 
-The Express method allows for a quicker method of linking a Project. Use the Express method if you simply want to connect a Jira Project quickly, and you aren’t dealing with a complex Jira workflow.
+The Express method allows for a quicker method of linking a Space. Use the Express method if you simply want to connect a Jira Space quickly, and you aren’t dealing with a complex Jira workflow.
 
 ![image](images/Connect_DefectDojo_to_Jira_2.png)
 
@@ -122,7 +122,7 @@ If you leave this field blank, it will default to **Jira\_full.**
 ​
 9. Decide whether you wish to automatically sync Findings with Jira. If this is enabled, Jira Issues will automatically be kept in sync with the related Findings. If this is not enabled, you will need to manually push any changes made to a Finding after the Issue has been created in Jira.
 ​
-10. Select your Issue key. In Jira, this is the string associated with an Issue (e.g. the word **‘EXAMPLE’** in an issue called **EXAMPLE\-123**). If you don’t know your issue key, create a new Issue in the Jira Project. In the screenshot below, we can see that the issue key on our Jira Project is **DEF**.
+10. Select your Issue key. In Jira, this is the string associated with an Issue (e.g. the word **‘EXAMPLE’** in an issue called **EXAMPLE\-123**). If you don’t know your issue key, create a new Issue in the Jira Space. In the screenshot below, we can see that the issue key on our Jira Space is **DEF**.
 ​
 ![image](images/Connect_DefectDojo_to_Jira_3.png)
 ​
@@ -154,23 +154,23 @@ Comments (in Jira) and Notes (in DefectDojo) can be kept in sync. This setting c
 
 ## Step 2: Connect a Product or Engagement to Jira
 
-Each Product or Engagement in DefectDojo has its own settings which govern how Findings are converted to JIRA Issues. From here, you can decide the associated JIRA Project and set the default behaviour for creating Issues, Epics, Labels and other JIRA metadata.
+Each Product or Engagement in DefectDojo has its own settings which govern how Findings are converted to JIRA Issues. From here, you can decide the associated Jira Space and set the default behaviour for creating Issues, Epics, Labels and other JIRA metadata.
 
 ### Add Jira to a Product or Engagement (Pro UI)
 
-You can find this page by clicking the Gear menu on a Product or Engagement - ⚙️ and opening the Jira Project Settings page.
+You can find this page by clicking the Gear menu on a Product or Engagement - ⚙️ and opening the Jira Space Settings page.
 
 ![image](images/jira-project-settings.png)
 
 #### Jira Instance
 
-If you have multiple instances of Jira set up, for separate products or teams within your organization, you can indicate which Jira Project you want DefectDojo to create Issues in. Select a Project from the drop\-down menu.
+If you have multiple instances of Jira set up, for separate products or teams within your organization, you can indicate which Jira Space you want DefectDojo to create Issues in. Select a Space from the drop\-down menu.
 
-If this menu doesn't list any Jira instances, confirm that those Projects are connected in your global Jira Configuration for DefectDojo \- yourcompany.defectdojo.com/jira.
+If this menu doesn't list any Jira instances, confirm that those Space are connected in your global Jira Configuration for DefectDojo \- yourcompany.defectdojo.com/jira.
 
 #### Project key
 
-This is the key of the Project that you want to use with DefectDojo.  The Project Key for a given project can be found in the URL.
+This is the key of the Space that you want to use with DefectDojo.  The Space Key for a given Space can be found in the URL.  (This was previously referred to as a **Jira Project Key**, but as of Sepetember 2025, this is now referred to in Jira as the **Space Key**).
 
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_3.png)
 
@@ -192,15 +192,15 @@ Here is an example of a **jira\_full** Issue:
 
 #### Component
 
-If you manage your Jira project using Components, you can assign the appropriate Component for DefectDojo here.
+If you manage your Jira Space using Components, you can assign the appropriate Component for DefectDojo here.
 
 **Custom fields**
 
 If you don’t need to use Custom Fields with DefectDojo issues, you can leave this field as ‘null’.
 
-However, if your Jira Project Settings **require you** to use Custom Fields on new Issues, you will need to hard-code these mappings.
+However, if your Jira Space Settings **require you** to use Custom Fields on new Issues, you will need to hard-code these mappings.
 
-Note that DefectDojo cannot send any Issue\-specific metadata as Custom Fields, only a default value. This section should only be set up if your JIRA Project **requires that these Custom Fields exist** in every Issue in your project.
+Note that DefectDojo cannot send any Issue\-specific metadata as Custom Fields, only a default value. This section should only be set up if your Jira Space **requires that these Custom Fields exist** in every Issue in your Space.
 
 Follow **[this guide](#custom-fields-in-jira)** to get started working with Custom Fields.
 
@@ -212,7 +212,7 @@ Select the relevant labels that you want the Issue to be created with in Jira, e
 
 #### Default assignee
 
-The name of the default assignee in Jira. If left blank, DefectDojo will follow the default behaviour in your Jira Project when creating Issues.
+The name of the default assignee in Jira. If left blank, DefectDojo will follow the default behaviour in your Jira Space when creating Issues.
 
 ### Add Jira to a Product or Engagement (Classic UI / Open-Source)
 
@@ -228,13 +228,13 @@ Jira settings are located near the bottom of the Product Settings page.
 
 #### Jira Instance
 
-If you have multiple instances of Jira set up, for separate products or teams within your organization, you can indicate which Jira Project you want DefectDojo to create Issues in. Select a Project from the drop\-down menu.
+If you have multiple instances of Jira set up, for separate products or teams within your organization, you can indicate which Jira Space you want DefectDojo to create Issues in. Select a Project from the drop\-down menu.
 
 If this menu doesn't list any Jira instances, confirm that those Projects are connected in your global Jira Configuration for DefectDojo \- yourcompany.defectdojo.com/jira.
 
 #### Project key
 
-This is the key of the Project that you want to use with DefectDojo.  The Project Key for a given project can be found in the URL.
+This is the key of the Space that you want to use with DefectDojo.  The Space Key for a given project can be found in the URL, or under "Space key" listed in Space Settings.
 
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_3.png)
 
@@ -256,17 +256,17 @@ Here is an example of a **jira\_full** Issue:
 
 #### Component
 
-If you manage your Jira project using Components, you can assign the appropriate Component for DefectDojo here.
+If you manage your Jira Space using Components, you can assign the appropriate Component for DefectDojo here.
 
 **Custom fields**
 
 If you don’t need to use Custom Fields with DefectDojo issues, you can leave this field as ‘null’.
 
-However, if your Jira Project Settings **require you** to use Custom Fields on new Issues, you will need to hard\-code these mappings.
+However, if your Jira Space Settings **require you** to use Custom Fields on new Issues, you will need to hard\-code these mappings.
 
 **Jira Cloud now allows you to create a default Custom Field value directly in\-app. [See Atlassian's documentation on Custom Fields](https://support.atlassian.com/jira-cloud-administration/docs/configure-a-custom-field/) for more information on how to configure this.**
 
-Note that DefectDojo cannot send any Issue\-specific metadata as Custom Fields, only a default value. This section should only be set up if your JIRA Project **requires that these Custom Fields exist** in every Issue in your project.
+Note that DefectDojo cannot send any Issue\-specific metadata as Custom Fields, only a default value. This section should only be set up if your Jira Space **requires that these Custom Fields exist** in every Issue in your Space.
 
 Follow **[this guide](#custom-fields-in-jira)** to get started working with Custom Fields.
 
@@ -278,11 +278,11 @@ Select the relevant labels that you want the Issue to be created with in Jira, e
 
 #### Default assignee
 
-The name of the default assignee in Jira. If left blank, DefectDojo will follow the default behaviour in your Jira Project when creating Issues.
+The name of the default assignee in Jira. If left blank, DefectDojo will follow the default behaviour in your Jira Space when creating Issues.
 
 ### Additional Form Options
 
-#### Enable Connection With Jira Project
+#### Enable Connection With Jira Space
 
 Jira integrations can be removed from your instance only if no related Issues have been created.  If Issues have been created, there is no way to completely remove a Jira Instance from DefectDojo.
 
@@ -373,7 +373,7 @@ Add whatever title severity and description you wish, and then click “Finished
 
 If Jira Issues are not being created correctly, check your Notifications for error codes.
 
-* Confirm that the Jira User associated with DefectDojo's Jira Configuration has permission to create and update issues on that particular Jira Project.
+* Confirm that the Jira User associated with DefectDojo's Jira Configuration has permission to create and update issues on that particular Jira Space.
 
 #### Test 2: Jira Webhooks send to DefectDojo
 
@@ -389,7 +389,7 @@ If this doesn’t work correctly, it could be due to a Firewall issue on your Ji
 
 Jira integrations can be removed from your instance only if no related Issues have been created.  If Issues have been created, there is no way to completely remove a Jira Instance from DefectDojo.
 
-However, you can disable your Jira integration by disabling it at the Product level.  From the **Edit Product** form (Classic UI) or from the **Jira Product Settings** (Pro UI) you can uncheck the "Enable Connection With Jira Project" option.  This will not delete or change any existing Jira tickets created by DefectDojo, but will disable any further updates.
+However, you can disable your Jira integration by disabling it at the Product level.  From the **Edit Product** form (Classic UI) or from the **Jira Product Settings** (Pro UI) you can uncheck the "Enable Connection With Jira Space" option.  This will not delete or change any existing Jira tickets created by DefectDojo, but will disable any further updates.
 
 # Pushing Findings To Jira
 
