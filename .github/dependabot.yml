@@ -11,6 +11,8 @@ updates:
     versions:
     - ">= 5.a"
     - "< 6"
+  - dependency-name: boto3
+    update-types: ["version-update:semver-minor"]
 - package-ecosystem: npm
   directory: "/components"
   schedule:
