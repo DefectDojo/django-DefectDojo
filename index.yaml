@@ -34,6 +34,34 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: changed
+          description: Bump DefectDojo to 2.52.3
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: 2.52.3
+    created: "2025-11-24T17:05:50.208833306Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: ~16.7.0
+    - condition: redis.enabled
+      name: redis
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: ~19.6.4
+    description: A Helm chart for Kubernetes to install DefectDojo
+    digest: a878713ce8ff5fb4057c25894a5da6abd701013683c7158ab705475cb05c3a1b
+    icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
+    maintainers:
+    - email: defectdojo-project@owasp.org
+      name: madchap
+      url: https://github.com/DefectDojo/django-DefectDojo
+    name: defectdojo
+    urls:
+    - https://github.com/DefectDojo/django-DefectDojo/releases/download/2.52.3/defectdojo-1.8.3.tgz
+    version: 1.8.3
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
           description: Location of HELM development hints has been changed
         - kind: changed
           description: Bump DefectDojo to 2.52.2
@@ -7046,4 +7074,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2025-11-24T05:07:54.037237953Z"
+generated: "2025-11-24T17:05:50.195724899Z"
