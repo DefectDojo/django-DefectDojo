@@ -37,7 +37,7 @@ Markdown==3.10
 openpyxl==3.1.5
 Pillow==12.0.0  # required by django-imagekit
 psycopg[c]==3.2.12
-psycopg-pool==3.2.7
+psycopg-pool==3.2.8
 cryptography==46.0.3
 python-dateutil==2.9.0.post0
 pytz==2025.2
