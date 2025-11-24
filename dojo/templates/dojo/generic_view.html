@@ -20,28 +20,20 @@
   {% endblock %} {% block postscript %} {{ block.super }}
   <script type="text/javascript">
     const channel = new MessageChannel();
-    const iframe = document.querySelector("iframe");
-    iframe.onload = () => {
-      iframe.contentWindow.postMessage(
-        { action: " {{ actions }} " },
-        "{{url}}",
-        [channel.port2]
-      );
-      setTimeout(() => {
-        channel.port1.start();
-        channel.port1.onmessage = (event) => {
-          if (event.data.action === "{{ actions }}") {
-            setTimeout(() => {
-              iframe.contentWindow.postMessage({
-                action: "{{ actions }}",
-                data: {
-                  parameters: "{{ parameters }}"
-                },
-              });
-            }, 100);
-          }
-        };
-      }, 100);
+  const iframe = document.querySelector("iframe");
+  iframe.onload = () => {
+    iframe.contentWindow.postMessage({ action: "{{ actions }}" }, "{{ url }}", [
+      channel.port2,
+    ]);
+    channel.port1.start();
+    channel.port1.onmessage = (event) => {
+      if (event.data.action === "{{ actions }}") {
+        channel.port1.postMessage({
+          action: "{{ actions }}",
+          data: "{{ parameters }}",
+        });
+      }
     };
+  };
   </script>
 {% endblock %}

@@ -1340,7 +1340,6 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 product_type,
                 is_long_term_acceptance=form.cleaned_data["long_term_acceptance"]
             )
-            #TODO: modificar el campo accepted_dy a vacio para los caos donde el fiding ya tiena un aceptador
             for abuse_control, result in abuse_control_result.items():
                 if not abuse_control_result[abuse_control]["status"]:
                     messages.add_message(
@@ -1403,7 +1402,8 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 or rp_helper.role_has_exclusive_permissions(request.user)
                 or get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
-            elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
+            elif (rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type)
+                  or risk_acceptance.long_term_acceptance is True):
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
             else:
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
