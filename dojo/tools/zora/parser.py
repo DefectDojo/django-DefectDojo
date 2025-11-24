@@ -60,6 +60,7 @@ class ZoraParser:
             )
             if row.get("fixVersion"):
                 finding.fix_available = True
+                finding.fix_version = row.get("fixVersion")
             else:
                 finding.fix_available = False
             vuln_id = row.get("id")

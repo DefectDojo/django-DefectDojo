@@ -21,12 +21,16 @@ class TestZoraParser(DojoTestCase):
             # Check a specific finding for correctness
             finding = findings[0]
             self.assertEqual(True, finding.fix_available)
+            self.assertEqual("1.2.5-r1", finding.fix_version)
             finding = findings[1]
             self.assertEqual(False, finding.fix_available)
+            self.assertEqual(None, finding.fix_version)
             finding = findings[2]
             self.assertEqual(False, finding.fix_available)
+            self.assertEqual(None, finding.fix_version)
             finding = findings[3]
             self.assertEqual(True, finding.fix_available)
+            self.assertEqual("3.3.5-r0", finding.fix_version)
             finding = findings[10]
             self.assertEqual("net/url: Insufficient validation of bracketed IPv6 hostnames in net/url", finding.title)
             self.assertEqual("Medium", finding.severity)
