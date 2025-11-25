@@ -3,8 +3,6 @@ title: "CycloneDX"
 toc_hide: true
 ---
 
-# CycloneDX Parser Documentation
-
 The [CycloneDX](https://www.cyclonedx.org/) parser for DefectDojo supports imports from both JSON and XML formats. CycloneDX is a lightweight software bill of materials (SBOM) standard designed for use in application security contexts and supply chain component analysis.
 
 ## Supported File Types
