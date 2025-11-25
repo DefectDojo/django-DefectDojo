@@ -799,17 +799,17 @@ def enable_flow_ia_recommendation(**kwargs):
 def parser_ia_recommendation(ia_recommendation: dict = {}):
     markdown_code = ""
     context = {}
-    if recomendations := ia_recommendation["data"].get("recommendations", None):
+    if recomendations := ia_recommendation.get("recommendations", None):
         markdown_code = "\n###✅ Recomendaciones \n<br>"
         for recomendation in recomendations:
             markdown_code += "- " + recomendation + "<br>"
 
-    if mitigations := ia_recommendation["data"].get("mitigations", None):
+    if mitigations := ia_recommendation.get("mitigations", None):
         markdown_code += "\n###🛠️ Mitigación\n<br>"
         for mitigation in mitigations:
             markdown_code += mitigation + "<br>"
 
-    if files_to_fix := ia_recommendation["data"].get("files_to_fix", None):
+    if files_to_fix := ia_recommendation.get("files_to_fix", None):
         markdown_code += "\n###📌 Archivos a corregir\n<br>"
         for file_to_fix in files_to_fix:
             markdown_code += "```" + file_to_fix + "```"
@@ -817,7 +817,7 @@ def parser_ia_recommendation(ia_recommendation: dict = {}):
     markdown_code = markdown_code.replace("'", "`")
     html = markdown.markdown(markdown_code)
     context["ia_recommendations"] = html
-    context["like_status"] = ia_recommendation["data"].get("like_status", None)
+    context["like_status"] = ia_recommendation.get("like_status", None)
     return context
 
 
