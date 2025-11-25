@@ -202,7 +202,7 @@ Both formats map the `analysis.state` field to DefectDojo status flags:
 
 ### Description Construction
 
-**JSON Format (lines 28-33):**
+**JSON Format:**
 1. Primary content from `vulnerabilities[].description`
 2. If `vulnerabilities[].detail` exists, appended with newline separator
 3. If both are missing, defaults to "Description was not provided."
@@ -210,7 +210,7 @@ Both formats map the `analysis.state` field to DefectDojo status flags:
 **XML Format:** Description is built from multiple fields:
 1. **Primary description** from `vulnerability/description`
 2. **Detail appended** from `vulnerability/detail` if present: `description += f"\n{detail}"`
-3. **Fallback description** (lines 97-104) when description is missing, constructed from:
+3. **Fallback description** when description is missing, constructed from:
    - `**Ref:** {ref}`
    - `**Id:** {vuln_id}`
    - `**Severity:** {severity}`
