@@ -749,6 +749,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | postgresql.primary.podSecurityContext.fsGroup | int | `1001` | fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully. |
 | postgresql.volumePermissions.containerSecurityContext | object | `{"runAsUser":1001}` | if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above |
 | redisParams | string | `""` | Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `redisScheme` is `rediss` |
+| redisPort | int | `6379` | Define the protocol to use with the external Redis instance |
 | redisScheme | string | `"redis"` | Define the protocol to use with the external Redis instance |
 | redisServer | string | `nil` | To use an external Redis instance, set `redis.enabled` to false and set the address here: |
 | revisionHistoryLimit | int | `10` | Allow overriding of revisionHistoryLimit across all deployments. |

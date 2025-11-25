@@ -30,8 +30,8 @@ data:
   DD_CELERY_BROKER_SCHEME: {{ template "redis.scheme" . }}
   DD_CELERY_BROKER_USER: ''
   DD_CELERY_BROKER_HOST: {{ template "redis.hostname" . }}
-  DD_CELERY_BROKER_PORT: '{{ .Values.valkey.service.port }}'
-  DD_CELERY_BROKER_PARAMS: '{{ .Values.redisParams | default $defaultBrokerParams }}'
+  DD_CELERY_BROKER_PORT: '{{ template "redis.port" . }}'
+  DD_CELERY_BROKER_PARAMS: '{{ template "redis.params" . }}'
   DD_CELERY_BROKER_PATH: '{{ .Values.celery.path | default "//" }}'
   DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}
   DD_CELERY_WORKER_POOL_TYPE: {{ .Values.celery.worker.appSettings.poolType | default "solo" }}

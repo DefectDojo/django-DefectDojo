@@ -1324,6 +1324,10 @@
             "description": "Parameters attached to the redis connection string, defaults to \"ssl_cert_reqs=optional\" if `redisScheme` is `rediss`",
             "type": "string"
         },
+        "redisPort": {
+            "description": "Define the protocol to use with the external Redis instance",
+            "type": "integer"
+        },
         "redisScheme": {
             "description": "Define the protocol to use with the external Redis instance",
             "type": "string"

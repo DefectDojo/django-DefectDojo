@@ -696,9 +696,6 @@ extraEnv: []
 # ```
 localsettingspy: ""
 
-#
-# External database support.
-#
 # -- Parameters attached to the valkey connection string, defaults to "ssl_cert_reqs=optional" if `valkey.tls.enabled`
 valkeyParams: ""
 #
@@ -709,6 +706,8 @@ valkeyParams: ""
 redisServer: ~
 # -- Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `redisScheme` is `rediss`
 redisParams: ""
+# -- Define the protocol to use with the external Redis instance
+redisPort: 6379
 # -- Define the protocol to use with the external Redis instance
 redisScheme: redis
 #

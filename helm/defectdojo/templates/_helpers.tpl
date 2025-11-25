@@ -96,6 +96,17 @@ redis
 {{- end -}}
 
 {{- /*
+  Determine the default port to use for Redis.
+*/}}
+{{- define "redis.port" -}}
+{{- if .Values.valkey.enabled -}}
+{{- .Values.valkey.service.port -}}
+{{- else -}}
+{{- .Values.redisPort -}}
+{{- end -}}
+{{- end -}}
+
+{{- /*
   Builds the repository names for use with local or private registries
 */}}
 {{- define "celery.beat.image" -}}
