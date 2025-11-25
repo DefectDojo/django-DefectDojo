@@ -265,7 +265,7 @@ def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
         # Let watson handle the bulk indexing
         context_manager.end()
 
-        logger.info(f"Completed async watson index update: {instances_added} updated, {instances_skipped} skipped")
+        logger.debug(f"Completed async watson index update: {instances_added} updated, {instances_skipped} skipped")
 
     except Exception as e:
         logger.error(f"Watson async index update failed for {model_name}: {e}")
