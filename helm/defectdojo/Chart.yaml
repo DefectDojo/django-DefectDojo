@@ -39,3 +39,5 @@ annotations:
       description: Added HPA and PDB for celery worker and Django
     - kind: fixed
       description: extraAnnotations spec doesn't affect initializer job
+    - kind: changed
+      description: chore(deps)_ update gcr.io/cloudsql_docker/gce_proxy docker tag from 1.37.9 to v1.37.10 (helm/defectdojo/values.yaml)
