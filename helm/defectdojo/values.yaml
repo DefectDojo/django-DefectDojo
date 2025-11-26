@@ -92,7 +92,7 @@ networkPolicy:
   annotations: {}
 
 # -- Primary hostname of instance
-host: defectdojo.default.minikube.local
+host: &host defectdojo.default.minikube.local
 
 # -- The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira.
 # Use syntax: `siteUrl: 'https://<yourdomain>'`
@@ -203,7 +203,16 @@ monitoring:
     extraVolumeMounts: []
     # -- Optional: add resource requests/limits for the nginx prometheus exporter container
     resources: {}
-
+    # -- Set liveness probe for Monitoring prometheus container.
+    livenessProbe:
+      httpGet:
+        path: /metrics
+        port: http-metrics
+      periodSeconds: 20
+      initialDelaySeconds: 15
+      timeoutSeconds: 5
+    readinessProbe: {}
+    startupProbe: {}
 secrets:
   # -- Add annotations for secret resources
   annotations: {}
@@ -439,8 +448,14 @@ django:
     livenessProbe:
       # -- Enable liveness checks on uwsgi container.
       enabled: true
+      httpGet:
+        path: /login?force_login_form&next=/
+        port: http-uwsgi
+        httpHeaders:
+        - name: Host
+          value: *host
       failureThreshold: 6
-      initialDelaySeconds: 0
+      # initialDelaySeconds: ~
       periodSeconds: 10
       successThreshold: 1
       timeoutSeconds: 5

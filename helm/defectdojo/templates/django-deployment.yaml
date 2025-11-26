@@ -129,13 +129,15 @@ spec:
         - name: http-metrics
           protocol: TCP
           containerPort: 9113
-        livenessProbe:
-          httpGet:
-            path: /metrics
-            port: http-metrics
-          periodSeconds: 20
-          initialDelaySeconds: 15
-          timeoutSeconds: 5
+        {{- with .Values.monitoring.prometheus.livenessProbe }}
+        livenessProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.monitoring.prometheus.readinessProbe }}
+        readinessProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.monitoring.prometheus.startupProbe }}
+        startupProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
         {{- with .Values.monitoring.prometheus.resources }}
         resources: {{- . | toYaml | nindent 10 }}
         {{- end }}
@@ -238,20 +240,17 @@ spec:
           {{- . | toYaml | nindent 8 }}
         {{- end }}
         {{- if .Values.django.uwsgi.livenessProbe.enabled }}
-        livenessProbe:
-          httpGet:
-            path: /login?force_login_form&next=/
-            port: http-uwsgi
-            httpHeaders:
-            - name: Host
-              value: {{ .Values.host }}
-          failureThreshold: {{ .Values.django.uwsgi.livenessProbe.failureThreshold }}
-          {{- if .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
-          initialDelaySeconds: {{ .Values.django.uwsgi.livenessProbe.initialDelaySeconds }}
-          {{- end }}
-          periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
-          successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold }}
-          timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds }}
+        {{- with .Values.django.uwsgi.livenessProbe }}
+        livenessProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.django.uwsgi.readinessProbe }}
+        readinessProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.django.uwsgi.startupProbe }}
+        startupProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- if .Values.django.uwsgi.livenessProbe.enabled }}
         {{- end }}
         resources:
           {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}

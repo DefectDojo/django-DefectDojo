@@ -796,8 +796,28 @@
                                 "failureThreshold": {
                                     "type": "integer"
                                 },
-                                "initialDelaySeconds": {
-                                    "type": "integer"
+                                "httpGet": {
+                                    "type": "object",
+                                    "properties": {
+                                        "httpHeaders": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "value": {}
+                                                }
+                                            }
+                                        },
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "port": {
+                                            "type": "string"
+                                        }
+                                    }
                                 },
                                 "periodSeconds": {
                                     "type": "integer"
@@ -1145,8 +1165,40 @@
                         "imagePullPolicy": {
                             "type": "string"
                         },
+                        "livenessProbe": {
+                            "description": "Set liveness probe for Monitoring prometheus container.",
+                            "type": "object",
+                            "properties": {
+                                "httpGet": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "string"
+                                        },
+                                        "port": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "initialDelaySeconds": {
+                                    "type": "integer"
+                                },
+                                "periodSeconds": {
+                                    "type": "integer"
+                                },
+                                "timeoutSeconds": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "readinessProbe": {
+                            "type": "object"
+                        },
                         "resources": {
                             "description": "Optional: add resource requests/limits for the nginx prometheus exporter container",
+                            "type": "object"
+                        },
+                        "startupProbe": {
                             "type": "object"
                         }
                     }

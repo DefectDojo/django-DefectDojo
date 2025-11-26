@@ -665,7 +665,10 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.uwsgi.image | object | `{"digest":"","registry":"","repository":"","tag":""}` | If empty, uses values from images.django.image |
 | django.uwsgi.livenessProbe.enabled | bool | `true` | Enable liveness checks on uwsgi container. |
 | django.uwsgi.livenessProbe.failureThreshold | int | `6` |  |
-| django.uwsgi.livenessProbe.initialDelaySeconds | int | `0` |  |
+| django.uwsgi.livenessProbe.httpGet.httpHeaders[0].name | string | `"Host"` |  |
+| django.uwsgi.livenessProbe.httpGet.httpHeaders[0].value | string | `"defectdojo.default.minikube.local"` |  |
+| django.uwsgi.livenessProbe.httpGet.path | string | `"/login?force_login_form&next=/"` |  |
+| django.uwsgi.livenessProbe.httpGet.port | string | `"http-uwsgi"` |  |
 | django.uwsgi.livenessProbe.periodSeconds | int | `10` |  |
 | django.uwsgi.livenessProbe.successThreshold | int | `1` |  |
 | django.uwsgi.livenessProbe.timeoutSeconds | int | `5` |  |
@@ -736,7 +739,10 @@ A Helm chart for Kubernetes to install DefectDojo
 | monitoring.prometheus.image.repository | string | `"nginx/nginx-prometheus-exporter"` |  |
 | monitoring.prometheus.image.tag | string | `"1.4.2"` |  |
 | monitoring.prometheus.imagePullPolicy | string | `"IfNotPresent"` |  |
+| monitoring.prometheus.livenessProbe | object | `{"httpGet":{"path":"/metrics","port":"http-metrics"},"initialDelaySeconds":15,"periodSeconds":20,"timeoutSeconds":5}` | Set liveness probe for Monitoring prometheus container. |
+| monitoring.prometheus.readinessProbe | object | `{}` |  |
 | monitoring.prometheus.resources | object | `{}` | Optional: add resource requests/limits for the nginx prometheus exporter container |
+| monitoring.prometheus.startupProbe | object | `{}` |  |
 | networkPolicy | object | `{"annotations":{},"egress":[],"enabled":false,"ingress":[],"ingressExtend":[]}` | Enables application network policy For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/ |
 | networkPolicy.egress | list | `[]` |  ``` egress: - to:   - ipBlock:       cidr: 10.0.0.0/24   ports:   - protocol: TCP     port: 443 ``` |
 | networkPolicy.ingress | list | `[]` | For more detailed configuration with ports and peers. It will ignore ingressExtend ``` ingress:  - from:     - podSelector:         matchLabels:           app.kubernetes.io/instance: defectdojo     - podSelector:         matchLabels:           app.kubernetes.io/instance: defectdojo-prometheus    ports:    - protocol: TCP      port: 8443 ``` |
