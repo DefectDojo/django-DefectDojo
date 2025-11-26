@@ -55,7 +55,7 @@ For teams managing a smaller volume of Findings, DefectDojo Open-Source is a gre
 
 ### Installation Guides
 
-There are a few supported ways to install DefectDojo’s Open Source edition ([available on Github](https://github.com/DefectDojo/django-DefectDojo)):
+There are a few supported ways to install DefectDojo’s Open-Source edition ([available on Github](https://github.com/DefectDojo/django-DefectDojo)):
 
 [Docker Compose](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) is the easiest method to install the core program and services required to run DefectDojo.
 Our [Architecture](https://docs.defectdojo.com/en/open_source/installation/architecture/) guide gives you an overview of each service and component used by DefectDojo.
@@ -63,7 +63,7 @@ Our [Architecture](https://docs.defectdojo.com/en/open_source/installation/archi
 
 Kubernetes is not fully supported at the Open-Source level, but this guide can be referenced and used as a starting point to integrate DefectDojo into Kubernetes architecture.
 
-If you run into trouble with an Open Source install, we highly recommend asking questions on the [OWASP Slack](https://owasp.org/slack/invite). Our community members are active on the #defectdojo channel and can help you with issues you’re facing.
+If you run into trouble with an Open-Source install, we highly recommend asking questions on the [OWASP Slack](https://owasp.org/slack/invite). Our community members are active on the #defectdojo channel and can help you with issues you’re facing.
 
 ## 🟧 DefectDojo Pro Edition
 
