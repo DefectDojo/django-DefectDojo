@@ -43,8 +43,6 @@ class ZoraParser:
             description += f"**Image**: {row.get('image')}\n"
             description += f"**ID**: {row.get('id')}\n"
             description += f"**Details**: {row.get('description')}\n"
-            if row.get("fixVersion"):
-                description += f"**Fix Version**: {row.get('fixVersion')}\n"
             mitigation = row.get("description", "")
             unique_id = f"{row.get('source')}-{row.get('image')}-{row.get('id')}"
             status = row.get("status", "").upper()
@@ -60,6 +58,11 @@ class ZoraParser:
                 test=test,
                 is_mitigated=is_mitigated,
             )
+            if row.get("fixVersion"):
+                finding.fix_available = True
+                finding.fix_version = row.get("fixVersion")
+            else:
+                finding.fix_available = False
             vuln_id = row.get("id")
             if vuln_id:
                 finding.unsaved_vulnerability_ids = [vuln_id]
