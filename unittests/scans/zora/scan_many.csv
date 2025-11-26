@@ -21,7 +21,7 @@ public key verification failed by calling SSL_get_verify_result(), and those
 that do, and take appropriate action, are not affected.  This issue was
 introduced in the initial implementation of RPK support in OpenSSL 3.2.
 
-The FIPS modules in 3.4, 3.3, 3.2, 3.1 and 3.0 are not affected by this issue.","3.3.3-r0"
+The FIPS modules in 3.4, 3.3, 3.2, 3.1 and 3.0 are not affected by this issue.",""
 "Trivy","ghcr.io/undistro/popeye:0.21","CVE-2024-13176","openssl: Timing side-channel in ECDSA signature computation","MEDIUM","fixed","Issue summary: A timing side-channel which could potentially allow recovering
 the private key exists in the ECDSA signature computation.
 
@@ -38,7 +38,7 @@ process must either be located in the same physical computer or must
 have a very fast network connection with low latency. For that reason
 the severity of this vulnerability is Low.
 
-The FIPS modules in 3.4, 3.3, 3.2, 3.1 and 3.0 are affected by this issue.","3.3.2-r2"
+The FIPS modules in 3.4, 3.3, 3.2, 3.1 and 3.0 are affected by this issue.",
 "Trivy","ghcr.io/undistro/popeye:0.21","CVE-2025-9230","openssl: Out-of-bounds read & write in RFC 3211 KEK Unwrap","MEDIUM","fixed","Issue summary: An application trying to decrypt CMS messages encrypted using
 password based encryption can trigger an out-of-bounds read and write.
 
