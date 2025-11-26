@@ -63,7 +63,7 @@ Generally, role and permission assignment happens at the [Product Type/Product l
 
 DefectDojo supports reports from [over 200](/en/connecting_your_tools/parsers/) commercial and open-source security security tools.
 
-If you're looking to add a new tool to your suite, we have a list of recommended Open Source tools which you can check out [here](https://defectdojo.com/blog/announcing-the-defectdojo-open-source-security-awards).
+If you're looking to add a new tool to your suite, we have a list of recommended Open-Source tools which you can check out [here](https://defectdojo.com/blog/announcing-the-defectdojo-open-source-security-awards).
 
 ### What is the different between Import and Reimport?
 
@@ -126,6 +126,6 @@ DefectDojo Pro users also have access to [executive-level Metrics dashboards](/e
 
 ### How can I integrate a project management tool with DefectDojo?
 
-In both Pro and Open Source editions of DefectDojo, Findings in DefectDojo can be pushed to Jira as Issues, which allows you to integrate issue remediation with your development team.  We have a [complete guide to Jira](/en/share_your_findings/jira_guide/) written which describes the process in detail.
+In both Pro and Open-Source editions of DefectDojo, Findings in DefectDojo can be pushed to Jira as Issues, which allows you to integrate issue remediation with your development team.  We have a [complete guide to Jira](/en/share_your_findings/jira_guide/) written which describes the process in detail.
 
 DefectDojo Pro adds support for [Additional Project Tracking Integrations](/en/share_your_findings/integrations/)**: ServiceNow, Azure DevOps, GitHub and GitLab.
