@@ -7,21 +7,27 @@ entries:
           description: Added HPA and PDB for celery worker and Django
         - kind: fixed
           description: extraAnnotations spec doesn't affect initializer job
+        - kind: changed
+          description: chore(deps)_ update gcr.io/cloudsql_docker/gce_proxy docker tag from 1.37.9 to v1.37.10 (helm/defectdojo/values.yaml)
+        - kind: changed
+          description: chore(deps)_ update nginx/nginx_prometheus_exporter docker tag from 1.4.2 to v1.5.1 (helm/defectdojo/values.yaml)
+        - kind: changed
+          description: Replace Redis with Valkey
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 2.53.0-dev
-    created: "2025-11-26T05:07:04.126826093Z"
+    created: "2025-11-27T05:10:59.21788106Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
       repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
       version: ~16.7.0
-    - condition: redis.enabled
-      name: redis
-      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
-      version: ~19.6.4
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: ~0.10.0
     description: A Helm chart for Kubernetes to install DefectDojo
-    digest: 7539494e7a1a1977b7c71915907543371ab2543ec22e0f4c2cf81af40767081a
+    digest: e7990ebe7890e86d114c824a7c8e35fd5a83a22a53d5fc5b5f6af9b4dee57eb5
     icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
     maintainers:
     - email: defectdojo-project@owasp.org
@@ -7074,4 +7080,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2025-11-26T05:07:04.11454053Z"
+generated: "2025-11-27T05:10:59.208720177Z"
