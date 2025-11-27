@@ -1398,6 +1398,22 @@ class FindingViewSet(
                     if "like_status" in data:
                         ia_recommendation_dict["data"]["like_status"] = (
                             data.get("like_status"))
+                    if data.get("umbral") in data:
+                        ia_recommendation_dict["data"]["umbral"] = (
+                            data.get("umbral"))
+                    if data.get("decision") in data:
+                        ia_recommendation_dict["data"]["decision"] = (
+                            data.get("decision"))
+                    if data.get("error") in data:
+                        ia_recommendation_dict["data"]["error"] = (
+                            data.get("error"))
+                    if data.get("commit") in data:
+                        ia_recommendation_dict["data"]["commit"] = (
+                            data.get("commit"))
+                    if data.get("pullrequest") in data:
+                        ia_recommendation_dict["data"]["pullrequest"] = (
+                            data.get("pullrequest"))
+
                     finding.ia_recommendation = ia_recommendation_dict
                     finding.save()
                     return http_response.ok(IARecommendationSerializer(finding.ia_recommendation).data)

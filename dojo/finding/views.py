@@ -3524,30 +3524,70 @@ def generate_token_generative_ia(request, fid):
             "At the moment, you can't generate a recommendation for this finding.\n"
             "Please try again later or with a different finding.🫣"
         )}
-    url = GeneralSettings.get_value("HOST_LOGIN_IA_RECOMMENDATION", "")
-    payload = f"grant_type=client_credentials&client_id={settings.CLIENT_ID_IA}&client_secret={settings.CLIENT_SECRET_IA}"
+    url = GeneralSettings.get_value("HOST_IA_RECOMMENDATION") 
+    params = {
+        "grant_type": "client_credentials",
+        "client_id" : settings.CLIENT_ID_IA,
+        "client_secret": settings.CLIENT_SECRET_IA
+    }
     headers = {
         "Content-Type": "application/x-www-form-urlencoded"
     }
     logger.debug("IA RECOMMENDATION:get token by finding: %s", fid)
     response = requests.request("POST",
-                                url=f"{url}/auth/login",
+                                url=f"{url}/oauth2/token",
                                 headers=headers,
-                                data=payload,
+                                params=params,
+                                verify=settings.VERIFY_REQUEST_ENABLED
                                 )
     if response.status_code != 200:
         logger.error(" IA RECOMMENDATION: Error generating token %s", response.text)
         error_response["status"] = "Error"
         return JsonResponse(error_response, status=200)
 
-    # get Recommendation
-    access_token = response.json()["data"]["access_token"]
-    headers = {"Authorization": f"Bearer {access_token}"}
+    # Create threads 
+    access_token = response.json()["access_token"]
+    url = GeneralSettings.get_value("HOST_IA_RECOMMENDATION_CORE")
+    headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
+    body = {
+        "thread_id": "",
+        "metadata": {
+            "user_id": "string"
+        },
+        "if_exists": "raise"
+    }
+
     logger.debug("IA RECOMMENDATION: get recomendation by finding: %s", fid)
-    response = requests.request("GET",
-                                url=f"{url}/devsecops/recommendation-process/{fid}",
+    response = requests.request("POST",
+                                url=f"{url}/core/api/v1/threads",
                                 headers=headers,
-                                timeout=300
+                                json=body,
+                                verify=settings.VERIFY_REQUEST_ENABLED
+                                )
+    if response.status_code != 200:
+        logger.error(" IA RECOMMENDATIONE: error getting IA RECOMMENDATION: %s", response.text)
+        error_response["status"] = "Error"
+        return JsonResponse(error_response, status=200)
+    
+    # Create runs 
+    thread_id = response.json()["thread_id"]
+    url = GeneralSettings.get_value("HOST_IA_RECOMMENDATION_CORE")
+    headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
+    body = {
+        "agent_id": GeneralSettings.get_value("ia_agent_id", "marvin_ia_recommendation_agent"),
+        "thread_id": thread_id,
+        "messages": GeneralSettings.get_value("IA_MESSAGE", "Analyze the finding") + fid,
+        "metadata": {
+            "user_id": "string"
+        }
+    }
+
+    logger.debug("IA RECOMMENDATION: get recomendation by finding: %s", fid)
+    response = requests.request("POST",
+                                url=f"{url}/core/api/v1/runs",
+                                headers=headers,
+                                json=body,
+                                verify=settings.VERIFY_REQUEST_ENABLED
                                 )
     if response.status_code != 200:
         logger.error(" IA RECOMMENDATIONE: error getting IA RECOMMENDATION: %s", response.text)
@@ -3555,14 +3595,13 @@ def generate_token_generative_ia(request, fid):
         return JsonResponse(error_response, status=200)
 
     finding = get_object_or_404(Finding, id=fid)
-    
-    finding.ia_recommendation = response.json()
+    data = response.json()
+    finding.ia_recommendation["data"] = data
     finding.ia_recommendation["data"]["like_status"] = None
     finding.ia_recommendation["data"]["user"] = request.user.username
     finding.ia_recommendation["data"]["last_modified"] = str(timezone.now().date())
     finding.save()
-    contex = finding_helper.parser_ia_recommendation(
-        response.json())
+    contex = finding_helper.parser_ia_recommendation(response.json())
     return JsonResponse(contex, status=200)
 
 
