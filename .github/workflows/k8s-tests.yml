@@ -73,8 +73,8 @@ jobs:
                --set images.nginx.image.tag=latest \
                --set imagePullPolicy=Never \
                --set initializer.keepSeconds="-1" \
-               --set redis.enabled=true \
-               --set createRedisSecret=true \
+               --set valkey.enabled=true \
+               --set createValkeySecret=true \
                --set postgresql.enabled=true \
                --set createPostgresqlSecret=true \
                --set createSecret=true

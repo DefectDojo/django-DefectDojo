@@ -36,10 +36,8 @@ spec:
           valueFrom:
             secretKeyRef:
               # Use broker chart secret
-              # name: {{ $fullName }}-{{ .Values.celery.broker }}
-              # Use secret handled outside of the chart
-              name: defectdojo-{{ .Values.celery.broker }}-specific
-              key: {{ .Values.celery.broker }}-password
+              name: defectdojo-valkey-specific
+              key: valkey-password
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
