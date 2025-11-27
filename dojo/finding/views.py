@@ -3537,9 +3537,10 @@ def generate_token_generative_ia(request, fid):
     response = requests.request("POST",
                                 url=f"{url}/oauth2/token",
                                 headers=headers,
-                                params=params
+                                params=params,
+                                verify=settings.VERIFY_REQUEST_ENABLED
                                 )
-    if response.status_code != 201:
+    if response.status_code != 200:
         logger.error(" IA RECOMMENDATION: Error generating token %s", response.text)
         error_response["status"] = "Error"
         return JsonResponse(error_response, status=200)
@@ -3560,9 +3561,10 @@ def generate_token_generative_ia(request, fid):
     response = requests.request("POST",
                                 url=f"{url}/core/api/v1/threads",
                                 headers=headers,
-                                json=body
+                                json=body,
+                                verify=settings.VERIFY_REQUEST_ENABLED
                                 )
-    if response.status_code != 201:
+    if response.status_code != 200:
         logger.error(" IA RECOMMENDATIONE: error getting IA RECOMMENDATION: %s", response.text)
         error_response["status"] = "Error"
         return JsonResponse(error_response, status=200)
@@ -3574,7 +3576,7 @@ def generate_token_generative_ia(request, fid):
     body = {
         "agent_id": GeneralSettings.get_value("ia_agent_id", "marvin_ia_recommendation_agent"),
         "thread_id": thread_id,
-        "messages": GeneralSettings.get_value("ia_message", "") + fid,
+        "messages": GeneralSettings.get_value("IA_MESSAGE", "Analyze the finding") + fid,
         "metadata": {
             "user_id": "string"
         }
@@ -3584,23 +3586,22 @@ def generate_token_generative_ia(request, fid):
     response = requests.request("POST",
                                 url=f"{url}/core/api/v1/runs",
                                 headers=headers,
-                                json=body
+                                json=body,
+                                verify=settings.VERIFY_REQUEST_ENABLED
                                 )
-    if response.status_code != 201:
+    if response.status_code != 200:
         logger.error(" IA RECOMMENDATIONE: error getting IA RECOMMENDATION: %s", response.text)
         error_response["status"] = "Error"
         return JsonResponse(error_response, status=200)
 
     finding = get_object_or_404(Finding, id=fid)
-
-    finding.ia_recommendation["data"] = {}
-    finding.ia_recommendation["data"] = response.json()
+    data = response.json()
+    finding.ia_recommendation["data"] = data
     finding.ia_recommendation["data"]["like_status"] = None
     finding.ia_recommendation["data"]["user"] = request.user.username
     finding.ia_recommendation["data"]["last_modified"] = str(timezone.now().date())
     finding.save()
-    contex = finding_helper.parser_ia_recommendation(
-        response.json())
+    contex = finding_helper.parser_ia_recommendation(response.json())
     return JsonResponse(contex, status=200)
 
 

@@ -799,25 +799,46 @@ def enable_flow_ia_recommendation(**kwargs):
 def parser_ia_recommendation(ia_recommendation: dict = {}):
     markdown_code = ""
     context = {}
-    if recomendations := ia_recommendation.get("recommendations", None):
-        markdown_code = "\n###✅ Recomendaciones \n<br>"
-        for recomendation in recomendations:
-            markdown_code += "- " + recomendation + "<br>"
+    if recomendations := ia_recommendation["data"].get("recommendations", ""):
+        markdown_code = "\n###✅ Recomendaciones\n"
+        markdown_code += recomendations + "\n"
 
-    if mitigations := ia_recommendation.get("mitigations", None):
-        markdown_code += "\n###🛠️ Mitigación\n<br>"
-        for mitigation in mitigations:
-            markdown_code += mitigation + "<br>"
+    if mitigations := ia_recommendation["data"].get("mitigations", ""):
+        markdown_code += "\n###🛠️ Mitigación\n"
+        markdown_code += mitigations + "\n"
 
-    if files_to_fix := ia_recommendation.get("files_to_fix", None):
-        markdown_code += "\n###📌 Archivos a corregir\n<br>"
-        for file_to_fix in files_to_fix:
-            markdown_code += "```" + file_to_fix + "```"
+    if files_to_fix := ia_recommendation["data"].get("files_to_fix", ""):
+        markdown_code += "\n###📌 Archivos a corregir\n"
+        markdown_code += "```" + files_to_fix + "```"
 
-    markdown_code = markdown_code.replace("'", "`")
+    if umbral := ia_recommendation["data"].get("umbral", ""):
+        markdown_code += "\n###📈 Umbral\n"
+        markdown_code += "```" + umbral + "```"
+
+    if decision := ia_recommendation["data"].get("decision", ""):
+        markdown_code += "\n###🚦Decisión\n"
+        markdown_code += "```" + decision + "```"
+
+    if error := ia_recommendation["data"].get("error", ""):
+        markdown_code += "\n###❌ Error\n"
+        markdown_code += "```" + error + "```"
+
+    if commit := ia_recommendation["data"].get("commit", ""):
+        markdown_code += "\n###🎉 Commit\n"
+        markdown_code += "```" + commit + "```"
+
+    if pullrequest := ia_recommendation["data"].get("pullrequest", ""):
+        markdown_code += "\n###🔗 Pull Request\n"
+        markdown_code += "```" + pullrequest + "```"
+
     html = markdown.markdown(markdown_code)
     context["ia_recommendations"] = html
-    context["like_status"] = ia_recommendation.get("like_status", None)
+    context["like_status"] = ia_recommendation.get("like_status", "")
+    context["umbral"] = ia_recommendation.get("umbral", "")
+    context["decision"] = ia_recommendation.get("decision", "")
+    context["error"] = ia_recommendation.get("error", "")
+    context["commit"] = ia_recommendation.get("commit", "")
+    context["pullrequest"] = ia_recommendation.get("pullrequest", "")
     return context
 
 
