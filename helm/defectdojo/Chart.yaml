@@ -13,10 +13,10 @@ dependencies:
     version: ~16.7.0
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: postgresql.enabled
-  - name: redis
-    version: ~19.6.4
-    repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
-    condition: redis.enabled
+  - name: valkey
+    version: ~0.10.0
+    repository: "oci://registry-1.docker.io/cloudpirates"
+    condition: valkey.enabled
 # For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/
 # This is example for "artifacthub.io/changes"
 # artifacthub.io/changes: |
@@ -43,3 +43,5 @@ annotations:
       description: chore(deps)_ update gcr.io/cloudsql_docker/gce_proxy docker tag from 1.37.9 to v1.37.10 (helm/defectdojo/values.yaml)
     - kind: changed
       description: chore(deps)_ update nginx/nginx_prometheus_exporter docker tag from 1.4.2 to v1.5.1 (helm/defectdojo/values.yaml)
+    - kind: changed
+      description: Replace Redis with Valkey
