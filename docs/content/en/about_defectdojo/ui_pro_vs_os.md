@@ -27,7 +27,7 @@ To access the Pro UI, open your User Options menu from the top-right hand corner
 
 1. The **Sidebar** has been reorganized into four parent categories: Dashboards, Import, Manage, and Settings.
 
-2. The Homepage, [AI-powered native API connection capabilities](en/ai/mcp_server_pro/), Pro Metrics, and the Calendar view are all accessible under Dashboards.
+2. The Homepage, [AI-powered native API connection capabilities](/en/ai/mcp_server_pro/), Pro Metrics, and the Calendar view are all accessible under Dashboards.
 
 4. Import methods can be found in the Import section: set up [API Connectors](/en/connecting_your_tools/connectors/about_connectors/), use the [Import Scan](/en/connecting_your_tools/import_scan_files/import_scan_ui/) form to Add Findings, use [Smart Upload](/en/connecting_your_tools/import_scan_files/smart_upload/) to handle infrastructure scanning tools, or use our external tools—[Universal Importer and DefectDojo CLI](/en/connecting_your_tools/external_tools/)—to streamline both the import and reimport processes of Findings and associated objects.
 

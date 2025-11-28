@@ -73,7 +73,7 @@ DefectDojo Inc. hosts a Pro edition of this software for commercial purposes.  A
 
 * [Connectors](/en/connecting_your_tools/connectors/about_connectors/): out-of-the-box API integrations with enterprise-level scanners (such as Checkmarx One, BurpSuite, Semgrep and more)
 * **Configurable Import Methods**: [Universal Parser](/supported_tools/parsers/universal_parser/), [Smart Upload](/en/connecting_your_tools/import_scan_files/smart_upload/)
-* **[CLI Tools](en/connecting_your_tools/external_tools/)** for rapid integration with your systems
+* **[CLI Tools](/en/connecting_your_tools/external_tools/)** for rapid integration with your systems
 * **[Additional Project Tracking Integrations](/en/share_your_findings/integrations/)**: ServiceNow, Azure DevOps, GitHub and GitLab
 * **[Improved Metrics](/en/customize_dojo/dashboards/pro_dashboards/)** for executive reporting and high-level analysis
 * **[Priority And Risk](/en/working_with_findings/finding_priority/)** to identify the Findings of highest urgency, system-wide

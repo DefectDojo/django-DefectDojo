@@ -20,7 +20,7 @@ The essence of DefectDojo is to import security data, organize it, and present i
 
 ### DefectDojo Open-Source
 
-1. Open-Source users can start by creating their first [Product Type and Product]((/en/working_with_findings/organizing_engagements_tests/product_hierarchy)).  Once those are created, they can [import a file](/en/connecting_your_tools/import_scan_files/import_scan_ui) to one of those Products using the UI.
+1. Open-Source users can start by creating their first [Product Type and Product](/en/working_with_findings/organizing_engagements_tests/product_hierarchy).  Once those are created, they can [import a file](/en/connecting_your_tools/import_scan_files/import_scan_ui) to one of those Products using the UI.
 
 2. Now that you have data in DefectDojo, consider expanding your Product layout [Product Hierarchy Overview](/en/working_with_findings/organizing_engagements_tests/product_hierarchy). The Product Hierarchy creates a working inventory of your apps, which helps you divide your data up into logical categories. These categories can be used to apply access control rules, or to segment your reports to the correct team.
 
