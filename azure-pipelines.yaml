@@ -129,4 +129,4 @@ steps:
             }
           ]
         }
-    # condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
+    condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
