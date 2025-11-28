@@ -799,37 +799,41 @@ def enable_flow_ia_recommendation(**kwargs):
 def parser_ia_recommendation(ia_recommendation: dict = {}):
     markdown_code = ""
     context = {}
-    if recomendations := ia_recommendation["data"].get("recommendations", ""):
-        markdown_code = "\n###✅ Recomendaciones\n"
-        markdown_code += recomendations + "\n"
+    try:
+        if recomendations := ia_recommendation["data"].get("recommendations", ""):
+            markdown_code = "\n###✅ Recomendaciones\n"
+            markdown_code += recomendations + "\n"
 
-    if mitigations := ia_recommendation["data"].get("mitigations", ""):
-        markdown_code += "\n###🛠️ Mitigación\n"
-        markdown_code += mitigations + "\n"
+        if mitigations := ia_recommendation["data"].get("mitigations", ""):
+            markdown_code += "\n###🛠️ Mitigación\n"
+            markdown_code += mitigations + "\n"
 
-    if files_to_fix := ia_recommendation["data"].get("files_to_fix", ""):
-        markdown_code += "\n###📌 Archivos a corregir\n"
-        markdown_code += "```" + files_to_fix + "```"
+        if files_to_fix := ia_recommendation["data"].get("files_to_fix", ""):
+            markdown_code += "\n###📌 Archivos a corregir\n"
+            markdown_code += "```" + files_to_fix + "```"
 
-    if umbral := ia_recommendation["data"].get("umbral", ""):
-        markdown_code += "\n###📈 Umbral\n"
-        markdown_code += "```" + umbral + "```"
+        if umbral := ia_recommendation["data"].get("umbral", ""):
+            markdown_code += "\n###📈 Umbral\n"
+            markdown_code += "```" + umbral + "```"
 
-    if decision := ia_recommendation["data"].get("decision", ""):
-        markdown_code += "\n###🚦Decisión\n"
-        markdown_code += "```" + decision + "```"
+        if decision := ia_recommendation["data"].get("decision", ""):
+            markdown_code += "\n###🚦Decisión\n"
+            markdown_code += "```" + decision + "```"
 
-    if error := ia_recommendation["data"].get("error", ""):
-        markdown_code += "\n###❌ Error\n"
-        markdown_code += "```" + error + "```"
+        if error := ia_recommendation["data"].get("error", ""):
+            markdown_code += "\n###❌ Error\n"
+            markdown_code += "```" + error + "```"
 
-    if commit := ia_recommendation["data"].get("commit", ""):
-        markdown_code += "\n###🎉 Commit\n"
-        markdown_code += "```" + commit + "```"
+        if commit := ia_recommendation["data"].get("commit", ""):
+            markdown_code += "\n###🎉 Commit\n"
+            markdown_code += "```" + commit + "```"
 
-    if pullrequest := ia_recommendation["data"].get("pullrequest", ""):
-        markdown_code += "\n###🔗 Pull Request\n"
-        markdown_code += "```" + pullrequest + "```"
+        if pullrequest := ia_recommendation["data"].get("pullrequest", ""):
+            markdown_code += "\n###🔗 Pull Request\n"
+            markdown_code += "```" + pullrequest + "```"
+    except Exception as e:
+        context["ia_recommendations"] = "This recommendation is obsolete. Please generate a new one."
+        return context
 
     html = markdown.markdown(markdown_code)
     context["ia_recommendations"] = html
