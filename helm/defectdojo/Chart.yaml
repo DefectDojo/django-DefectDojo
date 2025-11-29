@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "2.52.0-dev"
+appVersion: "2.53.0-dev"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.7.1-dev
+version: 1.9.0-dev
 icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
 maintainers:
   - name: madchap
@@ -13,10 +13,35 @@ dependencies:
     version: ~16.7.0
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: postgresql.enabled
-  - name: redis
-    version: ~19.6.4
-    repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
-    condition: redis.enabled
+  - name: valkey
+    version: ~0.10.0
+    repository: "oci://registry-1.docker.io/cloudpirates"
+    condition: valkey.enabled
+# For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/
+# This is example for "artifacthub.io/changes"
+# artifacthub.io/changes: |
+#   - kind: added
+#     description: Cool feature
+#   - kind: fixed
+#     description: Minor bug
+#   - kind: changed
+#     description: Broken feature
+#   - kind: removed
+#     description: Old bug
+#   - kind: deprecated
+#     description: Not-needed feature
+#   - kind: security
+#     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "true"
-  artifacthub.io/changes: ""
+  artifacthub.io/changes: |
+    - kind: added
+      description: Added HPA and PDB for celery worker and Django
+    - kind: fixed
+      description: extraAnnotations spec doesn't affect initializer job
+    - kind: changed
+      description: chore(deps)_ update gcr.io/cloudsql_docker/gce_proxy docker tag from 1.37.9 to v1.37.10 (helm/defectdojo/values.yaml)
+    - kind: changed
+      description: chore(deps)_ update nginx/nginx_prometheus_exporter docker tag from 1.4.2 to v1.5.1 (helm/defectdojo/values.yaml)
+    - kind: changed
+      description: Replace Redis with Valkey

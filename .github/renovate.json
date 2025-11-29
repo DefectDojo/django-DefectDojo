@@ -1,21 +1,66 @@
 {
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
   "dependencyDashboard": true,
   "dependencyDashboardApproval": false,
-  "baseBranches": ["dev"],
+  "baseBranchPatterns": ["dev"],
   "rebaseWhen": "conflicted",
   "separateMinorPatch": true,
-  "ignorePaths": ["requirements.txt", "requirements-lint.txt", "components/package.json", "components/package-lock.json", "dojo/components/yarn.lock", "dojo/components/package.json", "Dockerfile**"],
+  "ignorePaths": [
+    "requirements.txt",
+    "requirements-lint.txt",
+    "components/package.json",
+    "components/package-lock.json",
+    "dojo/components/yarn.lock",
+    "dojo/components/package.json",
+    "Dockerfile**"
+  ],
   "ignoreDeps": [],
   "packageRules": [{
-    "packagePatterns": ["*"],
-    "commitMessageExtra": "from {{currentVersion}} to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}",
+    "matchPackageNames": ["*"],
+    "commitMessageExtra": "from {{currentVersion}} to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}",
     "commitMessageSuffix": "({{packageFile}})",
     "labels": ["dependencies"]
+  },{
+    "description": "Update renovate weekly (sundays) - They are releasing new versions too often, so it is a bit noisy, and keeping renovating a bit older does not create vulnerabilities in DD",
+    "matchDatasources": "github-releases",
+    "matchPackageNames": "renovatebot/renovate",
+    "separateMinorPatch": false,
+    "schedule": ["* * * * 0"]
+  },{
+    "description": "Minikube does not like freshly released k8s. We need to wait some time so it will be adopted",
+    "matchDatasources": [
+      "custom.endoflife-oldest-maintained",
+      "github-releases"
+    ],
+    "matchPackageNames": [
+      "kubernetes",
+      "kubernetes/kubernetes"
+    ],
+    "minimumReleaseAge": "2 days"
   }],
-  "registryAliases": {
-    "bitnami": "https://charts.bitnami.com/bitnami"
-  }
+  "customDatasources": {
+    "endoflife-oldest-maintained": {
+      "defaultRegistryUrlTemplate": "https://endoflife.date/api/v1/products/{{packageName}}",
+      "format": "json",
+      "transformTemplates": [
+        "{ \"releases\": [$.result.releases[isMaintained = true]^(<eolFrom)[0].latest.{\"version\": name, \"releaseTimestamp\": date, \"changelogUrl\": link}], \"sourceUrl\": \"https://github.com/kubernetes/kubernetes\", \"homepage\": \"https://kubernetes.io/\" }"
+      ]
+    }
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^.github/workflows//"
+      ],
+      "matchStrings": [
+        "\\w*:\\s\"(?<currentValue>\\S+)\"\\s#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s",
+        "\\w*:\\s'(?<currentValue>\\S+)'\\s#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s",
+        "\\w*:\\s(?<currentValue>\\S+)\\s#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ]
 }

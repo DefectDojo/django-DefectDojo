@@ -25,7 +25,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
 from django.db import connection, models
-from django.db.models import Count, JSONField, Q
+from django.db.models import Count, F, JSONField, Q
 from django.db.models.expressions import Case, When
 from django.db.models.functions import Lower
 from django.urls import reverse
@@ -129,7 +129,7 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
             obj.tags.set(cleaned_tag_list)
 
 
-def _copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
+def copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
     if exclude_fields is None:
         exclude_fields = []
     new_model_instance = model_in_database.__class__()
@@ -231,15 +231,15 @@ class Dojo_User(User):
     def force_password_reset(user):
         return hasattr(user, "usercontactinfo") and user.usercontactinfo.force_password_reset
 
-    def disable_force_password_reset(user):
-        if hasattr(user, "usercontactinfo"):
-            user.usercontactinfo.force_password_reset = False
-            user.usercontactinfo.save()
+    def disable_force_password_reset(self):
+        if hasattr(self, "usercontactinfo"):
+            self.usercontactinfo.force_password_reset = False
+            self.usercontactinfo.save()
 
-    def enable_force_password_reset(user):
-        if hasattr(user, "usercontactinfo"):
-            user.usercontactinfo.force_password_reset = True
-            user.usercontactinfo.save()
+    def enable_force_password_reset(self):
+        if hasattr(self, "usercontactinfo"):
+            self.usercontactinfo.force_password_reset = True
+            self.usercontactinfo.save()
 
     @staticmethod
     def generate_full_name(user):
@@ -750,7 +750,7 @@ class NoteHistory(models.Model):
     current_editor = models.ForeignKey(Dojo_User, editable=False, null=True, on_delete=models.CASCADE)
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         copy.save()
         return copy
 
@@ -776,7 +776,7 @@ class Notes(models.Model):
         return self.entry
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_history = list(self.history.all())
         # Save the object before setting any ManyToMany relationships
@@ -801,7 +801,7 @@ class FileUpload(models.Model):
             storage.delete(path)
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Add unique modifier to file name
         copy.title = f"{self.title} - clone-{str(uuid4())[:8]}"
         # Create new unique file name
@@ -1093,8 +1093,8 @@ class SLA_Configuration(models.Model):
                     product.async_updating = True
                     super(Product, product).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async  # noqa: I001, PLC0415 circular import
-                update_sla_expiration_dates_sla_config_async(self, products, tuple(severities))
+                from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
+                async_update_sla_expiration_dates_sla_config_sync(self, products, severities=severities)
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -1255,8 +1255,8 @@ class Product(models.Model):
                     sla_config.async_updating = True
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_product_async  # noqa: I001, PLC0415 circular import
-                update_sla_expiration_dates_product_async(self, sla_config)
+                from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
+                async_update_sla_expiration_dates_sla_config_sync(sla_config, Product.objects.filter(id=self.id))
 
     def get_absolute_url(self):
         return reverse("view_product", args=[str(self.id)])
@@ -1581,7 +1581,7 @@ class Engagement(models.Model):
         return reverse("view_engagement", args=[str(self.id)])
 
     def copy(self):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
@@ -1690,6 +1690,17 @@ class Endpoint_Status(models.Model):
         indexes = [
             models.Index(fields=["finding", "mitigated"]),
             models.Index(fields=["endpoint", "mitigated"]),
+            # Optimize frequent lookups of "active" statuses (mitigated/flags all False)
+            models.Index(
+                name="idx_eps_active_by_endpoint",
+                fields=["endpoint"],
+                condition=Q(mitigated=False, false_positive=False, out_of_scope=False, risk_accepted=False),
+            ),
+            models.Index(
+                name="idx_eps_active_by_finding",
+                fields=["finding"],
+                condition=Q(mitigated=False, false_positive=False, out_of_scope=False, risk_accepted=False),
+            ),
         ]
         constraints = [
             models.UniqueConstraint(fields=["finding", "endpoint"], name="endpoint-finding relation"),
@@ -1699,7 +1710,7 @@ class Endpoint_Status(models.Model):
         return f"'{self.finding}' on '{self.endpoint}'"
 
     def copy(self, finding=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         current_endpoint = self.endpoint
         if finding:
             copy.finding = finding
@@ -1749,6 +1760,12 @@ class Endpoint(models.Model):
         ordering = ["product", "host", "protocol", "port", "userinfo", "path", "query", "fragment"]
         indexes = [
             models.Index(fields=["product"]),
+            # Fast case-insensitive equality on host within product scope
+            models.Index(
+                F("product"),
+                Lower("host"),
+                name="idx_ep_product_lower_host",
+            ),
         ]
 
     def __hash__(self):
@@ -2161,7 +2178,7 @@ class Test(models.Model):
         return bc
 
     def copy(self, engagement=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
@@ -2217,6 +2234,7 @@ class Test(models.Model):
 
     @property
     def hash_code_fields(self):
+        """Retrieve OS HASH_CODE_FIELDS_PER_SCANNER settings. Be aware when calling this to make sure Pro doesn't use these OS seetings"""
         hashCodeFields = None
 
         if hasattr(settings, "HASHCODE_FIELDS_PER_SCANNER"):
@@ -2231,7 +2249,9 @@ class Test(models.Model):
         else:
             deduplicationLogger.debug("Section HASHCODE_FIELDS_PER_SCANNER not found in settings.dist.py")
 
-        deduplicationLogger.debug(f"HASHCODE_FIELDS_PER_SCANNER is: {hashCodeFields}")
+        hash_code_fields_always = getattr(settings, "HASH_CODE_FIELDS_ALWAYS", [])
+        deduplicationLogger.debug(f"HASHCODE_FIELDS_PER_SCANNER is: {hashCodeFields} + HASH_CODE_FIELDS_ALWAYS: {hash_code_fields_always}")
+
         return hashCodeFields
 
     @property
@@ -2415,6 +2435,11 @@ class Finding(models.Model):
                                         default=None,
                                         verbose_name=_("Fix Available"),
                                         help_text=_("Denotes if there is a fix available for this flaw."))
+    fix_version = models.CharField(null=True,
+                                         blank=True,
+                                         max_length=100,
+                                         verbose_name=_("Fix version"),
+                                         help_text=_("Version of the affected component in which the flaw is fixed."))
     impact = models.TextField(verbose_name=_("Impact"),
                                 null=True,
                                 blank=True,
@@ -2827,7 +2852,7 @@ class Finding(models.Model):
         return reverse("view_finding", args=[str(self.id)])
 
     def copy(self, test=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
@@ -2889,6 +2914,11 @@ class Finding(models.Model):
         return None
 
     def compute_hash_code(self):
+        # Allow Pro to overwrite compute hash_code which gets dedupe settings from a database instead of django.settings
+        from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
+        if compute_hash_code_method := get_custom_method("FINDING_COMPUTE_HASH_METHOD"):
+            deduplicationLogger.debug("using custom FINDING_COMPUTE_HASH_METHOD method")
+            return compute_hash_code_method(self)
 
         # Check if all needed settings are defined
         if not hasattr(settings, "HASHCODE_FIELDS_PER_SCANNER") or not hasattr(settings, "HASHCODE_ALLOWS_NULL_CWE") or not hasattr(settings, "HASHCODE_ALLOWED_FIELDS"):
@@ -2935,6 +2965,13 @@ class Finding(models.Model):
                 # Generically use the finding attribute having the same name, converts to str in case it's integer
                 fields_to_hash += str(getattr(self, hashcodeField))
                 deduplicationLogger.debug(hashcodeField + " : " + str(getattr(self, hashcodeField)))
+
+        # Log the hash_code fields that are always included (but are not part of the hash_code_fields list as they are inserted downtstream in self.hash_fields)
+        hash_code_fields_always = getattr(settings, "HASH_CODE_FIELDS_ALWAYS", [])
+        for hashcodeField in hash_code_fields_always:
+            if getattr(self, hashcodeField):
+                deduplicationLogger.debug(hashcodeField + " : " + str(getattr(self, hashcodeField)))
+
         deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
 
@@ -3001,6 +3038,7 @@ class Finding(models.Model):
         if hasattr(settings, "HASH_CODE_FIELDS_ALWAYS"):
             for field in settings.HASH_CODE_FIELDS_ALWAYS:
                 if getattr(self, field):
+                    deduplicationLogger.debug("adding HASH_CODE_FIELDS_ALWAYSfield %s to hash_fields: %s", field, getattr(self, field))
                     fields_to_hash += str(getattr(self, field))
 
         logger.debug("fields_to_hash      : %s", fields_to_hash)
@@ -3119,16 +3157,25 @@ class Finding(models.Model):
         return self.test.engagement.product.sla_configuration
 
     def get_sla_period(self):
+        # Determine which method to use to calculate the SLA
+        from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
+        if method := get_custom_method("FINDING_SLA_PERIOD_METHOD"):
+            return method(self)
+        # Run the default method
         sla_configuration = self.get_sla_configuration()
         sla_period = getattr(sla_configuration, self.severity.lower(), None)
         enforce_period = getattr(sla_configuration, str("enforce_" + self.severity.lower()), None)
         return sla_period, enforce_period
 
     def set_sla_expiration_date(self):
+        # First check if SLA is enabled globally
         system_settings = System_Settings.objects.get()
         if not system_settings.enable_finding_sla:
             return
+        # Call the internal method to set the sla expiration date
+        self._set_sla_expiration_date()
 
+    def _set_sla_expiration_date(self):
         # some parsers provide date as a `str` instead of a `date` in which case we need to parse it #12299 on GitHub
         sla_start_date = self.get_sla_start_date()
         if sla_start_date and isinstance(sla_start_date, str):
@@ -3453,15 +3500,16 @@ class Finding(models.Model):
     def set_hash_code(self, dedupe_option):
         from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
         if hash_method := get_custom_method("FINDING_HASH_METHOD"):
+            deduplicationLogger.debug("Using custom hash method")
             hash_method(self, dedupe_option)
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
         # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
         elif dedupe_option:
             if self.hash_code is not None:
-                deduplicationLogger.debug("Hash_code already computed for finding")
+                deduplicationLogger.debug("Hash_code already computed for finding %i", self.id)
             else:
                 self.hash_code = self.compute_hash_code()
-                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
+                deduplicationLogger.debug("Hash_code computed for finding %i: %s", self.id, self.hash_code)
 
 
 class FindingAdmin(admin.ModelAdmin):
@@ -3804,7 +3852,7 @@ class Risk_Acceptance(models.Model):
         return None
 
     def copy(self, engagement=None):
-        copy = _copy_model_util(self)
+        copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
@@ -3953,7 +4001,7 @@ class JIRA_Instance(models.Model):
     high_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: High"))
     critical_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: Critical"))
     finding_text = models.TextField(null=True, blank=True, help_text=_("Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information."))
-    accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, verbose_name="Risk Accepted resolution mapping", help_text=_("JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. This Risk Acceptance will not have an expiration date. This mapping is not used when Findings are pushed to JIRA. In that case the Risk Accepted Findings are closed in JIRA and JIRA sets the default resolution."))
+    accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, verbose_name="Risk Accepted resolution mapping", help_text=_('JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. The expiration time for this Risk Acceptance will be determined by the "Risk acceptance form default days" in "System Settings". This mapping is not used when Findings are pushed to JIRA. In that case the Risk Accepted Findings are closed in JIRA and JIRA sets the default resolution.'))
     false_positive_mapping_resolution = models.CharField(null=True, blank=True, verbose_name="False Positive resolution mapping", max_length=300, help_text=_("JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding being marked as False Positive Defect Dojo. This mapping is not used when Findings are pushed to JIRA. In that case the Finding is closed in JIRA and JIRA sets the default resolution."))
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
     finding_jira_sync = models.BooleanField(default=False, blank=False, verbose_name=_("Automatically sync Findings with JIRA?"), help_text=_("If enabled, this will sync changes to a Finding automatically to JIRA"))
@@ -4644,11 +4692,15 @@ class Answered_Survey(models.Model):
         return self.survey.name
 
 
+def default_expiration():
+    return timezone.now() + timedelta(days=7)
+
+
 class General_Survey(models.Model):
     survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
     num_responses = models.IntegerField(default=0)
     generated = models.DateTimeField(auto_now_add=True, null=True)
-    expiration = models.DateTimeField(null=False, blank=False)
+    expiration = models.DateTimeField(default=default_expiration)
 
     class Meta:
         verbose_name = _("General Engagement Survey")
@@ -4656,6 +4708,10 @@ class General_Survey(models.Model):
 
     def __str__(self):
         return self.survey.name
+
+    def clean(self):
+        if self.expiration and timezone.is_naive(self.expiration):
+            self.expiration = timezone.make_aware(self.expiration)
 
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):

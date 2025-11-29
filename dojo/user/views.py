@@ -175,7 +175,7 @@ def logout_view(request):
 
 @user_passes_test(lambda u: u.is_active)
 def alerts(request):
-    alerts = Alerts.objects.filter(user_id=request.user)
+    alerts = Alerts.objects.filter(user_id=request.user).order_by("-id")
 
     if request.method == "POST":
         removed_alerts = request.POST.getlist("alert_select")
@@ -194,7 +194,7 @@ def alerts(request):
 
 
 def delete_alerts(request):
-    alerts = Alerts.objects.filter(user_id=request.user)
+    alerts = Alerts.objects.filter(user_id=request.user).order_by("-id")
 
     if request.method == "POST":
         alerts.filter().delete()
@@ -287,7 +287,7 @@ def change_password(request):
             new_password = form.cleaned_data["new_password"]
 
             user.set_password(new_password)
-            Dojo_User.disable_force_password_reset(user)
+            user.disable_force_password_reset()
             user.save()
 
             messages.add_message(request,

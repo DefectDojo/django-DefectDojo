@@ -319,3 +319,21 @@ Number  Content
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", finding.cvssv3)
                 self.assertEqual(7.5, finding.cvssv3_score)
+
+    def test_severity_prio(self):
+        # this tests issue #13647. The unittest file is just a copy of cvss_severity_source.json with edited severities
+        with sample_path("severity_prio.json").open(encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 2)
+            with self.subTest("SeveritySource matches the CVSS entry"):
+                finding = findings[0]
+                self.assertEqual("Low", finding.severity)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N", finding.cvssv3)
+                self.assertEqual(6.5, finding.cvssv3_score)
+
+            with self.subTest("SeveritySource does not match the CVSS entry"):
+                finding = findings[1]
+                self.assertEqual("Critical", finding.severity)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", finding.cvssv3)
+                self.assertEqual(7.5, finding.cvssv3_score)

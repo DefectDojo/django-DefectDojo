@@ -354,6 +354,34 @@ class DojoFilter(FilterSet):
                 if exclude:
                     self.form.fields[field].label = "Not " + self.form.fields[field].label
 
+    def filter_queryset(self, queryset):
+        qs = super().filter_queryset(queryset)
+        if hasattr(self, "form") and hasattr(self.form, "cleaned_data"):
+            for name, f in self.filters.items():
+                field_name = getattr(f, "field_name", "") or ""
+                # Only apply distinct for tag lookups that can duplicate base rows
+                if "tags__name" in field_name:
+                    value = self.form.cleaned_data.get(name, None)
+                    if value not in (None, "", [], (), {}):
+                        lookup_expr = getattr(f, "lookup_expr", None)
+                        is_exclude = getattr(f, "exclude", False)
+                        needs_distinct = (
+                            is_exclude
+                            or lookup_expr in {
+                                "in",
+                                "contains",
+                                "icontains",
+                                "startswith",
+                                "istartswith",
+                                "endswith",
+                                "iendswith",
+                            }
+                        )
+                        # exact/iexact typically won't duplicate rows
+                        if needs_distinct:
+                            return qs.distinct()
+        return qs
+
 
 def get_tags_model_from_field_name(field):
     exclude = False
@@ -1395,10 +1423,10 @@ class ApiProductFilter(DojoFilter):
     name = CharFilter(lookup_expr="icontains")
     name_exact = CharFilter(field_name="name", lookup_expr="iexact")
     description = CharFilter(lookup_expr="icontains")
-    business_criticality = CharFilter(method=custom_filter, field_name="business_criticality")
-    platform = CharFilter(method=custom_filter, field_name="platform")
-    lifecycle = CharFilter(method=custom_filter, field_name="lifecycle")
-    origin = CharFilter(method=custom_filter, field_name="origin")
+    business_criticality = MultipleChoiceFilter(choices=Product.BUSINESS_CRITICALITY_CHOICES)
+    platform = MultipleChoiceFilter(choices=Product.PLATFORM_CHOICES)
+    lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES)
+    origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES)
     # NumberInFilter
     id = NumberInFilter(field_name="id", lookup_expr="in")
     product_manager = NumberInFilter(field_name="product_manager", lookup_expr="in")

@@ -31,13 +31,15 @@
                 }
             }
         },
-        "annotations": {
-            "type": "object"
+        "alternativeHosts": {
+            "description": "optional list of alternative hostnames to use that gets appended to DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match the global hostname.",
+            "type": "array"
         },
         "celery": {
             "type": "object",
             "properties": {
                 "annotations": {
+                    "description": "Common annotations to worker and beat deployments and pods.",
                     "type": "object"
                 },
                 "beat": {
@@ -47,34 +49,73 @@
                             "type": "object"
                         },
                         "annotations": {
+                            "description": "Annotations for the Celery beat deployment.",
+                            "type": "object"
+                        },
+                        "automountServiceAccountToken": {
+                            "type": "boolean"
+                        },
+                        "containerSecurityContext": {
+                            "description": "Container security context for the Celery beat containers.",
                             "type": "object"
                         },
                         "extraEnv": {
+                            "description": "Additional environment variables injected to Celery beat containers.",
                             "type": "array"
                         },
                         "extraInitContainers": {
+                            "description": "A list of additional initContainers to run before celery beat containers.",
                             "type": "array"
                         },
                         "extraVolumeMounts": {
+                            "description": "Array of additional volume mount points for the celery beat containers.",
                             "type": "array"
                         },
                         "extraVolumes": {
+                            "description": "A list of extra volumes to mount @type: array\u003cmap\u003e",
                             "type": "array"
                         },
+                        "image": {
+                            "description": "If empty, uses values from images.django.image",
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
                         "livenessProbe": {
+                            "description": "Enable liveness probe for Celery beat container. ``` exec: command: - bash - -c - celery -A dojo inspect ping -t 5 initialDelaySeconds: 30 periodSeconds: 60 timeoutSeconds: 10 ```",
                             "type": "object"
                         },
                         "nodeSelector": {
                             "type": "object"
                         },
                         "podAnnotations": {
+                            "description": "Annotations for the Celery beat pods.",
+                            "type": "object"
+                        },
+                        "podSecurityContext": {
+                            "description": "Pod security context for the Celery beat pods.",
                             "type": "object"
                         },
                         "readinessProbe": {
+                            "description": "Enable readiness probe for Celery beat container.",
                             "type": "object"
                         },
                         "replicas": {
-                            "type": "integer"
+                            "description": "Multiple replicas are not allowed (Beat is intended to be a singleton) because scaling to \u003e1 will double-run schedules",
+                            "type": "integer",
+                            "maximum": 1
                         },
                         "resources": {
                             "type": "object",
@@ -104,15 +145,13 @@
                             }
                         },
                         "startupProbe": {
+                            "description": "Enable startup probe for Celery beat container.",
                             "type": "object"
                         },
                         "tolerations": {
                             "type": "array"
                         }
                     }
-                },
-                "broker": {
-                    "type": "string"
                 },
                 "logLevel": {
                     "type": "string"
@@ -124,38 +163,115 @@
                             "type": "object"
                         },
                         "annotations": {
+                            "description": "Annotations for the Celery worker deployment.",
                             "type": "object"
                         },
                         "appSettings": {
                             "type": "object",
                             "properties": {
                                 "poolType": {
+                                    "description": "Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops) poolType: prefork autoscaleMin: 2 autoscaleMax: 8 concurrency: 8 prefetchMultiplier: 128",
                                     "type": "string"
                                 }
                             }
                         },
+                        "automountServiceAccountToken": {
+                            "type": "boolean"
+                        },
+                        "autoscaling": {
+                            "description": "Autoscaling configuration for Celery worker deployment.",
+                            "type": "object",
+                            "properties": {
+                                "behavior": {
+                                    "type": "object"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "maxReplicas": {
+                                    "type": "integer"
+                                },
+                                "minReplicas": {
+                                    "type": "integer"
+                                },
+                                "targetCPUUtilizationPercentage": {
+                                    "type": "integer"
+                                },
+                                "targetMemoryUtilizationPercentage": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "containerSecurityContext": {
+                            "description": "Container security context for the Celery worker containers.",
+                            "type": "object"
+                        },
                         "extraEnv": {
+                            "description": "Additional environment variables injected to Celery worker containers.",
                             "type": "array"
                         },
                         "extraInitContainers": {
+                            "description": "A list of additional initContainers to run before celery worker containers.",
                             "type": "array"
                         },
                         "extraVolumeMounts": {
+                            "description": "Array of additional volume mount points for the celery worker containers.",
                             "type": "array"
                         },
                         "extraVolumes": {
+                            "description": "A list of extra volumes to mount. @type: array\u003cmap\u003e",
                             "type": "array"
                         },
+                        "image": {
+                            "description": "If empty, uses values from images.django.image",
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
                         "livenessProbe": {
+                            "description": "Enable liveness probe for Celery worker containers. ``` exec: command: - bash - -c - celery -A dojo inspect ping -t 5 initialDelaySeconds: 30 periodSeconds: 60 timeoutSeconds: 10 ```",
                             "type": "object"
                         },
                         "nodeSelector": {
                             "type": "object"
                         },
                         "podAnnotations": {
+                            "description": "Annotations for the Celery worker pods.",
+                            "type": "object"
+                        },
+                        "podDisruptionBudget": {
+                            "description": "Configure pod disruption budgets for Celery worker ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget",
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "minAvailable": {
+                                    "type": "string"
+                                },
+                                "unhealthyPodEvictionPolicy": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "podSecurityContext": {
+                            "description": "Pod security context for the Celery worker pods.",
                             "type": "object"
                         },
                         "readinessProbe": {
+                            "description": "Enable readiness probe for Celery worker container.",
                             "type": "object"
                         },
                         "replicas": {
@@ -189,7 +305,12 @@
                             }
                         },
                         "startupProbe": {
+                            "description": "Enable startup probe for Celery worker container.",
                             "type": "object"
+                        },
+                        "terminationGracePeriodSeconds": {
+                            "description": "Termination grace period seconds for Celery worker pods.",
+                            "type": "integer"
                         },
                         "tolerations": {
                             "type": "array"
@@ -199,15 +320,31 @@
             }
         },
         "cloudsql": {
+            "description": "Google CloudSQL support in GKE via gce-proxy",
             "type": "object",
             "properties": {
+                "containerSecurityContext": {
+                    "description": "Optional: security context for the CloudSQL proxy container.",
+                    "type": "object"
+                },
                 "enable_iam_login": {
+                    "description": "use IAM database authentication",
                     "type": "boolean"
                 },
                 "enabled": {
+                    "description": "To use CloudSQL in GKE set 'enable: true'",
                     "type": "boolean"
                 },
+                "extraEnv": {
+                    "description": "Additional environment variables for the CloudSQL proxy container.",
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "description": "Array of additional volume mount points for the CloudSQL proxy container",
+                    "type": "array"
+                },
                 "image": {
+                    "description": "set repo and image tag of gce-proxy",
                     "type": "object",
                     "properties": {
                         "pullPolicy": {
@@ -222,32 +359,74 @@
                     }
                 },
                 "instance": {
+                    "description": "set CloudSQL instance: 'project:zone:instancename'",
                     "type": "string"
                 },
+                "resources": {
+                    "description": "Optional: add resource requests/limits for the CloudSQL proxy container.",
+                    "type": "object"
+                },
                 "use_private_ip": {
+                    "description": "whether to use a private IP to connect to the database",
                     "type": "boolean"
                 },
                 "verbose": {
+                    "description": "By default, the proxy has verbose logging. Set this to false to make it less verbose",
                     "type": "boolean"
                 }
             }
         },
         "createPostgresqlSecret": {
-            "type": "boolean"
-        },
-        "createRedisSecret": {
+            "description": "create postgresql secret in defectdojo chart, outside of postgresql chart",
             "type": "boolean"
         },
         "createSecret": {
+            "description": "create defectdojo specific secret",
+            "type": "boolean"
+        },
+        "createValkeySecret": {
+            "description": "create valkey secret in defectdojo chart, outside of valkey chart",
             "type": "boolean"
         },
         "dbMigrationChecker": {
             "type": "object",
             "properties": {
+                "containerSecurityContext": {
+                    "description": "Container security context for the DB migration checker.",
+                    "type": "object"
+                },
                 "enabled": {
+                    "description": "Enable/disable the DB migration checker.",
                     "type": "boolean"
                 },
+                "extraEnv": {
+                    "description": "Additional environment variables for DB migration checker.",
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "description": "Array of additional volume mount points for DB migration checker.",
+                    "type": "array"
+                },
+                "image": {
+                    "description": "If empty, uses values from images.django.image",
+                    "type": "object",
+                    "properties": {
+                        "digest": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "resources": {
+                    "description": "Resource requests/limits for the DB migration checker.",
                     "type": "object",
                     "properties": {
                         "limits": {
@@ -277,6 +456,7 @@
             }
         },
         "disableHooks": {
+            "description": "Avoid using pre-install hooks, which might cause issues with ArgoCD",
             "type": "boolean"
         },
         "django": {
@@ -288,10 +468,47 @@
                 "annotations": {
                     "type": "object"
                 },
+                "automountServiceAccountToken": {
+                    "type": "boolean"
+                },
+                "autoscaling": {
+                    "description": "Autoscaling configuration for the Django deployment.",
+                    "type": "object",
+                    "properties": {
+                        "behavior": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "maxReplicas": {
+                            "type": "integer"
+                        },
+                        "minReplicas": {
+                            "type": "integer"
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "integer"
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "extraEnv": {
+                    "description": "Additional environment variables injected to all Django containers and initContainers.",
+                    "type": "array"
+                },
                 "extraInitContainers": {
+                    "description": "A list of additional initContainers to run before the uwsgi and nginx containers.",
+                    "type": "array"
+                },
+                "extraVolumeMounts": {
+                    "description": "Array of additional volume mount points common to all containers and initContainers.",
                     "type": "array"
                 },
                 "extraVolumes": {
+                    "description": "A list of extra volumes to mount.",
                     "type": "array"
                 },
                 "ingress": {
@@ -301,6 +518,7 @@
                             "type": "boolean"
                         },
                         "annotations": {
+                            "description": "Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...) `kubernetes.io/ingress.class: nginx` Depending on the size and complexity of your scans, you might want to increase the default ingress timeouts if you see repeated 504 Gateway Timeouts `nginx.ingress.kubernetes.io/proxy-read-timeout: \"1800\"` `nginx.ingress.kubernetes.io/proxy-send-timeout: \"1800\"`",
                             "type": "object"
                         },
                         "enabled": {
@@ -315,6 +533,7 @@
                     }
                 },
                 "mediaPersistentVolume": {
+                    "description": "This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume",
                     "type": "object",
                     "properties": {
                         "enabled": {
@@ -324,18 +543,22 @@
                             "type": "integer"
                         },
                         "name": {
+                            "description": "any name",
                             "type": "string"
                         },
                         "persistentVolumeClaim": {
+                            "description": "in case if pvc specified, should point to the already existing pvc",
                             "type": "object",
                             "properties": {
                                 "accessModes": {
+                                    "description": "check KUBERNETES.md doc first for option to choose",
                                     "type": "array",
                                     "items": {
                                         "type": "string"
                                     }
                                 },
                                 "create": {
+                                    "description": "set to true to create a new pvc and if django.mediaPersistentVolume.type is set to pvc",
                                     "type": "boolean"
                                 },
                                 "name": {
@@ -350,6 +573,7 @@
                             }
                         },
                         "type": {
+                            "description": "could be emptyDir (not for production) or pvc",
                             "type": "string"
                         }
                     }
@@ -357,11 +581,41 @@
                 "nginx": {
                     "type": "object",
                     "properties": {
+                        "containerSecurityContext": {
+                            "description": "Container security context for the nginx containers.",
+                            "type": "object",
+                            "properties": {
+                                "runAsUser": {
+                                    "description": "nginx dockerfile sets USER=1001",
+                                    "type": "integer"
+                                }
+                            }
+                        },
                         "extraEnv": {
+                            "description": "To extra environment variables to the nginx container, you can use extraEnv. For example: extraEnv: - name: FOO valueFrom: configMapKeyRef: name: foo key: bar",
                             "type": "array"
                         },
                         "extraVolumeMounts": {
+                            "description": "Array of additional volume mount points for nginx containers.",
                             "type": "array"
+                        },
+                        "image": {
+                            "description": "If empty, uses values from images.nginx.image",
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "resources": {
                             "type": "object",
@@ -406,6 +660,30 @@
                 "nodeSelector": {
                     "type": "object"
                 },
+                "podDisruptionBudget": {
+                    "description": "Configure pod disruption budgets for django ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget",
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "minAvailable": {
+                            "type": "string"
+                        },
+                        "unhealthyPodEvictionPolicy": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "podSecurityContext": {
+                    "description": "Pod security context for the Django pods.",
+                    "type": "object",
+                    "properties": {
+                        "fsGroup": {
+                            "type": "integer"
+                        }
+                    }
+                },
                 "replicas": {
                     "type": "integer"
                 },
@@ -423,6 +701,10 @@
                 "strategy": {
                     "type": "object"
                 },
+                "terminationGracePeriodSeconds": {
+                    "description": "Termination grace period seconds for django pods.",
+                    "type": "integer"
+                },
                 "tolerations": {
                     "type": "array"
                 },
@@ -433,6 +715,7 @@
                             "type": "object",
                             "properties": {
                                 "maxFd": {
+                                    "description": "Use this value to set the maximum number of file descriptors. If set to 0 will be detected by uwsgi e.g. 102400",
                                     "type": "integer"
                                 },
                                 "processes": {
@@ -456,23 +739,55 @@
                                     "type": "string"
                                 },
                                 "enabled": {
+                                    "description": "includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible NOTE: it reflects REQUESTS_CA_BUNDLE for celery workers, beats as well",
                                     "type": "boolean"
                                 }
                             }
                         },
+                        "containerSecurityContext": {
+                            "type": "object",
+                            "properties": {
+                                "runAsUser": {
+                                    "description": "django dockerfile sets USER=1001",
+                                    "type": "integer"
+                                }
+                            }
+                        },
                         "enableDebug": {
+                            "description": "this also requires DD_DEBUG to be set to True",
                             "type": "boolean"
                         },
                         "extraEnv": {
+                            "description": "To add (or override) extra variables which need to be pulled from another configMap, you can use extraEnv. For example: extraEnv: - name: DD_DATABASE_HOST valueFrom: configMapKeyRef: name: my-other-postgres-configmap key: cluster_endpoint",
                             "type": "array"
                         },
                         "extraVolumeMounts": {
+                            "description": "Array of additional volume mount points for uwsgi containers.",
                             "type": "array"
+                        },
+                        "image": {
+                            "description": "If empty, uses values from images.django.image",
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "livenessProbe": {
                             "type": "object",
                             "properties": {
                                 "enabled": {
+                                    "description": "Enable liveness checks on uwsgi container.",
                                     "type": "boolean"
                                 },
                                 "failureThreshold": {
@@ -496,6 +811,7 @@
                             "type": "object",
                             "properties": {
                                 "enabled": {
+                                    "description": "Enable readiness checks on uwsgi container.",
                                     "type": "boolean"
                                 },
                                 "failureThreshold": {
@@ -546,6 +862,7 @@
                             "type": "object",
                             "properties": {
                                 "enabled": {
+                                    "description": "Enable startup checks on uwsgi container.",
                                     "type": "boolean"
                                 },
                                 "failureThreshold": {
@@ -569,43 +886,110 @@
                 }
             }
         },
+        "extraAnnotations": {
+            "description": "Annotations globally added to all resources",
+            "type": "object"
+        },
         "extraConfigs": {
+            "description": "To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below: NOTE  Do not store any kind of sensitive information inside of it ``` DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true' DD_SOCIAL_AUTH_AUTH0_KEY: 'dev' DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx' ```",
             "type": "object"
         },
         "extraEnv": {
+            "description": "To add (or override) extra variables which need to be pulled from another configMap, you can use extraEnv. For example: ``` - name: DD_DATABASE_HOST valueFrom: configMapKeyRef: name: my-other-postgres-configmap key: cluster_endpoint ```",
             "type": "array"
         },
         "extraLabels": {
+            "description": "Labels globally added to all resources",
             "type": "object"
         },
         "extraSecrets": {
+            "description": "Extra secrets can be created inside of extraSecrets block: ``` DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx' ```",
             "type": "object"
         },
         "gke": {
+            "description": "Settings to make running the chart on GKE simpler",
             "type": "object",
             "properties": {
                 "useGKEIngress": {
+                    "description": "Set to true to configure the Ingress to use the GKE provided ingress controller",
                     "type": "boolean"
                 },
                 "useManagedCertificate": {
+                    "description": "Set to true to have GKE automatically provision a TLS certificate for the host specified Requires useGKEIngress to be set to true When using this option, be sure to set django.ingress.activateTLS to false",
                     "type": "boolean"
                 },
                 "workloadIdentityEmail": {
+                    "description": "Workload Identity allows the K8s service account to assume the IAM access of a GCP service account to interact with other GCP services Only works with serviceAccount.create = true",
                     "type": "string"
                 }
             }
         },
         "host": {
+            "description": "Primary hostname of instance",
             "type": "string"
         },
         "imagePullPolicy": {
             "type": "string"
         },
         "imagePullSecrets": {
+            "description": "When using a private registry, name of the secret that holds the registry secret (eg deploy token from gitlab-ci project)",
             "type": [
                 "string",
                 "null"
             ]
+        },
+        "images": {
+            "type": "object",
+            "properties": {
+                "django": {
+                    "type": "object",
+                    "properties": {
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "description": "Prefix \"sha256:\" is expected in this place",
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "If empty, use appVersion. Another possible values are: latest, X.X.X, X.X.X-debian, X.X.X-alpine (where X.X.X is version of DD). For dev builds (only for testing purposes): nightly-dev, nightly-dev-debian, nightly-dev-alpine. To see all, check https://hub.docker.com/r/defectdojo/defectdojo-django/tags.",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "nginx": {
+                    "type": "object",
+                    "properties": {
+                        "image": {
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "description": "Prefix \"sha256:\" is expected in this place",
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "description": "If empty, use appVersion. Another possible values are: latest, X.X.X, X.X.X-alpine (where X.X.X is version of DD). For dev builds (only for testing purposes): nightly-dev, nightly-dev-alpine. To see all, check https://hub.docker.com/r/defectdojo/defectdojo-nginx/tags.",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         },
         "initializer": {
             "type": "object",
@@ -613,28 +997,61 @@
                 "affinity": {
                     "type": "object"
                 },
-                "annotations": {
+                "automountServiceAccountToken": {
+                    "type": "boolean"
+                },
+                "containerSecurityContext": {
+                    "description": "Container security context for the initializer Job container",
                     "type": "object"
                 },
                 "extraEnv": {
+                    "description": "Additional environment variables injected to the initializer job pods.",
                     "type": "array"
                 },
                 "extraVolumeMounts": {
+                    "description": "Array of additional volume mount points for the initializer job (init)containers.",
                     "type": "array"
                 },
                 "extraVolumes": {
+                    "description": "A list of extra volumes to attach to the initializer job pods.",
                     "type": "array"
+                },
+                "image": {
+                    "description": "If empty, uses values from images.django.image",
+                    "type": "object",
+                    "properties": {
+                        "digest": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "jobAnnotations": {
                     "type": "object"
                 },
                 "keepSeconds": {
+                    "description": "A positive integer will keep this Job and Pod deployed for the specified number of seconds, after which they will be removed. For all other values, the Job and Pod will remain deployed.",
                     "type": "integer"
                 },
                 "labels": {
                     "type": "object"
                 },
                 "nodeSelector": {
+                    "type": "object"
+                },
+                "podAnnotations": {
+                    "type": "object"
+                },
+                "podSecurityContext": {
+                    "description": "Pod security context for the initializer Job",
                     "type": "object"
                 },
                 "resources": {
@@ -668,6 +1085,7 @@
                     "type": "boolean"
                 },
                 "staticName": {
+                    "description": "staticName defines whether name of the job will be the same (e.g., \"defectdojo-initializer\") or different every time - generated based on current time (e.g., \"defectdojo-initializer-2024-11-11-18-57\") This might be handy for ArgoCD deployments",
                     "type": "boolean"
                 },
                 "tolerations": {
@@ -676,6 +1094,7 @@
             }
         },
         "localsettingspy": {
+            "description": "To add code snippet which would extend setting functionality, you might add it here It will be stored as ConfigMap and mounted `dojo/settings/local_settings.py`. For more see: https://documentation.defectdojo.com/getting_started/configuration/ For example: ``` localsettingspy: | INSTALLED_APPS += ( 'debug_toolbar', ) MIDDLEWARE = [ 'debug_toolbar.middleware.DebugToolbarMiddleware', ] + MIDDLEWARE ```",
             "type": "string"
         },
         "monitoring": {
@@ -687,49 +1106,87 @@
                 "prometheus": {
                     "type": "object",
                     "properties": {
+                        "containerSecurityContext": {
+                            "description": "Optional: container security context for nginx prometheus exporter",
+                            "type": "object"
+                        },
                         "enabled": {
+                            "description": "Add the nginx prometheus exporter sidecar",
                             "type": "boolean"
                         },
+                        "extraEnv": {
+                            "description": "Optional: additional environment variables injected to the nginx prometheus exporter container",
+                            "type": "array"
+                        },
+                        "extraVolumeMounts": {
+                            "description": "Array of additional volume mount points for the nginx prometheus exporter",
+                            "type": "array"
+                        },
                         "image": {
-                            "type": "string"
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "imagePullPolicy": {
                             "type": "string"
+                        },
+                        "resources": {
+                            "description": "Optional: add resource requests/limits for the nginx prometheus exporter container",
+                            "type": "object"
                         }
                     }
                 }
             }
         },
         "networkPolicy": {
+            "description": "Enables application network policy For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/",
             "type": "object",
             "properties": {
                 "annotations": {
                     "type": "object"
                 },
                 "egress": {
+                    "description": " ``` egress: - to: - ipBlock: cidr: 10.0.0.0/24 ports: - protocol: TCP port: 443 ```",
                     "type": "array"
                 },
                 "enabled": {
                     "type": "boolean"
                 },
                 "ingress": {
+                    "description": "For more detailed configuration with ports and peers. It will ignore ingressExtend ``` ingress: - from: - podSelector: matchLabels: app.kubernetes.io/instance: defectdojo - podSelector: matchLabels: app.kubernetes.io/instance: defectdojo-prometheus ports: - protocol: TCP port: 8443 ```",
                     "type": "array"
                 },
                 "ingressExtend": {
+                    "description": "if additional labels need to be allowed (e.g. prometheus scraper) ``` ingressExtend: - podSelector: matchLabels: app.kubernetes.io/instance: defectdojo-prometheus ```",
                     "type": "array"
                 }
             }
         },
         "podLabels": {
+            "description": "Additional labels to add to the pods: ``` podLabels: key: value ```",
             "type": "object"
         },
         "postgresServer": {
+            "description": "To use an external PostgreSQL instance (like CloudSQL), set `postgresql.enabled` to false, set items in `postgresql.auth` part for authentication, and set the address here:",
             "type": [
                 "string",
                 "null"
             ]
         },
         "postgresql": {
+            "description": "For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/postgresql",
             "type": "object",
             "properties": {
                 "architecture": {
@@ -767,6 +1224,7 @@
                     }
                 },
                 "enabled": {
+                    "description": "To use an external instance, switch enabled to `false` and set the address in `postgresServer` below",
                     "type": "boolean"
                 },
                 "primary": {
@@ -779,9 +1237,11 @@
                             "type": "object",
                             "properties": {
                                 "enabled": {
+                                    "description": "Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC",
                                     "type": "boolean"
                                 },
                                 "runAsUser": {
+                                    "description": "runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift \"restricted SCC\" to work successfully.",
                                     "type": "integer"
                                 }
                             }
@@ -804,9 +1264,11 @@
                             "type": "object",
                             "properties": {
                                 "enabled": {
+                                    "description": "Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC",
                                     "type": "boolean"
                                 },
                                 "fsGroup": {
+                                    "description": "fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift \"restricted SCC\" to work successfully.",
                                     "type": "integer"
                                 }
                             }
@@ -843,6 +1305,7 @@
                     "type": "object",
                     "properties": {
                         "containerSecurityContext": {
+                            "description": "if using restricted SCC set runAsUser: \"auto\" and if running under anyuid SCC - runAsUser needs to match the line above",
                             "type": "object",
                             "properties": {
                                 "runAsUser": {
@@ -857,89 +1320,58 @@
                 }
             }
         },
-        "redis": {
-            "type": "object",
-            "properties": {
-                "architecture": {
-                    "type": "string"
-                },
-                "auth": {
-                    "type": "object",
-                    "properties": {
-                        "existingSecret": {
-                            "type": "string"
-                        },
-                        "existingSecretPasswordKey": {
-                            "type": "string"
-                        },
-                        "password": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "enabled": {
-                    "type": "boolean"
-                },
-                "sentinel": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        }
-                    }
-                },
-                "tls": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        }
-                    }
-                }
-            }
-        },
         "redisParams": {
+            "description": "Parameters attached to the redis connection string, defaults to \"ssl_cert_reqs=optional\" if `redisScheme` is `rediss`",
+            "type": "string"
+        },
+        "redisPort": {
+            "description": "Define the protocol to use with the external Redis instance",
+            "type": "integer"
+        },
+        "redisScheme": {
+            "description": "Define the protocol to use with the external Redis instance",
             "type": "string"
         },
         "redisServer": {
+            "description": "To use an external Redis instance, set `redis.enabled` to false and set the address here:",
             "type": [
                 "string",
                 "null"
             ]
         },
-        "repositoryPrefix": {
-            "type": "string"
-        },
         "revisionHistoryLimit": {
+            "description": "Allow overriding of revisionHistoryLimit across all deployments.",
             "type": "integer"
         },
         "secrets": {
             "type": "object",
             "properties": {
                 "annotations": {
+                    "description": "Add annotations for secret resources",
                     "type": "object"
                 }
             }
         },
         "securityContext": {
+            "description": "Security context settings",
             "type": "object",
             "properties": {
-                "djangoSecurityContext": {
+                "containerSecurityContext": {
                     "type": "object",
                     "properties": {
-                        "runAsUser": {
-                            "type": "integer"
+                        "runAsNonRoot": {
+                            "type": "boolean"
                         }
                     }
                 },
                 "enabled": {
                     "type": "boolean"
                 },
-                "nginxSecurityContext": {
+                "podSecurityContext": {
                     "type": "object",
                     "properties": {
-                        "runAsUser": {
-                            "type": "integer"
+                        "runAsNonRoot": {
+                            "type": "boolean"
                         }
                     }
                 }
@@ -949,17 +1381,25 @@
             "type": "object",
             "properties": {
                 "annotations": {
+                    "description": "Optional additional annotations to add to the DefectDojo's Service Account.",
                     "type": "object"
                 },
                 "create": {
+                    "description": "Specifies whether a service account should be created.",
                     "type": "boolean"
                 },
                 "labels": {
+                    "description": "Optional additional labels to add to the DefectDojo's Service Account.",
                     "type": "object"
+                },
+                "name": {
+                    "description": "The name of the service account to use. If not set and create is true, a name is generated using the fullname template",
+                    "type": "string"
                 }
             }
         },
-        "tag": {
+        "siteUrl": {
+            "description": "The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira. Use syntax: `siteUrl: 'https://\u003cyourdomain\u003e'`",
             "type": "string"
         },
         "tests": {
@@ -968,6 +1408,27 @@
                 "unitTests": {
                     "type": "object",
                     "properties": {
+                        "automountServiceAccountToken": {
+                            "type": "boolean"
+                        },
+                        "image": {
+                            "description": "If empty, uses values from images.django.image",
+                            "type": "object",
+                            "properties": {
+                                "digest": {
+                                    "type": "string"
+                                },
+                                "registry": {
+                                    "type": "string"
+                                },
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
                         "resources": {
                             "type": "object",
                             "properties": {
@@ -1000,6 +1461,61 @@
             }
         },
         "trackConfig": {
+            "description": "Track configuration (trackConfig): will automatically respin application pods in case of config changes detection can be: 1. disabled (default) 2. enabled, enables tracking configuration changes based on SHA256",
+            "type": "string"
+        },
+        "valkey": {
+            "description": "For more advance options check the bitnami chart documentation: https://artifacthub.io/packages/helm/cloudpirates-valkey/valkey",
+            "type": "object",
+            "properties": {
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretPasswordKey": {
+                            "type": "string"
+                        },
+                        "password": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "enabled": {
+                    "description": "To use an external instance, switch enabled to `false` and set the address in `redisServer` below",
+                    "type": "boolean"
+                },
+                "sentinel": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "service": {
+                    "description": "To use a different port for Redis (default: 6379)",
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "tls": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "If TLS is enabled, the Redis broker will use the redis:// and optionally mount the certificates from an existing secret.",
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
+        "valkeyParams": {
+            "description": "Parameters attached to the valkey connection string, defaults to \"ssl_cert_reqs=optional\" if `valkey.tls.enabled`",
             "type": "string"
         }
     }

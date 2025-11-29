@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.template import TemplateDoesNotExist
@@ -782,7 +783,11 @@ def push_finding_to_jira(finding, *args, **kwargs):
 @app.task
 @dojo_model_from_id(model=Finding_Group)
 def push_finding_group_to_jira(finding_group, *args, **kwargs):
+    # Look for findings that have single ticket associations separate from the group
+    for finding in finding_group.findings.filter(jira_issue__isnull=False):
+        update_jira_issue(finding, *args, **kwargs)
     if finding_group.has_jira_issue:
+        # Update the jira issue for the group
         return update_jira_issue(finding_group, *args, **kwargs)
     return add_jira_issue(finding_group, *args, **kwargs)
 
@@ -1802,9 +1807,14 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
 
                 if finding.test.engagement.product.enable_full_risk_acceptance:
                     logger.debug(f"Creating risk acceptance for finding linked to {jira_issue.jira_key}.")
+                    # loads the expiration from the system setting "Risk acceptance form default days" as otherwise
+                    # the acceptance will never expire
+                    risk_acceptance_form_default_days = get_system_setting("risk_acceptance_form_default_days", 90)
+                    expiration_date_from_system_settings = timezone.now() + relativedelta(days=risk_acceptance_form_default_days)
                     ra = Risk_Acceptance.objects.create(
                         accepted_by=assignee_name,
                         owner=finding.reporter,
+                        expiration_date=expiration_date_from_system_settings,
                         decision_details=f"Risk Acceptance automatically created from JIRA issue {jira_issue.jira_key} with resolution {resolution_name}",
                     )
                     finding.test.engagement.risk_acceptance.add(ra)

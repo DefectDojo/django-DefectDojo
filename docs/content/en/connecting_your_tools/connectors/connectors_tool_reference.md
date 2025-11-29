@@ -20,6 +20,17 @@ Whenever possible, we recommend creating a new 'DefectDojo Bot' account within y
 
 # **Supported Connectors**
 
+## **Anchore**
+
+The Anchore connector uses a user's API token to pull data from Anchore Enterprise.  Products will be mapped and discovered based on "Applications", which are composed of multiple Images in Anchore - see [Anchore Enterprise Documentation](https://docs.anchore.com/current/docs/sbom_management/application_groups/application_management_anchorectl/) for more information.
+
+#### Connector Mappings
+
+1. The Anchore URL in the **Location** field: this is the URL where you access the Anchore.
+2. Enter a valid API Key in the Secret field. This is the API key associated with your Burp Service account.
+
+See the official [Anchore documentation](https://docs.anchore.com/current/docs/) for more information on creating a token for Anchore.
+
 ## **AWS Security Hub**
 
 The AWS Security Hub connector uses an AWS access key to interact with the Security Hub APIs.
@@ -161,6 +172,8 @@ The SonarQube Connector can fetch data from either a SonarCloud account or from 
 1. Enter the base url of your SonarQube instance in the Location field: for example `https://my.sonarqube.com/`
 2. Enter a valid **API key** in the Secret field. This will need to be a **[User](https://docs.sonarsource.com/sonarqube/latest/user-guide/user-account/generating-and-using-tokens/)** [API Token Type](https://docs.sonarsource.com/sonarqube/latest/user-guide/user-account/generating-and-using-tokens/).
 
+The token will need to have access to Projects, Vulnerabilities and Hotspots within Sonar.
+
 API tokens can be found and generated via **My Account \-\> Security \-\> Generate Token** in the SonarQube app. For more information, [see SonarQube documentation](https://docs.sonarsource.com/sonarqube/latest/user-guide/user-account/generating-and-using-tokens/).
 
 ## **Snyk**
@@ -176,7 +189,7 @@ See the [Snyk API documentation](https://docs.snyk.io/snyk-api) for more info.
 
 ## Tenable
 
-The Tenable connector uses the **Tenable.io** REST API to fetch data.
+The Tenable connector uses the **Tenable.io** REST API to fetch data.  Currently, only vulnerability scans are imported - Web App Scans cannot be imported with the Connector.
 
 On\-premise Tenable Connectors are not available at this time.
 

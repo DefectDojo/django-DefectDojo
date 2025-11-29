@@ -93,7 +93,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         parser = self.get_parser()
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
-        parsed_findings = self.parse_findings(scan, parser)
+        parsed_findings = self.parse_findings(scan, parser) or []
         # process the findings in the foreground or background
         (
             new_findings,
@@ -170,7 +170,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # we need to make sure there are no side effects such as closing findings
         # for findings with a different service value
         # https://github.com/DefectDojo/django-DefectDojo/issues/12754
-        original_findings = self.test.finding_set.all().filter(service=self.service)
+        if self.service is not None:
+            original_findings = self.test.finding_set.all().filter(service=self.service)
+        else:
+            original_findings = self.test.finding_set.all().filter(Q(service__isnull=True) | Q(service__exact=""))
+
         logger.debug(f"original_findings_qyer: {original_findings.query}")
         self.original_items = list(original_findings)
         logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
@@ -179,9 +183,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.unchanged_items = []
         self.group_names_to_findings_dict = {}
         # Progressive batching for chord execution
-        post_processing_task_signatures = []
-        current_batch_number = 1
-        max_batch_size = 1024
+        # No chord: we dispatch per 1000 findings or on the final finding
 
         logger.debug(f"starting reimport of {len(parsed_findings) if parsed_findings else 0} items.")
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
@@ -200,6 +202,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 )
                 continue
             cleaned_findings.append(sanitized)
+
+        batch_finding_ids: list[int] = []
+        batch_max_size = 1000
 
         for idx, unsaved_finding in enumerate(cleaned_findings):
             is_final = idx == len(cleaned_findings) - 1
@@ -251,31 +256,34 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     unsaved_finding,
                 )
-                # all data is already saved on the finding, we only need to trigger post processing
-
-                # Execute post-processing task immediately if async, otherwise execute synchronously
+                # all data is already saved on the finding, we only need to trigger post processing in batches
                 push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+                batch_finding_ids.append(finding.id)
 
-                post_processing_task_signature = finding_helper.post_process_finding_save_signature(
-                    finding,
-                    dedupe_option=True,
-                    rules_option=True,
-                    product_grading_option=False,
-                    issue_updater_option=True,
-                    push_to_jira=push_to_jira,
-                )
-                post_processing_task_signatures.append(post_processing_task_signature)
+                # If batch is full or we're at the end, dispatch one batched task
+                if len(batch_finding_ids) >= batch_max_size or is_final:
+                    finding_ids_batch = list(batch_finding_ids)
+                    batch_finding_ids.clear()
+                    if we_want_async(async_user=self.user):
+                        finding_helper.post_process_findings_batch_signature(
+                            finding_ids_batch,
+                            dedupe_option=True,
+                            rules_option=True,
+                            product_grading_option=True,
+                            issue_updater_option=True,
+                            push_to_jira=push_to_jira,
+                        )()
+                    else:
+                        finding_helper.post_process_findings_batch(
+                            finding_ids_batch,
+                            dedupe_option=True,
+                            rules_option=True,
+                            product_grading_option=True,
+                            issue_updater_option=True,
+                            push_to_jira=push_to_jira,
+                        )
 
-            # Check if we should launch a chord (batch full or end of findings)
-            if we_want_async(async_user=self.user) and post_processing_task_signatures:
-                post_processing_task_signatures, current_batch_number, _ = self.maybe_launch_post_processing_chord(
-                    post_processing_task_signatures,
-                    current_batch_number,
-                    max_batch_size,
-                    is_final,
-                )
-            else:
-                post_processing_task_signature()
+            # No chord: tasks are dispatched immediately above per batch
 
         self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
         # due to #3958 we can have duplicates inside the same report
@@ -479,6 +487,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         to cover circumstances where mitigation timestamps are different, and
         decide which one to honor
         """
+        if existing_finding.fix_available != unsaved_finding.fix_available:
+            existing_finding.fix_available = unsaved_finding.fix_available
+            existing_finding.fix_version = unsaved_finding.fix_version
+
         # if the reimported item has a mitigation time, we can compare
         if unsaved_finding.is_mitigated:
             # The new finding is already mitigated, so nothing to change on the
@@ -588,6 +600,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # First check that the existing finding is definitely not mitigated
         if not (existing_finding.mitigated and existing_finding.is_mitigated):
             logger.debug("Reimported item matches a finding that is currently open.")
+            if existing_finding.fix_available != unsaved_finding.fix_available:
+                existing_finding.fix_available = unsaved_finding.fix_available
+                existing_finding.fix_version = unsaved_finding.fix_version
             if unsaved_finding.is_mitigated:
                 logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
                 # TODO: Implement a date comparison for opened defectdojo findings before closing them by reimporting,
@@ -689,8 +704,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if len(self.endpoints_to_add) > 0:
             self.endpoint_manager.chunk_endpoints_and_disperse(finding, self.endpoints_to_add)
         # Parsers must use unsaved_tags to store tags, so we can clean them
-        if finding.unsaved_tags:
-            finding.tags = clean_tags(finding.unsaved_tags)
+        if finding_from_report.unsaved_tags:
+            cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
+            if isinstance(cleaned_tags, list):
+                finding.tags.set(cleaned_tags)
+            elif isinstance(cleaned_tags, str):
+                finding.tags.set([cleaned_tags])
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files
@@ -764,4 +783,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> str:
+        # this is overridden in Pro, but will still call this via super()
+        deduplicationLogger.debug("Calculating hash code for unsaved finding")
         return unsaved_finding.compute_hash_code()

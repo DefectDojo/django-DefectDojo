@@ -6,13 +6,18 @@ from threading import local
 from urllib.parse import quote
 
 import pghistory.middleware
+import requests
 from auditlog.context import set_actor
 from auditlog.middleware import AuditlogMiddleware as _AuditlogMiddleware
 from django.conf import settings
+from django.contrib import messages
 from django.db import models
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.functional import SimpleLazyObject
+from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden, AuthTokenError
+from social_django.middleware import SocialAuthExceptionMiddleware
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
 
@@ -75,13 +80,39 @@ class LoginRequiredMiddleware:
         return self.get_response(request)
 
 
+class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
+    def process_exception(self, request, exception):
+        if isinstance(exception, requests.exceptions.RequestException):
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION)
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthCanceled):
+            messages.warning(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED)
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthFailed):
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED)
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthForbidden):
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN)
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthTokenError):
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR)
+            return redirect("/login?force_login_form")
+        if isinstance(exception, TypeError) and "'NoneType' object is not iterable" in str(exception):
+            logger.warning("OIDC login error: NoneType is not iterable")
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE)
+            return redirect("/login?force_login_form")
+        logger.error(f"Unhandled exception during social login: {exception}")
+        return super().process_exception(request, exception)
+
+
 class DojoSytemSettingsMiddleware:
     _thread_local = local()
 
     def __init__(self, get_response):
         self.get_response = get_response
         from dojo.models import System_Settings  # noqa: PLC0415 circular import
-        models.signals.post_save.connect(self.cleanup, sender=System_Settings)
+        # Use classmethod directly to avoid keeping reference to middleware instance
+        models.signals.post_save.connect(DojoSytemSettingsMiddleware.cleanup, sender=System_Settings)
 
     def __call__(self, request):
         self.load()
@@ -254,17 +285,19 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
             total_instances = sum(len(pk_list) for pk_list in captured_tasks.values())
             threshold = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_THRESHOLD", 100)
 
-            # If threshold is below 0, async updating is disabled
-            if threshold < 0:
-                logger.debug(f"AsyncSearchContextMiddleware: Async updating disabled (threshold={threshold}), using synchronous update")
-            elif total_instances > threshold:
-                logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances > {threshold} threshold, triggering async update")
-                self._trigger_async_index_update(captured_tasks)
-                # Invalidate to prevent synchronous index update by super()._close_search_context()
-                search_context_manager.invalidate()
-            else:
-                logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances <= {threshold} threshold, using synchronous update")
-                # Let watson handle synchronous update for small numbers
+            # only needed when at least one model instance is updated
+            if total_instances > 0:
+                # If threshold is below 0, async updating is disabled
+                if threshold < 0:
+                    logger.debug(f"AsyncSearchContextMiddleware: Async updating disabled (threshold={threshold}), using synchronous update")
+                elif total_instances > threshold:
+                    logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances > {threshold} threshold, triggering async update")
+                    self._trigger_async_index_update(captured_tasks)
+                    # Invalidate to prevent synchronous index update by super()._close_search_context()
+                    search_context_manager.invalidate()
+                else:
+                    logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances <= {threshold} threshold, using synchronous update")
+                    # Let watson handle synchronous update for small numbers
 
         super()._close_search_context(request)
 

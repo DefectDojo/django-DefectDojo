@@ -114,6 +114,7 @@ from dojo.models import (
     Vulnerability_Id_Template,
     get_current_date,
 )
+from dojo.notifications.helper import create_notification
 from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
@@ -536,13 +537,13 @@ class UserSerializer(serializers.ModelSerializer):
         return ret
 
     def update(self, instance, validated_data):
+        permissions_in_payload = None
         new_configuration_permissions = None
         if (
             "user_permissions" in validated_data
         ):  # This field was renamed from "configuration_permissions" in the meantime
-            new_configuration_permissions = set(
-                validated_data.pop("user_permissions"),
-            )
+            permissions_in_payload = validated_data.pop("user_permissions")
+            new_configuration_permissions = set(permissions_in_payload)
 
         instance = super().update(instance, validated_data)
 
@@ -562,6 +563,10 @@ class UserSerializer(serializers.ModelSerializer):
                 new_configuration_permissions,
             )
             instance.user_permissions.set(new_permissions)
+
+        # Clear all configuration permissions if an empty list is provided
+        if isinstance(permissions_in_payload, list) and len(permissions_in_payload) == 0:
+            instance.user_permissions.clear()
 
         return instance
 
@@ -695,14 +700,14 @@ class DojoGroupSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
+        permissions_in_payload = None
         new_configuration_permissions = None
         if (
             "auth_group" in validated_data
             and "permissions" in validated_data["auth_group"]
         ):  # This field was renamed from "configuration_permissions" in the meantime
-            new_configuration_permissions = set(
-                validated_data.pop("auth_group")["permissions"],
-            )
+            permissions_in_payload = validated_data.pop("auth_group")["permissions"]
+            new_configuration_permissions = set(permissions_in_payload)
 
         instance = super().update(instance, validated_data)
 
@@ -722,6 +727,10 @@ class DojoGroupSerializer(serializers.ModelSerializer):
                 new_configuration_permissions,
             )
             instance.auth_group.permissions.set(new_permissions)
+
+        # Clear all configuration permissions if an empty list is provided
+        if isinstance(permissions_in_payload, list) and len(permissions_in_payload) == 0:
+            instance.auth_group.permissions.clear()
 
         return instance
 
@@ -1684,6 +1693,9 @@ class FindingSerializer(serializers.ModelSerializer):
         many=True, read_only=True, source="risk_acceptance_set",
     )
     push_to_jira = serializers.BooleanField(default=False)
+    found_by = serializers.PrimaryKeyRelatedField(
+        queryset=Test_Type.objects.all(), many=True,
+    )
     age = serializers.IntegerField(read_only=True)
     sla_days_remaining = serializers.IntegerField(read_only=True, allow_null=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
@@ -1766,6 +1778,16 @@ class FindingSerializer(serializers.ModelSerializer):
         if parsed_vulnerability_ids:
             save_vulnerability_ids(instance, parsed_vulnerability_ids)
 
+        # Get found_by from validated_data
+        found_by = validated_data.pop("found_by", None)
+        # Handle updates to found_by data
+        if found_by:
+            instance.found_by.set(found_by)
+        # If there is no argument entered for found_by, the user would like to clear out the values on the Finding's found_by field
+        # Findings still maintain original found_by value associated with their test
+        # In the event the user does not supply the found_by field at all, we do not modify it
+        elif isinstance(found_by, list) and len(found_by) == 0:
+            instance.found_by.clear()
         instance = super().update(
             instance, validated_data,
         )
@@ -1928,6 +1950,16 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         if push_to_jira:
             jira_helper.push_to_jira(new_finding)
 
+        # Create a notification
+        create_notification(
+            event="finding_added",
+            title=_("Addition of %s") % new_finding.title,
+            finding=new_finding,
+            description=_('Finding "%s" was added by %s') % (new_finding.title, new_finding.reporter),
+            url=reverse("view_finding", args=(new_finding.id,)),
+            icon="exclamation-triangle",
+        )
+
         return new_finding
 
     def validate(self, data):
@@ -2081,6 +2113,11 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
+
+    business_criticality = serializers.ChoiceField(choices=Product.BUSINESS_CRITICALITY_CHOICES, allow_blank=True, allow_null=True, required=False)
+    platform = serializers.ChoiceField(choices=Product.PLATFORM_CHOICES, allow_blank=True, allow_null=True, required=False)
+    lifecycle = serializers.ChoiceField(choices=Product.LIFECYCLE_CHOICES, allow_blank=True, allow_null=True, required=False)
+    origin = serializers.ChoiceField(choices=Product.ORIGIN_CHOICES, allow_blank=True, allow_null=True, required=False)
 
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)

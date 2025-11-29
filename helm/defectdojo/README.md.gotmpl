@@ -11,7 +11,7 @@ this [guide](https://helm.sh/docs/using_helm/#installing-helm).
 
 ## Supported Kubernetes Versions
 
-The tests cover the deployment on the lastest [kubernetes version](https://kubernetes.io/releases/) and the oldest supported [version from AWS](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions). The assumption is that version in between do not have significant differences. Current tested versions can looks up in the [github k8s workflow](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/k8s-tests.yml).
+The tests cover the deployment on the lastest [kubernetes version](https://kubernetes.io/releases/) and [the oldest officially supported version](https://kubernetes.io/releases/). The assumption is that version in between do not have significant differences. Current tested versions can looks up in the [github k8s workflow](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/k8s-tests.yml).
 
 ## Helm chart
 
@@ -94,7 +94,7 @@ helm install \
   --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
   --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 ```
 
@@ -280,10 +280,10 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 
-# For high availability deploy multiple instances of Django, Celery and Redis
+# For high availability deploy multiple instances of Django, Celery and Valkey
 helm install \
   defectdojo \
   ./helm/defectdojo \
@@ -292,9 +292,10 @@ helm install \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
   --set celery.worker.replicas=3 \
-  --set redis.replicas=3 \
+  --set valkey.architecture=replication \
+  --set valkey.replicaCount=3 \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 
 # Run highly available PostgreSQL cluster
@@ -306,13 +307,14 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.replicas=3 \
   --set celery.worker.replicas=3 \
-  --set redis.replicas=3 \
+  --set valkey.architecture=replication \
+  --set valkey.replicaCount=3 \
   --set django.ingress.secretName="minikube-tls" \
   --set postgresql.enabled=true \
   --set postgresql.replication.enabled=true \
   --set postgresql.replication.slaveReplicas=3 \
   --set createSecret=true \
-  --set createRedisSecret=true \
+  --set createValkeySecret=true \
   --set createPostgresqlSecret=true
 
 # Note: If you run `helm install defectdojo before, you will get an error
@@ -359,16 +361,13 @@ You will still need to set a host value as well.
 
 If you want to use a redis-sentinel setup as the Celery broker, you will need to set the following.
 
-1. Set redis.scheme to "sentinel" in values.yaml
+1. Set valkey.scheme to "sentinel" in values.yaml
 2. Set two additional extraEnv vars specifying the sentinel master name and port in values.yaml
 
 ```yaml
-celery:
-  broker: 'redis'
-
-redis:
-  redisServer: 'PutYourRedisSentinelAddress'
+valkey:
   scheme: 'sentinel'
+redisServer: 'PutYourRedisSentinelAddress'
 
 extraEnv:
   - name: DD_CELERY_BROKER_TRANSPORT_OPTIONS
@@ -451,10 +450,10 @@ extraEnv:
 
 #### Step 4: Deploy DefectDojo
 
-After modifying the `values.yaml` file as needed, deploy DefectDojo using Helm. This command also generates the required secrets for the DefectDojo admin UI and Redis:
+After modifying the `values.yaml` file as needed, deploy DefectDojo using Helm. This command also generates the required secrets for the DefectDojo admin UI and Valkey:
 
 ```bash
-helm install defectdojo defectdojo -f values.yaml -n defectdojo --set createSecret=true --set createRedisSecret=true
+helm install defectdojo defectdojo -f values.yaml -n defectdojo --set createSecret=true --set createValkeySecret=true
 ```
 
 
@@ -495,6 +494,22 @@ kubectl delete serviceAccount defectdojo
 kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 ```
 
+## Development/contribution
+
+In case you decide to help with the improvement of the HELM chart, keep in mind that values/descriptions might need to be adjusted in multiple places (see below).
+
+### HELM Docs update
+
+Documentation provided in the README file needs to contain the latest information from `values.yaml` and all other related assets.
+If GitHub Action _Lint Helm chart / Update documentation_ step fails, install https://github.com/norwoodj/helm-docs and run locally `helm-docs --chart-search-root helm/deeefectdojo` before committing your changes.
+The helm-docs documentation will be generated for you.
+      
+### HELM Schema update
+
+The HELM structure supports the existence of a `values.schema.json` file. This file is used to validate all values provided by the user before Helm starts rendering templates.
+The chart needs to have a `values.schema.json` file that is compatible with the default `values.yaml` file.
+If GitHub Action _Lint Helm chart / Update schema_ step fails, install https://github.com/losisin/helm-values-schema-json and run locally `helm schema --use-helm-docs` in `helm/defectdojo` before committing your changes.
+The HELM schema will be generated for you.
 
 # General information about chart values
 

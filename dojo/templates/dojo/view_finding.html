@@ -285,7 +285,7 @@
                 </tr>
                 <tr>
                     {% block header_body %}
-                        <td title="hash_code: {{ finding.hash_code }}">{{ finding.id }}</td>
+                        <td title="unique_id_from_tool: {{ finding.unique_id_from_tool }}, hash_code: {{ finding.hash_code }}">{{ finding.id }}</td>
                         <td>
                             <span class="label severity severity-{{ finding.severity }}">
                                 {% if finding.severity %}
@@ -538,9 +538,7 @@
     <div class="panel panel-default">
         <table id="error_notes" class="table-striped table table-condensed table-hover centered">
             <tr>
-                {% if finding.service %}
                 <th>Service</th>
-                {% endif %}
                 {% if finding.file_path %}
                 <th>Location</th>
                 {% endif %}
@@ -555,6 +553,12 @@
                 {% endif %}
                 {% if finding.component_version %}
                 <th>Component Version</th>
+                {% endif %}
+                {% if finding.fix_available %}
+                <th>Fix Available</th>
+                {% endif %}
+                {% if finding.fix_version %}
+                <th>Fixed Version</th>
                 {% endif %}
                 {% if finding.has_jira_configured or finding.jira_issue %}
                 <th>JIRA</th>
@@ -571,13 +575,11 @@
                 {% endif %}
             </tr>
             <tr>
-                {% if finding.service %}
                 <td>
                     <span>
                         {{ finding.service }}
                     </span>
                 </td>
-                {% endif %}
                 {% if finding.file_path %}
                 <td>
                     <span>
@@ -612,6 +614,20 @@
                 <td>
                     <span>
                         {{ finding.component_version }}
+                    </span>
+                </td>
+                {% endif %}
+                {% if finding.fix_available %}
+                <td>
+                    <span>
+                        {{ finding.fix_available }}
+                    </span>
+                </td>
+                {% endif %}
+                {% if finding.fix_version %}
+                <td>
+                    <span>
+                        {{ finding.fix_version }}
                     </span>
                 </td>
                 {% endif %}
@@ -1209,7 +1225,7 @@
                 var i = $($(this).find('i').get(0));
                 i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
             })
-            
+
             // Configure tooltips for CVSS vectors - try multiple approaches
             $(document).on('shown.bs.tooltip shown.bs.popover', function() {
                 $('.tooltip-inner, .popover-content').css({
@@ -1221,7 +1237,7 @@
                     'max-width': '1200px !important'
                 });
             });
-            
+
             // Force tooltip configuration
             $('.has-popover').each(function() {
                 $(this).on('mouseenter', function() {

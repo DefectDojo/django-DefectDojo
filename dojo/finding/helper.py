@@ -1,5 +1,6 @@
 import logging
 from contextlib import suppress
+from datetime import datetime
 from time import strftime
 
 from django.conf import settings
@@ -9,6 +10,7 @@ from django.db.utils import IntegrityError
 from django.dispatch.dispatcher import receiver
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.timezone import is_naive, make_aware, now
 from fieldsignals import pre_save_changed
 
 import dojo.jira_link.helper as jira_helper
@@ -17,6 +19,11 @@ from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
+from dojo.finding.deduplication import (
+    dedupe_batch_of_findings,
+    do_dedupe_finding,
+    get_finding_models_for_deduplication,
+)
 from dojo.models import (
     Endpoint,
     Endpoint_Status,
@@ -35,7 +42,6 @@ from dojo.tools import tool_issue_updater
 from dojo.utils import (
     calculate_grade,
     close_external_issue,
-    do_dedupe_finding,
     do_false_positive_history,
     get_current_user,
     mass_model_updater,
@@ -457,6 +463,59 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
             jira_helper.push_to_jira(finding.finding_group)
 
 
+@dojo_async_task(signature=True)
+@app.task
+def post_process_findings_batch_signature(finding_ids, *args, dedupe_option=True, rules_option=True, product_grading_option=True,
+             issue_updater_option=True, push_to_jira=False, user=None, **kwargs):
+    return post_process_findings_batch(finding_ids, dedupe_option, rules_option, product_grading_option,
+                                       issue_updater_option, push_to_jira, user, **kwargs)
+
+
+@dojo_async_task
+@app.task
+def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_option=True, product_grading_option=True,
+             issue_updater_option=True, push_to_jira=False, user=None, **kwargs):
+
+    if not finding_ids:
+        return
+
+    system_settings = System_Settings.objects.get()
+
+    # use list() to force a complete query execution and related objects to be loaded once
+    findings = get_finding_models_for_deduplication(finding_ids)
+
+    if not findings:
+        logger.debug(f"no findings found for batch deduplication with IDs: {finding_ids}")
+        return
+
+    # Batch dedupe with single queries per algorithm; fallback to per-finding for anything else
+    if dedupe_option and system_settings.enable_deduplication:
+        dedupe_batch_of_findings(findings)
+
+    if system_settings.false_positive_history:
+        # Only perform false positive history if deduplication is disabled
+        if system_settings.enable_deduplication:
+            deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
+        else:
+            for finding in findings:
+                do_false_positive_history(finding, *args, **kwargs)
+
+    # Non-status changing tasks
+    if issue_updater_option:
+        for finding in findings:
+            tool_issue_updater.async_tool_issue_update(finding)
+
+    if product_grading_option and system_settings.enable_product_grade:
+        calculate_grade(findings[0].test.engagement.product)
+
+    if push_to_jira:
+        for finding in findings:
+            if finding.has_jira_issue or not finding.finding_group:
+                jira_helper.push_to_jira(finding)
+            else:
+                jira_helper.push_to_jira(finding.finding_group)
+
+
 @receiver(pre_delete, sender=Finding)
 def finding_pre_delete(sender, instance, **kwargs):
     logger.debug("finding pre_delete: %d", instance.id)
@@ -628,13 +687,16 @@ def engagement_post_delete(sender, instance, **kwargs):
 def fix_loop_duplicates():
     """Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates."""
     """ i.e. A -> B -> C. This can lead to problems when deleting findingns, performing deduplication, etc """
-    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).order_by("-id")
+    # Build base queryset without selecting full rows to minimize memory
+    loop_qs = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False)
 
-    loop_count = len(candidates)
+    # Use COUNT(*) at the DB instead of materializing the queryset
+    loop_count = loop_qs.count()
 
     if loop_count > 0:
-        deduplicationLogger.info(f"Identified {len(candidates)} Findings with Loops")
-        for find_id in candidates.values_list("id", flat=True):
+        deduplicationLogger.info(f"Identified {loop_count} Findings with Loops")
+        # Stream IDs only in descending order to avoid loading full Finding rows
+        for find_id in loop_qs.order_by("-id").values_list("id", flat=True).iterator(chunk_size=1000):
             removeLoop(find_id, 50)
 
         new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
@@ -737,6 +799,17 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
         finding_template.cve = None
 
 
+def normalize_datetime(value):
+    """Ensure value is timezone-aware datetime."""
+    if value:
+        if not isinstance(value, datetime):
+            value = datetime.combine(value, datetime.min.time())
+        # Make timezone-aware if naive
+        if is_naive(value):
+            value = make_aware(value)
+    return value
+
+
 def close_finding(
     *,
     finding,
@@ -758,15 +831,16 @@ def close_finding(
     """
     # Core status updates
     finding.is_mitigated = is_mitigated
-    now = timezone.now()
-    finding.mitigated = mitigated or now
+    current_time = now()
+    mitigated_date = normalize_datetime(mitigated) or current_time
+    finding.mitigated = mitigated_date
     finding.mitigated_by = mitigated_by or user
     finding.active = False
     finding.false_p = bool(false_p)
     finding.out_of_scope = bool(out_of_scope)
     finding.duplicate = bool(duplicate)
     finding.under_review = False
-    finding.last_reviewed = finding.mitigated
+    finding.last_reviewed = mitigated_date
     finding.last_reviewed_by = user
 
     # Create note if provided
@@ -776,16 +850,16 @@ def close_finding(
             entry=note_entry,
             author=user,
             note_type=note_type,
-            date=finding.mitigated,
+            date=mitigated_date,
         )
         finding.notes.add(new_note)
 
     # Endpoint statuses
     for status in finding.status_finding.all():
         status.mitigated_by = finding.mitigated_by
-        status.mitigated_time = finding.mitigated
+        status.mitigated_time = mitigated_date
         status.mitigated = True
-        status.last_modified = timezone.now()
+        status.last_modified = current_time
         status.save()
 
     # Risk acceptance
