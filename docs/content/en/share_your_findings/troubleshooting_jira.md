@@ -101,6 +101,34 @@ To correct this issue, you can add the 'Epic Name' field to your Project's issue
 
 ![image](images/epic_name_error.png)
 
+## Configuring JIRA Connection Retries and Timeouts
+
+DefectDojo's JIRA integration includes configurable retry and timeout settings to handle rate limiting and connection issues. These settings are important for maintaining system responsiveness, especially when using Celery workers.
+
+### Available Configuration Variables
+
+The following environment variables control JIRA connection behavior:
+
+- **`DD_JIRA_MAX_RETRIES`** (default: `3`): Maximum number of retry attempts for recoverable errors. The integration will automatically retry on HTTP 429 (Too Many Requests), HTTP 503 (Service Unavailable), and connection errors. See the [JIRA rate limiting documentation](https://developer.atlassian.com/cloud/jira/platform/rate-limiting/) for more information.
+
+- **`DD_JIRA_CONNECT_TIMEOUT`** (default: `10` seconds): Connection timeout for establishing a connection to the JIRA server.
+
+- **`DD_JIRA_READ_TIMEOUT`** (default: `30` seconds): Read timeout for waiting for a response from the JIRA server after the connection is established.
+
+**Note on Rate Limiting**: The jira library has a built-in maximum wait time of 60 seconds for rate limiting retries. If JIRA's `Retry-After` header indicates a wait time longer than 60 seconds, the request will fail and not be retried. This is a limitation of the jira library version currently in use.
+
+### Why Conservative Values Matter
+
+**Important**: It is recommended to use conservative (lower) values for these settings. Here's why:
+
+1. **Celery Task Blocking**: JIRA operations in DefectDojo run as asynchronous Celery tasks. When a task is waiting for a retry delay, it blocks that Celery worker from processing other tasks.
+
+2. **Worker Pool Exhaustion**: If multiple JIRA operations are retrying with long delays, you can quickly exhaust your Celery worker pool, causing other tasks (not just JIRA-related) to queue up and wait.
+
+3. **System Responsiveness**: Long retry delays can make the system appear unresponsive, especially during JIRA outages or rate limiting events.
+
+JIRA Rate limiting is new, so please let us know on Slack or GitHub what works best for you.
+
 ## Jira and DefectDojo are out of sync
 
 Sometimes Jira is down, or DefectDojo is down, or there was bug in a webhook. In this case, Jira can become out of sync with DefectDojo. If this is the case for lots of issues, manual reconciliation might not be feasible. For this scenario there is the management command 'jira_status_reconciliation'.

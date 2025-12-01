@@ -250,6 +250,16 @@ env = environ.FileAwareEnv(
     # When interacting with jira tickets that attached finding groups, we should no be opening any findings
     # on the DefectDojo side because jira has no way of knowing if a finding really should be reopened or not
     DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN=(bool, False),
+    # JIRA connection retry and timeout settings: https://developer.atlassian.com/cloud/jira/platform/rate-limiting/
+    # Maximum number of retry attempts for recoverable errors (429, 503, ConnectionError)
+    # See https://jira.readthedocs.io/ for more in the jira library used by DefectDojo
+    # Note: The jira library has a built-in maximum wait time of 60s for rate limiting retries.
+    # If JIRA's Retry-After header indicates a wait time longer than 60s, the request will fail and not be retried.
+    DD_JIRA_MAX_RETRIES=(int, 3),
+    # Connection timeout (seconds) for establishing a connection to the JIRA server
+    DD_JIRA_CONNECT_TIMEOUT=(int, 10),
+    # Read timeout (seconds) for waiting for a response from the JIRA server
+    DD_JIRA_READ_TIMEOUT=(int, 30),
     # You can set extra Jira issue types via a simple env var that supports a csv format, like "Work Item,Vulnerability"
     DD_JIRA_EXTRA_ISSUE_TYPES=(str, ""),
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
@@ -1722,6 +1732,12 @@ if env("DD_JIRA_EXTRA_ISSUE_TYPES"):
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
 JIRA_DESCRIPTION_MAX_LENGTH = env("DD_JIRA_DESCRIPTION_MAX_LENGTH")
 JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN = env("DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN")
+# JIRA connection retry and timeout settings
+JIRA_MAX_RETRIES = env("DD_JIRA_MAX_RETRIES")
+JIRA_CONNECT_TIMEOUT = env("DD_JIRA_CONNECT_TIMEOUT")
+JIRA_READ_TIMEOUT = env("DD_JIRA_READ_TIMEOUT")
+# Combine timeouts into a tuple for the JIRA library: (connect_timeout, read_timeout)
+JIRA_TIMEOUT = (JIRA_CONNECT_TIMEOUT, JIRA_READ_TIMEOUT)
 
 # ------------------------------------------------------------------------------
 # LOGGING
