@@ -115,6 +115,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
     DD_SOCIAL_AUTH_CREATE_USER_MAPPING=(str, "username"),  # could also be email or fullname
     DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
+    DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS=(bool, False),  # If true, the redirect after login will use the HTTPS protocol
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT=(str, ""),
@@ -283,6 +284,8 @@ env = environ.FileAwareEnv(
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
+    # Batch size for import/reimport deduplication processing
+    DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=(int, 1000),
     # Delete Auditlogs older than x month; -1 to keep all logs
     DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
     # Batch size for flushing audit logs per task run
@@ -592,6 +595,7 @@ PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
 SHOW_LOGIN_FORM = env("DD_SOCIAL_AUTH_SHOW_LOGIN_FORM")
 SOCIAL_LOGIN_AUTO_REDIRECT = env("DD_SOCIAL_LOGIN_AUTO_REDIRECT")
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = env("DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS")
 SOCIAL_AUTH_CREATE_USER = env("DD_SOCIAL_AUTH_CREATE_USER")
 SOCIAL_AUTH_CREATE_USER_MAPPING = env("DD_SOCIAL_AUTH_CREATE_USER_MAPPING")
 
@@ -1420,6 +1424,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Cycognito Scan": ["title", "severity"],
     "OpenVAS Parser v2": ["title", "severity", "vuln_id_from_tool", "endpoints"],
     "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
+    "OpenReports": ["vulnerability_ids", "component_name", "component_version", "severity"],
+    "n0s1 Scanner": ["description"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1492,6 +1498,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "AWS Inspector2 Scan": True,
     "Cyberwatch scan (Galeax)": True,
     "OpenVAS Parser v2": True,
+    "OpenReports": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1682,6 +1689,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
     "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
     "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
+    "OpenReports": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1703,6 +1711,7 @@ DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 
 TRACK_IMPORT_HISTORY = env("DD_TRACK_IMPORT_HISTORY")
+IMPORT_REIMPORT_DEDUPE_BATCH_SIZE = env("DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE")
 
 # ------------------------------------------------------------------------------
 # JIRA
