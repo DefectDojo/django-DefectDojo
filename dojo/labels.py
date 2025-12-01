@@ -63,7 +63,7 @@ class LabelsProxy(
         As a side benefit, this will explode if any label defined on this class is not present in the given dict: a
         runtime check that a labels dict must be complete.
         """
-        for _l, _v in self._get_label_entries().items():
+        for _l, _v in self._get_label_entries().items():  # noqa: RUF052
             try:
                 setattr(self, _l, label_set[_v])
             except KeyError:
