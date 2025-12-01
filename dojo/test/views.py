@@ -607,7 +607,6 @@ class AddFindingView(View):
 
             # Note: this notification has not be moved to "@receiver(post_save, sender=Finding)" method as many other notifications
             # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
-            # TODO: but same should be implemented for API endpoint
 
             # Create a notification
             create_notification(

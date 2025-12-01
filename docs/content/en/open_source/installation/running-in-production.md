@@ -53,7 +53,7 @@ Media files for uploaded files, including threat models and risk acceptance, are
 ### uWSGI
 
 By default (except in `ptvsd` mode for debug purposes), uWSGI will
-handle 4 concurrent connections.
+handle 16 concurrent connections.
 
 Based on your resource settings, you can tweak:
 

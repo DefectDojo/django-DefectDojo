@@ -176,11 +176,11 @@ class TestDojoImporterPerformance(DojoTestCase):
 
         self._import_reimport_performance(
             expected_num_queries1=340,
-            expected_num_async_tasks1=10,
+            expected_num_async_tasks1=7,
             expected_num_queries2=288,
-            expected_num_async_tasks2=22,
+            expected_num_async_tasks2=18,
             expected_num_queries3=175,
-            expected_num_async_tasks3=20,
+            expected_num_async_tasks3=17,
         )
 
     @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
@@ -194,11 +194,11 @@ class TestDojoImporterPerformance(DojoTestCase):
 
         self._import_reimport_performance(
             expected_num_queries1=306,
-            expected_num_async_tasks1=10,
+            expected_num_async_tasks1=7,
             expected_num_queries2=281,
-            expected_num_async_tasks2=22,
+            expected_num_async_tasks2=18,
             expected_num_queries3=170,
-            expected_num_async_tasks3=20,
+            expected_num_async_tasks3=17,
         )
 
     @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
@@ -217,12 +217,12 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
         self._import_reimport_performance(
-            expected_num_queries1=350,
-            expected_num_async_tasks1=10,
-            expected_num_queries2=305,
-            expected_num_async_tasks2=22,
-            expected_num_queries3=190,
-            expected_num_async_tasks3=20,
+            expected_num_queries1=345,
+            expected_num_async_tasks1=6,
+            expected_num_queries2=293,
+            expected_num_async_tasks2=17,
+            expected_num_queries3=180,
+            expected_num_async_tasks3=16,
         )
 
     @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
@@ -239,12 +239,12 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=316,
-            expected_num_async_tasks1=10,
-            expected_num_queries2=298,
-            expected_num_async_tasks2=22,
-            expected_num_queries3=185,
-            expected_num_async_tasks3=20,
+            expected_num_queries1=311,
+            expected_num_async_tasks1=6,
+            expected_num_queries2=286,
+            expected_num_async_tasks2=17,
+            expected_num_queries3=175,
+            expected_num_async_tasks3=16,
         )
 
     @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
@@ -265,12 +265,12 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=351,
-            expected_num_async_tasks1=11,
-            expected_num_queries2=306,
-            expected_num_async_tasks2=23,
-            expected_num_queries3=191,
-            expected_num_async_tasks3=21,
+            expected_num_queries1=347,
+            expected_num_async_tasks1=8,
+            expected_num_queries2=295,
+            expected_num_async_tasks2=19,
+            expected_num_queries3=182,
+            expected_num_async_tasks3=18,
         )
 
     @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
@@ -288,12 +288,12 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=317,
-            expected_num_async_tasks1=11,
-            expected_num_queries2=299,
-            expected_num_async_tasks2=23,
-            expected_num_queries3=186,
-            expected_num_async_tasks3=21,
+            expected_num_queries1=313,
+            expected_num_async_tasks1=8,
+            expected_num_queries2=288,
+            expected_num_async_tasks2=19,
+            expected_num_queries3=177,
+            expected_num_async_tasks3=18,
         )
 
     # Deduplication is enabled in the tests above, but to properly test it we must run the same import twice and capture the results.
@@ -412,9 +412,9 @@ class TestDojoImporterPerformance(DojoTestCase):
 
         self._deduplication_performance(
             expected_num_queries1=311,
-            expected_num_async_tasks1=12,
+            expected_num_async_tasks1=8,
             expected_num_queries2=204,
-            expected_num_async_tasks2=12,
+            expected_num_async_tasks2=8,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
 
@@ -429,9 +429,9 @@ class TestDojoImporterPerformance(DojoTestCase):
 
         self._deduplication_performance(
             expected_num_queries1=275,
-            expected_num_async_tasks1=12,
+            expected_num_async_tasks1=8,
             expected_num_queries2=185,
-            expected_num_async_tasks2=12,
+            expected_num_async_tasks2=8,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
 
@@ -449,10 +449,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=323,
-            expected_num_async_tasks1=12,
-            expected_num_queries2=318,
-            expected_num_async_tasks2=12,
+            expected_num_queries1=316,
+            expected_num_async_tasks1=7,
+            expected_num_queries2=287,
+            expected_num_async_tasks2=7,
         )
 
     @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
@@ -469,8 +469,8 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=287,
-            expected_num_async_tasks1=12,
-            expected_num_queries2=281,
-            expected_num_async_tasks2=12,
+            expected_num_queries1=280,
+            expected_num_async_tasks1=7,
+            expected_num_queries2=250,
+            expected_num_async_tasks2=7,
         )
