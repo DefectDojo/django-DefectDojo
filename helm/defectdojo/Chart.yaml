@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "2.53.0-dev"
+appVersion: "2.53.0"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.9.0-dev
+version: 1.9.0
 icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
 maintainers:
   - name: madchap
@@ -33,7 +33,7 @@ dependencies:
 #   - kind: security
 #     description: Critical bug
 annotations:
-  artifacthub.io/prerelease: "true"
+  artifacthub.io/prerelease: "false"
   artifacthub.io/changes: |
     - kind: added
       description: Added HPA and PDB for celery worker and Django
@@ -45,3 +45,5 @@ annotations:
       description: chore(deps)_ update nginx/nginx_prometheus_exporter docker tag from 1.4.2 to v1.5.1 (helm/defectdojo/values.yaml)
     - kind: changed
       description: Replace Redis with Valkey
+    - kind: changed
+      description: Bump DefectDojo to 2.53.0
