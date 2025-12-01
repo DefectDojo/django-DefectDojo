@@ -35,7 +35,6 @@ def expire_now(risk_acceptance):
             else:
                 if finding.is_mitigated is True:
                     logger.debug(f"Finding is mitigated {finding.is_mitigated}")
-                    finding.risk_status = "Risk Expired"
                 else:
                     logger.debug("%i:%s: unaccepting a.k.a reactivating finding.", finding.id, finding)
                     finding.risk_status = "Risk Active"
@@ -67,11 +66,10 @@ def expire_now(risk_acceptance):
 
         # best effort JIRA integration, no status changes, just a comment
         post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
-
-    risk_acceptance.expiration_date = timezone.now()
-    risk_acceptance.expiration_date_handled = timezone.now()
-    risk_acceptance.save()
-    Notification.risk_acceptance_expiration(risk_acceptance, reactivated_findings)
+        risk_acceptance.expiration_date = timezone.now()
+        risk_acceptance.expiration_date_handled = timezone.now()
+        risk_acceptance.save()
+        Notification.risk_acceptance_expiration(risk_acceptance, reactivated_findings)
 
 
 def reinstate(risk_acceptance, old_expiration_date):
@@ -174,6 +172,14 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
 
 
 def generate_permision_key(permission_keys, user, risk_acceptance, transfer_finding=None):
+    if risk_acceptance.long_term_acceptance:
+        permission_key = PermissionKey.get_or_create_permission_key(
+            lifetime=settings.LIFETIME_HOURS_PERMISSION_KEY,
+            user=user,
+            risk_acceptance=risk_acceptance,
+            transfer_finding=transfer_finding
+        )
+        return permission_key.token
     if len(permission_keys) == 0:
         permission_key = PermissionKey.create_token(
             lifetime=settings.LIFETIME_HOURS_PERMISSION_KEY,

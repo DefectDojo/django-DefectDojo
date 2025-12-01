@@ -5146,6 +5146,37 @@ class PermissionKey(models.Model):
     def expire(self):
         self.status = False
 
+    @classmethod
+    def get_or_create_permission_key(
+        cls,
+        lifetime,
+        user,
+        risk_acceptance,
+        transfer_finding
+    ):
+        token = secrets.token_urlsafe(64)
+        expiration = timezone.now() + timedelta(hours=lifetime)
+        try:
+            permission_key = cls.get_token(risk_acceptance=risk_acceptance, user=user)
+            if permission_key:
+                return permission_key
+            else:
+                permissionkey = cls.objects.create(
+                    token=token,
+                    user=user,
+                    risk_acceptance=risk_acceptance,
+                    transfer_finding=transfer_finding,
+                    expiration=expiration)
+        except IntegrityError:
+            logger.debug("IntegrityError token key duplicated")
+            permissionkey = cls.objects.create(
+                token=secrets.token_urlsafe(64)[0],
+                user=user,
+                risk_acceptance=risk_acceptance,
+                transfer_finding=transfer_finding,
+                expiration=expiration)
+
+        return permissionkey
 
     @classmethod
     def create_token(
@@ -5183,7 +5214,7 @@ class PermissionKey(models.Model):
                                             user=user)
         except ObjectDoesNotExist as e:
             logger.error(f"Permission key not found for user {user.id} associated with risk acceptance {risk_acceptance.id}")
-            raise e
+            return None
         return permission_key
 
 
