@@ -208,7 +208,6 @@ def can_be_pushed_to_jira(obj, form=None):
             return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "error_below_minimum_threshold"
     elif isinstance(obj, Finding_Group):
         finding_group_status = _safely_get_obj_status_for_jira(obj)
-        logger.error("Finding group status: %s", finding_group_status)
         if "Empty" in finding_group_status:
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it contains no findings above minimum treshold.", "error_empty"
 
