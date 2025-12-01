@@ -13,6 +13,44 @@ entries:
           description: chore(deps)_ update nginx/nginx_prometheus_exporter docker tag from 1.4.2 to v1.5.1 (helm/defectdojo/values.yaml)
         - kind: changed
           description: Replace Redis with Valkey
+        - kind: changed
+          description: Bump DefectDojo to 2.53.0
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: 2.53.0
+    created: "2025-12-01T17:27:02.701403088Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: ~16.7.0
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: ~0.10.0
+    description: A Helm chart for Kubernetes to install DefectDojo
+    digest: ca40fa76eaa2065b5d4074940d97f2116bd8e567e6b0681a8242ab89ee3dc3ac
+    icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
+    maintainers:
+    - email: defectdojo-project@owasp.org
+      name: madchap
+      url: https://github.com/DefectDojo/django-DefectDojo
+    name: defectdojo
+    urls:
+    - https://github.com/DefectDojo/django-DefectDojo/releases/download/2.53.0/defectdojo-1.9.0.tgz
+    version: 1.9.0
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
+          description: Added HPA and PDB for celery worker and Django
+        - kind: fixed
+          description: extraAnnotations spec doesn't affect initializer job
+        - kind: changed
+          description: chore(deps)_ update gcr.io/cloudsql_docker/gce_proxy docker tag from 1.37.9 to v1.37.10 (helm/defectdojo/values.yaml)
+        - kind: changed
+          description: chore(deps)_ update nginx/nginx_prometheus_exporter docker tag from 1.4.2 to v1.5.1 (helm/defectdojo/values.yaml)
+        - kind: changed
+          description: Replace Redis with Valkey
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 2.53.0-dev
@@ -7080,4 +7118,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2025-12-01T05:13:19.991477904Z"
+generated: "2025-12-01T17:27:02.69238697Z"
