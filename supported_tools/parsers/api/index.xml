@@ -7,15 +7,16 @@ Set your API key directly in the format &lt;code&gt;username:password&lt;/code&g
 &lt;p&gt;In &lt;code&gt;Tool Configuration&lt;/code&gt;, select &lt;code&gt;Tool Type&lt;/code&gt; to &amp;ldquo;Cobalt.io&amp;rdquo; and &lt;code&gt;Authentication Type&lt;/code&gt; &amp;ldquo;API Key&amp;rdquo;.
 Paste your Cobalt.io API token in the &lt;code&gt;API Key&lt;/code&gt; field and the desired org token in the &lt;code&gt;Extras&lt;/code&gt; field.
 Currently Defect Dojo only supports &lt;a href="https://github.com/DefectDojo/django-DefectDojo/issues/12572"&gt;V1 API Keys&lt;/a&gt;.&lt;/p&gt;</description></item><item><title>Edgescan</title><link>https://docs.defectdojo.com/supported_tools/parsers/api/edgescan/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/supported_tools/parsers/api/edgescan/</guid><description>&lt;p&gt;Import Edgescan vulnerabilities by API or &lt;a href="../../file/edgescan"&gt;JSON file&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;All parsers which using API have common basic configuration step but with different values. Please, &lt;a href="../"&gt;read these steps&lt;/a&gt; at first.&lt;/p&gt;</description></item><item><title>SonarQube API Import</title><link>https://docs.defectdojo.com/supported_tools/parsers/api/sonarqube/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/supported_tools/parsers/api/sonarqube/</guid><description>&lt;p&gt;All parsers which using API have common basic configuration step but with different values. Please, &lt;a href="../"&gt;read these steps&lt;/a&gt; at first.&lt;/p&gt;
-&lt;p&gt;In &lt;code&gt;Tool Configuration&lt;/code&gt;, select &lt;code&gt;Tool Type&lt;/code&gt; to &amp;ldquo;SonarQube&amp;rdquo; and &lt;code&gt;Authentication Type&lt;/code&gt; &amp;ldquo;API Key&amp;rdquo;.
-Note the url must be in the format of &lt;code&gt;https://&amp;lt;sonarqube_host&amp;gt;/api&lt;/code&gt;
+&lt;p&gt;All parsers which using API have common basic configuration step but with different values. Please, &lt;a href="../"&gt;read these steps&lt;/a&gt; at first.&lt;/p&gt;</description></item><item><title>SonarQube API Import</title><link>https://docs.defectdojo.com/supported_tools/parsers/api/sonarqube/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/supported_tools/parsers/api/sonarqube/</guid><description>&lt;p&gt;All parsers that use API pull have common basic configuration steps, but with different values. Please, &lt;a href="../"&gt;read these steps&lt;/a&gt; first.&lt;/p&gt;
+&lt;h2 id="tool-configuration"&gt;Tool Configuration&lt;/h2&gt;
+&lt;p&gt;In &lt;code&gt;Tool Configuration&lt;/code&gt;, select &lt;code&gt;Tool Type&lt;/code&gt; &amp;ldquo;SonarQube&amp;rdquo; and &lt;code&gt;Authentication Type&lt;/code&gt; &amp;ldquo;API Key&amp;rdquo;.
+The URL must be in the format of &lt;code&gt;https://&amp;lt;sonarqube_host&amp;gt;/api&lt;/code&gt;
 Paste your SonarQube API token in the &amp;ldquo;API Key&amp;rdquo; field.
-By default the tool will import vulnerabilities issues
-and security hotspots only, but additional filters can be setup using the
-Extras field separated by commas (e.g. &lt;code&gt;BUG,VULNERABILITY,CODE_SMELL&lt;/code&gt;). When using
-SonarCloud, you must also specify the Organization ID in the Extras field as follows
-&lt;code&gt;OrgID=sonarcloud-organzation-ID&lt;/code&gt;. If also specifying issue type filters, please
-seperate the items in the Extras field by a vertical bar as follows
-&lt;code&gt;BUG,VULNERABILITY,CODE_SMELL|OrgID=sonarcloud-organzation-ID&lt;/code&gt;&lt;/p&gt;</description></item><item><title>Vulners</title><link>https://docs.defectdojo.com/supported_tools/parsers/api/vulners/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/supported_tools/parsers/api/vulners/</guid><description>&lt;p&gt;All parsers which using API have common basic configuration step but with different values. Please, &lt;a href="../"&gt;read these steps&lt;/a&gt; at first.&lt;/p&gt;
+By default, the tool will import vulnerability issues
+and security hotspots only, but additional filters can be applied using the
+&amp;ldquo;Extras&amp;rdquo; field separated by commas (e.g. &lt;code&gt;BUG,VULNERABILITY,CODE_SMELL&lt;/code&gt;). When using
+SonarCloud, you must also specify the Organization ID in the &amp;ldquo;Extras&amp;rdquo; field (e.g.
+&lt;code&gt;OrgID=sonarcloud-organzation-ID&lt;/code&gt;). When also specifying issue type filters, please
+separate the items in the &amp;ldquo;Extras&amp;rdquo; field by a vertical bar (e.g.
+&lt;code&gt;BUG,VULNERABILITY,CODE_SMELL|OrgID=sonarcloud-organzation-ID&lt;/code&gt;)&lt;/p&gt;</description></item><item><title>Vulners</title><link>https://docs.defectdojo.com/supported_tools/parsers/api/vulners/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/supported_tools/parsers/api/vulners/</guid><description>&lt;p&gt;All parsers which using API have common basic configuration step but with different values. Please, &lt;a href="../"&gt;read these steps&lt;/a&gt; at first.&lt;/p&gt;
 &lt;p&gt;Import Vulners &lt;a href="https://vulners.com/docs/API_wrapper/linux_audit/#linux-audit"&gt;Audit&lt;/a&gt; results, no file required.&lt;/p&gt;</description></item></channel></rss>
