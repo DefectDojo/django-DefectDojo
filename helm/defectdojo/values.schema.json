@@ -153,9 +153,6 @@
                         }
                     }
                 },
-                "broker": {
-                    "type": "string"
-                },
                 "logLevel": {
                     "type": "string"
                 },
@@ -180,6 +177,30 @@
                         },
                         "automountServiceAccountToken": {
                             "type": "boolean"
+                        },
+                        "autoscaling": {
+                            "description": "Autoscaling configuration for Celery worker deployment.",
+                            "type": "object",
+                            "properties": {
+                                "behavior": {
+                                    "type": "object"
+                                },
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "maxReplicas": {
+                                    "type": "integer"
+                                },
+                                "minReplicas": {
+                                    "type": "integer"
+                                },
+                                "targetCPUUtilizationPercentage": {
+                                    "type": "integer"
+                                },
+                                "targetMemoryUtilizationPercentage": {
+                                    "type": "integer"
+                                }
+                            }
                         },
                         "containerSecurityContext": {
                             "description": "Container security context for the Celery worker containers.",
@@ -227,8 +248,23 @@
                             "type": "object"
                         },
                         "podAnnotations": {
-                            "description": "Annotations for the Celery beat pods.",
+                            "description": "Annotations for the Celery worker pods.",
                             "type": "object"
+                        },
+                        "podDisruptionBudget": {
+                            "description": "Configure pod disruption budgets for Celery worker ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget",
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                },
+                                "minAvailable": {
+                                    "type": "string"
+                                },
+                                "unhealthyPodEvictionPolicy": {
+                                    "type": "string"
+                                }
+                            }
                         },
                         "podSecurityContext": {
                             "description": "Pod security context for the Celery worker pods.",
@@ -271,6 +307,10 @@
                         "startupProbe": {
                             "description": "Enable startup probe for Celery worker container.",
                             "type": "object"
+                        },
+                        "terminationGracePeriodSeconds": {
+                            "description": "Termination grace period seconds for Celery worker pods.",
+                            "type": "integer"
                         },
                         "tolerations": {
                             "type": "array"
@@ -340,12 +380,12 @@
             "description": "create postgresql secret in defectdojo chart, outside of postgresql chart",
             "type": "boolean"
         },
-        "createRedisSecret": {
-            "description": "create redis secret in defectdojo chart, outside of redis chart",
-            "type": "boolean"
-        },
         "createSecret": {
             "description": "create defectdojo specific secret",
+            "type": "boolean"
+        },
+        "createValkeySecret": {
+            "description": "create valkey secret in defectdojo chart, outside of valkey chart",
             "type": "boolean"
         },
         "dbMigrationChecker": {
@@ -430,6 +470,30 @@
                 },
                 "automountServiceAccountToken": {
                     "type": "boolean"
+                },
+                "autoscaling": {
+                    "description": "Autoscaling configuration for the Django deployment.",
+                    "type": "object",
+                    "properties": {
+                        "behavior": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "maxReplicas": {
+                            "type": "integer"
+                        },
+                        "minReplicas": {
+                            "type": "integer"
+                        },
+                        "targetCPUUtilizationPercentage": {
+                            "type": "integer"
+                        },
+                        "targetMemoryUtilizationPercentage": {
+                            "type": "integer"
+                        }
+                    }
                 },
                 "extraEnv": {
                     "description": "Additional environment variables injected to all Django containers and initContainers.",
@@ -596,6 +660,21 @@
                 "nodeSelector": {
                     "type": "object"
                 },
+                "podDisruptionBudget": {
+                    "description": "Configure pod disruption budgets for django ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget",
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "minAvailable": {
+                            "type": "string"
+                        },
+                        "unhealthyPodEvictionPolicy": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "podSecurityContext": {
                     "description": "Pod security context for the Django pods.",
                     "type": "object",
@@ -621,6 +700,10 @@
                 },
                 "strategy": {
                     "type": "object"
+                },
+                "terminationGracePeriodSeconds": {
+                    "description": "Termination grace period seconds for django pods.",
+                    "type": "integer"
                 },
                 "tolerations": {
                     "type": "array"
@@ -914,9 +997,6 @@
                 "affinity": {
                     "type": "object"
                 },
-                "annotations": {
-                    "type": "object"
-                },
                 "automountServiceAccountToken": {
                     "type": "boolean"
                 },
@@ -965,6 +1045,9 @@
                     "type": "object"
                 },
                 "nodeSelector": {
+                    "type": "object"
+                },
+                "podAnnotations": {
                     "type": "object"
                 },
                 "podSecurityContext": {
@@ -1237,52 +1320,16 @@
                 }
             }
         },
-        "redis": {
-            "description": "For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/redis",
-            "type": "object",
-            "properties": {
-                "architecture": {
-                    "type": "string"
-                },
-                "auth": {
-                    "type": "object",
-                    "properties": {
-                        "existingSecret": {
-                            "type": "string"
-                        },
-                        "existingSecretPasswordKey": {
-                            "type": "string"
-                        },
-                        "password": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "enabled": {
-                    "description": "To use an external instance, switch enabled to `false`` and set the address in `redisServer` below",
-                    "type": "boolean"
-                },
-                "sentinel": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        }
-                    }
-                },
-                "tls": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "description": "If TLS is enabled, the Redis broker will use the redis:// and optionally mount the certificates from an existing secret.",
-                            "type": "boolean"
-                        }
-                    }
-                }
-            }
-        },
         "redisParams": {
-            "description": "Parameters attached to the redis connection string, defaults to \"ssl_cert_reqs=optional\" if `redis.tls.enabled`",
+            "description": "Parameters attached to the redis connection string, defaults to \"ssl_cert_reqs=optional\" if `redisScheme` is `rediss`",
+            "type": "string"
+        },
+        "redisPort": {
+            "description": "Define the protocol to use with the external Redis instance",
+            "type": "integer"
+        },
+        "redisScheme": {
+            "description": "Define the protocol to use with the external Redis instance",
             "type": "string"
         },
         "redisServer": {
@@ -1415,6 +1462,60 @@
         },
         "trackConfig": {
             "description": "Track configuration (trackConfig): will automatically respin application pods in case of config changes detection can be: 1. disabled (default) 2. enabled, enables tracking configuration changes based on SHA256",
+            "type": "string"
+        },
+        "valkey": {
+            "description": "For more advance options check the bitnami chart documentation: https://artifacthub.io/packages/helm/cloudpirates-valkey/valkey",
+            "type": "object",
+            "properties": {
+                "auth": {
+                    "type": "object",
+                    "properties": {
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "existingSecretPasswordKey": {
+                            "type": "string"
+                        },
+                        "password": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "enabled": {
+                    "description": "To use an external instance, switch enabled to `false` and set the address in `redisServer` below",
+                    "type": "boolean"
+                },
+                "sentinel": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "service": {
+                    "description": "To use a different port for Redis (default: 6379)",
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "tls": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "description": "If TLS is enabled, the Redis broker will use the redis:// and optionally mount the certificates from an existing secret.",
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
+        "valkeyParams": {
+            "description": "Parameters attached to the valkey connection string, defaults to \"ssl_cert_reqs=optional\" if `valkey.tls.enabled`",
             "type": "string"
         }
     }

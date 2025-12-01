@@ -58,12 +58,23 @@
 {{- end -}}
 
 {{- define "redis.hostname" -}}
-{{- if eq .Values.celery.broker "redis" -}}
-{{- if .Values.redis.enabled -}}
-{{- printf "%s-%s" .Release.Name "redis-master" | trunc 63 | trimSuffix "-" -}}
+{{- if .Values.valkey.enabled -}}
+{{- printf "%s-%s" .Release.Name "valkey" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- .Values.redisServer | default "127.0.0.1" | quote -}}
 {{- end -}}
+{{- end -}}
+
+{{- /*
+  Determine the default params to use for Redis.
+*/}}
+{{- define "redis.params" -}}
+{{- $redisScheme := include "redis.scheme" . -}}
+{{- $defaultBrokerParams := ternary "ssl_cert_reqs=optional" "" (eq "rediss" $redisScheme) -}}
+{{- if .Values.valkey.enabled -}}
+{{- default $defaultBrokerParams .Values.valkeyParams -}}
+{{- else -}}
+{{- default $defaultBrokerParams .Values.redisParams -}}
 {{- end -}}
 {{- end -}}
 
@@ -71,14 +82,27 @@
   Determine the protocol to use for Redis.
 */}}
 {{- define "redis.scheme" -}}
-{{- if eq .Values.celery.broker "redis" -}}
-{{- if .Values.redis.tls.enabled -}}
-{{- printf "rediss" -}}
-{{- else if .Values.redis.sentinel.enabled -}}
-{{- printf "sentinel" -}}
+{{- if .Values.valkey.enabled -}}
+{{- if .Values.valkey.tls.enabled -}}
+rediss
+{{- else if .Values.valkey.sentinel.enabled -}}
+sentinel
 {{- else -}}
-{{- printf "redis" -}}
+redis
 {{- end -}}
+{{- else -}}
+{{- .Values.redisScheme -}}
+{{- end -}}
+{{- end -}}
+
+{{- /*
+  Determine the default port to use for Redis.
+*/}}
+{{- define "redis.port" -}}
+{{- if .Values.valkey.enabled -}}
+{{- .Values.valkey.service.port -}}
+{{- else -}}
+{{- .Values.redisPort -}}
 {{- end -}}
 {{- end -}}
 

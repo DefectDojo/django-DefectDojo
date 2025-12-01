@@ -208,7 +208,6 @@ def can_be_pushed_to_jira(obj, form=None):
             return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "error_below_minimum_threshold"
     elif isinstance(obj, Finding_Group):
         finding_group_status = _safely_get_obj_status_for_jira(obj)
-        logger.error("Finding group status: %s", finding_group_status)
         if "Empty" in finding_group_status:
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it contains no findings above minimum treshold.", "error_empty"
 
@@ -433,14 +432,19 @@ def has_jira_configured(obj):
 
 
 def connect_to_jira(jira_server, jira_username, jira_password):
+    max_retries = getattr(settings, "JIRA_MAX_RETRIES", 3)
+    timeout = getattr(settings, "JIRA_TIMEOUT", (10, 30))
+
     return JIRA(
         server=jira_server,
         basic_auth=(jira_username, jira_password),
-        max_retries=0,
+        max_retries=max_retries,
+        timeout=timeout,
         options={
             "verify": settings.JIRA_SSL_VERIFY,
             "headers": settings.ADDITIONAL_HEADERS,
-        })
+        },
+    )
 
 
 def get_jira_connect_method():
@@ -783,7 +787,11 @@ def push_finding_to_jira(finding, *args, **kwargs):
 @app.task
 @dojo_model_from_id(model=Finding_Group)
 def push_finding_group_to_jira(finding_group, *args, **kwargs):
+    # Look for findings that have single ticket associations separate from the group
+    for finding in finding_group.findings.filter(jira_issue__isnull=False):
+        update_jira_issue(finding, *args, **kwargs)
     if finding_group.has_jira_issue:
+        # Update the jira issue for the group
         return update_jira_issue(finding_group, *args, **kwargs)
     return add_jira_issue(finding_group, *args, **kwargs)
 
