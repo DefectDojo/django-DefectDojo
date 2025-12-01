@@ -3576,7 +3576,7 @@ def generate_token_generative_ia(request, fid):
     body = {
         "agent_id": GeneralSettings.get_value("ia_agent_id", "marvin_ia_recommendation_agent"),
         "thread_id": thread_id,
-        "messages": GeneralSettings.get_value("IA_MESSAGE", "Analyze the finding") + fid,
+        "messages": GeneralSettings.get_value("IA_MESSAGE", "Analyze the finding") + " " + fid,
         "metadata": {
             "user_id": "string"
         }
@@ -3596,12 +3596,13 @@ def generate_token_generative_ia(request, fid):
 
     finding = get_object_or_404(Finding, id=fid)
     data = response.json()
+    finding.ia_recommendation = {}
     finding.ia_recommendation["data"] = data
     finding.ia_recommendation["data"]["like_status"] = None
     finding.ia_recommendation["data"]["user"] = request.user.username
     finding.ia_recommendation["data"]["last_modified"] = str(timezone.now().date())
     finding.save()
-    contex = finding_helper.parser_ia_recommendation(response.json())
+    contex = finding_helper.parser_ia_recommendation(finding.ia_recommendation)
     return JsonResponse(contex, status=200)
 
 
