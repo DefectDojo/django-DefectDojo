@@ -837,12 +837,6 @@ def parser_ia_recommendation(ia_recommendation: dict = {}):
 
     html = markdown.markdown(markdown_code)
     context["ia_recommendations"] = html
-    context["like_status"] = ia_recommendation.get("like_status", "")
-    context["umbral"] = ia_recommendation.get("umbral", "")
-    context["decision"] = ia_recommendation.get("decision", "")
-    context["error"] = ia_recommendation.get("error", "")
-    context["commit"] = ia_recommendation.get("commit", "")
-    context["pullrequest"] = ia_recommendation.get("pullrequest", "")
     return context
 
 
