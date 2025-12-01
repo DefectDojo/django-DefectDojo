@@ -433,14 +433,19 @@ def has_jira_configured(obj):
 
 
 def connect_to_jira(jira_server, jira_username, jira_password):
+    max_retries = getattr(settings, "JIRA_MAX_RETRIES", 3)
+    timeout = getattr(settings, "JIRA_TIMEOUT", (10, 30))
+
     return JIRA(
         server=jira_server,
         basic_auth=(jira_username, jira_password),
-        max_retries=0,
+        max_retries=max_retries,
+        timeout=timeout,
         options={
             "verify": settings.JIRA_SSL_VERIFY,
             "headers": settings.ADDITIONAL_HEADERS,
-        })
+        },
+    )
 
 
 def get_jira_connect_method():
