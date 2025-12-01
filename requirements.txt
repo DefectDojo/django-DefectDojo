@@ -135,7 +135,7 @@ certifi==2025.11.12
 PyNaCl==1.6.1
 charset-normalizer==3.4.4
 xmlschema==2.5.1
-sqlparse==0.5.3
+sqlparse==0.5.4
 cffi==2.0.0
 gitdb==4.0.12
 click-plugins==1.1.1.2
