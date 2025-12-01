@@ -11,7 +11,7 @@ from dojo.authorization.authorization_decorators import user_is_configuration_au
 from dojo.filters import TestTypeFilter
 from dojo.forms import Test_TypeForm
 from dojo.models import Test_Type
-from dojo.utils import add_breadcrumb, get_page_items
+from dojo.utils import add_breadcrumb, get_page_items, get_visible_scan_types
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ Test Type views
 
 @login_required
 def test_type(request):
-    initial_queryset = Test_Type.objects.all().order_by("name")
+    initial_queryset = get_visible_scan_types().order_by("name")
     name_words = initial_queryset.values_list("name", flat=True)
     test_types = TestTypeFilter(request.GET, queryset=initial_queryset)
     tts = get_page_items(request, test_types.qs, 25)
@@ -35,7 +35,8 @@ def test_type(request):
         "user": request.user,
         "tts": tts,
         "test_types": test_types,
-        "name_words": name_words})
+        "name_words": name_words,
+    })
 
 
 @user_is_configuration_authorized("dojo.add_test_type")

@@ -68,6 +68,7 @@ from dojo.models import (
     Product,
     System_Settings,
     Test,
+    Test_Type,
     User,
 )
 from dojo.notifications.helper import create_notification
@@ -81,6 +82,25 @@ labels = get_labels()
 """
 Helper functions for DefectDojo
 """
+
+
+def get_visible_scan_types():
+    """
+    Returns a QuerySet of active, non-excluded Test_Type objects.
+    Supports comma or pipe-separated names in PARSER_EXCLUDE.
+    """
+    exclude_raw = (getattr(settings, "PARSER_EXCLUDE", "") or "").strip()
+    if exclude_raw:
+        # Support both ',' and '|' separators
+        parts = [p.strip() for sep in (",", "|") for p in exclude_raw.split(sep)]
+        excluded_names = {p for p in parts if p}
+    else:
+        excluded_names = set()
+
+    qs = Test_Type.objects.filter(active=True)
+    if excluded_names:
+        qs = qs.exclude(name__in=excluded_names)
+    return qs
 
 
 def do_false_positive_history(finding, *args, **kwargs):
