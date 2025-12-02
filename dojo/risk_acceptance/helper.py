@@ -173,6 +173,14 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
 
 
 def generate_permision_key(permission_keys, user, risk_acceptance, transfer_finding=None):
+    if risk_acceptance.long_term_acceptance:
+        permission_key =PermissionKey.get_or_create_permission_key(
+            lifetime=settings.LIFETIME_HOURS_PERMISSION_KEY,
+            user=user,
+            risk_acceptance=risk_acceptance,
+            transfer_finding=transfer_finding
+        )
+        return permission_key.token
     if len(permission_keys) == 0:
         permission_key = PermissionKey.create_token(
             lifetime=settings.LIFETIME_HOURS_PERMISSION_KEY,
