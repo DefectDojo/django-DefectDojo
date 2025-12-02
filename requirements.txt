@@ -152,7 +152,7 @@ argon2-cffi-bindings==25.1.0
 isodate==0.7.2
 oauthlib==3.3.1
 rpds-py==0.30.0
-s3transfer==0.15.0
+s3transfer==0.16.0
 setuptools==80.9.0
 referencing==0.37.0
 tzdata==2025.2
