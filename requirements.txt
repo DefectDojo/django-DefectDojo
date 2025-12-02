@@ -70,7 +70,7 @@ hyperlink==21.0.0
 django-test-migrations==1.5.0
 djangosaml2==1.11.1
 drf-spectacular==0.29.0
-drf-spectacular-sidecar==2025.10.1
+drf-spectacular-sidecar==2025.12.1
 django-ratelimit==4.1.0
 argon2-cffi==25.1.0
 blackduck==1.1.3
