@@ -163,7 +163,7 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
     if settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL is True:
-        permission_keys = update_or_create_url_risk_acceptance(risk_pending)
+        permission_keys = update_or_create_url_risk_acceptance(risk_pending, send_notification=True)
     else:
         Notification.risk_acceptance_request(
             risk_pending=risk_pending,
@@ -566,16 +566,17 @@ def generate_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list:
     return permission_keys
 
 
-def update_or_create_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list: 
+def update_or_create_url_risk_acceptance(risk_pending: Risk_Acceptance, send_notification) -> list: 
     permission_keys = risk_pending.permissionkey_set.all()
     if len(permission_keys) > 0:
         update_expiration_date_permission_key(risk_pending)
     permission_keys = generate_url_risk_acceptance(risk_pending)
 
-    Notification.risk_acceptance_request(
-    risk_pending=risk_pending,
-    permission_keys=permission_keys,
-    enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
+    if send_notification:
+        Notification.risk_acceptance_request(
+        risk_pending=risk_pending,
+        permission_keys=permission_keys,
+        enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
 
     return permission_keys
 
