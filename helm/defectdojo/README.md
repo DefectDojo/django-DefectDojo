@@ -623,7 +623,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.ingress.enabled | bool | `true` |  |
 | django.ingress.ingressClassName | string | `""` |  |
 | django.ingress.secretName | string | `"defectdojo-tls"` |  |
-| django.mediaPersistentVolume | object | `{"enabled":true,"fsGroup":1001,"name":"media","persistentVolumeClaim":{"accessModes":["ReadWriteMany"],"create":false,"name":"","size":"5Gi","storageClassName":""},"type":"emptyDir"}` | This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume |
+| django.mediaPersistentVolume | object | `{"enabled":true,"name":"media","persistentVolumeClaim":{"accessModes":["ReadWriteMany"],"create":false,"name":"","size":"5Gi","storageClassName":""},"type":"emptyDir"}` | This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume |
 | django.mediaPersistentVolume.name | string | `"media"` | any name |
 | django.mediaPersistentVolume.persistentVolumeClaim | object | `{"accessModes":["ReadWriteMany"],"create":false,"name":"","size":"5Gi","storageClassName":""}` | in case if pvc specified, should point to the already existing pvc |
 | django.mediaPersistentVolume.persistentVolumeClaim.accessModes | list | `["ReadWriteMany"]` | check KUBERNETES.md doc first for option to choose |
