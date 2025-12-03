@@ -105,7 +105,7 @@ class KiuwanParser:
             finding.mitigation = "Not provided!"
             finding.severity = findingdict["severity"]
             finding.static_finding = True
-            finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("kiuwan")]
+            finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER["kiuwan"]] if "kiuwan" in settings.DD_CUSTOM_TAG_PARSER else []
             if cwe := row.get("CWE"):
                 if cwe.isdigit():
                     finding.cwe = int(cwe)
