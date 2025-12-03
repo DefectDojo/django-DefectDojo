@@ -3,6 +3,7 @@ import hashlib
 import io
 
 from dojo.models import Finding
+from django.conf import settings
 
 __author__ = "dr3dd589"
 
@@ -104,6 +105,7 @@ class KiuwanParser:
             finding.mitigation = "Not provided!"
             finding.severity = findingdict["severity"]
             finding.static_finding = True
+            finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("kiuwan")]
             if cwe := row.get("CWE"):
                 if cwe.isdigit():
                     finding.cwe = int(cwe)
