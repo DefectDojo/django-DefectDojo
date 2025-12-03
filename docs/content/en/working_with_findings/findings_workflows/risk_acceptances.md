@@ -27,15 +27,14 @@ Generally, any Risk Acceptances should follow your internal security policy and 
 
 ### DefectDojo Pro vs Open Source: Cross-Product Risk Acceptances
 
-**DefectDojo Pro** provides enhanced Risk Acceptance capabilities that allow you to manage risk decisions at scale:
+**DefectDojo Pro** provides enhanced Risk Acceptance capabilities that managing risk decisions at scale:
 
 * **Cross-Product Risk Acceptances**: In DefectDojo Pro, you can apply a single Risk Acceptance across multiple Products. For example, if CVE-2024-1234 appears in 10 different products, you can create one Risk Acceptance that governs all instances of that CVE across your entire portfolio.
 * **Bulk CVE Management**: Search for all Findings with a specific CVE or vulnerability ID, then apply a Risk Acceptance to all instances simultaneously, regardless of which Product they belong to.
 
-**DefectDojo Open Source** implements Risk Acceptances at the Product level:
+**DefectDojo Open Source** implements Risk Acceptances at the Engagement level:
 
-* **Product-Scoped Risk Acceptances**: Risk Acceptances are restricted to individual Products. If CVE-2024-1234 appears in 10 different products, you need to create 10 separate Risk Acceptances—one for each Product.
-* **Asset-Level Control**: This approach provides granular control and ensures that risk decisions are made in the context of each specific asset or application.
+* **Product-Scoped Risk Acceptances**: Risk Acceptances are restricted to individual Products. If CVE-2024-1234 appears in 10 different products, you need to create 10 separate Risk Acceptances—one for each Engagement.
 
 Both approaches follow the same Risk Acceptance workflow described below, but the scope differs based on your DefectDojo edition.
 
