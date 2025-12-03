@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import serialize
 from django.db.models.query_utils import Q
@@ -157,10 +158,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> list[Finding]:
-        # Progressive batching for chord execution
-        post_processing_task_signatures = []
-        current_batch_number = 1
-        max_batch_size = 1024
+        # Batched post-processing (no chord): dispatch a task per 1000 findings or on final finding
+        batch_finding_ids: list[int] = []
+        batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
 
         """
         Saves findings in memory that were parsed from the scan report into the database.
@@ -237,32 +237,34 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             finding = self.process_vulnerability_ids(finding)
             # Categorize this finding as a new one
             new_findings.append(finding)
-            # all data is already saved on the finding, we only need to trigger post processing
-
-            # We create a signature for the post processing task so we can decide to apply it async or sync
+            # all data is already saved on the finding, we only need to trigger post processing in batches
             push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
-            post_processing_task_signature = finding_helper.post_process_finding_save_signature(
-                finding,
-                dedupe_option=True,
-                rules_option=True,
-                product_grading_option=False,
-                issue_updater_option=True,
-                push_to_jira=push_to_jira,
-            )
+            batch_finding_ids.append(finding.id)
 
-            post_processing_task_signatures.append(post_processing_task_signature)
+            # If batch is full or we're at the end, dispatch one batched task
+            if len(batch_finding_ids) >= batch_max_size or is_final_finding:
+                finding_ids_batch = list(batch_finding_ids)
+                batch_finding_ids.clear()
+                if we_want_async(async_user=self.user):
+                    finding_helper.post_process_findings_batch_signature(
+                        finding_ids_batch,
+                        dedupe_option=True,
+                        rules_option=True,
+                        product_grading_option=True,
+                        issue_updater_option=True,
+                        push_to_jira=push_to_jira,
+                    )()
+                else:
+                    finding_helper.post_process_findings_batch(
+                        finding_ids_batch,
+                        dedupe_option=True,
+                        rules_option=True,
+                        product_grading_option=True,
+                        issue_updater_option=True,
+                        push_to_jira=push_to_jira,
+                    )
 
-            # Check if we should launch a chord (batch full or end of findings)
-            if we_want_async(async_user=self.user) and post_processing_task_signatures:
-                post_processing_task_signatures, current_batch_number, _ = self.maybe_launch_post_processing_chord(
-                    post_processing_task_signatures,
-                    current_batch_number,
-                    max_batch_size,
-                    is_final_finding,
-                )
-            else:
-                # Execute task immediately for synchronous processing
-                post_processing_task_signature()
+            # No chord: tasks are dispatched immediately above per batch
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(

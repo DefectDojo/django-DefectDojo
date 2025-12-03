@@ -111,7 +111,8 @@ class DojoSytemSettingsMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         from dojo.models import System_Settings  # noqa: PLC0415 circular import
-        models.signals.post_save.connect(self.cleanup, sender=System_Settings)
+        # Use classmethod directly to avoid keeping reference to middleware instance
+        models.signals.post_save.connect(DojoSytemSettingsMiddleware.cleanup, sender=System_Settings)
 
     def __call__(self, request):
         self.load()
