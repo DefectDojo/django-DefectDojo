@@ -832,7 +832,7 @@ def parser_ia_recommendation(ia_recommendation: dict = {}):
             markdown_code += "\n###🔗 Pull Request\n"
             markdown_code += "```" + pullrequest + "```"
     except Exception as e:
-        context["ia_recommendations"] = f"This recommendation is obsolete. Please generate a new one."
+        context["ia_recommendations"] = "This recommendation is obsolete. Please generate a new one."
         return context
 
     html = markdown.markdown(markdown_code)

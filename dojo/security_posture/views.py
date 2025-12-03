@@ -21,6 +21,7 @@ def security_posture_view(request: HttpRequest) -> HttpResponse:
     base_params += f"&engagement_name={engagement_name}" if engagement_name else ""
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
     return render(request, 'dojo/generic_view.html', {
-        'name': page_name,
-        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/secure/product/safety-position{base_params}",  
+        'actions': page_name,
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/secure/product/safety-position",  
+        'parameters': base_params,
         'user': user})

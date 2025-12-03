@@ -3616,8 +3616,9 @@ def all_findings_v2(request: HttpRequest, product_id) -> HttpResponse:
     base_params += f"&product={product_id}" if product_id else ""
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
     return render(request, 'dojo/generic_view.html', {
-        'name': page_name,
-        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list{base_params}",  
+        'actions': page_name,
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list",  
+        'parameters': base_params,
         'user': user,
     })
 
@@ -3630,7 +3631,8 @@ def finding_list_v2(request: HttpRequest) -> HttpResponse:
     base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
     return render(request, 'dojo/generic_view.html', {
-        'name': page_name,
-        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list{base_params}",
+        'actions': page_name,
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list",
+        'parameters': base_params,
         'user': user,
     })

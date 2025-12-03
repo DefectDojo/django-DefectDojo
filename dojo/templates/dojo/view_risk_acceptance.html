@@ -36,6 +36,99 @@
         justify-content: center;
         height: 100%;
     }
+    {% comment %} hoal {% endcomment %}
+     .tooltip-inner {
+        max-width: 650px;
+    }
+    .process-timeline-horizontal {
+        margin-top: 20px;
+        margin-left: 10px;
+    }
+    .timeline-row {
+        position: relative;
+        display: flex;
+    }
+    .timeline-step {
+        position: relative;
+        text-align: center;
+        padding: 20px;
+        background-color: #f4f4f4;
+        opacity: 0.5;
+        border-right: 1px solid #ddd;
+        width: 33.3%;
+    }
+    .timeline-step:last-child {
+        border-right: none;
+    }
+    .timeline-step.active {
+        opacity: 1;
+        background-color: #e9ecef;
+    }
+    .timeline-step.danger {
+        opacity: 1;
+        background-color: #e9ecef;
+    }
+    .timeline-step::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 20px;
+        background-color: #6c757d;
+        border-radius: 50%;
+    }
+    .timeline-step.active::before {
+        background-color: #28a745;
+    }
+    .timeline-step.danger::before {
+        background-color: #d11d38;
+    }
+    .timeline-content {
+        position: relative;
+        z-index: 1;
+    }
+    .discussion-item {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .discussion-right {
+        align-self: flex-end;
+        text-align: end;
+        background-color: #e6f2ff;
+        border-radius: 10px;
+        padding: 10px;
+        width: 300px;
+        margin-left: auto; /* This will push it to the right */
+    }
+    
+    .discussion-left {
+        align-self: flex-start;
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        padding: 10px;
+        width: 300px;
+        margin-right: auto; /* This will keep it on the left */
+    }
+    .sticky-form {
+        position: sticky;
+        bottom: 0;
+        background-color: white;
+        padding: 15px;
+        border-top: 1px solid #ddd;
+        z-index: 1000;
+    }
+    .modal-header .close {
+        margin-top: -26px;
+    }
+    .modal-header{
+        padding: 8px;
+        background-color:#20a6d8bf;
+        border-button:#20a6d8bf;
+    }
 {% endblock %}
 {% block add_css %}
     {{ block.super }}
@@ -44,6 +137,7 @@
 {% block content %}
     {{ block.super }}
     {% include 'dojo/modal/modal_loading.html' %}
+    {% include 'dojo/modal/send_email.html'%}
     <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -117,6 +211,9 @@
                 <table class="table-striped table table-condensed table-hover centered">
                     <tr>
                         <th>Date</th>
+                        {% if risk_acceptance.long_term_acceptance%}
+                        <th>Recommended reviewers</th>
+                        {% endif %}
                         <th>Recommended Acceptors</th>
                         <th>Name</th>
                         <th>Decision</th>
@@ -137,12 +234,18 @@
                     </tr>
                     <tr>
                         <td>{{ risk_acceptance.created|date }}</td>
+                        {% if risk_acceptance.long_term_acceptance %}
+                            <td> 👤 {{risk_acceptance.reviewed_by}}</br></td>
+                        {% endif %}
                         <td>
-                            {% for accepted_by in risk_acceptance.accepted_by_user%}
-                            👤 {{accepted_by}}</br>
-                            {% endfor %}
+                            {% if risk_acceptance.accepted_by_user %}
+                                {% for accepted_by in risk_acceptance.accepted_by_user%}
+                                👤 {{accepted_by}}</br>
+                                {% endfor %}
+                            {% else %}
+                                Undefined
+                            {% endif %}
                         </td>
-
                         <td>{{ risk_acceptance.name }}</td>
                         <td>{{ risk_acceptance.get_decision_display|default_if_none:"" }}</td>
                         <td>{{ risk_acceptance.long_term_acceptance}}
@@ -230,6 +333,62 @@
             {% endif%}
         </div>
     {% endif %}
+    <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Process <span class="pull-right"><a rel="noopener noreferrer" data-toggle="collapse" href="#vuln_procs"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_procs" class="panel-body finding-description collapse in">
+                {% if risk_acceptance.long_term_acceptance %}
+                <div class="container-fluid process-timeline-horizontal">
+                    <div class="row timeline-row">
+                        <div class="col-4 timeline-step {% if risk_acceptance.created %}active{% endif %}">
+                            <div class="timeline-content">
+                                <strong>Created</strong>
+                                <p>
+                                    {{ risk_acceptance.created|date:"d M Y H:i" }}
+                                    <br>
+                                    <strong>By:</strong> {{ risk_acceptance.owner.username}}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 timeline-step {% if risk_acceptance.reviewed_date %}active{% endif %}">
+                            <div class="timeline-content">
+                                <strong>Reviewed</strong>
+                                <p>
+                                    {% if risk_acceptance.reviewed_date %}
+                                        {{ risk_acceptance.reviewed_date|date:"d M Y H:i" }}
+                                        <br>
+                                        <strong>By:</strong> {{ risk_acceptance.reviewed_by }}
+                                    {% else %}
+                                        Pending review by Risk team
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 timeline-step {% if risk_acceptance.accepted_date %}active{% endif %}">
+                            <div class="timeline-content">
+                                <strong>Final Status</strong>
+                                <p>
+                                    {% if risk_acceptance.accepted_date %}
+                                        {{ risk_acceptance.accepted_date|date:"d M Y H:i" }}
+                                        <br>
+                                        <strong>By:</strong> {{ finding_exclusion.accepted_by.username }}
+                                        {% for accepted_by in risk_acceptance.accepted_by_user %}
+                                            {{ accepted_by }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        Awaiting acceptance by Risk approvers
+                                    {% endif %}
+                                    {{ finding_exclusion.status_updated_at|date:"d M Y H:i" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
     <div id="risk_acceptance" class="panel panel-default table-responsive">
         <div class="panel-heading tight">
             <div class="clearfix">
@@ -260,8 +419,10 @@
                     <th>Vulnerability Id</th>
                     <th>Name</th>
                     <th>Date</th>
-                    <th>Active</th>
                     <th>Status</th>
+                    {% if risk_acceptance.long_term_acceptance %}
+                        <th>Reviewed by</th>
+                    {% endif %}
                     <th>Accepted by</th>
                     <th>Actions</th>
                 </thead>
@@ -302,9 +463,11 @@
                         <td><a rel="noopener noreferrer" href="{% url 'view_finding' finding.id %}"
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
-                        <td>{{ finding.active }}</td>
                         <td>{{ finding|finding_display_status}}</td>
-                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_accepted_by|safe}}</td>
+                        {% if risk_acceptance.long_term_acceptance %}
+                            <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_reviewed_by:risk_acceptance|safe}}</td>
+                        {% endif %}
+                        <td style="white-space: nowrap;">{{ finding|render_risk_acceptance_accepted_by:risk_acceptance|safe}}</td>
                         <td>
                             {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}
                             <form method="post">
@@ -386,7 +549,7 @@
                         <a rel="noopener noreferrer" href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a>
                     </td>
                     <td>
-                        {{ risk_acceptance.created }}
+                        {{ Risk_acceptance.created }}
                     </td>
                     <td>
                         {% if engagement|has_object_permission:"Risk_Acceptance" %}
@@ -521,7 +684,6 @@
     </script>
 {% endif %}
 <script type="module">
-    // cookies token
     import {MAX_RETRY, RETRY_INTERVAL} from '{% static "dojo/js/settings.js" %}'
      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     
@@ -563,20 +725,8 @@
                 console.log(response)
             })
         });
-        // Trigger change event risk acceptance button
-        $("#id_risk_accept_pending").click(function(e) {
-            let alert = localStorage.getItem('raExpirationDateAlerta');
-            if(!alert){
-                e.preventDefault();
-                let ms = confirm("Are you sure you want to accept this risk with date expiration " + $("#id_expiration_date").val() + "?");
-                if (ms){
-                    localStorage.setItem('raExpirationDateAlerta', 'true');
-                    return; 
-                } else {
-                    console.log("The risk acceptance was cancelled.");
-                    return; // exit function
-                }
-            }
+        $('#send-email-risk-acceptance-id').on('click', function() {
+            $('#modal_send_email_id').modal('show');
         });
     });
 
@@ -642,5 +792,85 @@
             }, 0);
         {% endif %}
     });
+</script>
+<script type="module">
+    import {MAX_RETRY, RETRY_INTERVAL} from '{% static "dojo/js/settings.js" %}'
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+async function sendEmail() {
+    const form = document.getElementById('email-form');
+    const submitBtn = document.getElementById('send-email-btn');
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending...';
+    
+    const formData = new FormData(form);
+    
+    formData.append('enable_acceptance_risk_for_email', true);
+    formData.append('risk_acceptance_id', {{ risk_acceptance.id }});
+    formData.append('is_async', false);
+    formData.append('template', 'risk_acceptance_request');
+
+    
+    try {
+        const response = await $.ajax({
+            url: "/api/v2/notifications_email",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: { "X-CSRFToken": csrftoken },
+            retry: MAX_RETRY,
+            retryInterval: RETRY_INTERVAL,
+        });
+        return response;
+    } catch (error) {
+        throw error;
+    }
+  }
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showSuccessMessage(message) {
+    alert('✅ ' + message);
+}
+
+function showErrorMessage(message) {
+    alert('❌ ' + message);
+}
+
+$(document).ready(function() {
+    $('#send-email-btn').on('click', function(event)
+    {
+        event.preventDefault();
+        sendEmail().then(response => {
+            showSuccessMessage('Email sent successfully.');
+            $('#modal_send_email_id').modal('hide');
+        }).catch(error => {
+            showErrorMessage('Failed to send email. Please try again.');
+        }).finally(() => {
+                const submitBtn = document.getElementById('send-email-btn');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Send Email';
+        });
+    });
+});
+
+$('#modal_send_email_id').on('hidden.bs.modal', function () {
+    $('#recipient-email').val(""); 
+    document.getElementById('email-form').reset();
+});
 </script>
 {% endblock %}

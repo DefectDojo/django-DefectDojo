@@ -40,7 +40,7 @@ class RenderRiskAcceptanceAcceptedByTests(DojoTestCase):
         self.risk_acceptance.accepted_by = "['JohnSmith']"
         self.risk_acceptance.save()
         self.finding.save()
-        result = render_risk_acceptance_accepted_by(self.finding)
+        result = render_risk_acceptance_accepted_by(self.finding, self.risk_acceptance)
         self.assertIn("👤 John Smith ✅", result)
 
     def test_render_risk_acceptance_multiple_users(self):
@@ -49,7 +49,7 @@ class RenderRiskAcceptanceAcceptedByTests(DojoTestCase):
         self.risk_acceptance.accepted_by = "['JohnSmith', 'JaneDoe']"
         self.risk_acceptance.save()
         self.finding.save()
-        result = render_risk_acceptance_accepted_by(self.finding)
+        result = render_risk_acceptance_accepted_by(self.finding, self.risk_acceptance)
         self.assertIn("👤 John Smith ✅", result)
         self.assertIn("👤 Jane Doe ✅", result)
 
@@ -59,7 +59,7 @@ class RenderRiskAcceptanceAcceptedByTests(DojoTestCase):
         self.risk_acceptance.accepted_by = "['JohnSmith', 'JaneDoe']"
         self.risk_acceptance.save()
         self.finding.save()
-        result = render_risk_acceptance_accepted_by(self.finding)
+        result = render_risk_acceptance_accepted_by(self.finding, self.risk_acceptance)
         self.assertIn("👤 John Smith ⏳", result)
         self.assertIn("👤 Jane Doe ⏳", result)
 
@@ -69,6 +69,6 @@ class RenderRiskAcceptanceAcceptedByTests(DojoTestCase):
         self.risk_acceptance.accepted_by = "['JohnSmith', 'JaneDoe']"
         self.risk_acceptance.save()
         self.finding.save()
-        result = render_risk_acceptance_accepted_by(self.finding)
+        result = render_risk_acceptance_accepted_by(self.finding, self.risk_acceptance)
         self.assertIn("👤 John Smith ✅", result)
         self.assertIn("👤 Jane Doe ✅", result)

@@ -24,6 +24,7 @@ def get_contacts_product_type_and_product_by_serverity(
         engagement: Engagement,
         finding_serverity: str,
         user):
+    
 
     rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(
         finding_serverity)
@@ -45,4 +46,4 @@ def get_contacts_product_type_and_product_by_serverity(
     if contact_list == []:
         contact_list.append(user)
 
-    return contact_list
+    return contact_list    
