@@ -391,7 +391,7 @@ class BaseImporter(ImporterOptions):
         # We filter out these findings here to avoid FK violations (IntegrityError)
         all_findings = []
         for list_, _ in finding_action_mappings:
-all_findings.extend(list_)
+            all_findings.extend(list_)
         existing_findings = finding_helper.filter_findings_by_existence(all_findings) if all_findings else []
         existing_ids = {f.id for f in existing_findings}
 
