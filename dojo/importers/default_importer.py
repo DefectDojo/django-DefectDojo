@@ -150,7 +150,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Update the test progress to reflect that the import has completed
         logger.debug("IMPORT_SCAN: Updating Test progress")
         self.update_test_progress()
-        logger.debug("IMPORT_SCAN: Updating Priority, EPSS, KEV")
         self.update_priority_epss_kev.apply_async(args=[self, new_findings])
         logger.debug("IMPORT_SCAN: Done")
         return self.test, 0, len(new_findings), len(closed_findings), 0, 0, test_import_history

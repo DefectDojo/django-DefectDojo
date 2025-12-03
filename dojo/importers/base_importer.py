@@ -29,6 +29,7 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Test_Type,
     Vulnerability_Id,
+    GeneralSettings,
 )
 from dojo.notifications.helper import create_notification, EmailNotificationManger
 from dojo.tools.factory import get_parser
@@ -876,8 +877,17 @@ class BaseImporter(ImporterOptions):
         epss_dict = None
         kev_dict = None
 
+        if GeneralSettings.get_value(
+            "ENABLE_UPDATE_PRIORITY_EPSS_KEV_ON_IMPORT_SCAN",
+            False
+        ):
+            logger.debug("IMPORT_SCAN: ENABLE_UPDATE_PRIORITY_EPSS_KEV_ON_IMPORT_SCAN is disabled")
+            return
+
         if not findings:
             return
+        
+        logger.debug("IMPORT_SCAN: Updating Priority, EPSS, KEV")
         
         # Collect all vulnerability IDs from findings
         cve_list = []
