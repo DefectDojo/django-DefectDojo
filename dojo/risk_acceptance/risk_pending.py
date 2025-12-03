@@ -23,7 +23,7 @@ from dojo.models import (
     )
 from dojo.api_v2.api_error import ApiError
 from dojo.risk_acceptance.helper import post_jira_comments, get_product_type_prefix_key
-from dojo.product_type.helper import get_contacts_product_type_and_product_by_serverity
+from dojo.product_type.helper import get_contacts_product_type_and_product_by_serverity, get_contacts_product_type_and_product
 from dojo.group.queries import users_with_permissions_to_approve_long_term_findings
 from dojo.risk_acceptance.notification import Notification
 from dojo.user.queries import get_role_members, get_user
@@ -288,6 +288,12 @@ def is_permissions_risk_acceptance(
     group_name =  GeneralSettings.get_value("GROUP_APPROVERS_LONGTERM_ACCEPTANCE", "Approvers_Risk")
     users = get_users_for_group_by_role(group_name, "Risk")
     if user in users and finding.risk_accepted is False:
+        return True
+    
+    if finding.long_term_acceptance:
+        contacts_dict = get_contacts_product_type_and_product(engagement.product)
+        for user in contacts_dict.keys():
+            return user
         return True
 
     result = False

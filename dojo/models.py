@@ -3045,6 +3045,13 @@ class Finding(models.Model):
         return results
 
     @property
+    def long_term_acceptance(self):
+        ras = self.risk_acceptance_set.all().filter(long_term_acceptance=True)
+        if ras:
+            return ras[0]
+        return None
+
+    @property
     def risk_acceptance(self):
         ras = self.risk_acceptance_set.all()
         if ras:
