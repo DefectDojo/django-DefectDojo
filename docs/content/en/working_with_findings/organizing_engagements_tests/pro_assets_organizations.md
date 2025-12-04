@@ -8,7 +8,7 @@ DefectDojo Pro is extending the Product/Product Type object classes to provide g
 ## Significant Changes
 
 * **Product Types** have been renamed to "Organizations", and **Products** have been renamed to "Assets".  Currently, this name change is opt-in for existing DefectDojo Pro subscriptions.
-* **Assets** can now have parent/child relationships with one another to further sub-categorize Organizational components.  This feature has been added independently of the name change, so if your organization still uses **Product Type/Product** naming, you will be able to set up Parent/Child relationships with your Products.
+* **Assets** can now have parent/child relationships with one another to further sub-categorize Organizational components. 
 
 ### Organizations
 
