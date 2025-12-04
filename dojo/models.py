@@ -4,7 +4,6 @@ import copy
 import hashlib
 import logging
 import re
-import json
 import warnings
 from contextlib import suppress
 from datetime import datetime, timedelta
@@ -3299,36 +3298,63 @@ class Finding(models.Model):
     def get_sla_configuration(self):
         return self.test.engagement.product.sla_configuration
     
+    def _calculate_severity_priority(self, tags, priority) -> int:
+        priorization_weights = settings.PRIORIZATION_FIELD_WEIGHTS
+        if tags:
+            if any(tag in tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
+                priority = round(float(priority), 2)
+                RP_VERY_CRITICAL = priorization_weights.get(
+                    "RP_Very_Critical", None
+                )
+                RP_CRITICAL = priorization_weights.get("RP_Critical", None)
+                RP_HIGH = priorization_weights.get("RP_High", None)
+                RP_MEDIUM_LOW = priorization_weights.get(
+                    "RP_Medium_Low", None
+                )
+
+                if RP_VERY_CRITICAL and RP_CRITICAL and RP_HIGH and RP_MEDIUM_LOW:
+
+                    if (
+                        float(RP_VERY_CRITICAL.split("-")[0])
+                        <= priority
+                        <= float(RP_VERY_CRITICAL.split("-")[1])
+                    ):
+                        return "Very Critical"
+                    elif (
+                        float(RP_CRITICAL.split("-")[0])
+                        <= priority
+                        <= float(RP_CRITICAL.split("-")[1])
+                    ):
+                        return "Critical"
+                    elif (
+                        float(RP_HIGH.split("-")[0])
+                        <= priority
+                        <= float(RP_HIGH.split("-")[1])
+                    ):
+                        return "High"
+                    elif (
+                        float(RP_MEDIUM_LOW.split("-")[0])
+                        <= priority
+                        <= float(RP_MEDIUM_LOW.split("-")[1])
+                    ):
+                        return "Medium Low"
+        return "Unknown"
+    
+    @property
+    def priority_classification(self):
+        return self._calculate_severity_priority(self.tags, self.priority)
+    
     def get_severity_related_to_priority(self):
         """Get severity related to priority the finding"""
 
         severity_mapping = {
-            "Very-Critical": "critical",
+            "Very Critical": "critical",
             "Critical": "high",
             "High": "medium",
-            "Medium-Low": "low",
+            "Medium Low": "low",
         }
         severity = self.severity.lower()
-        if self.tags:
-            if any(tag in self.tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
-                # If the finding has a tag that matches the priority filter tags, use the priority field
-                priority = round(float(self.priority), 2)
-                RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Very_Critical", None)
-                RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical", None)
-                RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High", None)
-                RP_MEDIUM_LOW = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Medium_Low", None)
-
-                if RP_VERY_CRITICAL and RP_CRITICAL and RP_HIGH and RP_MEDIUM_LOW:
-
-                    if float(RP_VERY_CRITICAL.split("-")[0]) <= priority <= float(RP_VERY_CRITICAL.split("-")[1]):
-                        severity = "Very-Critical"
-                    elif float(RP_CRITICAL.split("-")[0]) <= priority <= float(RP_CRITICAL.split("-")[1]):
-                        severity = "Critical"
-                    elif float(RP_HIGH.split("-")[0]) <= priority <= float(RP_HIGH.split("-")[1]):
-                        severity = "High"
-                    elif float(RP_MEDIUM_LOW.split("-")[0]) <= priority <= float(RP_MEDIUM_LOW.split("-")[1]):
-                        severity = "Medium-Low"
-        return severity_mapping.get(severity, severity)
+        return severity_mapping.get(self.priority_classification, severity)
 
 
     def get_sla_period(self):

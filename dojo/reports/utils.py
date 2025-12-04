@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 from datetime import datetime
-from dojo.utils import calculate_severity_priority
 import logging
 import re
 logger = logging.getLogger(__name__)
@@ -137,8 +136,6 @@ def configure_values_excel(finding, worksheet, excludes_list, allowed_foreign_ke
                         value = str(getattr(finding, key))
                 if value and isinstance(value, datetime):
                     value = value.replace(tzinfo=None)
-                if key == "priority":
-                    value = calculate_severity_priority(finding.tags, value)
                 worksheet.cell(row=row_num, column=col_num, value=value)
                 col_num += 1
         except Exception as exc:
@@ -266,8 +263,6 @@ def configure_values_csv(finding, excludes_list, allowed_foreign_keys, allowed_a
                         value = str(getattr(finding, key))
                 if value and isinstance(value, str):
                     value = value.replace("\n", " NEWLINE ").replace("\r", "")
-                if key == "priority":
-                    value = calculate_severity_priority(finding.tags, value)
                 fields.append(value)
         except Exception as exc:
             logger.error("Error in attribute: " + str(exc))

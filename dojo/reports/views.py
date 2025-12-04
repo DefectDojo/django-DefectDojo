@@ -62,8 +62,7 @@ from dojo.utils import (
     get_page_items,
     get_period_counts_legacy,
     get_system_setting,
-    get_words_for_field,
-    calculate_severity_priority
+    get_words_for_field
 )
 
 logger = logging.getLogger(__name__)
@@ -758,7 +757,7 @@ def get_foreign_keys():
 
 
 def get_attributes():
-    return ["sla_age", "sla_deadline", "sla_days_remaining"]
+    return ["sla_age", "sla_deadline", "sla_days_remaining", "priority_classification"]
 
 
 class CSVExportView(View):

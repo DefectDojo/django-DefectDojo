@@ -2862,52 +2862,6 @@ def user_is_contacts(user, product, contacts_dict=None):
 
     return any(contact == user for contact in contacts_all.values())
 
-
-def calculate_severity_priority(tags, priority) -> int:
-    """
-    Returns the severity according to the priority
-    """
-    if tags:
-        if any(tag in tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
-            priority = round(float(priority), 2)
-            RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get(
-                "RP_Very_Critical", None
-            )
-            RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical", None)
-            RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High", None)
-            RP_MEDIUM_LOW = settings.PRIORIZATION_FIELD_WEIGHTS.get(
-                "RP_Medium_Low", None
-            )
-
-            if RP_VERY_CRITICAL and RP_CRITICAL and RP_HIGH and RP_MEDIUM_LOW:
-
-                if (
-                    float(RP_VERY_CRITICAL.split("-")[0])
-                    <= priority
-                    <= float(RP_VERY_CRITICAL.split("-")[1])
-                ):
-                    return "Very-Critical"
-                elif (
-                    float(RP_CRITICAL.split("-")[0])
-                    <= priority
-                    <= float(RP_CRITICAL.split("-")[1])
-                ):
-                    return "Critical"
-                elif (
-                    float(RP_HIGH.split("-")[0])
-                    <= priority
-                    <= float(RP_HIGH.split("-")[1])
-                ):
-                    return "High"
-                elif (
-                    float(RP_MEDIUM_LOW.split("-")[0])
-                    <= priority
-                    <= float(RP_MEDIUM_LOW.split("-")[1])
-                ):
-                    return "Medium-Low"
-    return "Unknown"
-
-
 class Response:
 
     def __init__(self, status, message) -> None:

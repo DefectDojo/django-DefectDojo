@@ -2,9 +2,7 @@ import logging
 from django.utils import timezone
 from dojo.models import GeneralSettings
 from dojo.api_v2.utils import http_response
-from dojo.api_v2.security_posture.serializers import EngagementSecuritypostureSerializer
 from dojo.models import Engagement
-from dojo.utils import calculate_severity_priority
 logger = logging.getLogger(__name__)
 
 def calculate_posture(result):
@@ -95,9 +93,9 @@ def get_security_posture(engagement: Engagement, engagement_name: str):
         "unknown": 0,
     }
     for finding in active_finding.iterator():
-        priority = calculate_severity_priority(finding.tags, finding.priority)  
+        priority = finding.priority_classification
         logger.debug(f"Finding {finding.id} has priority {priority}")
-        data["counter_findings_by_priority"][str(priority).lower().replace("-", "_")] += 1 
+        data["counter_findings_by_priority"][str(priority).lower().replace(" ", "_")] += 1
         data["counter_findings_by_severity"][str(finding.severity).lower()] += 1 
     events = active_finding.filter(
         active=True,

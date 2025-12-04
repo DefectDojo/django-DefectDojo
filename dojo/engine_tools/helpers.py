@@ -536,24 +536,25 @@ def identify_priority_vulnerabilities(findings) -> int:
 
 
 def get_severity_risk_map():
+    priorization_weights = settings.PRIORIZATION_FIELD_WEIGHTS
     return {
         "Standard": {
-            "Low": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Low")),
-            "Medium": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Medium")),
-            "High": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_High")),
-            "Critical": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Critical")),
+            "Low": float(priorization_weights.get("P_Low")),
+            "Medium": float(priorization_weights.get("P_Medium")),
+            "High": float(priorization_weights.get("P_High")),
+            "Critical": float(priorization_weights.get("P_Critical")),
         },
         "Discreet": {
-            "Low": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Low")),
-            "Medium": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Low")),
-            "High": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Medium")),
-            "Critical": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_High")),
+            "Low": float(priorization_weights.get("P_Low")),
+            "Medium": float(priorization_weights.get("P_Low")),
+            "High": float(priorization_weights.get("P_Medium")),
+            "Critical": float(priorization_weights.get("P_High")),
         },
         "Stable": {
-            "Low": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Low")),
-            "Medium": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Low")),
-            "High": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_High")),
-            "Critical": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Critical")),
+            "Low": float(priorization_weights.get("P_Low")),
+            "Medium": float(priorization_weights.get("P_Low")),
+            "High": float(priorization_weights.get("P_High")),
+            "Critical": float(priorization_weights.get("P_Critical")),
         },
     }
 

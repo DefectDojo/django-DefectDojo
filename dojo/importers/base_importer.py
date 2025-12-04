@@ -880,14 +880,15 @@ class BaseImporter(ImporterOptions):
         if GeneralSettings.get_value(
             "ENABLE_UPDATE_PRIORITY_EPSS_KEV_ON_IMPORT_SCAN",
             False
-        ):
-            logger.debug("IMPORT_SCAN: ENABLE_UPDATE_PRIORITY_EPSS_KEV_ON_IMPORT_SCAN is disabled")
+        ) is False:
+            logger.info("IMPORT_SCAN: ENABLE_UPDATE_PRIORITY_EPSS_KEV_ON_IMPORT_SCAN is disabled")
             return
 
         if not findings:
+            logger.info("IMPORT_SCAN: No findings to update Priority, EPSS, KEV")
             return
         
-        logger.debug("IMPORT_SCAN: Updating Priority, EPSS, KEV")
+        logger.info("IMPORT_SCAN: Updating Priority, EPSS, KEV")
         
         # Collect all vulnerability IDs from findings
         cve_list = []
@@ -909,4 +910,4 @@ class BaseImporter(ImporterOptions):
             finding.ransomware_used = ransomware_used
             finding.kev_date = kev_date_added
         Finding.objects.bulk_update(findings, ["priority", "sla_expiration_date", "epss_score", "epss_percentile", "known_exploited", "ransomware_used", "kev_date"], 1000)
-        logger.debug("Findings updated with priority and SLA expiration date")
+        logger.info("Findings updated with priority and SLA expiration date")

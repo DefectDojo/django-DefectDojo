@@ -256,12 +256,13 @@ class FindingStatusFilter(ChoiceFilter):
 
 class FindingPriorityFilter(MultipleChoiceFilter):
     tags_priority = settings.PRIORITY_FILTER_TAGS.split(",")
-    RP_VERY_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get(
+    priority_weights = settings.PRIORIZATION_FIELD_WEIGHTS
+    RP_VERY_CRITICAL = priority_weights.get(
                 "RP_Very_Critical", None
             )
-    RP_CRITICAL = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_Critical", None)
-    RP_HIGH = settings.PRIORIZATION_FIELD_WEIGHTS.get("RP_High", None)
-    RP_MEDIUM_LOW = settings.PRIORIZATION_FIELD_WEIGHTS.get(
+    RP_CRITICAL = priority_weights.get("RP_Critical", None)
+    RP_HIGH = priority_weights.get("RP_High", None)
+    RP_MEDIUM_LOW = priority_weights.get(
         "RP_Medium_Low", None
     )
 
@@ -275,7 +276,7 @@ class FindingPriorityFilter(MultipleChoiceFilter):
     def __init__(self, *args, **kwargs):
         choices = [
             (0, _("Unknown")),
-            (1, _("Medium-Low")),
+            (1, _("Medium Low")),
             (2, _("High")),
             (3, _("Critical")),
             (4, _("Very Critical")),
@@ -296,7 +297,7 @@ class FindingPriorityFilter(MultipleChoiceFilter):
 
                 if priority_int == 0:  # Unknown
                     combined_query |= Q(priority=0.0) & ~Q(tags__name__in=self.tags_priority)
-                elif priority_int == 1:  # Medium-Low
+                elif priority_int == 1:  # Medium Low
                     if self.RP_MEDIUM_LOW:
                         lower, upper = map(float, self.RP_MEDIUM_LOW.split("-"))
                         combined_query |= Q(
@@ -1695,6 +1696,37 @@ class ApiFindingFilter(DojoFilter):
     product_name_contains = CharFilter(lookup_expr="engagement__product__name__icontains", field_name="test", label="exact product name")
     product_lifecycle = CharFilter(method=custom_filter, lookup_expr="engagement__product__lifecycle",
                                    field_name="test__engagement__product__lifecycle", label="Comma separated list of exact product lifecycles")
+    priority_classification = MultipleChoiceFilter(
+        choices=[
+            ("Very Critical", _("Very Critical")),
+            ("Critical", _("Critical")),
+            ("High", _("High")),
+            ("Medium Low", _("Medium Low")),
+            ("Unknown", _("Unknown")),
+        ],
+        method="filter_priority_string",
+        label="Priority (String)")
+
+    def filter_priority_string(self, queryset, name, value):
+        if not value:
+            return queryset
+        
+        priority_map = {
+            "Very Critical": 4,
+            "Critical": 3,
+            "High": 2,
+            "Medium Low": 1,
+            "Unknown": 0,
+        }
+        
+        numeric_values = [str(priority_map.get(v)) for v in value if v in priority_map]
+        
+        if numeric_values:
+            priority_filter = FindingPriorityFilter()
+            return priority_filter.filter(queryset, numeric_values)
+        
+        return queryset
+
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()
