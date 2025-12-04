@@ -19,21 +19,54 @@
   <hr />
   {% endblock %} {% block postscript %} {{ block.super }}
   <script type="text/javascript">
-    const channel = new MessageChannel();
-  const iframe = document.querySelector("iframe");
-  iframe.onload = () => {
-    iframe.contentWindow.postMessage({ action: "{{ actions }}" }, "{{ url }}", [
-      channel.port2,
-    ]);
-    channel.port1.start();
-    channel.port1.onmessage = (event) => {
-      if (event.data.action === "{{ actions }}") {
-        channel.port1.postMessage({
-          action: "{{ actions }}",
-          data: "{{ parameters }}",
-        });
+  document.addEventListener("DOMContentLoaded", function () {
+      const iframe = document.querySelector("iframe");
+      if (!iframe) return;
+
+      let channel = new MessageChannel();
+      let messageInitialized = false;
+
+      function initializeMessage() {
+        if (messageInitialized) return;
+
+        try {
+          channel.port1.start();
+          channel.port1.onmessage = function (event) {
+            if (event.data && event.data.action === "{{ actions }}") {
+              try {
+                channel.port1.postMessage({
+                  action: "{{ actions }}",
+                  data: "{{ parameters }}",
+                });
+              } catch (error) {
+                console.error("Error responding to iframe message:", error);
+              }
+            }
+          };
+
+          iframe.contentWindow.postMessage({ action: "{{ actions }}" }, "{{ url }}", [
+            channel.port2,
+          ]);
+
+          messageInitialized = true;
+        } catch (error) {
+          console.error("Error initializing iframe communication:", error);
+        }
       }
-    };
-  };
+
+      iframe.addEventListener("load", function () {
+        setTimeout(initializeMessage, 100);
+      });
+
+      setTimeout(function () {
+        if (!messageInitialized) {
+          initializeMessage();
+        }
+      }, 1000);
+
+      if (iframe.complete || iframe.readyState === "complete") {
+        setTimeout(initializeMessage, 100);
+      }
+    });
   </script>
 {% endblock %}
