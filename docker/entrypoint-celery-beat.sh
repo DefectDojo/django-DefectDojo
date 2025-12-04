@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# set -e  # needed to handle "exit" correctly
+set -e  # needed to handle "exit" correctly
 
 . /secret-file-loader.sh
 . /reach_database.sh
@@ -31,4 +31,4 @@ python3 manage.py check
 exec celery --app=dojo \
     beat \
   --pidfile= \
-  --schedule=celerybeat-schedule
+  --schedule=/var/run/defectdojo/celerybeat-schedule
