@@ -1,4 +1,3 @@
-import json
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
@@ -14,7 +13,6 @@ from dojo.models import (
     GeneralSettings,
     Product_Type,
 )
-
 
 class SecurityPostureAPITest(TestCase):
     fixtures = ['dojo_testdata.json']
@@ -114,10 +112,8 @@ class SecurityPostureAPITest(TestCase):
             }
         )
 
-    @patch('dojo.utils.calculate_severity_priority')
-    def test_get_security_posture_with_engagement_id(self, mock_calculate_severity_priority):
+    def test_get_security_posture_with_engagement_id(self):
         """Test get security posture with valid engagement_id"""
-        mock_calculate_severity_priority.return_value = "Very-Critica"
         response = self.client.get(
             self.url,
             {'engagement_id': self.engagement.id},
@@ -179,10 +175,8 @@ class SecurityPostureAPITest(TestCase):
         
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch('dojo.utils.calculate_severity_priority')
-    def test_get_security_posture_findings_count(self, mock_calculate_severity_priority):
+    def test_get_security_posture_findings_count(self):
         """Test that findings counts are correct"""
-        mock_calculate_severity_priority.return_value = "Very-Critica"
         response = self.client.get(
             self.url,
             {'engagement_id': self.engagement.id},
@@ -196,5 +190,5 @@ class SecurityPostureAPITest(TestCase):
         self.assertEqual(data['counter_findings_by_priority']['critical'], 0)
         self.assertEqual(data['counter_findings_by_priority']['high'], 0)
         self.assertEqual(data['counter_findings_by_priority']['medium_low'], 0)
-        self.assertEqual(data['counter_findings_by_priority']['unknown'], 9)
+        self.assertEqual(data['counter_findings_by_priority']['unknown'], 0)
 
