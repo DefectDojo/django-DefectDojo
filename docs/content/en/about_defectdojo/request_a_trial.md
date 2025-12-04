@@ -6,11 +6,11 @@ weight: 6
 pro-feature: true
 ---
 
-If your team requires an on\-premise DefectDojo installation, please connect with our Sales team by emailing \-\> [info@defectdojo.com](mailto:info@defectdojo.com) . This trial setup process only applies to DefectDojo Cloud users.
+If your team requires an on-premise DefectDojo installation, please connect with our Sales team by emailing → [hello@defectdojo.com](mailto:hello@defectdojo.com) . This trial setup process only applies to DefectDojo Cloud users.
 
-All DefectDojo plans include a free 2\-week trial, which you can use to evaluate our software. DefectDojo Trial instances are fully\-featured and can be immediately converted to our team into paid instances \- no need to set everything up again, or reupload any data when your trial period ends.
+All DefectDojo plans include a free 2-week trial, which you can use to evaluate our software. DefectDojo Trial instances are fully-featured and can be immediately converted into paid instances by our team; no need to set everything up again, or reupload any data when your trial period ends.
 
-At the end of this process, you'll be put in touch with our Sales team, who will follow up to receive your billing information, and authorize and set up your company's trial instance.
+At the end of this process, you'll be put in touch with our Sales team who will follow up to receive your billing information and authorize your company's trial instance.
 
 # **Requesting your Trial**
 
@@ -29,7 +29,7 @@ Enter your company's **Name** and the **Server Label** you want to use with Defe
 
 ![image](images/request_a_trial_2.png)
 
-Normally, DefectDojo will name your domain according to your Company Name., but if you select "Use Server Label in Domain", DefectDojo will instead label your domain according to the Server Label you chose. This approach may be preferred if you plan to use multiple DefectDojo instances (such as a Production instance and a Test instance, for example). Please contact our Sales team \-\> [info@defectdojo.com](mailto:info@defectdojo.com) if you require multiple instances.
+Normally, DefectDojo will name your domain according to your company name, but if you select "Use Server Label in Domain" DefectDojo will instead label your domain according to the Server Label you chose. This approach may be preferred if you plan to use multiple DefectDojo instances (such as a Production instance and a Test instance, for example). Please contact our Sales team → [hello@defectdojo.com](mailto:hello@defectdojo.com) if you require multiple instances.
 
 ## Step 3: Select a Server Location
 
@@ -43,11 +43,11 @@ Enter the IP address ranges, subnet mask and labels that you want to allow to ac
 
 ![image](images/request_a_trial_4.png)
 
-If you want to use external services with DefectDojo (GitHub or JIRA), check the appropriate boxes listed under **Select External Services.** 
+If you want to use external services with DefectDojo (e.g., GitHub or JIRA), check the appropriate boxes listed under **Select External Services.** 
 
 ## Step 5: Confirm your Plan type and Billing Frequency
 
-Before you complete the process, please confirm the plan you want to use along with your billing frequency \- monthly or annually.
+Before you complete the process, please confirm the plan you want to use along with your billing frequency (monthly or annually).
 
 ![image](images/request_a_trial_5.png)
 
@@ -60,8 +60,8 @@ We'll prompt you to look over your request one more time. Once submitted, only F
 After reviewing and accepting DefectDojo's License and Support Agreement, you can click **Checkout With Stripe** or **Contact Sales**.
 
 * Checkout With Stripe will take you to a Stripe page where you can enter your billing information.
-* If you do not wish to enter your billing info at this time, you can click Contact Sales - our Sales team will be in touch to set up your trial.
+* If you do not wish to enter your billing info at this time, you can click Contact Sales, and our Sales team will be in touch to help you finalize your trial subscription.
 
 # Once your trial has been approved
 
-Our Support team will send you a Welcome email with links and an initial password to access your DefectDojo instance. You can always reach out to [support@defectdojo.com](mailto:support@defectdojo.com) for product assistance once your trial begins.
+Our Support team will send you a Welcome email with links and an initial password to access your DefectDojo instance. You can always reach out to [support@defectdojo.com](mailto:support@defectdojo.com) for DefectDojo Pro assistance once your trial begins.

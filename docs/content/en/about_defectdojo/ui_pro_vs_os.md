@@ -6,16 +6,14 @@ weight: 5
 pro-feature: true
 ---
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Pro UI and associated features are only available in DefectDojo Pro.</span>
-
-In late 2023, DefectDojo Inc. released a new UI for DefectDojo Pro, which has since been in Pro for Pro customers to test and experiment with.
+In late 2023, DefectDojo Inc. released a new UI for DefectDojo Pro, which is now the default UI for this edition.
 
 The Pro UI brings the following enhancements to DefectDojo:
 
-- Modern and sleek design, built using Vue.js
-- Optimized data delivery and load times, especially for large datasets
-- Access to new Pro features, including [API Connectors](/en/connecting_your_tools/connectors/about_connectors/), [Universal Importer](/en/connecting_your_tools/external_tools/), and Pro Metrics views
-- Improved UI workflows: better filtering, dashboards, and navigation
+- Modern and sleek design using Vue.js.
+- Optimized data delivery and load times, especially for large datasets.
+- Access to new Pro features, including [API Connectors](/en/connecting_your_tools/connectors/about_connectors/), [Universal Importer](/en/connecting_your_tools/external_tools/), and [Pro Metrics](https://docs.defectdojo.com/en/customize_dojo/dashboards/pro_dashboards/) views.
+- Improved UI workflows: better filtering, dashboards, and navigation.
 
 ## Switching To The Pro UI
 
@@ -25,34 +23,38 @@ To access the Pro UI, open your User Options menu from the top-right hand corner
 
 ## Navigational Changes
 
-![image](images/beta-ui-overview.png)
+![image](images/pro_ui_overview.png)
 
-1. The **Sidebar** has been reorganized: Pro Metrics and the Homepage can be found in the first section.
+1. The **Sidebar** has been reorganized into four parent categories: Dashboards, Import, Manage, and Settings.
 
-2. Import methods can be found in the **Import** section: set up [API Connectors](/en/connecting_your_tools/connectors/about_connectors/), use the Import Scan form to [Add Findings](/en/connecting_your_tools/import_scan_files/import_scan_ui/), or use [Smart Upload](/en/connecting_your_tools/import_scan_files/smart_upload/) to handle infrastructure scanning tools.
+2. The Homepage, [AI-powered native API connection capabilities](/en/ai/mcp_server_pro/), Pro Metrics, and the Calendar view are all accessible under Dashboards.
 
-3. The **Manage** section allows you to view different objects in the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/), with views for Product Types, Products, Engagements, Tests, Findings, Risk Acceptances, Endpoints and Components.
+4. Import methods can be found in the Import section: set up [API Connectors](/en/connecting_your_tools/connectors/about_connectors/), use the [Import Scan](/en/connecting_your_tools/import_scan_files/import_scan_ui/) form to Add Findings, use [Smart Upload](/en/connecting_your_tools/import_scan_files/smart_upload/) to handle infrastructure scanning tools, or use our external tools—[Universal Importer and DefectDojo CLI](/en/connecting_your_tools/external_tools/)—to streamline both the import and reimport processes of Findings and associated objects.
 
-4. The **Settings** section allows you to configure your DefectDojo instance, including your License, Cloud Settings, Users, Feature Configuration and admin-level Enterprise Settings.
+5. The **Manage** section allows you to view different objects in the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/), with views for Product Types, Products, Engagements, Tests, Findings, Risk Acceptances, Endpoints, and Components.  There are additional sections for generating reports (Report Builder), using surveys (Surveys), as well as a [Rules Engine](/en/customize_dojo/rules_engine/). 
 
-The Enterprise settings section contains the System Settings, Jira Instances, Deduplication Settings, SAML, OAuth, Login and MFA forms.
+5. The **Settings** section allows you to configure your DefectDojo instance, including your Integrations, License, Cloud Settings, Users, Feature Configuration and admin-level Enterprise Settings.
 
-5. The Pro UI also has a **new table format** to help with navigation.  This table is used with all [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/). Each column can be clicked on to apply a relevant filter, and columns can be reordered to present data however you like.
+6. The **Pro Settings** section contains the System Settings, Banner Settings, Notification Settings, Jira Instances, Deduplication Settings, and Authentication Settings, including SAML, OIDC, OAuth, Login, and MFA forms.
 
-6. The table also has a **"Toggle Columns"** menu which can add or remove columns from the table.
+7. The Pro UI also has a **new table format**, used in the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/) to help with navigation.  Each column can be clicked on to apply a relevant filter, and columns can be reordered to present data however you like.
+
+8. The table also has a **"Toggle Columns"** menu which can add or remove columns from the table.
 
 ## Filtering the Table
-In this screenshot we are filtering for all Findings that are in 'Product One'.  Once we apply this filter (by clicking outside of the Filters menu), the contents of this Finding list will automatically update to reflect the filter applied.
 
-![image](images/rules_engine_3.png)
+In this screenshot we are filtering for all Findings that are in “Sam’s Awesome Product.” Once we click Apply, the contents of this Finding list will update to reflect the chosen filter.
+
+![image](images/pro_ui_sams_filter.png)
 
 ## New Dashboards
 
-New metrics visualizations are included in the Pro UI.  All of these reports can be filtered and exported as PDF to share them with a wider audience.
+New Metrics visualizations are included in the Pro UI. All of these reports can be filtered and exported as PDFs to share them with a wider audience.
 
 ![image](images/program_insights.png)
 
 - The **Executive Insights** dashboard displays the current state of your Products and Product Types.
-- **Program Insights** dashboard displays the effectiveness of your security team and the cost savings associated with separating duplicates and false positives from actionable Findings.
-- **Remediation Insights** displays your effectiveness at remediating Findings.
+- **Priority Insights** show the most critical findings with the option to filter for various timelines, Product Types, Products, and Tags.
+- The **Program Insights** dashboard displays the effectiveness of your security team and the cost savings associated with separating duplicates and false positives from actionable Findings.
+- **Remediation Insights** displays your team's effectiveness at remediating Findings.
 - **Tool Insights** displays the effectiveness of your tool suite (and Connectors pipelines) at detecting and reporting vulnerabilities.
