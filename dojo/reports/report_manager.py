@@ -61,7 +61,7 @@ class BaseReportManager(ABC):
             "mitigated_by", "reporter", "review_requested_by", "sonarqube_issue", "test"]
 
     def get_attributes(self):
-        return ["sla_age", "sla_deadline", "sla_days_remaining"]
+        return ["sla_age", "sla_deadline", "sla_days_remaining", "priority_classification"]
 
     def add_findings_data(self):
         return self.findings
