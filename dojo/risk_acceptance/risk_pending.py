@@ -226,7 +226,7 @@ def risk_acceptante_pending(eng: Engagement,
                     finding.accepted_by = user.username
                     risk_acceptance.accepted_date = timezone.now()
                     risk_acceptance.save()
-                    risk_accepted_succesfully(finding, risk_acceptance)
+                    risk_accepted_succesfully(finding, risk_acceptance, True)
                     message = "Finding Accept successfully from risk acceptance."
                     status_permission["status"] = "OK"
 
@@ -292,9 +292,10 @@ def is_permissions_risk_acceptance(
     
     if finding.long_term_acceptance:
         contacts_dict = get_contacts_product_type_and_product(engagement.product)
-        for user in contacts_dict.keys():
-            return user
-        return True
+        if user in list(contacts_dict.values()):
+            return True
+        else:
+            return False
 
     result = False
     if get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
