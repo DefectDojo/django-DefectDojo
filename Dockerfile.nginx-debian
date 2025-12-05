@@ -40,9 +40,7 @@ ENV \
 RUN \
     apt-get -y update && \
     apt-get -y install --no-install-recommends apt-transport-https ca-certificates curl wget gnupg && \
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key -o /usr/share/keyrings/nodesource.gpg && \
-    echo 'deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x bookworm main' > /etc/apt/sources.list.d/nodesource.list && \
-    echo 'deb-src [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x bookworm main' >> /etc/apt/sources.list.d/nodesource.list && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg -o /usr/share/keyrings/yarn.gpg && \
     echo 'deb [signed-by=/usr/share/keyrings/yarn.gpg] https://dl.yarnpkg.com/debian/ stable main' > /etc/apt/sources.list.d/yarn.list && \
     apt-get update -y && \
@@ -65,7 +63,7 @@ RUN pip3 install \
 COPY components/ ./components/
 RUN \
   cd components && \
-  yarn
+    yarn
 
 COPY manage.py ./
 COPY dojo/ ./dojo/
