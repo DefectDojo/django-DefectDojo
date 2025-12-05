@@ -1131,6 +1131,18 @@ class TestForm(forms.ModelForm):
         else:
             self.fields["lead"].queryset = get_authorized_users(Permissions.Test_View).filter(is_active=True)
 
+    def is_valid(self):
+        valid = super().is_valid()
+
+        # we're done now if not valid
+        if not valid:
+            return valid
+        if self.cleaned_data["target_start"] > self.cleaned_data["target_end"]:
+            self.add_error("target_start", "Your target start date exceeds your target end date")
+            self.add_error("target_end", "Your target start date exceeds your target end date")
+            return False
+        return True
+
     class Meta:
         model = Test
         fields = ["title", "test_type", "target_start", "target_end", "description",
@@ -3620,13 +3632,14 @@ class AddGeneralQuestionnaireForm(forms.ModelForm):
             if expiration < today:
                 msg = "The expiration cannot be in the past"
                 raise forms.ValidationError(msg)
-            if expiration.day == today.day:
+            if expiration == today:
                 msg = "The expiration cannot be today"
                 raise forms.ValidationError(msg)
-        else:
-            msg = "An expiration for the survey must be supplied"
-            raise forms.ValidationError(msg)
-        return expiration
+            return timezone.make_aware(
+                datetime.combine(expiration, datetime.min.time()),
+            )
+        msg = "An expiration for the survey must be supplied"
+        raise forms.ValidationError(msg)
 
 
 class Delete_Questionnaire_Form(forms.ModelForm):

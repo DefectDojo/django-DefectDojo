@@ -16,7 +16,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.functional import SimpleLazyObject
-from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden
+from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden, AuthTokenError
 from social_django.middleware import SocialAuthExceptionMiddleware
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
@@ -83,20 +83,23 @@ class LoginRequiredMiddleware:
 class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
     def process_exception(self, request, exception):
         if isinstance(exception, requests.exceptions.RequestException):
-            messages.error(request, "Please use the standard login below.")
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION)
             return redirect("/login?force_login_form")
         if isinstance(exception, AuthCanceled):
-            messages.warning(request, "Social login was canceled. Please try again or use the standard login.")
+            messages.warning(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED)
             return redirect("/login?force_login_form")
         if isinstance(exception, AuthFailed):
-            messages.error(request, "Social login failed. Please try again or use the standard login.")
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED)
             return redirect("/login?force_login_form")
         if isinstance(exception, AuthForbidden):
-            messages.error(request, "You are not authorized to log in via this method. Please contact support or use the standard login.")
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN)
+            return redirect("/login?force_login_form")
+        if isinstance(exception, AuthTokenError):
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR)
             return redirect("/login?force_login_form")
         if isinstance(exception, TypeError) and "'NoneType' object is not iterable" in str(exception):
             logger.warning("OIDC login error: NoneType is not iterable")
-            messages.error(request, "An unexpected error occurred during social login. Please use the standard login.")
+            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE)
             return redirect("/login?force_login_form")
         logger.error(f"Unhandled exception during social login: {exception}")
         return super().process_exception(request, exception)
@@ -108,7 +111,8 @@ class DojoSytemSettingsMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         from dojo.models import System_Settings  # noqa: PLC0415 circular import
-        models.signals.post_save.connect(self.cleanup, sender=System_Settings)
+        # Use classmethod directly to avoid keeping reference to middleware instance
+        models.signals.post_save.connect(DojoSytemSettingsMiddleware.cleanup, sender=System_Settings)
 
     def __call__(self, request):
         self.load()

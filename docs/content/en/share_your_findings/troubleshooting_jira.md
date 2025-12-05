@@ -53,6 +53,8 @@ For example:
 curl -H "Authorization: Bearer ATATT1234567890abcdefghijklmnopqrstuvwxyz" https://<COMPANY>.atlassian.net/rest/api/latest/issue/<JIRA_ISSUE_KEY>/transitions?expand=transitions.fields
 ```
 
+## I can't find an Epic Name ID for my Space
+Certain Spaces in Jira, such as Team-Managed Spaces, do not use Epics and therefore will not have an Epic Name ID.  In this case, set Epic Name ID to 0 in DefectDojo.
 
 ## Findings that I 'Push To Jira' do not appear in Jira
 Using the 'Push To Jira' workflow triggers an asynchronous process, however an Issue should be created in Jira fairly quickly after 'Push To Jira' is triggered.
@@ -60,16 +62,16 @@ Using the 'Push To Jira' workflow triggers an asynchronous process, however an I
 * Check your DefectDojo notifications to see if the process was successful.  If the push failed, you will get an error response from Jira in your notifications.
 
 Common reasons issues are not created:
-* The Default Issue Type you have selected is not usable with the Jira Project
-* Issues in the Project have required attributes that prevent them from being created via DefectDojo (see our guide to [Custom Fields](../jira_guide/#custom-fields-in-jira))
+* The Default Issue Type you have selected is not usable with the Jira Space
+* Issues in the Space have required attributes that prevent them from being created via DefectDojo (see our guide to [Custom Fields](../jira_guide/#custom-fields-in-jira))
 
 
 ## Error: Product Misconfigured or no permissions in Jira?
 
 This error message can appear when attempting to add a created Jira configuration to a Product.  DefectDojo will attempt to validate a connection to Jira, and if that connection fails, it will raise this error message.
 
-* Check to see if your Jira credentials are allowed to create issues in the given Jira Project you have selected.
-* The "Project Key" field needs to be a valid Jira Project. Jira issues can use many different Keys within a single Project; the easiest way to confirm your Project Key is to look at the URL for that particular Jira Project: generally this will look like `https://xyz.atlassian.net/jira/core/projects/JTV/board`.  In this case `JTV` is the Project Key.
+* Check to see if your Jira credentials are allowed to create issues in the given Jira Space you have selected.
+* The "Project Key" field needs to be a valid Jira Space. Jira issues can use many different Keys within a single Space; the easiest way to confirm your Project Key is to look at the URL for that particular Jira Space: generally this will look like `https://xyz.atlassian.net/jira/core/projects/JTV/board`.  In this case `JTV` is the Space Key.
 
 ## Changes made to Jira issues are not updating Findings in DefectDojo
 
@@ -87,7 +89,7 @@ This error message can appear when attempting to add a created Jira configuratio
 
 DefectDojo's Jira integration needs a customfield value for 'Epic Name'.  However, your Project settings might not actually use 'Epic Name' as a field when creating Epics.  Atlassian made a change in [August 2023](https://community.atlassian.com/t5/Jira-articles/Upcoming-changes-to-epic-fields-in-company-managed-projects/ba-p/1997562) which combined the 'Epic Name' and 'Epic Summary' fields.
 
-Newer Jira Projects might not use this field when creating Epics by default, which results in this error message.
+Newer Jira Spaces might not use this field when creating Epics by default, which results in this error message.
 
 To correct this issue, you can add the 'Epic Name' field to your Project's issue creation screen:
 
@@ -98,6 +100,34 @@ To correct this issue, you can add the 'Epic Name' field to your Project's issue
 5. Add Epic Name as a field to this particular screen by following Jira's instructions.
 
 ![image](images/epic_name_error.png)
+
+## Configuring JIRA Connection Retries and Timeouts
+
+DefectDojo's JIRA integration includes configurable retry and timeout settings to handle rate limiting and connection issues. These settings are important for maintaining system responsiveness, especially when using Celery workers.
+
+### Available Configuration Variables
+
+The following environment variables control JIRA connection behavior:
+
+- **`DD_JIRA_MAX_RETRIES`** (default: `3`): Maximum number of retry attempts for recoverable errors. The integration will automatically retry on HTTP 429 (Too Many Requests), HTTP 503 (Service Unavailable), and connection errors. See the [JIRA rate limiting documentation](https://developer.atlassian.com/cloud/jira/platform/rate-limiting/) for more information.
+
+- **`DD_JIRA_CONNECT_TIMEOUT`** (default: `10` seconds): Connection timeout for establishing a connection to the JIRA server.
+
+- **`DD_JIRA_READ_TIMEOUT`** (default: `30` seconds): Read timeout for waiting for a response from the JIRA server after the connection is established.
+
+**Note on Rate Limiting**: The jira library has a built-in maximum wait time of 60 seconds for rate limiting retries. If JIRA's `Retry-After` header indicates a wait time longer than 60 seconds, the request will fail and not be retried. This is a limitation of the jira library version currently in use.
+
+### Why Conservative Values Matter
+
+**Important**: It is recommended to use conservative (lower) values for these settings. Here's why:
+
+1. **Celery Task Blocking**: JIRA operations in DefectDojo run as asynchronous Celery tasks. When a task is waiting for a retry delay, it blocks that Celery worker from processing other tasks.
+
+2. **Worker Pool Exhaustion**: If multiple JIRA operations are retrying with long delays, you can quickly exhaust your Celery worker pool, causing other tasks (not just JIRA-related) to queue up and wait.
+
+3. **System Responsiveness**: Long retry delays can make the system appear unresponsive, especially during JIRA outages or rate limiting events.
+
+JIRA Rate limiting is new, so please let us know on Slack or GitHub what works best for you.
 
 ## Jira and DefectDojo are out of sync
 
