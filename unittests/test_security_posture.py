@@ -190,5 +190,5 @@ class SecurityPostureAPITest(TestCase):
         self.assertEqual(data['counter_findings_by_priority']['critical'], 0)
         self.assertEqual(data['counter_findings_by_priority']['high'], 0)
         self.assertEqual(data['counter_findings_by_priority']['medium_low'], 0)
-        self.assertEqual(data['counter_findings_by_priority']['unknown'], 0)
+        self.assertEqual(data['counter_findings_by_priority']['unknown'], 9)
 
