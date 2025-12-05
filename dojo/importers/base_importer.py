@@ -1,6 +1,5 @@
 import base64
 import logging
-from typing import List, Tuple
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -30,11 +29,14 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Test_Type,
     Vulnerability_Id,
+    GeneralSettings,
 )
 from dojo.notifications.helper import create_notification, EmailNotificationManger
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe
+from dojo.engine_tools.helpers import get_risk_priority_epss_kev_data, calculate_priority_epss_kev_finding, get_severity_risk_map
+from dojo.celery import app
 
 logger = logging.getLogger(__name__)
 
@@ -865,3 +867,47 @@ class BaseImporter(ImporterOptions):
                     settings.PROVIDERS_CYBERSECURITY_EMAIL.get("redteam", []).split(":")
                 ),
             )
+
+    @app.task
+    def update_priority_epss_kev(sef, findings: list[Finding]) -> None:
+        """
+        Get priority, EPSS score and KEV status update for a list of findings
+        """
+        df_risk_score = None
+        epss_dict = None
+        kev_dict = None
+
+        if GeneralSettings.get_value(
+            "ENABLE_UPDATE_PRIORITY_EPSS_KEV_ON_IMPORT_SCAN",
+            False
+        ) is False:
+            logger.info("IMPORT_SCAN: ENABLE_UPDATE_PRIORITY_EPSS_KEV_ON_IMPORT_SCAN is disabled")
+            return
+
+        if not findings:
+            logger.info("IMPORT_SCAN: No findings to update Priority, EPSS, KEV")
+            return
+        
+        logger.info("IMPORT_SCAN: Updating Priority, EPSS, KEV")
+        
+        # Collect all vulnerability IDs from findings
+        cve_list = []
+        for finding in findings:
+            if finding.cve:
+                cve_list.append(finding.cve)
+        
+        severity_risk_map = get_severity_risk_map()
+        if cve_list:
+            df_risk_score, epss_dict, kev_dict = get_risk_priority_epss_kev_data()
+        for finding in findings:
+            priority, epss_score, epss_percentile, known_exploited, ransomware_used, kev_date_added, _ = calculate_priority_epss_kev_finding(
+                finding, severity_risk_map, df_risk_score, epss_dict, kev_dict)
+            finding.priority = priority
+            finding.set_sla_expiration_date()
+            finding.epss_score = epss_score
+            finding.epss_percentile = epss_percentile
+            finding.known_exploited = known_exploited
+            finding.ransomware_used = ransomware_used
+            finding.kev_date = kev_date_added
+        Finding.objects.bulk_update(findings, ["priority", "sla_expiration_date", "epss_score", "epss_percentile", "known_exploited", "ransomware_used", "kev_date"], 1000)
+        logger.info("Findings updated with priority and SLA expiration date")

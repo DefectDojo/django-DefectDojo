@@ -46,7 +46,7 @@ from dojo.models import (
     GeneralSettings,
     Risk_Acceptance,)
 
-from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view, calculate_severity_priority
+from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
 
 logger = logging.getLogger(__name__)
 
@@ -311,7 +311,7 @@ def finding_sla(finding):
         return ""
 
     title = ""
-    severity = calculate_severity_priority(finding.tags, finding.priority)
+    severity = finding.priority_classification
     if severity == "Unknown":
         severity = finding.severity
     days_remaining = finding.sla_days_remaining()
@@ -839,8 +839,7 @@ def finding_display_status(finding, event="view"):
 
 @register.filter
 def priority_display_status(finding):
-    return calculate_severity_priority(finding.tags, finding.priority)
-
+    return finding.priority_classification.replace(" ", "-")
 
 @register.filter
 def cwe_url(cwe):

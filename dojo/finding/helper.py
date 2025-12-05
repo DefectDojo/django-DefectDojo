@@ -3,7 +3,6 @@ import logging
 import re
 from contextlib import suppress
 from time import strftime
-from django.template.loader import render_to_string
 from django.conf import settings
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
@@ -28,13 +27,10 @@ from dojo.models import (
     Test,
     Vulnerability_Id,
     Vulnerability_Id_Template,
-    ExclusivePermission,
     GeneralSettings
 )
 from dojo.api_v2.api_error import ApiError
 from dojo.notes.helper import delete_related_notes
-from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
-from dojo.authorization.roles_permissions import Permissions
 from dojo.utils import get_current_user, mass_model_updater, to_str_typed, get_product
 
 logger = logging.getLogger(__name__)

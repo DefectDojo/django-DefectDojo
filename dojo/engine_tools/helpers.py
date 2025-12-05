@@ -25,7 +25,7 @@ from dojo.celery import app
 from dojo.user.queries import get_user
 from dojo.notifications.helper import create_notification, EmailNotificationManger
 from dojo.utils import get_full_url
-
+from django.db.models import Count
 
 logger = get_task_logger(__name__)
 
@@ -378,17 +378,25 @@ def add_discussion_to_finding_exclusion(finding_exclusion) -> None:
 
 @app.task
 def update_finding_prioritization_per_cve(
-    vulnerability_id, cve_greater, severity, scan_type, priorization, epss_dict, kev_dict
+    finding: Finding,
+    cve_greater,
+    priorization,
+    epss_score,
+    epss_percentile,
+    known_exploited,
+    ransomware_used,
+    kev_date_added,
 ) -> None:
-    priority_cve_severity_filter = Q()
-    epss_score = None
-    epss_percentile = None
-    known_exploited = False
-    ransomware_used = False
-    kev_date_added = None
 
+    priority_cve_severity_filter = Q()
+    vulnerability_id = finding.cve
+    severity = finding.severity
+    scan_type = finding.test.scan_type
     if vulnerability_id:
-        if scan_type in ["Tenable Scan", "SARIF"]:
+        if (
+            Constants.TAG_TENABLE.value in finding.tags
+            or Constants.TAG_HACKING.value in finding.tags
+        ):
             ids = (
                 Vulnerability_Id.objects.filter(
                     vulnerability_id=cve_greater
@@ -397,31 +405,33 @@ def update_finding_prioritization_per_cve(
                 else []
             )
             priority_cve_severity_filter = (
-                (Q(id__in=ids) & Q(severity=severity) & Q(cve=vulnerability_id) & ~Q(cve=None))
+                (
+                    Q(id__in=ids)
+                    & Q(severity=severity)
+                    & Q(cve=vulnerability_id)
+                    & ~Q(cve=None)
+                )
                 if ids
                 else (Q(severity=severity) & Q(cve=vulnerability_id) & ~Q(cve=None))
             )
-            epss_score = epss_dict.get(cve_greater, {}).get("epss", None)
-            epss_percentile = epss_dict.get(cve_greater, {}).get("percentil", None)
-            known_exploited = True if kev_dict.get(cve_greater, {}) else False
-            ransomware_used = kev_dict.get(cve_greater, {}).get("knownRansomwareCampaignUse", False)
-            kev_date_added = kev_dict.get(cve_greater, {}).get("dateAdded", None)
-            
         else:
             priority_cve_severity_filter = (Q(cve=vulnerability_id) & ~Q(cve=None)) | (
                 Q(vuln_id_from_tool=vulnerability_id) & ~Q(vuln_id_from_tool=None)
             )
-            epss_score = epss_dict.get(vulnerability_id, {}).get("epss", None)
-            epss_percentile = epss_dict.get(vulnerability_id, {}).get("percentil", None)
-            known_exploited = True if kev_dict.get(vulnerability_id, {}) else False
-            ransomware_used = kev_dict.get(vulnerability_id, {}).get("knownRansomwareCampaignUse", False)
-            kev_date_added = kev_dict.get(vulnerability_id, {}).get("dateAdded", None)
     else:
-        priority_cve_severity_filter = Q(severity=severity) & Q(cve=None)
+        priority_cve_severity_filter = Q(severity=severity)
 
-    findings = Finding.objects.filter(
-        priority_cve_severity_filter, test__scan_type=scan_type
-    ).filter(priority_tag_filter)
+    findings = (
+        Finding.objects.filter(priority_cve_severity_filter, test__scan_type=scan_type)
+        .filter(priority_tag_filter)
+        .filter(active=True)
+    )
+
+    # If we need to filter by vulnerability_id count, apply it after the initial query
+    if vulnerability_id and Constants.TAG_HACKING.value in finding.tags and not ids:
+        findings = findings.annotate(
+            vulnerability_id_count=Count("vulnerability_id")
+        ).filter(vulnerability_id_count=1)
     for finding_update in findings:
         finding_update.priority = priorization
         finding_update.set_sla_expiration_date()
@@ -431,8 +441,20 @@ def update_finding_prioritization_per_cve(
         finding_update.ransomware_used = ransomware_used
         finding_update.kev_date = kev_date_added
 
-    Finding.objects.bulk_update(findings, ["priority", "sla_expiration_date", "epss_score", "epss_percentile", "known_exploited", "ransomware_used", "kev_date"], 1000)
-    message = f"{vulnerability_id} with severity {severity} of {scan_type} with {findings.count()} findings updated with prioritization {priorization} and EPSS score {epss_score} and percentile {epss_percentile}"
+    Finding.objects.bulk_update(
+        findings,
+        [
+            "priority",
+            "sla_expiration_date",
+            "epss_score",
+            "epss_percentile",
+            "known_exploited",
+            "ransomware_used",
+            "kev_date",
+        ],
+        1000,
+    )
+    message = f"{vulnerability_id} with severity {severity} and cve_greater {cve_greater} of {scan_type} with {findings.count()} findings updated with prioritization {priorization} and EPSS score {epss_score} and percentile {epss_percentile}"
     if known_exploited:
         message += f" (Known Exploited Vulnerability) - Ransomware_used {ransomware_used} - KEV Date Added {kev_date_added}"
     return message
@@ -447,63 +469,33 @@ def identify_priority_vulnerabilities(findings) -> int:
     """
     system_user = get_user(settings.SYSTEM_USER)
 
-    severity_risk_map = {
-        "Low": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Low")),
-        "Medium": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Medium")),
-        "High": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_High")),
-        "Critical": float(settings.PRIORIZATION_FIELD_WEIGHTS.get("P_Critical")),
-    }
-
-    try:
-        risk_score_dataframes = list_and_read_parquet_files_from_s3(
-            bucket_name=settings.BUCKET_NAME_RISK_SCORE,
-            prefix_path=settings.PATH_FOLDER_RISK_SCORE
-        )
-        
-        if risk_score_dataframes:
-            df_risk_score = combine_parquet_dataframes(risk_score_dataframes)
-            logger.info(f"Loaded combined risk score data with {len(df_risk_score)} records")
-        else:
-            df_risk_score = pd.DataFrame(columns=["cve", "prediction"])
-
-    except Exception as e:
-        logger.error(f"Error reading risk score files: {e}")
-        df_risk_score = pd.DataFrame(columns=["cve", "prediction"])
-
-    # Get epss data and kev data
-    epss_dict = download_epss_data(backward_day=0, cve_cutoff=settings.CVE_CUTOFF)
-    kev_dict = generate_cve_kev_dict()
+    severity_risk_map = get_severity_risk_map()
+    df_risk_score, epss_dict, kev_dict = get_risk_priority_epss_kev_data()
 
     for finding in findings:
-        cve_greater = None
-        if not df_risk_score.empty and finding.cve:
-            cve_greater = finding.cve
-            if Constants.TAG_TENABLE.value in finding.tags or Constants.TAG_HACKING.value in finding.tags:
-                vulnerabilities_id = finding.vulnerability_ids
-                priority = 0
-                for vuln_id in vulnerabilities_id:
-                    loc_res = df_risk_score.loc[
-                        df_risk_score["cve"] == vuln_id, "prediction"
-                    ].values
-                    if loc_res.size > 0:
-                        if float(loc_res[0]) > priority:
-                            cve_greater = vuln_id
-                            priority = float(loc_res[0])
-                    else:
-                        priority = severity_risk_map.get(finding.severity, 0)
-            else:
-                loc_res = df_risk_score.loc[
-                    df_risk_score["cve"] == finding.cve, "prediction"
-                ].values
-                if loc_res.size > 0:
-                    priority = float(loc_res[0])
-                else:
-                    priority = severity_risk_map.get(finding.severity, 0)
-        else:
-            priority = severity_risk_map.get(finding.severity, 0)
+        (
+            priority,
+            epss_score,
+            epss_percentile,
+            known_exploited,
+            ransomware_used,
+            kev_date_added,
+            cve_greater,
+        ) = calculate_priority_epss_kev_finding(
+            finding, severity_risk_map, df_risk_score, epss_dict, kev_dict
+        )
 
         update_finding_prioritization_per_cve.apply_async(
-            args=(finding.cve, cve_greater, finding.severity, finding.test.scan_type, priority, epss_dict, kev_dict)
+            args=(
+                finding,
+                cve_greater,
+                priority,
+                epss_score,
+                epss_percentile,
+                known_exploited,
+                ransomware_used,
+                kev_date_added,
+            ),
         )
 
         if priority >= float(
@@ -542,61 +534,187 @@ def identify_priority_vulnerabilities(findings) -> int:
                     args=(fx.unique_id_from_tool, relative_url)
                 )
 
+
+def get_severity_risk_map():
+    priorization_weights = settings.PRIORIZATION_FIELD_WEIGHTS
+    return {
+        "Standard": {
+            "Low": float(priorization_weights.get("P_Low")),
+            "Medium": float(priorization_weights.get("P_Medium")),
+            "High": float(priorization_weights.get("P_High")),
+            "Critical": float(priorization_weights.get("P_Critical")),
+        },
+        "Discreet": {
+            "Low": float(priorization_weights.get("P_Low")),
+            "Medium": float(priorization_weights.get("P_Low")),
+            "High": float(priorization_weights.get("P_Medium")),
+            "Critical": float(priorization_weights.get("P_High")),
+        },
+        "Stable": {
+            "Low": float(priorization_weights.get("P_Low")),
+            "Medium": float(priorization_weights.get("P_Low")),
+            "High": float(priorization_weights.get("P_High")),
+            "Critical": float(priorization_weights.get("P_Critical")),
+        },
+    }
+
+
+def get_risk_priority_epss_kev_data():
+    try:
+        risk_score_dataframes = list_and_read_parquet_files_from_s3(
+            bucket_name=settings.BUCKET_NAME_RISK_SCORE,
+            prefix_path=settings.PATH_FOLDER_RISK_SCORE,
+        )
+
+        if risk_score_dataframes:
+            df_risk_score = combine_parquet_dataframes(risk_score_dataframes)
+            logger.info(
+                f"Loaded combined risk score data with {len(df_risk_score)} records"
+            )
+        else:
+            df_risk_score = pd.DataFrame(columns=["cve", "prediction"])
+
+    except Exception as e:
+        logger.error(f"Error reading risk score files: {e}")
+        df_risk_score = pd.DataFrame(columns=["cve", "prediction"])
+
+    # Get epss data and kev data
+    epss_dict = download_epss_data(backward_day=0, cve_cutoff=settings.CVE_CUTOFF)
+    kev_dict = generate_cve_kev_dict()
+    return df_risk_score, epss_dict, kev_dict
+
+
+def calculate_priority_epss_kev_finding(
+    finding, severity_risk_map, df_risk_score, epss_dict, kev_dict
+):
+    priority = 0
+    epss_score = None
+    epss_percentile = None
+    known_exploited = False
+    ransomware_used = False
+    kev_date_added = None
+    cve_greater = None
+    # Convert tags to string and extract severity type from tag
+    tags_str = (
+        str(finding.tags.names())
+        if hasattr(finding.tags, "names")
+        else str(finding.tags)
+    )
+
+    severity_risk_map = severity_risk_map.get(
+        settings.PRIORIZATION_FIELD_WEIGHTS.get(tags_str.replace(",", ":"), "Standard"),
+        severity_risk_map["Standard"],
+    )
+    if df_risk_score is not None and not df_risk_score.empty and finding.cve:
+        cve_greater = finding.cve
+        if (
+            Constants.TAG_TENABLE.value in finding.tags
+            or Constants.TAG_HACKING.value in finding.tags
+        ):
+            vulnerabilities_id = finding.vulnerability_ids
+            priority = 0
+            for vuln_id in vulnerabilities_id:
+                loc_res = df_risk_score.loc[
+                    df_risk_score["cve"] == vuln_id, "prediction"
+                ].values
+                if loc_res.size > 0:
+                    current_priority = float(loc_res[0])
+                    if current_priority > priority:
+                        cve_greater = vuln_id
+                        priority = current_priority
+
+            if priority == 0:
+                priority = severity_risk_map.get(finding.severity, 0)
+        else:
+            loc_res = df_risk_score.loc[
+                df_risk_score["cve"] == finding.cve, "prediction"
+            ].values
+            if loc_res.size > 0:
+                priority = float(loc_res[0])
+            else:
+                priority = severity_risk_map.get(finding.severity, 0)
+    else:
+        priority = severity_risk_map.get(finding.severity, 0)
+
+    if cve_greater:
+        epss_score = epss_dict.get(cve_greater, {}).get("epss", None)
+        epss_percentile = epss_dict.get(cve_greater, {}).get("percentil", None)
+        known_exploited = True if kev_dict.get(cve_greater, {}) else False
+        ransomware_used = kev_dict.get(cve_greater, {}).get(
+            "knownRansomwareCampaignUse", False
+        )
+        kev_date_added = kev_dict.get(cve_greater, {}).get("dateAdded", None)
+
+    return (
+        priority,
+        epss_score,
+        epss_percentile,
+        known_exploited,
+        ransomware_used,
+        kev_date_added,
+        cve_greater,
+    )
+
+
 def list_and_read_parquet_files_from_s3(bucket_name: str, prefix_path: str) -> list:
     try:
         s3 = boto3.client("s3")
-        
-        response = s3.list_objects_v2(
-            Bucket=bucket_name,
-            Prefix=prefix_path
-        )
-        
-        if 'Contents' not in response:
+
+        response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix_path)
+
+        if "Contents" not in response:
             logger.warning(f"No files found in s3://{bucket_name}/{prefix_path}")
             return []
-        
+
         dataframes = []
-        parquet_files = [obj for obj in response['Contents'] 
-                        if obj['Key'].endswith('.parquet')]
-        
-        logger.info(f"Found {len(parquet_files)} parquet files in s3://{bucket_name}/{prefix_path}")
-        
+        parquet_files = [
+            obj for obj in response["Contents"] if obj["Key"].endswith(".parquet")
+        ]
+
+        logger.info(
+            f"Found {len(parquet_files)} parquet files in s3://{bucket_name}/{prefix_path}"
+        )
+
         for obj in parquet_files:
-            file_key = obj['Key']
+            file_key = obj["Key"]
             try:
                 file_response = s3.get_object(Bucket=bucket_name, Key=file_key)
                 parquet_content = file_response["Body"].read()
                 df = pd.read_parquet(BytesIO(parquet_content))
-                
-                df.attrs['source_file'] = file_key
-                df.attrs['last_modified'] = obj['LastModified']
-                df.attrs['size'] = obj['Size']
-                
+
+                df.attrs["source_file"] = file_key
+                df.attrs["last_modified"] = obj["LastModified"]
+                df.attrs["size"] = obj["Size"]
+
                 dataframes.append(df)
                 logger.info(f"Successfully read {file_key} - {len(df)} rows")
-                
+
             except Exception as e:
                 logger.error(f"Error reading {file_key}: {str(e)}")
                 continue
-        
+
         return dataframes
-        
+
     except Exception as e:
         logger.error(f"Error listing/reading parquet files from S3: {str(e)}")
         return []
-    
+
+
 def combine_parquet_dataframes(dataframes: list) -> pd.DataFrame:
     if not dataframes:
         return pd.DataFrame()
-    
+
     try:
         combined_df = pd.concat(dataframes, ignore_index=True)
-        logger.info(f"Combined {len(dataframes)} DataFrames into one with {len(combined_df)} total rows")
+        logger.info(
+            f"Combined {len(dataframes)} DataFrames into one with {len(combined_df)} total rows"
+        )
         return combined_df
-        
+
     except Exception as e:
         logger.error(f"Error combining DataFrames: {str(e)}")
         return pd.DataFrame()
+
 
 def download_epss_data(backward_day, cve_cutoff):
     base_url = "https://epss.empiricalsecurity.com/epss_scores-{}.csv.gz"
@@ -617,6 +735,7 @@ def download_epss_data(backward_day, cve_cutoff):
             attempts += 1
     return None
 
+
 def format_data(epss_data, cve_cutoff):
     if not epss_data:
         return None
@@ -628,6 +747,7 @@ def format_data(epss_data, cve_cutoff):
         if len(row) >= 3 and row[0] >= cve_cutoff
     }
 
+
 def generate_cve_kev_dict():
     """
     Generates a dictionary mapping CVEs to their KEV data.
@@ -637,39 +757,50 @@ def generate_cve_kev_dict():
     try:
         url = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
         response = requests.get(url)
-        
+
         if response.status_code != 200:
             logger.error("Could not download KEV data for dictionary generation.")
             return {}
-        
+
         data = response.json()
-        logger.info("KEV data downloaded for dictionary generation - catalog version %s.", data.get("catalogVersion", "unknown"))
-        
+        logger.info(
+            "KEV data downloaded for dictionary generation - catalog version %s.",
+            data.get("catalogVersion", "unknown"),
+        )
+
         cve_kev_dict = {}
         for item in data.get("vulnerabilities", []):
             cve_id = item.get("cveID")
             if cve_id:
                 cve_kev_dict[cve_id] = {
                     "dateAdded": item.get("dateAdded", ""),
-                    "knownRansomwareCampaignUse": True if item.get("knownRansomwareCampaignUse") == "Known" else False
+                    "knownRansomwareCampaignUse": (
+                        True
+                        if item.get("knownRansomwareCampaignUse") == "Known"
+                        else False
+                    ),
                 }
-        
+
         return cve_kev_dict
-        
+
     except Exception as e:
         logger.error(f"Error generating CVE-KEV dictionary: {str(e)}")
         return {}
+
 
 @app.task
 def check_priorization():
     # Get all vulnerabilities with priority tag filter
     all_vulnerabilities = (
-        Finding.objects.filter(priority_tag_filter)
-        .order_by("cve", "test__scan_type", "severity")
-        .distinct("cve", "test__scan_type", "severity")
+        Finding.objects.filter(active=True)
+        .filter(priority_tag_filter)
+        .order_by("priority", "test__scan_type", "severity")
+        .distinct("priority", "test__scan_type", "severity")
     )
 
-    logger.info(f"Identified {len(all_vulnerabilities)} vulnerabilities for prioritization.")
+    logger.info(
+        f"Identified {len(all_vulnerabilities)} vulnerabilities for prioritization."
+    )
 
     # Identify priority vulnerabilities
     identify_priority_vulnerabilities(all_vulnerabilities)
@@ -715,4 +846,3 @@ def remove_findings_from_deleted_finding_exclusions(
         logger.error(
             f"Error processing deleted exclusion {unique_id_from_tool}: {str(e)}"
         )
-

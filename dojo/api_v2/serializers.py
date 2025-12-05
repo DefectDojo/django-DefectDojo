@@ -1725,6 +1725,7 @@ class FindingSerializer(serializers.ModelSerializer):
         required=False, queryset=User.objects.all(),
     )
     permissions = serializers.SerializerMethodField(read_only=True, allow_null=True)
+    priority_classification = serializers.CharField(read_only=True)
 
     class Meta:
         model = Finding
@@ -2105,7 +2106,7 @@ class EngagementByProductResponseSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    findings_count = serializers.SerializerMethodField()
+    # findings_count = serializers.SerializerMethodField()
     # findings_list = serializers.SerializerMethodField()
 
     tags = TagListSerializerField(required=False)
@@ -2129,8 +2130,8 @@ class ProductSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(msg)
         return data
 
-    def get_findings_count(self, obj) -> int:
-        return obj.findings_count
+    # def get_findings_count(self, obj) -> int:
+    #     return obj.findings_count
 
     # TODO: maybe extend_schema_field is needed here?
     # def get_findings_list(self, obj) -> list[int]:
