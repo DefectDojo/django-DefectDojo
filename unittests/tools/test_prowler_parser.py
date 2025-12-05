@@ -4,8 +4,7 @@ from dojo.models import Test
 
 
 class TestProwlerParser(TestCase):
-
-    #TODO: Write test for:
+    # TODO: Write test for:
     # AWS CSV
     # JSON CSV
     # Azure CSV
@@ -39,14 +38,16 @@ class TestProwlerParser(TestCase):
             with self.subTest(i=0):
                 self.assertEqual(items[0].title, "Check if IAM Access Analyzer is enabled")
                 self.assertEqual(items[0].severity, "Low")
-                description = "**Cloud Type** : AWS\n\n" + \
-                              "**Description** : Check if IAM Access Analyzer is enabled\n\n" + \
-                              "**Service Name** : accessanalyzer\n\n" + \
-                              "**Status Detail** : IAM Access Analyzer in account <account_uid> is not enabled.\n\n" + \
-                              "**Finding Created Time** : 2025-02-14 14:27:03.913874\n\n" + \
-                              "**Region** : <region>\n\n" + \
-                              "**Notes** : \n\n" + \
-                              "**Related URL** : https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html\n\n" + \
-                              "**Additional URLs** : https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-getting-started.html | https://aws.amazon.com/iam/features/analyze-access/"
+                description = (
+                    "**Cloud Type** : AWS\n\n"
+                    + "**Description** : Check if IAM Access Analyzer is enabled\n\n"
+                    + "**Service Name** : accessanalyzer\n\n"
+                    + "**Status Detail** : IAM Access Analyzer in account <account_uid> is not enabled.\n\n"
+                    + "**Finding Created Time** : 2025-02-14 14:27:03.913874\n\n"
+                    + "**Region** : <region>\n\n"
+                    + "**Notes** : \n\n"
+                    + "**Related URL** : https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html\n\n"
+                    + "**Additional URLs** : https://docs.aws.amazon.com/IAM/latest/UserGuide/access-analyzer-getting-started.html | https://aws.amazon.com/iam/features/analyze-access/"
+                )
 
                 self.assertEqual(items[0].description, description)
