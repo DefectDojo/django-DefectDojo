@@ -16,6 +16,7 @@ class TestLegitifyParser(DojoTestCase):
                 self.assertEqual("Repository | Default Branch Should Require Code Review", finding.title)
                 self.assertFalse(finding.dynamic_finding)
                 self.assertTrue(finding.static_finding)
+                self.assertTrue(finding.fix_available)
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
@@ -32,6 +33,7 @@ class TestLegitifyParser(DojoTestCase):
                 self.assertEqual("Repository | Default Branch Should Require Code Review", finding.title)
                 self.assertFalse(finding.dynamic_finding)
                 self.assertTrue(finding.static_finding)
+                self.assertTrue(finding.fix_available)
             for finding in findings:
                 for endpoint in finding.unsaved_endpoints:
                     endpoint.clean()
