@@ -388,7 +388,7 @@ class EmailNotificationManger(NotificationManagerHelpers):
             if settings.AWS_SES_EMAIL:
                 copy_email = kwargs.get("copy_email", [])
                 if copy_email:
-                  copy_email = copy_email.split(",")
+                    copy_email = copy_email.split(",")
 
                 ses_email.aws_ses(
                     email=address,
