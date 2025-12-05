@@ -386,9 +386,10 @@ class EmailNotificationManger(NotificationManagerHelpers):
         try:
             kwargs["system_settings"] = self.system_settings
             if settings.AWS_SES_EMAIL:
-                copy_email = kwargs.get("copy_email", None)
+                copy_email = kwargs.get("copy_email", [])
                 if copy_email:
                     copy_email = copy_email.split(",")
+
                 ses_email.aws_ses(
                     email=address,
                     email_from_address=f"{self.system_settings.team_name} <{self.system_settings.email_from}>",

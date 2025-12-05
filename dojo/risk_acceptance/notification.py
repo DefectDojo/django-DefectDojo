@@ -30,6 +30,10 @@ class Notification:
 
     @staticmethod
     def risk_acceptance_decline(title: str, risk_acceptance: Risk_Acceptance, finding: Finding):
+        recipients = []
+        if risk_acceptance.long_term_acceptance:
+            recipients.append(risk_acceptance.reviewed_by)
+        recipients.append(risk_acceptance.owner.get_username())
 
         create_notification(
             event="risk_acceptance_request",
@@ -43,7 +47,7 @@ class Notification:
             owner=get_current_user(),
             icon="times-circle",
             color_icon="#B90C0C",
-            recipients=[risk_acceptance.owner.get_username()],
+            recipients=recipients,
             url=reverse(
                 "view_risk_acceptance",
                 args=(
@@ -55,6 +59,11 @@ class Notification:
 
     @staticmethod
     def risk_acceptance_accept(title: str, risk_acceptance: Risk_Acceptance, finding: Finding):
+        recipients = []
+        if risk_acceptance.long_term_acceptance:
+            recipients.append(risk_acceptance.reviewed_by)
+        recipients.append(risk_acceptance.owner.get_username())
+            
         create_notification(
             event="risk_acceptance_request",
             subject=f"✅Acceptance request confirmed in Risk_Accepted: {risk_acceptance.id}👌",
@@ -67,7 +76,7 @@ class Notification:
             owner=risk_acceptance.accepted_by.replace("[", "").replace("]", "").replace("'", "").replace(",", " and"),
             icon="check-circle",
             color_icon="#096C11",
-            recipients=[risk_acceptance.owner.get_username()],
+            recipients=recipients,
             url=reverse(
                 "view_risk_acceptance",
                 args=(
@@ -145,7 +154,7 @@ class Notification:
         rule_event_mapping={
             "accept": {
                 "title":"The <strong>acceptance</strong> process has been successfully completed for the risk acceptance with ID: {risk_pending.id}",
-                "description": "You have <strong>accepted</strong> temporary the following findings:",
+                "description": "The following findings have been temporarily <strong>accepted</strong>:",
                 "subject": f"✅Acceptance process completed successfully for Risk_Accepted ID: {risk_pending.id}👌",
                 "icon":"check-circle",
                 "color_icon":"#096C11",
@@ -153,7 +162,7 @@ class Notification:
                 },
             "reject": {
                 "title": f"The <strong>Reject</strong< process has been successfully completed for the risk acceptance with ID: {risk_pending.id}",
-                "description": "You have <strong>Reject</strong> request acceptance for the following findings:",
+                "description": "The following findings have been temporarily <strong>Reject</strong>:",
                 "subject": f"✅The Reject process completed successfully for Risk_Accepted id: {risk_pending.id}👌",
                 "icon": "check-circle",
                 "color_icon": "#096C11",
@@ -186,6 +195,9 @@ class Notification:
             }
         }
         event_mapping = rule_event_mapping.get(error, rule_event_mapping["generic"])
+        recipients = event_mapping["recipients"]
+        if risk_pending.long_term_acceptance:
+            recipients.append(risk_pending.reviewed_by)
 
         create_notification(
             event="risk_acceptance_confirmed",
@@ -198,7 +210,7 @@ class Notification:
             description=event_mapping["description"],
             icon=event_mapping["icon"],
             color_icon=event_mapping["color_icon"],
-            recipients=event_mapping["recipients"],
+            recipients=recipients,
             url=reverse(
                 "view_risk_acceptance",
                 args=(
