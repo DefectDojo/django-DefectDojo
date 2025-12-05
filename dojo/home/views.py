@@ -79,20 +79,18 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 def dashboard_v2(request: HttpRequest) -> HttpResponse:
     if GeneralSettings.get_value("NEW_DASBOARD", default=False):
         page_name = ('Dashboard')
-        role = Role.objects.get(id=Roles.Maintainer)
         user = request.user.id
         cookie_csrftoken = get_token(request)
         cookie_sessionid = request.COOKIES.get('sessionid', '')
-        mf_frontend_defect_dojo_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
+        base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
         add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
-        return render(request, 'dojo/new_dashboard.html', {
-        'name': page_name,
-        'mf_frontend_defect_dojo_url': settings.MF_FRONTEND_DEFECT_DOJO_URL,
-        'mf_frontend_defect_dojo_path': settings.MF_FRONTEND_DEFECT_DOJO_PATH.get("metrics_scan_cycle"),
-        'mf_frontend_defect_dojo_params': mf_frontend_defect_dojo_params,
-        'role': role,
-        'user': user,
+        return render(request, 'dojo/generic_view.html', {
+            'actions': page_name,
+            'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/metrics/panel",  
+            'parameters': base_params,
+            'user': user,
         })
+
     else:
         dashboard_cache = None
 

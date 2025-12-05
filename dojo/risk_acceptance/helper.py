@@ -66,8 +66,7 @@ def expire_now(risk_acceptance):
                 reactivated_findings.append(finding)
 
         # best effort JIRA integration, no status changes, just a comment
-        post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
-
+    post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
     risk_acceptance.expiration_date = timezone.now()
     risk_acceptance.expiration_date_handled = timezone.now()
     risk_acceptance.save()
@@ -164,7 +163,7 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
     if settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL is True:
-        permission_keys = update_or_create_url_risk_acceptance(risk_pending)
+        permission_keys = update_or_create_url_risk_acceptance(risk_pending, send_notification=True)
     else:
         Notification.risk_acceptance_request(
             risk_pending=risk_pending,
@@ -174,6 +173,14 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
 
 
 def generate_permision_key(permission_keys, user, risk_acceptance, transfer_finding=None):
+    if risk_acceptance.long_term_acceptance:
+        permission_key =PermissionKey.get_or_create_permission_key(
+            lifetime=settings.LIFETIME_HOURS_PERMISSION_KEY,
+            user=user,
+            risk_acceptance=risk_acceptance,
+            transfer_finding=transfer_finding
+        )
+        return permission_key.token
     if len(permission_keys) == 0:
         permission_key = PermissionKey.create_token(
             lifetime=settings.LIFETIME_HOURS_PERMISSION_KEY,
@@ -567,16 +574,17 @@ def generate_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list:
     return permission_keys
 
 
-def update_or_create_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list: 
+def update_or_create_url_risk_acceptance(risk_pending: Risk_Acceptance, send_notification) -> list: 
     permission_keys = risk_pending.permissionkey_set.all()
     if len(permission_keys) > 0:
         update_expiration_date_permission_key(risk_pending)
     permission_keys = generate_url_risk_acceptance(risk_pending)
 
-    Notification.risk_acceptance_request(
-    risk_pending=risk_pending,
-    permission_keys=permission_keys,
-    enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
+    if send_notification:
+        Notification.risk_acceptance_request(
+        risk_pending=risk_pending,
+        permission_keys=permission_keys,
+        enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
 
     return permission_keys
 

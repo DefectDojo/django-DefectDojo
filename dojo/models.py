@@ -2430,6 +2430,7 @@ class Finding(models.Model):
                       ('Risk Rejected', 'Risk Rejected'),
                       ('Risk Expired', 'Risk Expired'),
                       ('Risk Accepted', 'Risk Accepted'),
+                      ('Risk Reviewed', 'Risk Reviewed'),
                       ('Risk Active', 'Risk Active'),
                       ('On Whitelist', 'On Whitelist'),
                       ('On Blacklist', 'On Blacklist'),
@@ -2646,6 +2647,12 @@ class Finding(models.Model):
                                    blank=True,
                                    verbose_name=_('Accepted By'),
                                    help_text=_("The person that accepts the risk, can be outside of DefectDojo."))
+    reviewed_by = models.CharField(max_length=200,
+                                   default="",
+                                   null=True,
+                                   blank=True,
+                                   verbose_name=_('Reviewed By'),
+                                   help_text=_("The person that reviews the risk acceptance for acceptance long term."))
     reporter = models.ForeignKey(Dojo_User,
                                  editable=False,
                                  default=1,
@@ -3037,6 +3044,13 @@ class Finding(models.Model):
         return results
 
     @property
+    def long_term_acceptance(self):
+        ras = self.risk_acceptance_set.all().filter(long_term_acceptance=True)
+        if ras:
+            return ras[0]
+        return None
+
+    @property
     def risk_acceptance(self):
         ras = self.risk_acceptance_set.all()
         if ras:
@@ -3249,6 +3263,8 @@ class Finding(models.Model):
             status += ["Transfer Rejected"]
         if self.risk_status == "Risk Pending":
             status += ["Risk Pending"]
+        if self.risk_status == "Risk Reviewed":
+            status += ["Risk Reviewed"]
         if self.risk_status == "Risk Rejected":
             status += ["Risk Rejected"]
         if self.risk_status == "On Whitelist":
@@ -4139,11 +4155,14 @@ class Risk_Acceptance(models.Model):
     decision_details = models.TextField(default=None, blank=True, null=True, help_text=_("If a compensating control exists to mitigate the finding or reduce risk, then list the compensating control(s)."))
 
     accepted_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name=_("Accepted By"), help_text=_("The person that accepts the risk, can be outside of DefectDojo."))
+    reviewed_by = models.CharField(max_length=200, default=None, null=True, blank=True, verbose_name=_("Reviewed By"), help_text=_("The person that reviews the risk acceptance for acceptance long term"))
     path = models.FileField(upload_to="risk/%Y/%m/%d",
                             editable=True, null=True,
                             blank=True, verbose_name=_("Proof"))
     owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.RESTRICT, help_text=_("User in DefectDojo owning this acceptance. Only the owner and staff users can edit the risk acceptance."))
 
+    reviewed_date = models.DateTimeField(default=None, null=True, blank=True, help_text=_("When the risk acceptance is reviewed"))
+    accepted_date = models.DateTimeField(default=None, null=True, blank=True, help_text=_("When the risk acceptance is accepted"))
     expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text=_("When the risk acceptance expires, the findings will be reactivated (unless disabled below)."))
     expiration_date_warned = models.DateTimeField(default=None, null=True, blank=True, help_text=_("(readonly) Date at which notice about the risk acceptance expiration was sent."))
     expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text=_("(readonly) When the risk acceptance expiration was handled (manually or by the daily job)."))
@@ -4209,8 +4228,8 @@ class Risk_Acceptance(models.Model):
         if self.accepted_by:
             pattern = r"^\[\s*'(?:[^']*)'(?:\s*,\s*'(?:[^']*)')*\s*\]$"
             try:
-                if re.match(pattern, self.accepted_by):
-                    usernames = ast.literal_eval(self.accepted_by)
+                if re.match(pattern, str(self.accepted_by)):
+                    usernames = ast.literal_eval(str(self.accepted_by))
             except Exception as e:
                 logger.error(f"Error evaluating accepted_by: {e}")
         return usernames
@@ -5160,6 +5179,37 @@ class PermissionKey(models.Model):
     def expire(self):
         self.status = False
 
+    @classmethod
+    def get_or_create_permission_key(
+        cls,
+        lifetime,
+        user,
+        risk_acceptance,
+        transfer_finding
+    ):
+        token = secrets.token_urlsafe(64)
+        expiration = timezone.now() + timedelta(hours=lifetime)
+        try:
+            permission_key = cls.get_token(risk_acceptance=risk_acceptance, user=user)
+            if permission_key:
+                return permission_key
+            else:
+                permissionkey = cls.objects.create(
+                    token=token,
+                    user=user,
+                    risk_acceptance=risk_acceptance,
+                    transfer_finding=transfer_finding,
+                    expiration=expiration)
+        except IntegrityError:
+            logger.debug("IntegrityError token key duplicated")
+            permissionkey = cls.objects.create(
+                token=secrets.token_urlsafe(64)[0],
+                user=user,
+                risk_acceptance=risk_acceptance,
+                transfer_finding=transfer_finding,
+                expiration=expiration)
+
+        return permissionkey
 
     @classmethod
     def create_token(
@@ -5197,7 +5247,7 @@ class PermissionKey(models.Model):
                                             user=user)
         except ObjectDoesNotExist as e:
             logger.error(f"Permission key not found for user {user.id} associated with risk acceptance {risk_acceptance.id}")
-            raise e
+            return None
         return permission_key
 
 

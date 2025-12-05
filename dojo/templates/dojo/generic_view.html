@@ -3,15 +3,70 @@
 {% load i18n %}
 {% load static %}
 {% block add_styles %}
-    .embed-responsive .embed-responsive-item,
-    .embed-responsive iframe { height: 100%;} 
+  .embed-responsive .embed-responsive-item,
+  .embed-responsive iframe { height: 100%;}
 {% endblock %}
 {% block content %}
-    {{block.super }}
-    <div class="embed-responsive embed-responsive-16by9">
-        <iframe class="embed-responsive-item"
-            src="{{url}}" 
-            frameborder="0" allowfullscreen></iframe>
-    </div>
-    <hr />
+  {{block.super }}
+  <div class="embed-responsive embed-responsive-16by9">
+    <iframe
+      class="embed-responsive-item"
+      src="{{url}}"
+      frameborder="0"
+      allowfullscreen
+    ></iframe>
+  </div>
+  <hr />
+  {% endblock %} {% block postscript %} {{ block.super }}
+  <script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+      const iframe = document.querySelector("iframe");
+      if (!iframe) return;
+
+      let channel = new MessageChannel();
+      let messageInitialized = false;
+
+      function initializeMessage() {
+        if (messageInitialized) return;
+
+        try {
+          channel.port1.start();
+          channel.port1.onmessage = function (event) {
+            if (event.data && event.data.action === "{{ actions }}") {
+              try {
+                channel.port1.postMessage({
+                  action: "{{ actions }}",
+                  data: "{{ parameters }}",
+                });
+              } catch (error) {
+                console.error("Error responding to iframe message:", error);
+              }
+            }
+          };
+
+          iframe.contentWindow.postMessage({ action: "{{ actions }}" }, "{{ url }}", [
+            channel.port2,
+          ]);
+
+          messageInitialized = true;
+        } catch (error) {
+          console.error("Error initializing iframe communication:", error);
+        }
+      }
+
+      iframe.addEventListener("load", function () {
+        setTimeout(initializeMessage, 100);
+      });
+
+      setTimeout(function () {
+        if (!messageInitialized) {
+          initializeMessage();
+        }
+      }, 1000);
+
+      if (iframe.complete || iframe.readyState === "complete") {
+        setTimeout(initializeMessage, 100);
+      }
+    });
+  </script>
 {% endblock %}

@@ -41,7 +41,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from dojo.endpoint.utils import save_endpoints_to_add
-from dojo.group.queries import get_users_for_group
+from dojo.group.queries import users_with_permissions_to_approve_long_term_findings
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import (
@@ -1312,7 +1312,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             active=True,
             severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         if form.cleaned_data['long_term_acceptance'] == "True":
-            form.fields["approvers"].widget.attrs['value'] = form.cleaned_data["approvers_long_acceptance"].username
+            form.fields["approvers"].widget.attrs['value'] = "" 
         else:
             form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
 
@@ -1334,7 +1334,11 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 return render(request, "dojo/add_risk_acceptance.html", {"form": form})
 
             abuse_control_result = rp_helper.abuse_control(
-                request.user, finding, product, product_type
+                request.user,
+                finding,
+                product,
+                product_type,
+                is_long_term_acceptance=form.cleaned_data["long_term_acceptance"]
             )
             for abuse_control, result in abuse_control_result.items():
                 if not abuse_control_result[abuse_control]["status"]:
@@ -1398,7 +1402,8 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 or rp_helper.role_has_exclusive_permissions(request.user)
                 or get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
-            elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
+            elif (rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type)
+                  or risk_acceptance.long_term_acceptance is True):
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
             else:
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
@@ -1823,7 +1828,13 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                             return redirect_to_return_url_or_else(
                                 request, reverse("view_risk_acceptance", args=(eid, raid))
                             )
-                        abuse_control_result = rp_helper.abuse_control(request.user, finding, product, product_type)
+                        abuse_control_result = rp_helper.abuse_control(
+                            request.user,
+                            finding,
+                            product,
+                            product_type,
+                            is_long_term_acceptance=risk_acceptance.long_term_acceptance
+                        )
                         for abuse_control, result in abuse_control_result.items():
                             if not abuse_control_result[abuse_control]["status"]:
                                 messages.add_message(
@@ -1904,6 +1915,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             "note_form": note_form,
             "replace_form": replace_form,
             "add_findings_form": add_findings_form,
+            "user_acceptances": users_with_permissions_to_approve_long_term_findings("Approvers_Risk", "Risk", product),
             # 'show_add_findings_form': len(unaccepted_findings),
             "request": request,
             "add_findings": add_fpage,
