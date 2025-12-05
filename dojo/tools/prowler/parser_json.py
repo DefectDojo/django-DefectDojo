@@ -5,6 +5,7 @@ from dojo.models import Finding
 
 
 class ProwlerParserJSON:
+
     """This parser is for Prowler JSON files."""
 
     def get_findings(self, file, test):

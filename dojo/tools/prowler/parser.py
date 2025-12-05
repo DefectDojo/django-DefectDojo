@@ -3,7 +3,8 @@ from dojo.tools.prowler.parser_json import ProwlerParserJSON
 
 
 class ProwlerParser:
-    """Prowler is an Open Cloud Security that automates security and compliance in cloud environments. This parser is for Prowler JSON files and Prowler CSV files."""
+
+    "Prowler is an Open Cloud Security that automates security and compliance in cloud environments. This parser is for Prowler JSON files and Prowler CSV files."
 
     def get_scan_types(self):
         return ["Prowler Scan"]

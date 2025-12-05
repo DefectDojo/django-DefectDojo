@@ -6,6 +6,7 @@ from dojo.models import Finding
 
 
 class ProwlerParserCSV:
+
     """Parser for Prowler CSV (semicolon-separated)."""
 
     def get_findings(self, filename, test):
