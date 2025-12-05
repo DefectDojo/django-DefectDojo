@@ -1,10 +1,11 @@
 import csv
 import hashlib
 import io
+
 from dojo.models import Finding
 
 
-class ProwlerParserCSV(object):
+class ProwlerParserCSV:
     """Parser for Prowler CSV (semicolon-separated)."""
 
     def get_findings(self, filename, test):
@@ -19,7 +20,7 @@ class ProwlerParserCSV(object):
         for row in reader:
             csvarray.append(row)
 
-        dupes = dict()
+        dupes = {}
         for row in csvarray:
             # Skip vulnerability if the status is "PASS", continue parsing is status is "FAIL" or "MANUAL"
             if row.get("STATUS") == "PASS":
@@ -27,10 +28,12 @@ class ProwlerParserCSV(object):
 
             provider = row.get("PROVIDER", "N/A")
             # Set provider name to the correct capitalization format
-            if provider == "kubernetes" or provider == "azure":
-                provider = provider.capitalize()
-            else:
-                provider = provider.upper()
+            provider = provider.capitalize() if provider in {"kubernetes", "azure"} else provider.upper()
+
+            # if provider == "kubernetes" or provider == "azure":
+            #    provider = provider.capitalize()
+            # else:
+            #    provider = provider.upper()
 
             description = (
                 "**Cloud Type** : "
@@ -88,10 +91,7 @@ class ProwlerParserCSV(object):
             compliance = row.get("COMPLIANCE", "N/A")
 
             # If compliance is not 'N/A', break info into multiple lines
-            if compliance != "N/A":
-                references = "\n".join(part.strip() for part in compliance.split("|"))
-            else:
-                references = "N/A"
+            references = "\n".join(part.strip() for part in compliance.split("|")) if compliance != "N/A" else "N/A"
 
             finding = Finding(
                 title=title,
@@ -119,11 +119,10 @@ class ProwlerParserCSV(object):
         s = severity.lower()
         if s == "critical":
             return "Critical"
-        elif s == "high":
+        if s == "high":
             return "High"
-        elif s == "medium":
+        if s == "medium":
             return "Medium"
-        elif s == "low":
+        if s == "low":
             return "Low"
-        else:
-            return "Info"
+        return "Info"

@@ -2,10 +2,8 @@ from dojo.tools.prowler.parser_csv import ProwlerParserCSV
 from dojo.tools.prowler.parser_json import ProwlerParserJSON
 
 
-class ProwlerParser(object):
-    """
-    Prowler is an Open Cloud Security that automates security and compliance in cloud environments. This parser is for Prowler JSON files and Prowler CSV files.
-    """
+class ProwlerParser:
+    """Prowler is an Open Cloud Security that automates security and compliance in cloud environments. This parser is for Prowler JSON files and Prowler CSV files."""
 
     def get_scan_types(self):
         return ["Prowler Scan"]

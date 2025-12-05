@@ -1,16 +1,16 @@
 import hashlib
 import json
-from urllib.parse import urlparse
-from dojo.models import Endpoint, Finding
+
+from dojo.models import Finding
 
 
-class ProwlerParserJSON(object):
+class ProwlerParserJSON:
     """This parser is for Prowler JSON files."""
 
     def get_findings(self, file, test):
         data = json.load(file)
 
-        dupes = dict()
+        dupes = {}
         for node in data:
             # Skip vulnerability if the status is "PASS", continue parsing is status is "FAIL" or "MANUAL"
             if node.get("status_code") == "PASS":
@@ -89,14 +89,13 @@ class ProwlerParserJSON(object):
         s = severity.lower()
         if s == "critical":
             return "Critical"
-        elif s == "high":
+        if s == "high":
             return "High"
-        elif s == "medium":
+        if s == "medium":
             return "Medium"
-        elif s == "low":
+        if s == "low":
             return "Low"
-        else:
-            return "Info"
+        return "Info"
 
     def get_cloud_type(self, node: dict) -> str:
         """Determine the cloud type of a Prowler JSON finding. Returns one of: AWS, Azure, Kubernetes, GCP, or N/A"""
@@ -106,9 +105,9 @@ class ProwlerParserJSON(object):
             account_type.lower()
             if account_type == "gcp":
                 return "GCP"
-            elif account_type == "aws":
+            if account_type == "aws":
                 return "AWS"
-            elif account_type == "azure":
+            if account_type == "azure":
                 return "Azure"
 
         # Check for Kubernetes
@@ -122,11 +121,11 @@ class ProwlerParserJSON(object):
 
     def add_cloud_type_metadata(self, node: dict, cloudtype: str, description: str) -> str:
         # Add metadata for GCP, AWS, and Azure
-        if cloudtype == "GCP" or cloudtype == "AWS" or cloudtype == "Azure":
+        if cloudtype in {"GCP", "AWS", "Azure"}:
             description += "\n\n" + "**" + cloudtype + " Region** : " + node.get("cloud", {}).get("region", "N/A")
             return description
 
-        ## Add metadata for Kubernetes
+        # Add metadata for Kubernetes
         if cloudtype == "Kubernetes":
             for resource in node.get("resources", []):
                 pod = resource.get("data", {}).get("metadata", {}).get("name")
