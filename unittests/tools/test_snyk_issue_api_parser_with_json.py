@@ -7,9 +7,9 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestSnykIssueApiParserWithJson(DojoTestCase):
     def parse_json(self, filename):
-        testfile = (get_unit_tests_scans_path("snyk_issue_api") / filename).open(encoding="utf-8")
-        parser = SnykIssueApiParser()
-        return parser.get_findings(testfile, Test())
+        with (get_unit_tests_scans_path("snyk_issue_api") / filename).open(encoding="utf-8") as testfile:
+            parser = SnykIssueApiParser()
+            return parser.get_findings(testfile, Test())
 
     def test_parse_sca_single_finding(self):
         findings = self.parse_json("snyk_sca_scan_api_single_vuln.json")
