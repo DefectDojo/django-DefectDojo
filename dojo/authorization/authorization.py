@@ -100,7 +100,9 @@ def user_has_permission(user, obj, permission):
         isinstance(obj, Risk_Acceptance)
         and permission == Permissions.Risk_Acceptance
     ):
-        return user_has_permission(user, obj.engagement.product, permission)
+        if obj.engagement is not None:
+            return user_has_permission(user, obj.engagement.product, permission)
+        return user_has_global_permission(user, permission)
     if ((
         isinstance(obj, Finding | Stub_Finding)
     ) and permission in Permissions.get_finding_permissions()) or (
