@@ -68,6 +68,7 @@ from dojo.models import (
     Product,
     System_Settings,
     Test,
+    Test_Type,
     User,
 )
 from dojo.notifications.helper import create_notification
@@ -81,6 +82,11 @@ labels = get_labels()
 """
 Helper functions for DefectDojo
 """
+
+
+def get_visible_scan_types():
+    """Returns a QuerySet of active Test_Type objects."""
+    return Test_Type.objects.filter(active=True)
 
 
 def do_false_positive_history(finding, *args, **kwargs):

@@ -275,7 +275,6 @@ env = environ.FileAwareEnv(
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
     # AWS Scout2 Scan Parser is deprecated (see https://github.com/DefectDojo/django-DefectDojo/pull/5268)
-    DD_PARSER_EXCLUDE=(str, ""),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -1852,9 +1851,6 @@ QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 # Create a unique finding for all findings in qualys WAS parser
 # If using this, lines for Qualys WAS deduplication functions must be un-commented
 QUALYS_WAS_UNIQUE_ID = False
-
-# exclusion list for parsers
-PARSER_EXCLUDE = env("DD_PARSER_EXCLUDE")
 
 SERIALIZATION_MODULES = {
     "xml": "tagulous.serializers.xml_serializer",
