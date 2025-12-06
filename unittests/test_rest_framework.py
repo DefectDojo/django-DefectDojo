@@ -1194,6 +1194,7 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
             "created": "2020-11-09T23:13:08.520000Z",
             "updated": "2023-09-15T17:17:39.462854Z",
             "owner": 1,
+            "product": 1,
             "accepted_findings": [
                 226,
             ],

@@ -98,6 +98,7 @@ from dojo.organization.api.urls import add_organization_urls
 from dojo.organization.urls import urlpatterns as organization_urls
 from dojo.regulations.urls import urlpatterns as regulations
 from dojo.reports.urls import urlpatterns as reports_urls
+from dojo.risk_acceptance.urls import urlpatterns as risk_acceptance_urls
 from dojo.search.urls import urlpatterns as search_urls
 from dojo.sla_config.urls import urlpatterns as sla_urls
 from dojo.survey.urls import urlpatterns as survey_urls
@@ -192,6 +193,7 @@ ur += dev_env_urls
 ur += endpoint_urls
 ur += eng_urls
 ur += finding_urls
+ur += risk_acceptance_urls
 ur += finding_group_urls
 ur += home_urls
 ur += metrics_urls

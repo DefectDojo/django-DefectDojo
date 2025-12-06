@@ -345,6 +345,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
             "decision_details": "it has been decided!",
             "accepted_by": "pointy haired boss",
             "owner": 1,
+            "product": Finding.objects.get(pk=finding_id).test.engagement.product.pk,
             "expiration_date": "2024-12-31",
             "reactivate_expired": True,
             }
@@ -401,6 +402,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
             "decision_details": "it has been decided!",
             "accepted_by": "pointy haired boss",
             "owner": 1,
+            "product": Finding.objects.get(pk=finding_id).test.engagement.product.pk,
             "expiration_date": "2024-12-31",
             "reactivate_expired": True,
             }

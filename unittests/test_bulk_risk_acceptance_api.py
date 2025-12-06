@@ -91,7 +91,7 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         self.assertEqual(self.test_c.unaccepted_open_findings.count(), 33)
 
         self.assertEqual(self.test_d.unaccepted_open_findings.count(), 34)
-        self.assertEqual(self.engagement_2a.risk_acceptance.count(), 0)
+        self.assertEqual(self.engagement_2a.product.risk_acceptances.count(), 0)
 
     def test_engagement_accept_risks(self):
         accepted_risks = [{"vulnerability_id": f"CVE-1999-{i}", "justification": "Demonstration purposes",
@@ -101,7 +101,7 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         self.assertEqual(len(result.json()), 50)
         self.assertEqual(self.engagement.unaccepted_open_findings.count(), 50)
 
-        self.assertEqual(self.engagement_2a.risk_acceptance.count(), 0)
+        self.assertEqual(self.engagement_2a.product.risk_acceptances.count(), 0)
         self.assertEqual(self.engagement_2a.unaccepted_open_findings.count(), 34)
 
     def test_finding_accept_risks(self):
@@ -111,9 +111,9 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         self.assertEqual(len(result.json()), 106)
         self.assertEqual(Finding.unaccepted_open_findings().count(), 62)
 
-        self.assertEqual(self.engagement_2a.risk_acceptance.count(), 0)
+        self.assertEqual(self.engagement_2a.product.risk_acceptances.count(), 0)
         self.assertEqual(self.engagement_2a.unaccepted_open_findings.count(), 34)
 
-        for ra in self.engagement_2b.risk_acceptance.all():
+        for ra in self.engagement_2b.product.risk_acceptances.all():
             for finding in ra.accepted_findings.all():
                 self.assertEqual(self.engagement_2a.product, finding.test.engagement.product)

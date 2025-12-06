@@ -51,12 +51,12 @@ def expire_now(risk_acceptance):
 
     accepted_findings = risk_acceptance.accepted_findings.all()
     title = "Risk acceptance with " + str(len(accepted_findings)) + " accepted findings has expired for " + \
-            str(risk_acceptance.engagement.product) + ": " + str(risk_acceptance.engagement.name)
+            str(risk_acceptance.product)
 
     create_notification(event="risk_acceptance_expiration", title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
-                         reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
-                         product=risk_acceptance.engagement.product,
-                         url=reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)))
+                         reactivated_findings=reactivated_findings,
+                         product=risk_acceptance.product,
+                         url=reverse("view_risk_acceptance", args=(risk_acceptance.id,)))
 
 
 def reinstate(risk_acceptance, old_expiration_date):
@@ -91,7 +91,7 @@ def reinstate(risk_acceptance, old_expiration_date):
     risk_acceptance.save()
 
 
-def delete(eng, risk_acceptance):
+def delete(product, risk_acceptance):
     findings = risk_acceptance.accepted_findings.all()
     for finding in findings:
         finding.active = True
@@ -104,8 +104,6 @@ def delete(eng, risk_acceptance):
     post_jira_comments(risk_acceptance, findings, unaccepted_message_creator)
 
     risk_acceptance.accepted_findings.clear()
-    eng.risk_acceptance.remove(risk_acceptance)
-    eng.save()
 
     risk_acceptance.path.delete()
     risk_acceptance.delete()
@@ -195,14 +193,14 @@ def expiration_handler(*args, **kwargs):
         for risk_acceptance in risk_acceptances:
             logger.debug("notifying for risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
-            notification_title = "Risk acceptance with " + str(len(risk_acceptance.accepted_findings.all())) + " accepted findings will expire on " + \
-                timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
-                str(risk_acceptance.engagement.product) + ": " + str(risk_acceptance.engagement.name)
+            finding_count = len(risk_acceptance.accepted_findings.all())
+            ra_date = timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y")
+            notification_title = f"Risk acceptance with {finding_count} accepted findings will expire on {ra_date} for {risk_acceptance.product}"
 
             create_notification(event="risk_acceptance_expiration", title=notification_title, risk_acceptance=risk_acceptance,
-                                accepted_findings=risk_acceptance.accepted_findings.all(), engagement=risk_acceptance.engagement,
-                                product=risk_acceptance.engagement.product,
-                                url=reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)))
+                                accepted_findings=risk_acceptance.accepted_findings.all(),
+                                product=risk_acceptance.product,
+                                url=reverse("view_risk_acceptance", args=(risk_acceptance.id, )))
 
             post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_warning_message_creator, heads_up_days)
 
@@ -212,10 +210,10 @@ def expiration_handler(*args, **kwargs):
 
 def get_view_risk_acceptance(risk_acceptance: Risk_Acceptance) -> str:
     """Return the full qualified URL of the view risk acceptance page."""
-    # Suppressing this error because it does not happen under most circumstances that a risk acceptance does not have engagement
+    # Suppressing this error because it does not happen under most circumstances that a risk acceptance does not have product
     with suppress(AttributeError):
-        get_full_url(
-            reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)),
+        return get_full_url(
+            reverse("view_risk_acceptance", args=(risk_acceptance.id,)),
         )
     return ""
 
@@ -223,21 +221,21 @@ def get_view_risk_acceptance(risk_acceptance: Risk_Acceptance) -> str:
 def expiration_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings has expired".format(
         escape_for_jira(risk_acceptance.name),
-        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.id,))),
         len(risk_acceptance.accepted_findings.all()))
 
 
 def expiration_warning_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings will expire in {} days".format(
         escape_for_jira(risk_acceptance.name),
-        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.id,))),
         len(risk_acceptance.accepted_findings.all()), heads_up_days)
 
 
 def reinstation_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings has been reinstated (expires on {})".format(
         escape_for_jira(risk_acceptance.name),
-        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+        get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.id,))),
         len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
 
 
@@ -245,7 +243,7 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
         return "Finding has been added to risk acceptance [({})|{}] with {} findings (expires on {})".format(
             escape_for_jira(risk_acceptance.name),
-            get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
+            get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.id,))),
             len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
     return "Finding has been risk accepted"
 
@@ -253,7 +251,7 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
 def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
         return "finding was unaccepted/deleted from risk acceptance [({})|{}]".format(escape_for_jira(risk_acceptance.name),
-            get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))))
+            get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.id,))))
     return "Finding is no longer risk accepted"
 
 
@@ -280,7 +278,7 @@ def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days
     if not risk_acceptance:
         return
 
-    jira_project = jira_helper.get_jira_project(risk_acceptance.engagement)
+    jira_project = jira_helper.get_jira_project(risk_acceptance.product)
 
     if jira_project and jira_project.risk_acceptance_expiration_notification:
         jira_instance = jira_helper.get_jira_instance(risk_acceptance.engagement)
@@ -311,9 +309,9 @@ def get_almost_expired_risk_acceptances_to_handle(heads_up_days):
 
 def prefetch_for_expiration(risk_acceptances):
     return risk_acceptances.prefetch_related("accepted_findings", "accepted_findings__jira_issue",
-                                                "engagement_set",
-                                                "engagement__jira_project",
-                                                "engagement__jira_project__jira_instance",
+                                                "product",
+                                                "product__jira_project_set",
+                                                "product__jira_project_set__jira_instance",
                                              )
 
 
