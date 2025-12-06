@@ -539,9 +539,6 @@
                         "enabled": {
                             "type": "boolean"
                         },
-                        "fsGroup": {
-                            "type": "integer"
-                        },
                         "name": {
                             "description": "any name",
                             "type": "string"
