@@ -18,7 +18,7 @@ django_extensions==4.1
 django-slack==5.19.0
 django-watson==1.6.3
 django-prometheus==2.4.1
-Django==5.1.14
+Django==5.1.15
 django-single-session==0.2.0
 djangorestframework==3.16.1
 html2text==2025.4.15
