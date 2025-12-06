@@ -569,6 +569,17 @@ You can also optionally set the following variables:
 
 Once these variables have been set, restart DefectDojo. Log In With OIDC should now be added to the DefectDojo login page.
 
+### Group synchronization options:
+You can set the following variables to parse the OIDC groups:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_OIDC_GET_GROUPS=True,     # Enable group synchronization from OIDC claims
+    DD_SOCIAL_AUTH_OIDC_GROUPS_FILTER='',    # Optional regex to filter group names
+    DD_SOCIAL_AUTH_OIDC_CLEANUP_GROUPS=True, # Remove user from groups not present in OIDC claim
+    {{< /highlight >}}
+
+Once these variables have been set, restart DefectDojo. 
+
 ## SAML Configuration
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users can follow this guide to set up a SAML configuration using the DefectDojo UI. Open-Source users can set up SAML via environment variables, using the following [guide](./#open-source-saml).
