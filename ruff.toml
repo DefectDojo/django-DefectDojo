@@ -1,5 +1,5 @@
-# Always generate Python 3.13-compatible code.
-target-version = "py313"
+# Always generate Python 3.14-compatible code.
+target-version = "py314"
 
 # Same as Black.
 line-length = 120
