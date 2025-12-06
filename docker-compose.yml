@@ -128,7 +128,7 @@ services:
     volumes:
       - defectdojo_postgres:/var/lib/postgresql/data
   valkey:
-    image: valkey/valkey:7.2.11-alpine@sha256:7b2019b47ad58be661fa6eba5ea66106eadde03459387113aaed29a464a5876b
+    image: valkey/valkey:7.2.11-alpine@sha256:36745d7c91d75dde02fa239ebe333fa1c7637249ed76f7da1c5ea838375974ff
     volumes:
       # we keep using the redis volume as renaming is not possible and copying data over
       # would require steps during downtime or complex commands in the intializer
