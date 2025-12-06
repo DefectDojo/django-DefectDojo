@@ -1,0 +1,2860 @@
+{
+  "data": {
+    "auto": {
+      "assessment": {
+        "ref": "13371337-1337-1337-1337-133713371337",
+        "applicationRef": "73317331-7331-7331-7331-733173317331",
+        "platformType": "android",
+        "packageKey": "com.org.appname",
+        "packageVersion": "1.0.0",
+        "taskId": "1231231231231",
+        "title": "AppName",
+        "iconURL": "https://api.nowsecure.com/icon/hjfkjz9mxb3bxy3zi1ohraj60oqtpbw63wnvgon8l1ytt49dqwickoczrzopvkvb",
+        "isAppstoreDownload": false,
+        "createdAt": "2025-06-20T06:47:15.551Z",
+        "createdBy": {
+          "ref": "123123aa-129a-1223-ba11-129c91234asf",
+          "email": "user@email.com",
+          "name": "John Doe",
+          "__typename": "UserSummary"
+        },
+        "buildRef": "123123aa-123a-1a31-123a-1231aa112311",
+        "buildVersion": "010000",
+        "upload": {
+          "ref": "1231acc1-123a-129f-19af-0aa123018391",
+          "createdAt": "2025-06-20T06:45:16.788Z",
+          "digest": "25tnhu7gc0u70lw9jnc120rilyz2z1blfnhssinqsgnvpjtvafj0x82ddfclyzri",
+          "__typename": "AutoUpload"
+        },
+        "analysisConfigLevel": "BASELINE",
+        "type": "baseline",
+        "analysisJobType": "FULL",
+        "staticScore": null,
+        "score": 86.5,
+        "favorite": false,
+        "assessmentError": null,
+        "isDebugMode": false,
+        "hasPreviousAssessmentForComparison": false,
+        "policy": {
+          "ref": "1a11aa11-1111-1111-a111-11111aaa1111",
+          "name": "NowSecure Default Policy",
+          "createdBy": null,
+          "createdAt": "2022-07-06T11:04:26.575Z",
+          "updatedAt": "2025-08-20T16:25:34.128Z",
+          "archivedAt": null,
+          "targetType": "ORGANIZATION",
+          "isDefault": true,
+          "isNSManaged": true,
+          "latestVersion": {
+            "ref": "1111a11a-11aa-1aa1-1a1a-111a11111aa1",
+            "version": 60,
+            "trackedVersion": null,
+            "trackedVersionRef": null,
+            "__typename": "PolicyVersion"
+          },
+          "targets": [
+            {
+              "ref": "a1a111aa-111a-11aa-111a-11a111a1a1a1",
+              "type": "ORGANIZATION",
+              "__typename": "PolicyTarget"
+            }
+          ],
+          "enabled": true,
+          "trackedPolicy": null,
+          "__typename": "Policy"
+        },
+        "policyVersion": {
+          "ref": "a11aa111-1a11-1111-1a1a-11aaa1a111a1",
+          "policyRef": "1a11aa11-1111-1111-a111-11111aaa1111",
+          "version": 56,
+          "policyCategories": [
+            {
+              "policyCategory": 1,
+              "label": "Needs Remediation",
+              "description": "NowSecure suggests remediation",
+              "color": "#CA1108",
+              "__typename": "PolicyCategory"
+            },
+            {
+              "policyCategory": 2,
+              "label": "Review Required",
+              "description": "NowSecure suggests security review to determine risk",
+              "color": "#FBA255",
+              "__typename": "PolicyCategory"
+            },
+            {
+              "policyCategory": 3,
+              "label": "Informational",
+              "description": "NowSecure suggests general review for audit and information",
+              "color": "#0099ff",
+              "__typename": "PolicyCategory"
+            }
+          ],
+          "__typename": "PolicyVersion"
+        },
+        "analysis": {
+          "isAuthenticated": null,
+          "isCancelled": false,
+          "isComplete": true,
+          "isRunning": false,
+          "status": "completed",
+          "mappedStatus": "completed",
+          "errorCode": null,
+          "error": null,
+          "artifacts": [
+            {
+              "assessmentRef": "13371337-1337-1337-1337-133713371337",
+              "ref": "111111a1-1111-11aa-a11a-a111aa111a11",
+              "artifactType": "HAR",
+              "tags": "dynamic combined har",
+              "displayName": "Download artifact for Combined HAR",
+              "byteSize": 243826,
+              "filename": "combined.har",
+              "contentType": "application/json",
+              "url": "/v4/asset/artifact/13371337-1337-1337-1337-133713371337/111111a1-1111-11aa-a11a-a111aa111a11",
+              "__typename": "AnalysisArtifact"
+            },
+            {
+              "assessmentRef": "13371337-1337-1337-1337-133713371337",
+              "ref": "aa111a1a-a1aa-11a1-1a11-a1aa1111aaaa",
+              "artifactType": "HAR",
+              "tags": "dynamic combined har",
+              "displayName": "Download artifact for Combined HAR+Beat",
+              "byteSize": 446396,
+              "filename": "combined_with_beat.har",
+              "contentType": "application/json",
+              "url": "/v4/asset/artifact/13371337-1337-1337-1337-133713371337/aa111a1a-a1aa-11a1-1a11-a1aa1111aaaa",
+              "__typename": "AnalysisArtifact"
+            }
+          ],
+          "screenshots": [
+            {
+              "ref": "111111a1-a111-111a-11aa-1aa11111a1a1",
+              "url": "/v4/asset/screenshot/13371337-1337-1337-1337-133713371337/111111a1-a111-111a-11aa-1aa11111a1a1",
+              "analysisPass": 1,
+              "__typename": "AnalysisScreenshot"
+            },
+            {
+              "ref": "1111a111-aaaa-1a1a-1a1a-a111a1a1a11a",
+              "url": "/v4/asset/screenshot/13371337-1337-1337-1337-133713371337/1111a111-aaaa-1a1a-1a1a-a111a1a1a11a",
+              "analysisPass": 1,
+              "__typename": "AnalysisScreenshot"
+            }
+          ],
+          "task": {
+            "static": {
+              "id": "1231231231231.static",
+              "status": "completed",
+              "modifiedAt": "2025-06-20T07:18:45.377Z",
+              "isRunning": false,
+              "isComplete": true,
+              "__typename": "AnalysisJob"
+            },
+            "dynamic": {
+              "id": "1231231231231.dynamic",
+              "status": "completed",
+              "modifiedAt": "2025-06-20T07:18:36.233Z",
+              "isRunning": false,
+              "isComplete": true,
+              "__typename": "AnalysisJob"
+            },
+            "__typename": "AnalysisTask"
+          },
+          "__typename": "AutoAssessmentAnalysis"
+        },
+        "build": {
+          "ref": "123123aa-123a-1a31-123a-1231aa112311",
+          "digest": "25tnhu7gc0u70lw9jnc120rilyz2z1blfnhssinqsgnvpjtvafj0x82ddfclyzri",
+          "version": "1.0.0",
+          "__typename": "AutoBuild"
+        },
+        "group": {
+          "ref": "a111aaaa-aa11-11aa-1a11-11a111aa1111",
+          "__typename": "AutoGroup"
+        },
+        "__typename": "AutoAssessment",
+        "report": {
+          "createdAt": "2025-06-20T06:47:15.551Z",
+          "findings": [
+            {
+              "affected": true,
+              "checkId": "apk_insecure_network_config",
+              "uniqueVulnerabilityId": 2802557,
+              "check": {
+                "id": "apk_insecure_network_config",
+                "analysisType": "static",
+                "title": "App Configuration Allows Insecure Network Connections",
+                "description": "This check analyzes the app and looks for settings that allow cleartext traffic, such as `android:usesCleartextTraffic` in the `AndroidManifest.xml` file and `cleartextTrafficPermitted` in the Network Security Config file.",
+                "shortDescription": "Allowing insecure connections increases the risk of exposing sensitive data. Applications should explicitly disable cleartext communications, in order to avoid data interception or modification, which compromises sensitive information.",
+                "platformType": "android",
+                "category": "network",
+                "categories": [
+                  "Networking"
+                ],
+                "legacyFindingKey": "apk_insecure_network_config",
+                "isNew": false,
+                "deprecated": false,
+                "context": {
+                  "view": "table",
+                  "title": "Network Configurations Allowing Cleartext Traffic",
+                  "fields": [
+                    {
+                      "key": "source",
+                      "format": null,
+                      "title": "Source",
+                      "description": "the file type that allows insecure access",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "xml_element",
+                      "format": null,
+                      "title": "XML Element",
+                      "description": "the XML element in the Android Manifest (`<application>`) or Network Security Configuration `<domain-config>` or `<base-config>`)",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "xml_attribute",
+                      "format": null,
+                      "title": "XML Attribute",
+                      "description": "the XML attribute allowing cleartext traffic in the Android Manifest (`android:usesCleartextTraffic`) or Network Security Configuration `cleartextTrafficPermitted`)",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "default_used",
+                      "format": null,
+                      "title": "Uses SDK Default",
+                      "description": "states if the Android SDK version's default value was used",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "allow_cleartext",
+                      "format": null,
+                      "title": "Allow Cleartext",
+                      "description": "value of either `android:usesCleartextTraffic` or `cleartextTrafficPermitted` attributes indicating whether cleartext data is allowed",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "domain",
+                      "format": null,
+                      "title": "Domain",
+                      "description": "the domain that allows cleartext data (only present if <domain-config> is used)",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "include_subdomains",
+                      "format": null,
+                      "title": "Includes Subdomains",
+                      "description": "value of the `includeSubdomains` attribute indicating whether cleartext data is allowed for subdomains (only present if <domain-config> is used)",
+                      "__typename": "FindingContextField"
+                    }
+                  ],
+                  "children": null,
+                  "__typename": "FindingContextMetadata"
+                },
+                "issue": {
+                  "cvss": 7.5,
+                  "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                  "title": "App Configuration Allows Insecure Network Connections",
+                  "description": "The app utilizes insecure settings to permit cleartext network connections.\n\nCleartext connections transmit data unencrypted, which may expose sensitive information (such as passwords or credit card details) to attackers and leave the app vulnerable to man-in-the-middle attacks.\n\nBy default, Android prohibits cleartext connections (e.g., HTTP, FTP, WebSockets, XMPP, IMAP, SMTP) in apps installed on devices running Android 9 (API 28) or above. However, app developers have two main ways allow cleartext connections:\n\n- **Android Manifest:** whenever `android:usesCleartextTraffic` is set to `true` in the `<application>` element of the Android manifest file.\n- **Network Security Config:** by setting the attribute `cleartextTrafficPermitted` to `true` within the `<base-config>` element of the Network Security Config to enable cleartext traffic globally for the app or within `<domain-config>` for a more fine-grained approach, which would enable cleartext traffic only to specific domains and their subdomains.\n\nIf a Network Security Config is provided, all cleartext traffic rules in the Android Manifest will be overridden.",
+                  "recommendation": "The evidence table lists all configurations that allow cleartext network traffic:\n\n- **Source:** the file type that allows insecure access\n- **XML Element:** the XML element in the Android Manifest (`<application>`) or Network Security Configuration `<domain-config>` or `<base-config>`)\n- **XML Attribute:** the XML attribute allowing cleartext traffic in the Android Manifest (`android:usesCleartextTraffic`) or Network Security Configuration `cleartextTrafficPermitted`)\n- **Uses SDK Default:** states if the Android SDK version's default value was used\n- **Allow Cleartext:** value of either `android:usesCleartextTraffic` or `cleartextTrafficPermitted` attributes indicating whether cleartext data is allowed\n- **Domain:** the domain that allows cleartext data (only present if <domain-config> is used)\n- **Includes Subdomains:** value of the `includeSubdomains` attribute indicating whether cleartext data is allowed for subdomains (only present if <domain-config> is used)\n\nTo mitigate this issue, we recommend the following:\n\n1. **Set `minSdkVersion` to 28 or higher in `build.gradle`**: To ensure that secure defaults are enforced, configure the `minSdkVersion` to 28 or above. This will prevent installation on devices that do not support secure defaults by default.\n\n```gradle\nandroid {\n    defaultConfig {\n        minSdkVersion 28\n    }\n}\n```\n\n**Note**: The current Android [documentation](https://developer.android.com/privacy-and-security/security-config#CleartextTrafficPermitted) states that apps targeting API 28 or above (`targetSdkVersion`) will use secure defaults. However, **this is not always the case**. Despite targeting a higher SDK, devices running API 27 or lower continue to use insecure default values, even when an app's `targetSdkVersion` is set to a secure API level. Setting a `minSdkVersion` above 27 prevents the app from being installed on devices running Android 8.1 (API 27) or lower.\n\n2. **Enforce Explicit Security Configurations**: While upgrading the `minSdkVersion` is the preferred approach to ensure secure default values, the Android Manifest and Network Security Config can ensure that explicit incorrect cleartext traffic configurations are not allowed. This step also adds an extra layer of protection if upgrading the `minSdkVersion` is not feasible (e.g., for compatibility or to maintain support for a broader user base):\n\n- **Update `AndroidManifest.xml`**: Ensure that the attribute `android:usesCleartextTraffic` is present and set to `false`.\n\n  ```xml\n  <application\n      android:usesCleartextTraffic=\"false\"\n      ... >\n      ...\n  </application>\n  ```\n\n- **Network Security Config (`network_security_config.xml`)**: If a custom `android:networkSecurityConfig` file is used (typically in `res/xml/network_security_config.xml`), ensure that the `base-config` and all `domain-config` entries have `cleartextTrafficPermitted` set to `false`:\n\n  ```xml\n  <network-security-config>\n      <base-config cleartextTrafficPermitted=\"false\">\n          ...\n      </base-config>\n      <domain-config cleartextTrafficPermitted=\"false\">\n          ...\n      </domain-config>\n  </network-security-config>\n  ```\n\n**Cleartext Exception Considerations**: If cleartext connections are essential for specific domains (e.g., for backend compatibility), consider limiting cleartext traffic strictly to those domains. Note, however, that this introduces **significant security risks**, and whenever possible, backends should support secure connections (HTTPS).\n\n**Limitations of `isCleartextTrafficPermitted`**: Although setting `isCleartextTrafficPermitted` improves security for most network traffic, it [may not prevent all cleartext communications](https://developer.android.com/reference/android/security/NetworkSecurityPolicy#isCleartextTrafficPermitted()) (e.g., those initiated through low-level sockets). This configuration is enforced on a best-effort basis and applies primarily to higher-level network APIs such as [`HttpsURLConnection`](https://developer.android.com/reference/javax/net/ssl/HttpsURLConnection).",
+                  "passingContent": "The app has no insecure settings allowing cleartext connections.",
+                  "category": "network",
+                  "severity": "high",
+                  "warn": false,
+                  "impactSummary": "Allowing cleartext network connections allows attackers to intercept, inspect or manipulate data transmitted between the app and external servers, compromising the integrity and confidentiality of user information. This vulnerability can have serious business implications, particularly in the event of a data breach, including loss of customer trust, potential legal liabilities and financial penalties.",
+                  "regulations": [
+                    {
+                      "type": "cwe",
+                      "label": "CWE",
+                      "links": [
+                        {
+                          "title": "319",
+                          "url": "https://cwe.mitre.org/data/definitions/319.html",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "fisma_low",
+                      "label": "FISMA LOW",
+                      "links": [
+                        {
+                          "title": "SC-13 CRYPTOGRAPHIC PROTECTION",
+                          "url": "https://csrc.nist.gov/Projects/risk-management/sp800-53-controls/release-search#!/control?version=5.1&number=SC-13",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "fisma_med",
+                      "label": "FISMA MED",
+                      "links": [
+                        {
+                          "title": "SC-8 TRANSMISSION CONFIDENTIALITY AND INTEGRITY",
+                          "url": "https://csrc.nist.gov/Projects/risk-management/sp800-53-controls/release-search#!/control?version=5.1&number=SC-8",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "owasp",
+                      "label": "Risk OWASP",
+                      "links": [
+                        {
+                          "title": "MSTG-NETWORK-1 (OWASP MASVS v1.5.0)",
+                          "url": "https://github.com/OWASP/owasp-masvs/blob/v1.5.0/Document/0x10-V5-Network_communication_requirements.md",
+                          "__typename": "RegulatoryLink"
+                        },
+                        {
+                          "title": "MASVS-NETWORK-1 (OWASP MASVS v2.1.0)",
+                          "url": "https://github.com/OWASP/owasp-masvs/blob/v2.1.0/controls/MASVS-NETWORK-1.md",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "gdpr",
+                      "label": "GDPR",
+                      "links": [
+                        {
+                          "title": "Risks violating Article 25",
+                          "url": "https://gdpr-info.eu/art-25-gdpr/",
+                          "__typename": "RegulatoryLink"
+                        },
+                        {
+                          "title": "Risks violating Article 32",
+                          "url": "https://gdpr-info.eu/art-32-gdpr/",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "ffiec",
+                      "label": "FFIEC",
+                      "links": [
+                        {
+                          "title": "May violate D3.PC.Am.Int.7",
+                          "url": "https://www.ffiec.gov/pdf/cybersecurity/FFIEC_CAT_May_2017.pdf",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "pci",
+                      "label": "PCI",
+                      "links": [
+                        {
+                          "title": "May violate requirement 4.1",
+                          "url": "https://www.pcisecuritystandards.org/document_library?document=pci_dss",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "hipaa",
+                      "label": "HIPAA",
+                      "links": [
+                        {
+                          "title": "May violate §164.312(e)(1): Standard: Transmission security.",
+                          "url": "https://www.hhs.gov/sites/default/files/ocr/privacy/hipaa/administrative/securityrule/techsafeguards.pdf?language=es",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "ccpa",
+                      "label": "CCPA",
+                      "links": [
+                        {
+                          "title": "Risks violating CCPA: exfiltration, theft, or disclosure of PII",
+                          "url": "https://cdp.cooley.com/ccpa-2018/#section-1798-150",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    }
+                  ],
+                  "stepsToReproduce": null,
+                  "codeSamples": [
+                    {
+                      "platform": "android",
+                      "syntax": "xml",
+                      "caption": "Good Code Example",
+                      "block": "<base-config cleartextTrafficPermitted=\"false\">\n<trust-anchors>\n    <certificates src=\"system\" />\n</trust-anchors>\n</base-config>",
+                      "__typename": "IssueCodeSample"
+                    }
+                  ],
+                  "guidanceLinks": [
+                    {
+                      "platform": "android",
+                      "caption": "Android Developer Documentation - Android Manifest",
+                      "url": "https://developer.android.com/guide/topics/manifest/manifest-intro",
+                      "__typename": "IssueGuidanceLink"
+                    },
+                    {
+                      "platform": "android",
+                      "caption": "Android Developer Documentation - `usesCleartextTraffic` field",
+                      "url": "https://developer.android.com/guide/topics/manifest/application-element#usesCleartextTraffic",
+                      "__typename": "IssueGuidanceLink"
+                    },
+                    {
+                      "platform": "android",
+                      "caption": "Android Developer Documentation - Network Security Config",
+                      "url": "https://developer.android.com/privacy-and-security/security-config",
+                      "__typename": "IssueGuidanceLink"
+                    }
+                  ],
+                  "__typename": "FindingIssue"
+                },
+                "compliance": null,
+                "__typename": "FindingCheck"
+              },
+              "userChanges": null,
+              "cvss": 7.5,
+              "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "findingStatus": "detected",
+              "decision": "NONE",
+              "decisionInfo": null,
+              "evidenceDecision": "NONE",
+              "hidden": false,
+              "impactType": "high",
+              "severity": "high",
+              "note": null,
+              "adjustments": [],
+              "shortRemediation": null,
+              "title": "App Configuration Allows Insecure Network Connections",
+              "hasContext": true,
+              "hasCodeLocations": false,
+              "canHaveActionableEvidence": true,
+              "hasActionedEvidence": false,
+              "policyCategory": {
+                "policyCategory": 1,
+                "color": "#CA1108",
+                "label": "Needs Remediation",
+                "__typename": "PolicyCategory"
+              },
+              "policyFindingOverrides": {
+                "checkId": "apk_insecure_network_config",
+                "cvss": 7.5,
+                "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                "hidden": false,
+                "impactType": "high",
+                "__typename": "PolicyFinding"
+              },
+              "complianceReportRelations": [
+                {
+                  "catalog": "MASVS",
+                  "groupId": "MASVS-NETWORK",
+                  "controlId": "MSTG-NETWORK-1",
+                  "version": "1",
+                  "__typename": "ComplianceReportRelation"
+                },
+                {
+                  "catalog": "MASVS",
+                  "groupId": "MASVS-NETWORK",
+                  "controlId": "MASVS-NETWORK-1",
+                  "version": "2",
+                  "__typename": "ComplianceReportRelation"
+                }
+              ],
+              "__typename": "Finding"
+            },
+            {
+              "affected": true,
+              "checkId": "apk_webview_access",
+              "uniqueVulnerabilityId": 2802571,
+              "check": {
+                "id": "apk_webview_access",
+                "analysisType": "static",
+                "title": "WebViews Allowing Access to Local Files",
+                "description": "This check statically analyzes the app looking for WebViews configured to allow file access using specific methods from the [android.webkit.WebSettings](https://developer.android.com/reference/android/webkit/WebSettings.html) class.\n\nIt also considers the app's `minSdkVersion` from the `AndroidManifest.xml`, which determines default values for WebView file access methods as follows:\n\n- [`setAllowFileAccess`](<https://developer.android.com/reference/android/webkit/WebSettings#setAllowFileAccess(boolean)>): `True` when the app's `minSdkVersion` <= 29\n- [`setAllowFileAccessFromFileURLs`](<https://developer.android.com/reference/android/webkit/WebSettings#setAllowFileAccessFromFileURLs(boolean)>): `True` when the app's `minSdkVersion` <= 15\n- [`setAllowUniversalAccessFromFileURLs`](<https://developer.android.com/reference/android/webkit/WebSettings#setAllowUniversalAccessFromFileURLs(boolean)>): `True` when the app's `minSdkVersion` <= 15\n\nThis finding is triggered when the following criteria are met for a WebView:\n\n1. It has file access enabled by default (due to the `minSdkVersion`) or explicitly by using the above methods.\n2. It has JavaScript enabled due to the use of `setJavaScriptEnabled(true)`.",
+                "shortDescription": "Allowing WebViews to access local files can lead to unauthorized access or manipulation by attackers. If executable code or scripts are available locally, attackers could inject and execute malicious code, resulting in exposure of configuration files, cached data, credentials, or other sensitive information, potentially leading to significant data breaches and compromised user privacy.",
+                "platformType": "android",
+                "category": "platform",
+                "categories": [
+                  "Platform Interaction"
+                ],
+                "legacyFindingKey": "apk_webview_access",
+                "isNew": false,
+                "deprecated": false,
+                "context": {
+                  "view": "table",
+                  "title": "Methods allowing local resource access in WebViews",
+                  "fields": [
+                    {
+                      "key": "local_resource_access_method",
+                      "format": null,
+                      "title": "Access Method",
+                      "description": "the method allowing access to local resources",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "default_used",
+                      "format": null,
+                      "title": "Uses SDK Default",
+                      "description": "states if the Android SDK version's default value was used",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "value",
+                      "format": null,
+                      "title": "Value",
+                      "description": "the boolean value passed to the access method",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "source_file",
+                      "format": null,
+                      "title": "Source File",
+                      "description": "the file where the access method was used",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "package_name",
+                      "format": null,
+                      "title": "Package Name",
+                      "description": "the package containing the access method",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "class_name",
+                      "format": null,
+                      "title": "Class",
+                      "description": "the class using the access method",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "method",
+                      "format": null,
+                      "title": "Method",
+                      "description": "the method using the access method",
+                      "__typename": "FindingContextField"
+                    }
+                  ],
+                  "children": null,
+                  "__typename": "FindingContextMetadata"
+                },
+                "issue": {
+                  "cvss": 7.5,
+                  "cvssVector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:L/A:L",
+                  "title": "WebViews Allowing Access to Local Files",
+                  "description": "Some WebViews were detected with access to local files.\n\nWebViews are components used to display web content within a mobile app. If improperly configured, WebViews can provide access to local files stored on the device or sensitive app data. This access occurs because WebViews can load content from multiple sources, including the local file system. Without proper restrictions, an attacker could take advantage of this behavior to gain access to or manipulate local files, which could potentially compromise the security of the app and its users.",
+                  "recommendation": "- **Access Method:** the method allowing access to local resources\n- **Uses SDK Default:** states if the Android SDK version's default value was used\n- **Value:** the boolean value passed to the access method\n- **Source File:** the file where the access method was used\n- **Package Name:** the package containing the access method\n- **Class:** the class using the access method\n- **Method:** the method using the access method\n\nWhen determining to remediate or dismiss this issue, consider the use case of the analyzed app as there are legitimate cases where enabling both local file access and JavaScript is necessary, such as hybrid apps, apps that display interactive local HTML content for offline use (e.g. e-book readers), offline documentation apps, or educational tools. In these situations, ensure all local files are trusted and properly secured to minimize potential security risks.\n\nOtherwise, please follow these recommendations:\n\nIf **Uses SDK Default** is `false`, the identified method is explicitly called in the app's code or libraries. In this case, update the method calls to disable file access, for example, by changing `setAllowFileAccess(true)` to `setAllowFileAccess(false)`.\n\nIf **Uses SDK Default** is `true`, the identified WebView uses insecure default `WebSettings` values. WebView settings change based on the app's `minSdkVersion` declared in the Android Manifest. To ensure secure settings are used, you can either update AndroidManifest.xml by setting `minSdkVersion` to 30 or higher, which changes the default `WebSettings` to more secure values, or explicitly set secure values in the code. This can be done by locating the insecure WebView and manually applying secure settings, for example, by calling `webView.getSettings().setAllowFileAccess(false)`.\n\nIf the **Value** is `<Boolean Variable>`, then the flagged method was not provided an explicit `true` or `false` value. In this case, each of these methods must be reviewed manually to determine that the parameter passed to the method is secure. For example, if `setAllowFileAccess(flag)` was found, ensure that `flag` is set to `false` prior to the method being called.\n\n**Locating the finding:** Use the provided values for **Source File**, **Package Name**, **Class**, **Method** as well as the additional location data (if available) to determine the source of the offending code. If the issue originates from a third-party library, try updating the library or using a different one. If this isn't possible or the issue persists, carefully analyze how the app uses the identified WebViews and report the issue to the library maintainers.\n\nSome additional mitigations include:\n\n- Validating and sanitizing all content loaded into WebViews.\n- Avoid using `setAllowFileAccessFromFileURLs` or `setAllowUniversalAccessFromFileURLs` for accessing local content. Instead, use [WebViewAssetLoader](https://developer.android.com/reference/androidx/webkit/WebViewAssetLoader).\n- Ensuring that exported activities handling Intents validate input URIs and implementing intent-filters to accept only trusted sources.\n- Validating URLs used in WebViews using [shouldOverrideUrlLoading](https://developer.android.com/reference/android/webkit/WebViewClient#shouldOverrideUrlLoadingandroid.webkit.WebView,%20android.webkit.WebResourceRequest).\n- Enforcing HTTPS for all content loaded into the WebView and ensure correct TLS implementation to prevent MITM attacks.\n- Validating inputs to any existing [JavaScript Interfaces to client-side Android code](https://developer.android.com/develop/ui/views/layout/webapps/webview#BindingJavaScript).",
+                  "passingContent": "No WebViews were detected with access to local files.",
+                  "category": null,
+                  "severity": "high",
+                  "warn": false,
+                  "impactSummary": "If local files contain executable code or scripts, an attacker could exploit the WebView to inject and execute malicious code, which could then result in unauthorized access to sensitive local resources such as configuration files, cached data, user credentials, tokens, or personal information stored in the app's directory, potentially leading to data breaches.\n\nSome common scenarios include:\n\n- **Man-in-the-middle (MITM) Attacks**: If the WebView loads content over unsecured connections (e.g., HTTP), an attacker on the same network can intercept and modify the data in transit by injecting malicious scripts or code into the intercepted content, allowing the WebView to execute that code and potentially access sensitive data or local resources.\n- **Exploitation via Exported Components**: If the app has exported activities that accept Intents to load URLs in a WebView without proper validation, an attacker could craft an Intent to load malicious content or local files, potentially leading to data leakage or code execution.\n- **Loading Untrusted or User-Generated Content**: If the WebView loads content from user input or external sources without proper validation or sanitization, it can allow attackers to provide crafted input containing malicious scripts or code that the WebView processes, resulting in code execution within the context of the app.\n- **Exploitation via External Storage**: If the app loads resources from external storage without verifying their integrity or origin, it may allow attackers to place malicious files in external storage that the WebView accesses, resulting in the execution of malicious code within the app.",
+                  "regulations": [
+                    {
+                      "type": "owasp",
+                      "label": "Risk OWASP",
+                      "links": [
+                        {
+                          "title": "MSTG-PLATFORM-6 (OWASP MASVS v1.5.0)",
+                          "url": "https://github.com/OWASP/owasp-masvs/blob/v1.5.0/Document/0x11-V6-Interaction_with_the_environment.md",
+                          "__typename": "RegulatoryLink"
+                        },
+                        {
+                          "title": "MASVS-PLATFORM-2 (OWASP MASVS v2.1.0)",
+                          "url": "https://github.com/OWASP/owasp-masvs/blob/v2.1.0/controls/MASVS-PLATFORM-2.md",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    }
+                  ],
+                  "stepsToReproduce": null,
+                  "codeSamples": null,
+                  "guidanceLinks": [
+                    {
+                      "platform": "android",
+                      "caption": "OWASP MASTG - Testing WebView Protocol Handlers",
+                      "url": "https://mas.owasp.org/MASTG/tests/android/MASVS-PLATFORM/MASTG-TEST-0032",
+                      "__typename": "IssueGuidanceLink"
+                    },
+                    {
+                      "platform": "android",
+                      "caption": "Android Developers - WebSettings",
+                      "url": "https://developer.android.com/reference/android/webkit/WebSettings.html",
+                      "__typename": "IssueGuidanceLink"
+                    }
+                  ],
+                  "__typename": "FindingIssue"
+                },
+                "compliance": null,
+                "__typename": "FindingCheck"
+              },
+              "userChanges": null,
+              "cvss": 7.5,
+              "cvssVector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:L/A:L",
+              "findingStatus": "detected",
+              "decision": "NONE",
+              "decisionInfo": null,
+              "evidenceDecision": "NONE",
+              "hidden": false,
+              "impactType": "high",
+              "severity": "high",
+              "note": null,
+              "adjustments": [],
+              "shortRemediation": null,
+              "title": "WebViews Allowing Access to Local Files",
+              "hasContext": true,
+              "hasCodeLocations": true,
+              "canHaveActionableEvidence": true,
+              "hasActionedEvidence": false,
+              "policyCategory": {
+                "policyCategory": 1,
+                "color": "#CA1108",
+                "label": "Needs Remediation",
+                "__typename": "PolicyCategory"
+              },
+              "policyFindingOverrides": {
+                "checkId": "apk_webview_access",
+                "cvss": 7.5,
+                "cvssVector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:L/A:L",
+                "hidden": false,
+                "impactType": "high",
+                "__typename": "PolicyFinding"
+              },
+              "complianceReportRelations": [
+                {
+                  "catalog": "MASVS",
+                  "groupId": "MASVS-PLATFORM",
+                  "controlId": "MSTG-PLATFORM-6",
+                  "version": "1",
+                  "__typename": "ComplianceReportRelation"
+                },
+                {
+                  "catalog": "MASVS",
+                  "groupId": "MASVS-PLATFORM",
+                  "controlId": "MASVS-PLATFORM-2",
+                  "version": "2",
+                  "__typename": "ComplianceReportRelation"
+                }
+              ],
+              "__typename": "Finding"
+            },
+            {
+              "affected": true,
+              "checkId": "openssl_cve_2023_0286",
+              "uniqueVulnerabilityId": 2802566,
+              "check": {
+                "id": "openssl_cve_2023_0286",
+                "analysisType": "static",
+                "title": "Dependent OpenSSL Library Vulnerable to CVE-2023-0286",
+                "description": "This test retrieves the list of software components for the app and checks if it contains versions of the OpenSSL library vulnerable to CVE-2023-0286.",
+                "shortDescription": "Using a vulnerable version of the OpenSSL library affected by CVE-2023-0286 may allow attackers to read sensitive memory contents due to improper handling of X.509 GeneralName fields. This type confusion vulnerability can potentially lead to security breaches and unauthorized access to sensitive data.",
+                "platformType": null,
+                "category": "code",
+                "categories": [
+                  "Code Quality"
+                ],
+                "legacyFindingKey": "openssl_cve_2023_0286",
+                "isNew": false,
+                "deprecated": true,
+                "context": {
+                  "view": "table",
+                  "title": "OpenSSL Libs Vulnerable to CVE-2023-0286 Found",
+                  "fields": [
+                    {
+                      "key": "version",
+                      "format": null,
+                      "title": "Version",
+                      "description": "vulnerable version.",
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "source",
+                      "format": null,
+                      "title": "Source",
+                      "description": "path within your app package file where the vulnerable version was found.",
+                      "__typename": "FindingContextField"
+                    }
+                  ],
+                  "children": null,
+                  "__typename": "FindingContextMetadata"
+                },
+                "issue": {
+                  "cvss": 7.4,
+                  "cvssVector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:H",
+                  "title": "Dependent OpenSSL Library Vulnerable to CVE-2023-0286",
+                  "description": "The app contains a version of the OpenSSL library vulnerable to CVE-2023-0286.\n\n[CVE-2023-0286](https://nvd.nist.gov/vuln/detail/CVE-2023-0286) is a type confusion vulnerability where OpenSSL processes an X.509 GeneralName containing an X.400 Address. The X.400 Address is then assigned the wrong data type and stored as an `ANS1_TYPE` instead of `ANS1_STRING`. This allows attackers to read the contents of memory addresses by passing pointers to `memcmp` when calls to this function are taking place during certificate revocation list validation.",
+                  "recommendation": "The evidence table shows versions of OpenSSL vulnerable to CVE-2023-0286:\n\n- **Version:** vulnerable version.\n- **Source:** path within your app package file where the vulnerable version was found.\n\nIt is important to remember the following when evaluating this finding:\n\n- The affected instances might be a direct package dependency of your app or a dependency of a third-party library included in your project. If that's the case, update the third-party library or use a different one.\n- The CVSS score is predetermined by the associated CVEs without considering the context of any specific app. This means the way your app interacts with this library may mitigate the risks considered in the CVSS score.\n\nUpdate the version of all vulnerable instances of the OpenSSL library by completing the following recommendations:\n\n- If the `version` found is between `1.0.2 - 1.0.2zf` please upgrade to `1.0.2zg`.\n- If the `version` found is between `1.1.1 - 1.1.1q` please upgrade to `1.1.1t`.\n- If the `version` found is between `3.0.0 - 3.0.7` please upgrade to `3.0.8`.\n\n**Note**: If SQLCipher is one of your dependencies please note that it currently has a vulnerable version of OpenSSL v1.1.1q. However the maintainers state that [SQLCipher is not affected by this cve because SQLCipher does not use the X.509 features of OpenSSL](https://github.com/sqlcipher/android-database-sqlcipher/issues/622#issuecomment-1501789797).",
+                  "passingContent": "The app does not contain a version of the OpenSSL library vulnerable to CVE-2023-0286.",
+                  "category": "code",
+                  "severity": "high",
+                  "warn": false,
+                  "impactSummary": "An attacker may use this vulnerability to access values at any specified memory address. Sensitive information can potentially be accessed. However, it should be noted that in order for this attack to be carried out, a few criteria must be met. The criteria may make this vector of attack much more uncommon and difficult to carry out compared to other well-known critical bugs, such as [\"heartbleed\"](https://heartbleed.com/). These prerequisites and mitigating factors limit its usefulness to attackers.",
+                  "regulations": [
+                    {
+                      "type": "owasp",
+                      "label": "Risk OWASP",
+                      "links": [
+                        {
+                          "title": "MSTG-CODE-5 (OWASP MASVS v1.5.0)",
+                          "url": "https://github.com/OWASP/owasp-masvs/blob/v1.5.0/Document/0x12-V7-Code_quality_and_build_setting_requirements.md",
+                          "__typename": "RegulatoryLink"
+                        },
+                        {
+                          "title": "MASVS-CODE-3 (OWASP MASVS v2.1.0)",
+                          "url": "https://github.com/OWASP/owasp-masvs/blob/v2.1.0/controls/MASVS-CODE-3.md",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    }
+                  ],
+                  "stepsToReproduce": null,
+                  "codeSamples": null,
+                  "guidanceLinks": [
+                    {
+                      "platform": null,
+                      "caption": "NIST Common Vulnerability Listing for CVE-2023-0286",
+                      "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-0286",
+                      "__typename": "IssueGuidanceLink"
+                    },
+                    {
+                      "platform": null,
+                      "caption": "OWASP MASTG - Checking for Weaknesses in Third Party Libraries (MSTG-CODE-5, Android)",
+                      "url": "https://github.com/OWASP/owasp-mastg/blob/v1.5.0/Document/0x05i-Testing-Code-Quality-and-Build-Settings.md#checking-for-weaknesses-in-third-party-libraries-mstg-code-5",
+                      "__typename": "IssueGuidanceLink"
+                    },
+                    {
+                      "platform": null,
+                      "caption": "OWASP MASTG - Checking for Weaknesses in Third Party Libraries (MSTG-CODE-5, iOS)",
+                      "url": "https://github.com/OWASP/owasp-mastg/blob/v1.5.0/Document/0x06i-Testing-Code-Quality-and-Build-Settings.md#checking-for-weaknesses-in-third-party-libraries-mstg-code-5",
+                      "__typename": "IssueGuidanceLink"
+                    }
+                  ],
+                  "__typename": "FindingIssue"
+                },
+                "compliance": null,
+                "__typename": "FindingCheck"
+              },
+              "userChanges": null,
+              "cvss": 7.4,
+              "cvssVector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:H",
+              "findingStatus": "detected",
+              "decision": "NONE",
+              "decisionInfo": null,
+              "evidenceDecision": "NONE",
+              "hidden": false,
+              "impactType": "high",
+              "severity": "high",
+              "note": null,
+              "adjustments": [],
+              "shortRemediation": null,
+              "title": "Dependent OpenSSL Library Vulnerable to CVE-2023-0286",
+              "hasContext": true,
+              "hasCodeLocations": false,
+              "canHaveActionableEvidence": true,
+              "hasActionedEvidence": false,
+              "policyCategory": {
+                "policyCategory": 1,
+                "color": "#CA1108",
+                "label": "Needs Remediation",
+                "__typename": "PolicyCategory"
+              },
+              "policyFindingOverrides": {
+                "checkId": "openssl_cve_2023_0286",
+                "cvss": 7.4,
+                "cvssVector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:H",
+                "hidden": false,
+                "impactType": "high",
+                "__typename": "PolicyFinding"
+              },
+              "complianceReportRelations": [
+                {
+                  "catalog": "MASVS",
+                  "groupId": "MASVS-CODE",
+                  "controlId": "MSTG-CODE-5",
+                  "version": "1",
+                  "__typename": "ComplianceReportRelation"
+                },
+                {
+                  "catalog": "MASVS",
+                  "groupId": "MASVS-CODE",
+                  "controlId": "MASVS-CODE-3",
+                  "version": "2",
+                  "__typename": "ComplianceReportRelation"
+                }
+              ],
+              "__typename": "Finding"
+            },
+            {
+              "affected": true,
+              "checkId": "on_received_ssl_error_proceed",
+              "uniqueVulnerabilityId": 2802560,
+              "check": {
+                "id": "on_received_ssl_error_proceed",
+                "analysisType": "static",
+                "title": "Insecure Implementation of WebView SSL Error Can Expose Network Traffic to Interception and Modification",
+                "description": "The Android `WebviewClient` class can notify the host application whenever a recoverable SSL certificate error occurs while loading a resource using the onReceivedSslError method call. On receiving this error, the host application can do one of two things - call `SslErrorHandler.cancel()` or `SslErrorHandler.proceed()`. The default (and recommended) behavior is to cancel the load. Applications can choose to proceed past the SSL error however using `SslErrorHandler.proceed()`. This test checks for instances where the application proceeds past SSL errors received by the WebViewClient.",
+                "shortDescription": "Using `SslErrorHandler.proceed()` can lead to ignoring SSL certificate errors, making the application vulnerable to man-in-the-middle attacks. This allows attackers to modify web content, steal sensitive data, and execute arbitrary code, potentially resulting in security alerts from Google Play Store.",
+                "platformType": "android",
+                "category": "code",
+                "categories": [
+                  "Networking"
+                ],
+                "legacyFindingKey": "on_received_ssl_error_proceed",
+                "isNew": false,
+                "deprecated": false,
+                "context": {
+                  "view": "table",
+                  "title": "Proceeds past SSL errors",
+                  "fields": [
+                    {
+                      "key": "method",
+                      "format": "method",
+                      "title": "Location in Code",
+                      "description": null,
+                      "__typename": "FindingContextField"
+                    }
+                  ],
+                  "children": null,
+                  "__typename": "FindingContextMetadata"
+                },
+                "issue": {
+                  "cvss": 5.9,
+                  "cvssVector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+                  "title": "Insecure Implementation of WebView SSL Error Can Expose Network Traffic to Interception and Modification",
+                  "description": "The app is using `SslErrorHandler.proceed()`, an unsafe implementation of `WebViewClient.onReceivedSslError` that ignores all SSL certificate validation errors and leaves the app vulnerable to man-in-the-middle attacks.\nIts use can allow an attacker to modify the content of the affected WebView, steal sensitive transmitted data, and execute code inside the app. The use of `SslErrorHandler.proceed()` typically results in a security alert from Google that prevents the app from being uploaded to the Play Store.",
+                  "recommendation": "Unsafe network error handling in Android WebViews can allow an app to make an insecure connection. Apps should never allow users to bypass network security controls or have the app written in such a way that allows the app to create connections that ignore security alerts.\nThese high risk scenarios can be avoided by properly implementing the call `SslErrorHandler.cancel()` to cancel the load when a SSL error is received by the WebviewClient.",
+                  "passingContent": null,
+                  "category": null,
+                  "severity": "medium",
+                  "warn": false,
+                  "impactSummary": "Applications that implement improper error handling with Webview network security controls can have network communications intercepted.\nA Webview is an in-app browser and is used to serve arbitrary content to users in the same way that a browser would. This makes vulnerabilities in WebViews especially broad as these issues can not only affect the app itself, but also create issues for the content loaded by the app's functionality.\nAn attacker who is able to exploit this vulnerability may use arbitrary code as a vector for follow-on attacks that lead to loss or change of sensitive user information as well as displaying malicious or offensive content in the app.",
+                  "regulations": [
+                    {
+                      "type": "owasp",
+                      "label": "Risk OWASP",
+                      "links": [
+                        {
+                          "title": "MSTG-NETWORK-1 (OWASP MASVS v1.5.0)",
+                          "url": "https://github.com/OWASP/owasp-masvs/blob/v1.5.0/Document/0x10-V5-Network_communication_requirements.md",
+                          "__typename": "RegulatoryLink"
+                        },
+                        {
+                          "title": "MASVS-NETWORK-1 (OWASP MASVS v2.1.0)",
+                          "url": "https://github.com/OWASP/owasp-masvs/blob/v2.1.0/controls/MASVS-NETWORK-1.md",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    }
+                  ],
+                  "stepsToReproduce": "Verify Webview code contains proper error handling measures as described in the Recommended Fix section.\nThe NowSecure automated test for this vulnerability identifies instances where the application proceeds past SSL errors received by the WebViewClient.",
+                  "codeSamples": [
+                    {
+                      "platform": "android",
+                      "syntax": "java",
+                      "caption": "Good Code Example",
+                      "block": "public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error){\nString message = \"\";\nswitch(error.getPrimaryError()){\n    case SslError.SSL_UNTRUSTED:\n        message = \"The certificate is not trusted\";\n        Log.e(\"Ssl Certificate error found: \"+message);\n        handler.cancel();\n    break;\n    //... do this for the SsLError constants you would like to check for\n}\n}\n\n// The SslError constants are up to you to decide if the server you are connecting to meets your expectations or does not.\n// We simply log the message as an error for reference and do not allow the user to proceed.",
+                      "__typename": "IssueCodeSample"
+                    },
+                    {
+                      "platform": "android",
+                      "syntax": "kotlin",
+                      "caption": "Good Code Example",
+                      "block": "fun onReceivedSslError(view: WebView?, handler: SslErrorHandler, error: SslError) {\nvar message: String = \"\"\n when (error.primaryError) {\n      SslError.SSL_UNTRUSTED -> {\n          message = \"The certificate is not trusted\"\n          Log.e(\"Ssl Certificate error found: $message\")\n          handler.cancel()\n      }\n     //... do this for the SsLError constants you would like to check for\n }\n}\n\n// The SslError constants are up to you to decide if the server you are connecting to meets your expectations or does not.\n// We simply log the message as an error for reference and do not allow the user to proceed.",
+                      "__typename": "IssueCodeSample"
+                    }
+                  ],
+                  "guidanceLinks": [
+                    {
+                      "platform": "android",
+                      "caption": "This article describes the callback that an app receives when an SSL error occurs",
+                      "url": "https://developer.android.com/reference/android/webkit/WebViewClient#onReceivedSslError(android.webkit.WebView,%20android.webkit.SslErrorHandler,%20android.net.http.SslError)",
+                      "__typename": "IssueGuidanceLink"
+                    },
+                    {
+                      "platform": "android",
+                      "caption": "This documentation contains a description of the SslError class containing the type of error and the SSL certificate",
+                      "url": "https://developer.android.com/reference/android/net/http/SslError",
+                      "__typename": "IssueGuidanceLink"
+                    }
+                  ],
+                  "__typename": "FindingIssue"
+                },
+                "compliance": null,
+                "__typename": "FindingCheck"
+              },
+              "userChanges": null,
+              "cvss": 5.9,
+              "cvssVector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "findingStatus": "detected",
+              "decision": "NONE",
+              "decisionInfo": null,
+              "evidenceDecision": "NONE",
+              "hidden": false,
+              "impactType": "medium",
+              "severity": "medium",
+              "note": null,
+              "adjustments": [],
+              "shortRemediation": null,
+              "title": "Insecure Implementation of WebView SSL Error Can Expose Network Traffic to Interception and Modification",
+              "hasContext": true,
+              "hasCodeLocations": false,
+              "canHaveActionableEvidence": true,
+              "hasActionedEvidence": false,
+              "policyCategory": {
+                "policyCategory": 1,
+                "color": "#CA1108",
+                "label": "Needs Remediation",
+                "__typename": "PolicyCategory"
+              },
+              "policyFindingOverrides": {
+                "checkId": "on_received_ssl_error_proceed",
+                "cvss": 5.9,
+                "cvssVector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+                "hidden": false,
+                "impactType": "medium",
+                "__typename": "PolicyFinding"
+              },
+              "complianceReportRelations": [
+                {
+                  "catalog": "MASVS",
+                  "groupId": "MASVS-NETWORK",
+                  "controlId": "MSTG-NETWORK-1",
+                  "version": "1",
+                  "__typename": "ComplianceReportRelation"
+                },
+                {
+                  "catalog": "MASVS",
+                  "groupId": "MASVS-NETWORK",
+                  "controlId": "MASVS-NETWORK-1",
+                  "version": "2",
+                  "__typename": "ComplianceReportRelation"
+                }
+              ],
+              "__typename": "Finding"
+            },
+            {
+              "affected": true,
+              "checkId": "keysize_check",
+              "uniqueVulnerabilityId": 2802539,
+              "check": {
+                "id": "keysize_check",
+                "analysisType": "static",
+                "title": "Key Used to Publish App is Potentially Forgeable",
+                "description": "This test checks that all keys used to sign the app are larger than 1024 bits.",
+                "shortDescription": "Usage of signing keys shorter than 1024 bits can lead to vulnerabilities from brute force attacks on digital signatures, exposing the app to forged updates, malware injection, or reputational damage.",
+                "platformType": "android",
+                "category": "code",
+                "categories": [
+                  "Resilience"
+                ],
+                "legacyFindingKey": "keysize_check",
+                "isNew": false,
+                "deprecated": false,
+                "context": {
+                  "view": "table",
+                  "title": "Insecure Keys",
+                  "fields": [
+                    {
+                      "key": "key_size",
+                      "format": null,
+                      "title": "Key Size",
+                      "description": null,
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "key_type",
+                      "format": null,
+                      "title": "Key Type",
+                      "description": null,
+                      "__typename": "FindingContextField"
+                    },
+                    {
+                      "key": "issuer",
+                      "format": null,
+                      "title": "Issuer",
+                      "description": null,
+                      "__typename": "FindingContextField"
+                    }
+                  ],
+                  "children": null,
+                  "__typename": "FindingContextMetadata"
+                },
+                "issue": {
+                  "cvss": 5.9,
+                  "cvssVector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+                  "title": "Key Used to Publish App is Potentially Forgeable",
+                  "description": "At least one key that was used to sign the app is too short to be considered secure.\n\nThe application was signed using a key length less than or equal to 1024 bits, making it potentially vulnerable to brute force attacks resulting in forged digital signatures. An attacker requires significantly less time to brute force a signing key with a short key length. Insecure keys can be exploited to inject malware into trusted versions of apps, publish updates that will be accepted by the OS as valid, or tarnish the publisher's brand.\n\nThe `minSdkVersion` of an app, indicated in the AndroidManifest.xml, determines the signing version that will be used. The signing version specifies the key length that is used during the signing process.\n\n- [v2 Android 7.0 (API level 24)](https://source.android.com/docs/security/features/apksigning/v2)\n- [v3 Android 9 (API level 28)](https://source.android.com/docs/security/features/apksigning/v3)\n- [v4 Android 11 (API level 30)](https://source.android.com/docs/security/features/apksigning/v4)\n\nFor example, if your app supports `minSdkVersion` of 24 and is installed on Android 7.0 device, it will use an insecure v2 signing version for verification.",
+                  "recommendation": "You can use [Keytool](https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html) to verify the length of your keys with `keytool -list -v -keystore <key>`.\n\nFor optimal protection, apps should be signed by a key with a length of at least 2048 (preferably 4096) bits. You can [use Keytool](https://developer.android.com/studio/publish/app-signing) with the `-keysize <size>` parameter to specify a key length longer than the 1024-bit default. For apps that have already been signed, updating the key will require [key rotation](https://support.google.com/googleplay/android-developer/answer/9842756?hl=en).",
+                  "passingContent": "The app wasn't signed with keys having a key size considered weak.",
+                  "category": null,
+                  "severity": "medium",
+                  "warn": false,
+                  "impactSummary": "Apps with forged signing keys can be used as a vector for fraud and phishing attacks which can have significant reputational impact. An attacker can use leverage forged app updates to modify an app without the developer's consent.",
+                  "regulations": [
+                    {
+                      "type": "cwe",
+                      "label": "CWE",
+                      "links": [
+                        {
+                          "title": "310",
+                          "url": "https://cwe.mitre.org/data/definitions/310.html",
+                          "__typename": "RegulatoryLink"
+                        },
+                        {
+                          "title": "326",
+                          "url": "https://cwe.mitre.org/data/definitions/326.html",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "niap",
+                      "label": "NIAP",
+                      "links": [
+                        {
+                          "title": "FPT_TUD_EXT.1.6",
+                          "url": "https://www.niap-ccevs.org/MMO/PP/-429-M-/pp_app_v1.3_table-reqs.htm#FPT_TUD_EXT.1.6",
+                          "__typename": "RegulatoryLink"
+                        },
+                        {
+                          "title": "FCS_COP.1.1(3)",
+                          "url": "https://www.niap-ccevs.org/MMO/PP/-429-M-/pp_app_v1.3_table-reqs.htm#FCS_COP.1.1(3)",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "fisma_low",
+                      "label": "FISMA LOW",
+                      "links": [
+                        {
+                          "title": "SC-13 CRYPTOGRAPHIC PROTECTION",
+                          "url": "https://csrc.nist.gov/Projects/risk-management/sp800-53-controls/release-search#!/control?version=5.1&number=SC-13",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "fisma_med",
+                      "label": "FISMA MED",
+                      "links": [
+                        {
+                          "title": "SI-7 SOFTWARE, FIRMWARE, AND INFORMATION INTEGRITY",
+                          "url": "https://csrc.nist.gov/Projects/risk-management/sp800-53-controls/release-search#!/control?version=5.1&number=SI-7",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "owasp",
+                      "label": "Risk OWASP",
+                      "links": [
+                        {
+                          "title": "MSTG-CODE-1 (OWASP MASVS v1.5.0)",
+                          "url": "https://github.com/OWASP/owasp-masvs/blob/v1.5.0/Document/0x12-V7-Code_quality_and_build_setting_requirements.md",
+                          "__typename": "RegulatoryLink"
+                        },
+                        {
+                          "title": "MASVS-RESILIENCE-2 (OWASP MASVS v2.1.0)",
+                          "url": "https://github.com/OWASP/owasp-masvs/blob/v2.1.0/controls/MASVS-RESILIENCE-2.md",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "gdpr",
+                      "label": "GDPR",
+                      "links": [
+                        {
+                          "title": "Risks violating Article 25",
+                          "url": "https://gdpr-info.eu/art-25-gdpr/",
+                          "__typename": "RegulatoryLink"
+                        },
+                        {
+                          "title": "Risks violating Article 32",
+                          "url": "https://gdpr-info.eu/art-32-gdpr/",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "ffiec",
+                      "label": "FFIEC",
+                      "links": [
+                        {
+                          "title": "May violate D3.PC.Se.Int.3",
+                          "url": "https://www.ffiec.gov/pdf/cybersecurity/FFIEC_CAT_May_2017.pdf",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "pci",
+                      "label": "PCI",
+                      "links": [
+                        {
+                          "title": "May violate requirement 3.6.1",
+                          "url": "https://www.pcisecuritystandards.org/document_library?document=pci_dss",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "hipaa",
+                      "label": "HIPAA",
+                      "links": [
+                        {
+                          "title": "May violate §164.312(a)(1): Standard: Access control.",
+                          "url": "https://www.hhs.gov/sites/default/files/ocr/privacy/hipaa/administrative/securityrule/techsafeguards.pdf?language=es",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "ccpa",
+                      "label": "CCPA",
+                      "links": [
+                        {
+                          "title": "Risks violating CCPA: exfiltration, theft, or disclosure of PII",
+                          "url": "https://cdp.cooley.com/ccpa-2018/#section-1798-150",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    },
+                    {
+                      "type": "cwe_top_25",
+                      "label": "CWE Top 25",
+                      "links": [
+                        {
+                          "title": "2021 CWE Top 25 Most Dangerous Software Errors",
+                          "url": "https://cwe.mitre.org/top25/archive/2021/2021_cwe_top25.html",
+                          "__typename": "RegulatoryLink"
+                        }
+                      ],
+                      "__typename": "RegulatoryRelation"
+                    }
+                  ],
+                  "stepsToReproduce": null,
+                  "codeSamples": [
+                    {
+                      "platform": "android",
+                      "syntax": "bash",
+                      "caption": "Key Replacement Process",
+                      "block": "In order to replace the key of an app that has already been created, a rotation must be done (this is a linked list of previous certs to tell other applications this new one can be trusted). Once it has been generated the new key must be added to the Google Play console to ensure that future builds that contain the new cert are accepted by the Play Store and app.\n\nFrom Command Line\nApp Key Generation:\n$ keytool -genkey -v -keystore my-key.keystore -alias alias_name -keyalg RSA -keysize 4096 -validity 10000\n\nDebug Key Generation:\n$ keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 4096 -validity 10000",
+                      "__typename": "IssueCodeSample"
+                    }
+                  ],
+                  "guidanceLinks": [
+                    {
+                      "platform": "android",
+                      "caption": "Android Developer Documentation - Sign your app for release to Google Play",
+                      "url": "https://developer.android.com/studio/publish/app-signing#generate-key",
+                      "__typename": "IssueGuidanceLink"
+                    },
+                    {
+                      "platform": "android",
+                      "caption": "Google Play - Instructions for apps created before August 2021",
+                      "url": "https://support.google.com/googleplay/android-developer/answer/9842756?hl=en#zippy=%2Cinstructions-for-apps-created-before-august",
+                      "__typename": "IssueGuidanceLink"
+                    },
+                    {
+                      "platform": "android",
+                      "caption": "Google Play - Upgrade your app signing key",
+                      "url": "https://support.google.com/googleplay/android-developer/answer/9842756?hl=en#upgrade",
+                      "__typename": "IssueGuidanceLink"
+                    },
+                    {
+                      "platform": "android",
+                      "caption": "Google Play - App Signing Best Practices",
+                      "url": "https://support.google.com/googleplay/android-developer/answer/9842756?hl=en#best",
+                      "__typename": "IssueGuidanceLink"
+                    }
+                  ],
+                  "__typename": "FindingIssue"
+                },
+                "compliance": null,
+                "__typename": "FindingCheck"
+              },
+              "userChanges": null,
+              "cvss": 5.9,
+              "cvssVector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "findingStatus": "detected",
+              "decision": "NONE",
+              "decisionInfo": null,
+              "evidenceDecision": "NONE",
+              "hidden": false,
+              "impactType": "medium",
+              "severity": "medium",
+              "note": null,
+              "adjustments": [],
+              "shortRemediation": null,
+              "title": "Key Used to Publish App is Potentially Forgeable",
+              "hasContext": true,
+              "hasCodeLocations": false,
+              "canHaveActionableEvidence": false,
+              "hasActionedEvidence": false,
+              "policyCategory": {
+                "policyCategory": 1,
+                "color": "#CA1108",
+                "label": "Needs Remediation",
+                "__typename": "PolicyCategory"
+              },
+              "policyFindingOverrides": {
+                "checkId": "keysize_check",
+                "cvss": 5.9,
+                "cvssVector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+                "hidden": false,
+                "impactType": "medium",
+                "__typename": "PolicyFinding"
+              },
+              "complianceReportRelations": [
+                {
+                  "catalog": "MASVS",
+                  "groupId": "MASVS-CODE",
+                  "controlId": "MSTG-CODE-1",
+                  "version": "1",
+                  "__typename": "ComplianceReportRelation"
+                },
+                {
+                  "catalog": "MASVS",
+                  "groupId": "MASVS-RESILIENCE",
+                  "controlId": "MASVS-RESILIENCE-2",
+                  "version": "2",
+                  "__typename": "ComplianceReportRelation"
+                }
+              ],
+              "__typename": "Finding"
+            }
+          ],
+          "__typename": "AssessmentReport"
+        },
+        "baseReport": {
+          "findings": [
+            {
+              "checkId": "apk_insecure_network_config",
+              "affected": true,
+              "cvss": 7.5,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_webview_access",
+              "affected": true,
+              "cvss": 7.5,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "openssl_cve_2023_0286",
+              "affected": true,
+              "cvss": 7.4,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "on_received_ssl_error_proceed",
+              "affected": true,
+              "cvss": 5.9,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "keysize_check",
+              "affected": false,
+              "cvss": 5.9,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "libcurl",
+              "affected": false,
+              "cvss": 5.7,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_custom",
+              "affected": false,
+              "cvss": 4.4,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "unprotected_context_registered_broadcast_receivers",
+              "affected": false,
+              "cvss": 4,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "unprotected_manifest_broadcast_receivers",
+              "affected": false,
+              "cvss": 4,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "libraries_ssp",
+              "affected": false,
+              "cvss": 1.6,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_weak_crypto_hashing_algorithms",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_build_fingerprint",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_deeplinks",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "vulnerable_libraries",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "hardcoded_passwords",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_strandhogg",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_insecure_prng",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_network_config_exceptions",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_ssl_vuln",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_intent_redirection",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_hardcoded_secrets",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_device_or_other_ids_collected",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "ai_use_on_device",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "api_hsts",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_textfield_autocorrect",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_certificate_pinning",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_flow",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "zip_file_in_transit_check_https",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_firebase_mfa_not_used",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "kotlin_debug_lib",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_insecure_constants",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_debuggable_webviews",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "hardcoded_api_keys",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "javascript_interface_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_dangerous_permissions",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "url_listing",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_crypto_keys",
+              "affected": null,
+              "cvss": null,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sms_communications",
+              "affected": null,
+              "cvss": null,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "unsigned_jwt",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sdcard_file_list",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_sqlcipher",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_application_servers",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_padding_oracle",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_iv_hardcoded",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sql_injection",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "path_traversal",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "serialized_objects",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "arbitrary_code_execution_observed",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_static_iv",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_uses_vpn_permission",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "obfuscation_check",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "master_key_check",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "fragment_injection",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "secure_random_check",
+              "affected": null,
+              "cvss": 0,
+              "findingStatus": "inconclusive",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "api_discovery",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_info",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "automation_info",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "behavioral_events",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_connection_domains",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_ivs",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_tracking_domains",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_sensitive_data_pii",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "ai_libraries",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_build_info",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_nsc",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "get_app_files",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "app_sbom",
+              "affected": false,
+              "cvss": null,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "snoop_network_hosts",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_sqlite",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "all_android_components",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_permissions",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "get_reflection_code",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "detected",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_device_or_other_ids_shared",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_location_collected",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_location_shared",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_personal_info_collected",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_data_safety_personal_info_shared",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "api_authentication",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "api_cors",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "cookie_without_httponly_flag",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "cookie_without_secure_flag",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_weak_crypto_insufficient_rounds",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "runs_root_command",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "runs_root_command_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_bluetooth_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_dns1",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_dns2",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_email",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_firstname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_name",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_gpslatitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_gpslongitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_iv_reuse",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_weak_crypto_encryption_modes",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_lastname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_localwifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_iv_null",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_password",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_phonenumber",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_weak_crypto_encryption_algorithms",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_root_detection_rasp",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "key_reuse",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_custom",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_surrounding_wifi_network_bssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_surrounding_wifi_network_ssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_surrounding_wifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_android_id",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_build_fingerprint",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_serial",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_imei",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_username",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_wifi_ip",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_wifi_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_logcat_data_zipcode",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_android_id",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_bluetooth_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_build_fingerprint",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_dns1",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_dns2",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_email",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "certificate_validation",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "hostname_verification",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_firstname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_name",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_gpslatitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_gpslongitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "uses_http",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_imei",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "zip_file_in_transit_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_lastname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_localwifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_password",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_phonenumber",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_cert_validation",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_custom",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_serial",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_surrounding_wifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_surrounding_wifi_network_bssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_surrounding_wifi_network_ssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "zip_file_in_transit_check_broken_ssl",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_username",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_wifi_ip",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_wifi_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sensitive_data_http_zipcode",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "writable_executable_files_private_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "writable_executable_files_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "world_readable_files_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_sensitive_data_implicit_intents",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "ai_api_keys",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_bluetooth_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_dns1",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_dns2",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_email",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_firstname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_name",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_gpslatitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_gpslongitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "world_writable_files_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "remote_code_execution",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_lastname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_localwifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_password",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_phonenumber",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "arbitrary_code_execution_probable",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_leaked_data_sdcard",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_android_id",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_bluetooth_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_build_fingerprint",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_custom",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_dns1",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_dns2",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_email",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_firstname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_name",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_gpslatitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_gpslongitude",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_imei",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_lastname",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_localwifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_password",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_phonenumber",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_serial",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_surrounding_wifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_surrounding_wifi_network_bssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_surrounding_wifi_network_ssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_username",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_wifi_ip",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_wifi_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_memdump_data_zipcode",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_surrounding_wifi_network_bssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_surrounding_wifi_network_ssid",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_surrounding_wifimac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_android_id",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_serial",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_imei",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_wifi_ip",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_username",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_wifi_mac",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "leaked_data_in_files_zipcode",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_biometric_key_invalidation_disabled",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_janus_vuln",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "openssl_cve_2014_0224",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "openssl_cve_2014_0160",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "debug_flag_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_minimum_sdk",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_debug_symbols",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "joda_cve",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_ftp_libs",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_target_sdk_min",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "allow_backup_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "get_native_methods",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "sqlcipher_key_leakage_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_blocker_apptentive",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "exported_components",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "android_janus_warn",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_libraries_aslr",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "okhttp",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "libpng_cve",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "play_services_basement",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "potential_sqlcipher_key_leakage_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_blocker_segment",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_in_app_updates",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "use_of_deprecated_xamarin",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "certificate_validity_check",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            },
+            {
+              "checkId": "apk_vpn_always_on_not_available",
+              "affected": false,
+              "cvss": 0,
+              "findingStatus": "pass",
+              "__typename": "Finding"
+            }
+          ],
+          "__typename": "AssessmentReport"
+        }
+      },
+      "__typename": "AutoQuery"
+    }
+  }
+}
