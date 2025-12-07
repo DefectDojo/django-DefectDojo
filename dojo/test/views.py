@@ -3,7 +3,7 @@ import base64
 import logging
 import operator
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import reduce
 
 from django.contrib import messages
@@ -393,6 +393,9 @@ def test_calendar(request):
     tests = tests.prefetch_related("test_type", "lead", "engagement__product")
 
     add_breadcrumb(title=_("Test Calendar"), top_level=True, request=request)
+    for t in tests:
+        if t.target_end:
+            t.target_end += timedelta(days=1)
     return render(request, "dojo/calendar.html", {
         "caltype": "tests",
         "leads": request.GET.getlist("lead", ""),
@@ -604,7 +607,6 @@ class AddFindingView(View):
 
             # Note: this notification has not be moved to "@receiver(post_save, sender=Finding)" method as many other notifications
             # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
-            # TODO: but same should be implemented for API endpoint
 
             # Create a notification
             create_notification(

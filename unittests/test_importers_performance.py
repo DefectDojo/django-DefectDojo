@@ -26,9 +26,7 @@ from dojo.models import (
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
 
 STACK_HAWK_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings.json"
 STACK_HAWK_SUBSET_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings_subset.json"
@@ -181,11 +179,11 @@ class TestDojoImporterPerformance(DojoTestCase):
 
         self._import_reimport_performance(
             expected_num_queries1=306,
-            expected_num_async_tasks1=10,
+            expected_num_async_tasks1=7,
             expected_num_queries2=281,
-            expected_num_async_tasks2=22,
+            expected_num_async_tasks2=18,
             expected_num_queries3=170,
-            expected_num_async_tasks3=20,
+            expected_num_async_tasks3=17,
         )
 
     @override_settings(ENABLE_AUDITLOG=True)
@@ -202,12 +200,12 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=316,
-            expected_num_async_tasks1=10,
-            expected_num_queries2=298,
-            expected_num_async_tasks2=22,
-            expected_num_queries3=185,
-            expected_num_async_tasks3=20,
+            expected_num_queries1=311,
+            expected_num_async_tasks1=6,
+            expected_num_queries2=286,
+            expected_num_async_tasks2=17,
+            expected_num_queries3=175,
+            expected_num_async_tasks3=16,
         )
 
     @override_settings(ENABLE_AUDITLOG=True)
@@ -225,12 +223,12 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=317,
-            expected_num_async_tasks1=11,
-            expected_num_queries2=299,
-            expected_num_async_tasks2=23,
-            expected_num_queries3=186,
-            expected_num_async_tasks3=21,
+            expected_num_queries1=313,
+            expected_num_async_tasks1=8,
+            expected_num_queries2=288,
+            expected_num_async_tasks2=19,
+            expected_num_queries3=177,
+            expected_num_async_tasks3=18,
         )
 
     # Deduplication is enabled in the tests above, but to properly test it we must run the same import twice and capture the results.
@@ -346,9 +344,9 @@ class TestDojoImporterPerformance(DojoTestCase):
 
         self._deduplication_performance(
             expected_num_queries1=275,
-            expected_num_async_tasks1=12,
+            expected_num_async_tasks1=8,
             expected_num_queries2=185,
-            expected_num_async_tasks2=12,
+            expected_num_async_tasks2=8,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
 
@@ -366,8 +364,8 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=287,
-            expected_num_async_tasks1=12,
-            expected_num_queries2=281,
-            expected_num_async_tasks2=12,
+            expected_num_queries1=280,
+            expected_num_async_tasks1=7,
+            expected_num_queries2=250,
+            expected_num_async_tasks2=7,
         )

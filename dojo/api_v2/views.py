@@ -14,6 +14,7 @@ from django.db import IntegrityError
 from django.db.models.query import QuerySet as DjangoQuerySet
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.renderers import OpenApiJsonRenderer2
@@ -176,6 +177,7 @@ from dojo.utils import (
     generate_file_response,
     get_setting,
     get_system_setting,
+    process_tag_notifications,
 )
 
 logger = logging.getLogger(__name__)
@@ -528,6 +530,15 @@ class EngagementViewSet(
             )
             note.save()
             engagement.notes.add(note)
+            # Determine if we need to send any notifications for user mentioned
+            process_tag_notifications(
+                request=request,
+                note=note,
+                parent_url=request.build_absolute_uri(
+                    reverse("view_engagement", args=(engagement.id,)),
+                ),
+                parent_title=f"Engagement: {engagement.name}",
+            )
 
             serialized_note = serializers.NoteSerializer(
                 {"author": author, "entry": entry, "private": private},
@@ -1086,6 +1097,15 @@ class FindingViewSet(
             )
             note.save()
             finding.notes.add(note)
+            # Determine if we need to send any notifications for user mentioned
+            process_tag_notifications(
+                request=request,
+                note=note,
+                parent_url=request.build_absolute_uri(
+                    reverse("view_finding", args=(finding.id,)),
+                ),
+                parent_title=f"Finding: {finding.title}",
+            )
 
             if finding.has_jira_issue:
                 jira_helper.add_comment(finding, note)
@@ -2135,6 +2155,15 @@ class TestsViewSet(
             )
             note.save()
             test.notes.add(note)
+            # Determine if we need to send any notifications for user mentioned
+            process_tag_notifications(
+                request=request,
+                note=note,
+                parent_url=request.build_absolute_uri(
+                    reverse("view_test", args=(test.id,)),
+                ),
+                parent_title=f"Test: {test.title}",
+            )
 
             serialized_note = serializers.NoteSerializer(
                 {"author": author, "entry": entry, "private": private},

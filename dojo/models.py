@@ -1093,8 +1093,8 @@ class SLA_Configuration(models.Model):
                     product.async_updating = True
                     super(Product, product).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async  # noqa: I001, PLC0415 circular import
-                update_sla_expiration_dates_sla_config_async(self, products, tuple(severities))
+                from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
+                async_update_sla_expiration_dates_sla_config_sync(self, products, severities=severities)
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -1255,8 +1255,8 @@ class Product(models.Model):
                     sla_config.async_updating = True
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
-                from dojo.sla_config.helpers import update_sla_expiration_dates_product_async  # noqa: I001, PLC0415 circular import
-                update_sla_expiration_dates_product_async(self, sla_config)
+                from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
+                async_update_sla_expiration_dates_sla_config_sync(sla_config, Product.objects.filter(id=self.id))
 
     def get_absolute_url(self):
         return reverse("view_product", args=[str(self.id)])
@@ -2234,6 +2234,7 @@ class Test(models.Model):
 
     @property
     def hash_code_fields(self):
+        """Retrieve OS HASH_CODE_FIELDS_PER_SCANNER settings. Be aware when calling this to make sure Pro doesn't use these OS seetings"""
         hashCodeFields = None
 
         if hasattr(settings, "HASHCODE_FIELDS_PER_SCANNER"):
@@ -2913,6 +2914,11 @@ class Finding(models.Model):
         return None
 
     def compute_hash_code(self):
+        # Allow Pro to overwrite compute hash_code which gets dedupe settings from a database instead of django.settings
+        from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
+        if compute_hash_code_method := get_custom_method("FINDING_COMPUTE_HASH_METHOD"):
+            deduplicationLogger.debug("using custom FINDING_COMPUTE_HASH_METHOD method")
+            return compute_hash_code_method(self)
 
         # Check if all needed settings are defined
         if not hasattr(settings, "HASHCODE_FIELDS_PER_SCANNER") or not hasattr(settings, "HASHCODE_ALLOWS_NULL_CWE") or not hasattr(settings, "HASHCODE_ALLOWED_FIELDS"):
@@ -3151,16 +3157,25 @@ class Finding(models.Model):
         return self.test.engagement.product.sla_configuration
 
     def get_sla_period(self):
+        # Determine which method to use to calculate the SLA
+        from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
+        if method := get_custom_method("FINDING_SLA_PERIOD_METHOD"):
+            return method(self)
+        # Run the default method
         sla_configuration = self.get_sla_configuration()
         sla_period = getattr(sla_configuration, self.severity.lower(), None)
         enforce_period = getattr(sla_configuration, str("enforce_" + self.severity.lower()), None)
         return sla_period, enforce_period
 
     def set_sla_expiration_date(self):
+        # First check if SLA is enabled globally
         system_settings = System_Settings.objects.get()
         if not system_settings.enable_finding_sla:
             return
+        # Call the internal method to set the sla expiration date
+        self._set_sla_expiration_date()
 
+    def _set_sla_expiration_date(self):
         # some parsers provide date as a `str` instead of a `date` in which case we need to parse it #12299 on GitHub
         sla_start_date = self.get_sla_start_date()
         if sla_start_date and isinstance(sla_start_date, str):
@@ -3485,15 +3500,16 @@ class Finding(models.Model):
     def set_hash_code(self, dedupe_option):
         from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
         if hash_method := get_custom_method("FINDING_HASH_METHOD"):
+            deduplicationLogger.debug("Using custom hash method")
             hash_method(self, dedupe_option)
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
         # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
         elif dedupe_option:
             if self.hash_code is not None:
-                deduplicationLogger.debug("Hash_code already computed for finding")
+                deduplicationLogger.debug("Hash_code already computed for finding %i", self.id)
             else:
                 self.hash_code = self.compute_hash_code()
-                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
+                deduplicationLogger.debug("Hash_code computed for finding %i: %s", self.id, self.hash_code)
 
 
 class FindingAdmin(admin.ModelAdmin):
@@ -4676,11 +4692,15 @@ class Answered_Survey(models.Model):
         return self.survey.name
 
 
+def default_expiration():
+    return timezone.now() + timedelta(days=7)
+
+
 class General_Survey(models.Model):
     survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
     num_responses = models.IntegerField(default=0)
     generated = models.DateTimeField(auto_now_add=True, null=True)
-    expiration = models.DateTimeField(null=False, blank=False)
+    expiration = models.DateTimeField(default=default_expiration)
 
     class Meta:
         verbose_name = _("General Engagement Survey")
@@ -4688,6 +4708,10 @@ class General_Survey(models.Model):
 
     def __str__(self):
         return self.survey.name
+
+    def clean(self):
+        if self.expiration and timezone.is_naive(self.expiration):
+            self.expiration = timezone.make_aware(self.expiration)
 
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):

@@ -7,7 +7,7 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpResponse
 from django.test import RequestFactory, override_settings
 from requests.exceptions import ConnectionError as RequestsConnectionError
-from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden
+from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden, AuthTokenError
 
 from dojo.middleware import CustomSocialAuthExceptionMiddleware
 
@@ -52,6 +52,7 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
             (AuthCanceled("User canceled login"), "Social login was canceled. Please try again or use the standard login."),
             (AuthFailed("Token exchange failed"), "Social login failed. Please try again or use the standard login."),
             (AuthForbidden("User not allowed"), "You are not authorized to log in via this method. Please contact support or use the standard login."),
+            (AuthTokenError("Invalid or expired token"), "Social login failed due to an invalid or expired token. Please try again or use the standard login."),
         ]
         for path in login_paths:
             for exception, expected_message in exceptions:

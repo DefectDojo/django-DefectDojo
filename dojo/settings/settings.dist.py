@@ -175,6 +175,12 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ""),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ""),
     DD_SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL=(bool, True),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION=(str, "Please use the standard login below."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED=(str, "Social login was canceled. Please try again or use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED=(str, "Social login failed. Please try again or use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN=(str, "You are not authorized to log in via this method. Please contact support or use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE=(str, "An unexpected error occurred during social login. Please use the standard login."),
+    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR=(str, "Social login failed due to an invalid or expired token. Please try again or use the standard login."),
     DD_SAML2_ENABLED=(bool, False),
     # Allows to override default SAML authentication backend. Check https://djangosaml2.readthedocs.io/contents/setup.html#custom-user-attributes-processing
     DD_SAML2_AUTHENTICATION_BACKENDS=(str, "djangosaml2.backends.Saml2Backend"),
@@ -244,6 +250,16 @@ env = environ.FileAwareEnv(
     # When interacting with jira tickets that attached finding groups, we should no be opening any findings
     # on the DefectDojo side because jira has no way of knowing if a finding really should be reopened or not
     DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN=(bool, False),
+    # JIRA connection retry and timeout settings: https://developer.atlassian.com/cloud/jira/platform/rate-limiting/
+    # Maximum number of retry attempts for recoverable errors (429, 503, ConnectionError)
+    # See https://jira.readthedocs.io/ for more in the jira library used by DefectDojo
+    # Note: The jira library has a built-in maximum wait time of 60s for rate limiting retries.
+    # If JIRA's Retry-After header indicates a wait time longer than 60s, the request will fail and not be retried.
+    DD_JIRA_MAX_RETRIES=(int, 3),
+    # Connection timeout (seconds) for establishing a connection to the JIRA server
+    DD_JIRA_CONNECT_TIMEOUT=(int, 10),
+    # Read timeout (seconds) for waiting for a response from the JIRA server
+    DD_JIRA_READ_TIMEOUT=(int, 30),
     # You can set extra Jira issue types via a simple env var that supports a csv format, like "Work Item,Vulnerability"
     DD_JIRA_EXTRA_ISSUE_TYPES=(str, ""),
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
@@ -268,6 +284,8 @@ env = environ.FileAwareEnv(
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
+    # Batch size for import/reimport deduplication processing
+    DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=(int, 1000),
     # Delete Auditlogs older than x month; -1 to keep all logs
     DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
     # Batch size for flushing audit logs per task run
@@ -647,6 +665,13 @@ if value := env("DD_SOCIAL_AUTH_OIDC_JWKS_URI"):
     SOCIAL_AUTH_OIDC_JWKS_URI = value
 if value := env("DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT"):
     SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT = value
+
+SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE")
+SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR")
 
 AUTH0_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED")
 SOCIAL_AUTH_AUTH0_KEY = env("DD_SOCIAL_AUTH_AUTH0_KEY")
@@ -1395,6 +1420,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Cycognito Scan": ["title", "severity"],
     "OpenVAS Parser v2": ["title", "severity", "vuln_id_from_tool", "endpoints"],
     "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
+    "OpenReports": ["vulnerability_ids", "component_name", "component_version", "severity"],
     "n0s1 Scanner": ["description"],
 }
 
@@ -1468,6 +1494,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "AWS Inspector2 Scan": True,
     "Cyberwatch scan (Galeax)": True,
     "OpenVAS Parser v2": True,
+    "OpenReports": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1658,6 +1685,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Cyberwatch scan (Galeax)": DEDUPE_ALGO_HASH_CODE,
     "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
     "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
+    "OpenReports": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1679,6 +1707,7 @@ DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 
 TRACK_IMPORT_HISTORY = env("DD_TRACK_IMPORT_HISTORY")
+IMPORT_REIMPORT_DEDUPE_BATCH_SIZE = env("DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE")
 
 # ------------------------------------------------------------------------------
 # JIRA
@@ -1700,6 +1729,12 @@ if env("DD_JIRA_EXTRA_ISSUE_TYPES"):
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
 JIRA_DESCRIPTION_MAX_LENGTH = env("DD_JIRA_DESCRIPTION_MAX_LENGTH")
 JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN = env("DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN")
+# JIRA connection retry and timeout settings
+JIRA_MAX_RETRIES = env("DD_JIRA_MAX_RETRIES")
+JIRA_CONNECT_TIMEOUT = env("DD_JIRA_CONNECT_TIMEOUT")
+JIRA_READ_TIMEOUT = env("DD_JIRA_READ_TIMEOUT")
+# Combine timeouts into a tuple for the JIRA library: (connect_timeout, read_timeout)
+JIRA_TIMEOUT = (JIRA_CONNECT_TIMEOUT, JIRA_READ_TIMEOUT)
 
 # ------------------------------------------------------------------------------
 # LOGGING
@@ -1874,6 +1909,7 @@ VULNERABILITY_URLS = {
     "C-": "https://hub.armosec.io/docs/",  # e.g. https://hub.armosec.io/docs/c-0085
     "CISCO-SA-": "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/",  # e.g. https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-umbrella-tunnel-gJw5thgE
     "CAPEC": "https://capec.mitre.org/data/definitions/&&.html",  # e.g. https://capec.mitre.org/data/definitions/157.html
+    "CERTFR-": "https://www.cert.ssi.gouv.fr/alerte/",  # e.g. https://www.cert.ssi.gouv.fr/alerte/CERTFR-2025-ALE-012"
     "CGA-": "https://images.chainguard.dev/security/",  # e.g. https://images.chainguard.dev/security/CGA-24pq-h5fw-43v3
     "CONFSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/CONFSERVER-93361
     "CVE-": "https://nvd.nist.gov/vuln/detail/",  # e.g. https://nvd.nist.gov/vuln/detail/cve-2022-22965
@@ -1929,6 +1965,7 @@ VULNERABILITY_URLS = {
     "TS-": """https://tailscale.com/security-bulletins#""",  # e.g. https://tailscale.com/security-bulletins or https://tailscale.com/security-bulletins#ts-2022-001-1243
     "TYPO3-": "https://typo3.org/security/advisory/",  # e.g. https://typo3.org/security/advisory/typo3-core-sa-2025-010
     "USN-": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
+    "VA-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/va-25-282-01
     "VAR-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/var-201801-0152
     "VNS": "https://vulners.com/",
     "WID-SEC-W-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/wid-sec-w-2025-1468
