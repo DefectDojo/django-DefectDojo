@@ -73,7 +73,7 @@ def backfill_pghistory_tables(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0248_findingreviewers_findingreviewersevent_and_more"),
+        ("dojo", "0249_findingreviewers_findingreviewersevent_and_more"),
     ]
 
     operations = [

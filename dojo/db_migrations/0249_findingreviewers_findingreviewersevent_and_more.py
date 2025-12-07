@@ -9,7 +9,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0247_remove_finding_insert_insert_and_more")
+        ("dojo", "0248_alter_general_survey_expiration")
     ]
 
     operations = [
