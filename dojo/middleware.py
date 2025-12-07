@@ -13,8 +13,6 @@ from django.db import models
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
-from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden
-from django.utils.functional import SimpleLazyObject
 from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden, AuthTokenError
 from social_django.middleware import SocialAuthExceptionMiddleware
 from watson.middleware import SearchContextMiddleware
