@@ -356,30 +356,25 @@ def register_django_pghistory_models():
     # don't specifically cover proxy models for auto-generated ManyToMany through tables.
     # This is a common pattern used by libraries like django-pghistory and is necessary
     # because accessing Model.field.through at module import time triggers AppRegistryNotReady.
-    try:
-        FindingReviewers = apps.get_model("dojo", "FindingReviewers")
-    except LookupError:
-        # Model doesn't exist yet, create it
-        # Note: Finding is imported above, and apps registry is ready when this runs
-        reviewers_through = Finding._meta.get_field("reviewers").remote_field.through
+    reviewers_through = Finding._meta.get_field("reviewers").remote_field.through
 
-        class FindingReviewers(reviewers_through):
-            class Meta:
-                proxy = True
+    class FindingReviewers(reviewers_through):
+        class Meta:
+            proxy = True
 
-        pghistory.track(
-            pghistory.InsertEvent(),
-            pghistory.DeleteEvent(),
-            pghistory.ManualEvent(label="initial_backfill"),
-            meta={
-                "db_table": "dojo_finding_reviewersevent",
-                "indexes": [
-                    models.Index(fields=["pgh_created_at"]),
-                    models.Index(fields=["pgh_label"]),
-                    models.Index(fields=["pgh_context_id"]),
-                ],
-            },
-        )(FindingReviewers)
+    pghistory.track(
+        pghistory.InsertEvent(),
+        pghistory.DeleteEvent(),
+        pghistory.ManualEvent(label="initial_backfill"),
+        meta={
+            "db_table": "dojo_finding_reviewersevent",
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
+    )(FindingReviewers)
 
     # Only log during actual application startup, not during shell commands
     if "shell" not in sys.argv:
