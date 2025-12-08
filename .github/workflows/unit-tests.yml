@@ -22,6 +22,7 @@ jobs:
       platform: ${{ matrix.platform }}
 
   test-rest-framework:
+    timeout-minutes: 20
     strategy:
         matrix:
             platform: ['linux/amd64', 'linux/arm64']
@@ -36,6 +37,7 @@ jobs:
 
   # only run integration tests for linux/amd64 (default)
   test-user-interface:
+    timeout-minutes: 20
     needs: build-docker-containers
     uses: ./.github/workflows/integration-tests.yml
     secrets: inherit
