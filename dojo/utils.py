@@ -10,6 +10,7 @@ import re
 from calendar import monthrange
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
+from functools import cached_property
 from math import pi, sqrt
 from pathlib import Path
 
@@ -1303,52 +1304,77 @@ def get_celery_worker_status():
 
 
 # Used to display the counts and enabled tabs in the product view
+# Uses @cached_property for lazy loading to avoid expensive queries on every page load
+# See: https://github.com/DefectDojo/django-DefectDojo/issues/10313
 class Product_Tab:
     def __init__(self, product, title=None, tab=None):
-        self.product = product
-        self.title = title
-        self.tab = tab
-        self.engagement_count = Engagement.objects.filter(
-            product=self.product, active=True).count()
-        self.open_findings_count = Finding.objects.filter(test__engagement__product=self.product,
-                                                          false_p=False,
-                                                          duplicate=False,
-                                                          out_of_scope=False,
-                                                          active=True,
-                                                          mitigated__isnull=True).count()
-        active_endpoints = Endpoint.objects.filter(
-            product=self.product,
+        self._product = product
+        self._title = title
+        self._tab = tab
+        self._engagement = None
+
+    @cached_property
+    def engagement_count(self):
+        return Engagement.objects.filter(
+            product=self._product, active=True).count()
+
+    @cached_property
+    def open_findings_count(self):
+        return Finding.objects.filter(
+            test__engagement__product=self._product,
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            active=True,
+            mitigated__isnull=True).count()
+
+    @cached_property
+    def _active_endpoints(self):
+        return Endpoint.objects.filter(
+            product=self._product,
             status_endpoint__mitigated=False,
             status_endpoint__false_positive=False,
             status_endpoint__out_of_scope=False,
             status_endpoint__risk_accepted=False,
         )
-        self.endpoints_count = active_endpoints.distinct().count()
-        self.endpoint_hosts_count = active_endpoints.values("host").distinct().count()
-        self.benchmark_type = Benchmark_Type.objects.filter(
+
+    @cached_property
+    def endpoints_count(self):
+        return self._active_endpoints.distinct().count()
+
+    @cached_property
+    def endpoint_hosts_count(self):
+        return self._active_endpoints.values("host").distinct().count()
+
+    @cached_property
+    def benchmark_type(self):
+        return Benchmark_Type.objects.filter(
             enabled=True).order_by("name")
-        self.engagement = None
 
     def setTab(self, tab):
-        self.tab = tab
+        self._tab = tab
 
     def setEngagement(self, engagement):
-        self.engagement = engagement
+        self._engagement = engagement
 
+    @property
     def engagement(self):
-        return self.engagement
+        return self._engagement
 
+    @property
     def tab(self):
-        return self.tab
+        return self._tab
 
     def setTitle(self, title):
-        self.title = title
+        self._title = title
 
+    @property
     def title(self):
-        return self.title
+        return self._title
 
+    @property
     def product(self):
-        return self.product
+        return self._product
 
     def engagements(self):
         return self.engagement_count
@@ -1361,9 +1387,6 @@ class Product_Tab:
 
     def endpoint_hosts(self):
         return self.endpoint_hosts_count
-
-    def benchmark_type(self):
-        return self.benchmark_type
 
 
 # Used to display the counts and enabled tabs in the product view
