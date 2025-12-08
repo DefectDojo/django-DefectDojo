@@ -1,0 +1,36 @@
+{
+    "apiVersion": "openreports.io/v1alpha1",
+    "kind": "Report",
+    "metadata": {
+        "creationTimestamp": "2025-10-27T08:26:27Z",
+        "generation": 1,
+        "labels": {
+            "app.kubernetes.io/managed-by": "image-scanner"
+        },
+        "name": "deployment-clean-app-b2131",
+        "namespace": "test",
+        "ownerReferences": [
+            {
+                "apiVersion": "stas.statnett.no/v1alpha1",
+                "blockOwnerDeletion": true,
+                "controller": true,
+                "kind": "ContainerImageScan",
+                "name": "deployment-clean-app-b2131",
+                "uid": "cdc1999a-2e70-4917-b606-e137be3c2aad"
+            }
+        ],
+        "resourceVersion": "4269547",
+        "uid": "f06c27ce-9ef6-418b-8049-3a5be737da35"
+    },
+    "scope": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "name": "clean-app",
+        "uid": "f9ca3c43-302e-46ba-a19e-d2651c8d941b"
+    },
+    "summary": {
+        "fail": 0,
+        "skip": 0,
+        "warn": 0
+    }
+}
