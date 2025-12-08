@@ -75,7 +75,7 @@ Core Application [Organization]
     └── Pen Test Group B
 ```
 
-Crucially, giving a user RBAC access to a single Child Asset (e.g. `Pen Test Group A`) here does not allow them to see any Findings from other Child Assets (e.g. `Pen Test Group A`), nor does it allow them to see Findings in the Parent Asset (`webapp-frontend`).
+Crucially, giving a user RBAC access to a single Child Asset (e.g. `Pen Test Group A`) here does not allow them to see any Findings from other Child Assets (e.g. `Pen Test Group B`), nor does it allow them to see Findings in the Parent Asset (`webapp-frontend`).
 
 The Parent Asset could contain Engagements representing CI/CD results, internal Testing, historical data, or other Finding data which you do not want 3rd parties to be able to discover.  Creating a Child Asset for specific Test results allows your internal team to report on those results in combination with the state of the parent Asset.
 
