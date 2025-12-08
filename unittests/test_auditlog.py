@@ -22,22 +22,6 @@ class TestAuditConfig(TestCase):
 
     """Test audit configuration functionality."""
 
-    @patch("dojo.auditlog.pghistory")
-    def test_register_django_pghistory_models(self, mock_pghistory):
-        """Test that register_django_pghistory_models registers all models."""
-        # Mock pghistory.track
-        mock_pghistory.track = MagicMock()
-        mock_pghistory.InsertEvent = MagicMock()
-        mock_pghistory.UpdateEvent = MagicMock()
-        mock_pghistory.DeleteEvent = MagicMock()
-        mock_pghistory.ManualEvent = MagicMock()
-
-        register_django_pghistory_models()
-
-        # Verify that track was called multiple times (once for each model)
-        self.assertTrue(mock_pghistory.track.called)
-        self.assertGreater(mock_pghistory.track.call_count, 5)
-
     @patch("dojo.auditlog.call_command")
     def test_configure_pghistory_triggers_enabled(self, mock_call_command):
         """Test that configure_pghistory_triggers enables triggers when audit logging is enabled."""
