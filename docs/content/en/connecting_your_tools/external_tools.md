@@ -9,20 +9,19 @@ weight: 2
 
 ## About External Tools
 
-`defectdojo-cli` and `universal-importer` are command-line tools designed to seamlessly upload scan results into DefectDojo. They streamline both the import and re-import processes of findings and associated objects. These tools are flexible and support importing and re-importing scan results, making it ideal for users who want to quickly set up these interactions with the DefectDojo API.
+`defectdojo-cli` and `universal-importer` are command-line tools designed to streamline both the import and re-import processes of Findings and associated objects, making it ideal for users who want to quickly set up these interactions with the DefectDojo API.
 
 DefectDojo-CLI has the same functionality as Universal Importer, but also includes the ability to export Findings from DefectDojo to JSON or CSV.
 
 ## Installation
 
-1. Use the DefectDojo UI to download the appropriate binary for your operating system from the platform.
+1. Locate “External Tools” from your User Profile menu:
 
-2. Locate “External Tools” from your User Profile menu:
+2. Download the appropriate binary for your operating system from the platform.
 
 ![image](images/external-tools.png)
 
-3. Extract the downloaded archive within a directory of your choice.
-Optional: Add the directory containing the extracted binary to your system's $PATH for repeat access.
+3. Extract the downloaded archive within a directory of your choice. Optionally, add the directory containing the extracted binary to your system's $PATH for repeat access.
 
 **Note that Macintosh users may be blocked from running DefectDojo-CLI or Universal Importer as they are apps from an unidentified developer.  See [Apple Support](https://support.apple.com/en-ca/guide/mac-help/mh40616/mac) for instructions on how to override the block from Apple.**  
 
@@ -50,10 +49,10 @@ in the user dropdown in the top-right corner:
 **For Universal Importer:**
 	`export DD_IMPORTER_DOJO_API_TOKEN=YOUR_API_KEY`
 
-
 Note: On Windows, use `set` instead of `export`.
 
 ### Windows: Using PowerShell
+
 1. Open PowerShell (Windows Key, then search for "PowerShell").
 2. Set the environment variables:
    - **Temporary:**
@@ -156,16 +155,17 @@ defectdojo-cli [global options] import <required flags> [optional flags]
 * Create an Engagement inside the product
 * Provide the id of the Engagement in the engagement parameter
 
-In this scenario a new Test will be created inside the Engagement.
+In this scenario, a new Test will be created inside the Engagement.
 
 **By Name:**
+
 * Create a Product (or use an existing product)
 * Create an Engagement inside the product
 * Provide product-name
 * Provide engagement-name
 * Optionally provide product-type-name
 
-In this scenario DefectDojo will look up the Engagement by the provided details.
+In this scenario, DefectDojo will look up the Engagement by the provided details.
 
 When using names you can let the importer automatically create Engagements, Products and Product-types by using `auto-create-context=true`.
 You can use `deduplication-on-engagement` to restrict deduplication for imported Findings to the newly created Engagement.
@@ -284,7 +284,7 @@ By Names:
 - Provide engagement-name
 - Optional: Provide test-name
 
-In this scenario DefectDojo will look up the Test by the provided details. If no test-name is provided, the latest test inside the engagement will be chosen based on scan-type.
+In this scenario, DefectDojo will look up the Test by the provided details. If no test-name is provided, the latest test inside the engagement will be chosen based on scan-type.
 
 When using names you can let the importer automatically create Engagements, Products and Product-types by using `auto-create-context=true`.
 You can use `deduplication-on-engagement` to restrict deduplication for imported Findings to the newly created Engagement.
@@ -601,7 +601,7 @@ defectdojo-cli interactive
 
 `universal-importer` seamlessly integrates scan results into DefectDojo, streamlining both the import and reimport processes of findings and associated objects. Designed for ease of use, the tool supports various endpoints, catering to both initial imports and subsequent reimports — ideal for users requiring robust and flexible interaction with the DefectDojo API.
 
-Usage of Universal Importer is similar to DefectDojo-CLI, however Universal Importer does not have the Export functionality, and environment variables are encoded differently.
+While similar to DefectDojo-CLI, Universal Importer does not have the Export functionality, and environment variables are encoded differently.
 
 ### Commands
 
