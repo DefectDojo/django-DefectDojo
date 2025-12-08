@@ -119,5 +119,5 @@ If your diagram displays an Asset with un-selected Parent Assets, you can click 
 * RBAC scopes have not changed within this system; each Asset is still considered an individual object for the purposes of assigning permissions.  No new RBAC inheritance has been created.
   * Giving a user access to an entire Organization will still give that user access to all Assets contained within that Organization (as with Product Types).
   * Giving a user access to a single Asset does not give that user access to any related Parent or Child Assets, nor access to the Organization.
-* There is no limit to the number of Parent/Child relationships that can be created.Theoretically, you could represent a repository's entire directory structure with separate Assets if you wished.
+* There is no limit to the number of Parent/Child relationships that can be created. Theoretically, you could represent a repository's entire directory structure with separate Assets if you wished.
 * Cyclical relationships are not allowed: Parent Assets cannot be Children of their Child Assets.
