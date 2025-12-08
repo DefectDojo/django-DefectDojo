@@ -4,7 +4,7 @@ Unit tests for audit configuration functionality.
 Tests pghistory audit system configuration and event creation.
 """
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from django.apps import apps
 from django.conf import settings
@@ -13,7 +13,6 @@ from django.test import TestCase, override_settings
 from dojo.auditlog import (
     configure_audit_system,
     configure_pghistory_triggers,
-    register_django_pghistory_models,
 )
 from dojo.models import Product_Type
 
