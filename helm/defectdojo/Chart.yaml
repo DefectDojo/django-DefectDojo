@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "2.53.0"
+appVersion: "2.53.1"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.9.0
+version: 1.9.1
 icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
 maintainers:
   - name: madchap
@@ -35,15 +35,7 @@ dependencies:
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/changes: |
-    - kind: added
-      description: Added HPA and PDB for celery worker and Django
-    - kind: fixed
-      description: extraAnnotations spec doesn't affect initializer job
+    - kind: deprecated
+      description: djnago.mediaPersistentVolume.fsGroup was removed because it was replaced with django.podSecurityContext.fsGroup
     - kind: changed
-      description: chore(deps)_ update gcr.io/cloudsql_docker/gce_proxy docker tag from 1.37.9 to v1.37.10 (helm/defectdojo/values.yaml)
-    - kind: changed
-      description: chore(deps)_ update nginx/nginx_prometheus_exporter docker tag from 1.4.2 to v1.5.1 (helm/defectdojo/values.yaml)
-    - kind: changed
-      description: Replace Redis with Valkey
-    - kind: changed
-      description: Bump DefectDojo to 2.53.0
+      description: Bump DefectDojo to 2.53.1

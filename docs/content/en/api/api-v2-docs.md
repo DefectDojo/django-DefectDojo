@@ -178,3 +178,106 @@ Example for importing a scan result:
 | [dd-import](https://github.com/MaibornWolff/dd-import)                    | working (2021-08-24)    | dd-import is not directly an API wrapper. It offers some convenience functions to make it easier to import findings and language data from CI/CD pipelines. |
 
 Some of the api wrappers contain quite a bit of logic to ease scanning and importing in CI/CD environments. We are in the process of simplifying this by making the DefectDojo API smarter (so api wrappers / script can be dumber).
+
+## API Notes
+
+### Import / Reimport
+
+**Reimport** is actually the easiest way to get started as it will create any entities on the fly if needed and it will automatically detect if it is a first time upload or a re-upload.
+
+## Import
+Importing via the API is performed via the [import-scan](https://demo.defectdojo.org/api/v2/doc/) endpoint.
+
+As described in the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy), Test gets created inside an Engagement, inside a Product, inside a Product Type.
+
+An import can be performed by specifying the names of these entities in the API request:
+
+
+```JSON
+{
+    "minimum_severity": 'Info',
+    "active": True,
+    "verified": True,
+    "scan_type": 'ZAP Scan',
+    "test_title": 'Manual ZAP Scan by John',
+    "product_type_name": 'Good Products',
+    "product_name": 'My little product',
+    "engagement_name": 'Important import',
+    "auto_create_context": True,
+}
+```
+
+When `auto_create_context` is `True`, the product, engagement, and environment will be created if needed. Make sure your user has sufficient [permissions](/en/customize_dojo/user_management/about_perms_and_roles/) to do this.
+
+A classic way of importing a scan is by specifying the ID of the engagement instead:
+
+```JSON
+{
+    "minimum_severity": 'Info',
+    "active": True,
+    "verified": True,
+    "scan_type": 'ZAP Scan',
+    "test_title": 'Manual ZAP Scan by John',
+    "engagement": 123,
+}
+```
+
+## Reimport
+ReImporting via the API is performed via the [reimport-scan](https://demo.defectdojo.org/api/v2/doc/) endpoint.
+
+A reimport can be performed by specifying the names of these entities in the API request:
+
+
+```JSON
+{
+    "minimum_severity": 'Info',
+    "active": True,
+    "verified": True,
+    "scan_type": 'ZAP Scan',
+    "test_title": 'Manual ZAP Scan by John',
+    "product_type_name": 'Good Products',
+    "product_name": 'My little product',
+    "engagement_name": 'Important import',
+    "auto_create_context": True,
+    "do_not_reactivate": False,
+}
+```
+
+When `auto_create_context` is `True`, the Product Type, Product and Engagement will be created if they do not already exist. Make sure your user has sufficient [permissions](/en/customize_dojo/user_management/about_perms_and_roles/) to create a Product/Product Type.
+
+When `do_not_reactivate` is `True`, the importing/reimporting will ignore uploaded active findings and not reactivate previously closed findings, while still creating new findings if there are new ones. You will get a note on the finding to explain that it was not reactivated for that reason.
+
+A reimport will automatically select the latest test inside the provided engagement that satisifes the provided `scan_type` and (optionally) provided `test_title`.
+
+If no existing Test is found, the reimport endpoint will use the import function to import the provided report into a new Test. This means a (CI/CD) script using the API doesn't need to know if a Test already exists, or if it is a first time upload for this Product / Engagement.
+
+A classic way of reimporting a scan is by specifying the ID of the test instead:
+
+```JSON
+{
+    "minimum_severity": 'Info',
+    "active": True,
+    "verified": True,
+    "scan_type": 'ZAP Scan',
+    "test": 123,
+}
+```
+
+## Using the Scan Completion Date (API: `scan_date`) field
+
+DefectDojo offers a plethora of supported scanner reports, but not all of them contain the
+information most important to a user. The `scan_date` field is a flexible smart feature that
+allows users to set the completion date of the a given scan report, and have it propagate
+down to all the findings imported. This field is **not** mandatory, but the default value for
+this field is the date of import (whenever the request is processed and a successful response is returned).
+
+Here are the following use cases for using this field:
+
+1. The report **does not** set the date, and `scan_date` is **not** set at import
+    - Finding date will be the default value of `scan_date`
+2. The report **sets** the date, and the `scan_date` is **not** set at import
+    - Finding date will be whatever the report sets
+3. The report **does not** set the date, and the `scan_date` is **set** at import
+    - Finding date will be whatever the user set for `scan_date`
+4. The report **sets** the date, and the `scan_date` is **set** at import
+    - Finding date will be whatever the user set for `scan_date`
