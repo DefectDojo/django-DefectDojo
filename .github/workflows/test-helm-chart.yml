@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -22,7 +22,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
 
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
           python-version: 3.14 # Renovate helper is not needed here
 
@@ -34,7 +34,7 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # v2.8.0
         with:
-          yamale_version: 6.0.0 # renovate: datasource=pypi depName=yamale versioning=semver
+          yamale_version: 6.1.0 # renovate: datasource=pypi depName=yamale versioning=semver
           yamllint_version: 1.37.1 # renovate: datasource=pypi depName=yamllint versioning=semver
 
       - name: Determine target branch
@@ -66,7 +66,7 @@ jobs:
         if: env.changed == 'true'
 
       - name: Check update of "artifacthub.io/changes" HELM annotation
-        if: env.changed == 'true'
+        if: ${{ env.changed == 'true' && !(startsWith(github.head_ref, 'master-into-dev/') || startsWith(github.head_ref, 'master-into-bugfix/')) }}
         run: |
           # fast fail if `git show` fails
           set -e
@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -114,7 +114,12 @@ jobs:
       - name: Update values in HELM chart
         if: startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')
         run: |
-          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: ${{ github.event.pull_request.title }}\n"' helm/defectdojo/Chart.yaml
+          title=${{ github.event.pull_request.title }}
+          chars='{}:[],&*#?|-<>=!%@'
+          for c in $(echo "$chars" | grep -o .); do
+            title="${title//"$c"/_}"
+          done
+          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: $title\n"' helm/defectdojo/Chart.yaml
           git add helm/defectdojo/Chart.yaml
           git commit -m "ci: update Chart annotations from PR #${{ github.event.pull_request.number }}" || echo "No changes to commit"
 
@@ -142,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Generate values schema json
         uses: losisin/helm-values-schema-json-action@660c441a4a507436a294fc55227e1df54aca5407 # v2.3.1
@@ -162,7 +167,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -184,7 +189,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Run ah lint
         working-directory: ./helm/defectdojo
         run: |-

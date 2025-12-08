@@ -22,7 +22,7 @@ jobs:
             os: debian
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@b589f2d61bf96695c546929c72b38563e856059d # v2.14.0
@@ -73,8 +73,8 @@ jobs:
                --set images.nginx.image.tag=latest \
                --set imagePullPolicy=Never \
                --set initializer.keepSeconds="-1" \
-               --set redis.enabled=true \
-               --set createRedisSecret=true \
+               --set valkey.enabled=true \
+               --set createValkeySecret=true \
                --set postgresql.enabled=true \
                --set createPostgresqlSecret=true \
                --set createSecret=true
