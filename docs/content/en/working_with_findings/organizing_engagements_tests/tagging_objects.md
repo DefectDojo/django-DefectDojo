@@ -9,7 +9,7 @@ exclude_search: false
 Tags are ideal for grouping objects in a manner that can be filtered out into smaller, more digestible chunks.  They can be used to denote status, or to create custom sets of Product Type, Products, Engagements or Findings across the data model.
 
 In DefectDojo, tags are a first class citizen and are recognized as the facilitators
-of organization within each level of the [data model](../Product_hierarchy).
+of organization within each level of the [data model](../product_hierarchy).
 
 Here is an example with a Product with two tags and four findings each with a single tag:
 

@@ -532,23 +532,68 @@ class FindingTagFilter(DojoFilter):
         field_name="tags__name",
         to_field_name="name",
         queryset=Finding.tags.tag_model.objects.all().order_by("name"),
-        help_text="Filter Findings by the selected tags")
+        help_text="Filter Findings by the selected tags (OR logic)",
+    )
+
+    tags_and = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Finding.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Findings by the selected tags (AND logic)",
+        label="Tags (AND)",
+        conjoined=True,
+    )
+
     test__tags = ModelMultipleChoiceFilter(
         field_name="test__tags__name",
         to_field_name="name",
         queryset=Test.tags.tag_model.objects.all().order_by("name"),
-        help_text="Filter Tests by the selected tags")
+        help_text="Filter Findings by the selected Test tags (OR logic)",
+        label="Test Tags",
+    )
+
+    test__tags_and = ModelMultipleChoiceFilter(
+        field_name="test__tags__name",
+        to_field_name="name",
+        queryset=Test.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Findings by the selected Test tags (AND logic)",
+        label="Test Tags (AND)",
+        conjoined=True,
+    )
+
     test__engagement__tags = ModelMultipleChoiceFilter(
         field_name="test__engagement__tags__name",
         to_field_name="name",
         queryset=Engagement.tags.tag_model.objects.all().order_by("name"),
-        help_text="Filter Engagements by the selected tags")
+        help_text="Filter Findings by the selected Engagement tags (OR logic)",
+        label="Engagement Tags",
+    )
+
+    test__engagement__tags_and = ModelMultipleChoiceFilter(
+        field_name="test__engagement__tags__name",
+        to_field_name="name",
+        queryset=Engagement.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Findings by the selected Engagement tags (AND logic)",
+        label="Engagement Tags (AND)",
+        conjoined=True,
+    )
+
     test__engagement__product__tags = ModelMultipleChoiceFilter(
         field_name="test__engagement__product__tags__name",
         to_field_name="name",
         queryset=Product.tags.tag_model.objects.all().order_by("name"),
-        label=labels.ASSET_FILTERS_TAGS_FILTER_LABEL,
-        help_text=labels.ASSET_FILTERS_TAGS_FILTER_HELP)
+        help_text="Filter Findings by the selected Product tags (OR logic)",
+        label="Product Tags",
+    )
+
+    test__engagement__product__tags_and = ModelMultipleChoiceFilter(
+        field_name="test__engagement__product__tags__name",
+        to_field_name="name",
+        queryset=Product.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Findings by the selected Product tags (AND logic)",
+        label="Product Tags (AND)",
+        conjoined=True,
+    )
 
     not_tags = ModelMultipleChoiceFilter(
         field_name="tags__name",
