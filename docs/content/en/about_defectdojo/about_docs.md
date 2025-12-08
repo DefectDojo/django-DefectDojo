@@ -13,25 +13,25 @@ weight: 1
 
 ## What is DefectDojo?
 
-DefectDojo is a DevSecOps platform. DefectDojo streamlines DevSecOps by serving as an aggregator and single pane of glass for your security tools.
+DefectDojo is a Developer Security Operations (DevSecOps) platform. DefectDojo streamlines DevSecOps by serving as an automatic aggregator for your suite of security tools, allowing you to easily organize your security work and report your organization’s security posture to other stakeholders.
 
-DefectDojo has smart features to enhance and tune the results from your security tools including the ability to merge findings, remember false positives, and distill duplicates. 
-
-DefectDojo also integrates with JIRA, provides metrics / reports, and can also be used for traditional pen test management.
+While security process automation and integrated development pipelines are the end goals of DefectDojo, at its core this software is a bug tracker for security vulnerabilities, which is meant to ingest, organize and standardize reports from many security tools.
 
 ### What does DefectDojo do?
 
-Whether you're a one-person security team for a small organization, or a CISO overseeing a large amount of software projects, DefectDojo allows you to organize your security work, and easily report your organization's security posture to other stakeholders.
+DefectDojo has smart features to enhance and tune the results from your security tools, including the ability to:
 
-While security process automation and integrated development pipelines are the ultimate end goals of DefectDojo, this software is a bug tracker at its core for security vulnerabilities, which is meant to ingest, organize and standardize reports from many security tools. 
+- Track and report on security Findings in context
+- Enforce SLAs in context
+- Handle False Positives, Risk Acceptances and other triage decisions
+- Distill duplicates using DefectDojo's deduplication algorithm
+- Integrate with external Project Tracking software.
+- Provide metrics/reports across repositories and development branches using CI/CD integration.
+- Coordinate traditional Pen test management.
+- Set and enforce SLAs for vulnerability remediation procedures.
+- Create and track Risk Acceptances for security vulnerabilities.
 
-DefectDojo's Product:Engagement model enables allows you to take inventory of your development environment and immediately place new security Findings in context.
-
-- Track and report on vulnerabilities and test results across repositories and development branches, using CI/CD integration
-- Ingest Pen tester reports and capture point-in-time snapshots of your security profile
-- Create and track Risk Acceptances for security vulnerabilities
-- Set and enforce SLAs to reflect your organization's policies for vulnerability remediation
-- Filter out redundant data using DefectDojo's deduplication algorithm
+Ultimately, DefectDojo's Product:Engagement model allows you to take inventory of your development environment and immediately place new security Findings in context.
 
 ---
 Here are some examples of ways DefectDojo can be implemented, with DefectDojo co-founder and CTO Matt Tesauro:
@@ -39,58 +39,82 @@ Here are some examples of ways DefectDojo can be implemented, with DefectDojo co
 
 ---
 
+## DefectDojo Open-Source
 
-### How does DefectDojo work?
+DefectDojo's core functionality is available in DefectDojo Open-Source.
 
-Whether you're a Pro or an Open-Source user, we have many resources that can help you get started with DefectDojo.
+This edition of DefectDojo includes:
 
-- Our [New User Checklist](../new_user_checklist) covers the fundamentals of setting up your DefectDojo environment and setting up your import, triage and reporting workflows.
+- Import/Reimport for all 200+ Supported Tools
+- REST API
+- Deduplication features
+- Limited UI, metrics and reporting features
+- Jira integration capability
 
-- We support a large amount of [security tool integrations](/supported_tools/) to help fit DefectDojo in your DevSecOps program.
-
-- Our team maintains a [YouTube Channel](https://www.youtube.com/@defectdojo) which hosts tutorials, archived Office Hours events and other content. New subscribers are always welcome!
-
-## Open-Source DefectDojo
-
-The Open-Source edition of DefectDojo is [available on GitHub](https://github.com/DefectDojo/django-DefectDojo).
+For teams managing a smaller volume of Findings, DefectDojo Open-Source is a great starting point.
 
 ### Installation Guides
 
-There are a few supported ways to install DefectDojo's Open Source edition:
+There are a few supported ways to install DefectDojo’s Open-Source edition ([available on Github](https://github.com/DefectDojo/django-DefectDojo)):
 
-- [Docker Compose](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) is the easiest method to install the core program and services required to run DefectDojo.
-- [Kubernetes](https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/KUBERNETES.md) is not fully supported at the Open-Source level, but this guide can be referenced and used as a **starting point** to integrate DefectDojo into Kubernetes architecture.
+[Docker Compose](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) is the easiest method to install the core program and services required to run DefectDojo.
+Our [Architecture](https://docs.defectdojo.com/en/open_source/installation/architecture/) guide gives you an overview of each service and component used by DefectDojo.
+[Running In Production](https://docs.defectdojo.com/en/open_source/installation/running-in-production/) lists system requirements, performance tweaks and maintenance processes for running DefectDojo on a production server (with Docker Compose).
 
-Other guides for working with an Open-Source install:
-- [Architecture](/en/open_source/installation/architecture/) gives you an overview of each service and component used by DefectDojo.
-- [Running In Production](/en/open_source/installation/running-in-production/) provides system requirements, performance tweaks and maintenance processes for running DefectDojo on a production server.  Note that this guide strictly covers Docker Compose installs, not Kubernetes.
+Kubernetes is not fully supported at the Open-Source level, but this guide can be referenced and used as a starting point to integrate DefectDojo into Kubernetes architecture.
 
-If you run into trouble with an Open Source install, we highly recommend asking questions on the [OWASP Slack](https://owasp.org/slack/invite). Our community members are active on the **# defectdojo** channel and can help you with issues you’re facing.
-
-Looking for cool DefectDojo laptop stickers? As a thank you for being a part of the DefectDojo community, you can sign up to get some free DefectDojo stickers.  For more information, check out [this link](https://defectdojo.com/defectdojo-sticker-request).
-
-### Online Demo
-
-A running example of DefectDojo (Open-Source Edition) is available on [our demo server](https://demo.defectdojo.org), using the credentials `admin` / `1Defectdojo@demo#appsec`. The demo server is refreshed regularly and provisioned with some sample data.
+If you run into trouble with an Open-Source install, we highly recommend asking questions on the [OWASP Slack](https://owasp.org/slack/invite). Our community members are active on the #defectdojo channel and can help you with issues you’re facing.
 
 ## 🟧 DefectDojo Pro Edition
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/XUES0mCCGOI?si=2GEnd1iHlLcQE0R3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
----
+DefectDojo Inc. hosts a Pro edition of this software for commercial purposes.  Along with a sleek, modern UI, DefectDojo Pro includes:
 
-DefectDojo Inc. hosts a commercial edition of this software, which includes:
+* [Connectors](/en/connecting_your_tools/connectors/about_connectors/): out-of-the-box API integrations with enterprise-level scanners (such as Checkmarx One, BurpSuite, Semgrep and more)
+* **Configurable Import Methods**: [Universal Parser](/supported_tools/parsers/universal_parser/), [Smart Upload](/en/connecting_your_tools/import_scan_files/smart_upload/)
+* **[CLI Tools](/en/connecting_your_tools/external_tools/)** for rapid integration with your systems
+* **[Additional Project Tracking Integrations](/en/share_your_findings/integrations/)**: ServiceNow, Azure DevOps, GitHub and GitLab
+* **[Improved Metrics](/en/customize_dojo/dashboards/pro_dashboards/)** for executive reporting and high-level analysis
+* **[Priority And Risk](/en/working_with_findings/finding_priority/)** to identify the Findings of highest urgency, system-wide
+* **Premium Support** and implementation guidance for your organization
 
-- [additional features](../pro_features), smart features and UI improvements 
-- cloud hosting, with regular backups, updates and maintenance
-- premium support and implementation guidance
+The Pro edition is available as a cloud-hosted SaaS offering, and is also available for installation on-premises.
 
-For more information, check out our Pricing page at [defectdojo.com](https://defectdojo.com/pricing).  After filling out a quick survey to assess your organization's needs we'll provide you with a custom quote for DefectDojo.
+For more information on DefectDojo Pro, check out our [Pricing page](https://defectdojo.com/pricing).
 
-DefectDojo Pro edition is available as a cloud-hosted SaaS offering but is also available for installation on-premises.
+## Online Demos
 
-### Connect With Us
+Online demos for both Open-Source and Pro versions of DefectDojo are available.  Both can be accessed using the following credentials:
 
-* To get in touch with our team, you can always reach out to **info@defectdojo.com**.
-* Follow DefectDojo Inc. on [LinkedIn](https://www.linkedin.com/company/33245534) for company updates.
-* DefectDojo hosts online presentations for AppSec professionals that can be accessed live or on demand - check us out on our [Events page](https://defectdojo.com/events). Many of these are also available on our [YouTube Channel](https://www.youtube.com/@defectdojo).
+- Username: `admin`
+- Password: `1Defectdojo@demo#appsec`
+
+These demos come loaded with sample data, and are reset on a daily basis.
+
+### Open-Source Demo
+
+A running example of DefectDojo (Open-Source Edition) is available at [https://demo.defectdojo.org/](https://demo.defectdojo.org/).
+
+### Pro Demo
+
+A running example of DefectDojo Pro is available at
+[https://pro.demo.defectdojo.com/](https://pro.demo.defectdojo.com/).
+
+## Learning DefectDojo
+
+Whether you’re a Pro or an Open-Source user, we have many resources to help you get started with DefectDojo.
+
+* Our [New User Checklist](/en/about_defectdojo/new_user_checklist/) covers the fundamentals of setting up your DefectDojo environment and establishing your import, triage and reporting workflows.
+* Review our supported [security tool integrations](/en/connecting_your_tools/parsers/) to help fit DefectDojo in your DevSecOps program.
+* Our team maintains a [YouTube Channel](https://www.youtube.com/@defectdojo) which hosts tutorials, archived Office Hours events, and other content. 
+
+## Connect With Us
+
+To get in touch with the DefectDojo Inc team, you can always reach out to [hello@defectdojo.com](mailto:hello@defectdojo.com).
+
+We regularly on [LinkedIn](https://www.linkedin.com/company/33245534) and also host online presentations for AppSec professionals that can be accessed live or on demand. You can learn about upcoming events on our [Events page](https://defectdojo.com/events) or watch past presentations on our [YouTube Channel](https://www.youtube.com/@defectdojo).
+
+### Stickers
+
+Looking for cool DefectDojo laptop stickers? As a thank you for being a part of the DefectDojo community, you can sign up to get some free DefectDojo stickers. For more information, check out [this link](https://defectdojo.com/defectdojo-sticker-request).
