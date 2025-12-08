@@ -12,9 +12,11 @@ DefectDojo Pro is extending the Product/Product Type object classes to provide g
 
 ### Organizations
 
-As with Product Types **Organizations** should be understood as a top-level category.  You can use these to separate your organization's core software applications, departments or business functions.
+As with Product Types, **Organizations** should be understood as a top-level category.  You can use these to separate your business' core software applications, departments or business functions.
 
-* For example, you could create an organization for many repository groupings: "Core Application", "Infrastructure", "DevOps", "Analytics", "SDK" could all contain multiple code repos.
+For example, you could create an Organization for many repository groupings: "Core Application", "Infrastructure", "DevOps", "Analytics", "SDK" could all contain multiple code repos.
+
+Keep in mind that for reporting purposes, it’s easier to combine multiple Organizations into a single document than it is to subdivide a single Organization into separate documents. Therefore, we recommend setting up Organizations at as granular a level as makes sense for your team's reports. For example, there is no need to represent a large business division as an Organization if you're primarily going to be reporting on individual departments within that division.
 
 ### Assets
 
@@ -102,7 +104,7 @@ Each Asset node can be interacted with by clicking on the blue buttons.  These b
 * 👁️ (eyeball icon) will take you directly to the corresponding Asset View (formerly known as the Product View).
 * ✏️ (pencil icon) will open a modal with the Edit Asset form (formerly known as the Edit Product form)
 * ➕ (plus icon) will allow you to add a new Child Asset to this Asset.  The Asset does not need to be currently visible in the diagram, but must be part of the same Organization.
-* ✥ (four-arrows icon) allows you to change the Parent Asset of the currently selected Asset.  
+* ✥ (four-arrows icon) allows you to change the Parent Asset of the currently selected Asset.
 * 🗑️ (trash can icon) allows you to remove an Asset's parent relationship. This icon only appears if an Asset already has a Parent.
 
 If your diagram displays an Asset with un-selected Parent Assets, you can click the Load More button to populate the diagram with the Parent Asset (as well as that Parent Asset's children).
@@ -116,3 +118,4 @@ If your diagram displays an Asset with un-selected Parent Assets, you can click 
   * Giving a user access to an entire Organization will still give that user access to all Assets contained within that Organization (as with Product Types).
   * Giving a user access to a single Asset does not give that user access to any related Parent or Child Assets, nor access to the Organization.
 * There is no limit to the number of Parent/Child relationships that can be created.Theoretically, you could represent a repository's entire directory structure with separate Assets if you wished.
+* Cyclical relationships are not allowed: Parent Assets cannot be Children of their Child Assets
