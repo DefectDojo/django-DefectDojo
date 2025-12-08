@@ -3,7 +3,9 @@ title: "⚠️ Assets and Organizations (Pro)"
 description: "DefectDojo Pro - Product Hierarchy Overhaul"
 ---
 
-DefectDojo Pro is extending the Product/Product Type object classes to provide greater flexibility with the data model.  Currently, this feature is in Beta.
+DefectDojo Pro is extending the Product/Product Type object classes to provide greater flexibility with the data model.
+
+Currently, this feature is in Beta. Pro users who are interested in opting in can do so by emailing [support@defectdojo.com](mailto:support@defectdojo.com).
 
 ## Significant Changes
 
@@ -118,4 +120,4 @@ If your diagram displays an Asset with un-selected Parent Assets, you can click 
   * Giving a user access to an entire Organization will still give that user access to all Assets contained within that Organization (as with Product Types).
   * Giving a user access to a single Asset does not give that user access to any related Parent or Child Assets, nor access to the Organization.
 * There is no limit to the number of Parent/Child relationships that can be created.Theoretically, you could represent a repository's entire directory structure with separate Assets if you wished.
-* Cyclical relationships are not allowed: Parent Assets cannot be Children of their Child Assets
+* Cyclical relationships are not allowed: Parent Assets cannot be Children of their Child Assets.
