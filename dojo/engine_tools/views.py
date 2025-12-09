@@ -91,13 +91,13 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     form = CreateFindingExclusionForm(initial={
             "unique_id_from_tool": default_unique_id,
             "practice": default_practice
-        })
+        }, user=request.user)
 
     finding_exclusion = None
 
     if request.method == "POST":
-        form = CreateFindingExclusionForm(request.POST)
-        list_type = request.POST.get(key="type")
+        form = CreateFindingExclusionForm(user=request.user, data=request.POST)
+        list_type = request.POST.get(key="type")    
         
         if form.is_valid():
             exclusion: FindingExclusion = form.save(commit=False)
@@ -401,6 +401,8 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
         previous_status=previous_status,
         current_status="Rejected"
     )
+
+    maintainers = get_reviewers_members()
     
     create_notification(
         event="finding_exclusion_rejected",
@@ -408,7 +410,7 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
         title=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}",
         description=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}.",
         url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-        recipients=[finding_exclusion.created_by.username],
+        recipients=[finding_exclusion.created_by.username] + maintainers,
         icon="xmark-circle",
         color_icon="#FA0101"
     )
@@ -423,14 +425,22 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
     
             
 def expire_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
-    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value) and \
+    if not is_in_reviewer_group(request.user) and \
         not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
         raise PermissionDenied
     finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
     
+    previous_status = finding_exclusion.status
     expire_finding_exclusion_immediately.apply_async(args=(str(finding_exclusion.uuid),))
     
-    messages.add_message(
+    FindingExclusionLog.objects.create(
+        finding_exclusion=finding_exclusion,
+        changed_by=request.user,
+        previous_status=previous_status,
+        current_status="Expired"
+    )
+
+    messages.add_message(   
             request,
             messages.SUCCESS,
             f"Finding Exclusion {finding_exclusion.uuid} expired.",
@@ -477,7 +487,13 @@ def delete_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
     
     finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
     remove_findings_from_deleted_finding_exclusions.apply_async(
-        args=(finding_exclusion.unique_id_from_tool, finding_exclusion.type))
+        args=(
+            finding_exclusion.unique_id_from_tool,
+            finding_exclusion.type,
+            list(finding_exclusion.engagements.values_list('id', flat=True)),
+            [finding_exclusion.product.id] if finding_exclusion.product else []
+        )
+    )
     finding_exclusion.delete()
     
     messages.add_message(
@@ -490,25 +506,36 @@ def delete_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
 
 
 def reopen_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
-    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
+    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value) or \
+        not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
         raise PermissionDenied
     
     finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
     
     previous_status = finding_exclusion.status
-    finding_exclusion.status = "Pending"
-    finding_exclusion.final_status = None
+    finding_exclusion.status = "Accepted"
+    finding_exclusion.final_status = "Accepted"
     finding_exclusion.status_updated_at = datetime.now()
     finding_exclusion.status_updated_by = request.user
-    finding_exclusion.reviewed_at = None
-    finding_exclusion.reviewed_by = None
+    finding_exclusion.reviewed_at = datetime.now()
+    finding_exclusion.reviewed_by = request.user
     finding_exclusion.save()
     
     FindingExclusionLog.objects.create(
         finding_exclusion=finding_exclusion,
         changed_by=request.user,
         previous_status=previous_status,
-        current_status="Pending"
+        current_status="Accepted"
+    )
+
+    relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
+    engagement_ids = finding_exclusion.engagements.values_list('id', flat=True)
+    add_findings_to_whitelist.apply_async(
+        args=(
+            finding_exclusion.unique_id_from_tool,
+            str(relative_url),
+            list(engagement_ids)
+        )
     )
     
     messages.add_message(

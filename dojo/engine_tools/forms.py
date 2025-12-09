@@ -1,4 +1,5 @@
 from django import forms
+from dojo.templatetags.authorization_tags import is_in_reviewer_group
 from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
 from dojo.models import Product, Product_Type, Engagement
 from dojo.engine_tools.helpers import Constants
@@ -47,11 +48,10 @@ class CreateFindingExclusionForm(forms.ModelForm):
     
     class Meta:
         model = FindingExclusion
-    class Meta:
-        model = FindingExclusion
         fields = ["type", "unique_id_from_tool", "reason", "practice", "scope", "product_type", "product", "engagements"]
         
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
         super().__init__(*args, **kwargs)
 
         if self.initial.get("practice"):
@@ -80,6 +80,8 @@ class CreateFindingExclusionForm(forms.ModelForm):
         scope = cleaned_data.get("scope")
         
         if scope == 'specific':
+            if not is_in_reviewer_group(self.user):
+                raise forms.ValidationError("You do not have permission to create a specific engagement exclusion.")
             if not cleaned_data.get("product_type"):
                 self.add_error('product_type', "This field is required when 'Specific Engagements' is selected.")
             if not cleaned_data.get("product"):

@@ -186,7 +186,7 @@
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if request.user|is_in_reviewer_group %}
+                            {% if request.user|is_in_reviewer_group or request.user|is_in_approver_group %}
                                 {% if finding_exclusion.status == 'Rejected' or finding_exclusion.status == 'Expired' %}
                                 <li>
                                     <a class="dropdown-item" href="{% url 'reopen_finding_exclusion' finding_exclusion.uuid %}">
@@ -250,7 +250,7 @@
             </div>
             <div id="vuln_desc" class="panel-body finding-description collapse in">
               <pre>{{ finding_exclusion.reason }}</pre>
-              {% if finding_exclusion.engagements %}
+              {% if finding_exclusion.engagements.all %}
                 <strong>This applies to the following engagements:</strong>
                 <ul>
                 {% for engagement in finding_exclusion.engagements.all %}
