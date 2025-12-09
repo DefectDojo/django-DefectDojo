@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.urls import reverse
 from django.conf import settings
+from django.core.cache import cache
 from datetime import timedelta
 from celery.utils.log import get_task_logger
 from enum import Enum
@@ -392,6 +393,9 @@ def update_finding_prioritization_per_cve(
     vulnerability_id = finding.cve
     severity = finding.severity
     scan_type = finding.test.scan_type
+    logger.info(
+        f"Init update_finding_prioritization_per_cve with CVE {vulnerability_id}, severity {severity}, cve_greater {cve_greater}, scan_type {scan_type}"
+    )
     if vulnerability_id:
         if (
             Constants.TAG_TENABLE.value in finding.tags
@@ -424,7 +428,7 @@ def update_finding_prioritization_per_cve(
     findings = (
         Finding.objects.filter(priority_cve_severity_filter, test__scan_type=scan_type)
         .filter(priority_tag_filter)
-        .filter(active=True)
+        .filter(active=settings.CELERY_CRON_STATUS_FINDINGS_PRIORIZATION)
     )
 
     # If we need to filter by vulnerability_id count, apply it after the initial query
@@ -432,7 +436,14 @@ def update_finding_prioritization_per_cve(
         findings = findings.annotate(
             vulnerability_id_count=Count("vulnerability_id")
         ).filter(vulnerability_id_count=1)
-    for finding_update in findings:
+
+    # Process in chunks to avoid memory issues
+    MAX_BATCH_SIZE = 5000
+    findings_iterator = findings.iterator(chunk_size=1000)
+    findings_to_update = []
+    total_processed = 0
+
+    for finding_update in findings_iterator:
         finding_update.priority = priorization
         finding_update.set_sla_expiration_date()
         finding_update.epss_score = epss_score
@@ -440,23 +451,50 @@ def update_finding_prioritization_per_cve(
         finding_update.known_exploited = known_exploited
         finding_update.ransomware_used = ransomware_used
         finding_update.kev_date = kev_date_added
+        findings_to_update.append(finding_update)
 
-    Finding.objects.bulk_update(
-        findings,
-        [
-            "priority",
-            "sla_expiration_date",
-            "epss_score",
-            "epss_percentile",
-            "known_exploited",
-            "ransomware_used",
-            "kev_date",
-        ],
-        1000,
-    )
-    message = f"{vulnerability_id} with severity {severity} and cve_greater {cve_greater} of {scan_type} with {findings.count()} findings updated with prioritization {priorization} and EPSS score {epss_score} and percentile {epss_percentile}"
+        # Update in batches to avoid memory overflow
+        if len(findings_to_update) >= MAX_BATCH_SIZE:
+            Finding.objects.bulk_update(
+                findings_to_update,
+                [
+                    "priority",
+                    "sla_expiration_date",
+                    "epss_score",
+                    "epss_percentile",
+                    "known_exploited",
+                    "ransomware_used",
+                    "kev_date",
+                ],
+                1000,
+            )
+            total_processed += len(findings_to_update)
+            logger.info(
+                f"Updated batch of {len(findings_to_update)} findings (total: {total_processed}) for CVE {vulnerability_id}"
+            )
+            findings_to_update = []
+
+    # Update remaining findings
+    if findings_to_update:
+        Finding.objects.bulk_update(
+            findings_to_update,
+            [
+                "priority",
+                "sla_expiration_date",
+                "epss_score",
+                "epss_percentile",
+                "known_exploited",
+                "ransomware_used",
+                "kev_date",
+            ],
+            1000,
+        )
+        total_processed += len(findings_to_update)
+
+    message = f"{vulnerability_id} with severity {severity} and cve_greater {cve_greater} of {scan_type} with {total_processed} findings updated with prioritization {priorization} and EPSS score {epss_score} and percentile {epss_percentile}"
     if known_exploited:
         message += f" (Known Exploited Vulnerability) - Ransomware_used {ransomware_used} - KEV Date Added {kev_date_added}"
+    logger.info("Finished update_finding_prioritization_per_cve: " + message)
     return message
 
 
@@ -560,6 +598,19 @@ def get_severity_risk_map():
 
 
 def get_risk_priority_epss_kev_data():
+    """
+    Get risk score, EPSS and KEV data with caching for performance
+    Cache TTL: 24 hours (86400 seconds)
+    """
+    cache_key = "risk_priority_epss_kev_data"
+    cached_data = cache.get(cache_key)
+
+    if cached_data:
+        logger.info("Using cached risk score, EPSS and KEV data")
+        return cached_data
+
+    logger.info("Fetching fresh risk score, EPSS and KEV data")
+
     try:
         risk_score_dataframes = list_and_read_parquet_files_from_s3(
             bucket_name=settings.BUCKET_NAME_RISK_SCORE,
@@ -581,7 +632,14 @@ def get_risk_priority_epss_kev_data():
     # Get epss data and kev data
     epss_dict = download_epss_data(backward_day=0, cve_cutoff=settings.CVE_CUTOFF)
     kev_dict = generate_cve_kev_dict()
-    return df_risk_score, epss_dict, kev_dict
+
+    result = (df_risk_score, epss_dict, kev_dict)
+
+    # Cache for 24 hours
+    cache.set(cache_key, result, 86400)
+    logger.info("Cached risk score, EPSS and KEV data for 24 hours")
+
+    return result
 
 
 def calculate_priority_epss_kev_finding(
@@ -792,10 +850,10 @@ def generate_cve_kev_dict():
 def check_priorization():
     # Get all vulnerabilities with priority tag filter
     all_vulnerabilities = (
-        Finding.objects.filter(active=True)
+        Finding.objects.filter(active=settings.CELERY_CRON_STATUS_FINDINGS_PRIORIZATION)
         .filter(priority_tag_filter)
-        .order_by("priority", "test__scan_type", "severity")
-        .distinct("priority", "test__scan_type", "severity")
+        .order_by("cve", "test__scan_type", "severity")
+        .distinct("cve", "test__scan_type", "severity")
     )
 
     logger.info(
