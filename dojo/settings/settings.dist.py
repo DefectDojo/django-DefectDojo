@@ -1846,6 +1846,10 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 # Maximum size of a scan file in MB
 SCAN_FILE_MAX_SIZE = env("DD_SCAN_FILE_MAX_SIZE")
 
+# Engagement ID format
+# Example: "ENG-{id:04d}"
+ENGAGEMENT_ID_FORMAT = env("DD_ENGAGEMENT_ID_FORMAT", default="ENG-{id:04d}")
+
 # Apply a severity level to "Security Weaknesses" in Qualys WAS
 QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 

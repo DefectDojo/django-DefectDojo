@@ -1580,6 +1580,15 @@ class Engagement(models.Model):
     def get_absolute_url(self):
         return reverse("view_engagement", args=[str(self.id)])
 
+    @property
+    def engagement_id(self):
+        if hasattr(settings, 'ENGAGEMENT_ID_FORMAT') and settings.ENGAGEMENT_ID_FORMAT:
+            try:
+                return settings.ENGAGEMENT_ID_FORMAT.format(id=self.id)
+            except Exception:
+                return str(self.id)
+        return None
+
     def copy(self):
         copy = copy_model_util(self)
         # Save the necessary ManyToMany relationships
