@@ -6,7 +6,7 @@ django-debug-toolbar==6.1.0
 django-debug-toolbar-request-history==0.1.4
 
 # Testing dependencies
-vcrpy==8.0.0
+vcrpy==8.1.0
 vcrpy-unittest==0.1.7
 django-test-migrations==1.5.0
 parameterized==0.9.0
