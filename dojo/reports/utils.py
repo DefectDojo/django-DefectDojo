@@ -84,6 +84,9 @@ def configure_headers_excel(finding, worksheet, font_bold, excludes_list, allowe
     cell = worksheet.cell(row=row_num, column=col_num, value="cloud_id")
     cell.font = font_bold
     col_num += 1
+    cell = worksheet.cell(row=row_num, column=col_num, value="hostname")
+    cell.font = font_bold
+    col_num += 1
     cell = worksheet.cell(row=row_num, column=col_num, value="custom_id")
     cell.font = font_bold
     col_num += 1
@@ -160,6 +163,8 @@ def configure_values_excel(finding, worksheet, excludes_list, allowed_foreign_ke
     col_num += 1
     worksheet.cell(row=row_num, column=col_num, value=extract_field_from_text_html(finding.description, "Cloud Id:"))
     col_num += 1
+    worksheet.cell(row=row_num, column=col_num, value=extract_field_from_text_html(finding.description, "Hostname:"))
+    col_num += 1
     worksheet.cell(row=row_num, column=col_num, value=extract_field_from_text_html(finding.description, "Custom Id:"))
     col_num += 1
     worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
@@ -234,6 +239,7 @@ def configure_headers_csv(finding, excludes_list, allowed_attributes, fields):
         "namespace_image",
         "tag_image",
         "cloud_id",
+        "hostname",
         "custom_id",
         "found_by",
         "engagement",
@@ -278,6 +284,7 @@ def configure_values_csv(finding, excludes_list, allowed_foreign_keys, allowed_a
     fields.append(extract_field_from_text_html(finding.description, "Namespaces:"))
     fields.append(extract_field_from_text_html(finding.description, "Tag:"))
     fields.append(extract_field_from_text_html(finding.description, "Cloud Id:"))
+    fields.append(extract_field_from_text_html(finding.description, "Hostname:"))
     fields.append(extract_field_from_text_html(finding.description, "Custom Id:"))
     fields.append(finding.test.test_type.name)
     fields.append(finding.test.engagement.name)

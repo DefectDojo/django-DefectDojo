@@ -47,6 +47,7 @@ from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.helper import (
     ACCEPTED_FINDINGS_QUERY,
+    ACCEPTED_LONG_TERM_FINDINGS_QUERY,
     PENDING_ACCEPTANCE_QUERY,
     REJECTED_ACCEPTANCE_QUERY,
     EXPIRED_ACCEPTANCE_QUERY,
@@ -181,6 +182,9 @@ class FindingStatusFilter(ChoiceFilter):
     def risk_accepted(self, qs, name):
         return qs.filter(ACCEPTED_FINDINGS_QUERY)
     
+    def risk_accepted_long_term(self, qs, name):
+        return qs.filter(ACCEPTED_LONG_TERM_FINDINGS_QUERY)
+    
     def pending_acceptance(self, qs, name):
         return qs.filter(PENDING_ACCEPTANCE_QUERY)
     
@@ -234,6 +238,7 @@ class FindingStatusFilter(ChoiceFilter):
         14: (_("Transfer Expired"), transfer_expired),
         15: (_("On Whitelist"), on_whitelist),
         16: (_("On Blacklist"), on_blacklist),
+        17: (_("Risk Accepted Long Term"), risk_accepted_long_term),
     }
 
     def __init__(self, *args, **kwargs):
