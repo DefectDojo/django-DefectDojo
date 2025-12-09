@@ -1,0 +1,12 @@
+{% if finding and not custom_breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+  <li><a data-toggle="tooltip" data-placement="top" title="Engagement" href="{% url 'view_engagement' finding.test.engagement.id %}">{{finding.test.engagement.name}}</a></li>
+  <li><a data-toggle="tooltip" data-placement="top" title="Test" href="{% url 'view_test' finding.test.id %}">{{finding.test}}</a></li>
+  <li><a data-toggle="tooltip" data-placement="top" title="Finding" href="{% url 'view_finding' finding.id %}">{{finding.title|truncatechars_html:60}}</a></li>
+  {% if product_tab.title %}
+    <li class="breadcrumb-item active" aria-current="page">{{product_tab.title}}</li>
+  {% endif %}
+  </ol>
+</nav>
+{% endif %}

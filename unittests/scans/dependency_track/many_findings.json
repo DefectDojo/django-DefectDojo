@@ -1,0 +1,110 @@
+{
+  "version": "1.0",
+  "meta" : {
+    "application": "Dependency-Track",
+    "version": "3.4.0",
+    "timestamp": "2018-11-18T23:31:42Z",
+    "baseUrl": "http://dtrack.example.org"
+  },
+  "project" : {
+    "uuid": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+    "name": "Acme Example",
+    "version": "1.0",
+    "description": "A sample application"
+  },
+  "findings" : [
+    {
+      "component": {
+        "uuid": "b815b581-fec1-4374-a871-68862a8f8d52",
+        "name": "timespan",
+        "version": "2.3.0",
+        "purl": "pkg:npm/timespan@2.3.0"
+      },
+      "vulnerability": {
+        "uuid": "115b80bb-46c4-41d1-9f10-8a175d4abb46",
+        "source": "NPM",
+        "vulnId": "533",
+        "title": "Regular Expression Denial of Service",
+        "subtitle": "timespan",
+        "severity": "LOW",
+        "severityRank": 3,
+        "cweId": 400,
+        "cweName": "Uncontrolled Resource Consumption ('Resource Exhaustion')",
+        "description": "Affected versions of `timespan`...",
+        "recommendation": "No direct patch is available..."
+      },
+      "analysis": {
+        "state": "NOT_SET",
+        "isSuppressed": false
+      },
+      "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:b815b581-fec1-4374-a871-68862a8f8d52:115b80bb-46c4-41d1-9f10-8a175d4abb46"
+    },
+    {
+      "component": {
+        "uuid": "979f87f5-eaf5-4095-9d38-cde17bf9228e",
+        "name": "uglify-js",
+        "version": "2.4.24",
+        "purl": "pkg:npm/uglify-js@2.4.24"
+      },
+      "vulnerability": {
+        "uuid": "701a3953-666b-4b7a-96ca-e1e6a3e1def3",
+        "source": "NPM",
+        "vulnId": "48",
+        "title": "Regular Expression Denial of Service",
+        "subtitle": "uglify-js",
+        "severity": "LOW",
+        "severityRank": 3,
+        "cweId": 400,
+        "cweName": "Uncontrolled Resource Consumption ('Resource Exhaustion')",
+        "description": "Versions of `uglify-js` prior to...",
+        "recommendation": "Update to version 2.6.0 or later."
+      },
+      "analysis": {
+        "isSuppressed": false
+      },
+      "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:979f87f5-eaf5-4095-9d38-cde17bf9228e:701a3953-666b-4b7a-96ca-e1e6a3e1def3"
+    },
+    {
+      "analysis": {
+        "isSuppressed": false,
+        "state": "FALSE_POSITIVE"
+      },
+      "component": {
+        "name": "actionview",
+        "purl": "pkg:gem/actionview@5.2.3",
+        "uuid": "3e52f829-3317-48c3-bde1-342c610bd223",
+        "version": "5.2.3"
+      },
+      "matrix": "8d7f5fcd-210b-491d-a29e-904c2e01b281:3e52f829-3317-48c3-bde1-342c610bd223:900991f6-335a-49cb-9bf6-87b545f960ce",
+      "vulnerability": {
+        "cweId": 22,
+        "cweName": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "Directory traversal vulnerability in Action View in Ruby on Rails before 3.2.22.2 and 4.x before 4.1.14.2 allows remote attackers to read arbitrary files by leveraging an application's unrestricted use of the render method and providing a .. (dot dot) in a pathname.  NOTE: this vulnerability exists because of an incomplete fix for CVE-2016-0752.",
+        "severity": "MEDIUM",
+        "severityRank": 2,
+        "source": "NVD",
+        "uuid": "900991f6-335a-49cb-9bf6-87b545f960ce",
+        "vulnId": "CVE-2016-2097"
+      }
+    },
+    {
+      "analysis": {
+        "isSuppressed": false
+      },
+      "component": {
+        "name": "actionview",
+        "uuid": "3e52f829-3317-48c3-bde1-342c610bd223"
+      },
+      "matrix": "8d7f5fcd-210b-491d-a29e-904c2e01b281:3e52f829-3317-48c3-bde1-342c610bd223:900991f6-335a-49cb-9bf6-87b545f960ce",
+      "vulnerability": {
+        "cweId": 22,
+        "cweName": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "severity": "MEDIUM",
+        "severityRank": 2,
+        "source": "NVD",
+        "uuid": "900991f6-335a-49cb-9bf6-87b545f960ce",
+        "vulnId": "CVE-2016-2097"
+      }
+    }
+  ]
+}

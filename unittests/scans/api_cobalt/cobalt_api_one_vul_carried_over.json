@@ -1,0 +1,42 @@
+{
+  "data": [
+    {
+      "resource": {
+        "id": "vu_5wXY6bq",
+        "tag": "#PT3334_39",
+        "title": "Missing firewall",
+        "description": "A firewall is...",
+        "type_category": null,
+        "labels": [],
+        "impact": 1,
+        "likelihood": 1,
+        "severity": "low",
+        "affected_targets": [
+          "https://example.co.uk",
+          "https://example.de"
+        ],
+        "proof_of_concept": "Try this...",
+        "suggested_fix": "Be sure to...",
+        "pentest_id": "pt_NR5CDkK",
+        "asset_id": "as_cwrsqsL",
+        "log": [
+          {
+            "action": "created",
+            "timestamp": "2021-06-03T15:13:24.322Z"
+          },
+          {
+            "action": "likelihood_changed",
+            "value": 1,
+            "timestamp": "2021-06-05T15:14:05.856Z"
+          }
+        ],
+        "state": "carried_over"
+      },
+      "links": {
+        "ui": {
+          "url": "https://api.cobalt.io/links/long-web-app-redirect-to-this-finding"
+        }
+      }
+    }
+  ]
+}

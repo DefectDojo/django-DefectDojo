@@ -1,0 +1,196 @@
+[
+  {
+    "config": {
+      "protocol_version": "v1.0.0",
+      "scanner_name": "govulncheck",
+      "scanner_version": "v1.0.1",
+      "db": "https://vuln.go.dev",
+      "db_last_modified": "2024-01-04T18:39:51Z",
+      "go_version": "go1.21.4",
+      "scan_level": "symbol"
+    }
+  },
+  {
+    "progress": {
+      "message": "Scanning your code and 47 packages across 1 dependent module for known vulnerabilities..."
+    }
+  },
+  {
+    "osv": {
+      "schema_version": "1.3.1",
+      "id": "GO-2021-0113",
+      "modified": "2023-06-12T18:45:41Z",
+      "published": "2021-10-06T17:51:21Z",
+      "severity":"Low",
+      "aliases": [
+        "CVE-2021-38561",
+        "GHSA-ppp9-7jff-5vj2"
+      ],
+      "summary": "Out-of-bounds read in golang.org/x/text/language",
+      "details": "Due to improper index calculation, an incorrectly formatted language tag can cause Parse to panic via an out of bounds read. If Parse is used to process untrusted user inputs, this may be used as a vector for a denial of service attack.",
+      "affected": [
+        {
+          "package": {
+            "name": "golang.org/x/text",
+            "ecosystem": "Go"
+          },
+          "ranges": [
+            {
+              "type": "SEMVER",
+              "events": [
+                {
+                  "introduced": "0"
+                },
+                {
+                  "fixed": "0.3.7"
+                }
+              ]
+            }
+          ],
+          "ecosystem_specific": {
+            "imports": [
+              {
+                "path": "golang.org/x/text/language",
+                "symbols": [
+                  "MatchStrings",
+                  "MustParse",
+                  "Parse",
+                  "ParseAcceptLanguage"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "references": [
+        {
+          "type": "FIX",
+          "url": "https://go.dev/cl/340830"
+        },
+        {
+          "type": "FIX",
+          "url": "https://go.googlesource.com/text/+/383b2e75a7a4198c42f8f87833eefb772868a56f"
+        }
+      ],
+      "credits": [
+        {
+          "name": "Guido Vranken"
+        }
+      ],
+      "database_specific": {
+        "url": "https://pkg.go.dev/vuln/GO-2021-0113"
+      }
+    }
+  },
+  {
+    "finding": {
+      "osv": "GO-2021-0113",
+      "fixed_version": "v0.3.7",
+      "trace": [
+        {
+          "module": "golang.org/x/text",
+          "version": "v0.3.5",
+          "package": "golang.org/x/text/language",
+          "function": "Parse"
+        },
+        {
+          "module": "vuln.tutorial",
+          "package": "vuln.tutorial",
+          "function": "main",
+          "position": {
+            "filename": "govulncheck/vulnerable/main.go",
+            "offset": 189,
+            "line": 12,
+            "column": 43
+          }
+        }
+      ]
+    }
+  },
+  {
+    "osv": {
+      "schema_version": "1.3.1",
+      "id": "GO-2022-1059",
+      "modified": "2023-06-12T18:45:41Z",
+      "published": "2022-10-11T18:16:24Z",
+      "severity": "High",
+      "aliases": [
+        "CVE-2022-32149",
+        "GHSA-69ch-w2m2-3vjp"
+      ],
+      "summary": "Denial of service via crafted Accept-Language header in golang.org/x/text/language",
+      "details": "An attacker may cause a denial of service by crafting an Accept-Language header which ParseAcceptLanguage will take significant time to parse.",
+      "affected": [
+        {
+          "package": {
+            "name": "golang.org/x/text",
+            "ecosystem": "Go"
+          },
+          "ranges": [
+            {
+              "type": "SEMVER",
+              "events": [
+                {
+                  "introduced": "0"
+                },
+                {
+                  "fixed": "0.3.8"
+                }
+              ]
+            }
+          ],
+          "ecosystem_specific": {
+            "imports": [
+              {
+                "path": "golang.org/x/text/language",
+                "symbols": [
+                  "MatchStrings",
+                  "ParseAcceptLanguage"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "references": [
+        {
+          "type": "REPORT",
+          "url": "https://go.dev/issue/56152"
+        },
+        {
+          "type": "FIX",
+          "url": "https://go.dev/cl/442235"
+        },
+        {
+          "type": "WEB",
+          "url": "https://groups.google.com/g/golang-announce/c/-hjNw559_tE/m/KlGTfid5CAAJ"
+        }
+      ],
+      "credits": [
+        {
+          "name": "Adam Korczynski (ADA Logics)"
+        },
+        {
+          "name": "OSS-Fuzz"
+        }
+      ],
+      "database_specific": {
+        "url": "https://pkg.go.dev/vuln/GO-2022-1059"
+      }
+    }
+  },
+  {
+    "finding": {
+      "osv": "GO-2022-1059",
+      "fixed_version": "v0.3.8",
+      "trace": [
+        {
+          "module": "golang.org/x/text",
+          "version": "v0.3.5",
+          "package": "golang.org/x/text/language"
+        }
+      ]
+    }
+  }
+]
+  

@@ -1,0 +1,12 @@
+{
+   "twig/twig": {
+        "version": "v2.5.0",
+        "advisories": [
+            {
+                "title": "Sandbox Information Disclosure",
+                "link": "https://symfony.com/blog/twig-sandbox-information-disclosure",
+                "cve": ""
+            }
+        ]
+    }
+}

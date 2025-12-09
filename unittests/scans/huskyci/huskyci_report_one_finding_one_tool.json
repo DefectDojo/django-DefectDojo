@@ -1,0 +1,177 @@
+{
+    "RID": "q9nrt31wDpiyCz9xbxcoWPHujWHlDD6S",
+    "repositoryURL": "https://github.com/globocom/huskyCI.git",
+    "repositoryBranch": "poc-ruby-brakeman",
+    "commitAuthors": [
+        "jr.joserenato.jr@gmail.com"
+    ],
+    "status": "finished",
+    "result": "failed",
+    "errorFound": "",
+    "containers": [
+        {
+            "CID": "71e70e55d642165bd859f7bfffb5751c8736c0e62655fdf782d8bc09bb67e953",
+            "securityTest": {
+                "name": "gitleaks",
+                "image": "huskyci/gitleaks",
+                "imageTag": "2.1.0",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone -b %GIT_BRANCH% --single-branch %GIT_REPO% code --quiet 2> /tmp/errorGitCloneGitleaks\nif [ $? -eq 0 ]; then\n    touch /tmp/results.json\n    timeout -t 360 $(which gitleaks) --log=warn --report=/tmp/results.json --repo-path=./code --branch=%GIT_BRANCH% --repo-config &> /tmp/errorGitleaks\n    if [[ $? -eq 124 || $? -eq 143 ]]; then #timeout exit codes\n        echo 'ERROR_TIMEOUT_GITLEAKS'\n        cat /tmp/errorGitleaks\n    elif [ $? -eq 2 ]; then\n        echo 'ERROR_RUNNING_GITLEAKS'\n        cat /tmp/errorGitleaks\n    else\n        jq -j -M -c . /tmp/results.json\n    fi\nelse\n    echo \"ERROR_CLONING\"\n    cat /tmp/errorGitCloneGitleaks\nfi\n",
+                "type": "Generic",
+                "language": "",
+                "default": true,
+                "timeOutSeconds": 360
+            },
+            "cStatus": "finished",
+            "cOutput": "",
+            "cResult": "passed",
+            "cInfo": "No issues found.",
+            "startedAt": "2020-06-25T15:51:03.988Z",
+            "finishedAt": "2020-06-25T15:51:06.639Z"
+        },
+        {
+            "CID": "e69ecc2b975a28c05140cecaa5a5e5ad4741be8ae385ee238399a1e699b6ae18",
+            "securityTest": {
+                "name": "gitauthors",
+                "image": "huskyci/gitauthors",
+                "imageTag": "2.18.4",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone %GIT_REPO% code --quiet 2> /tmp/errorGitCloneEnry\ncd code\ngit branch -a | egrep 'remotes/origin/master' 1> /dev/null 2> /dev/null\nif [ $? -ne 0 ]; then\n  echo \"{\\\"authors\\\":[]}\"\n  exit 0\nfi\ngit checkout %GIT_BRANCH% --quiet\nif [ $? -eq 0 ]; then\n  for i in $(git log origin/master.. --pretty=\"%ae\" | sort -u); do\n    jsonMiddle=\"\\\"$i\\\",$jsonMiddle\"\n  done\n  length=${#jsonMiddle}\n  endindex=$(expr $length - 1)\n  authors=\"${jsonMiddle:0:$endindex}\"\n  echo \"{\\\"authors\\\":[$authors]}\"\nelse\n  echo \"ERROR_CLONING\"\n  cat /tmp/errorGitCloneEnry\nfi\n",
+                "type": "Generic",
+                "language": "",
+                "default": true,
+                "timeOutSeconds": 60
+            },
+            "cStatus": "finished",
+            "cOutput": "{\"authors\":[\"jr.joserenato.jr@gmail.com\"]}\r\n",
+            "cResult": "passed",
+            "cInfo": "No issues found.",
+            "startedAt": "2020-06-25T15:51:03.988Z",
+            "finishedAt": "2020-06-25T15:51:19.452Z"
+        },
+        {
+            "CID": "3abcdda0601544ebcecf38149c9948c1af6763fd147eb0f03bee2ffc5c45be04",
+            "securityTest": {
+                "name": "brakeman",
+                "image": "huskyci/brakeman",
+                "imageTag": "4.8.2",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone -b %GIT_BRANCH% --single-branch %GIT_REPO% code --quiet 2> /tmp/errorGitCloneBrakeman\nif [ $? -eq 0 ]; then\n  if [ -d /code/app ]; then\n    brakeman -q -o results.json /code\n    jq -j -M -c . results.json\n  else\n    mv code app\n    brakeman -q -o results.json .\n    jq -j -M -c . results.json\n  fi\nelse\n  echo \"ERROR_CLONING\"\n  cat /tmp/errorGitCloneBrakeman\nfi\n",
+                "type": "Language",
+                "language": "Ruby",
+                "default": true,
+                "timeOutSeconds": 360
+            },
+            "cStatus": "finished",
+            "cOutput": "{\"scan_info\":{\"app_path\":\"/code\",\"rails_version\":\"6.0.0\",\"security_warnings\":1,\"start_time\":\"2020-06-25 15:51:54 +0000\",\"end_time\":\"2020-06-25 15:51:54 +0000\",\"duration\":0.0962613,\"checks_performed\":[\"BasicAuth\",\"BasicAuthTimingAttack\",\"ContentTag\",\"CookieSerialization\",\"CreateWith\",\"CrossSiteScripting\",\"DefaultRoutes\",\"Deserialize\",\"DetailedExceptions\",\"DigestDoS\",\"DynamicFinders\",\"EscapeFunction\",\"Evaluation\",\"Execute\",\"FileAccess\",\"FileDisclosure\",\"FilterSkipping\",\"ForgerySetting\",\"HeaderDoS\",\"I18nXSS\",\"JRubyXML\",\"JSONEncoding\",\"JSONEntityEscape\",\"JSONParsing\",\"LinkTo\",\"LinkToHref\",\"MailTo\",\"MassAssignment\",\"MimeTypeDoS\",\"ModelAttrAccessible\",\"ModelAttributes\",\"ModelSerialize\",\"NestedAttributes\",\"NestedAttributesBypass\",\"NumberToCurrency\",\"PageCachingCVE\",\"PermitAttributes\",\"QuoteTableName\",\"Redirect\",\"RegexDoS\",\"Render\",\"RenderDoS\",\"RenderInline\",\"ResponseSplitting\",\"RouteDoS\",\"SQL\",\"SQLCVEs\",\"SSLVerify\",\"SafeBufferManipulation\",\"SanitizeMethods\",\"SelectTag\",\"SelectVulnerability\",\"Send\",\"SendFile\",\"SessionManipulation\",\"SessionSettings\",\"SimpleFormat\",\"SingleQuotes\",\"SkipBeforeFilter\",\"SprocketsPathTraversal\",\"StripTags\",\"SymbolDoSCVE\",\"TranslateBug\",\"UnsafeReflection\",\"ValidationRegex\",\"WithoutProtection\",\"XMLDoS\",\"YAMLParsing\"],\"number_of_controllers\":1,\"number_of_models\":1,\"number_of_templates\":2,\"ruby_version\":\"2.4.10\",\"brakeman_version\":\"4.8.2\"},\"warnings\":[{\"warning_type\":\"Command Injection\",\"warning_code\":14,\"fingerprint\":\"b4725bb3764a3b1e792e2a48804c55e4ed8903f38fbc20b3247317d9a0be65cb\",\"check_name\":\"Execute\",\"message\":\"Possible command injection\",\"file\":\"app/controllers/application_controller.rb\",\"line\":4,\"link\":\"https://brakemanscanner.org/docs/warning_types/command_injection/\",\"code\":\"system(\\\"ls #{options}\\\")\",\"render_path\":null,\"location\":{\"type\":\"method\",\"class\":\"ApplicationController\",\"method\":\"test\"},\"user_input\":\"options\",\"confidence\":\"Medium\"}],\"ignored_warnings\":[],\"errors\":[],\"obsolete\":[]}",
+            "cResult": "failed",
+            "cInfo": "Issues found.",
+            "startedAt": "2020-06-25T15:51:03.995Z",
+            "finishedAt": "2020-06-25T15:51:55.023Z"
+        }
+    ],
+    "startedAt": "2020-06-25T15:51:01.144Z",
+    "finishedAt": "2020-06-25T15:51:55.024Z",
+    "codes": [
+        {
+            "language": "CSS",
+            "files": [
+                "app/assets/stylesheets/application.css"
+            ]
+        },
+        {
+            "language": "HTML",
+            "files": [
+                "public/404.html",
+                "public/422.html",
+                "public/500.html"
+            ]
+        },
+        {
+            "language": "HTML+ERB",
+            "files": [
+                "app/views/layouts/application.html.erb",
+                "app/views/layouts/mailer.html.erb",
+                "app/views/layouts/mailer.text.erb"
+            ]
+        },
+        {
+            "language": "Ruby",
+            "files": [
+                "Gemfile",
+                "Gemfile.lock",
+                "Rakefile",
+                "app/channels/application_cable/channel.rb",
+                "app/channels/application_cable/connection.rb",
+                "app/controllers/application_controller.rb",
+                "app/helpers/application_helper.rb",
+                "app/jobs/application_job.rb",
+                "app/mailers/application_mailer.rb",
+                "app/models/application_record.rb",
+                "bin/rails",
+                "bin/rake",
+                "bin/setup",
+                "bin/yarn",
+                "config/application.rb",
+                "config/boot.rb",
+                "config/environment.rb",
+                "config/environments/development.rb",
+                "config/environments/production.rb",
+                "config/environments/test.rb",
+                "config/initializers/application_controller_renderer.rb",
+                "config/initializers/assets.rb",
+                "config/initializers/backtrace_silencers.rb",
+                "config/initializers/content_security_policy.rb",
+                "config/initializers/cookies_serializer.rb",
+                "config/initializers/filter_parameter_logging.rb",
+                "config/initializers/inflections.rb",
+                "config/initializers/mime_types.rb",
+                "config/initializers/wrap_parameters.rb",
+                "config/puma.rb",
+                "config/routes.rb",
+                "config/spring.rb",
+                "config.ru",
+                "db/seeds.rb",
+                "test/application_system_test_case.rb",
+                "test/channels/application_cable/connection_test.rb",
+                "test/test_helper.rb"
+            ]
+        }
+    ],
+    "huskyciresults": {
+        "goresults": {
+            "gosecoutput": {}
+        },
+        "pythonresults": {
+            "banditoutput": {},
+            "safetyoutput": {}
+        },
+        "javascriptresults": {
+            "npmauditoutput": {},
+            "yarnauditoutput": {}
+        },
+        "rubyresults": {
+            "brakemanoutput": {
+                "mediumvulns": [
+                    {
+                        "language": "Ruby",
+                        "securitytool": "Brakeman",
+                        "confidence": "Medium",
+                        "file": "app/controllers/application_controller.rb",
+                        "line": "4",
+                        "code": "system(\"ls #{options}\")",
+                        "details": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+                        "type": "Command Injection",
+                        "title": "Vulnerable Dependency: Command Injection Possible command injection"
+                    }
+                ]
+            }
+        },
+        "javaresults": {
+            "spotbugsoutput": {}
+        },
+        "hclresults": {
+            "tfsecoutput": {}
+        },
+        "genericresults": {
+            "gitleaksoutput": {}
+        }
+    }
+}

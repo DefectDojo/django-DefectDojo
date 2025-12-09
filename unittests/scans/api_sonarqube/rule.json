@@ -1,0 +1,35 @@
+{
+	"key": "typescript:S1854",
+	"repo": "typescript",
+	"name": "Dead stores should be removed",
+	"createdAt": "2018-01-17T10:11:21-0500",
+	"htmlDesc": "<p>A dead store happens when a local variable is assigned a value that is not read by any subsequent instruction. Calculating or retrieving a value\nonly to then overwrite it or throw it away, could indicate a serious error in the code. Even if it's not an error, it is at best a waste of resources.\nTherefore all calculated values should be used.</p>\n<h2>Noncompliant Code Example</h2>\n<pre>\ni = a + b; // Noncompliant; calculation result not used before value is overwritten\ni = compute();\n</pre>\n<h2>Compliant Solution</h2>\n<pre>\ni = a + b;\ni += compute();\n</pre>\n<h2>Exceptions</h2>\n<p>This rule ignores initializations to -1, 0, 1, <code>null</code>, <code>true</code>, <code>false</code>, <code>\"\"</code>, <code>[]</code> and\n<code>{}</code>.</p>\n<h2>See</h2>\n<ul>\n  <li> <a href=\"http://cwe.mitre.org/data/definitions/563.html\">MITRE, CWE-563</a> - Assignment to Variable without Use ('Unused Variable') </li>\n  <li> <a href=\"https://www.securecoding.cert.org/confluence/x/QYA5\">CERT, MSC13-C.</a> - Detect and remove unused values </li>\n  <li> <a href=\"https://www.securecoding.cert.org/confluence/x/uQCSBg\">CERT, MSC56-J.</a> - Detect and remove superfluous code and values </li>\n</ul>",
+	"mdDesc": "<p>A dead store happens when a local variable is assigned a value that is not read by any subsequent instruction. Calculating or retrieving a value\nonly to then overwrite it or throw it away, could indicate a serious error in the code. Even if it's not an error, it is at best a waste of resources.\nTherefore all calculated values should be used.</p>\n<h2>Noncompliant Code Example</h2>\n<pre>\ni = a + b; // Noncompliant; calculation result not used before value is overwritten\ni = compute();\n</pre>\n<h2>Compliant Solution</h2>\n<pre>\ni = a + b;\ni += compute();\n</pre>\n<h2>Exceptions</h2>\n<p>This rule ignores initializations to -1, 0, 1, <code>null</code>, <code>true</code>, <code>false</code>, <code>\"\"</code>, <code>[]</code> and\n<code>{}</code>.</p>\n<h2>See</h2>\n<ul>\n  <li> <a href=\"http://cwe.mitre.org/data/definitions/563.html\">MITRE, CWE-563</a> - Assignment to Variable without Use ('Unused Variable') </li>\n  <li> <a href=\"https://www.securecoding.cert.org/confluence/x/QYA5\">CERT, MSC13-C.</a> - Detect and remove unused values </li>\n  <li> <a href=\"https://www.securecoding.cert.org/confluence/x/uQCSBg\">CERT, MSC56-J.</a> - Detect and remove superfluous code and values </li>\n</ul>",
+	"severity": "MAJOR",
+	"status": "READY",
+	"isTemplate": false,
+	"tags": [
+	],
+	"sysTags": [
+		"cert",
+		"cwe",
+		"unused"
+	],
+	"lang": "ts",
+	"langName": "TypeScript",
+	"params": [
+	],
+	"defaultDebtRemFnType": "CONSTANT_ISSUE",
+	"defaultDebtRemFnOffset": "15min",
+	"debtOverloaded": false,
+	"debtRemFnType": "CONSTANT_ISSUE",
+	"debtRemFnOffset": "15min",
+	"defaultRemFnType": "CONSTANT_ISSUE",
+	"defaultRemFnBaseEffort": "15min",
+	"remFnType": "CONSTANT_ISSUE",
+	"remFnBaseEffort": "15min",
+	"remFnOverloaded": false,
+	"scope": "MAIN",
+	"isExternal": false,
+	"type": "CODE_SMELL"
+}

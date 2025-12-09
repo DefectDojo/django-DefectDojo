@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XanitizerFindingsList xanitizerVersion="version manualBuild, build no. 357 of 10/30/19" xanitizerVersionShort="manualBuild" timeStamp="2019-11-21 13:31:08" timeStampLong="1574339468791" allFindings="1" findingsNotRemovedByFilter="1" problemFindingsNotRemovedByFilter="1">
+
+
+  <finding id="365" kind="PATH">
+    <problemType>Injection: OS Command Injection</problemType>
+    <problemTypeId>ci:OSCommandInjection</problemTypeId>
+    <producer>BuiltIn:TAINTPATHS</producer>
+    <category>Taint Paths</category>
+    <rating>10.00</rating>
+    <classification>Warning</classification>
+    <matchCode>NOT</matchCode>
+    <reviewed>Not Reviewed</reviewed>
+    <date>2019-11-21 13:31:08 - new</date>
+    <package>org.owasp.webgoat.plugin</package>
+    <class>Exec</class>
+    <file>Exec.java</file>
+    <line>108</line>
+    <cweNumber>CWE-78</cweNumber>
+    <description><![CDATA[
+An identified taint path for the problem type 'Injection: OS Command Injection'
+
+Matching pattern in taint source kind 'Servlet Request Input':
+java.lang.String[] javax.servlet.ServletRequest.getParameterValues(java.lang.String)
+
+Matching pattern in taint sink kind 'OS Command Injection':
+java.lang.Process java.lang.Runtime.exec(java.lang.String[])
+]]></description>
+    <startNode lineNo="516" classFQN="org.owasp.webgoat.session.ParameterParser" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java">
+      <code lineNo="511" finding="false">     * @return The rawParameter value</code>
+      <code lineNo="512" finding="false">     * @exception ParameterNotFoundException Description of the Exception</code>
+      <code lineNo="513" finding="false">     * @throws org.owasp.webgoat.session.ParameterNotFoundException if any.</code>
+      <code lineNo="514" finding="false">     */</code>
+      <code lineNo="515" finding="false">    public String getRawParameter(String name) throws ParameterNotFoundException {</code>
+      <code lineNo="516" finding="true">        String[] values = request.getParameterValues(name);</code>
+      <code lineNo="517" finding="false"></code>
+      <code lineNo="518" finding="false">        if (values == null) {</code>
+      <code lineNo="519" finding="false">            throw new ParameterNotFoundException(name + " not found");</code>
+      <code lineNo="520" finding="false">        } else if (values[0].length() == 0) {</code>
+      <code lineNo="521" finding="false">            throw new ParameterNotFoundException(name + " was empty");</code>
+    </startNode>
+    <endNode lineNo="108" classFQN="org.owasp.webgoat.plugin.Exec" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java">
+      <code lineNo="103" finding="false">        ThreadWatcher watcher;</code>
+      <code lineNo="104" finding="false"></code>
+      <code lineNo="105" finding="false">        try</code>
+      <code lineNo="106" finding="false">        {</code>
+      <code lineNo="107" finding="false">            // start the command</code>
+      <code lineNo="108" finding="true">            child = Runtime.getRuntime().exec(command);</code>
+      <code lineNo="109" finding="false"></code>
+      <code lineNo="110" finding="false">            // get the streams in and out of the command</code>
+      <code lineNo="111" finding="false">            InputStream processIn = child.getInputStream();</code>
+      <code lineNo="112" finding="false">            InputStream processError = child.getErrorStream();</code>
+      <code lineNo="113" finding="false">            OutputStream processOut = child.getOutputStream();</code>
+    </endNode>
+    <Path>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="516" fact="Taint value ID 6 (type: java.lang.String[])" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="518" fact="Taint value ID 6 (type: java.lang.String[]) 'values'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="518" fact="Taint value ID 6 (type: java.lang.String[]) 'values'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="520" fact="Taint value ID 6 (type: java.lang.String[]) 'values'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="520" fact="Taint value ID 6 (type: java.lang.String[]) 'values'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="520" fact="Taint value ID 6 (type: java.lang.String[]) 'values'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="520" fact="Taint value ID 6 (type: java.lang.String[]) 'values'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="524" fact="Taint value ID 6 (type: java.lang.String[]) 'values'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="524" fact="Taint value ID 6 (type: java.lang.String[]) 'values'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="524" fact="Taint value ID 12" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="524" fact="Tainted return value" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="501" fact="Taint value ID 6 (type: java.lang.String)" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="501" fact="Taint value ID 6 (type: java.lang.String)" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.session.ParameterParser" lineNo="501" fact="Taint value ID -2 (type: java.lang.String)" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/session/ParameterParser.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="639" fact="Taint value ID 95 (type: java.lang.String)" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="641" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="641" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="642" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="642" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="642" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="642" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="644" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="645" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="645" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 95 (type: java.lang.String) 'protocol'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 114 (type: java.lang.StringBuilder)" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 116 (type: java.lang.String)" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="652" fact="Taint value ID 105 (type: java.lang.String[])" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.ChallengeScreen" lineNo="653" fact="Taint value ID 105 (type: java.lang.String[]) 'cmd'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/ChallengeScreen.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="443" fact="Taint value ID 1 (type: java.lang.String[])" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="445" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="445" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="445" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="95" fact="Taint value ID 1 (type: java.lang.String[])" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="97" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="98" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="98" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="99" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="99" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="100" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="100" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="100" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="100" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="100" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="101" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="101" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="101" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="102" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="108" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+      <node classFQN="org.owasp.webgoat.plugin.Exec" lineNo="108" fact="Taint value ID 1 (type: java.lang.String[]) 'command'" relativePath="../../../../../.Xanitizer/XanitizerProject-webgoat/SourceCode/org/owasp/webgoat/plugin/Exec.java"></node>
+    </Path>
+  </finding>
+
+
+</XanitizerFindingsList>

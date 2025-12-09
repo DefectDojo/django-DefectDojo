@@ -1,0 +1,2 @@
+Rule code,Rule,Priority,Software characteristic,Language,Effort,File,Line number,Line text,Source file,Source line number,Source line text,Muted,Normative,Status,CWE Scope,Framework
+OPT.PLSQL.GEN_PLSQL.VAR2,"Define variables as VARCHAR2, nor as VARCHAR",Very High,Efficiency,PL-SQL,03m,file.sql,3,"  userid varchar(250),",,,,No,,none,,

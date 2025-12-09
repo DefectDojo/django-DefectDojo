@@ -1,0 +1,62 @@
+name: github-pages
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'docs/**'
+    branches:
+      - master
+      - bugfix
+
+# Taken from https://github.com/marketplace/actions/hugo-setup#%EF%B8%8F-workflow-for-autoprefixer-and-postcss-cli
+# Both builds have to be one worflow as otherwise one publish will overwrite the other
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@75d2e84710de30f6ff7268e08f310b60ef14033f # v3.0.0
+        with:
+          hugo-version: '0.152.2' # renovate: datasource=github-releases depName=gohugoio/hugo
+          extended: true
+
+      - name: Setup Node
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: '24.11.1' # TODO: Renovate helper might not be needed here - needs to be fully tested
+
+      - name: Cache dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Checkout
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+
+      - name: Install dependencies
+        run: cd docs && npm ci
+      
+      - name: Build production website
+        env:
+          HUGO_ENVIRONMENT: production
+          HUGO_ENV: production
+        run: cd docs && hugo --minify --gc --config config/production/hugo.toml
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
+        if: github.repository == 'DefectDojo/django-DefectDojo' # Deploy docs only in core repo, not in forks - it would just fail in fork
+        with: # publishes to the `gh-pages` branch by default
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/public
+          cname: docs.defectdojo.com

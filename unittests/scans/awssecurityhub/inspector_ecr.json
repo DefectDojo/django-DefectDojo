@@ -1,0 +1,805 @@
+{
+  "Findings": [
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:inspector2:eu-central-1:123456789012:finding/fbd353dda17ad52c47774ad7d62360b2",
+      "ProductArn": "arn:aws:securityhub:eu-central-1::product/aws/inspector",
+      "ProductName": "Inspector",
+      "CompanyName": "Amazon",
+      "Region": "eu-central-1",
+      "GeneratorId": "AWSInspector",
+      "AwsAccountId": "123456789012",
+      "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"],
+      "FirstObservedAt": "2023-08-23T14:00:39Z",
+      "LastObservedAt": "2023-08-30T21:11:07Z",
+      "CreatedAt": "2023-08-23T14:00:39Z",
+      "UpdatedAt": "2023-08-30T21:11:07Z",
+      "Severity": {
+        "Label": "MEDIUM",
+        "Normalized": 40
+      },
+      "Title": "CVE-2023-2650 - openssl",
+      "Description": "Issue summary: Processing some specially crafted ASN.1 object identifiers or\ndata containing them may be very slow.\n\nImpact summary: Applications that use OBJ_obj2txt() directly, or use any of\nthe OpenSSL subsystems OCSP, PKCS7/SMIME, CMS, CMP/CRMF or TS with no message\nsize limit may experience notable to very long delays when processing those\nmessages, which may lead to a Denial of Service.\n\nAn OBJECT IDENTIFIER is composed of a series of numbers - sub-identifiers -\nmost of which have no size limit.  OBJ_obj2txt() may be used to translate\nan ASN.1 OBJECT IDENTIFIER given in DER encoding form (using the OpenSSL\ntype ASN1_OBJECT) to its canonical numeric text form, which are the\nsub-identifiers of the OBJECT IDENTIFIER in decimal form, separated by\nperiods.\n\nWhen one of the sub-identifiers in the OBJECT IDENTIFIER is very large\n(these are sizes that are seen as absurdly large, taking up tens or hundreds\nof KiBs), the translation to a decimal number in text may take a very long\ntime.  The time comp...Truncated",
+      "Remediation": {
+        "Recommendation": {
+          "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+      },
+      "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "6.5",
+        "aws/inspector/resources/1/resourceDetails/awsEcrContainerImageDetails/platform": "DEBIAN_11",
+        "aws/inspector/packageVulnerabilityDetails/vulnerablePackages/sourceLayerHashes": "sha256:d5fad00d4eb04c332a8728ee7642bff8fb9cd3cec653ca301ab69a4ca075a757",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-central-1::product/aws/inspector/arn:aws:inspector2:eu-central-1:123456789012:finding/fbd353dda17ad52c47774ad7d62360b2",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsEcrContainerImage",
+          "Id": "arn:aws:ecr:eu-central-1:123456789012:repository/repo-os/sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74",
+          "Partition": "aws",
+          "Region": "eu-central-1",
+          "Details": {
+            "AwsEcrContainerImage": {
+              "RegistryId": "123456789012",
+              "RepositoryName": "repo-os",
+              "Architecture": "amd64",
+              "ImageDigest": "sha256:af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74",
+              "ImageTags": ["2023-08-23"],
+              "ImagePublishedAt": "2023-08-23T14:00:14Z"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "Vulnerabilities": [
+        {
+          "Id": "CVE-2023-2650",
+          "VulnerablePackages": [
+            {
+              "Name": "openssl",
+              "Version": "1.1.1n",
+              "Epoch": "0",
+              "Release": "0+deb11u4",
+              "Architecture": "AMD64",
+              "PackageManager": "OS",
+              "FixedInVersion": "0:1.1.1n-0+deb11u5",
+              "Remediation": "apt-get update && apt-get upgrade",
+              "SourceLayerHash": "sha256:d5fad00d4eb04c332a8728ee7642bff8fb9cd3cec653ca301ab69a4ca075a757"
+            }
+          ],
+          "Cvss": [
+            {
+              "Version": "3.1",
+              "BaseScore": 6.5,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+              "Source": "NVD"
+            },
+            {
+              "Version": "3.1",
+              "BaseScore": 6.5,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+              "Source": "NVD"
+            }
+          ],
+          "Vendor": {
+            "Name": "DEBIAN_CVE",
+            "Url": "https://security-tracker.debian.org/tracker/CVE-2023-2650",
+            "VendorSeverity": "not yet assigned"
+          },
+          "ReferenceUrls": [
+            "https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=null"
+          ],
+          "FixAvailable": "YES",
+          "EpssScore": 0.0014,
+          "ExploitAvailable": "NO"
+        }
+      ],
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "MEDIUM"
+        },
+        "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"]
+      }
+    },
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:inspector2:eu-central-1:123456789012:finding/fabd67b4e814d66ce64fb34f2f20b559",
+      "ProductArn": "arn:aws:securityhub:eu-central-1::product/aws/inspector",
+      "ProductName": "Inspector",
+      "CompanyName": "Amazon",
+      "Region": "eu-central-1",
+      "GeneratorId": "AWSInspector",
+      "AwsAccountId": "123456789012",
+      "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"],
+      "FirstObservedAt": "2023-08-09T06:27:25Z",
+      "LastObservedAt": "2023-08-30T21:11:47Z",
+      "CreatedAt": "2023-08-09T06:27:25Z",
+      "UpdatedAt": "2023-08-30T21:11:47Z",
+      "Severity": {
+        "Label": "HIGH",
+        "Normalized": 70
+      },
+      "Title": "CVE-2022-32149 - golang.org/x/text, golang.org/x/text and 1 more",
+      "Description": "An attacker may cause a denial of service by crafting an Accept-Language header which ParseAcceptLanguage will take significant time to parse.",
+      "Remediation": {
+        "Recommendation": {
+          "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+      },
+      "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "7.5",
+        "aws/inspector/resources/1/resourceDetails/awsEcrContainerImageDetails/platform": "DEBIAN_12",
+        "aws/inspector/packageVulnerabilityDetails/vulnerablePackages/sourceLayerHashes": "sha256:98386e4f090a680777a76ed54c91064550622229029076560f990b1c2cb3f4cf,sha256:98386e4f090a680777a76ed54c91064550622229029076560f990b1c2cb3f4cf,sha256:98386e4f090a680777a76ed54c91064550622229029076560f990b1c2cb3f4cf",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-central-1::product/aws/inspector/arn:aws:inspector2:eu-central-1:123456789012:finding/fabd67b4e814d66ce64fb34f2f20b559",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsEcrContainerImage",
+          "Id": "arn:aws:ecr:eu-central-1:123456789012:repository/repo-gomod/sha256:a94c3dfd6c8ecb573a30fae7c18cf682de4b6c16f3c7250c107de1770db41220",
+          "Partition": "aws",
+          "Region": "eu-central-1",
+          "Details": {
+            "AwsEcrContainerImage": {
+              "RegistryId": "123456789012",
+              "RepositoryName": "repo-gomod",
+              "Architecture": "amd64",
+              "ImageDigest": "sha256:a94c3dfd6c8ecb573a30fae7c18cf682de4b6c16f3c7250c107de1770db41220",
+              "ImageTags": ["c-c4036e958892d4e087301fa446c19ff5b7b80ecd"],
+              "ImagePublishedAt": "2023-08-01T13:13:45Z"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "Vulnerabilities": [
+        {
+          "Id": "CVE-2022-32149",
+          "VulnerablePackages": [
+            {
+              "Name": "golang.org/x/text",
+              "Version": "0.3.8-0.20220509174342-b4bca84b0361",
+              "Epoch": "0",
+              "PackageManager": "GOMOD",
+              "FilePath": "usr/local/go/src/go.mod",
+              "FixedInVersion": "0.3.8",
+              "Remediation": "Update text to 0.3.8",
+              "SourceLayerHash": "sha256:98386e4f090a680777a76ed54c91064550622229029076560f990b1c2cb3f4cf"
+            },
+            {
+              "Name": "golang.org/x/text",
+              "Version": "0.3.3",
+              "Epoch": "0",
+              "PackageManager": "GOMOD",
+              "FilePath": "usr/local/go/src/something/go.sum",
+              "FixedInVersion": "0.3.8",
+              "Remediation": "Update text to 0.3.8",
+              "SourceLayerHash": "sha256:98386e4f090a680777a76ed54c91064550622229029076560f990b1c2cb3f4cf"
+            },
+            {
+              "Name": "golang.org/x/text",
+              "Version": "0.3.8-0.20220509174342-b4bca84b0361",
+              "Epoch": "0",
+              "PackageManager": "GOMOD",
+              "FilePath": "usr/local/go/src/go.sum",
+              "FixedInVersion": "0.3.8",
+              "Remediation": "Update text to 0.3.8",
+              "SourceLayerHash": "sha256:98386e4f090a680777a76ed54c91064550622229029076560f990b1c2cb3f4cf"
+            }
+          ],
+          "Cvss": [
+            {
+              "Version": "3.1",
+              "BaseScore": 7.5,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "Source": "NVD"
+            },
+            {
+              "Version": "3.1",
+              "BaseScore": 7.5,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "Source": "NVD"
+            }
+          ],
+          "Vendor": {
+            "Name": "NVD",
+            "Url": "https://nvd.nist.gov/vuln/detail/CVE-2022-32149",
+            "VendorSeverity": "HIGH",
+            "VendorCreatedAt": "2022-10-14T15:15:00Z",
+            "VendorUpdatedAt": "2022-10-18T17:41:00Z"
+          },
+          "ReferenceUrls": [
+            "https://groups.google.com/g/golang-announce/c/-hjNw559_tE/m/KlGTfid5CAAJ"
+          ],
+          "FixAvailable": "YES",
+          "ExploitAvailable": "YES"
+        }
+      ],
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "HIGH"
+        },
+        "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"]
+      }
+    },
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:inspector2:eu-central-1:123456789012:finding/ed174f9755171e51f5f45e2bfc0bb685",
+      "ProductArn": "arn:aws:securityhub:eu-central-1::product/aws/inspector",
+      "ProductName": "Inspector",
+      "CompanyName": "Amazon",
+      "Region": "eu-central-1",
+      "GeneratorId": "AWSInspector",
+      "AwsAccountId": "123456789012",
+      "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"],
+      "FirstObservedAt": "2023-08-30T14:28:53Z",
+      "LastObservedAt": "2023-08-30T14:28:53Z",
+      "CreatedAt": "2023-08-30T14:28:53Z",
+      "UpdatedAt": "2023-08-30T14:28:53Z",
+      "Severity": {
+        "Label": "HIGH",
+        "Normalized": 70
+      },
+      "Title": "CVE-2022-25883 - semver",
+      "Description": "Versions of the package semver before 7.5.2 are vulnerable to Regular Expression Denial of Service (ReDoS) via the function new Range, when untrusted user data is provided as a range.\r\r\r",
+      "Remediation": {
+        "Recommendation": {
+          "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+      },
+      "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "7.5",
+        "aws/inspector/resources/1/resourceDetails/awsEcrContainerImageDetails/platform": "ALPINE_LINUX_3_18",
+        "aws/inspector/packageVulnerabilityDetails/vulnerablePackages/sourceLayerHashes": "sha256:751194035c3611aead30c71ecc70008764778b49867f805c9a12b0c42a5e07bf",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-central-1::product/aws/inspector/arn:aws:inspector2:eu-central-1:123456789012:finding/ed174f9755171e51f5f45e2bfc0bb685",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsEcrContainerImage",
+          "Id": "arn:aws:ecr:eu-central-1:123456789012:repository/repo-nodepkg/sha256:1e9cf640d33e8a4fca7cb8d7ddf952ef0a3cd54b9446567d44e638a6571385bd",
+          "Partition": "aws",
+          "Region": "eu-central-1",
+          "Details": {
+            "AwsEcrContainerImage": {
+              "RegistryId": "123456789012",
+              "RepositoryName": "repo-nodepkg",
+              "Architecture": "amd64",
+              "ImageDigest": "sha256:1e9cf640d33e8a4fca7cb8d7ddf952ef0a3cd54b9446567d44e638a6571385bd",
+              "ImageTags": ["c-5081c9b0cf8160ea0c46bd49a1362f92f3aa4e73"],
+              "ImagePublishedAt": "2023-08-30T14:28:45Z"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "Vulnerabilities": [
+        {
+          "Id": "CVE-2022-25883",
+          "VulnerablePackages": [
+            {
+              "Name": "semver",
+              "Version": "7.5.1",
+              "Epoch": "0",
+              "PackageManager": "NODEPKG",
+              "FilePath": "usr/local/lib/node_modules/npm/node_modules/semver/package.json",
+              "FixedInVersion": "7.5.2",
+              "Remediation": "Update semver to 7.5.2",
+              "SourceLayerHash": "sha256:751194035c3611aead30c71ecc70008764778b49867f805c9a12b0c42a5e07bf"
+            }
+          ],
+          "Cvss": [
+            {
+              "Version": "3.1",
+              "BaseScore": 7.5,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "Source": "NVD"
+            },
+            {
+              "Version": "3.1",
+              "BaseScore": 7.5,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "Source": "NVD"
+            }
+          ],
+          "Vendor": {
+            "Name": "NVD",
+            "Url": "https://nvd.nist.gov/vuln/detail/CVE-2022-25883",
+            "VendorSeverity": "HIGH",
+            "VendorCreatedAt": "2023-06-21T05:15:00Z",
+            "VendorUpdatedAt": "2023-07-12T00:53:00Z"
+          },
+          "FixAvailable": "YES",
+          "ExploitAvailable": "YES"
+        }
+      ],
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "HIGH"
+        },
+        "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"]
+      }
+    },
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:inspector2:eu-central-1:123456789012:finding/fb283a3490f48eec11b6500faab7470c",
+      "ProductArn": "arn:aws:securityhub:eu-central-1::product/aws/inspector",
+      "ProductName": "Inspector",
+      "CompanyName": "Amazon",
+      "Region": "eu-central-1",
+      "GeneratorId": "AWSInspector",
+      "AwsAccountId": "123456789012",
+      "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"],
+      "FirstObservedAt": "2023-08-10T07:36:46Z",
+      "LastObservedAt": "2023-08-21T17:01:53Z",
+      "CreatedAt": "2023-08-10T07:36:46Z",
+      "UpdatedAt": "2023-08-21T17:01:53Z",
+      "Severity": {
+        "Label": "CRITICAL",
+        "Normalized": 90
+      },
+      "Title": "CVE-2023-37920 - certifi, certifi and 2 more",
+      "Description": "Certifi is a curated collection of Root Certificates for validating the trustworthiness of SSL certificates while verifying the identity of TLS hosts. Certifi prior to version 2023.07.22 recognizes \"e-Tugra\" root certificates. e-Tugra's root certificates were subject to an investigation prompted by reporting of security issues in their systems. Certifi 2023.07.22 removes root certificates from \"e-Tugra\" from the root store.",
+      "Remediation": {
+        "Recommendation": {
+          "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+      },
+      "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "9.8",
+        "aws/inspector/resources/1/resourceDetails/awsEcrContainerImageDetails/platform": "DEBIAN_11",
+        "aws/inspector/packageVulnerabilityDetails/vulnerablePackages/sourceLayerHashes": "sha256:5d982d4bf57c6a5661a4a4624fa46b4235430afdfc5c7477457e76ac0f780d7e,sha256:5d982d4bf57c6a5661a4a4624fa46b4235430afdfc5c7477457e76ac0f780d7e,sha256:3d418b079937b4bec95f67f57b775741b05df804006733b418dd0633d553c751,sha256:5d982d4bf57c6a5661a4a4624fa46b4235430afdfc5c7477457e76ac0f780d7e",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-central-1::product/aws/inspector/arn:aws:inspector2:eu-central-1:123456789012:finding/fb283a3490f48eec11b6500faab7470c",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsEcrContainerImage",
+          "Id": "arn:aws:ecr:eu-central-1:123456789012:repository/repo-poetry/sha256:d0406162a81777e5fe3eb5835fec5d4436ca750a1e12e367474efc39cc62cfbf",
+          "Partition": "aws",
+          "Region": "eu-central-1",
+          "Details": {
+            "AwsEcrContainerImage": {
+              "RegistryId": "123456789012",
+              "RepositoryName": "repo-poetry",
+              "Architecture": "amd64",
+              "ImageDigest": "sha256:d0406162a81777e5fe3eb5835fec5d4436ca750a1e12e367474efc39cc62cfbf",
+              "ImageTags": ["tag1", "tag2", "tag-last"],
+              "ImagePublishedAt": "2023-08-10T07:36:02Z"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "Vulnerabilities": [
+        {
+          "Id": "CVE-2023-37920",
+          "VulnerablePackages": [
+            {
+              "Name": "certifi",
+              "Version": "2022.12.7",
+              "Epoch": "0",
+              "PackageManager": "POETRY",
+              "FilePath": "app/poetry.lock",
+              "FixedInVersion": "2023.7.22",
+              "Remediation": "Update certifi to 2023.7.22",
+              "SourceLayerHash": "sha256:5d982d4bf57c6a5661a4a4624fa46b4235430afdfc5c7477457e76ac0f780d7e"
+            },
+            {
+              "Name": "certifi",
+              "Version": "2023.5.7",
+              "Epoch": "0",
+              "PackageManager": "POETRY",
+              "FilePath": "app/poetry.lock",
+              "FixedInVersion": "2023.7.22",
+              "Remediation": "Update certifi to 2023.7.22",
+              "SourceLayerHash": "sha256:5d982d4bf57c6a5661a4a4624fa46b4235430afdfc5c7477457e76ac0f780d7e"
+            },
+            {
+              "Name": "certifi",
+              "Version": "2023.5.7",
+              "Epoch": "0",
+              "PackageManager": "PYTHONPKG",
+              "FilePath": "app/.cache/pypoetry/virtualenvs/something-ANnMAkq9-py3.9/lib/python3.9/site-packages/certifi-2023.5.7.dist-info/METADATA",
+              "FixedInVersion": "2023.7.22",
+              "Remediation": "Update certifi to 2023.7.22",
+              "SourceLayerHash": "sha256:3d418b079937b4bec95f67f57b775741b05df804006733b418dd0633d553c751"
+            },
+            {
+              "Name": "certifi",
+              "Version": "2022.12.7",
+              "Epoch": "0",
+              "PackageManager": "POETRY",
+              "FilePath": "app/poetry.lock",
+              "FixedInVersion": "2023.7.22",
+              "Remediation": "Update certifi to 2023.7.22",
+              "SourceLayerHash": "sha256:5d982d4bf57c6a5661a4a4624fa46b4235430afdfc5c7477457e76ac0f780d7e"
+            }
+          ],
+          "Cvss": [
+            {
+              "Version": "3.1",
+              "BaseScore": 9.8,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "Source": "NVD"
+            },
+            {
+              "Version": "3.1",
+              "BaseScore": 9.8,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "Source": "NVD"
+            }
+          ],
+          "Vendor": {
+            "Name": "NVD",
+            "Url": "https://nvd.nist.gov/vuln/detail/CVE-2023-37920",
+            "VendorSeverity": "CRITICAL",
+            "VendorCreatedAt": "2023-07-25T21:15:00Z",
+            "VendorUpdatedAt": "2023-08-12T06:16:00Z"
+          },
+          "ReferenceUrls": [
+            "https://groups.google.com/a/mozilla.org/g/dev-security-policy/c/C-HrP1SEq1A",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/5EX6NG7WUFNUKGFHLM35KHHU3GAKXRTG/"
+          ],
+          "FixAvailable": "YES",
+          "ExploitAvailable": "NO"
+        }
+      ],
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "CRITICAL"
+        },
+        "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"]
+      }
+    },
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:inspector2:eu-central-1:123456789012:finding/b05900ac9880dc902ef729b72a91a21a",
+      "ProductArn": "arn:aws:securityhub:eu-central-1::product/aws/inspector",
+      "ProductName": "Inspector",
+      "CompanyName": "Amazon",
+      "Region": "eu-central-1",
+      "GeneratorId": "AWSInspector",
+      "AwsAccountId": "123456789012",
+      "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"],
+      "FirstObservedAt": "2023-08-21T13:40:40Z",
+      "LastObservedAt": "2023-08-21T13:41:59Z",
+      "CreatedAt": "2023-08-21T13:40:40Z",
+      "UpdatedAt": "2023-08-21T13:41:59Z",
+      "Severity": {
+        "Label": "HIGH",
+        "Normalized": 70
+      },
+      "Title": "CVE-2022-31163 - tzinfo",
+      "Description": "TZInfo is a Ruby library that provides access to time zone data and allows times to be converted using time zone rules. Versions prior to 0.36.1, as well as those prior to 1.2.10 when used with the Ruby data source tzinfo-data, are vulnerable to relative path traversal. With the Ruby data source, time zones are defined in Ruby files. There is one file per time zone. Time zone files are loaded with `require` on demand. In the affected versions, `TZInfo::Timezone.get` fails to validate time zone identifiers correctly, allowing a new line character within the identifier. With Ruby version 1.9.3 and later, `TZInfo::Timezone.get` can be made to load unintended files with `require`, executing them within the Ruby process. Versions 0.3.61 and 1.2.10 include fixes to correctly validate time zone identifiers. Versions 2.0.0 and later are not vulnerable. Version 0.3.61 can still load arbitrary files from the Ruby load path if their name follows the rules for a valid time zone identifier and the file has a p...Truncated",
+      "Remediation": {
+        "Recommendation": {
+          "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+      },
+      "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "8.1",
+        "aws/inspector/resources/1/resourceDetails/awsEcrContainerImageDetails/platform": "ALPINE_LINUX_3_17",
+        "aws/inspector/packageVulnerabilityDetails/vulnerablePackages/sourceLayerHashes": "sha256:6ce38273df14da22f8dbb8d224d0f7ed007da6daa6fde797eb3e505e8932eb20",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-central-1::product/aws/inspector/arn:aws:inspector2:eu-central-1:123456789012:finding/b05900ac9880dc902ef729b72a91a21a",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsEcrContainerImage",
+          "Id": "arn:aws:ecr:eu-central-1:123456789012:repository/repo-bundler/sha256:f15d536b44e9700b6d687947139cec8f7741ea4f796f807d4d909b68fb34c418",
+          "Partition": "aws",
+          "Region": "eu-central-1",
+          "Details": {
+            "AwsEcrContainerImage": {
+              "RegistryId": "123456789012",
+              "RepositoryName": "repo-bundler",
+              "Architecture": "amd64",
+              "ImageDigest": "sha256:f15d536b44e9700b6d687947139cec8f7741ea4f796f807d4d909b68fb34c418",
+              "ImagePublishedAt": "2023-08-21T13:40:31Z"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "Vulnerabilities": [
+        {
+          "Id": "CVE-2022-31163",
+          "VulnerablePackages": [
+            {
+              "Name": "tzinfo",
+              "Version": "1.2.9",
+              "Epoch": "0",
+              "PackageManager": "BUNDLER",
+              "FilePath": "app/node_modules/@something/Gemfile.lock",
+              "FixedInVersion": "1.2.10",
+              "Remediation": "Update tzinfo to 1.2.10",
+              "SourceLayerHash": "sha256:6ce38273df14da22f8dbb8d224d0f7ed007da6daa6fde797eb3e505e8932eb20"
+            }
+          ],
+          "Cvss": [
+            {
+              "Version": "3.1",
+              "BaseScore": 8.1,
+              "BaseVector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "Source": "NVD"
+            },
+            {
+              "Version": "3.1",
+              "BaseScore": 8.1,
+              "BaseVector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "Source": "NVD"
+            }
+          ],
+          "Vendor": {
+            "Name": "NVD",
+            "Url": "https://nvd.nist.gov/vuln/detail/CVE-2022-31163",
+            "VendorSeverity": "HIGH",
+            "VendorCreatedAt": "2022-07-22T04:15:00Z",
+            "VendorUpdatedAt": "2022-10-26T19:00:00Z"
+          },
+          "ReferenceUrls": [
+            "https://lists.debian.org/debian-lts-announce/2022/08/msg00009.html"
+          ],
+          "FixAvailable": "YES",
+          "ExploitAvailable": "NO"
+        }
+      ],
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "HIGH"
+        },
+        "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"]
+      }
+    },
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:inspector2:eu-central-1:123456789012:finding/1f46c626e66f19961cb634e30463b913",
+      "ProductArn": "arn:aws:securityhub:eu-central-1::product/aws/inspector",
+      "ProductName": "Inspector",
+      "CompanyName": "Amazon",
+      "Region": "eu-central-1",
+      "GeneratorId": "AWSInspector",
+      "AwsAccountId": "123456789012",
+      "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"],
+      "FirstObservedAt": "2023-08-21T13:39:12Z",
+      "LastObservedAt": "2023-08-21T13:41:58Z",
+      "CreatedAt": "2023-08-21T13:39:12Z",
+      "UpdatedAt": "2023-08-21T13:41:58Z",
+      "Severity": {
+        "Label": "HIGH",
+        "Normalized": 70
+      },
+      "Title": "CVE-2023-37788 - github.com/elazarl/goproxy",
+      "Description": "goproxy v1.1 was discovered to contain an issue which can lead to a Denial of service (DoS) via unspecified vectors.",
+      "Remediation": {
+        "Recommendation": {
+          "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+      },
+      "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "7.5",
+        "aws/inspector/resources/1/resourceDetails/awsEcrContainerImageDetails/platform": "ALPINE_LINUX_3_17",
+        "aws/inspector/packageVulnerabilityDetails/vulnerablePackages/sourceLayerHashes": "sha256:ead62b4140ce38991b50e86efa65ebae81a6384f2024e8147b4b85d05f2bb5fa",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-central-1::product/aws/inspector/arn:aws:inspector2:eu-central-1:123456789012:finding/1f46c626e66f19961cb634e30463b913",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsEcrContainerImage",
+          "Id": "arn:aws:ecr:eu-central-1:123456789012:repository/repo-gobinary/sha256:6b48d92046b51a4761462e432d99724343006425dca0694b41634fd0b6ecce7c",
+          "Partition": "aws",
+          "Region": "eu-central-1",
+          "Details": {
+            "AwsEcrContainerImage": {
+              "RegistryId": "123456789012",
+              "RepositoryName": "repo-gobinary",
+              "Architecture": "amd64",
+              "ImageDigest": "sha256:6b48d92046b51a4761462e432d99724343006425dca0694b41634fd0b6ecce7c",
+              "ImageTags": ["tag-2023.123", "c-12345"],
+              "ImagePublishedAt": "2023-08-21T13:39:01Z"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "Vulnerabilities": [
+        {
+          "Id": "CVE-2023-37788",
+          "VulnerablePackages": [
+            {
+              "Name": "github.com/elazarl/goproxy",
+              "Version": "v0.0.0-20220901064549-fbd10ff4f5a1",
+              "Epoch": "0",
+              "PackageManager": "GOBINARY",
+              "FilePath": "app/snyk-alpine",
+              "FixedInVersion": "0.0.0-20230731152917-f99041a5c027",
+              "Remediation": "Update goproxy to 0.0.0-20230731152917-f99041a5c027",
+              "SourceLayerHash": "sha256:ead62b4140ce38991b50e86efa65ebae81a6384f2024e8147b4b85d05f2bb5fa"
+            }
+          ],
+          "Cvss": [
+            {
+              "Version": "3.1",
+              "BaseScore": 7.5,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "Source": "NVD"
+            },
+            {
+              "Version": "3.1",
+              "BaseScore": 7.5,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "Source": "NVD"
+            }
+          ],
+          "Vendor": {
+            "Name": "NVD",
+            "Url": "https://nvd.nist.gov/vuln/detail/CVE-2023-37788",
+            "VendorSeverity": "HIGH",
+            "VendorCreatedAt": "2023-07-18T19:15:00Z",
+            "VendorUpdatedAt": "2023-07-27T04:05:00Z"
+          },
+          "FixAvailable": "YES",
+          "ExploitAvailable": "YES"
+        }
+      ],
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "HIGH"
+        },
+        "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"]
+      }
+    },
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:inspector2:eu-central-1:123456789012:finding/8ba5034cf5b39282316fb9a919a2c556",
+      "ProductArn": "arn:aws:securityhub:eu-central-1::product/aws/inspector",
+      "ProductName": "Inspector",
+      "CompanyName": "Amazon",
+      "Region": "eu-central-1",
+      "GeneratorId": "AWSInspector",
+      "AwsAccountId": "123456789012",
+      "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"],
+      "FirstObservedAt": "2023-08-21T07:01:06Z",
+      "LastObservedAt": "2023-08-21T13:06:22Z",
+      "CreatedAt": "2023-08-21T07:01:06Z",
+      "UpdatedAt": "2023-08-21T13:06:22Z",
+      "Severity": {
+        "Label": "HIGH",
+        "Normalized": 70
+      },
+      "Title": "CVE-2023-25194 - org.apache.kafka:kafka-clients",
+      "Description": "A possible security vulnerability has been identified in Apache Kafka Connect API.\nThis requires access to a Kafka Connect worker, and the ability to create/modify connectors on it with an arbitrary Kafka client SASL JAAS config\nand a SASL-based security protocol, which has been possible on Kafka Connect clusters since Apache Kafka Connect 2.3.0.\nWhen configuring the connector via the Kafka Connect REST API, an authenticated operator can set the `sasl.jaas.config`\nproperty for any of the connector's Kafka clients to \"com.sun.security.auth.module.JndiLoginModule\", which can be done via the\n`producer.override.sasl.jaas.config`, `consumer.override.sasl.jaas.config`, or `admin.override.sasl.jaas.config` properties.\nThis will allow the server to connect to the attacker's LDAP server\nand deserialize the LDAP response, which the attacker can use to execute java deserialization gadget chains on the Kafka connect server.\nAttacker can cause unrestricted deserialization of untrusted data (or) RCE vulnerabili...Truncated",
+      "Remediation": {
+        "Recommendation": {
+          "Text": "Remediation is available. Please refer to the Fixed version in the vulnerability details section above.For detailed remediation guidance for each of the affected packages, refer to the vulnerabilities section of the detailed finding JSON."
+        }
+      },
+      "ProductFields": {
+        "aws/inspector/ProductVersion": "2",
+        "aws/inspector/FindingStatus": "ACTIVE",
+        "aws/inspector/inspectorScore": "8.8",
+        "aws/inspector/resources/1/resourceDetails/awsEcrContainerImageDetails/platform": "ALPINE_LINUX_3_15",
+        "aws/inspector/packageVulnerabilityDetails/vulnerablePackages/sourceLayerHashes": "sha256:66023291c834d436a456d628643f8ae182ab688f2ea3d9f7741652027dec1efb",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:eu-central-1::product/aws/inspector/arn:aws:inspector2:eu-central-1:123456789012:finding/8ba5034cf5b39282316fb9a919a2c556",
+        "aws/securityhub/ProductName": "Inspector",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsEcrContainerImage",
+          "Id": "arn:aws:ecr:eu-central-1:123456789012:repository/repo-jar/sha256:856d54232d3e463b6aa99d3f951cac8bacb6deb95e5795c1440f4be4ad60cf63",
+          "Partition": "aws",
+          "Region": "eu-central-1",
+          "Details": {
+            "AwsEcrContainerImage": {
+              "RegistryId": "123456789012",
+              "RepositoryName": "repo-jar",
+              "Architecture": "amd64",
+              "ImageDigest": "sha256:856d54232d3e463b6aa99d3f951cac8bacb6deb95e5795c1440f4be4ad60cf63",
+              "ImageTags": ["tag123"],
+              "ImagePublishedAt": "2023-08-21T07:00:59Z"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "Vulnerabilities": [
+        {
+          "Id": "CVE-2023-25194",
+          "VulnerablePackages": [
+            {
+              "Name": "org.apache.kafka:kafka-clients",
+              "Version": "3.1.2",
+              "Epoch": "0",
+              "PackageManager": "JAR",
+              "FilePath": "app/app.jar",
+              "FixedInVersion": "3.4.0",
+              "Remediation": "Update kafka-clients to 3.4.0",
+              "SourceLayerHash": "sha256:66023291c834d436a456d628643f8ae182ab688f2ea3d9f7741652027dec1efb"
+            }
+          ],
+          "Cvss": [
+            {
+              "Version": "3.1",
+              "BaseScore": 8.8,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "Source": "NVD"
+            },
+            {
+              "Version": "3.1",
+              "BaseScore": 8.8,
+              "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "Source": "NVD"
+            }
+          ],
+          "Vendor": {
+            "Name": "NVD",
+            "Url": "https://nvd.nist.gov/vuln/detail/CVE-2023-25194",
+            "VendorSeverity": "HIGH",
+            "VendorCreatedAt": "2023-02-07T20:15:00Z",
+            "VendorUpdatedAt": "2023-07-21T12:15:00Z"
+          },
+          "ReferenceUrls": [
+            "https://lists.apache.org/thread/vy1c7fqcdqvq5grcqp6q5jyyb302khyz",
+            "https://kafka.apache.org/cve-list"
+          ],
+          "FixAvailable": "YES",
+          "ExploitAvailable": "YES"
+        }
+      ],
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "HIGH"
+        },
+        "Types": ["Software and Configuration Checks/Vulnerabilities/CVE"]
+      }
+    }
+  ]
+}

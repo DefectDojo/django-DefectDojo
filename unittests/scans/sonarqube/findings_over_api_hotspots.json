@@ -1,0 +1,127 @@
+{
+    "paging": {
+      "pageIndex": 1,
+      "pageSize": 100,
+      "total": 4
+    },
+    "hotspots": [
+      {
+        "key": "fwafewef",
+        "component": "nana-ofewfe:src/app/component.asdf",
+        "project": "nana-ofewfe",
+        "securityCategory": "xss",
+        "vulnerabilityProbability": "HIGH",
+        "status": "TO_REVIEW",
+        "line": 47,
+        "message": "Make sure disabling asdfbuilt-in sanitization is safe here.",
+        "author": "",
+        "creationDate": "2024-02-13T09:15:26+0000",
+        "updateDate": "2024-02-13T09:15:26+0000",
+        "textRange": {
+          "startLine": 47,
+          "endLine": 47,
+          "startOffset": 26,
+          "endOffset": 56
+        },
+        "flows": [],
+        "ruleKey": "typescript:7777",
+        "messageFormattings": []
+      },
+      {
+        "key": "cyxcvyxcvyxv",
+        "component": "keyfoot.htmlfjoes",
+        "project": "nana-ofewfe",
+        "securityCategory": "others",
+        "vulnerabilityProbability": "LOW",
+        "status": "TO_REVIEW",
+        "line": 5,
+        "message": "Make sure nasdfre.",
+        "author": "",
+        "creationDate": "2023-07-27T08:53:15+0000",
+        "updateDate": "2023-08-15T06:40:11+0000",
+        "textRange": {
+          "startLine": 5,
+          "endLine": 5,
+          "startOffset": 6,
+          "endOffset": 75
+        },
+        "flows": [],
+        "ruleKey": "Web:1222",
+        "messageFormattings": []
+      },
+      {
+        "key": "werrwerwerwer",
+        "component": "keyfoot.htmlfjoes",
+        "project": "nana-ofewfe",
+        "securityCategory": "others",
+        "vulnerabilityProbability": "LOW",
+        "status": "TO_REVIEW",
+        "line": 8,
+        "message": "Make sure no123123.",
+        "author": "",
+        "creationDate": "2023-07-27T08:53:15+0000",
+        "updateDate": "2023-08-15T06:40:11+0000",
+        "textRange": {
+          "startLine": 8,
+          "endLine": 8,
+          "startOffset": 6,
+          "endOffset": 77
+        },
+        "flows": [],
+        "ruleKey": "Web:9876",
+        "messageFormattings": []
+      },
+      {
+        "key": "jztjztjtzj",
+        "component": "nana-ofewfe:src/path/to//1231235/ccommp.html",
+        "project": "nana-ofewfe",
+        "securityCategory": "others",
+        "vulnerabilityProbability": "LOW",
+        "status": "TO_REVIEW",
+        "line": 3,
+        "message": "Make surgrgergrege.",
+        "author": "",
+        "creationDate": "2023-07-27T08:53:15+0000",
+        "updateDate": "2023-08-15T06:40:11+0000",
+        "textRange": {
+          "startLine": 3,
+          "endLine": 3,
+          "startOffset": 4,
+          "endOffset": 105
+        },
+        "flows": [],
+        "ruleKey": "Web:12345",
+        "messageFormattings": []
+      }
+    ],
+    "components": [
+      {
+        "key": "nana-ofewfe:src/path/to//1231235/ccommp.html",
+        "qualifier": "FIL",
+        "name": "ccommp.html",
+        "longName": "src/path/to//1231235/ccommp.html",
+        "path": "src/path/to//1231235/ccommp.html"
+      },
+      {
+        "key": "nana-ofewfe",
+        "qualifier": "TRK",
+        "name": "nana-ofewfe",
+        "longName": "nana-ofewfe"
+      },
+      {
+        "key": "keyfoot.htmlfjoes",
+        "qualifier": "FIL",
+        "name": "anonymous-footer.component.html",
+        "longName": "src/app/2389479284379021-footer.component.html",
+        "path": "src/app/2389479284379021-footer.component.html"
+      },
+      {
+        "key": "nana-ofewfe:src/app/component.asdf",
+        "qualifier": "FIL",
+        "name": "component.asdf",
+        "longName": "src/app/component.asdf",
+        "path": "src/app/component.asdf"
+      }
+    ]
+}
+  

@@ -1,0 +1,30 @@
+{
+    "recommendations": [
+      {
+        "rule": "2.1.2",
+        "severity": "HIGH",
+        "message": "Enable TLS or use a terminator in front of KrakenD."
+      },
+      {
+        "rule": "2.1.7",
+        "severity": "HIGH",
+        "message": "Enable HTTP security header checks (security/http)."
+      },
+      {
+        "rule": "2.2.1",
+        "severity": "MEDIUM",
+        "message": "Hide the version banner in runtime."
+      },
+      {
+        "rule": "3.1.1",
+        "severity": "LOW",
+        "message": "Enable a bot detector."
+      },
+      {
+        "rule": "4.2.1",
+        "severity": "MEDIUM",
+        "message": "Implement a telemetry system for tracing for monitoring and troubleshooting."
+      }
+    ],
+    "stats": {}
+  }

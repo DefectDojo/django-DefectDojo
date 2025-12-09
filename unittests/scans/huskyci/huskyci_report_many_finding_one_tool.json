@@ -1,0 +1,135 @@
+{
+    "RID": "PqhIwimX0HZjfpQ0yXYM4arLst4eGcm5",
+    "repositoryURL": "https://github.com/globocom/huskyCI.git",
+    "repositoryBranch": "poc-gitleaks",
+    "commitAuthors": [
+        "rafaveira3@gmail.com",
+        "jr.joserenato.jr@gmail.com"
+    ],
+    "status": "finished",
+    "result": "failed",
+    "errorFound": "",
+    "containers": [
+        {
+            "CID": "eab150ccd2eacec90e88151efa706cbe89f3de7d0f691b85e4b021c1d803a1d8",
+            "securityTest": {
+                "name": "gitleaks",
+                "image": "huskyci/gitleaks",
+                "imageTag": "2.1.0",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone -b %GIT_BRANCH% --single-branch %GIT_REPO% code --quiet 2> /tmp/errorGitCloneGitleaks\nif [ $? -eq 0 ]; then\n    touch /tmp/results.json\n    timeout -t 360 $(which gitleaks) --log=warn --report=/tmp/results.json --repo-path=./code --branch=%GIT_BRANCH% --repo-config &> /tmp/errorGitleaks\n    if [[ $? -eq 124 || $? -eq 143 ]]; then #timeout exit codes\n        echo 'ERROR_TIMEOUT_GITLEAKS'\n        cat /tmp/errorGitleaks\n    elif [ $? -eq 2 ]; then\n        echo 'ERROR_RUNNING_GITLEAKS'\n        cat /tmp/errorGitleaks\n    else\n        jq -j -M -c . /tmp/results.json\n    fi\nelse\n    echo \"ERROR_CLONING\"\n    cat /tmp/errorGitCloneGitleaks\nfi\n",
+                "type": "Generic",
+                "language": "",
+                "default": true,
+                "timeOutSeconds": 360
+            },
+            "cStatus": "finished",
+            "cOutput": "[{\"line\":\"-----BEGIN RSA PRIVATE KEY-----\",\"commit\":\"4e3baced086bb8725599b53b72ab0f0566b1e36c\",\"offender\":\"-----BEGIN RSA PRIVATE KEY-----\",\"rule\":\"RSA\",\"info\":\"-----BEGIN RSA PRIVATE KEY----- regex match\",\"commitMsg\":\"Initial commit \",\"author\":\"José Renato\",\"email\":\"jr.joserenato.jr@gmail.com\",\"file\":\"deployments/certs/ca-key.pem\",\"repo\":\".\",\"date\":\"2019-11-25T17:41:14-03:00\",\"tags\":\"key, RSA\",\"severity\":\"\"},{\"line\":\"-----BEGIN RSA PRIVATE KEY-----\",\"commit\":\"4e3baced086bb8725599b53b72ab0f0566b1e36c\",\"offender\":\"-----BEGIN RSA PRIVATE KEY-----\",\"rule\":\"RSA\",\"info\":\"-----BEGIN RSA PRIVATE KEY----- regex match\",\"commitMsg\":\"Initial commit \",\"author\":\"José Renato\",\"email\":\"jr.joserenato.jr@gmail.com\",\"file\":\"deployments/certs/client-huskyapi-key.pem\",\"repo\":\".\",\"date\":\"2019-11-25T17:41:14-03:00\",\"tags\":\"key, RSA\",\"severity\":\"\"},{\"line\":\"-----BEGIN RSA PRIVATE KEY-----\",\"commit\":\"4e3baced086bb8725599b53b72ab0f0566b1e36c\",\"offender\":\"-----BEGIN RSA PRIVATE KEY-----\",\"rule\":\"RSA\",\"info\":\"-----BEGIN RSA PRIVATE KEY----- regex match\",\"commitMsg\":\"Initial commit \",\"author\":\"José Renato\",\"email\":\"jr.joserenato.jr@gmail.com\",\"file\":\"deployments/certs/server-key.pem\",\"repo\":\".\",\"date\":\"2019-11-25T17:41:14-03:00\",\"tags\":\"key, RSA\",\"severity\":\"\"}]",
+            "cResult": "failed",
+            "cInfo": "Issues found.",
+            "startedAt": "2020-06-25T14:50:33.601Z",
+            "finishedAt": "2020-06-25T14:50:35.985Z"
+        },
+        {
+            "CID": "1ba4a6febbb4c96a0aebd63fbcc191552e9dfd264cf69cfde79bc8a3d355aebb",
+            "securityTest": {
+                "name": "gitauthors",
+                "image": "huskyci/gitauthors",
+                "imageTag": "2.18.4",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone %GIT_REPO% code --quiet 2> /tmp/errorGitCloneEnry\ncd code\ngit branch -a | egrep 'remotes/origin/master' 1> /dev/null 2> /dev/null\nif [ $? -ne 0 ]; then\n  echo \"{\\\"authors\\\":[]}\"\n  exit 0\nfi\ngit checkout %GIT_BRANCH% --quiet\nif [ $? -eq 0 ]; then\n  for i in $(git log origin/master.. --pretty=\"%ae\" | sort -u); do\n    jsonMiddle=\"\\\"$i\\\",$jsonMiddle\"\n  done\n  length=${#jsonMiddle}\n  endindex=$(expr $length - 1)\n  authors=\"${jsonMiddle:0:$endindex}\"\n  echo \"{\\\"authors\\\":[$authors]}\"\nelse\n  echo \"ERROR_CLONING\"\n  cat /tmp/errorGitCloneEnry\nfi\n",
+                "type": "Generic",
+                "language": "",
+                "default": true,
+                "timeOutSeconds": 60
+            },
+            "cStatus": "finished",
+            "cOutput": "{\"authors\":[\"rafaveira3@gmail.com\",\"jr.joserenato.jr@gmail.com\"]}\r\n",
+            "cResult": "passed",
+            "cInfo": "No issues found.",
+            "startedAt": "2020-06-25T14:50:33.601Z",
+            "finishedAt": "2020-06-25T14:50:43.366Z"
+        }
+    ],
+    "startedAt": "2020-06-25T14:50:31.572Z",
+    "finishedAt": "2020-06-25T14:50:43.367Z",
+    "codes": [
+        {
+            "language": "Shell",
+            "files": [
+                "deployments/dockerfiles/spotbugs/mvn-entrypoint.sh",
+                "deployments/scripts/build-containers.sh",
+                "deployments/scripts/check-containers-version.sh",
+                "deployments/scripts/create-certs.sh",
+                "deployments/scripts/generate-env.sh",
+                "deployments/scripts/generate-local-token.sh",
+                "deployments/scripts/push-containers.sh",
+                "deployments/scripts/restart-huskyci-api.sh",
+                "deployments/scripts/run-create-certs.sh"
+            ]
+        },
+        {
+            "language": "Dockerfile",
+            "files": [
+                "deployments/dockerfiles/api.Dockerfile",
+                "deployments/dockerfiles/bandit/Dockerfile",
+                "deployments/dockerfiles/brakeman/Dockerfile",
+                "deployments/dockerfiles/db.Dockerfile",
+                "deployments/dockerfiles/enry/Dockerfile",
+                "deployments/dockerfiles/gitauthors/Dockerfile",
+                "deployments/dockerfiles/gitleaks/Dockerfile",
+                "deployments/dockerfiles/gosec/Dockerfile",
+                "deployments/dockerfiles/npmaudit/Dockerfile",
+                "deployments/dockerfiles/safety/Dockerfile",
+                "deployments/dockerfiles/spotbugs/Dockerfile"
+            ]
+        }
+    ],
+    "huskyciresults": {
+        "goresults": {
+            "gosecoutput": {}
+        },
+        "pythonresults": {
+            "banditoutput": {},
+            "safetyoutput": {}
+        },
+        "javascriptresults": {
+            "npmauditoutput": {},
+            "yarnauditoutput": {}
+        },
+        "rubyresults": {
+            "brakemanoutput": {}
+        },
+        "javaresults": {
+            "spotbugsoutput": {}
+        },
+        "hclresults": {
+            "tfsecoutput": {}
+        },
+        "genericresults": {
+            "gitleaksoutput": {
+                "highvulns": [
+                    {
+                        "securitytool": "GitLeaks",
+                        "severity": "HIGH",
+                        "file": "deployments/certs/ca-key.pem",
+                        "code": "-----BEGIN RSA PRIVATE KEY-----",
+                        "title": "Hard Coded RSA in: deployments/certs/ca-key.pem"
+                    },
+                    {
+                        "securitytool": "GitLeaks",
+                        "severity": "HIGH",
+                        "file": "deployments/certs/client-huskyapi-key.pem",
+                        "code": "-----BEGIN RSA PRIVATE KEY-----",
+                        "title": "Hard Coded RSA in: deployments/certs/client-huskyapi-key.pem"
+                    },
+                    {
+                        "securitytool": "GitLeaks",
+                        "severity": "HIGH",
+                        "file": "deployments/certs/server-key.pem",
+                        "code": "-----BEGIN RSA PRIVATE KEY-----",
+                        "title": "Hard Coded RSA in: deployments/certs/server-key.pem"
+                    }
+                ]
+            }
+        }
+    }
+}

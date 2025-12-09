@@ -1,0 +1,289 @@
+{
+  "banner": {
+    "description": "WordPress Security Scanner by the WPScan Team",
+    "version": "3.5.4",
+    "authors": [
+      "@_WPScan_",
+      "@ethicalhack3r",
+      "@erwan_lr",
+      "@_FireFart_"
+    ],
+    "sponsored_by": "Sucuri - https://sucuri.net"
+  },
+  "start_time": 1562094676,
+  "start_memory": 40243200,
+  "target_url": "https://www.sample-owasp-wp.com/",
+  "effective_url": "https://www.sample-owasp-wp.com/",
+  "interesting_findings": [
+    {
+      "url": "https://www.sample-owasp-wp.com/",
+      "to_s": "https://www.sample-owasp-wp.com/",
+      "type": "headers",
+      "found_by": "Headers (Passive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+
+      },
+      "interesting_entries": [
+        "server: nginx/1.14.1"
+      ]
+    },
+    {
+      "url": "https://www.sample-owasp-wp.com/robots.txt",
+      "to_s": "https://www.sample-owasp-wp.com/robots.txt",
+      "type": "robots_txt",
+      "found_by": "Robots Txt (Aggressive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+
+      },
+      "interesting_entries": [
+
+      ]
+    },
+    {
+      "url": "https://www.sample-owasp-wp.com/xmlrpc.php",
+      "to_s": "https://www.sample-owasp-wp.com/xmlrpc.php",
+      "type": "xmlrpc",
+      "found_by": "Link Tag (Passive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+        "Direct Access (Aggressive Detection)": {
+          "confidence": 100
+        }
+      },
+      "references": {
+        "url": [
+          "http://codex.wordpress.org/XML-RPC_Pingback_API"
+        ],
+        "metasploit": [
+          "auxiliary/scanner/http/wordpress_ghost_scanner",
+          "auxiliary/dos/http/wordpress_xmlrpc_dos",
+          "auxiliary/scanner/http/wordpress_xmlrpc_login",
+          "auxiliary/scanner/http/wordpress_pingback_access"
+        ]
+      },
+      "interesting_entries": [
+
+      ]
+    },
+    {
+      "url": "https://www.sample-owasp-wp.com/readme.html",
+      "to_s": "https://www.sample-owasp-wp.com/readme.html",
+      "type": "readme",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+
+      },
+      "interesting_entries": [
+
+      ]
+    },
+    {
+      "url": "https://www.sample-owasp-wp.com/wp-content/mu-plugins/",
+      "to_s": "This site has 'Must Use Plugins': https://www.sample-owasp-wp.com/wp-content/mu-plugins/",
+      "type": "mu_plugins",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 80,
+      "confirmed_by": {
+
+      },
+      "references": {
+        "url": [
+          "http://codex.wordpress.org/Must_Use_Plugins"
+        ]
+      },
+      "interesting_entries": [
+
+      ]
+    },
+    {
+      "url": "https://www.sample-owasp-wp.com/wp-content/uploads/",
+      "to_s": "Upload directory has listing enabled: https://www.sample-owasp-wp.com/wp-content/uploads/",
+      "type": "upload_directory_listing",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+
+      },
+      "interesting_entries": [
+
+      ]
+    },
+    {
+      "url": "https://www.sample-owasp-wp.com/wp-cron.php",
+      "to_s": "https://www.sample-owasp-wp.com/wp-cron.php",
+      "type": "wp_cron",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 60,
+      "confirmed_by": {
+
+      },
+      "references": {
+        "url": [
+          "https://www.iplocation.net/defend-wordpress-from-ddos",
+          "https://github.com/wpscanteam/wpscan/issues/1299"
+        ]
+      },
+      "interesting_entries": [
+
+      ]
+    }
+  ],
+  "version": {
+    "number": "5.2.2",
+    "release_date": "2019-06-18",
+    "status": "latest",
+    "found_by": "Rss Generator (Passive Detection)",
+    "confidence": 100,
+    "interesting_entries": [
+      "https://www.sample-owasp-wp.com/feed/, <generator>https://wordpress.org/?v=5.2.2</generator>",
+      "https://www.sample-owasp-wp.com/comments/feed/, <generator>https://wordpress.org/?v=5.2.2</generator>"
+    ],
+    "confirmed_by": {
+
+    },
+    "vulnerabilities": [
+
+    ]
+  },
+  "main_theme": {
+    "slug": "customizr",
+    "location": "https://www.sample-owasp-wp.com/wp-content/themes/customizr/",
+    "latest_version": "4.1.42",
+    "last_updated": "2019-06-30T00:00:00.000Z",
+    "outdated": false,
+    "readme_url": "https://www.sample-owasp-wp.com/wp-content/themes/customizr/readme.txt",
+    "directory_listing": false,
+    "error_log_url": "https://www.sample-owasp-wp.com/wp-content/themes/customizr/error_log",
+    "style_url": "https://www.sample-owasp-wp.com/wp-content/themes/customizr/style.css?ver=4.1.42",
+    "style_name": null,
+    "style_uri": null,
+    "description": null,
+    "author": null,
+    "author_uri": null,
+    "template": null,
+    "license": null,
+    "license_uri": null,
+    "tags": null,
+    "text_domain": null,
+    "found_by": "Css Style (Passive Detection)",
+    "confidence": 70,
+    "interesting_entries": [
+
+    ],
+    "confirmed_by": {
+
+    },
+    "vulnerabilities": [
+      {
+          "title": "YouTube Embed <= 13.8.1 - Cross-Site Request Forgery (CSRF)",
+          "fixed_in": "11.8.2",
+          "references": {
+            "url": [
+              "https://security.dxw.com/advisories/csrf-in-youtube-plugin/",
+              "http://seclists.org/fulldisclosure/2017/Jul/64"
+            ],
+            "wpvulndb": [
+              "8873"
+            ]
+          }
+        }
+
+    ],
+    "version": {
+      "number": "4.1.42",
+      "confidence": 80,
+      "found_by": "Style (Passive Detection)",
+      "interesting_entries": [
+        "https://www.sample-owasp-wp.com/wp-content/themes/customizr/style.css?ver=4.1.42, Match: 'Version: 4.1.42'"
+      ],
+      "confirmed_by": {
+
+      }
+    },
+    "parents": [
+
+    ]
+  },
+  "plugins": {
+    "youtube-embed-plus": {
+      "slug": "youtube-embed-plus",
+      "location": "https://www.sample-owasp-wp.com/wp-content/plugins/youtube-embed-plus/",
+      "latest_version": "13.1",
+      "last_updated": "2019-05-11T14:32:00.000Z",
+      "outdated": false,
+      "readme_url": null,
+      "directory_listing": null,
+      "error_log_url": null,
+      "found_by": "Urls In Homepage (Passive Detection)",
+      "confidence": 100,
+      "interesting_entries": [
+
+      ],
+      "confirmed_by": {
+        "Javascript Var (Passive Detection)": {
+          "confidence": 60,
+          "interesting_entries": [
+
+          ]
+        }
+      },
+      "vulnerabilities": [
+        {
+          "title": "YouTube Embed <= 11.8.1 - Cross-Site Request Forgery (CSRF)",
+          "fixed_in": "11.8.2",
+          "references": {
+            "url": [
+              "https://security.dxw.com/advisories/csrf-in-youtube-plugin/",
+              "http://seclists.org/fulldisclosure/2017/Jul/64"
+            ],
+            "wpvulndb": [
+              "8873"
+            ]
+          }
+        },
+        {
+          "title": "YouTube Embed <= 12.8.1 - Cross-Site Request Forgery (CSRF)",
+          "fixed_in": "11.8.2",
+          "references": {
+            "url": [
+              "https://security.dxw.com/advisories/csrf-in-youtube-plugin/",
+              "http://seclists.org/fulldisclosure/2017/Jul/64"
+            ],
+            "wpvulndb": [
+              "8873"
+            ]
+          }
+        }
+      ],
+      "version": null
+    }
+  },
+  "config_backups": {
+
+  },
+  "stop_time": 1562094699,
+  "elapsed": 22,
+  "requests_done": 58,
+  "cached_requests": 6,
+  "data_sent": 12055,
+  "data_sent_humanised": "11.772 KB",
+  "data_received": 142206,
+  "data_received_humanised": "138.873 KB",
+  "used_memory": 198258688,
+  "used_memory_humanised": "189.074 MB"
+}

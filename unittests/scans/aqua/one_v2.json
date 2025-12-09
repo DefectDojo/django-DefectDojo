@@ -1,0 +1,33 @@
+{
+  "status": "SCANNED",
+  "image_name": "example:latest",
+  "registry": "docker.example.com",
+  "disallowed": false,
+  "cves_counts": {
+    "total": 1,
+    "high": 0,
+    "medium": 1,
+    "low": 0,
+    "score_average": 0
+  },
+  "cves": [
+    {
+      "file": "curl",
+      "name": "CVE-2019-15601",
+      "type": "CVE",
+      "description": "CURL before 7.68.0 lacks proper input validation, which allows users to create a `FILE:` URL that can make the client access a remote file using SMB (Windows-only issue).",
+      "score": "5",
+      "severity": "medium",
+      "publishdate": "2020-01-06",
+      "acknowledged": false,
+      "url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-15601",
+      "score_version": "CVSS v2",
+      "solution": "Upgrade to curl 7.68.0",
+      "vendor_name": "The Internet",
+      "vendor_severity": "medium",
+      "vendor_statement": "Good luck, have fun!",
+      "fix_version": "7.68.0"
+    }
+  ],
+  "errorMsg": null
+}

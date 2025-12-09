@@ -1,0 +1,221 @@
+{
+  "banner": {
+    "description": "WordPress Security Scanner by the WPScan Team",
+    "version": "3.8.17",
+    "authors": [
+      "@_WPScan_",
+      "@ethicalhack3r",
+      "@erwan_lr",
+      "@firefart"
+    ],
+    "sponsor": "Sponsored by Automattic - https://automattic.com/"
+  },
+  "start_time": 1616755303,
+  "start_memory": 45256704,
+  "target_url": "https://wordpress.org/",
+  "target_ip": "198.143.164.252",
+  "effective_url": "https://wordpress.org/",
+  "interesting_findings": [
+    {
+      "url": "https://wordpress.org/",
+      "to_s": "Headers",
+      "type": "headers",
+      "found_by": "Headers (Passive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+
+      },
+      "interesting_entries": [
+        "server: nginx",
+        "x-olaf: ⛄",
+        "x-nc: HIT ord 1"
+      ]
+    },
+    {
+      "url": "https://wordpress.org/robots.txt",
+      "to_s": "robots.txt found: https://wordpress.org/robots.txt",
+      "type": "robots_txt",
+      "found_by": "Robots Txt (Aggressive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+
+      },
+      "interesting_entries": [
+        "/wp-admin/",
+        "/wp-admin/admin-ajax.php",
+        "/search"
+      ]
+    },
+    {
+      "url": "https://wordpress.org/xmlrpc.php",
+      "to_s": "XML-RPC seems to be enabled: https://wordpress.org/xmlrpc.php",
+      "type": "xmlrpc",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+
+      },
+      "references": {
+        "url": [
+          "http://codex.wordpress.org/XML-RPC_Pingback_API"
+        ],
+        "metasploit": [
+          "auxiliary/scanner/http/wordpress_ghost_scanner",
+          "auxiliary/dos/http/wordpress_xmlrpc_dos",
+          "auxiliary/scanner/http/wordpress_xmlrpc_login",
+          "auxiliary/scanner/http/wordpress_pingback_access"
+        ]
+      },
+      "interesting_entries": [
+
+      ]
+    },
+    {
+      "url": "https://wordpress.org/wp-content/mu-plugins/",
+      "to_s": "This site has 'Must Use Plugins': https://wordpress.org/wp-content/mu-plugins/",
+      "type": "mu_plugins",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 80,
+      "confirmed_by": {
+
+      },
+      "references": {
+        "url": [
+          "http://codex.wordpress.org/Must_Use_Plugins"
+        ]
+      },
+      "interesting_entries": [
+
+      ]
+    },
+    {
+      "url": "https://wordpress.org/wp-cron.php",
+      "to_s": "The external WP-Cron seems to be enabled: https://wordpress.org/wp-cron.php",
+      "type": "wp_cron",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 60,
+      "confirmed_by": {
+
+      },
+      "references": {
+        "url": [
+          "https://www.iplocation.net/defend-wordpress-from-ddos",
+          "https://github.com/wpscanteam/wpscan/issues/1299"
+        ]
+      },
+      "interesting_entries": [
+
+      ]
+    }
+  ],
+  "version": {
+    "number": "5.7",
+    "release_date": "2021-03-09",
+    "status": "latest",
+    "found_by": "Unique Fingerprinting (Aggressive Detection)",
+    "confidence": 100,
+    "interesting_entries": [
+      "https://wordpress.org/wp-admin/css/media.css md5sum is a5c039aa17fd171756380c30122a18a1"
+    ],
+    "confirmed_by": {
+
+    },
+    "vulnerabilities": [
+
+    ]
+  },
+  "main_theme": {
+    "slug": "pub",
+    "location": "https://wordpress.org/wp-content/themes/pub/",
+    "latest_version": null,
+    "last_updated": null,
+    "outdated": false,
+    "readme_url": false,
+    "directory_listing": false,
+    "error_log_url": null,
+    "style_url": "https://wordpress.org/wp-content/themes/pub/style.css",
+    "style_name": null,
+    "style_uri": null,
+    "description": null,
+    "author": null,
+    "author_uri": null,
+    "template": null,
+    "license": null,
+    "license_uri": null,
+    "tags": null,
+    "text_domain": null,
+    "found_by": "Urls In 404 Page (Passive Detection)",
+    "confidence": 4,
+    "interesting_entries": [
+
+    ],
+    "confirmed_by": {
+
+    },
+    "vulnerabilities": [
+
+    ],
+    "version": null,
+    "parents": [
+
+    ]
+  },
+  "plugins": {
+    "jetpack": {
+      "slug": "jetpack",
+      "location": "https://wordpress.org/wp-content/plugins/jetpack/",
+      "latest_version": "9.5",
+      "last_updated": "2021-03-02T14:23:00.000Z",
+      "outdated": true,
+      "readme_url": null,
+      "directory_listing": null,
+      "error_log_url": null,
+      "found_by": "Urls In 404 Page (Passive Detection)",
+      "confidence": 80,
+      "interesting_entries": [
+
+      ],
+      "confirmed_by": {
+
+      },
+      "vulnerabilities": [
+
+      ],
+      "version": {
+        "number": "9.2.1",
+        "confidence": 80,
+        "found_by": "Readme - Stable Tag (Aggressive Detection)",
+        "interesting_entries": [
+          "https://wordpress.org/wp-content/plugins/jetpack/readme.txt"
+        ],
+        "confirmed_by": {
+
+        }
+      }
+    }
+  },
+  "config_backups": {
+
+  },
+  "vuln_api": {
+    "plan": "free",
+    "requests_done_during_scan": 3,
+    "requests_remaining": 16
+  },
+  "stop_time": 1616755326,
+  "elapsed": 22,
+  "requests_done": 138,
+  "cached_requests": 6,
+  "data_sent": 41931,
+  "data_sent_humanised": "40.948 KB",
+  "data_received": 7683771,
+  "data_received_humanised": "7.328 MB",
+  "used_memory": 267448320,
+  "used_memory_humanised": "255.059 MB"
+}

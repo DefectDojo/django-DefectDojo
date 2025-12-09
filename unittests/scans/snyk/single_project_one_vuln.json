@@ -1,0 +1,122 @@
+{
+  "vulnerabilities": [
+    {
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L",
+      "alternativeIds": [],
+      "creationTime": "2019-08-25T13:02:11.461178Z",
+      "credit": [
+        "Sean Mullan"
+      ],
+      "cvssScore": 6.5,
+      "description": "## Overview\n[org.apache.santuario:xmlsec](https://mvnrepository.com/artifact/org.apache.santuario/xmlsec) is a package to provide implementation of the primary security standards for XML, XML-Signature Syntax and Processing and XML Encryption Syntax and Processing.\n\nAffected versions of this package are vulnerable to XML External Entity (XXE) Injection. In version 2.0.3 a caching mechanism was introduced to speed up creating new XML documents using a static pool of DocumentBuilders. However, if some untrusted code can register a malicious implementation with the thread context class loader first, then this implementation might be cached and re-used by Apache Santuario - XML Security for Java, leading to potential security flaws when validating signed documents, etc.\n\n## Details\nXXE Injection is a type of attack against an application that parses XML input.\nXML is a markup language that defines a set of rules for encoding documents in a format that is both human-readable and machine-readable. By default, many XML processors allow specification of an external entity, a URI that is dereferenced and evaluated during XML processing. When an XML document is being parsed, the parser can make a request and include the content at the specified URI inside of the XML document.\n\nAttacks can include disclosing local files, which may contain sensitive data such as passwords or private user data, using file: schemes or relative paths in the system identifier.\n\nFor example, below is a sample XML document, containing an XML element- username.\n\n```xml\n<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n   <username>John</username>\n</xml>\n```\n\nAn external XML entity - `xxe`, is defined using a system identifier and present within a DOCTYPE header. These entities can access local or remote content. For example the below code contains an external XML entity that would fetch the content of  `/etc/passwd` and display it to the user rendered by `username`.\n\n```xml\n<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<!DOCTYPE foo [\n   <!ENTITY xxe SYSTEM \"file:///etc/passwd\" >]>\n   <username>&xxe;</username>\n</xml>\n```\n\nOther XXE Injection attacks can access local resources that may not stop returning data, possibly impacting application availability and leading to Denial of Service.\n\n## Remediation\nUpgrade `org.apache.santuario:xmlsec` to version 2.1.4 or higher.\n## References\n- [GitHub Commit](https://github.com/apache/santuario-java/commit/52ae824cf5f5c873a0e37bb33fedcc3b387cdba6)\n- [GitHub Commit](https://github.com/apache/santuario-java/commit/c5210f77a77105fba81311d16c07ceacc21f39d5)\n- [Possible Jira Issue](https://issues.apache.org/jira/browse/SANTUARIO-504?jql=project%20%3D%20SANTUARIO)\n- [Security Release](http://santuario.apache.org/secadv.data/CVE-2019-12400.asc?version=1&modificationDate=1566573083000&api=v2)\n",
+      "disclosureTime": "2019-05-10T21:50:00Z",
+      "exploit": "Not Defined",
+      "fixedIn": [
+        "2.1.4"
+      ],
+      "functions": [],
+      "functions_new": [],
+      "id": "SNYK-JAVA-ORGAPACHESANTUARIO-460281",
+      "identifiers": {
+        "CVE": [
+          "CVE-2019-12400"
+        ],
+        "CWE": [
+          "CWE-611"
+        ]
+      },
+      "language": "java",
+      "mavenModuleName": {
+        "artifactId": "xmlsec",
+        "groupId": "org.apache.santuario"
+      },
+      "modificationTime": "2020-06-12T14:36:59.920320Z",
+      "moduleName": "org.apache.santuario:xmlsec",
+      "packageManager": "maven",
+      "packageName": "org.apache.santuario:xmlsec",
+      "patches": [],
+      "proprietary": false,
+      "publicationTime": "2019-08-25T13:53:19Z",
+      "references": [
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/apache/santuario-java/commit/52ae824cf5f5c873a0e37bb33fedcc3b387cdba6"
+        },
+        {
+          "title": "GitHub Commit",
+          "url": "https://github.com/apache/santuario-java/commit/c5210f77a77105fba81311d16c07ceacc21f39d5"
+        },
+        {
+          "title": "Possible Jira Issue",
+          "url": "https://issues.apache.org/jira/browse/SANTUARIO-504?jql=project%20%3D%20SANTUARIO"
+        },
+        {
+          "title": "Security Release",
+          "url": "http://santuario.apache.org/secadv.data/CVE-2019-12400.asc?version=1&modificationDate=1566573083000&api=v2"
+        }
+      ],
+      "semver": {
+        "vulnerable": [
+          "[2.0.3, 2.1.4)"
+        ]
+      },
+      "severity": "medium",
+      "severityWithCritical": "medium",
+      "title": "XML External Entity (XXE) Injection",
+      "from": [
+        "com.test:myframework@1.0.0-SNAPSHOT",
+        "org.apache.santuario:xmlsec@2.1.1"
+      ],
+      "upgradePath": [
+        false,
+        "org.apache.santuario:xmlsec@2.1.4"
+      ],
+      "isUpgradable": true,
+      "isPatchable": false,
+      "name": "org.apache.santuario:xmlsec",
+      "version": "2.1.1"
+    }
+  ],
+  "ok": false,
+  "dependencyCount": 5,
+  "org": "myorg",
+  "policy": "# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.\nversion: v1.19.0\nignore: {}\npatch: {}\n",
+  "isPrivate": true,
+  "licensesPolicy": {
+    "severities": {},
+    "orgLicenseRules": {}
+  },
+  "packageManager": "maven",
+  "ignoreSettings": {
+    "adminOnly": false,
+    "reasonRequired": false,
+    "disregardFilesystemIgnores": false
+  },
+  "summary": "1 vulnerable dependency path",
+  "remediation": {
+    "unresolved": [],
+    "upgrade": {
+      "org.apache.santuario:xmlsec@2.1.1": {
+        "upgradeTo": "org.apache.santuario:xmlsec@2.1.4",
+        "upgrades": [
+          "org.apache.santuario:xmlsec@2.1.1"
+        ],
+        "vulns": [
+          "SNYK-JAVA-ORGAPACHESANTUARIO-460281"
+        ]
+      }
+    },
+    "patch": {},
+    "ignore": {},
+    "pin": {}
+  },
+  "filesystemPolicy": false,
+  "filtered": {
+    "ignore": [],
+    "patch": []
+  },
+  "uniqueCount": 1,
+  "projectName": "com.test:myframework",
+  "displayTargetFile": "pom.xml",
+  "path": "C:\\workspace"
+}

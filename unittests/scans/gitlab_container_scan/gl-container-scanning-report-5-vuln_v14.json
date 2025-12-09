@@ -1,0 +1,226 @@
+{
+  "version": "3.0.0",
+  "vulnerabilities": [
+    {
+      "id": "e3923d3ecd659db1569dd8f10768189b9220cce7",
+      "category": "container_scanning",
+      "message": "CVE-2020-1751 in libc6-2.28-10",
+      "description": "An out-of-bounds write vulnerability was found in glibc before 2.31 when handling signal trampolines on PowerPC. Specifically, the backtrace function did not properly check the array bounds when storing the frame address, resulting in a denial of service or potential code execution. The highest threat from this vulnerability is to system availability.",
+      "cve": "CVE-2020-1751",
+      "severity": "High",
+      "confidence": "Unknown",
+      "solution": "No solution provided",
+      "scanner": { "id": "trivy", "name": "trivy" },
+      "location": {
+        "dependency": { "package": { "name": "libc6" }, "version": "2.28-10" },
+        "operating_system": "debian 10.9",
+        "image": "registry/vulnerable-project:latest"
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2020-1751",
+          "value": "CVE-2020-1751",
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2020-1751"
+        }
+      ],
+      "links": [
+        { "url": "https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2020-1751" },
+        {
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-1751"
+        },
+        { "url": "https://linux.oracle.com/cve/CVE-2020-1751.html" },
+        { "url": "https://linux.oracle.com/errata/ELSA-2020-4444.html" },
+        { "url": "https://security.gentoo.org/glsa/202006-04" },
+        { "url": "https://security.netapp.com/advisory/ntap-20200430-0002/" },
+        { "url": "https://sourceware.org/bugzilla/show_bug.cgi?id=25423" },
+        { "url": "https://usn.ubuntu.com/4416-1/" },
+        { "url": "https://usn.ubuntu.com/usn/usn-4416-1" }
+      ]
+    },
+    {
+      "id": "539b91e1bbb1c1a89cd34310c462e113b55a3a47",
+      "category": "container_scanning",
+      "message": "CVE-2020-1752 in libc6-2.28-10",
+      "description": "A use-after-free vulnerability introduced in glibc upstream version 2.14 was found in the way the tilde expansion was carried out. Directory paths containing an initial tilde followed by a valid username were affected by this issue. A local attacker could exploit this flaw by creating a specially crafted path that, when processed by the glob function, would potentially lead to arbitrary code execution. This was fixed in version 2.32.",
+      "cve": "CVE-2020-1752",
+      "severity": "High",
+      "confidence": "Unknown",
+      "solution": "No solution provided",
+      "scanner": { "id": "trivy", "name": "trivy" },
+      "location": {
+        "dependency": { "package": { "name": "libc6" }, "version": "2.28-10" },
+        "operating_system": "debian 10.9",
+        "image": "registry/vulnerable-project:latest"
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2020-1752",
+          "value": "CVE-2020-1752",
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2020-1752"
+        }
+      ],
+      "links": [
+        { "url": "https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2020-1752" },
+        {
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-1752"
+        },
+        { "url": "https://linux.oracle.com/cve/CVE-2020-1752.html" },
+        { "url": "https://linux.oracle.com/errata/ELSA-2020-4444.html" },
+        { "url": "https://security.gentoo.org/glsa/202101-20" },
+        { "url": "https://security.netapp.com/advisory/ntap-20200511-0005/" },
+        { "url": "https://sourceware.org/bugzilla/show_bug.cgi?id=25414" },
+        {
+          "url": "https://sourceware.org/git/gitweb.cgi?p=glibc.git;h=ddc650e9b3dc916eab417ce9f79e67337b05035c"
+        },
+        { "url": "https://usn.ubuntu.com/4416-1/" },
+        { "url": "https://usn.ubuntu.com/usn/usn-4416-1" }
+      ]
+    },
+    {
+      "id": "c10ff6acb5bda2aa0917b507d15dcc5084231995",
+      "category": "container_scanning",
+      "message": "CVE-2021-3326 in libc6-2.28-10",
+      "description": "The iconv function in the GNU C Library (aka glibc or libc6) 2.32 and earlier, when processing invalid input sequences in the ISO-2022-JP-3 encoding, fails an assertion in the code path and aborts the program, potentially resulting in a denial of service.",
+      "cve": "CVE-2021-3326",
+      "severity": "High",
+      "confidence": "Unknown",
+      "solution": "No solution provided",
+      "scanner": { "id": "trivy", "name": "trivy" },
+      "location": {
+        "dependency": { "package": { "name": "libc6" }, "version": "2.28-10" },
+        "operating_system": "debian 10.9",
+        "image": "registry/vulnerable-project:latest"
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2021-3326",
+          "value": "CVE-2021-3326",
+          "url": "http://www.openwall.com/lists/oss-security/2021/01/28/2"
+        }
+      ],
+      "links": [
+        { "url": "http://www.openwall.com/lists/oss-security/2021/01/28/2" },
+        { "url": "https://linux.oracle.com/cve/CVE-2021-3326.html" },
+        { "url": "https://linux.oracle.com/errata/ELSA-2021-1585.html" },
+        { "url": "https://security.netapp.com/advisory/ntap-20210304-0007/" },
+        { "url": "https://sourceware.org/bugzilla/show_bug.cgi?id=27256" },
+        {
+          "url": "https://sourceware.org/git/?p=glibc.git;a=commit;h=7d88c6142c6efc160c0ee5e4f85cde382c072888"
+        }
+      ]
+    },
+    {
+      "id": "9b3644fda668e8cff802e55229ec84bf142a62e3",
+      "category": "container_scanning",
+      "message": "CVE-2021-33574 in libc6-2.28-10",
+      "description": "The mq_notify function in the GNU C Library (aka glibc) through 2.33 has a use-after-free. It may use the notification thread attributes object (passed through its struct sigevent parameter) after it has been freed by the caller, leading to a denial of service (application crash) or possibly unspecified other impact.",
+      "cve": "CVE-2021-33574",
+      "severity": "High",
+      "confidence": "Unknown",
+      "solution": "No solution provided",
+      "scanner": { "id": "trivy", "name": "trivy" },
+      "location": {
+        "dependency": { "package": { "name": "libc6" }, "version": "2.28-10" },
+        "operating_system": "debian 10.9",
+        "image": "registry/vulnerable-project:latest"
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2021-33574",
+          "value": "CVE-2021-33574",
+          "url": "https://sourceware.org/bugzilla/show_bug.cgi?id=27896"
+        }
+      ],
+      "links": [
+        { "url": "https://sourceware.org/bugzilla/show_bug.cgi?id=27896" }
+      ]
+    },
+    {
+      "id": "e06a8d6ae0aabb679a54fdd4082ff78b96c2f9fd",
+      "category": "container_scanning",
+      "message": "CVE-2019-25013 in libc6-2.28-10",
+      "description": "The iconv feature in the GNU C Library (aka glibc or libc6) through 2.32, when processing invalid multi-byte input sequences in the EUC-KR encoding, may have a buffer over-read.",
+      "cve": "CVE-2019-25013",
+      "severity": "Medium",
+      "confidence": "Unknown",
+      "solution": "No solution provided",
+      "scanner": { "id": "trivy", "name": "trivy" },
+      "location": {
+        "dependency": { "package": { "name": "libc6" }, "version": "2.28-10" },
+        "operating_system": "debian 10.9",
+        "image": "registry/vulnerable-project:latest"
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2019-25013",
+          "value": "CVE-2019-25013",
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-25013"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-25013"
+        },
+        { "url": "https://linux.oracle.com/cve/CVE-2019-25013.html" },
+        { "url": "https://linux.oracle.com/errata/ELSA-2021-1585.html" },
+        {
+          "url": "https://lists.apache.org/thread.html/r32d767ac804e9b8aad4355bb85960a6a1385eab7afff549a5e98660f@%3Cjira.kafka.apache.org%3E"
+        },
+        {
+          "url": "https://lists.apache.org/thread.html/r448bb851cc8e6e3f93f3c28c70032b37062625d81214744474ac49e7@%3Cdev.kafka.apache.org%3E"
+        },
+        {
+          "url": "https://lists.apache.org/thread.html/r4806a391091e082bdea17266452ca656ebc176e51bb3932733b3a0a2@%3Cjira.kafka.apache.org%3E"
+        },
+        {
+          "url": "https://lists.apache.org/thread.html/r499e4f96d0b5109ef083f2feccd33c51650c1b7d7068aa3bd47efca9@%3Cjira.kafka.apache.org%3E"
+        },
+        {
+          "url": "https://lists.apache.org/thread.html/r5af4430421bb6f9973294691a7904bbd260937e9eef96b20556f43ff@%3Cjira.kafka.apache.org%3E"
+        },
+        {
+          "url": "https://lists.apache.org/thread.html/r750eee18542bc02bd8350861c424ee60a9b9b225568fa09436a37ece@%3Cissues.zookeeper.apache.org%3E"
+        },
+        {
+          "url": "https://lists.apache.org/thread.html/r7a2e94adfe0a2f0a1d42e4927e8c32ecac97d37db9cb68095fe9ddbc@%3Cdev.zookeeper.apache.org%3E"
+        },
+        {
+          "url": "https://lists.apache.org/thread.html/rd2354f9ccce41e494fbadcbc5ad87218de6ec0fff8a7b54c8462226c@%3Cissues.zookeeper.apache.org%3E"
+        },
+        {
+          "url": "https://lists.apache.org/thread.html/rf9fa47ab66495c78bb4120b0754dd9531ca2ff0430f6685ac9b07772@%3Cdev.mina.apache.org%3E"
+        },
+        {
+          "url": "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/4Y6TX47P47KABSFOL26FLDNVCWXDKDEZ/"
+        },
+        {
+          "url": "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/TVCUNLQ3HXGS4VPUQKWTJGRAW2KTFGXS/"
+        },
+        { "url": "https://security.netapp.com/advisory/ntap-20210205-0004/" },
+        { "url": "https://sourceware.org/bugzilla/show_bug.cgi?id=24973" },
+        {
+          "url": "https://sourceware.org/git/?p=glibc.git;a=commit;h=ee7a3144c9922808181009b7b3e50e852fb4999b"
+        }
+      ]
+    }
+  ],
+  "remediations": [],
+  "scan": {
+    "scanner": {
+      "id": "trivy",
+      "name": "Trivy",
+      "url": "https://github.com/aquasecurity/trivy/",
+      "vendor": { "name": "GitLab" },
+      "version": "0.16.0"
+    },
+    "type": "container_scanning",
+    "start_time": "2021-06-01T21:20:59",
+    "end_time": "2021-06-01T21:21:00",
+    "status": "success"
+  }
+}

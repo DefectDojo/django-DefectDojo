@@ -1,0 +1,105 @@
+{
+    "RID": "BT6yDhqjjrTyZCTbsOWWkAnZPHy8YGwd",
+    "repositoryURL": "https://github.com/globocom/huskyCI.git",
+    "repositoryBranch": "test1",
+    "commitAuthors": [
+        "contato@edersonbrilhante.com.br"
+    ],
+    "status": "finished",
+    "result": "failed",
+    "errorFound": "",
+    "containers": [
+        {
+            "CID": "8c2e66441637c71968ea4c8183b964177d4e5c073ccbec6a8ecdd8bab0aa46f4",
+            "securityTest": {
+                "name": "gitleaks",
+                "image": "huskyci/gitleaks",
+                "imageTag": "2.1.0",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone -b %GIT_BRANCH% --single-branch %GIT_REPO% code --quiet 2> /tmp/errorGitCloneGitleaks\nif [ $? -eq 0 ]; then\n    touch /tmp/results.json\n    timeout -t 360 $(which gitleaks) --log=warn --report=/tmp/results.json --repo-path=./code --branch=%GIT_BRANCH% --repo-config &> /tmp/errorGitleaks\n    if [[ $? -eq 124 || $? -eq 143 ]]; then #timeout exit codes\n        echo 'ERROR_TIMEOUT_GITLEAKS'\n        cat /tmp/errorGitleaks\n    elif [ $? -eq 2 ]; then\n        echo 'ERROR_RUNNING_GITLEAKS'\n        cat /tmp/errorGitleaks\n    else\n        jq -j -M -c . /tmp/results.json\n    fi\nelse\n    echo \"ERROR_CLONING\"\n    cat /tmp/errorGitCloneGitleaks\nfi\n",
+                "type": "Generic",
+                "language": "",
+                "default": true,
+                "timeOutSeconds": 360
+            },
+            "cStatus": "finished",
+            "cOutput": "",
+            "cResult": "passed",
+            "cInfo": "No issues found.",
+            "startedAt": "2020-05-19T20:16:22.145169281Z",
+            "finishedAt": "2020-05-19T20:16:23.604059702Z"
+        },
+        {
+            "CID": "0b0a7149abe72db2f18a3edea1915a4ade3eeccbcfca29f47697280e73ff1527",
+            "securityTest": {
+                "name": "tfsec",
+                "image": "huskyci/tfsec",
+                "imageTag": "dev",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone -b %GIT_BRANCH% --single-branch %GIT_REPO% code --quiet 2> /tmp/errorGitCloneTFSec\nif [ $? -eq 0 ]; then\n    ./tfsec code --format=json | grep -v \"WARNING: skipped\" > pre-results.json\n    cat pre-results.json | grep -v \"WARNING: skipped\" > results.json\n    echo \"{\\\"warnings\\\":\\\"$(cat pre-results.json | grep \"WARNING: skipped\")\\\"}\" >> warning.json\n    cat results.json warning.json | jq -s add | jq -j -M -c .\nelse\n  echo \"ERROR_CLONING\"\n  cat /tmp/errorGitCloneTFSec\nfi\n",
+                "type": "Language",
+                "language": "HCL",
+                "default": true,
+                "timeOutSeconds": 360
+            },
+            "cStatus": "finished",
+            "cOutput": "",
+            "cResult": "passed",
+            "cInfo": "No issues found.",
+            "startedAt": "2020-05-19T20:16:22.146102023Z",
+            "finishedAt": "2020-05-19T20:16:23.781776912Z"
+        },
+        {
+            "CID": "65c3c239eb66fee471a35983aa90dffe2b24e048ae55450d16c5650c76f562dc",
+            "securityTest": {
+                "name": "gitauthors",
+                "image": "huskyci/gitauthors",
+                "imageTag": "2.18.2",
+                "cmd": "mkdir -p ~/.ssh &&\necho 'GIT_PRIVATE_SSH_KEY' > ~/.ssh/huskyci_id_rsa &&\nchmod 600 ~/.ssh/huskyci_id_rsa &&\necho \"IdentityFile ~/.ssh/huskyci_id_rsa\" >> /etc/ssh/ssh_config &&\necho \"StrictHostKeyChecking no\" >> /etc/ssh/ssh_config &&\nGIT_TERMINAL_PROMPT=0 git clone %GIT_REPO% code --quiet 2> /tmp/errorGitCloneEnry\ncd code\ngit branch -a | egrep 'remotes/origin/master' 1> /dev/null 2> /dev/null\nif [ $? -ne 0 ]; then\n  echo \"{\\\"authors\\\":[]}\"\n  exit 0\nfi\ngit checkout %GIT_BRANCH% --quiet\nif [ $? -eq 0 ]; then\n  for i in $(git log origin/master.. --pretty=\"%ae\" | sort -u); do\n    jsonMiddle=\"\\\"$i\\\",$jsonMiddle\"\n  done\n  length=${#jsonMiddle}\n  endindex=$(expr $length - 1)\n  authors=\"${jsonMiddle:0:$endindex}\"\n  echo \"{\\\"authors\\\":[$authors]}\"\nelse\n  echo \"ERROR_CLONING\"\n  cat /tmp/errorGitCloneEnry\nfi\n",
+                "type": "Generic",
+                "language": "",
+                "default": true,
+                "timeOutSeconds": 60
+            },
+            "cStatus": "finished",
+            "cOutput": "{\"authors\":[\"contato@edersonbrilhante.com.br\"]}\r\n",
+            "cResult": "passed",
+            "cInfo": "No issues found.",
+            "startedAt": "2020-05-19T20:16:22.147184454Z",
+            "finishedAt": "2020-05-19T20:16:25.721411977Z"
+        }
+    ],
+    "startedAt": "2020-05-19T20:16:20.571405Z",
+    "finishedAt": "2020-05-19T20:16:25.721487Z",
+    "codes": [
+        {
+            "language": "HCL",
+            "files": [
+                "terraform/main.tf"
+            ]
+        }
+    ],
+    "huskyciresults": {
+        "goresults": {
+            "gosecoutput": {}
+        },
+        "pythonresults": {
+            "banditoutput": {},
+            "safetyoutput": {}
+        },
+        "javascriptresults": {
+            "npmauditoutput": {},
+            "yarnauditoutput": {}
+        },
+        "rubyresults": {
+            "brakemanoutput": {}
+        },
+        "javaresults": {
+            "spotbugsoutput": {}
+        },
+        "hclresults": {
+            "tfsecoutput": {}
+        },
+        "genericresults": {
+            "gitleaksoutput": {}
+        }
+    }
+}

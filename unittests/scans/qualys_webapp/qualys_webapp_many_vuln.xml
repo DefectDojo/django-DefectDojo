@@ -1,0 +1,1165 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<WAS_SCAN_REPORT>
+    <HEADER>
+        <NAME>Scan Report</NAME>
+        <DESCRIPTION>Vulnerabilities of all selected scans are consolidated into one report so that you can view their evolution.</DESCRIPTION>
+        <GENERATION_DATETIME>01 Apr 2020 01:16PM GMT-0400</GENERATION_DATETIME>
+        <COMPANY_INFO>
+            <NAME>Example Co.</NAME>
+            <ADDRESS>2600 Dialtone Way</ADDRESS>
+            <CITY>Metropolis</CITY>
+            <STATE>Virginia</STATE>
+            <COUNTRY>United States of America</COUNTRY>
+            <ZIP_CODE>20121</ZIP_CODE>
+        </COMPANY_INFO>
+        <USER_INFO>
+            <NAME>Eddie Example</NAME>
+            <USERNAME>eexample</USERNAME>
+        </USER_INFO>
+    </HEADER>
+    <FILTERS>
+        <FILTER>
+            <NAME>REMEDIATION</NAME>
+            <VALUE>Include patched findings</VALUE>
+        </FILTER>
+        <FILTER>
+            <NAME>REMEDIATION</NAME>
+            <VALUE>Show ignored findings </VALUE>
+        </FILTER>
+    </FILTERS>
+    <TARGET>
+        <SCAN>Web Application Vulnerability Scan - eStore Server 1 - 2020-03-11</SCAN>
+    </TARGET>
+    <SUMMARY>
+        <GLOBAL_SUMMARY>
+            <SECURITY_RISK>Medium</SECURITY_RISK>
+            <VULNERABILITY>4</VULNERABILITY>
+            <SENSITIVE_CONTENT>0</SENSITIVE_CONTENT>
+            <INFORMATION_GATHERED>18</INFORMATION_GATHERED>
+        </GLOBAL_SUMMARY>
+        <SUMMARY_STATS>
+            <SUMMARY_STAT>
+                <SCAN>Web Application Vulnerability Scan - eStore Server 1 - 2020-03-11</SCAN>
+                <DATE>11 Mar 2020</DATE>
+                <LEVEL5>0</LEVEL5>
+                <LEVEL4>0</LEVEL4>
+                <LEVEL3>1</LEVEL3>
+                <LEVEL2>1</LEVEL2>
+                <LEVEL1>2</LEVEL1>
+                <SENSITIVE_CONTENT>0</SENSITIVE_CONTENT>
+                <INFORMATION_GATHERED>18</INFORMATION_GATHERED>
+            </SUMMARY_STAT>
+        </SUMMARY_STATS>
+    </SUMMARY>
+    <RESULTS>
+        <VULNERABILITY_LIST>
+            <VULNERABILITY>
+                <UNIQUE_ID>2ba09eec-7bb4-11ea-8a61-939892c11a65</UNIQUE_ID>
+                <ID>101507528</ID>
+                <DETECTION_ID>6058986</DETECTION_ID>
+                <QID>150004</QID>
+                <URL>https://store.example.com/js/xdr/core/lang/xdr_en.json.gz</URL>
+                <ACCESS_PATH>
+                    <URL>https://store.example.com/</URL>
+                    <URL>https://store.example.com/index.html</URL>
+                </ACCESS_PATH>
+                <AJAX>false</AJAX>
+                <AUTHENTICATION>Not Required</AUTHENTICATION>
+                <DETECTION_DATE>11 Mar 2020 01:07PM GMT-0400</DETECTION_DATE>
+                <PAYLOADS>
+                    <PAYLOAD>
+                        <NUM>1</NUM>
+                        <PAYLOAD>https://store.example.com/js/xdr/core/lang/xdr_en.json.gz</PAYLOAD>
+                        <REQUEST>
+                            <METHOD>GET</METHOD>
+                            <URL>https://store.example.com/js/xdr/core/lang/xdr_en.json.gz</URL>
+                            <HEADERS>
+                                <HEADER>
+                                    <key>Referer</key>
+                                    <value><![CDATA[ https://store.example.com/]]></value>
+                                </HEADER>
+                                <HEADER>
+                                    <key>Cookie</key>
+                                    <value><![CDATA[ NSC_ERR=4001;]]></value>
+                                </HEADER>
+                                <HEADER>
+                                    <key>Host</key>
+                                    <value><![CDATA[ store.example.com]]></value>
+                                </HEADER>
+                                <HEADER>
+                                    <key>User-Agent</key>
+                                    <value><![CDATA[ Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/601.4.4 (KHTML, like Gecko) Version/9.0.3 Safari/601.4.4]]></value>
+                                </HEADER>
+                                <HEADER>
+                                    <key>Accept</key>
+                                    <value><![CDATA[ */*]]></value>
+                                </HEADER>
+                            </HEADERS>
+                        </REQUEST>
+                        <RESPONSE>
+                            <CONTENTS base64="true">Y29tbWVudDogQXJjaGl2ZSBjb250ZW50IGlzIGd6aXBlZAoKT3JpZ2luYWwgVVJMIGlzOiBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci9jb3JlL2xhbmcveGRyX2VuLmpzb24KCkhUVFAvMS4xIDIwMCBPSw==</CONTENTS>
+                        </RESPONSE>
+                    </PAYLOAD>
+                </PAYLOADS>
+                <IGNORED>false</IGNORED>
+            </VULNERABILITY>
+            <VULNERABILITY>
+                <UNIQUE_ID>17af8b2c-7bb5-11ea-bb9e-b38bf643251f</UNIQUE_ID>
+                <ID>101507525</ID>
+                <DETECTION_ID>6058980</DETECTION_ID>
+                <QID>150085</QID>
+                <URL>https://store.example.com/logon/themes/Default/resources/config.xml</URL>
+                <AJAX>false</AJAX>
+                <AUTHENTICATION>Not Required</AUTHENTICATION>
+                <DETECTION_DATE>11 Mar 2020 01:07PM GMT-0400</DETECTION_DATE>
+                <PAYLOADS>
+                    <PAYLOAD>
+                        <NUM>1</NUM>
+                        <PAYLOAD>N/A</PAYLOAD>
+                        <REQUEST>
+                            <METHOD>POST</METHOD>
+                            <URL>https://store.example.com/logon/themes/Default/resources/config.xml</URL>
+                            <HEADERS>
+                                <HEADER>
+                                    <key>Host</key>
+                                    <value><![CDATA[ store.example.com]]></value>
+                                </HEADER>
+                                <HEADER>
+                                    <key>User-Agent</key>
+                                    <value><![CDATA[ Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/601.4.4 (KHTML, like Gecko) Version/9.0.3 Safari/601.4.4]]></value>
+                                </HEADER>
+                                <HEADER>
+                                    <key>Accept</key>
+                                    <value><![CDATA[ */*]]></value>
+                                </HEADER>
+                                <HEADER>
+                                    <key>Content-Type</key>
+                                    <value><![CDATA[ application/x-www-form-urlencoded]]></value>
+                                </HEADER>
+                            </HEADERS>
+                        </REQUEST>
+                        <RESPONSE>
+                            <CONTENTS base64="true">VnVsbmVyYWJsZSB0byBzbG93IEhUVFAgUE9TVCBhdHRhY2sKCUNvbm5lY3Rpb24gd2l0aCBwYXJ0aWFsIFBPU1QgYm9keSByZW1haW5lZCBvcGVuIGZvcjogMTM1MDM5IG1pbGxpc2Vjb25kcwoJU2VydmVyIHJlc2V0cyB0aW1lb3V0IGFmdGVyIGFjY2VwdGluZyByZXF1ZXN0IGRhdGEgZnJvbSBwZWVyLg==</CONTENTS>
+                        </RESPONSE>
+                    </PAYLOAD>
+                </PAYLOADS>
+                <IGNORED>false</IGNORED>
+            </VULNERABILITY>
+            <VULNERABILITY>
+                <UNIQUE_ID>33bd4ef8-7bb5-11ea-98f7-732e1650afdd</UNIQUE_ID>
+                <ID>101507526</ID>
+                <DETECTION_ID>6058982</DETECTION_ID>
+                <QID>150246</QID>
+                <URL>https://store.example.com/logon/themes/Default/resources/config.xml</URL>
+                <AJAX>false</AJAX>
+                <AUTHENTICATION>Not Required</AUTHENTICATION>
+                <DETECTION_DATE>11 Mar 2020 01:07PM GMT-0400</DETECTION_DATE>
+                <PAYLOADS>
+                    <PAYLOAD>
+                        <NUM>1</NUM>
+                        <PAYLOAD>N/A</PAYLOAD>
+                        <REQUEST>
+                            <METHOD>GET</METHOD>
+                            <URL>https://store.example.com/logon/themes/Default/resources/config.xml</URL>
+                            <HEADERS>
+                                <HEADER>
+                                    <key>Host</key>
+                                    <value><![CDATA[ store.example.com]]></value>
+                                </HEADER>
+                                <HEADER>
+                                    <key>User-Agent</key>
+                                    <value><![CDATA[ Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/601.4.4 (KHTML, like Gecko) Version/9.0.3 Safari/601.4.4]]></value>
+                                </HEADER>
+                                <HEADER>
+                                    <key>Accept</key>
+                                    <value><![CDATA[ */*]]></value>
+                                </HEADER>
+                            </HEADERS>
+                        </REQUEST>
+                        <RESPONSE>
+                            <CONTENTS base64="true">ClJlbGF0aXZlIFBhdGggQ1NTIExpbmtzIGZvdW5kOgovanMveGRyL2NvcmUvY3NzL3hkci5jc3M/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYgovbG9nb24vdGhlbWVzL0RlZmF1bHQvY3NzL2Jhc2UuY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIKL2xvZ29uL2ZvbnRzL2V4YW1wbGUtZm9udHMuY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIKL2xvZ29uL3RoZW1lcy9EZWZhdWx0L2Nzcy9jdXN0b20uY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmI=</CONTENTS>
+                        </RESPONSE>
+                    </PAYLOAD>
+                </PAYLOADS>
+                <IGNORED>false</IGNORED>
+            </VULNERABILITY>
+            <VULNERABILITY>
+                <UNIQUE_ID>7e3a2550-7bb5-11ea-acf9-6b5cf9f0dbed</UNIQUE_ID>
+                <ID>101507527</ID>
+                <DETECTION_ID>6058984</DETECTION_ID>
+                <QID>150246</QID>
+                <URL>https://store.example.com/index.html</URL>
+                <AJAX>false</AJAX>
+                <AUTHENTICATION>Not Required</AUTHENTICATION>
+                <DETECTION_DATE>11 Mar 2020 01:07PM GMT-0400</DETECTION_DATE>
+                <PAYLOADS>
+                    <PAYLOAD>
+                        <NUM>1</NUM>
+                        <PAYLOAD>N/A</PAYLOAD>
+                        <REQUEST>
+                            <METHOD>GET</METHOD>
+                            <URL>https://store.example.com/index.html</URL>
+                            <HEADERS>
+                                <HEADER>
+                                    <key>Host</key>
+                                    <value><![CDATA[ store.example.com]]></value>
+                                </HEADER>
+                                <HEADER>
+                                    <key>User-Agent</key>
+                                    <value><![CDATA[ Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/601.4.4 (KHTML, like Gecko) Version/9.0.3 Safari/601.4.4]]></value>
+                                </HEADER>
+                                <HEADER>
+                                    <key>Accept</key>
+                                    <value><![CDATA[ */*]]></value>
+                                </HEADER>
+                            </HEADERS>
+                        </REQUEST>
+                        <RESPONSE>
+                            <CONTENTS base64="true">ClJlbGF0aXZlIFBhdGggQ1NTIExpbmtzIGZvdW5kOgovanMveGRyL2NvcmUvY3NzL3hkci5jc3M/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYgovbG9nb24vdGhlbWVzL0RlZmF1bHQvY3NzL2Jhc2UuY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIKL2xvZ29uL2ZvbnRzL2V4YW1wbGUtZm9udHMuY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIKL2xvZ29uL3RoZW1lcy9EZWZhdWx0L2Nzcy9jdXN0b20uY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmI=</CONTENTS>
+                        </RESPONSE>
+                    </PAYLOAD>
+                </PAYLOADS>
+                <IGNORED>false</IGNORED>
+            </VULNERABILITY>
+        </VULNERABILITY_LIST>
+        <INFORMATION_GATHERED_LIST>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>b58af37c-7bb5-11ea-9543-d70435afdce0</UNIQUE_ID>
+                <ID>101507513</ID>
+                <DETECTION_ID>2244709</DETECTION_ID>
+                <QID>150021</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">TG9hZGVkIDAgYmxhY2tsaXN0IGVudHJpZXMuCkxvYWRlZCAwIHdoaXRlbGlzdCBlbnRyaWVzLgpIVE1MIGZvcm0gYXV0aGVudGljYXRpb24gdW5hdmFpbGFibGUsIG5vIFdFQkFQUCBlbnRyeSBmb3VuZApCYXRjaCAjMCBWaXJ0dWFsSG9zdERpc2NvdmVyeTogZXN0aW1hdGVkIHRpbWUgPCAxIG1pbnV0ZSAoMCB0ZXN0cywgMCBpbnB1dHMpClZpcnR1YWxIb3N0RGlzY292ZXJ5OiAwIHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgMCAgcmVxdWVzdHMsIDAgc2Vjb25kcy4gTm8gdGVzdHMgdG8gZXhlY3V0ZS4KQmF0Y2ggIzAgQ01TRGV0ZWN0aW9uOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgxIHRlc3RzLCAxIGlucHV0cykKW0NNU0RldGVjdGlvbiBwaGFzZV0gOiBObyBwb3RlbnRpYWwgQ01TIGZvdW5kLiBBYm9ydGluZyB0aGUgQ01TIERldGVjdGlvbiBwaGFzZUNNU0RldGVjdGlvbjogMSB2dWxuc2lncyB0ZXN0cywgY29tcGxldGVkIDQ4ICByZXF1ZXN0cywgOSBzZWNvbmRzLiBDb21wbGV0ZWQgNDggcmVxdWVzdHMgb2YgNDggZXN0aW1hdGVkIHJlcXVlc3RzICgxMDAlKS4gQWxsIHRlc3RzIGNvbXBsZXRlZC4KQ29sbGVjdGVkIDQxIGxpbmtzIG92ZXJhbGwgaW4gMCBob3VycyAzIG1pbnV0ZXMgZHVyYXRpb24uClBhdGggbWFuaXB1bGF0aW9uOiBFc3RpbWF0ZWQgcmVxdWVzdHMgKHBheWxvYWRzIHggbGlua3MpOiBmaWxlcyB3aXRoIGV4dGVuc2lvbjooMCB4IDI2KSArIGZpbGVzOigwIHggMjkpICsgIGRpcmVjdG9yaWVzOig5IHggMTkpICsgIHBhdGhzOigwIHggNDgpID0gdG90YWwgKDE3MSkgCkJhdGNoICMwIFdTIERpcmVjdG9yeSBQYXRoIG1hbmlwdWxhdGlvbjogZXN0aW1hdGVkIHRpbWUgPCAxIG1pbnV0ZSAoOSB0ZXN0cywgNDggaW5wdXRzKQpXUyBEaXJlY3RvcnkgUGF0aCBtYW5pcHVsYXRpb246IDkgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAxNzEgIHJlcXVlc3RzLCAzIHNlY29uZHMuIENvbXBsZXRlZCAxNzEgcmVxdWVzdHMgb2YgMTcxIGVzdGltYXRlZCByZXF1ZXN0cyAoMTAwJSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkJhdGNoICMwIFdTIGVudW1lcmF0aW9uOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgxMSB0ZXN0cywgNDggaW5wdXRzKQpXUyBlbnVtZXJhdGlvbjogMTEgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAyMzggIHJlcXVlc3RzLCAzIHNlY29uZHMuIENvbXBsZXRlZCAyMzggcmVxdWVzdHMgb2YgNTI4IGVzdGltYXRlZCByZXF1ZXN0cyAoNDUuMDc1OCUpLiBBbGwgdGVzdHMgY29tcGxldGVkLgpCYXRjaCAjMSBVUkkgcGFyYW1ldGVyIG1hbmlwdWxhdGlvbiAobm8gYXV0aCk6IGVzdGltYXRlZCB0aW1lIDwgMSBtaW51dGUgKDY4IHRlc3RzLCAxIGlucHV0cykKQmF0Y2ggIzEgVVJJIHBhcmFtZXRlciBtYW5pcHVsYXRpb24gKG5vIGF1dGgpOiA2OCB2dWxuc2lncyB0ZXN0cywgY29tcGxldGVkIDY3ICByZXF1ZXN0cywgMiBzZWNvbmRzLiBDb21wbGV0ZWQgNjcgcmVxdWVzdHMgb2YgNjggZXN0aW1hdGVkIHJlcXVlc3RzICg5OC41Mjk0JSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkJhdGNoICMxIEZvcm0gcGFyYW1ldGVyIG1hbmlwdWxhdGlvbiAobm8gYXV0aCk6IGVzdGltYXRlZCB0aW1lIDwgMSBtaW51dGUgKDY4IHRlc3RzLCA1IGlucHV0cykKQmF0Y2ggIzEgRm9ybSBwYXJhbWV0ZXIgbWFuaXB1bGF0aW9uIChubyBhdXRoKTogNjggdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAyNjggIHJlcXVlc3RzLCA2OTAgc2Vjb25kcy4gQ29tcGxldGVkIDI2OCByZXF1ZXN0cyBvZiAzNDAgZXN0aW1hdGVkIHJlcXVlc3RzICg3OC44MjM1JSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkJhdGNoICMxIFVSSSBibGluZCBTUUwgbWFuaXB1bGF0aW9uIChubyBhdXRoKTogZXN0aW1hdGVkIHRpbWUgPCAxIG1pbnV0ZSAoOCB0ZXN0cywgMSBpbnB1dHMpCkJhdGNoICMxIFVSSSBibGluZCBTUUwgbWFuaXB1bGF0aW9uIChubyBhdXRoKTogOCB2dWxuc2lncyB0ZXN0cywgY29tcGxldGVkIDE2ICByZXF1ZXN0cywgMCBzZWNvbmRzLiBDb21wbGV0ZWQgMTYgcmVxdWVzdHMgb2YgMjQgZXN0aW1hdGVkIHJlcXVlc3RzICg2Ni42NjY3JSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkJhdGNoICMxIEZvcm0gYmxpbmQgU1FMIG1hbmlwdWxhdGlvbiAobm8gYXV0aCk6IGVzdGltYXRlZCB0aW1lIDwgMTAgbWludXRlcyAoOCB0ZXN0cywgNSBpbnB1dHMpCkJhdGNoICMxIEZvcm0gYmxpbmQgU1FMIG1hbmlwdWxhdGlvbiAobm8gYXV0aCk6IDggdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAxMjggIHJlcXVlc3RzLCAyIHNlY29uZHMuIENvbXBsZXRlZCAxMjggcmVxdWVzdHMgb2YgMTIwIGVzdGltYXRlZCByZXF1ZXN0cyAoMTA2LjY2NyUpLiBBbGwgdGVzdHMgY29tcGxldGVkLgpCYXRjaCAjMSBVUkkgcGFyYW1ldGVyIHRpbWUtYmFzZWQgdGVzdHMgKG5vIGF1dGgpOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgxNCB0ZXN0cywgMSBpbnB1dHMpCkJhdGNoICMxIFVSSSBwYXJhbWV0ZXIgdGltZS1iYXNlZCB0ZXN0cyAobm8gYXV0aCk6IDE0IHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgMTQgIHJlcXVlc3RzLCAxIHNlY29uZHMuIENvbXBsZXRlZCAxNCByZXF1ZXN0cyBvZiAxNCBlc3RpbWF0ZWQgcmVxdWVzdHMgKDEwMCUpLiBBbGwgdGVzdHMgY29tcGxldGVkLgpCYXRjaCAjMSBGb3JtIGZpZWxkIHRpbWUtYmFzZWQgdGVzdHMgKG5vIGF1dGgpOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgxNCB0ZXN0cywgNSBpbnB1dHMpCkJhdGNoICMxIEZvcm0gZmllbGQgdGltZS1iYXNlZCB0ZXN0cyAobm8gYXV0aCk6IDE0IHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgNTYgIHJlcXVlc3RzLCAxIHNlY29uZHMuIENvbXBsZXRlZCA1NiByZXF1ZXN0cyBvZiA3MCBlc3RpbWF0ZWQgcmVxdWVzdHMgKDgwJSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkJhdGNoICMxIFVSSSBwYXJhbWV0ZXIgdGltZS1iYXNlZCB0ZXN0cyBmb3IgQXBhY2hlIFN0cnV0cyBWdWxuZXJhYmlsaXRpZXMgKG5vIGF1dGgpOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgxIHRlc3RzLCAxIGlucHV0cykKQmF0Y2ggIzEgVVJJIHBhcmFtZXRlciB0aW1lLWJhc2VkIHRlc3RzIGZvciBBcGFjaGUgU3RydXRzIFZ1bG5lcmFiaWxpdGllcyAobm8gYXV0aCk6IDEgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAxICByZXF1ZXN0cywgMCBzZWNvbmRzLiBDb21wbGV0ZWQgMSByZXF1ZXN0cyBvZiAxIGVzdGltYXRlZCByZXF1ZXN0cyAoMTAwJSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkJhdGNoICMxIEZvcm0gZmllbGQgdGltZS1iYXNlZCB0ZXN0cyBmb3IgQXBhY2hlIFN0cnV0cyBWdWxuZXJhYmlsaXRpZXMgKG5vIGF1dGgpOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgxIHRlc3RzLCA1IGlucHV0cykKQmF0Y2ggIzEgRm9ybSBmaWVsZCB0aW1lLWJhc2VkIHRlc3RzIGZvciBBcGFjaGUgU3RydXRzIFZ1bG5lcmFiaWxpdGllcyAobm8gYXV0aCk6IDEgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCA0ICByZXF1ZXN0cywgMCBzZWNvbmRzLiBDb21wbGV0ZWQgNCByZXF1ZXN0cyBvZiA1IGVzdGltYXRlZCByZXF1ZXN0cyAoODAlKS4gQWxsIHRlc3RzIGNvbXBsZXRlZC4KQmF0Y2ggIzIgVVJJIHBhcmFtZXRlciBtYW5pcHVsYXRpb24gKG5vIGF1dGgpOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICg2OCB0ZXN0cywgMCBpbnB1dHMpCkJhdGNoICMyIFVSSSBwYXJhbWV0ZXIgbWFuaXB1bGF0aW9uIChubyBhdXRoKTogNjggdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAwICByZXF1ZXN0cywgMCBzZWNvbmRzLiBObyB0ZXN0cyB0byBleGVjdXRlLgpCYXRjaCAjMiBGb3JtIHBhcmFtZXRlciBtYW5pcHVsYXRpb24gKG5vIGF1dGgpOiBlc3RpbWF0ZWQgdGltZSA8IDEwIG1pbnV0ZXMgKDY4IHRlc3RzLCA1IGlucHV0cykKQmF0Y2ggIzIgRm9ybSBwYXJhbWV0ZXIgbWFuaXB1bGF0aW9uIChubyBhdXRoKTogNjggdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCA1MjQgIHJlcXVlc3RzLCAyMiBzZWNvbmRzLiBDb21wbGV0ZWQgNTI0IHJlcXVlc3RzIG9mIDM0MCBlc3RpbWF0ZWQgcmVxdWVzdHMgKDE1NC4xMTglKS4gQWxsIHRlc3RzIGNvbXBsZXRlZC4KQmF0Y2ggIzIgVVJJIGJsaW5kIFNRTCBtYW5pcHVsYXRpb24gKG5vIGF1dGgpOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICg4IHRlc3RzLCAwIGlucHV0cykKQmF0Y2ggIzIgVVJJIGJsaW5kIFNRTCBtYW5pcHVsYXRpb24gKG5vIGF1dGgpOiA4IHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgMCAgcmVxdWVzdHMsIDAgc2Vjb25kcy4gTm8gdGVzdHMgdG8gZXhlY3V0ZS4KQmF0Y2ggIzIgRm9ybSBibGluZCBTUUwgbWFuaXB1bGF0aW9uIChubyBhdXRoKTogZXN0aW1hdGVkIHRpbWUgPCAxIG1pbnV0ZSAoOCB0ZXN0cywgNSBpbnB1dHMpCkJhdGNoICMyIEZvcm0gYmxpbmQgU1FMIG1hbmlwdWxhdGlvbiAobm8gYXV0aCk6IDggdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCA2NCAgcmVxdWVzdHMsIDQgc2Vjb25kcy4gQ29tcGxldGVkIDY0IHJlcXVlc3RzIG9mIDEyMCBlc3RpbWF0ZWQgcmVxdWVzdHMgKDUzLjMzMzMlKS4gQWxsIHRlc3RzIGNvbXBsZXRlZC4KQmF0Y2ggIzIgRm9ybSBmaWVsZCB0aW1lLWJhc2VkIHRlc3RzIChubyBhdXRoKTogZXN0aW1hdGVkIHRpbWUgPCAxIG1pbnV0ZSAoMTQgdGVzdHMsIDUgaW5wdXRzKQpCYXRjaCAjMiBGb3JtIGZpZWxkIHRpbWUtYmFzZWQgdGVzdHMgKG5vIGF1dGgpOiAxNCB2dWxuc2lncyB0ZXN0cywgY29tcGxldGVkIDU2ICByZXF1ZXN0cywgNSBzZWNvbmRzLiBDb21wbGV0ZWQgNTYgcmVxdWVzdHMgb2YgNzAgZXN0aW1hdGVkIHJlcXVlc3RzICg4MCUpLiBBbGwgdGVzdHMgY29tcGxldGVkLgpCYXRjaCAjMiBGb3JtIGZpZWxkIHRpbWUtYmFzZWQgdGVzdHMgZm9yIEFwYWNoZSBTdHJ1dHMgVnVsbmVyYWJpbGl0aWVzIChubyBhdXRoKTogZXN0aW1hdGVkIHRpbWUgPCAxIG1pbnV0ZSAoMSB0ZXN0cywgNSBpbnB1dHMpCkJhdGNoICMyIEZvcm0gZmllbGQgdGltZS1iYXNlZCB0ZXN0cyBmb3IgQXBhY2hlIFN0cnV0cyBWdWxuZXJhYmlsaXRpZXMgKG5vIGF1dGgpOiAxIHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgNCAgcmVxdWVzdHMsIDAgc2Vjb25kcy4gQ29tcGxldGVkIDQgcmVxdWVzdHMgb2YgNSBlc3RpbWF0ZWQgcmVxdWVzdHMgKDgwJSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkJhdGNoICM0IFdlYkNnaU9vYjogZXN0aW1hdGVkIHRpbWUgPCAxMCBtaW51dGVzICgyIHRlc3RzLCAxIGlucHV0cykKQmF0Y2ggIzQgV2ViQ2dpT29iOiAyIHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgNyAgcmVxdWVzdHMsIDIgc2Vjb25kcy4gQ29tcGxldGVkIDcgcmVxdWVzdHMgb2YgOTYgZXN0aW1hdGVkIHJlcXVlc3RzICg3LjI5MTY3JSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCk5vIFhNTCByZXF1ZXN0cyBmb3VuZC4gU2tpcHBpbmcgWFhFIHRlc3RzLgpCYXRjaCAjNCBET00gWFNTIGV4cGxvaXRhdGlvbjogZXN0aW1hdGVkIHRpbWUgPCAxIG1pbnV0ZSAoNCB0ZXN0cywgNCBpbnB1dHMpCkJhdGNoICM0IERPTSBYU1MgZXhwbG9pdGF0aW9uOiA0IHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgMzIgIHJlcXVlc3RzLCA2MiBzZWNvbmRzLiBObyB0ZXN0cyB0byBleGVjdXRlLgpCYXRjaCAjNCBIVFRQIGNhbGwgbWFuaXB1bGF0aW9uOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgzNyB0ZXN0cywgMCBpbnB1dHMpCkJhdGNoICM0IEhUVFAgY2FsbCBtYW5pcHVsYXRpb246IDM3IHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgMCAgcmVxdWVzdHMsIDAgc2Vjb25kcy4gTm8gdGVzdHMgdG8gZXhlY3V0ZS4KQmF0Y2ggIzQgT3BlbiBSZWRpcmVjdCBhbmFseXNpczogZXN0aW1hdGVkIHRpbWUgPCAxIG1pbnV0ZSAoMyB0ZXN0cywgMiBpbnB1dHMpCkJhdGNoICM0IE9wZW4gUmVkaXJlY3QgYW5hbHlzaXM6IDMgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAyICByZXF1ZXN0cywgMyBzZWNvbmRzLiBDb21wbGV0ZWQgMiByZXF1ZXN0cyBvZiAyIGVzdGltYXRlZCByZXF1ZXN0cyAoMTAwJSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkNTUkYgdGVzdHMgd2lsbCBub3QgYmUgbGF1bmNoZWQgYmVjYXVzZSB0aGUgc2NhbiBpcyBub3Qgc3VjY2Vzc2Z1bGx5IGF1dGhlbnRpY2F0ZWQuCkJhdGNoICM0IEZpbGUgSW5jbHVzaW9uIGFuYWx5c2lzOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgxIHRlc3RzLCAzMiBpbnB1dHMpCkJhdGNoICM0IEZpbGUgSW5jbHVzaW9uIGFuYWx5c2lzOiAxIHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgMCAgcmVxdWVzdHMsIDAgc2Vjb25kcy4gQ29tcGxldGVkIDAgcmVxdWVzdHMgb2YgMzIgZXN0aW1hdGVkIHJlcXVlc3RzICgwJSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkJhdGNoICM0IENvb2tpZSBtYW5pcHVsYXRpb246IGVzdGltYXRlZCB0aW1lIDwgMTAgbWludXRlcyAoNDUgdGVzdHMsIDYgaW5wdXRzKQpCYXRjaCAjNCBDb29raWUgbWFuaXB1bGF0aW9uOiA0NSB2dWxuc2lncyB0ZXN0cywgY29tcGxldGVkIDI4OSAgcmVxdWVzdHMsIDggc2Vjb25kcy4gQ29tcGxldGVkIDI4OSByZXF1ZXN0cyBvZiAyNTUgZXN0aW1hdGVkIHJlcXVlc3RzICgxMTMuMzMzJSkuIFhTUyBvcHRpbWl6YXRpb24gcmVtb3ZlZCA0MjAgbGlua3MuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkJhdGNoICM0IEhlYWRlciBtYW5pcHVsYXRpb246IGVzdGltYXRlZCB0aW1lIDwgMTAgbWludXRlcyAoNDUgdGVzdHMsIDE1IGlucHV0cykKQmF0Y2ggIzQgSGVhZGVyIG1hbmlwdWxhdGlvbjogNDUgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAxMDAzICByZXF1ZXN0cywgMjQgc2Vjb25kcy4gQ29tcGxldGVkIDEwMDMgcmVxdWVzdHMgb2YgMTg2MCBlc3RpbWF0ZWQgcmVxdWVzdHMgKDUzLjkyNDclKS4gWFNTIG9wdGltaXphdGlvbiByZW1vdmVkIDQyMCBsaW5rcy4gQWxsIHRlc3RzIGNvbXBsZXRlZC4KQmF0Y2ggIzQgc2hlbGwgc2hvY2sgZGV0ZWN0b3I6IGVzdGltYXRlZCB0aW1lIDwgMSBtaW51dGUgKDEgdGVzdHMsIDE1IGlucHV0cykKQmF0Y2ggIzQgc2hlbGwgc2hvY2sgZGV0ZWN0b3I6IDEgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAxNyAgcmVxdWVzdHMsIDAgc2Vjb25kcy4gQ29tcGxldGVkIDE3IHJlcXVlc3RzIG9mIDE1IGVzdGltYXRlZCByZXF1ZXN0cyAoMTEzLjMzMyUpLiBBbGwgdGVzdHMgY29tcGxldGVkLgpCYXRjaCAjNCBzaGVsbCBzaG9jayBkZXRlY3Rvcihmb3JtKTogZXN0aW1hdGVkIHRpbWUgPCAxIG1pbnV0ZSAoMSB0ZXN0cywgMiBpbnB1dHMpCkJhdGNoICM0IHNoZWxsIHNob2NrIGRldGVjdG9yKGZvcm0pOiAxIHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgMyAgcmVxdWVzdHMsIDEgc2Vjb25kcy4gQ29tcGxldGVkIDMgcmVxdWVzdHMgb2YgMiBlc3RpbWF0ZWQgcmVxdWVzdHMgKDE1MCUpLiBBbGwgdGVzdHMgY29tcGxldGVkLgpCYXRjaCAjNCBodHRwb3h5IGRldGVjdG9yOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgxIHRlc3RzLCAxNSBpbnB1dHMpCkJhdGNoICM0IGh0dHBveHkgZGV0ZWN0b3I6IDEgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAxNSAgcmVxdWVzdHMsIDAgc2Vjb25kcy4gQ29tcGxldGVkIDE1IHJlcXVlc3RzIG9mIDE1IGVzdGltYXRlZCByZXF1ZXN0cyAoMTAwJSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkJhdGNoICM0IGh0dHBveHkgZGV0ZWN0b3IoZm9ybSk6IGVzdGltYXRlZCB0aW1lIDwgMSBtaW51dGUgKDEgdGVzdHMsIDIgaW5wdXRzKQpCYXRjaCAjNCBodHRwb3h5IGRldGVjdG9yKGZvcm0pOiAxIHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgMiAgcmVxdWVzdHMsIDEgc2Vjb25kcy4gQ29tcGxldGVkIDIgcmVxdWVzdHMgb2YgMiBlc3RpbWF0ZWQgcmVxdWVzdHMgKDEwMCUpLiBBbGwgdGVzdHMgY29tcGxldGVkLgpCYXRjaCAjNCBTdHJ1dHMgdGltZWJhc2VkIGRldGVjdG9yOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgxIHRlc3RzLCAxNSBpbnB1dHMpCkJhdGNoICM0IFN0cnV0cyB0aW1lYmFzZWQgZGV0ZWN0b3I6IDEgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAxNSAgcmVxdWVzdHMsIDEgc2Vjb25kcy4gQ29tcGxldGVkIDE1IHJlcXVlc3RzIG9mIDE1IGVzdGltYXRlZCByZXF1ZXN0cyAoMTAwJSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuCkJhdGNoICM0IGluc2VjdXJlbHkgc2VydmVkIGNyZWQgZm9ybXMgZGV0ZWN0b3IgKG5vIGF1dGgpOiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgxIHRlc3RzLCAyIGlucHV0cykKQmF0Y2ggIzQgaW5zZWN1cmVseSBzZXJ2ZWQgY3JlZCBmb3JtcyBkZXRlY3RvciAobm8gYXV0aCk6IDEgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAwICByZXF1ZXN0cywgMCBzZWNvbmRzLiBObyB0ZXN0cyB0byBleGVjdXRlLgpCYXRjaCAjNSBIVFRQIFRpbWUgQmFuZGl0OiBlc3RpbWF0ZWQgdGltZSA8IDEgbWludXRlICgxIHRlc3RzLCAxMCBpbnB1dHMpCkJhdGNoICM1IEhUVFAgVGltZSBCYW5kaXQ6IDEgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAyMDAgIHJlcXVlc3RzLCAxNCBzZWNvbmRzLiBObyB0ZXN0cyB0byBleGVjdXRlLgpQYXRoIG1hbmlwdWxhdGlvbjogRXN0aW1hdGVkIHJlcXVlc3RzIChwYXlsb2FkcyB4IGxpbmtzKTogZmlsZXMgd2l0aCBleHRlbnNpb246KDAgeCAyNikgKyBmaWxlczooMCB4IDI5KSArICBkaXJlY3RvcmllczooNCB4IDE5KSArICBwYXRoczooMTEgeCA0OCkgPSB0b3RhbCAoNjA0KSAKQmF0Y2ggIzUgUGF0aCBYU1MgbWFuaXB1bGF0aW9uOiBlc3RpbWF0ZWQgdGltZSA8IDEwIG1pbnV0ZXMgKDE1IHRlc3RzLCA0OCBpbnB1dHMpCkJhdGNoICM1IFBhdGggWFNTIG1hbmlwdWxhdGlvbjogMTUgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCA2MDMgIHJlcXVlc3RzLCAxMCBzZWNvbmRzLiBDb21wbGV0ZWQgNjAzIHJlcXVlc3RzIG9mIDYwNCBlc3RpbWF0ZWQgcmVxdWVzdHMgKDk5LjgzNDQlKS4gQWxsIHRlc3RzIGNvbXBsZXRlZC4KUGF0aCBtYW5pcHVsYXRpb246IEVzdGltYXRlZCByZXF1ZXN0cyAocGF5bG9hZHMgeCBsaW5rcyk6IGZpbGVzIHdpdGggZXh0ZW5zaW9uOigwIHggMjYpICsgZmlsZXM6KDAgeCAyOSkgKyAgZGlyZWN0b3JpZXM6KDEgeCAxOSkgKyAgcGF0aHM6KDAgeCA0OCkgPSB0b3RhbCAoMTkpIApCYXRjaCAjNSBUb21jYXQgVnVsbiBtYW5pcHVsYXRpb246IGVzdGltYXRlZCB0aW1lIDwgMSBtaW51dGUgKDEgdGVzdHMsIDQ4IGlucHV0cykKQmF0Y2ggIzUgVG9tY2F0IFZ1bG4gbWFuaXB1bGF0aW9uOiAxIHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgMTMgIHJlcXVlc3RzLCAwIHNlY29uZHMuIENvbXBsZXRlZCAxMyByZXF1ZXN0cyBvZiAxOSBlc3RpbWF0ZWQgcmVxdWVzdHMgKDY4LjQyMTElKS4gQWxsIHRlc3RzIGNvbXBsZXRlZC4KUGF0aCBtYW5pcHVsYXRpb246IEVzdGltYXRlZCByZXF1ZXN0cyAocGF5bG9hZHMgeCBsaW5rcyk6IGZpbGVzIHdpdGggZXh0ZW5zaW9uOigwIHggMjYpICsgZmlsZXM6KDAgeCAyOSkgKyAgZGlyZWN0b3JpZXM6KDE2IHggMTkpICsgIHBhdGhzOigwIHggNDgpID0gdG90YWwgKDMwNCkgCkJhdGNoICM1IFRpbWUgYmFzZWQgcGF0aCBtYW5pcHVsYXRpb246IGVzdGltYXRlZCB0aW1lIDwgMSBtaW51dGUgKDE2IHRlc3RzLCAzMiBpbnB1dHMpCkJhdGNoICM1IFRpbWUgYmFzZWQgcGF0aCBtYW5pcHVsYXRpb246IDE2IHZ1bG5zaWdzIHRlc3RzLCBjb21wbGV0ZWQgNjQgIHJlcXVlc3RzLCA2NjAgc2Vjb25kcy4gQ29tcGxldGVkIDY0IHJlcXVlc3RzIG9mIDMwNCBlc3RpbWF0ZWQgcmVxdWVzdHMgKDIxLjA1MjYlKS4gQWxsIHRlc3RzIGNvbXBsZXRlZC4KUGF0aCBtYW5pcHVsYXRpb246IEVzdGltYXRlZCByZXF1ZXN0cyAocGF5bG9hZHMgeCBsaW5rcyk6IGZpbGVzIHdpdGggZXh0ZW5zaW9uOig0IHggMjYpICsgZmlsZXM6KDE4IHggMjkpICsgIGRpcmVjdG9yaWVzOigxMjMgeCAxOSkgKyAgcGF0aHM6KDE2IHggNDgpID0gdG90YWwgKDM3MzEpIApCYXRjaCAjNSBQYXRoIG1hbmlwdWxhdGlvbjogZXN0aW1hdGVkIHRpbWUgPCAxMCBtaW51dGVzICgxNjEgdGVzdHMsIDQ4IGlucHV0cykKQmF0Y2ggIzUgUGF0aCBtYW5pcHVsYXRpb246IDE2MSB2dWxuc2lncyB0ZXN0cywgY29tcGxldGVkIDI3NDcgIHJlcXVlc3RzLCA3NSBzZWNvbmRzLiBDb21wbGV0ZWQgMjc0NyByZXF1ZXN0cyBvZiAzNzMxIGVzdGltYXRlZCByZXF1ZXN0cyAoNzMuNjI2NCUpLiBBbGwgdGVzdHMgY29tcGxldGVkLgpCYXRjaCAjNSBXZWJDZ2lHZW5lcmljOiBlc3RpbWF0ZWQgdGltZSA8IDMwIG1pbnV0ZXMgKDIzIHRlc3RzLCAxIGlucHV0cykKQmF0Y2ggIzUgV2ViQ2dpR2VuZXJpYzogMjMgdnVsbnNpZ3MgdGVzdHMsIGNvbXBsZXRlZCAzOSAgcmVxdWVzdHMsIDYgc2Vjb25kcy4gQ29tcGxldGVkIDM5IHJlcXVlc3RzIG9mIDE5NjggZXN0aW1hdGVkIHJlcXVlc3RzICgxLjk4MTcxJSkuIEFsbCB0ZXN0cyBjb21wbGV0ZWQuClRvdGFsIHJlcXVlc3RzIG1hZGU6IDY4MjAKQXZlcmFnZSBzZXJ2ZXIgcmVzcG9uc2UgdGltZTogMC4zNSBzZWNvbmRzCg==</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>d6fbd5e4-7bb5-11ea-8553-0ba3ef6f38a3</UNIQUE_ID>
+                <ID>101507520</ID>
+                <DETECTION_ID>2244715</DETECTION_ID>
+                <QID>150202</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">ClgtQ29udGVudC1UeXBlLU9wdGlvbnM6IEhlYWRlciBtaXNzaW5nClJlc3BvbnNlIGhlYWRlcnMgb24gbGluazogR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0RlZmF1bHQvcmVzb3VyY2VzLyU3QmxhbmclN0QgcmVzcG9uc2UgY29kZTogNDA0CkRhdGU6IFdlZCwgMTEgTWFyIDIwMjAgMTc6MDk6NTAgR01UClNlcnZlcjogQXBhY2hlClgtRnJhbWUtT3B0aW9uczogU0FNRU9SSUdJTgpDb250ZW50LUxlbmd0aDogMTk2CktlZXAtQWxpdmU6IHRpbWVvdXQ9MTUsIG1heD05NQpDb25uZWN0aW9uOiBLZWVwLUFsaXZlCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sOyBjaGFyc2V0PWlzby04ODU5LTEKU3RyaWN0LVRyYW5zcG9ydC1TZWN1cml0eTogbWF4LWFnZT0xNTc2ODAwMDAsIG1heC1hZ2U9MzE1MzYwMDAKCkhlYWRlciBtaXNzaW5nIG9uIHRoZSBmb2xsb3dpbmcgbGluayhzKToKKE9ubHkgZmlyc3QgNTAgc3VjaCBwYWdlcyBhcmUgbGlzdGVkKQoKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0RlZmF1bHQvcmVzb3VyY2VzLyU3QmxhbmclN0QgcmVzcG9uc2UgY29kZTogNDA0CkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9EZWZhdWx0L2Nzcy9jdXN0b20uY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogNDA0CkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9FVUxBL3Jlc291cmNlcy8lN0JsYW5nJTdEIHJlc3BvbnNlIGNvZGU6IDQwNApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS92cG4vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19saWdodC5zdmcgcmVzcG9uc2UgY29kZTogNDA0CkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2Zhdmljb24uaWNvIHJlc3BvbnNlIGNvZGU6IDQwNAo=</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>1b45d5d8-7bb6-11ea-81a0-33a1fc38212b</UNIQUE_ID>
+                <ID>101507522</ID>
+                <DETECTION_ID>2244717</DETECTION_ID>
+                <QID>150009</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">RHVyYXRpb24gb2YgY3Jhd2wgcGhhc2UgKHNlY29uZHMpOiAyMTcuMDAKTnVtYmVyIG9mIGxpbmtzOiAzMAooVGhpcyBudW1iZXIgZXhjbHVkZXMgZm9ybSByZXF1ZXN0cyBhbmQgbGlua3MgcmUtcmVxdWVzdGVkIGR1cmluZyBhdXRoZW50aWNhdGlvbi4pCgpodHRwczovL3N0b3JlLmV4YW1wbGUuY29tLwpodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2NnaS9sb2dpbgpodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2Zhdmljb24uaWNvCmh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0RlZmF1bHQvY3NzL2N1c3RvbS5jc3M/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYgpodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9EZWZhdWx0L3Jlc291cmNlcy8lN0JsYW5nJTdECmh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0RlZmF1bHQvcmVzb3VyY2VzL2NvbmZpZy54bWwKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dvbi90aGVtZXMvRGVmYXVsdC9yZXNvdXJjZXMvZW4ueG1sCmh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0VVTEEvcmVzb3VyY2VzLyU3QmxhbmclN0QKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS92cG4vaW1hZ2VzL0FjY2Vzc0dhdGV3YXkuaWNvCmh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vdnBuL2ltYWdlcy9leGFtcGxlV2F0ZXJtYXJrLnBuZwpodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL3Zwbi9pbWFnZXMvTG9naW5CdXR0b25HbG93LnBuZwpodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL3Zwbi9pbWFnZXMvTmF2QmFyTGluay5naWYKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS92cG4vaW1hZ2VzL2NhcmJvbmZpYnJlX2ltZy5wbmcKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS92cG4vaW1hZ2VzL2NhcmJvbmZpYnJlX2ltZ193aGl0ZV9oZWFkZXIucG5nCmh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vdnBuL2ltYWdlcy9pY29uLVZQTi5wbmcKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS92cG4vaW5kZXguaHRtbApodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL3Zwbi9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX2JvbGQuc3ZnCmh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vdnBuL2pzL3hkci9jb3JlL2Nzcy9mb250cy9leGFtcGxlX3NhbnMvZXhhbXBsZXNhbnNfYm9sZC50dGYKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS92cG4vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19ib2xkLndvZmYKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS92cG4vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19saWdodC5zdmcKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS92cG4vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19saWdodC50dGYKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS92cG4vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19saWdodC53b2ZmCmh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vdnBuL2pzL3hkci9jb3JlL2Nzcy9mb250cy9leGFtcGxlX3NhbnMvZXhhbXBsZXNhbnNfcmVndWxhci5zdmcKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS92cG4vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19yZWd1bGFyLnR0ZgpodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL3Zwbi9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIud29mZgpodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL3Zwbi9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3NlbWlib2xkLnN2ZwpodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL3Zwbi9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3NlbWlib2xkLnR0ZgpodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL3Zwbi9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3NlbWlib2xkLndvZmYKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS92cG4vanMveGRyL2NvcmUvbGFuZy94ZHJfZW4uanNvbgpodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL3Zwbi9tZWRpYS9leGFtcGxlZ2F0ZXdheV9sb2dvX3doaXRlLnBuZwo=</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>53c92dd8-7bb6-11ea-9f2a-7f037388c6de</UNIQUE_ID>
+                <ID>101507508</ID>
+                <DETECTION_ID>2244705</DETECTION_ID>
+                <QID>150082</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">aHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbmRleC5odG1sCg==</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>789dff12-7bb6-11ea-9793-7bf3ea5aea49</UNIQUE_ID>
+                <ID>101507512</ID>
+                <DETECTION_ID>2244708</DETECTION_ID>
+                <QID>6</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">I3RhYmxlCklQX2FkZHJlc3MgSG9zdF9uYW1lCgoxNy40LjMxLjkgTm9fcmVnaXN0ZXJlZF9ob3N0bmFtZQo=</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>a8e1b236-7bb6-11ea-8787-d752869a9106</UNIQUE_ID>
+                <ID>101507518</ID>
+                <DETECTION_ID>2244713</DETECTION_ID>
+                <QID>150262</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">CkZlYXR1cmUtUG9saWN5OiBIZWFkZXIgbWlzc2luZwpSZXNwb25zZSBoZWFkZXJzIG9uIGxpbms6IEdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL3Jlc291cmNlcy5qcyByZXNwb25zZSBjb2RlOiAyMDAKQWdlOiA3CkRhdGU6IFdlZCwgMTEgTWFyIDIwMjAgMTc6MDg6NDggR01UCkNhY2hlLUNvbnRyb2w6IG5vLWNhY2hlCkNvbm5lY3Rpb246IEtlZXAtQWxpdmUKVmlhOiBOUy1DQUNIRS0xMC4wOiAxODAKRXRhZzogIjRhY2QtNTljZDY0Y2RjNjU4MCIKU2VydmVyOiBBcGFjaGUKWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lOCkxhc3QtTW9kaWZpZWQ6IFRodSwgMjMgSmFuIDIwMjAgMjI6Mzg6MzAgR01UCkFjY2VwdC1SYW5nZXM6IGJ5dGVzCkNvbnRlbnQtTGVuZ3RoOiAxOTE0OQpYLVhzcy1Qcm90ZWN0aW9uOiAxOyBtb2RlPWJsb2NrClgtQ29udGVudC1UeXBlLU9wdGlvbnM6IG5vc25pZmYKS2VlcC1BbGl2ZTogdGltZW91dD0xNSwgbWF4PTkzCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24vamF2YXNjcmlwdApTdHJpY3QtVHJhbnNwb3J0LVNlY3VyaXR5OiBtYXgtYWdlPTE1NzY4MDAwMCwgbWF4LWFnZT0zMTUzNjAwMAoKSGVhZGVyIG1pc3Npbmcgb24gdGhlIGZvbGxvd2luZyBsaW5rKHMpOgooT25seSBmaXJzdCA1MCBzdWNoIHBhZ2VzIGFyZSBsaXN0ZWQpCgpHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9yZXNvdXJjZXMuanMgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2luZGV4Lmh0bWwgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9EZWZhdWx0L3Jlc291cmNlcy8lN0JsYW5nJTdEIHJlc3BvbnNlIGNvZGU6IDQwNApQT1NUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vY2dpL2xvZ2luIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbWFnZXMvQWNjZXNzLmljbyByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL3hkci5jc3M/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0RlZmF1bHQvY3NzL2Jhc2UuY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL2ZvbnRzL2V4YW1wbGUtZm9udHMuY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9EZWZhdWx0L2Nzcy9jdXN0b20uY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogNDA0CkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci5qcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dpbi5qcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy92aWV3cy5qcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy9sb2dpbl92aWV3LmpzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL2xvZ2luX2Zvcm1fdmlldy5qcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9yZXNvdXJjZXMuanM/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vc2hhcmUuanM/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0VVTEEvcmVzb3VyY2VzLyU3QmxhbmclN0QgcmVzcG9uc2UgY29kZTogNDA0CkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9EZWZhdWx0L3Jlc291cmNlcy9jb25maWcueG1sIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dvbi90aGVtZXMvRGVmYXVsdC9yZXNvdXJjZXMvZW4ueG1sIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbWFnZXMvZXhhbXBsZVdhdGVybWFyay5wbmcgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2ltYWdlcy9Mb2dpbkJ1dHRvbkdsb3cucG5nIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbWFnZXMvTmF2QmFyTGluay5naWYgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2ltYWdlcy9jYXJib25maWJyZV9pbWcucG5nIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbWFnZXMvY2FyYm9uZmlicmVfaW1nX3doaXRlX2hlYWRlci5wbmcgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2ltYWdlcy9pY29uLnBuZyByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19ib2xkLnN2ZyByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19ib2xkLnR0ZiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19ib2xkLndvZmYgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci9jb3JlL2Nzcy9mb250cy9leGFtcGxlX3NhbnMvZXhhbXBsZXNhbnNfbGlnaHQuc3ZnIHJlc3BvbnNlIGNvZGU6IDQwNApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX2xpZ2h0LnR0ZiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19saWdodC53b2ZmIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIuc3ZnIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIudHRmIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIud29mZiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19zZW1pYm9sZC5zdmcgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci9jb3JlL2Nzcy9mb250cy9leGFtcGxlX3NhbnMvZXhhbXBsZXNhbnNfc2VtaWJvbGQudHRmIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3NlbWlib2xkLndvZmYgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci9jb3JlL2xhbmcveGRyX2VuLmpzb24gcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL21lZGlhL2V4YW1wbGVnYXRld2F5X2xvZ29fd2hpdGUucG5nIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9mYXZpY29uLmljbyByZXNwb25zZSBjb2RlOiA0MDQK</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>1fc56fe6-7bb7-11ea-b442-17afd10960e0</UNIQUE_ID>
+                <ID>101507516</ID>
+                <DETECTION_ID>2244711</DETECTION_ID>
+                <QID>45038</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">U2NhbiBkdXJhdGlvbjogMjEwMiBzZWNvbmRzCgpTdGFydCB0aW1lOiBXZWQsIE1hciAxMSAyMDIwLCAxNzowNzo0MiBHTVQKCkVuZCB0aW1lOiBXZWQsIE1hciAxMSAyMDIwLCAxNzo0Mjo0NCBHTVQK</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>3631d4e0-7bb7-11ea-9d4c-27ae861efbad</UNIQUE_ID>
+                <ID>101507507</ID>
+                <DETECTION_ID>2244704</DETECTION_ID>
+                <QID>150018</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">ClRvdGFsIG51bWJlciBvZiB1bmlxdWUgbGlua3MgdGhhdCBlbmNvdW50ZXJlZCB0aW1lb3V0IGVycm9yczogMQpMaW5rcyB3aXRoIGhpZ2hlc3QgbnVtYmVyIG9mIHRpbWVvdXRzOgogICAxIGh0dHA6Ly9zdG9yZS5leGFtcGxlLmNvbS9yZXNvdXJjZXMuanMKClBoYXNlIHdpc2Ugc3VtbWFyeSBvZiB0aW1lb3V0IGFuZCBjb25uZWN0aW9uIGVycm9ycyBlbmNvdW50ZXJlZDogCmVQaGFzZUNyYXdsICAgICAgICAgICAgICAgICAgICAgICAgOiAgICAgICAgICAxICAgICAgICAgMAo=</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>5c0f7564-7bb7-11ea-bac4-db4bebed65c1</UNIQUE_ID>
+                <ID>101507523</ID>
+                <DETECTION_ID>2244718</DETECTION_ID>
+                <QID>150206</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">CkNvbnRlbnQtU2VjdXJpdHktUG9saWN5OiBIZWFkZXIgbWlzc2luZwpSZXNwb25zZSBoZWFkZXJzIG9uIGxpbms6IEdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL3Jlc291cmNlcy5qcyByZXNwb25zZSBjb2RlOiAyMDAKQWdlOiA3CkRhdGU6IFdlZCwgMTEgTWFyIDIwMjAgMTc6MDg6NDggR01UCkNhY2hlLUNvbnRyb2w6IG5vLWNhY2hlCkNvbm5lY3Rpb246IEtlZXAtQWxpdmUKVmlhOiBOUy1DQUNIRS0xMC4wOiAxODAKRXRhZzogIjRhY2QtNTljZDY0Y2RjNjU4MCIKU2VydmVyOiBBcGFjaGUKWC1GcmFtZS1PcHRpb25zOiBTQU1FT1JJR0lOCkxhc3QtTW9kaWZpZWQ6IFRodSwgMjMgSmFuIDIwMjAgMjI6Mzg6MzAgR01UCkFjY2VwdC1SYW5nZXM6IGJ5dGVzCkNvbnRlbnQtTGVuZ3RoOiAxOTE0OQpYLVhzcy1Qcm90ZWN0aW9uOiAxOyBtb2RlPWJsb2NrClgtQ29udGVudC1UeXBlLU9wdGlvbnM6IG5vc25pZmYKS2VlcC1BbGl2ZTogdGltZW91dD0xNSwgbWF4PTkzCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24vamF2YXNjcmlwdApTdHJpY3QtVHJhbnNwb3J0LVNlY3VyaXR5OiBtYXgtYWdlPTE1NzY4MDAwMCwgbWF4LWFnZT0zMTUzNjAwMAoKSGVhZGVyIG1pc3Npbmcgb24gdGhlIGZvbGxvd2luZyBsaW5rKHMpOgooT25seSBmaXJzdCA1MCBzdWNoIHBhZ2VzIGFyZSBsaXN0ZWQpCgpHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9yZXNvdXJjZXMuanMgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2luZGV4Lmh0bWwgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9EZWZhdWx0L3Jlc291cmNlcy8lN0JsYW5nJTdEIHJlc3BvbnNlIGNvZGU6IDQwNApQT1NUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vY2dpL2xvZ2luIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbWFnZXMvQWNjZXNzLmljbyByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL3hkci5jc3M/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0RlZmF1bHQvY3NzL2Jhc2UuY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL2ZvbnRzL2V4YW1wbGUtZm9udHMuY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9EZWZhdWx0L2Nzcy9jdXN0b20uY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogNDA0CkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci5qcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dpbi5qcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy92aWV3cy5qcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy9sb2dpbl92aWV3LmpzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL2xvZ2luX2Zvcm1fdmlldy5qcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9yZXNvdXJjZXMuanM/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vc2hhcmUuanM/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0VVTEEvcmVzb3VyY2VzLyU3QmxhbmclN0QgcmVzcG9uc2UgY29kZTogNDA0CkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9EZWZhdWx0L3Jlc291cmNlcy9jb25maWcueG1sIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dvbi90aGVtZXMvRGVmYXVsdC9yZXNvdXJjZXMvZW4ueG1sIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbWFnZXMvZXhhbXBsZVdhdGVybWFyay5wbmcgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2ltYWdlcy9Mb2dpbkJ1dHRvbkdsb3cucG5nIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbWFnZXMvTmF2QmFyTGluay5naWYgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2ltYWdlcy9jYXJib25maWJyZV9pbWcucG5nIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbWFnZXMvY2FyYm9uZmlicmVfaW1nX3doaXRlX2hlYWRlci5wbmcgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2ltYWdlcy9pY29uLnBuZyByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19ib2xkLnN2ZyByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19ib2xkLnR0ZiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19ib2xkLndvZmYgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci9jb3JlL2Nzcy9mb250cy9leGFtcGxlX3NhbnMvZXhhbXBsZXNhbnNfbGlnaHQuc3ZnIHJlc3BvbnNlIGNvZGU6IDQwNApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX2xpZ2h0LnR0ZiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19saWdodC53b2ZmIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIuc3ZnIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIudHRmIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIud29mZiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19zZW1pYm9sZC5zdmcgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci9jb3JlL2Nzcy9mb250cy9leGFtcGxlX3NhbnMvZXhhbXBsZXNhbnNfc2VtaWJvbGQudHRmIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3NlbWlib2xkLndvZmYgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci9jb3JlL2xhbmcveGRyX2VuLmpzb24gcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL21lZGlhL2V4YW1wbGVfbG9nb193aGl0ZS5wbmcgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2Zhdmljb24uaWNvIHJlc3BvbnNlIGNvZGU6IDQwNAo=</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>b8ee9846-7bb7-11ea-9bb5-d3be1feb015b</UNIQUE_ID>
+                <ID>101507515</ID>
+                <DETECTION_ID>2247133</DETECTION_ID>
+                <QID>150126</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">MTEzMC4wMDAwMDAgYnl0ZXMvc2VjIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19saWdodC5zdmcKMTI4NC41MDAwMDAgYnl0ZXMvc2VjIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vZmF2aWNvbi5pY28KMTkyODg4LjgwMDAwMCBieXRlcy9zZWMgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX2JvbGQudHRmCjYwMDMzNy40MDAwMDAgYnl0ZXMvc2VjIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19ib2xkLndvZmYKNjA2NTk0LjkwMDAwMCBieXRlcy9zZWMgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX2xpZ2h0LndvZmYKNjE2ODQxLjkwMDAwMCBieXRlcy9zZWMgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3NlbWlib2xkLndvZmYKNjE2OTU5LjYwMDAwMCBieXRlcy9zZWMgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIud29mZgoxMDM5MDE5LjAwMDAwMCBieXRlcy9zZWMgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX2xpZ2h0LnR0ZgoxMDQxODIzLjUwMDAwMCBieXRlcy9zZWMgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3NlbWlib2xkLnR0ZgoxMDQzODMwLjIwMDAwMCBieXRlcy9zZWMgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIudHRmCg==</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>fc5211ee-7bb7-11ea-858f-6f9d39fb7c12</UNIQUE_ID>
+                <ID>101507521</ID>
+                <DETECTION_ID>2244716</DETECTION_ID>
+                <QID>45017</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">TmV0U2NhbGVyIFRDUC9JUF9GaW5nZXJwcmludCBVNDExODo0NDMK</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>13ad6906-7bb8-11ea-b8ac-97a67e8ac238</UNIQUE_ID>
+                <ID>101507524</ID>
+                <DETECTION_ID>2244719</DETECTION_ID>
+                <QID>150204</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">ClgtWHNzLVByb3RlY3Rpb246IEhlYWRlciBtaXNzaW5nClJlc3BvbnNlIGhlYWRlcnMgb24gbGluazogR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0RlZmF1bHQvcmVzb3VyY2VzLyU3QmxhbmclN0QgcmVzcG9uc2UgY29kZTogNDA0CkRhdGU6IFdlZCwgMTEgTWFyIDIwMjAgMTc6MDk6NTAgR01UClNlcnZlcjogQXBhY2hlClgtRnJhbWUtT3B0aW9uczogU0FNRU9SSUdJTgpDb250ZW50LUxlbmd0aDogMTk2CktlZXAtQWxpdmU6IHRpbWVvdXQ9MTUsIG1heD05NQpDb25uZWN0aW9uOiBLZWVwLUFsaXZlCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sOyBjaGFyc2V0PWlzby04ODU5LTEKU3RyaWN0LVRyYW5zcG9ydC1TZWN1cml0eTogbWF4LWFnZT0xNTc2ODAwMDAsIG1heC1hZ2U9MzE1MzYwMDAKCkhlYWRlciBtaXNzaW5nIG9uIHRoZSBmb2xsb3dpbmcgbGluayhzKToKKE9ubHkgZmlyc3QgNTAgc3VjaCBwYWdlcyBhcmUgbGlzdGVkKQoKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0RlZmF1bHQvcmVzb3VyY2VzLyU3QmxhbmclN0QgcmVzcG9uc2UgY29kZTogNDA0ClBPU1QgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9jZ2kvbG9naW4gcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9EZWZhdWx0L2Nzcy9jdXN0b20uY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogNDA0CkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9FVUxBL3Jlc291cmNlcy8lN0JsYW5nJTdEIHJlc3BvbnNlIGNvZGU6IDQwNApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dvbi90aGVtZXMvRGVmYXVsdC9yZXNvdXJjZXMvY29uZmlnLnhtbCByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0RlZmF1bHQvcmVzb3VyY2VzL2VuLnhtbCByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19saWdodC5zdmcgcmVzcG9uc2UgY29kZTogNDA0CkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2Zhdmljb24uaWNvIHJlc3BvbnNlIGNvZGU6IDQwNAo=</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>4732be84-7bb8-11ea-885a-33e4589f0cc1</UNIQUE_ID>
+                <ID>101507514</ID>
+                <DETECTION_ID>2244710</DETECTION_ID>
+                <QID>150152</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">VG90YWwgaW50ZXJuYWwgZm9ybXMgc2VlbiAodGhpcyBjb3VudCBpbmNsdWRlcyBkdXBsaWNhdGUgZm9ybXMpOiAyCgpDcmF3bGVkIGZvcm1zIChUb3RhbDogMikKTk9URTogVGhpcyBkb2VzIG5vdCBpbmNsdWRlIGF1dGhlbnRpY2F0aW9uIGZvcm1zLiBBdXRoZW50aWNhdGlvbiBmb3JtcyBhcmUgcmVwb3J0ZWQgc2VwYXJhdGVseSBpbiBRSUQgMTUwMTE1CkZvcm0gIzoxIEFjdGlvbiBVUkk6aHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dvbi90aGVtZXMvRGVmYXVsdC9yZXNvdXJjZXMvY29uZmlnLnhtbApGb3JtIEZpZWxkczogYTIyMzY5MzkzMzA4NTYzNDIsIGEyMTc1NzkwOTc2MDA1ODg0LCBhNzgyMTE5OTYwNTA3NTI1MCwgYTYwNjY5MjkyNzIzMzIxMDYKCkZvcm0gIzoyIEFjdGlvbiBVUkk6aHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9jZ2kvbG9naW4KRm9ybSBGaWVsZHM6IGE4ODM1NzM0Mjc4ODYwMzAyLCBhNzgyNDg1NTg2MTg1NTczOCwgYTk3ODI4Nzc3MjY3Njk2ODAsIGEwNDM1NTU1MzUwMTQ1Mzc3Cgo=</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>70bff3d4-7bb8-11ea-836f-57c1bd0229a9</UNIQUE_ID>
+                <ID>101507517</ID>
+                <DETECTION_ID>2244712</DETECTION_ID>
+                <QID>150099</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">VG90YWwgY29va2llczogMTUKTlNDX0FBQUM9eHl6OyBzZWN1cmU7IGV4cGlyZXM9VHVlLCAwOS1Ob3YtMTk5OSAyMzoxMjo0MCBHTVQ7IHBhdGg9LyBGaXJzdCBzZXQgYXQgVVJMOiBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tLwpOU0NfRVBBQz14eXo7IHNlY3VyZTsgZXhwaXJlcz1UdWUsIDA5LU5vdi0xOTk5IDIzOjEyOjQwIEdNVDsgcGF0aD0vIEZpcnN0IHNldCBhdCBVUkw6IGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vCk5TQ19VU0VSPXh5ejsgc2VjdXJlOyBleHBpcmVzPVR1ZSwgMDktTm92LTE5OTkgMjM6MTI6NDAgR01UOyBwYXRoPS8gRmlyc3Qgc2V0IGF0IFVSTDogaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS8KTlNDX1RFTVA9eHl6OyBzZWN1cmU7IGV4cGlyZXM9VHVlLCAwOS1Ob3YtMTk5OSAyMzoxMjo0MCBHTVQ7IHBhdGg9LyBGaXJzdCBzZXQgYXQgVVJMOiBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tLwpOU0NfUEVSUz14eXo7IHNlY3VyZTsgZXhwaXJlcz1UdWUsIDA5LU5vdi0xOTk5IDIzOjEyOjQwIEdNVDsgcGF0aD0vIEZpcnN0IHNldCBhdCBVUkw6IGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vCk5TQ19CQVNFVVJMPXh5ejsgc2VjdXJlOyBleHBpcmVzPVR1ZSwgMDktTm92LTE5OTkgMjM6MTI6NDAgR01UOyBwYXRoPS8gRmlyc3Qgc2V0IGF0IFVSTDogaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS8KQ3NyZlRva2VuPXh5ejsgc2VjdXJlOyBleHBpcmVzPVR1ZSwgMDktTm92LTE5OTkgMjM6MTI6NDAgR01UOyBwYXRoPS8gRmlyc3Qgc2V0IGF0IFVSTDogaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS8KQ3R4c0F1dGhJZD14eXo7IHNlY3VyZTsgZXhwaXJlcz1UdWUsIDA5LU5vdi0xOTk5IDIzOjEyOjQwIEdNVDsgcGF0aD0vIEZpcnN0IHNldCBhdCBVUkw6IGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vCkFTUC5ORVRfU2Vzc2lvbklkPXh5ejsgc2VjdXJlOyBleHBpcmVzPVR1ZSwgMDktTm92LTE5OTkgMjM6MTI6NDAgR01UOyBwYXRoPS8gRmlyc3Qgc2V0IGF0IFVSTDogaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS8KTlNDX1RNQUE9eHl6OyBleHBpcmVzPVR1ZSwgMDktTm92LTE5OTkgMjM6MTI6NDAgR01UOyBwYXRoPS8gRmlyc3Qgc2V0IGF0IFVSTDogaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS8KTlNDX1RNQVM9eHl6OyBzZWN1cmU7IGV4cGlyZXM9VHVlLCAwOS1Ob3YtMTk5OSAyMzoxMjo0MCBHTVQ7IHBhdGg9LyBGaXJzdCBzZXQgYXQgVVJMOiBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tLwpOU0NfVEVNUD14eXo7IGV4cGlyZXM9VHVlLCAwOS1Ob3YtMTk5OSAyMzoxMjo0MCBHTVQ7IHBhdGg9LyBGaXJzdCBzZXQgYXQgVVJMOiBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tLwpOU0NfUEVSUz14eXo7IGV4cGlyZXM9VHVlLCAwOS1Ob3YtMTk5OSAyMzoxMjo0MCBHTVQ7IHBhdGg9LyBGaXJzdCBzZXQgYXQgVVJMOiBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tLwpOU0NfQUFBQz14eXo7IGV4cGlyZXM9VHVlLCAwOS1Ob3YtMTk5OSAyMzoxMjo0MCBHTVQ7IHBhdGg9LyBGaXJzdCBzZXQgYXQgVVJMOiBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tLwpwd2NvdW50PTA7IHNlY3VyZTsgSHR0cE9ubHk7IGV4cGlyZXM9VHVlLCAwOS1Ob3YtMTk5OSAyMzoxMjo0MCBHTVQ7IHBhdGg9LyBGaXJzdCBzZXQgYXQgVVJMOiBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2luZGV4Lmh0bWwK</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>a76d438c-7bb8-11ea-bae6-cf3d8234bfbd</UNIQUE_ID>
+                <ID>101507511</ID>
+                <DETECTION_ID>2247132</DETECTION_ID>
+                <QID>150086</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">U2VydmVyIHJlc3BvbmRlZCAyMDAgdG8gdW5uZWNlc3NhcmlseSBsYXJnZSByYW5kb20gcmVxdWVzdCBib2R5KG92ZXIgNjQgS0IpIGZvciBVUkwgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dvbi90aGVtZXMvRGVmYXVsdC9yZXNvdXJjZXMvY29uZmlnLnhtbCwgc2lnbmlmaWNhbnRseSBpbmNyZWFzaW5nIGF0dGFja2VyJ3MgY2hhbmNlcyB0byBwcm9sb25nIHNsb3cgSFRUUCBQT1NUIGF0dGFjay4=</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>ce9e4668-7bb8-11ea-91fe-2fbece3172a5</UNIQUE_ID>
+                <ID>101507510</ID>
+                <DETECTION_ID>2244707</DETECTION_ID>
+                <QID>150208</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">ClJlZmVycmVyLVBvbGljeTogSGVhZGVyIG1pc3NpbmcKUmVzcG9uc2UgaGVhZGVycyBvbiBsaW5rOiBHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9yZXNvdXJjZXMuanMgcmVzcG9uc2UgY29kZTogMjAwCkFnZTogNwpEYXRlOiBXZWQsIDExIE1hciAyMDIwIDE3OjA4OjQ4IEdNVApDYWNoZS1Db250cm9sOiBuby1jYWNoZQpDb25uZWN0aW9uOiBLZWVwLUFsaXZlClZpYTogTlMtQ0FDSEUtMTAuMDogMTgwCkV0YWc6ICI0YWNkLTU5Y2Q2NGNkYzY1ODAiClNlcnZlcjogQXBhY2hlClgtRnJhbWUtT3B0aW9uczogU0FNRU9SSUdJTgpMYXN0LU1vZGlmaWVkOiBUaHUsIDIzIEphbiAyMDIwIDIyOjM4OjMwIEdNVApBY2NlcHQtUmFuZ2VzOiBieXRlcwpDb250ZW50LUxlbmd0aDogMTkxNDkKWC1Yc3MtUHJvdGVjdGlvbjogMTsgbW9kZT1ibG9jawpYLUNvbnRlbnQtVHlwZS1PcHRpb25zOiBub3NuaWZmCktlZXAtQWxpdmU6IHRpbWVvdXQ9MTUsIG1heD05MwpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2phdmFzY3JpcHQKU3RyaWN0LVRyYW5zcG9ydC1TZWN1cml0eTogbWF4LWFnZT0xNTc2ODAwMDAsIG1heC1hZ2U9MzE1MzYwMDAKCkhlYWRlciBtaXNzaW5nIG9uIHRoZSBmb2xsb3dpbmcgbGluayhzKToKKE9ubHkgZmlyc3QgNTAgc3VjaCBwYWdlcyBhcmUgbGlzdGVkKQoKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vcmVzb3VyY2VzLmpzIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbmRleC5odG1sIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dvbi90aGVtZXMvRGVmYXVsdC9yZXNvdXJjZXMvJTdCbGFuZyU3RCByZXNwb25zZSBjb2RlOiA0MDQKUE9TVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2NnaS9sb2dpbiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vaW1hZ2VzL0FjY2Vzcy5pY28gcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci9jb3JlL2Nzcy94ZHIuY3NzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9EZWZhdWx0L2Nzcy9iYXNlLmNzcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dvbi9mb250cy9leGFtcGxlLWZvbnRzLmNzcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dvbi90aGVtZXMvRGVmYXVsdC9jc3MvY3VzdG9tLmNzcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDQwNApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIuanM/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9naW4uanM/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMvdmlld3MuanM/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMvbG9naW5fdmlldy5qcz92PWZkOTZiYzg5NzcyNTYwMDNkZTA1ZWQ4NDI3MGI5MGJiIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy9sb2dpbl9mb3JtX3ZpZXcuanM/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vcmVzb3VyY2VzLmpzP3Y9ZmQ5NmJjODk3NzI1NjAwM2RlMDVlZDg0MjcwYjkwYmIgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL25zc2hhcmUuanM/dj1mZDk2YmM4OTc3MjU2MDAzZGUwNWVkODQyNzBiOTBiYiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vbG9nb24vdGhlbWVzL0VVTEEvcmVzb3VyY2VzLyU3QmxhbmclN0QgcmVzcG9uc2UgY29kZTogNDA0CkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2xvZ29uL3RoZW1lcy9EZWZhdWx0L3Jlc291cmNlcy9jb25maWcueG1sIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dvbi90aGVtZXMvRGVmYXVsdC9yZXNvdXJjZXMvZW4ueG1sIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbWFnZXMvZXhhbXBsZVdhdGVybWFyay5wbmcgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2ltYWdlcy9Mb2dpbkJ1dHRvbkdsb3cucG5nIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbWFnZXMvTmF2QmFyTGluay5naWYgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2ltYWdlcy9jYXJib25maWJyZV9pbWcucG5nIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbWFnZXMvY2FyYm9uZmlicmVfaW1nX3doaXRlX2hlYWRlci5wbmcgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2ltYWdlcy9pY29uLnBuZyByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19ib2xkLnN2ZyByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19ib2xkLnR0ZiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19ib2xkLndvZmYgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci9jb3JlL2Nzcy9mb250cy9leGFtcGxlX3NhbnMvZXhhbXBsZXNhbnNfbGlnaHQuc3ZnIHJlc3BvbnNlIGNvZGU6IDQwNApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX2xpZ2h0LnR0ZiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19saWdodC53b2ZmIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIuc3ZnIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIudHRmIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3JlZ3VsYXIud29mZiByZXNwb25zZSBjb2RlOiAyMDAKR0VUIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vanMveGRyL2NvcmUvY3NzL2ZvbnRzL2V4YW1wbGVfc2Fucy9leGFtcGxlc2Fuc19zZW1pYm9sZC5zdmcgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci9jb3JlL2Nzcy9mb250cy9leGFtcGxlX3NhbnMvZXhhbXBsZXNhbnNfc2VtaWJvbGQudHRmIHJlc3BvbnNlIGNvZGU6IDIwMApHRVQgaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9qcy94ZHIvY29yZS9jc3MvZm9udHMvZXhhbXBsZV9zYW5zL2V4YW1wbGVzYW5zX3NlbWlib2xkLndvZmYgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2pzL3hkci9jb3JlL2xhbmcveGRyX2VuLmpzb24gcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL21lZGlhL2V4YW1wbGVfbG9nb193aGl0ZS5wbmcgcmVzcG9uc2UgY29kZTogMjAwCkdFVCBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2Zhdmljb24uaWNvIHJlc3BvbnNlIGNvZGU6IDQwNAo=</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>1ebef002-7bb9-11ea-ba0b-8b169f3c593d</UNIQUE_ID>
+                <ID>101507519</ID>
+                <DETECTION_ID>2244714</DETECTION_ID>
+                <QID>150135</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">SW5jbHVkZVN1YkRvbWFpbnMgZGlyZWN0aXZlIG1pc3NpbmcgYW5kIG1heC1hZ2Ugc2V0IGJlbG93IDEyMCBkYXlzIGZvciAKaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9sb2dvbi90aGVtZXMvRGVmYXVsdC9yZXNvdXJjZXMvY29uZmlnLnhtbApOb3RlOkluY2x1ZGluZyBzdWJkb21haW5zIGRpcmVjdGl2ZSBpcyByZWNvbW1lbmRlZCBvbmx5IHdoZW4gYWxsIHNpdGVzIHdpdGhpbiB0aGUgb3JnYW5pemF0aW9uIGZvciB0aGUgZ2l2ZW4gZG9tYWluIG5hbWUgcmVxdWlyZSBzc2wuIEl0J3MgbmVjZXNzYXJ5IHRvIGV2YWx1YXRlIGFuIGltcGFjdCBvZiBleGlzdGluZyAzcmQgcGFydHkgc2VydmljZXMgbGlrZSBlbWFpbCBvciBETlMgQ05BTUVTIGZvciBDRE5zIGJlZm9yZSBhZGRpbmcgJ2luY2x1ZGVTdWJEb21haW5zJyBkaXJlY3RpdmUuCg==</DATA>
+            </INFORMATION_GATHERED>
+            <INFORMATION_GATHERED>
+                <UNIQUE_ID>4ff7db98-7bb9-11ea-b0c9-bbbfaededf3e</UNIQUE_ID>
+                <ID>101507509</ID>
+                <DETECTION_ID>2244706</DETECTION_ID>
+                <QID>150176</QID>
+                <LAST_TIME_DETECTED>11 Mar 2020 01:07PM GMT-0400</LAST_TIME_DETECTED>
+                <DATA base64="true">Ck51bWJlciBvZiB1bmlxdWUgSlMgbGlicmFyaWVzOiA4CkphdmFzY3JpcHQgbGlicmFyeSA6IEQzClZlcnNpb24gOiAzLjUuMTIKRm91bmQgb24gdGhlIGZvbGxvd2luZyBwYWdlKG9ubHkgZmlyc3QgcGFnZSBpcyByZXBvcnRlZCk6CiBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2luZGV4Lmh0bWwKCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQoKSmF2YXNjcmlwdCBsaWJyYXJ5IDogTUVUQUdlbmVyYXRvclJlcG9ydHMKVmVyc2lvbiA6IE1TSFRNTCA2LjAwLjI5MDAuMjgwMgpGb3VuZCBvbiB0aGUgZm9sbG93aW5nIHBhZ2Uob25seSBmaXJzdCBwYWdlIGlzIHJlcG9ydGVkKToKIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vaW5kZXguaHRtbAoKPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CgpKYXZhc2NyaXB0IGxpYnJhcnkgOiBVbmRlcnNjb3JlCkZvdW5kIG9uIHRoZSBmb2xsb3dpbmcgcGFnZShvbmx5IGZpcnN0IHBhZ2UgaXMgcmVwb3J0ZWQpOgogaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbmRleC5odG1sCgo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KCkphdmFzY3JpcHQgbGlicmFyeSA6IGpRdWVyeQpWZXJzaW9uIDogMy40LjEKRm91bmQgb24gdGhlIGZvbGxvd2luZyBwYWdlKG9ubHkgZmlyc3QgcGFnZSBpcyByZXBvcnRlZCk6CiBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2luZGV4Lmh0bWwKCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQoKSmF2YXNjcmlwdCBsaWJyYXJ5IDogalF1ZXJ5Lm1pZ3JhdGUKVmVyc2lvbiA6IDMuMS4wCkZvdW5kIG9uIHRoZSBmb2xsb3dpbmcgcGFnZShvbmx5IGZpcnN0IHBhZ2UgaXMgcmVwb3J0ZWQpOgogaHR0cHM6Ly9zdG9yZS5leGFtcGxlLmNvbS9pbmRleC5odG1sCgo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KCkphdmFzY3JpcHQgbGlicmFyeSA6IGpRdWVyeS51aS5hdXRvY29tcGxldGUKVmVyc2lvbiA6IDEuMTIuMQpGb3VuZCBvbiB0aGUgZm9sbG93aW5nIHBhZ2Uob25seSBmaXJzdCBwYWdlIGlzIHJlcG9ydGVkKToKIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vaW5kZXguaHRtbAoKPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CgpKYXZhc2NyaXB0IGxpYnJhcnkgOiBqUXVlcnkudWkuZGlhbG9nClZlcnNpb24gOiAxLjEyLjEKRm91bmQgb24gdGhlIGZvbGxvd2luZyBwYWdlKG9ubHkgZmlyc3QgcGFnZSBpcyByZXBvcnRlZCk6CiBodHRwczovL3N0b3JlLmV4YW1wbGUuY29tL2luZGV4Lmh0bWwKCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQoKSmF2YXNjcmlwdCBsaWJyYXJ5IDogalF1ZXJ5LnVpLnRvb2x0aXAKVmVyc2lvbiA6IDEuMTIuMQpGb3VuZCBvbiB0aGUgZm9sbG93aW5nIHBhZ2Uob25seSBmaXJzdCBwYWdlIGlzIHJlcG9ydGVkKToKIGh0dHBzOi8vc3RvcmUuZXhhbXBsZS5jb20vaW5kZXguaHRtbAoKPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Cg==</DATA>
+            </INFORMATION_GATHERED>
+        </INFORMATION_GATHERED_LIST>
+    </RESULTS>
+    <GLOSSARY>
+        <QID_LIST>
+            <QID>
+                <QID>6</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>DNS Host Name</TITLE>
+                <GROUP>IG-DIAG</GROUP>
+                <DESCRIPTION>The fully qualified domain name of this host, if it was obtained from a DNS server, is displayed in the RESULT section.</DESCRIPTION>
+                <IMPACT>N/A</IMPACT>
+                <SOLUTION>N/A</SOLUTION>
+            </QID>
+            <QID>
+                <QID>45017</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>2</SEVERITY>
+                <TITLE>Operating System Detected</TITLE>
+                <GROUP>IG-DIAG</GROUP>
+                <DESCRIPTION><![CDATA[Several different techniques can be used to identify the operating system (OS) running on a host. A short description of these techniques is provided below. The specific technique used to identify the OS on this host is included in the RESULTS section of your report.
+<P>
+1) <B>TCP/IP Fingerprint</B>: The operating system of a host can be identified from a remote system using TCP/IP fingerprinting. All underlying operating system TCP/IP stacks have subtle differences that can be seen in their responses to specially-crafted TCP packets. According to the results of this "fingerprinting" technique, the OS version is among those listed below. 
+<P>
+Note that if one or more of these subtle differences are modified by a firewall or a packet filtering device between the scanner and the host, the fingerprinting technique may fail. Consequently, the version of the OS may not be detected correctly. If the host is behind a proxy-type firewall, the version of the operating system detected may be that of the firewall instead of the host being scanned.
+<P>
+2) <B>NetBIOS</B>: Short for Network Basic Input Output System, an application programming interface (API) that augments the DOS BIOS by adding special functions for local-area networks (LANs). Almost all LANs for PCs are based on the NetBIOS. Some LAN manufacturers have even extended it, adding additional network capabilities. NetBIOS relies on a message format called Server Message Block (SMB). 
+<P>
+3) <B>PHP Info</B>: PHP is a hypertext pre-processor, an open-source, server-side, HTML-embedded scripting language used to create dynamic Web pages. Under some configurations it is possible to call PHP functions like phpinfo() and obtain operating system information.
+<P>
+4) <B>SNMP</B>: The Simple Network Monitoring Protocol is used to monitor hosts, routers, and the networks to which they attach. The SNMP service maintains Management Information Base (MIB), a set of variables (database) that can be fetched by Managers. These include "MIB_II.system.sysDescr" for the operating system.
+]]></DESCRIPTION>
+                <IMPACT>Not  applicable.</IMPACT>
+                <SOLUTION>Not  applicable.</SOLUTION>
+            </QID>
+            <QID>
+                <QID>45038</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>Host Scan Time</TITLE>
+                <GROUP>IG-DIAG</GROUP>
+                <DESCRIPTION><![CDATA[The Host Scan Time is the period of time it takes the scanning engine to perform the vulnerability assessment of a single target host. The Host Scan Time for this host is reported in the Result section below. 
+<P>
+The Host Scan Time does not have a direct correlation to the Duration time as displayed in the Report Summary section of a scan results report. The Duration is the period of time it takes the service to perform a scan task. The Duration includes the time it takes the service to scan all hosts, which may involve parallel scanning. It also includes the time it takes for a scanner appliance to pick up the scan task and transfer the results back to the service's Secure Operating Center. Further, when a scan task is distributed across multiple scanners, the Duration includes the time it takes to perform parallel host scanning on all scanners.
+<P>
+For host running the Qualys Windows agent this QID reports the time taken by the agent to collect the host metadata used for the most recent assessment scan.]]></DESCRIPTION>
+                <IMPACT>N/A</IMPACT>
+                <SOLUTION>N/A</SOLUTION>
+            </QID>
+            <QID>
+                <QID>150004</QID>
+                <CATEGORY>Confirmed Vulnerability</CATEGORY>
+                <SEVERITY>2</SEVERITY>
+                <TITLE>Path-Based Vulnerability</TITLE>
+                <GROUP>PATH</GROUP>
+                <OWASP>A5</OWASP>
+                <WASC>WASC-17,WASC-16,WASC-15</WASC>
+                <CWE>CWE-22</CWE>
+                <CVSS_BASE>2.1</CVSS_BASE>
+                <CVSS_TEMPORAL>1.9</CVSS_TEMPORAL>
+                <DESCRIPTION>A potentially sensitive file, directory, or directory listing was discovered on the Web server.</DESCRIPTION>
+                <IMPACT>The contents of this file or directory may disclose sensitive information.</IMPACT>
+                <SOLUTION>Verify that access to this file or directory is permitted. If necessary, remove it or apply access controls to it.</SOLUTION>
+            </QID>
+            <QID>
+                <QID>150009</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>Links Crawled</TITLE>
+                <GROUP>IG-DIAG</GROUP>
+                <DESCRIPTION><![CDATA[The list of unique links crawled and HTML forms submitted by the Web application scanner appear in the Results section. This list may contain fewer links than the maximum threshold defined at scan launch. 
+<P>NOTE: This list also includes 
+- All the unique links that are reported in QID 150140 (Redundant links/URL paths crawled and not crawled)
+- All the forms reported in QID 150152 (Forms Crawled), 
+- All the forms in QID 150115 (Authentication Form Found) and 
+- Certain requests from QID 150172 (Requests Crawled)]]></DESCRIPTION>
+                <IMPACT>N/A</IMPACT>
+                <SOLUTION>N/A</SOLUTION>
+            </QID>
+            <QID>
+                <QID>150018</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>2</SEVERITY>
+                <TITLE>Connection Error Occurred During Web Application Scan</TITLE>
+                <GROUP>IG-DIAG</GROUP>
+                <DESCRIPTION><![CDATA[The following are some of the possible reasons for the timeouts or connection errors:
+<OL>
+<LI> A disturbance in network connectivity between the scanner and the web application occurred.</LI>
+<LI> The web server or application server hosting the application was taken down in the midst of a scan.</LI>
+<LI> The web application experienced an overload, possibly due to load generated by the scan.</LI>
+<LI> An error occurred in the SSL/TLS handshake (applies to HTTPS web applications only).</LI>
+<LI> A security device, such as an IDS/IPS or web application firewall (WAF), began to drop or reject the HTTP connections from the scanner.</LI>
+<LI> Very large files like PDFs, videos, etc. are present on the site and caused timeouts when accessed by the scanner.</LI>
+</OL>]]></DESCRIPTION>
+                <IMPACT>Some of the links were not crawled or scanned. Results may be incomplete or incorrect.</IMPACT>
+                <SOLUTION>First, confirm that the server was not taken down in the midst of the scan.  After that, investigate the root cause by reviewing the listed links and examining web server logs, application server logs, or IDS/IPS/WAF logs. If the errors are caused due to load generated by the scanner then try reducing the scan intensity (this could increase the scan duration). If the errors are due to specific URLs being tested by the scanner or due to specific form data sent by the scanner, then configure blacklists in the scan configuration as needed to avoid such requests. If timeouts or connection errors are a persistent issue but you want the scan to run to completion, change the Behavior Settings in the option profile to increase the error thresholds or disable the error checks entirely.</SOLUTION>
+            </QID>
+            <QID>
+                <QID>150021</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>Scan Diagnostics</TITLE>
+                <GROUP>IG-DIAG</GROUP>
+                <DESCRIPTION>This check provides various details of the scan's performance and behavior. In some cases, this check can be used to identify problems that the scanner encountered when crawling the target Web application.</DESCRIPTION>
+                <IMPACT>The scan diagnostics data provides technical details about the crawler's performance and behavior. This information does not necessarily imply problems with the Web application.</IMPACT>
+                <SOLUTION>No action is required.</SOLUTION>
+            </QID>
+            <QID>
+                <QID>150082</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>Protection against Clickjacking</TITLE>
+                <GROUP>IG-DIAG</GROUP>
+                <CVSS_BASE>10.0</CVSS_BASE>
+                <CVSS_TEMPORAL>8.6</CVSS_TEMPORAL>
+                <DESCRIPTION>The URLs listed have protection against Clickjacking. The protection is implemented via the X-Frame-Options response header.</DESCRIPTION>
+                <IMPACT>X-Frame-Options header is used to prevent framing of the page. </IMPACT>
+                <SOLUTION>N/A</SOLUTION>
+            </QID>
+            <QID>
+                <QID>150085</QID>
+                <CATEGORY>Potential Vulnerability</CATEGORY>
+                <SEVERITY>3</SEVERITY>
+                <TITLE>Slow HTTP POST vulnerability</TITLE>
+                <GROUP>INFO</GROUP>
+                <OWASP>A6</OWASP>
+                <WASC>WASC-10</WASC>
+                <CWE>CWE-772</CWE>
+                <CVSS_BASE>6.1</CVSS_BASE>
+                <CVSS_TEMPORAL>5.5</CVSS_TEMPORAL>
+                <DESCRIPTION><![CDATA[The web application is possibly vulnerable to a "slow HTTP POST" Denial of Service (DoS) attack. This is an application-level DoS that consumes server resources by maintaining open connections for an extended period of time by slowly sending traffic to the server. If the server maintains too many connections open at once, then it may not be able to respond to new, legitimate connections. Unlike bandwidth-consumption DoS attacks, the "slow" attack does not require a large amount of traffic to be sent to the server -- only that the client is able to maintain open connections for several minutes at a time.
+<P>
+The attack holds server connections open by sending properly crafted HTTP POST headers that contain a Content-Length header with a large value to inform the web server how much of data to expect. After the HTTP POST headers are fully sent, the HTTP POST message body is sent at slow speeds to prolong the completion of the connection and lock up server resources. By waiting for the complete request body, the server is helping clients with slow or intermittent connections to complete requests, but is also exposing itself to abuse.
+<P>
+Further information can be found under <A HREF="https://media.blackhat.com/bh-dc-11/Brennan/BlackHat_DC_2011_Brennan_Denial_Service-Slides.pdf" TARGET="_blank">BlackHat_DC_2011_Brennan_Denial_Service-Slides.pdf</A>. ]]></DESCRIPTION>
+                <IMPACT>All other services remain intact but the web server itself becomes inaccessible.</IMPACT>
+                <SOLUTION><![CDATA[Solution would be server-specific, but general recommendations are:
+- to limit the size of the acceptable request to each form requirements
+- establish minimal acceptable speed rate
+- establish absolute request timeout for connection with POST request
+Server-specific details can be found <A HREF="https://blog.qualys.com/securitylabs/2011/11/02/how-to-protect-against-slow-http-attacks" TARGET="_blank">here</A>. 
+A tool that demonstrates this vulnerability in a more intrusive manner is available <A HREF="https://github.com/shekyan/slowhttptest" TARGET="_blank">here</A>.]]></SOLUTION>
+            </QID>
+            <QID>
+                <QID>150086</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>3</SEVERITY>
+                <TITLE>Server accepts unnecessarily large POST request body</TITLE>
+                <GROUP>IG-WEAK</GROUP>
+                <DESCRIPTION><![CDATA[The scanner successfully sent a POST request with content type of application/x-www-form-urlencoded and 65536 bytes length random text data. 
+Accepting request bodies with unnecessarily large size could help attacker to use less connections to achieve Layer 7 DDoS of web server. 
+More information can be found at the <A HREF="https://media.blackhat.com/bh-dc-11/Brennan/BlackHat_DC_2011_Brennan_Denial_Service-Slides.pdf" TARGET="_blank">here</A>]]></DESCRIPTION>
+                <IMPACT>Potentially could result in a successful application-layer DDoS attack. </IMPACT>
+                <SOLUTION><![CDATA[Limit the size of the request body to each form's requirements. For example, a search form with 256-char search field should not accept more than 1KB value.
+Server-specific details can be found <A HREF="https://community.qualys.com/blogs/securitylabs/2011/11/02/how-to-protect-against-slow-http-attacks" TARGET="_blank">here</A>. ]]></SOLUTION>
+            </QID>
+            <QID>
+                <QID>150099</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>Cookies Issued Without User Consent</TITLE>
+                <GROUP>IG-WEAK</GROUP>
+                <DESCRIPTION><![CDATA[The cookies listed in the Results section were issued from the web
+application during the crawl without accepting any opt-in dialogs.]]></DESCRIPTION>
+                <IMPACT>Cookies may be set without user explicitly agreeing to accept them.</IMPACT>
+                <SOLUTION>Review the application to ensure that all cookies listed are supposed to be issued without user opt-in.  If the EU Cookie law is applicable for this web application, ensure these cookies require user opt-in or have been classified as exempt by your organization.</SOLUTION>
+            </QID>
+            <QID>
+                <QID>150126</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>Links With High Resource Consumption</TITLE>
+                <GROUP>IG-WEAK</GROUP>
+                <DESCRIPTION><![CDATA[The list of links with lowest bytes/sec which are assumed to be resources with  highest resource consumption.  The links in the list have slower transfer times speeds to an average resource on the server.  This may indicate that the links are more CPU or DB intensive than majority of links.<P>
+The latency of the network and file size have no effect on calculations.
+]]></DESCRIPTION>
+                <IMPACT><![CDATA[The links with high resource consumption could be used to perform DOS on the server  by just performing GET Flooding. Attackers could more easily take the server down if there are huge resource hogs on it, performing less request.
+]]></IMPACT>
+                <SOLUTION><![CDATA[Find the root cause of resources slow download speed.<P>
+If the cause is a real CPU strain or complex DB queries performed, there may be a need for re-engineering of the web application or defense measures should be in place.  Examples of defense against DOS that is targeted towards high resource consumption links are Load Balancers and Rate Limiters.]]></SOLUTION>
+            </QID>
+            <QID>
+                <QID>150135</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>HTTP Strict Transport Security (HSTS) header missing/misconfigured.</TITLE>
+                <GROUP>IG-WEAK</GROUP>
+                <DESCRIPTION>HTTP Strict Transport Security (HSTS) header found to be missing or misconfigured. HSTS header dictates to a conforming browser that the current and all subsequent connections (for a configurable amount of time) to the subject website should only be performed over a secure transport layer. Additionally, users are not permitted to bypass SSL/TLS certificate errors; preventing browser click-throughs in the event of expired or otherwise untrusted certificates. </DESCRIPTION>
+                <IMPACT>If HSTS header is not set by Web applications using TLS, users are potentially vulnerable to active Man-in-the-middle(MITM), SSL Striping and passive eavesdropper attacks.</IMPACT>
+                <SOLUTION><![CDATA[1. The strongest protection is to ensure that all requested resources use only TLS with well-formed HSTS header. Add the Strict-Transport-Security HTTPS header to all responses from the target domains<BR>
+2. Add 'includeSubDomains' directive to all Strict-Transport-Security headers.<BR>
+3. Ensure that the max-age directive is included and set to an acceptable value equal to or greater than 10,368,000 seconds (120 days) with every Strict-Transport-Security header. If the max-age directive is not included, it must be added. If the value is set to less than 10,368,000 seconds, it must be increased to the minimum value.]]></SOLUTION>
+            </QID>
+            <QID>
+                <QID>150152</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>Forms Crawled</TITLE>
+                <GROUP>IG-DIAG</GROUP>
+                <DESCRIPTION><![CDATA[Results section consists of the unique forms submitted by the Web Application Scanner. Reported list of forms in this QID does not contain authentication forms (i.e. login forms) which are reported separately in QID 150115. There is redundancy checks done on forms based on form fields. Forms determined to be similar will be considered redundant and not tested. 
+<P>NOTE: The regular expression specified under 'Redundant Links' are not applied to forms. Forms (unique or redundant) are not reported under QID 150140.]]></DESCRIPTION>
+                <IMPACT>N/A</IMPACT>
+                <SOLUTION>N/A</SOLUTION>
+            </QID>
+            <QID>
+                <QID>150176</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>JavaScript Libraries Detected</TITLE>
+                <GROUP>IG-DIAG</GROUP>
+                <DESCRIPTION><![CDATA[The JavaScript libraries discovered by the scanner are provided in the Results section. The discovered libraries are reported only once based on the page on which they were first detected.<P>
+
+Each library is reported along with other information such as the URL of page on which it was first found, the version, and the URL of the .js file.]]></DESCRIPTION>
+                <IMPACT>N/A</IMPACT>
+                <SOLUTION>N/A</SOLUTION>
+            </QID>
+            <QID>
+                <QID>150202</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>2</SEVERITY>
+                <TITLE>Missing header: X-Content-Type-Options</TITLE>
+                <GROUP>IG-WEAK</GROUP>
+                <OWASP>A6</OWASP>
+                <WASC>WASC-15</WASC>
+                <DESCRIPTION>The X-Content-Type-Options response header is not present. WAS reports missing X-Content-Type-Options header on each crawled link for both static and dynamic responses. The scanner performs the check not only on 200 responses but 4xx and 5xx responses as well. It's also possible the QID will be reported on directory-level links.</DESCRIPTION>
+                <IMPACT><![CDATA[All web browsers employ a content-sniffing algorithm that inspects the contents of HTTP responses and also occasionally overrides the MIME type provided by the server. If X-Content-Type-Options header is not present, browsers can potentially be tricked into treating non-HTML response as HTML. An attacker can then potentially leverage the functionality to perform a cross-site scripting (XSS) attack. This specific case is known as a Content-Sniffing XSS (CS-XSS) attack.
+
+
+
+]]></IMPACT>
+                <SOLUTION><![CDATA[It is recommended to disable browser content sniffing by adding the X-Content-Type-Options header to the HTTP response with a value of 'nosniff'. Also, ensure that the 'Content-Type' header is set correctly on responses.
+]]></SOLUTION>
+            </QID>
+            <QID>
+                <QID>150204</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>Missing header: X-XSS-Protection</TITLE>
+                <GROUP>IG-WEAK</GROUP>
+                <OWASP>A6</OWASP>
+                <WASC>WASC-15</WASC>
+                <DESCRIPTION><![CDATA[The X-XSS-Protection response header is not present.
+]]></DESCRIPTION>
+                <IMPACT><![CDATA[The X-XSS-Protection response header provides a layer of protection against reflected cross-site scripting (XSS) attacks by instructing browsers to abort rendering a page in which a reflected XSS attack has been detected. This is a best-effort second line of defense measure which helps prevent an attacker from using evasion techniques to avoid the neutralization mechanisms that the filters use by default. When configured appropriately, browser-level XSS filters can provide additional layers of defense against web application attacks.
+<P>
+Note that HTTP 4xx and 5xx responses can also be susceptible to attacks such as XSS. For better security the X-XSS-Protection header should be set on 4xx and 5xx responses as well.]]></IMPACT>
+                <SOLUTION><![CDATA[It is recommend to set X-XSS-Protection header with value set to '1; mode=block' on all the relevant responses to activate browser's XSS filter.
+
+<P><B>NOTE:</B> The X-XSS-Protection header is not supported by all browsers. Google Chrome and Safari are some of the browsers which support it, Firefox on the other hand does not support the header. X-XSS-Protection header does not guarantee a complete protection against XSS. For better protection against XSS attacks, the web application should use secure coding principles. Also, consider leveraging the Content-Security-Policy (CSP) header, which is supported by all browsers.
+
+<P>Using X-XSS-Protection could have unintended side effects, please understand the implications carefully before using it.
+
+<P>References:<BR>
+- <A HREF="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection" TARGET="_blank">https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection</A><BR>
+- <A HREF="https://blog.innerht.ml/the-misunderstood-x-xss-protection/" TARGET="_blank">https://blog.innerht.ml/the-misunderstood-x-xss-protection/</A><BR>
+- <A HREF="https://www.mbsd.jp/blog/20160407.html" TARGET="_blank">https://www.mbsd.jp/blog/20160407.html</A><BR>
+- <A HREF="https://www.chromium.org/developers/design-documents/xss-auditor" TARGET="_blank">https://www.chromium.org/developers/design-documents/xss-auditor</A>]]></SOLUTION>
+            </QID>
+            <QID>
+                <QID>150206</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>2</SEVERITY>
+                <TITLE>Content-Security-Policy Not Implemented</TITLE>
+                <GROUP>IG-WEAK</GROUP>
+                <OWASP>A6</OWASP>
+                <WASC>WASC-15</WASC>
+                <DESCRIPTION><![CDATA[No Content-Security-Policy (CSP) is specified for the page. WAS checks for the missing CSP on all static and dynamic pages. It checks for CSP in the response headers (Content-Security-Policy, X-Content-Security-Policy or X-Webkit-CSP) and in response body (http-equiv="Content-Security-Policy" meta tag).<P>
+
+HTTP 4xx and 5xx responses can also be susceptible to attacks such as XSS. For better security it's important to set appropriate CSP policies on 4xx and 5xx responses as well.
+]]></DESCRIPTION>
+                <IMPACT><![CDATA[Content-Security Policy is a defense mechanism that can significantly reduce the risk and impact of XSS attacks in modern browsers. The CSP specification provides a set of content restrictions for web resources and a mechanism for transmitting the policy from a server to a client where the policy is enforced. When a Content Security Policy is specified, a number of default behaviors in user agents are changed; specifically inline content and JavaScript eval constructs are not interpreted without additional directives. In short, CSP allows you to create a whitelist of sources of the trusted content. The CSP policy instructs the browser to only render resources from those whitelisted sources. Even though an attacker can find a security vulnerability in the application through which to inject script, the script won't match the whitelisted sources defined in the CSP policy, and therefore will not be executed.<P>
+
+The absence of Content Security Policy in the response will allow the attacker to exploit vulnerabilities as the protection provided by the browser is not at all leveraged by the Web application. If secure CSP configuration is not implemented, browsers will not be able to block content-injection attacks such as Cross-Site Scripting and Clickjacking.
+
+]]></IMPACT>
+                <SOLUTION><![CDATA[Appropriate CSP policies help prevent content-injection attacks such as cross-site scripting (XSS) and clickjacking. It's recommended to add secure CSP policies as a part of a defense-in-depth approach for securing web applications.<P>
+
+References:<BR>
+- <A HREF="https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html" TARGET="_blank">https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html</A><BR>
+- <A HREF="https://developers.google.com/web/fundamentals/security/csp/" TARGET="_blank">https://developers.google.com/web/fundamentals/security/csp/</A>
+
+
+
+]]></SOLUTION>
+            </QID>
+            <QID>
+                <QID>150208</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>2</SEVERITY>
+                <TITLE>Missing header: Referrer-Policy</TITLE>
+                <GROUP>IG-WEAK</GROUP>
+                <OWASP>A6</OWASP>
+                <WASC>WASC-15</WASC>
+                <DESCRIPTION><![CDATA[No Referrer Policy is specified for the link. WAS checks for the missing Referrer Policy on all static and dynamic pages. It checks for one of the following Referrer Policy in the response headers:<P>
+1) no-referrer<BR>
+2) no-referrer-when-downgrade<BR>
+3) same-origin<BR>
+4) origin<BR>
+5) origin-when-cross-origin<BR>
+6) strict-origin<BR>
+7) strict-origin-when-cross-origin<BR>
+<P>
+If the Referrer Policy header is not found , WAS checks in response body for meta tag containing tag name as "referrer" and one of the above Referrer Policy.]]></DESCRIPTION>
+                <IMPACT><![CDATA[The Referrer-Policy header controls how much referrer information is sent to a site when navigating to it. Absence of Referrer-Policy header can lead to leakage of sensitive information via the referrer header.
+]]></IMPACT>
+                <SOLUTION><![CDATA[Referrer Policy header improves security by ensuring websites don't leak sensitive information via the referrer header. It's recommended to add secure Referrer Policies as a part of a defense-in-depth approach.<P>
+
+References:<BR>
+- <A HREF="https://www.w3.org/TR/referrer-policy/" TARGET="_blank">https://www.w3.org/TR/referrer-policy/</A><BR>
+- <A HREF="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy" TARGET="_blank">https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy</A>
+]]></SOLUTION>
+            </QID>
+            <QID>
+                <QID>150246</QID>
+                <CATEGORY>Confirmed Vulnerability</CATEGORY>
+                <SEVERITY>1</SEVERITY>
+                <TITLE>Path-relative stylesheet import (PRSSI) vulnerability</TITLE>
+                <GROUP>INFO</GROUP>
+                <CVSS_BASE>6.4</CVSS_BASE>
+                <CVSS_TEMPORAL>5.9</CVSS_TEMPORAL>
+                <DESCRIPTION><![CDATA[Relative URLs can be dangerous since browser may not determine the correct directory. If the HTML uses path-relative CSS links, it may be susceptible to path-relative stylesheet import (PRSSI) vulnerabilities. This could allow an attacker to take advantage of CSS imports with relative URLs by overwriting their target file.<P>
+
+References:<BR>
+<A HREF="https://www.theregister.co.uk/2015/02/20/prssi_web_vuln/" TARGET="_blank">Evil CSS Injection</A><BR>
+<A HREF="https://latesthackingnews.com/2017/07/16/relative-path-overwrite-attack/" TARGET="_blank">Relative Path Overwrite Attack</A><BR>
+<A HREF="https://seclab.ccs.neu.edu/static/publications/www2018rpo.pdf" TARGET="_blank">Research paper: Large-Scale Analysis of Style Injection by Relative Path Overwrite</A><BR>]]></DESCRIPTION>
+                <IMPACT>An attacker may trick browsers into importing JavaScript or HTML code as a stylesheet.  This has been shown to enable a number of different attacks, including cross-site scripting (XSS) and exfiltration of CSRF tokens.</IMPACT>
+                <SOLUTION><![CDATA[It is recommended to remove relative URLs and use absolute URLs in CSS imports.<P>
+
+The following alternatives can be applied to avoid PRSSI vulnerabilities.<BR>
+- Set a DOCTYPE which does not allow Quirks mode as explained at <A HREF="https://hsivonen.fi/doctype/" TARGET="_blank"> https://hsivonen.fi/doctype/</A><BR>
+- Set response header X-Frame-Options: deny<BR>
+- Set response header X-Content-Type-Options: nosniff<BR>
+- Define an HTML base tag to specify base URL for all relative URLs in a document.<BR>]]></SOLUTION>
+            </QID>
+            <QID>
+                <QID>150262</QID>
+                <CATEGORY>Information Gathered</CATEGORY>
+                <SEVERITY>2</SEVERITY>
+                <TITLE>Missing header: Feature-Policy</TITLE>
+                <GROUP>IG-WEAK</GROUP>
+                <OWASP>A6</OWASP>
+                <WASC>WASC-15</WASC>
+                <DESCRIPTION>The Feature-Policy response header is not present. </DESCRIPTION>
+                <IMPACT><![CDATA[Feature Policy allows web developers to selectively enable, disable, and modify the behavior of certain APIs and web features such as "geolocation","camera", "usb", "fullscreen", "animations" etc in the browser.
+<P> 
+These policies restrict what APIs the site can access or modify the browser's default behavior for certain features.]]></IMPACT>
+                <SOLUTION><![CDATA[It is recommended to set the Feature-Policy header to selectively enable, disable, and modify the behavior of certain APIs and web features.<P>
+
+References:<BR>
+- <A HREF="https://www.w3.org/TR/feature-policy/" TARGET="_blank">https://www.w3.org/TR/feature-policy/</A><BR>
+- <A HREF="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy" TARGET="_blank">https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy</A>]]></SOLUTION>
+            </QID>
+        </QID_LIST>
+        <GROUP_LIST>
+            <GROUP>
+                <CODE>PATH</CODE>
+                <NAME>Path Disclosure</NAME>
+                <TYPE>VULNERABILITY</TYPE>
+            </GROUP>
+            <GROUP>
+                <CODE>CC</CODE>
+                <NAME>Credit Card Numbers</NAME>
+                <TYPE>SENSITIVE_CONTENT</TYPE>
+            </GROUP>
+            <GROUP>
+                <CODE>IG-DIAG</CODE>
+                <NAME>Scan Diagnostics</NAME>
+                <TYPE>INFORMATION_GATHERED</TYPE>
+            </GROUP>
+            <GROUP>
+                <CODE>SSN-US</CODE>
+                <NAME>Social Security Numbers (US)</NAME>
+                <TYPE>SENSITIVE_CONTENT</TYPE>
+            </GROUP>
+            <GROUP>
+                <CODE>IG-WEAK</CODE>
+                <NAME>Security Weaknesses</NAME>
+                <TYPE>INFORMATION_GATHERED</TYPE>
+            </GROUP>
+            <GROUP>
+                <CODE>CUSTOM</CODE>
+                <NAME>Custom Contents</NAME>
+                <TYPE>SENSITIVE_CONTENT</TYPE>
+            </GROUP>
+            <GROUP>
+                <CODE>XSS</CODE>
+                <NAME>Cross-Site Scripting</NAME>
+                <TYPE>VULNERABILITY</TYPE>
+            </GROUP>
+            <GROUP>
+                <CODE>INFO</CODE>
+                <NAME>Information Disclosure</NAME>
+                <TYPE>VULNERABILITY</TYPE>
+            </GROUP>
+            <GROUP>
+                <CODE>SQL</CODE>
+                <NAME>SQL Injection</NAME>
+                <TYPE>VULNERABILITY</TYPE>
+            </GROUP>
+        </GROUP_LIST>
+        <OWASP_LIST>
+            <OWASP>
+                <CODE>A1</CODE>
+                <NAME>Injection</NAME>
+            </OWASP>
+            <OWASP>
+                <CODE>A2</CODE>
+                <NAME>Broken Authentication</NAME>
+            </OWASP>
+            <OWASP>
+                <CODE>A3</CODE>
+                <NAME>Sensitive Data Exposure</NAME>
+            </OWASP>
+            <OWASP>
+                <CODE>A4</CODE>
+                <NAME>XML External Entities (XXE)</NAME>
+            </OWASP>
+            <OWASP>
+                <CODE>A5</CODE>
+                <NAME>Broken Access Control</NAME>
+            </OWASP>
+            <OWASP>
+                <CODE>A6</CODE>
+                <NAME>Security Misconfiguration</NAME>
+            </OWASP>
+            <OWASP>
+                <CODE>A7</CODE>
+                <NAME>Cross-Site Scripting (XSS)</NAME>
+            </OWASP>
+            <OWASP>
+                <CODE>A8</CODE>
+                <NAME>Insecure Deserialization</NAME>
+            </OWASP>
+            <OWASP>
+                <CODE>A9</CODE>
+                <NAME>Using Components with Known Vulnerabilities</NAME>
+            </OWASP>
+            <OWASP>
+                <CODE>A10</CODE>
+                <NAME><![CDATA[Insufficient Logging & Monitoring]]></NAME>
+            </OWASP>
+        </OWASP_LIST>
+        <WASC_LIST>
+            <WASC>
+                <CODE>WASC-1</CODE>
+                <NAME>INSUFFICIENT AUTHENTICATION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-2</CODE>
+                <NAME>INSUFFICIENT AUTHORIZATION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-3</CODE>
+                <NAME>INTEGER OVERFLOWS</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-4</CODE>
+                <NAME>INSUFFICIENT TRANSPORT LAYER PROTECTION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-5</CODE>
+                <NAME>REMOTE FILE INCLUSION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-6</CODE>
+                <NAME>FORMAT STRING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-7</CODE>
+                <NAME>BUFFER OVERFLOW</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-8</CODE>
+                <NAME>CROSS-SITE SCRIPTING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-9</CODE>
+                <NAME>CROSS-SITE REQUEST FORGERY</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-10</CODE>
+                <NAME>DENIAL OF SERVICE</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-11</CODE>
+                <NAME>BRUTE FORCE</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-12</CODE>
+                <NAME>CONTENT SPOOFING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-13</CODE>
+                <NAME>INFORMATION LEAKAGE</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-14</CODE>
+                <NAME>SERVER MISCONFIGURATION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-15</CODE>
+                <NAME>APPLICATION MISCONFIGURATION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-16</CODE>
+                <NAME>DIRECTORY INDEXING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-17</CODE>
+                <NAME>IMPROPER FILESYSTEM PERMISSIONS</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-18</CODE>
+                <NAME>CREDENTIAL/SESSION PREDICTION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-19</CODE>
+                <NAME>SQL INJECTION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-20</CODE>
+                <NAME>IMPROPER INPUT HANDLING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-21</CODE>
+                <NAME>INSUFFICIENT ANTI-AUTOMATION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-22</CODE>
+                <NAME>IMPROPER OUTPUT HANDLING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-23</CODE>
+                <NAME>XML INJECTION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-24</CODE>
+                <NAME>HTTP REQUEST SPLITTING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-25</CODE>
+                <NAME>HTTP RESPONSE SPLITTING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-26</CODE>
+                <NAME>HTTP REQUEST SMUGGLING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-27</CODE>
+                <NAME>HTTP RESPONSE SMUGGLING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-28</CODE>
+                <NAME>NULL BYTE INJECTION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-29</CODE>
+                <NAME>LDAP INJECTION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-30</CODE>
+                <NAME>MAIL COMMAND INJECTION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-31</CODE>
+                <NAME>OS COMMANDING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-32</CODE>
+                <NAME>ROUTING DETOUR</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-33</CODE>
+                <NAME>PATH TRAVERSAL</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-34</CODE>
+                <NAME>PREDICTABLE RESOURCE LOCATION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-35</CODE>
+                <NAME>SOAP ARRAY ABUSE</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-36</CODE>
+                <NAME>SSI INJECTION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-37</CODE>
+                <NAME>SESSION FIXATION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-38</CODE>
+                <NAME>URL REDIRECTOR ABUSE</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-39</CODE>
+                <NAME>XPATH INJECTION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-40</CODE>
+                <NAME>INSUFFICIENT PROCESS VALIDATION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-41</CODE>
+                <NAME>XML ATTRIBUTE BLOWUP</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-42</CODE>
+                <NAME>ABUSE OF FUNCTIONALITY</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-43</CODE>
+                <NAME>XML EXTERNAL ENTITIES (XXE)</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-44</CODE>
+                <NAME>XML ENTITY EXPANSION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-45</CODE>
+                <NAME>FINGERPRINTING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-46</CODE>
+                <NAME>XQUERY INJECTION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-47</CODE>
+                <NAME>INSUFFICIENT SESSION EXPIRATION</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-48</CODE>
+                <NAME>INSECURE INDEXING</NAME>
+            </WASC>
+            <WASC>
+                <CODE>WASC-49</CODE>
+                <NAME>INSUFFICIENT PASSWORD RECOVERY</NAME>
+            </WASC>
+        </WASC_LIST>
+    </GLOSSARY>
+    <APPENDIX>
+        <SCAN_LIST>
+            <SCAN>
+                <NAME>Web Application Vulnerability Scan - example eStore Server 1 - 2020-03-11</NAME>
+                <REFERENCE>was/1583946412161.2260159</REFERENCE>
+                <START_DATE>11 Mar 2020 01:07PM GMT-0400</START_DATE>
+                <END_DATE>11 Mar 2020 01:42PM GMT-0400</END_DATE>
+                <MODE>Vulnerability</MODE>
+                <PROGRESSION_NUMBER>1</PROGRESSION_NUMBER>
+                <TYPE>Manual</TYPE>
+                <WEB_APPLICATION>example eStore Server 1</WEB_APPLICATION>
+                <AUTHENTICATION_RECORD>None</AUTHENTICATION_RECORD>
+                <PROFILE>Initial WAS Options</PROFILE>
+                <SCANNER>External (IP: 64.39.99.247, Scanner: 11.8.30-1, WAS: 7.6.34-1, Signatures: 2.4.837-4)</SCANNER>
+                <STATUS>Finished</STATUS>
+                <AUTHENTICATION_STATUS>No Authentication specified</AUTHENTICATION_STATUS>
+            </SCAN>
+        </SCAN_LIST>
+        <OPTION_PROFILE_DETAILS>
+            <FORM_SUBMISSION>BOTH</FORM_SUBMISSION>
+            <FORM_CRAWL_SCOPE>false</FORM_CRAWL_SCOPE>
+            <MAXIMUM_LINKS_TO_TEST_IN_SCOPE>300</MAXIMUM_LINKS_TO_TEST_IN_SCOPE>
+            <USER_AGENT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+            <REQUEST_PARAMETER_SET>Initial Parameters</REQUEST_PARAMETER_SET>
+            <DOCUMENT_TYPE>true</DOCUMENT_TYPE>
+            <SMART_SCAN_ENABLED>false</SMART_SCAN_ENABLED>
+            <SMARTSCAN_DEPTH>5</SMARTSCAN_DEPTH>
+            <ENHANCED_CRAWLING>false</ENHANCED_CRAWLING>
+            <TIMEOUT_ERROR_THRESHOLD>100</TIMEOUT_ERROR_THRESHOLD>
+            <UNEXPECTED_ERROR_THRESHOLD>300</UNEXPECTED_ERROR_THRESHOLD>
+            <SCAN_INTENSITY>LOW</SCAN_INTENSITY>
+            <BRUTEFORCE_OPTION>MINIMAL</BRUTEFORCE_OPTION>
+            <DETECTION_SCOPE>CORE</DETECTION_SCOPE>
+            <ENABLE_XSS_PAYLOADS>No</ENABLE_XSS_PAYLOADS>
+            <CREDIT_CARD_NUMBERS_SEARCH>false</CREDIT_CARD_NUMBERS_SEARCH>
+            <SOCIAL_SECURITY_NUMBERS_US_SEARCH>false</SOCIAL_SECURITY_NUMBERS_US_SEARCH>
+            <CUSTOM_SENSITIVE_CONTENT_SEARCH>Off</CUSTOM_SENSITIVE_CONTENT_SEARCH>
+        </OPTION_PROFILE_DETAILS>
+        <WEBAPP>
+            <ID>57405567</ID>
+            <NAME>example eStore Server 1</NAME>
+            <URL>https://store.example.com/</URL>
+            <OWNER>Sally Example (sexample)</OWNER>
+            <OPERATING_SYSTEM>NetScaler</OPERATING_SYSTEM>
+            <SCOPE>Limit to URL hostname</SCOPE>
+        </WEBAPP>
+        <SEVERITY_CATEGORY_LIST>
+            <SEVERITY_CATEGORY>
+                <NAME>Confirmed Vulnerability</NAME>
+                <DESCRIPTION>Vulnerabilities (QIDs) are design flaws, programming errors, or mis-configurations that make your web application and web application platform susceptible to malicious attacks. Depending on the level of the security risk, the successful exploitation of a vulnerability can vary from the disclosure of information to a complete compromise of the web application and/or the web application platform. Even if the web application isn't fully compromised, an exploited vulnerability could still lead to the web application being used to launch attacks against users of the site.</DESCRIPTION>
+                <SEVERITY_LEVEL_LIST>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>1</SEVERITY>
+                        <LEVEL>Minimal</LEVEL>
+                        <DESCRIPTION>Basic information disclosure (e.g. web server type, programming language) might enable intruders to discover other vulnerabilities, but lack of this information does not make the vulnerability harder to find.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>2</SEVERITY>
+                        <LEVEL>Medium</LEVEL>
+                        <DESCRIPTION>Intruders may be able to collect sensitive information about the application platform, such as the precise version of software used. With this information, intruders can easily exploit known vulnerabilities specific to software versions. Other types of sensitive information might disclose a few lines of source code or hidden directories.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>3</SEVERITY>
+                        <LEVEL>Serious</LEVEL>
+                        <DESCRIPTION>Vulnerabilities at this level typically disclose security-related information that could result in misuse or an exploit. Examples include source code disclosure or transmitting authentication credentials over non-encrypted channels.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>4</SEVERITY>
+                        <LEVEL>Critical</LEVEL>
+                        <DESCRIPTION>Intruders can exploit the vulnerability to gain highly sensitive content or affect other users of the web application. Examples include certain types of cross-site scripting and SQL injection attacks.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>5</SEVERITY>
+                        <LEVEL>Urgent</LEVEL>
+                        <DESCRIPTION>Intruders can exploit the vulnerability to compromise the web application's data store, obtain information from other users' accounts, or obtain command execution on a host in the web application's architecture.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                </SEVERITY_LEVEL_LIST>
+            </SEVERITY_CATEGORY>
+            <SEVERITY_CATEGORY>
+                <NAME>Potential Vulnerability</NAME>
+                <DESCRIPTION>Potential Vulnerabilities indicate that the scanner observed a weakness or error that is commonly used to attack a web application, and the scanner was unable to confirm if the weakness or error could be exploited. Where possible, the QID's description and results section include information and hints for following-up with manual analysis. For example, the exploitability of a QID may be influenced by characteristics that the scanner cannot confirm, such as the web application's network architecture, or the test to confirm exploitability requires more intrusive testing than the scanner is designed to conduct.</DESCRIPTION>
+                <SEVERITY_LEVEL_LIST>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>1</SEVERITY>
+                        <LEVEL>Minimal</LEVEL>
+                        <DESCRIPTION>Presence of this vulnerability is indicative of basic information disclosure (e.g. web server type, programming language) and might enable intruders to discover other vulnerabilities. For example in this scenario, information such as web server type, programming language, passwords or file path references can be disclosed.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>2</SEVERITY>
+                        <LEVEL>Medium</LEVEL>
+                        <DESCRIPTION>Presence of this vulnerability is indicative of basic information disclosure (e.g. web server type, programming language) and might enable intruders to discover other vulnerabilities. For example version of software or session data can be disclosed, which could be used to exploit.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>3</SEVERITY>
+                        <LEVEL>Serious</LEVEL>
+                        <DESCRIPTION>Presence of this vulnerability might give access to security-related information to intruders who are bound to misuse or exploit. Examples of what could happen if this vulnerability was exploited include bringing down the server or causing hindrance to the regular service.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>4</SEVERITY>
+                        <LEVEL>Critical</LEVEL>
+                        <DESCRIPTION>Presence of this vulnerability might give intruders the ability to gain highly sensitive content or affect other users of the web application.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>5</SEVERITY>
+                        <LEVEL>Urgent</LEVEL>
+                        <DESCRIPTION>Presence of this vulnerability might enable intruders to compromise the web application's data store, obtain information from other users' accounts, or obtain command execution on a host in the web application's architecture. For example in this scenario, the web application users can potentially be targeted if the application is exploited.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                </SEVERITY_LEVEL_LIST>
+            </SEVERITY_CATEGORY>
+            <SEVERITY_CATEGORY>
+                <NAME>Sensitive Content</NAME>
+                <DESCRIPTION>Sensitive content may be detected based on known patterns (credit card numbers, social security numbers) or custom patterns (strings, regular expressions), depending on the option profile used. Intruders may gain access to sensitive content that could result in misuse or other exploits.</DESCRIPTION>
+                <SEVERITY_LEVEL_LIST>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>1</SEVERITY>
+                        <LEVEL>Minimal</LEVEL>
+                        <DESCRIPTION>Sensitive content was found in the web server response. During our scan of the site form(s) were found with field(s) for credit card number or social security number. This information disclosure could result in a confidentiality breach and could be a target for intruders. For this reason we recommend caution.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>2</SEVERITY>
+                        <LEVEL>Medium</LEVEL>
+                        <DESCRIPTION>Sensitive content was found in the web server response. Specifically our service found a certain sensitive content pattern (defined in the option profile). This information disclosure could result in a confidentiality breach and could be a target for intruders. For this reason we recommend caution.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>3</SEVERITY>
+                        <LEVEL>Serious</LEVEL>
+                        <DESCRIPTION>Sensitive content was found in the web server response - a valid social security number or credit card information. This infomation disclosure could result in a confidentiality breach, and it gives intruders access to valid sensitive content that could be misused.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                </SEVERITY_LEVEL_LIST>
+            </SEVERITY_CATEGORY>
+            <SEVERITY_CATEGORY>
+                <NAME>Information Gathered</NAME>
+                <DESCRIPTION>Information Gathered issues (QIDs) include visible information about the web application's platform, code, or architecture. It may also include information about users of the web application.</DESCRIPTION>
+                <SEVERITY_LEVEL_LIST>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>1</SEVERITY>
+                        <LEVEL>Minimal</LEVEL>
+                        <DESCRIPTION>Intruders may be able to retrieve sensitive information related to the web application platform.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>2</SEVERITY>
+                        <LEVEL>Medium</LEVEL>
+                        <DESCRIPTION>Intruders may be able to retrieve sensitive information related to internal functionality or business logic of the web application.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                    <SEVERITY_LEVEL>
+                        <SEVERITY>3</SEVERITY>
+                        <LEVEL>Serious</LEVEL>
+                        <DESCRIPTION>Intruders may be able to detect highly sensitive data, such as personally identifiable information (PII) about other users of the web application.</DESCRIPTION>
+                    </SEVERITY_LEVEL>
+                </SEVERITY_LEVEL_LIST>
+            </SEVERITY_CATEGORY>
+        </SEVERITY_CATEGORY_LIST>
+    </APPENDIX>
+</WAS_SCAN_REPORT>

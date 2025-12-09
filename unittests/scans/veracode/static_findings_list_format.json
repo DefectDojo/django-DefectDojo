@@ -1,0 +1,164 @@
+{
+    "findings": [
+        {
+            "issue_id": 16516872,
+            "scan_type": "STATIC",
+            "description": "<span>This call to page.html() contains a cross-site scripting (XSS) flaw.  The application populates the HTTP response with untrusted input, allowing an attacker to embed malicious content, such as Javascript code, which will be executed in the context of the victim's browser.  XSS vulnerabilities are commonly exploited to steal or manipulate cookies, modify presentation of content, and compromise confidential information, with new attack vectors being discovered on a regular basis. </span> <span>Use contextual escaping on all untrusted data before using it to construct any portion of an HTTP response.  The escaping method should be chosen based on the specific use case of the untrusted data, otherwise it may not protect fully against the attack. For example, if the data is being written to the body of an HTML page, use HTML entity escaping; if the data is being written to an attribute, use attribute escaping; etc.  Both the OWASP Java Encoder library and the Microsoft AntiXSS library provide contextual escaping methods. For more details on contextual escaping, see https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md. In addition, as a best practice, always validate untrusted input to ensure that it conforms to the expected format, using centralized data validation routines when possible.</span> <span>References: <a href=\"https://cwe.mitre.org/data/definitions/79.html\">CWE</a> <a href=\"https://owasp.org/www-community/attacks/xss/\">OWASP</a> <a href=\"https://docs.veracode.com/r/review_cleansers\">Supported Cleansers</a></span>",
+            "count": 1,
+            "context_type": "APPLICATION",
+            "context_guid": "zyx789-xyz987",
+            "violates_policy": true,
+            "finding_status": {
+                "first_found_date": "2021-08-27T07:33:40.989Z",
+                "status": "OPEN",
+                "resolution": "UNRESOLVED",
+                "mitigation_review_status": "NONE",
+                "new": false,
+                "resolution_status": "NONE",
+                "last_seen_date": "2021-09-10T04:06:31.614Z"
+            },
+            "finding_details": {
+                "severity": 3,
+                "cwe": {
+                    "id": 80,
+                    "name": "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+                    "href": "https://api.veracode.com/appsec/v1/cwes/80"
+                },
+                "file_path": "/WEB-INF/views/contact.jsp",
+                "file_name": "update.jsp",
+                "module": "CoolProduct.jsa",
+                "relative_location": -1,
+                "finding_category": {
+                    "id": 20,
+                    "name": "Cross-Site Scripting (XSS)",
+                    "href": "https://api.veracode.com/appsec/v1/categories/20"
+                },
+                "procedure": "lambda_3",
+                "exploitability": 1,
+                "attack_vector": "page.html",
+                "file_line_number": 50
+            },
+            "build_id": 1268436506
+        },
+        {
+            "issue_id": 16516873,
+            "scan_type": "STATIC",
+            "description": "<span>This call to page.html() contains a cross-site scripting (XSS) flaw.  The application populates the HTTP response with untrusted input, allowing an attacker to embed malicious content, such as Javascript code, which will be executed in the context of the victim's browser.  XSS vulnerabilities are commonly exploited to steal or manipulate cookies, modify presentation of content, and compromise confidential information, with new attack vectors being discovered on a regular basis. </span> <span>Use contextual escaping on all untrusted data before using it to construct any portion of an HTTP response.  The escaping method should be chosen based on the specific use case of the untrusted data, otherwise it may not protect fully against the attack. For example, if the data is being written to the body of an HTML page, use HTML entity escaping; if the data is being written to an attribute, use attribute escaping; etc.  Both the OWASP Java Encoder library and the Microsoft AntiXSS library provide contextual escaping methods. For more details on contextual escaping, see https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md. In addition, as a best practice, always validate untrusted input to ensure that it conforms to the expected format, using centralized data validation routines when possible.</span> <span>References: <a href=\"https://cwe.mitre.org/data/definitions/79.html\">CWE</a> <a href=\"https://owasp.org/www-community/attacks/xss/\">OWASP</a> <a href=\"https://docs.veracode.com/r/review_cleansers\">Supported Cleansers</a></span>",
+            "count": 1,
+            "context_type": "APPLICATION",
+            "context_guid": "zyx789-xyz987",
+            "violates_policy": true,
+            "finding_status": {
+                "first_found_date": "2021-08-27T07:33:40.989Z",
+                "status": "CLOSED",
+                "resolution": "UNRESOLVED",
+                "mitigation_review_status": "NONE",
+                "new": false,
+                "resolution_status": "NONE",
+                "last_seen_date": "2021-09-10T04:06:31.614Z"
+            },
+            "finding_details": {
+                "severity": 3,
+                "cwe": {
+                    "id": 80,
+                    "name": "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)",
+                    "href": "https://api.veracode.com/appsec/v1/cwes/80"
+                },
+                "file_path": "/WEB-INF/views/contact.jsp",
+                "file_name": "update.jsp",
+                "module": "CoolProduct.jsa",
+                "relative_location": -1,
+                "finding_category": {
+                    "id": 20,
+                    "name": "Cross-Site Scripting (XSS)",
+                    "href": "https://api.veracode.com/appsec/v1/categories/20"
+                },
+                "procedure": "lambda_4",
+                "exploitability": 1,
+                "attack_vector": "page.html",
+                "file_line_number": 59
+            },
+            "build_id": 1268436506
+        },
+        {
+            "issue_id": 16516853,
+            "scan_type": "STATIC",
+            "description": "<span>The application contains hard-coded information that may contain credentials to an external service.  The use of hard-coded credentials significantly increases the possibility that the account being protected will be compromised. set</span> <span>Store credentials out-of-band from the application code.  Follow best practices for protecting credentials stored in locations such as configuration or properties files.</span> <span>References: <a href=\"https://cwe.mitre.org/data/definitions/798.html\">CWE</a></span>",
+            "count": 1,
+            "context_type": "APPLICATION",
+            "context_guid": "zyx789-xyz987",
+            "violates_policy": true,
+            "finding_status": {
+                "first_found_date": "2021-08-27T07:33:40.989Z",
+                "status": "OPEN",
+                "resolution": "UNRESOLVED",
+                "mitigation_review_status": "NONE",
+                "new": false,
+                "resolution_status": "NONE",
+                "last_seen_date": "2021-09-10T04:06:31.614Z"
+            },
+            "finding_details": {
+                "severity": 3,
+                "cwe": {
+                    "id": 798,
+                    "name": "Use of Hard-coded Credentials",
+                    "href": "https://api.veracode.com/appsec/v1/cwes/798"
+                },
+                "file_path": "/WEB-INF/layouts/default.jsp",
+                "file_name": "default.jsp",
+                "module": "CoolProduct.jsa",
+                "relative_location": -1,
+                "finding_category": {
+                    "id": 10,
+                    "name": "Credentials Management",
+                    "href": "https://api.veracode.com/appsec/v1/categories/10"
+                },
+                "procedure": "!main",
+                "exploitability": 1,
+                "attack_vector": "set",
+                "file_line_number": 135
+            },
+            "build_id": 1268436506
+        },
+        {
+            "issue_id": 16516871,
+            "scan_type": "STATIC",
+            "description": "<span>SSRF attacks works when an attacker can pass a URL to access other upstream resources. This happens when resource urls aren't validated for expected destination. Attackers can craft a vulnerable URL to access variety of sensitive information like AWS metadata, database services and other web enabled services.</span> <span>As a mitigation, create a list of allowed hosts and protocols and validate every request against it. As far as possible, don't allow URLs coming directly from user to be passed on these APIs.</span><span>References : <a href=\"https://cwe.mitre.org/data/definitions/918.html\">CWE 918</a><BR><a href=\"https://owasp.org/www-community/attacks/Server_Side_Request_Forgery\">SSRF Attacks</a></span>",
+            "count": 1,
+            "context_type": "APPLICATION",
+            "context_guid": "zyx789-xyz987",
+            "violates_policy": true,
+            "finding_status": {
+                "first_found_date": "2021-08-27T07:33:40.989Z",
+                "status": "OPEN",
+                "resolution": "UNRESOLVED",
+                "mitigation_review_status": "NONE",
+                "new": false,
+                "resolution_status": "NONE",
+                "last_seen_date": "2021-09-10T04:06:31.614Z"
+            },
+            "finding_details": {
+                "severity": 3,
+                "cwe": {
+                    "id": 918,
+                    "name": "Server-Side Request Forgery (SSRF)",
+                    "href": "https://api.veracode.com/appsec/v1/cwes/918"
+                },
+                "file_path": "com/insecure-company-alliance/CoolProduct/class.java",
+                "file_name": "class.java",
+                "module": "CoolProduct.jar",
+                "relative_location": 1,
+                "finding_category": {
+                    "id": 8,
+                    "name": "Information Leakage",
+                    "href": "https://api.veracode.com/appsec/v1/categories/8"
+                },
+                "procedure": "com.insecure-company-alliance.CoolProduct.Class.execute",
+                "exploitability": 1,
+                "attack_vector": "org.apache.http.client.HttpClient.execute",
+                "file_line_number": 147
+            },
+            "build_id": 1268436506
+        }
+    ]
+}

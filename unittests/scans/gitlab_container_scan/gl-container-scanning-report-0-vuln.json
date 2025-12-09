@@ -1,0 +1,20 @@
+{
+  "version": "3.0.0",
+  "vulnerabilities": [],
+  "remediations": [],
+  "scan": {
+    "scanner": {
+      "id": "trivy",
+      "name": "Trivy",
+      "url": "https://github.com/aquasecurity/trivy/",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "0.16.0"
+    },
+    "type": "container_scanning",
+    "start_time": "2021-04-14T19:45:58",
+    "end_time": "2021-04-14T19:46:18",
+    "status": "success"
+  }
+}

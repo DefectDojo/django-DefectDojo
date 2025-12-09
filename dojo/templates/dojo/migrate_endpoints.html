@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% load display_tags %}
+{% load authorization_tags %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        {{ name }}
+                    </h3>
+                </div>
+                <div id="the-filters" class="is-filters panel-body collapse">
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                </div>
+            </div>
+            <div class="panel-heading">
+                <form class="form-horizontal" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <button class="btn btn-primary" type="submit" name="run_migration">Run migration</button>
+                    </div>
+                </form>
+            </div>
+            {% if html_log|length > 0 %}
+                <ul>
+                    {% for log in html_log %}
+                        <li>
+                            {% if 'message' in log.keys %}
+                                <a href="{{ log.view }}">Endpoint</a> {{ log.message }}. It is not possible to migrate it.
+                                  <a href="{{ log.delete }}">Delete</a> or <a href="{{ log.edit }}">edit</a> this endpoint.
+                            {% else %}
+                                {{ log }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                No changes or broken endpoints detected.
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

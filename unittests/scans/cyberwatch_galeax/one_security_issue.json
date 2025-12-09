@@ -1,0 +1,30 @@
+{
+    "cves": [],
+    "security_issues": [
+      {
+        "type": "Security Issue",
+        "id": 23,
+        "security_issue_id": "WSTG-INFO-08",
+        "level": "level_info",
+        "editable": false,
+        "security_issue_title": "Fingerprint Web Application Framework",
+        "security_issue_description": "Anonymized description for fingerprinting framework.",
+        "servers": [
+          {
+            "active": "active",
+            "computer_id": 72,
+            "computer_name": "host",
+            "detected_at": "2025-01-06T15:55:06.704+01:00"
+          },
+          {
+            "active": "active",
+            "computer_id": 73,
+            "computer_name": "host",
+            "detected_at": "2025-01-06T15:55:06.709+01:00"
+          }
+        ],
+        "cve_announcements": []
+      }
+    ]
+  }
+  

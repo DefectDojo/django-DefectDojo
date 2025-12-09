@@ -1,0 +1,9 @@
+#!/usr/bin/expect
+
+set timeout -1;
+spawn /usr/bin/python manage.py changepassword admin;
+expect {
+    "Password:" { exp_send "$env(DD_ADMIN_PASSWORD)\r" ; exp_continue }
+    "Password (again):" { exp_send "$env(DD_ADMIN_PASSWORD)\r" ; exp_continue }
+    eof
+}

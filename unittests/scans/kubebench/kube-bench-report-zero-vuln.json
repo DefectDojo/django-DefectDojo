@@ -1,0 +1,402 @@
+[
+    {
+        "id": "4",
+        "version": "1.5",
+        "text": "Worker Node Security Configuration",
+        "node_type": "node",
+        "tests": [
+            {
+                "section": "4.1",
+                "pass": 10,
+                "fail": 0,
+                "warn": 0,
+                "info": 0,
+                "desc": "Worker Node Configuration Files",
+                "results": [
+                    {
+                        "test_number": "4.1.1",
+                        "test_desc": "Ensure that the kubelet service file permissions are set to 644 or more restrictive (Scored)",
+                        "audit": "/bin/sh -c 'if test -e /etc/systemd/system/kubelet.service; then stat -c permissions=%a /etc/systemd/system/kubelet.service; fi' ",
+                        "AuditConfig": "",
+                        "type": "",
+                        "remediation": "Run the below command (based on the file location on your system) on the each worker node.\nFor example,\nchmod 644 /etc/systemd/system/kubelet.service\n",
+                        "test_info": [
+                            "Run the below command (based on the file location on your system) on the each worker node.\nFor example,\nchmod 644 /etc/systemd/system/kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "bitmask '644' AND '644'"
+                    },
+                    {
+                        "test_number": "4.1.2",
+                        "test_desc": "Ensure that the kubelet service file ownership is set to root:root (Scored)",
+                        "audit": "/bin/sh -c 'if test -e /etc/systemd/system/kubelet.service; then stat -c %U:%G /etc/systemd/system/kubelet.service; fi' ",
+                        "AuditConfig": "",
+                        "type": "",
+                        "remediation": "Run the below command (based on the file location on your system) on the each worker node.\nFor example,\nchown root:root /etc/systemd/system/kubelet.service\n",
+                        "test_info": [
+                            "Run the below command (based on the file location on your system) on the each worker node.\nFor example,\nchown root:root /etc/systemd/system/kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'root:root' is present"
+                    },
+                    {
+                        "test_number": "4.1.3",
+                        "test_desc": "Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive (Scored)",
+                        "audit": "/bin/sh -c 'if test -e /var/lib/kubelet/kubeconfig; then stat -c permissions=%a /var/lib/kubelet/kubeconfig; fi' ",
+                        "AuditConfig": "",
+                        "type": "",
+                        "remediation": "Run the below command (based on the file location on your system) on the each worker node.\nFor example,\nchmod 644 /var/lib/kubelet/kubeconfig\n",
+                        "test_info": [
+                            "Run the below command (based on the file location on your system) on the each worker node.\nFor example,\nchmod 644 /var/lib/kubelet/kubeconfig\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "bitmask '644' AND '644'"
+                    },
+                    {
+                        "test_number": "4.1.4",
+                        "test_desc": "Ensure that the proxy kubeconfig file ownership is set to root:root (Scored)",
+                        "audit": "/bin/sh -c 'if test -e /var/lib/kubelet/kubeconfig; then stat -c %U:%G /var/lib/kubelet/kubeconfig; fi' ",
+                        "AuditConfig": "",
+                        "type": "",
+                        "remediation": "Run the below command (based on the file location on your system) on the each worker node.\nFor example, chown root:root /var/lib/kubelet/kubeconfig\n",
+                        "test_info": [
+                            "Run the below command (based on the file location on your system) on the each worker node.\nFor example, chown root:root /var/lib/kubelet/kubeconfig\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'root:root' is present"
+                    },
+                    {
+                        "test_number": "4.1.5",
+                        "test_desc": "Ensure that the kubelet.conf file permissions are set to 644 or more restrictive (Scored)",
+                        "audit": "/bin/sh -c 'if test -e /var/lib/kubelet/kubeconfig; then stat -c permissions=%a /var/lib/kubelet/kubeconfig; fi' ",
+                        "AuditConfig": "",
+                        "type": "",
+                        "remediation": "Run the below command (based on the file location on your system) on the each worker node.\nFor example,\nchmod 644 /var/lib/kubelet/kubeconfig\n",
+                        "test_info": [
+                            "Run the below command (based on the file location on your system) on the each worker node.\nFor example,\nchmod 644 /var/lib/kubelet/kubeconfig\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "bitmask '644' AND '644'"
+                    },
+                    {
+                        "test_number": "4.1.6",
+                        "test_desc": "Ensure that the kubelet.conf file ownership is set to root:root (Scored)",
+                        "audit": "/bin/sh -c 'if test -e /var/lib/kubelet/kubeconfig; then stat -c %U:%G /var/lib/kubelet/kubeconfig; fi' ",
+                        "AuditConfig": "",
+                        "type": "",
+                        "remediation": "Run the below command (based on the file location on your system) on the each worker node.\nFor example,\nchown root:root /var/lib/kubelet/kubeconfig\n",
+                        "test_info": [
+                            "Run the below command (based on the file location on your system) on the each worker node.\nFor example,\nchown root:root /var/lib/kubelet/kubeconfig\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'root:root' is equal to 'root:root'"
+                    },
+                    {
+                        "test_number": "4.1.7",
+                        "test_desc": "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Scored)",
+                        "audit": "CAFILE=$(ps -ef | grep kubelet | grep -v apiserver | grep -- --client-ca-file= | awk -F '--client-ca-file=' '{print $2}' | awk '{print $1}')\nif test -z $CAFILE; then CAFILE=/etc/kubernetes/certs/ca.crt; fi\nif test -e $CAFILE; then stat -c permissions=%a $CAFILE; fi\n",
+                        "AuditConfig": "",
+                        "type": "",
+                        "remediation": "Run the following command to modify the file permissions of the\n--client-ca-file chmod 644 \u003cfilename\u003e\n",
+                        "test_info": [
+                            "Run the following command to modify the file permissions of the\n--client-ca-file chmod 644 \u003cfilename\u003e\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "bitmask '644' AND '644'"
+                    },
+                    {
+                        "test_number": "4.1.8",
+                        "test_desc": "Ensure that the client certificate authorities file ownership is set to root:root (Scored)",
+                        "audit": "CAFILE=$(ps -ef | grep kubelet | grep -v apiserver | grep -- --client-ca-file= | awk -F '--client-ca-file=' '{print $2}' | awk '{print $1}')\nif test -z $CAFILE; then CAFILE=/etc/kubernetes/certs/ca.crt; fi\nif test -e $CAFILE; then stat -c %U:%G $CAFILE; fi\n",
+                        "AuditConfig": "",
+                        "type": "",
+                        "remediation": "Run the following command to modify the ownership of the --client-ca-file.\nchown root:root \u003cfilename\u003e\n",
+                        "test_info": [
+                            "Run the following command to modify the ownership of the --client-ca-file.\nchown root:root \u003cfilename\u003e\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'root:root' is equal to 'root:root'"
+                    },
+                    {
+                        "test_number": "4.1.9",
+                        "test_desc": "Ensure that the kubelet configuration file has permissions set to 644 or more restrictive (Scored)",
+                        "audit": "/bin/sh -c 'if test -e /var/lib/kubelet/kubeconfig; then stat -c permissions=%a /var/lib/kubelet/kubeconfig; fi' ",
+                        "AuditConfig": "",
+                        "type": "",
+                        "remediation": "Run the following command (using the config file location identified in the Audit step)\nchmod 644 /var/lib/kubelet/kubeconfig\n",
+                        "test_info": [
+                            "Run the following command (using the config file location identified in the Audit step)\nchmod 644 /var/lib/kubelet/kubeconfig\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "bitmask '644' AND '644'"
+                    },
+                    {
+                        "test_number": "4.1.10",
+                        "test_desc": "Ensure that the kubelet configuration file ownership is set to root:root (Scored)",
+                        "audit": "/bin/sh -c 'if test -e /var/lib/kubelet/kubeconfig; then stat -c %U:%G /var/lib/kubelet/kubeconfig; fi' ",
+                        "AuditConfig": "",
+                        "type": "",
+                        "remediation": "Run the following command (using the config file location identified in the Audit step)\nchown root:root /var/lib/kubelet/kubeconfig\n",
+                        "test_info": [
+                            "Run the following command (using the config file location identified in the Audit step)\nchown root:root /var/lib/kubelet/kubeconfig\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'root:root' is present"
+                    }
+                ]
+            },
+            {
+                "section": "4.2",
+                "pass": 13,
+                "fail": 0,
+                "warn": 0,
+                "info": 0,
+                "desc": "Kubelet",
+                "results": [
+                    {
+                        "test_number": "4.2.1",
+                        "test_desc": "Ensure that the anonymous-auth argument is set to false (Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "If using a Kubelet config file, edit the file to set authentication: anonymous: enabled to\nfalse.\nIf using executable arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.\n--anonymous-auth=false\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "If using a Kubelet config file, edit the file to set authentication: anonymous: enabled to\nfalse.\nIf using executable arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.\n--anonymous-auth=false\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'false' is equal to 'false'"
+                    },
+                    {
+                        "test_number": "4.2.2",
+                        "test_desc": "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "If using a Kubelet config file, edit the file to set authorization: mode to Webhook. If\nusing executable arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_AUTHZ_ARGS variable.\n--authorization-mode=Webhook\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "If using a Kubelet config file, edit the file to set authorization: mode to Webhook. If\nusing executable arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_AUTHZ_ARGS variable.\n--authorization-mode=Webhook\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": " 'Webhook' not have 'AlwaysAllow'"
+                    },
+                    {
+                        "test_number": "4.2.3",
+                        "test_desc": "Ensure that the --client-ca-file argument is set as appropriate (Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "If using a Kubelet config file, edit the file to set authentication: x509: clientCAFile to\nthe location of the client CA file.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_AUTHZ_ARGS variable.\n--client-ca-file=\u003cpath/to/client-ca-file\u003e\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "If using a Kubelet config file, edit the file to set authentication: x509: clientCAFile to\nthe location of the client CA file.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_AUTHZ_ARGS variable.\n--client-ca-file=\u003cpath/to/client-ca-file\u003e\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'--client-ca-file' is present"
+                    },
+                    {
+                        "test_number": "4.2.4",
+                        "test_desc": "Ensure that the --read-only-port argument is set to 0 (Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "If using a Kubelet config file, edit the file to set readOnlyPort to 0.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.\n--read-only-port=0\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "If using a Kubelet config file, edit the file to set readOnlyPort to 0.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.\n--read-only-port=0\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'0' is equal to '0' OR '--read-only-port' is not present"
+                    },
+                    {
+                        "test_number": "4.2.5",
+                        "test_desc": "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "If using a Kubelet config file, edit the file to set streamingConnectionIdleTimeout to a\nvalue other than 0.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.\n--streaming-connection-idle-timeout=5m\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "If using a Kubelet config file, edit the file to set streamingConnectionIdleTimeout to a\nvalue other than 0.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.\n--streaming-connection-idle-timeout=5m\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'4h' is not equal to '0' OR '--streaming-connection-idle-timeout' is not present"
+                    },
+                    {
+                        "test_number": "4.2.6",
+                        "test_desc": "Ensure that the --protect-kernel-defaults argument is set to true (Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "If using a Kubelet config file, edit the file to set protectKernelDefaults: true.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.\n--protect-kernel-defaults=true\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "If using a Kubelet config file, edit the file to set protectKernelDefaults: true.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.\n--protect-kernel-defaults=true\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'true' is equal to 'true'"
+                    },
+                    {
+                        "test_number": "4.2.7",
+                        "test_desc": "Ensure that the --make-iptables-util-chains argument is set to true (Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "If using a Kubelet config file, edit the file to set makeIPTablesUtilChains: true.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nremove the --make-iptables-util-chains argument from the\nKUBELET_SYSTEM_PODS_ARGS variable.\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "If using a Kubelet config file, edit the file to set makeIPTablesUtilChains: true.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nremove the --make-iptables-util-chains argument from the\nKUBELET_SYSTEM_PODS_ARGS variable.\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'{.makeIPTablesUtilChains}' is present OR '{.makeIPTablesUtilChains}' is not present"
+                    },
+                    {
+                        "test_number": "4.2.8",
+                        "test_desc": "Ensure that the --hostname-override argument is not set (Not Scored)",
+                        "audit": "/bin/ps -fC kubelet ",
+                        "AuditConfig": "",
+                        "type": "",
+                        "remediation": "Edit the kubelet service file /etc/systemd/system/kubelet.service\non each worker node and remove the --hostname-override argument from the\nKUBELET_SYSTEM_PODS_ARGS variable.\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "Edit the kubelet service file /etc/systemd/system/kubelet.service\non each worker node and remove the --hostname-override argument from the\nKUBELET_SYSTEM_PODS_ARGS variable.\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": false,
+                        "IsMultiple": false,
+                        "expected_result": "'' is not present"
+                    },
+                    {
+                        "test_number": "4.2.9",
+                        "test_desc": "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Not Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "If using a Kubelet config file, edit the file to set eventRecordQPS: to an appropriate level.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "If using a Kubelet config file, edit the file to set eventRecordQPS: to an appropriate level.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": false,
+                        "IsMultiple": false,
+                        "expected_result": "'0' is equal to '0'"
+                    },
+                    {
+                        "test_number": "4.2.10",
+                        "test_desc": "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "If using a Kubelet config file, edit the file to set tlsCertFile to the location\nof the certificate file to use to identify this Kubelet, and tlsPrivateKeyFile\nto the location of the corresponding private key file.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameters in KUBELET_CERTIFICATE_ARGS variable.\n--tls-cert-file=\u003cpath/to/tls-certificate-file\u003e\n--tls-private-key-file=\u003cpath/to/tls-key-file\u003e\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "If using a Kubelet config file, edit the file to set tlsCertFile to the location\nof the certificate file to use to identify this Kubelet, and tlsPrivateKeyFile\nto the location of the corresponding private key file.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the below parameters in KUBELET_CERTIFICATE_ARGS variable.\n--tls-cert-file=\u003cpath/to/tls-certificate-file\u003e\n--tls-private-key-file=\u003cpath/to/tls-key-file\u003e\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'--tls-cert-file' is present AND '--tls-private-key-file' is present"
+                    },
+                    {
+                        "test_number": "4.2.11",
+                        "test_desc": "Ensure that the --rotate-certificates argument is not set to false (Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "If using a Kubelet config file, edit the file to add the line rotateCertificates: true or\nremove it altogether to use the default value.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nremove --rotate-certificates=false argument from the KUBELET_CERTIFICATE_ARGS\nvariable.\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "If using a Kubelet config file, edit the file to add the line rotateCertificates: true or\nremove it altogether to use the default value.\nIf using command line arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nremove --rotate-certificates=false argument from the KUBELET_CERTIFICATE_ARGS\nvariable.\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'false' is equal to 'true' OR '--rotate-certificates' is not present"
+                    },
+                    {
+                        "test_number": "4.2.12",
+                        "test_desc": "Ensure that the RotateKubeletServerCertificate argument is set to true (Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "Edit the kubelet service file /etc/systemd/system/kubelet.service\non each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.\n--feature-gates=RotateKubeletServerCertificate=true\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "Edit the kubelet service file /etc/systemd/system/kubelet.service\non each worker node and set the below parameter in KUBELET_CERTIFICATE_ARGS variable.\n--feature-gates=RotateKubeletServerCertificate=true\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": true,
+                        "IsMultiple": false,
+                        "expected_result": "'true' is equal to 'true'"
+                    },
+                    {
+                        "test_number": "4.2.13",
+                        "test_desc": "Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers (Not Scored)",
+                        "audit": "/bin/ps -fC kubelet",
+                        "AuditConfig": "/bin/cat /var/lib/kubelet/kubeconfig",
+                        "type": "",
+                        "remediation": "If using a Kubelet config file, edit the file to set TLSCipherSuites: to\nTLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256\nor to a subset of these values.\nIf using executable arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the --tls-cipher-suites parameter as follows, or to a subset of these values.\n--tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n",
+                        "test_info": [
+                            "If using a Kubelet config file, edit the file to set TLSCipherSuites: to\nTLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256\nor to a subset of these values.\nIf using executable arguments, edit the kubelet service file\n/etc/systemd/system/kubelet.service on each worker node and\nset the --tls-cipher-suites parameter as follows, or to a subset of these values.\n--tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256\nBased on your system, restart the kubelet service. For example:\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n"
+                        ],
+                        "status": "PASS",
+                        "actual_value": "",
+                        "scored": false,
+                        "IsMultiple": false,
+                        "expected_result": "'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256' contains valid elements from 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256'"
+                    }
+                ]
+            }
+        ],
+        "total_pass": 22,
+        "total_fail": 1,
+        "total_warn": 0,
+        "total_info": 0
+    }
+]

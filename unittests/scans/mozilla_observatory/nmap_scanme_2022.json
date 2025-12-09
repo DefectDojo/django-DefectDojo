@@ -1,0 +1,142 @@
+{
+    "scan": {
+        "grade": "F",
+        "likelihood_indicator": "MEDIUM",
+        "response_headers": {
+            "Accept-Ranges": "bytes",
+            "Connection": "Keep-Alive",
+            "Content-Encoding": "gzip",
+            "Content-Length": "1570",
+            "Content-Type": "text/html",
+            "Date": "Mon, 20 Jun 2022 06:58:15 GMT",
+            "Keep-Alive": "timeout=5, max=100",
+            "Server": "Apache/2.4.7 (Ubuntu)",
+            "Vary": "Accept-Encoding"
+        },
+        "score": 0,
+        "tests_failed": 6,
+        "tests_passed": 6,
+        "tests_quantity": 12
+    },
+    "tests": {
+        "content-security-policy": {
+            "data": null,
+            "expectation": "csp-implemented-with-no-unsafe",
+            "http": false,
+            "meta": false,
+            "pass": false,
+            "policy": null,
+            "result": "csp-not-implemented",
+            "score_description": "Content Security Policy (CSP) header not implemented",
+            "score_modifier": -25
+        },
+        "contribute": {
+            "data": null,
+            "expectation": "contribute-json-only-required-on-mozilla-properties",
+            "pass": true,
+            "result": "contribute-json-only-required-on-mozilla-properties",
+            "score_description": "Contribute.json isn't required on websites that don't belong to Mozilla",
+            "score_modifier": 0
+        },
+        "cookies": {
+            "data": null,
+            "expectation": "cookies-secure-with-httponly-sessions",
+            "pass": true,
+            "result": "cookies-not-found",
+            "sameSite": null,
+            "score_description": "No cookies detected",
+            "score_modifier": 0
+        },
+        "cross-origin-resource-sharing": {
+            "data": {
+                "acao": null,
+                "clientaccesspolicy": null,
+                "crossdomain": null
+            },
+            "expectation": "cross-origin-resource-sharing-not-implemented",
+            "pass": true,
+            "result": "cross-origin-resource-sharing-not-implemented",
+            "score_description": "Content is not visible via cross-origin resource sharing (CORS) files or headers",
+            "score_modifier": 0
+        },
+        "public-key-pinning": {
+            "data": null,
+            "expectation": "hpkp-not-implemented",
+            "includeSubDomains": false,
+            "max-age": null,
+            "numPins": null,
+            "pass": true,
+            "preloaded": false,
+            "result": "hpkp-not-implemented-no-https",
+            "score_description": "HTTP Public Key Pinning (HPKP) header can't be implemented without HTTPS",
+            "score_modifier": 0
+        },
+        "redirection": {
+            "destination": "http://scanme.nmap.org/",
+            "expectation": "redirection-to-https",
+            "pass": false,
+            "redirects": false,
+            "result": "redirection-missing",
+            "route": [
+                "http://scanme.nmap.org/"
+            ],
+            "score_description": "Does not redirect to an HTTPS site",
+            "score_modifier": -20,
+            "status_code": 200
+        },
+        "referrer-policy": {
+            "data": null,
+            "expectation": "referrer-policy-private",
+            "http": false,
+            "meta": false,
+            "pass": true,
+            "result": "referrer-policy-not-implemented",
+            "score_description": "Referrer-Policy header not implemented",
+            "score_modifier": 0
+        },
+        "strict-transport-security": {
+            "data": null,
+            "expectation": "hsts-implemented-max-age-at-least-six-months",
+            "includeSubDomains": false,
+            "max-age": null,
+            "pass": false,
+            "preload": false,
+            "preloaded": false,
+            "result": "hsts-not-implemented-no-https",
+            "score_description": "HTTP Strict Transport Security (HSTS) header cannot be set for sites not available over HTTPS",
+            "score_modifier": -20
+        },
+        "subresource-integrity": {
+            "data": {},
+            "expectation": "sri-implemented-and-external-scripts-loaded-securely",
+            "pass": true,
+            "result": "sri-not-implemented-but-all-scripts-loaded-from-secure-origin",
+            "score_description": "Subresource Integrity (SRI) not implemented, but all scripts are loaded from a similar origin",
+            "score_modifier": 0
+        },
+        "x-content-type-options": {
+            "data": null,
+            "expectation": "x-content-type-options-nosniff",
+            "pass": false,
+            "result": "x-content-type-options-not-implemented",
+            "score_description": "X-Content-Type-Options header not implemented",
+            "score_modifier": -5
+        },
+        "x-frame-options": {
+            "data": null,
+            "expectation": "x-frame-options-sameorigin-or-deny",
+            "pass": false,
+            "result": "x-frame-options-not-implemented",
+            "score_description": "X-Frame-Options (XFO) header not implemented",
+            "score_modifier": -20
+        },
+        "x-xss-protection": {
+            "data": null,
+            "expectation": "x-xss-protection-1-mode-block",
+            "pass": false,
+            "result": "x-xss-protection-not-implemented",
+            "score_description": "X-XSS-Protection header not implemented",
+            "score_modifier": -10
+        }
+    }
+}

@@ -1,0 +1,23 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeScanner"
+        }
+      },
+      "results": [
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "OtherScanner"
+        }
+      },
+      "results": [
+      ]
+    }
+  ]
+}

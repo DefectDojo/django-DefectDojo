@@ -1,0 +1,18 @@
+[
+  {
+    "commit": "removing action\n",
+    "commitHash": "a7bce96377c4ff2ac16cd51fb0da7fe7ea678829",
+    "date": "2020-04-15 12:47:20",
+    "diff": "          COMMIT_EMAIL: \"dojo-helpers@this-repo.com\"\n",
+    "stringsFound": [
+      "dojo-helpers@this-repo.com"
+    ],
+    "path": ".github/workflows/main.yml",
+    "reason": "Email address",
+    "old_file_id": "2aba123d6e872777c8cf39ee34664d70e0b90ff0",
+    "new_file_id": "0000000000000000000000000000000000000000",
+    "old_line_num": 35,
+    "new_line_num": 0,
+    "parent_commit_hash": "d8b2f39e826321896a3c7c474fc40dfc0d1fc586"
+  }
+]

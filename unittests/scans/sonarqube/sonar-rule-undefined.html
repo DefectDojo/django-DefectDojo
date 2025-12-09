@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SonarQube Vulnerability Report</title>
+    <style>
+    /*
+	The sss stylesheet is released under the MIT license.
+	<https://github.com/Thiht/sss>
+	*/
+    pre,
+    td,
+    th {
+        padding: 5px 10px
+    }
+
+    code,
+    hr,
+    pre,
+    thead {
+        background: #EEE
+    }
+
+    body {
+        color: #333;
+        font-family: 'Segoe UI', 'Lucida Grande', Helvetica, sans-serif;
+        line-height: 1.5;
+    }
+
+    div.summup {
+        max-width: 800px;
+        margin: 50px auto;
+    }
+
+    div.detail {
+        padding: 20px;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-weight: 400;
+        line-height: 1em;
+        margin: 20px 0
+    }
+
+    h1 {
+        font-size: 2.25em
+    }
+
+    h2 {
+        font-size: 1.75em
+    }
+
+    h3 {
+        font-size: 1.5em
+    }
+
+    h4,
+    h5,
+    h6 {
+        font-size: 1.25em
+    }
+
+    a {
+        color: #08C;
+        text-decoration: none
+    }
+
+    a:focus,
+    a:hover {
+        text-decoration: underline
+    }
+
+    a:visited {
+        color: #058
+    }
+
+    img {
+        max-width: 100%
+    }
+
+    li+li {
+        margin-top: 3px
+    }
+
+    dt {
+        font-weight: 700
+    }
+
+    code {
+        font-family: Consolas, "Lucida Console", monospace;
+        padding: 1px 5px
+    }
+
+    pre {
+        white-space: pre-wrap
+    }
+
+    pre code {
+        padding: 0
+    }
+
+    blockquote {
+        border-left: 5px solid #EEE;
+        margin: 0;
+        padding: 0 10px
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%
+    }
+
+    table+table {
+        margin-top: 1em
+    }
+
+    thead {
+        text-align: left
+    }
+
+    td,
+    th {
+        border: 1px solid #EEE
+    }
+
+    td.component {
+        word-break: break-all;
+    }
+
+    hr {
+        border: 0;
+        height: 1px
+    }
+    </style>
+    <style>
+    .banner {
+        text-align: center;
+    }
+
+    canvas {
+        display: block;
+        margin: 10px auto;
+    }
+    </style>
+</head>
+
+<body>
+    <div class=summup>
+        <!-- insert your company banner here -->
+        <!--
+		<p class="banner">
+			<a href="https://www.soprasteria.com/" target="_blank">
+				<img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/02/Sopra_Steria_logo.svg/1280px-Sopra_Steria_logo.svg.png" alt="Sopra Steria" height="50">
+			</a>
+		</p>
+		-->
+        <h1>SonarQube Vulnerability Report</h1>
+        <dl>
+            <dt>Report Generated On</dt>
+            <dd>Fri Aug 02 2019</dd>
+            <dt>Project Name</dt>
+            <dd>java tomcat</dd>
+            <dt>Application</dt>
+            <dd>tomcat</dd>
+            <dt>Release</dt>
+            <dd>1.0.0</dd>
+            <dt>Delta analysis</dt>
+            <dd>No</dd>
+        </dl>
+        <h2>Summary of the Detected Vulnerabilities</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Severity</th>
+                    <th>Number of Issues</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="background-color:#2c3e50"></td>
+                    <td>BLOCKER</td>
+                    <td>67</td>
+                </tr>
+                <tr>
+                    <td style="background-color: #d43223"></td>
+                    <td>CRITICAL</td>
+                    <td>1774</td>
+                </tr>
+                <tr>
+                    <td style="background-color: #f39c12"></td>
+                    <td>MAJOR</td>
+                    <td>3229</td>
+                </tr>
+                <tr>
+                    <td style="background-color: #319ddb"></td>
+                    <td>MINOR</td>
+                    <td>2276</td>
+                </tr>
+            </tbody>
+        </table>
+        <canvas id="vulnerabilitiesPieChart" width="200" height="200"></canvas>
+    </div>
+    <div class=detail>
+        <h2>Detail of the Detected Vulnerabilities</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rule</th>
+                    <th>Severity</th>
+                    <th>Component</th>
+                    <th>Line</th>
+                    <th>Description</th>
+                    <th>Message</th>
+                    <th style="display:none;">Key</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><a href="https://sonarcloud.io/coding_rules#rule_key=squid:S2975">squid:S2975</a></td>
+                    <td>BLOCKER</td>
+                    <td class="component">java/org/apache/catalina/util/URLEncoder.java</td>
+                    <td>190</td>
+                    <td>&#34;clone&#34; should not be overridden</td>
+                    <td>Remove this &#34;clone&#34; implementation; use a copy constructor or copy factory instead.</td>
+                    <td style="display:none;">AWK40IMu-pl6AHs22MnV</td>
+                </tr>
+            </tbody>
+        </table>
+        <h3>Known Security Rules</h3>
+        <table style="table-layout: fixed; word-wrap: break-word">
+            <thead>
+                <tr>
+                    <th>Rule</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><a href="https://next.sonarqube.com/sonarqube/coding_rules#rule_key=squid:S864">squid:S864</a>
+                    </td>
+                    <td>
+                        <details>
+                            <p>The rules of operator precedence are complicated and can lead to errors. For this reason, parentheses should be used for clarification in complex
+                                statements. However, this does not mean that parentheses should be gratuitously added around every operation. </p>
+                            <p>This rule raises issues when <code>&amp;&amp;</code> and <code>||</code> are used in combination, when assignment and equality or relational
+                                operators are used in together in a condition, and for other operator combinations according to the following table:</p>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td> </td>
+                                        <td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code></td>
+                                        <td><code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>&gt;&gt;&gt;</code></td>
+                                        <td><code>&amp;</code></td>
+                                        <td><code>^</code></td>
+                                        <td> <code>|</code> </td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code></td>
+                                        <td> </td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>&gt;&gt;&gt;</code></td>
+                                        <td>x</td>
+                                        <td> </td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>&amp;</code></td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                        <td> </td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>^</code></td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                        <td> </td>
+                                        <td>x</td>
+                                    </tr>
+                                    <tr>
+                                        <td> <code>|</code> </td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                        <td>x</td>
+                                        <td> </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <h2>Noncompliant Code Example</h2>
+                            <pre>
+x = a + b - c;
+x = a + 1 &lt;&lt; b;  // Noncompliant
+
+if ( a &gt; b || c &lt; d || a == d) {...}
+if ( a &gt; b &amp;&amp; c &lt; d || a == b) {...}  // Noncompliant
+if (a = f(b,c) == 1) { ... } // Noncompliant; == evaluated first
+</pre>
+                            <h2>Compliant Solution</h2>
+                            <pre>
+x = a + b - c;
+x = (a + 1) &lt;&lt; b;
+
+if ( a &gt; b || c &lt; d || a == d) {...}
+if ( (a &gt; b &amp;&amp; c &lt; d) || a == b) {...}
+if ( (a = f(b,c)) == 1) { ... }
+</pre>
+                            <h2>See</h2>
+                            <ul>
+                                <li> MISRA C:2004, 12.1 - Limited dependence should be placed on C's operator precedence rules in expressions </li>
+                                <li> MISRA C:2004, 12.2 - The value of an expression shall be the same under any order of evaluation that the standard permits. </li>
+                                <li> MISRA C:2004, 12.5 - The operands of a logical &amp;&amp; or || shall be primary-expressions. </li>
+                                <li> MISRA C++:2008, 5-0-1 - The value of an expression shall be the same under any order of evaluation that the standard permits. </li>
+                                <li> MISRA C++:2008, 5-0-2 - Limited dependence should be placed on C++ operator precedence rules in expressions </li>
+                                <li> MISRA C++:2008, 5-2-1 - Each operand of a logical &amp;&amp; or || shall be a postfix-expression. </li>
+                                <li> MISRA C:2012, 12.1 - The precedence of operators within expressions should be made explicit </li>
+                                <li> <a href="https://www.securecoding.cert.org/confluence/x/_wI">CERT, EXP00-C.</a> - Use parentheses for precedence of operation </li>
+                                <li> <a href="https://www.securecoding.cert.org/confluence/x/9wHEAw">CERT, EXP53-J.</a> - Use parentheses for precedence of operation </li>
+                                <li> <a href="http://cwe.mitre.org/data/definitions/783.html">MITRE, CWE-783</a> - Operator Precedence Logic Error </li>
+                            </ul>
+                        </details>
+                    </td>
+                </tr>
+                <tr>
+                    <td><a href="https://next.sonarqube.com/sonarqube/coding_rules#rule_key=squid:S2115">squid:S2115</a>
+                    </td>
+                    <td>
+                        <details>
+                            <p>Failure to password-protect a database is so careless or naive as to be almost negligent. Databases should always be password protected, but the
+                                use of a database connection with an empty password is a clear indication of a database that is not protected.</p>
+                            <p>This rule flags database connections with empty passwords.</p>
+                            <h2>Noncompliant Code Example</h2>
+                            <pre>
+Connection conn = DriverManager.getConnection("jdbc:derby:memory:myDB;create=true", "AppLogin", "");
+Connection conn2 = DriverManager.getConnection("jdbc:derby:memory:myDB;create=true?user=user&amp;password=");
+</pre>
+                            <h2>Compliant Solution</h2>
+                            <pre>
+DriverManager.getConnection("jdbc:derby:memory:myDB;create=true?user=user&amp;password=password");
+
+DriverManager.getConnection("jdbc:mysql://address=(host=myhost1)(port=1111)(key1=value1)(user=sandy)(password=secret),address=(host=myhost2)(port=2222)(key2=value2)(user=sandy)(password=secret)/db");
+
+DriverManager.getConnection("jdbc:mysql://sandy:secret@[myhost1:1111,myhost2:2222]/db");
+
+String url = "jdbc:postgresql://localhost/test";
+Properties props = new Properties();
+props.setProperty("user", "fred");
+props.setProperty("password", "secret");
+DriverManager.getConnection(url, props);
+</pre>
+                            <h2>See</h2>
+                            <ul>
+                                <li> <a href="https://www.owasp.org/index.php/Top_10-2017_A3-Sensitive_Data_Exposure">OWASP Top 10 2017 Category A3</a> - Sensitive Data Exposure
+                                </li>
+                                <li> <a href="https://cwe.mitre.org/data/definitions/521.html">MITRE, CWE-521</a> - Weak Password Requirements </li>
+                            </ul>
+                        </details>
+                    </td>
+                </tr>
+                <tr>
+                    <td><a href="https://next.sonarqube.com/sonarqube/coding_rules#rule_key=squid:S1148">squid:S1148</a>
+                    </td>
+                    <td>
+                        <details>
+                            <p><code>Throwable.printStackTrace(...)</code> prints a <code>Throwable</code> and its stack trace to some stream. By default that stream
+                                <code>System.Err</code>, which could inadvertently expose sensitive information.</p>
+                            <p>Loggers should be used instead to print <code>Throwable</code>s, as they have many advantages:</p>
+                            <ul>
+                                <li> Users are able to easily retrieve the logs. </li>
+                                <li> The format of log messages is uniform and allow users to browse the logs easily. </li>
+                            </ul>
+                            <p>This rule raises an issue when <code>printStackTrace</code> is used without arguments, i.e. when the stack trace is printed to the default
+                                stream.</p>
+                            <h2>Noncompliant Code Example</h2>
+                            <pre>
+try {
+  /* ... */
+} catch(Exception e) {
+  e.printStackTrace();        // Noncompliant
+}
+</pre>
+                            <h2>Compliant Solution</h2>
+                            <pre>
+try {
+  /* ... */
+} catch(Exception e) {
+  LOGGER.log("context", e);
+}
+</pre>
+                            <h2>See</h2>
+                            <ul>
+                                <li> <a href="https://www.owasp.org/index.php/Top_10-2017_A3-Sensitive_Data_Exposure">OWASP Top 10 2017 Category A3</a> - Sensitive Data Exposure
+                                </li>
+                                <li> <a href="http://cwe.mitre.org/data/definitions/489.html">MITRE, CWE-489</a> - Leftover Debug Code </li>
+                            </ul>
+                        </details>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script>
+    var canvas = document.getElementById("vulnerabilitiesPieChart");
+    var ctx = canvas.getContext("2d");
+
+    var data = [
+        67,
+        1774,
+        3229,
+        2276
+    ];
+    var total = data.reduce(function(sum, n) {
+        return sum + n;
+    })
+    var colors = ['#2c3e50', '#d43223', '#f39c12', '#319ddb'];
+
+    for (var i = 0, lastend = 0; i < data.length; i++) {
+        ctx.fillStyle = colors[i];
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, canvas.height / 2);
+        ctx.arc(canvas.width / 2, canvas.height / 2, canvas.height / 2, lastend, lastend + (Math.PI * 2 * (data[i] /
+            total)), false);
+        ctx.lineTo(canvas.width / 2, canvas.height / 2);
+        ctx.fill();
+        lastend += Math.PI * 2 * (data[i] / total);
+    }
+    </script>
+</body>
+
+</html>

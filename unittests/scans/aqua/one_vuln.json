@@ -1,0 +1,156 @@
+{
+  "image": "your_image:latest",
+  "scan_started": {
+    "seconds": 1567784942,
+    "nanos": 28041437
+  },
+  "scan_duration": 25,
+  "image_size": 565733981,
+  "digest": "45bc57e4e876533bc61ba7bf229f0f9f96d137b787614c3d0d5c70c3578fe867",
+  "os": "alpine",
+  "version": "3.9.4",
+  "resources": [
+    {
+      "resource": {
+        "format": "apk",
+        "name": "musl",
+        "version": "1.1.20-r4",
+        "arch": "x86_64",
+        "cpe": "pkg:/alpine:3.9.4:musl:1.1.20-r4",
+        "license": "MIT"
+      },
+      "scanned": true,
+      "vulnerabilities": [
+        {
+          "name": "CVE-2019-14697",
+          "description": "musl libc through 1.1.23 has an x87 floating-point stack adjustment imbalance, related to the math/i386/ directory. In some cases, use of this library could introduce out-of-bounds writes that are not present in an application's source code.",
+          "nvd_score": 7.5,
+          "nvd_score_version": "CVSS v2",
+          "nvd_vectors": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "nvd_severity": "high",
+          "nvd_url": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-14697",
+          "vendor_score": 7.5,
+          "vendor_score_version": "CVSS v2",
+          "vendor_vectors": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "vendor_severity": "high",
+          "publish_date": "2019-08-06",
+          "modification_date": "2019-08-14",
+          "fix_version": "1.1.20-r5",
+          "solution": "Upgrade package musl to version 1.1.20-r5 or above.",
+          "nvd_score_v3": 9.8,
+          "nvd_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "nvd_severity_v3": "critical",
+          "vendor_score_v3": 9.8,
+          "vendor_vectors_v3": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "vendor_severity_v3": "critical",
+          "aqua_score": 7.5,
+          "aqua_severity": "high",
+          "aqua_vectors": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "aqua_scoring_system": "CVSS V2",
+          "heuristic_ref_id": 328701
+        }
+      ]
+    }
+  ],
+  "image_assurance_results": {
+    "disallowed": true,
+    "audit_required": true,
+    "policy_failures": [
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "blocking": true,
+        "controls": [
+          "max_severity"
+        ]
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "blocking": true,
+        "controls": [
+          "max_score"
+        ]
+      }
+    ],
+    "checks_performed": [
+      {
+        "failed": true,
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "max_severity",
+        "maximum_severity_allowed": "high",
+        "maximum_severity_found": "high",
+        "maximum_fixable_severity_found": "high",
+        "no_fix_excluded": true
+      },
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "malware"
+      },
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "sensitive_data"
+      },
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "root_user"
+      },
+      {
+        "failed": true,
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "max_score",
+        "maximum_score_allowed": 7,
+        "maximum_score_found": 7.5,
+        "maximum_fixable_score_found": 7.5,
+        "no_fix_excluded": true
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "malware"
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "sensitive_data"
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "root_user"
+      }
+    ],
+    "block_required": true
+  },
+  "vulnerability_summary": {
+    "total": 1,
+    "high": 1,
+    "medium": 0,
+    "low": 0,
+    "negligible": 0,
+    "sensitive": 0,
+    "malware": 0,
+    "score_average": 7.5,
+    "max_score": 7.5,
+    "max_fixable_score": 7.5,
+    "max_fixable_severity": "high"
+  },
+  "scan_options": {
+    "scan_sensitive_data": true,
+    "scan_malware": true,
+    "scan_timeout": 3600000000000,
+    "manual_pull_fallback": true,
+    "save_adhoc_scans": true
+  },
+  "initiating_user": "chk",
+  "data_date": 1567724137,
+  "pull_name": "your_image:latest",
+  "changed_result": false,
+  "required_image_platform": "amd64:::",
+  "scanned_image_platform": "amd64::linux:"
+}

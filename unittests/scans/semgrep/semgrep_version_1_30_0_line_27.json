@@ -1,0 +1,463 @@
+{
+    "errors": [],
+    "paths": {
+        "_comment": "<add --verbose for a list of skipped paths>",
+        "scanned": [
+            "test.go"
+        ]
+    },
+    "results": [
+        {
+            "check_id": "go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+            "end": {
+                "col": 31,
+                "line": 30,
+                "offset": 689
+            },
+            "extra": {
+                "engine_kind": "OSS",
+                "fingerprint": "f900d4624c2a2c2cae7cb9c94c4fb9df53a242700f19122be398d33598deb554a3fa3af3ba3864af95c90694505624e04e9e1c86fb96338f1feb40bd8b07ef2e_0",
+                "is_ignored": false,
+                "lines": "    tmpl := \"<html><body><h1>\" + customerId + \"</h1></body></html>\"\n\n\n    return template.HTML(tmpl)",
+                "message": "Found a formatted template string passed to 'template.HTML()'. 'template.HTML()' does not escape contents. Be absolutely sure there is no user-controlled data in this template. If user data can reach this template, you may have a XSS vulnerability.",
+                "metadata": {
+                    "category": "security",
+                    "confidence": "MEDIUM",
+                    "cwe": [
+                        "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                    ],
+                    "cwe2021-top25": true,
+                    "cwe2022-top25": true,
+                    "impact": "MEDIUM",
+                    "license": "Commons Clause License Condition v1.0[LGPL-2.1-only]",
+                    "likelihood": "LOW",
+                    "owasp": [
+                        "A07:2017 - Cross-Site Scripting (XSS)",
+                        "A03:2021 - Injection"
+                    ],
+                    "references": [
+                        "https://golang.org/pkg/html/template/#HTML"
+                    ],
+                    "semgrep.dev": {
+                        "rule": {
+                            "origin": "community",
+                            "rule_id": "8GUjDW",
+                            "url": "https://semgrep.dev/playground/r/e1TNz3/go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+                            "version_id": "e1TNz3"
+                        }
+                    },
+                    "shortlink": "https://sg.run/weE0",
+                    "source": "https://semgrep.dev/r/go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+                    "subcategory": [
+                        "audit"
+                    ],
+                    "technology": [
+                        "go"
+                    ]
+                },
+                "metavars": {
+                    "$T": {
+                        "abstract_content": "tmpl",
+                        "end": {
+                            "col": 9,
+                            "line": 27,
+                            "offset": 594
+                        },
+                        "start": {
+                            "col": 5,
+                            "line": 27,
+                            "offset": 590
+                        }
+                    },
+                    "$X": {
+                        "abstract_content": "\"<html><body><h1>\"+customerId",
+                        "end": {
+                            "col": 44,
+                            "line": 27,
+                            "offset": 629
+                        },
+                        "start": {
+                            "col": 13,
+                            "line": 27,
+                            "offset": 598
+                        }
+                    },
+                    "$Y": {
+                        "abstract_content": "\"</h1></body></html>\"",
+                        "end": {
+                            "col": 68,
+                            "line": 27,
+                            "offset": 653
+                        },
+                        "start": {
+                            "col": 47,
+                            "line": 27,
+                            "offset": 632
+                        }
+                    }
+                },
+                "severity": "WARNING"
+            },
+            "path": "test.go",
+            "start": {
+                "col": 5,
+                "line": 27,
+                "offset": 590
+            }
+        },
+        {
+            "check_id": "go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+            "end": {
+                "col": 82,
+                "line": 54,
+                "offset": 1365
+            },
+            "extra": {
+                "engine_kind": "OSS",
+                "fingerprint": "031880af370966b08c1806fde9119ea4c44be84c62070337dca38612f90d6bb71c5b2375ee4b74d4d78f1bb795e146c22083569f6e42a27277418809f3205224_0",
+                "is_ignored": false,
+                "lines": "    return template.HTML(\"<html><body><h1>\" + customerId + \"</h1></body></html>\")",
+                "message": "Found a formatted template string passed to 'template.HTML()'. 'template.HTML()' does not escape contents. Be absolutely sure there is no user-controlled data in this template. If user data can reach this template, you may have a XSS vulnerability.",
+                "metadata": {
+                    "category": "security",
+                    "confidence": "MEDIUM",
+                    "cwe": [
+                        "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                    ],
+                    "cwe2021-top25": true,
+                    "cwe2022-top25": true,
+                    "impact": "MEDIUM",
+                    "license": "Commons Clause License Condition v1.0[LGPL-2.1-only]",
+                    "likelihood": "LOW",
+                    "owasp": [
+                        "A07:2017 - Cross-Site Scripting (XSS)",
+                        "A03:2021 - Injection"
+                    ],
+                    "references": [
+                        "https://golang.org/pkg/html/template/#HTML"
+                    ],
+                    "semgrep.dev": {
+                        "rule": {
+                            "origin": "community",
+                            "rule_id": "8GUjDW",
+                            "url": "https://semgrep.dev/playground/r/e1TNz3/go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+                            "version_id": "e1TNz3"
+                        }
+                    },
+                    "shortlink": "https://sg.run/weE0",
+                    "source": "https://semgrep.dev/r/go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+                    "subcategory": [
+                        "audit"
+                    ],
+                    "technology": [
+                        "go"
+                    ]
+                },
+                "metavars": {
+                    "$T": {
+                        "abstract_content": "\"<html><body><h1>\"+customerId",
+                        "end": {
+                            "col": 57,
+                            "line": 54,
+                            "offset": 1340
+                        },
+                        "start": {
+                            "col": 26,
+                            "line": 54,
+                            "offset": 1309
+                        }
+                    },
+                    "$X": {
+                        "abstract_content": "\"</h1></body></html>\"",
+                        "end": {
+                            "col": 81,
+                            "line": 54,
+                            "offset": 1364
+                        },
+                        "start": {
+                            "col": 60,
+                            "line": 54,
+                            "offset": 1343
+                        }
+                    }
+                },
+                "severity": "WARNING"
+            },
+            "path": "test.go",
+            "start": {
+                "col": 12,
+                "line": 54,
+                "offset": 1295
+            }
+        },
+        {
+            "check_id": "go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+            "end": {
+                "col": 58,
+                "line": 61,
+                "offset": 1575
+            },
+            "extra": {
+                "engine_kind": "OSS",
+                "fingerprint": "18795c725c42a323357bf6a126fb895e11b764e80f583a69df3bd5c1812caf2259eab742aa70fcfb1663444041ea4795dfa53cc90cbe1eae03625c3feccddd53_0",
+                "is_ignored": false,
+                "lines": "    return template.HTML(\"<html><body><h1>\" + customerId)",
+                "message": "Found a formatted template string passed to 'template.HTML()'. 'template.HTML()' does not escape contents. Be absolutely sure there is no user-controlled data in this template. If user data can reach this template, you may have a XSS vulnerability.",
+                "metadata": {
+                    "category": "security",
+                    "confidence": "MEDIUM",
+                    "cwe": [
+                        "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                    ],
+                    "cwe2021-top25": true,
+                    "cwe2022-top25": true,
+                    "impact": "MEDIUM",
+                    "license": "Commons Clause License Condition v1.0[LGPL-2.1-only]",
+                    "likelihood": "LOW",
+                    "owasp": [
+                        "A07:2017 - Cross-Site Scripting (XSS)",
+                        "A03:2021 - Injection"
+                    ],
+                    "references": [
+                        "https://golang.org/pkg/html/template/#HTML"
+                    ],
+                    "semgrep.dev": {
+                        "rule": {
+                            "origin": "community",
+                            "rule_id": "8GUjDW",
+                            "url": "https://semgrep.dev/playground/r/e1TNz3/go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+                            "version_id": "e1TNz3"
+                        }
+                    },
+                    "shortlink": "https://sg.run/weE0",
+                    "source": "https://semgrep.dev/r/go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+                    "subcategory": [
+                        "audit"
+                    ],
+                    "technology": [
+                        "go"
+                    ]
+                },
+                "metavars": {
+                    "$T": {
+                        "abstract_content": "\"<html><body><h1>\"",
+                        "end": {
+                            "col": 44,
+                            "line": 61,
+                            "offset": 1561
+                        },
+                        "start": {
+                            "col": 26,
+                            "line": 61,
+                            "offset": 1543
+                        }
+                    },
+                    "$X": {
+                        "abstract_content": "customerId",
+                        "end": {
+                            "col": 57,
+                            "line": 61,
+                            "offset": 1574
+                        },
+                        "propagated_value": {
+                            "svalue_abstract_content": "r.URL.Query().Get(\"id\")",
+                            "svalue_end": {
+                                "col": 42,
+                                "line": 58,
+                                "offset": 1472
+                            },
+                            "svalue_start": {
+                                "col": 19,
+                                "line": 58,
+                                "offset": 1449
+                            }
+                        },
+                        "start": {
+                            "col": 47,
+                            "line": 61,
+                            "offset": 1564
+                        }
+                    }
+                },
+                "severity": "WARNING"
+            },
+            "path": "test.go",
+            "start": {
+                "col": 12,
+                "line": 61,
+                "offset": 1529
+            }
+        },
+        {
+            "check_id": "go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+            "end": {
+                "col": 31,
+                "line": 71,
+                "offset": 1890
+            },
+            "extra": {
+                "engine_kind": "OSS",
+                "fingerprint": "9d2e74567ab26a1d82545fcb12aeee62c0114385756213c3a4f0252c9e7233300490727af8c9cd3bba6194084f10dcaab03ac907162b58afa6370da6fbbd12fc_0",
+                "is_ignored": false,
+                "lines": "    tmpl, err := fmt.Printf(\"<html><body><h1>%s</h1></body></html>\", customerId)\n    if err != nil {\n        return template.HTML(\"\")\n    }\n    return template.HTML(tmpl)",
+                "message": "Found a formatted template string passed to 'template.HTML()'. 'template.HTML()' does not escape contents. Be absolutely sure there is no user-controlled data in this template. If user data can reach this template, you may have a XSS vulnerability.",
+                "metadata": {
+                    "category": "security",
+                    "confidence": "MEDIUM",
+                    "cwe": [
+                        "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                    ],
+                    "cwe2021-top25": true,
+                    "cwe2022-top25": true,
+                    "impact": "MEDIUM",
+                    "license": "Commons Clause License Condition v1.0[LGPL-2.1-only]",
+                    "likelihood": "LOW",
+                    "owasp": [
+                        "A07:2017 - Cross-Site Scripting (XSS)",
+                        "A03:2021 - Injection"
+                    ],
+                    "references": [
+                        "https://golang.org/pkg/html/template/#HTML"
+                    ],
+                    "semgrep.dev": {
+                        "rule": {
+                            "origin": "community",
+                            "rule_id": "8GUjDW",
+                            "url": "https://semgrep.dev/playground/r/e1TNz3/go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+                            "version_id": "e1TNz3"
+                        }
+                    },
+                    "shortlink": "https://sg.run/weE0",
+                    "source": "https://semgrep.dev/r/go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+                    "subcategory": [
+                        "audit"
+                    ],
+                    "technology": [
+                        "go"
+                    ]
+                },
+                "metavars": {
+                    "$ERR": {
+                        "abstract_content": "err",
+                        "end": {
+                            "col": 14,
+                            "line": 67,
+                            "offset": 1729
+                        },
+                        "start": {
+                            "col": 11,
+                            "line": 67,
+                            "offset": 1726
+                        }
+                    },
+                    "$P": {
+                        "abstract_content": "Printf",
+                        "end": {
+                            "col": 28,
+                            "line": 67,
+                            "offset": 1743
+                        },
+                        "start": {
+                            "col": 22,
+                            "line": 67,
+                            "offset": 1737
+                        }
+                    },
+                    "$T": {
+                        "abstract_content": "tmpl",
+                        "end": {
+                            "col": 9,
+                            "line": 67,
+                            "offset": 1724
+                        },
+                        "start": {
+                            "col": 5,
+                            "line": 67,
+                            "offset": 1720
+                        }
+                    }
+                },
+                "severity": "WARNING"
+            },
+            "path": "test.go",
+            "start": {
+                "col": 5,
+                "line": 67,
+                "offset": 1720
+            }
+        },
+        {
+            "check_id": "go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+            "end": {
+                "col": 91,
+                "line": 77,
+                "offset": 2127
+            },
+            "extra": {
+                "engine_kind": "OSS",
+                "fingerprint": "d5ee587632748693a7a70a22212cf105cdd778ee28678f970d4aed05a525226c14db4d8cd51ff6ec7e3d4f22b41c6788feebabf1f4bd70d9f8fb57ca8e70fb2b_0",
+                "is_ignored": false,
+                "lines": "    return template.HTML(fmt.Sprintf(\"<html><body><h1>%s</h1></body></html>\", customerId))",
+                "message": "Found a formatted template string passed to 'template.HTML()'. 'template.HTML()' does not escape contents. Be absolutely sure there is no user-controlled data in this template. If user data can reach this template, you may have a XSS vulnerability.",
+                "metadata": {
+                    "category": "security",
+                    "confidence": "MEDIUM",
+                    "cwe": [
+                        "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                    ],
+                    "cwe2021-top25": true,
+                    "cwe2022-top25": true,
+                    "impact": "MEDIUM",
+                    "license": "Commons Clause License Condition v1.0[LGPL-2.1-only]",
+                    "likelihood": "LOW",
+                    "owasp": [
+                        "A07:2017 - Cross-Site Scripting (XSS)",
+                        "A03:2021 - Injection"
+                    ],
+                    "references": [
+                        "https://golang.org/pkg/html/template/#HTML"
+                    ],
+                    "semgrep.dev": {
+                        "rule": {
+                            "origin": "community",
+                            "rule_id": "8GUjDW",
+                            "url": "https://semgrep.dev/playground/r/e1TNz3/go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+                            "version_id": "e1TNz3"
+                        }
+                    },
+                    "shortlink": "https://sg.run/weE0",
+                    "source": "https://semgrep.dev/r/go.lang.security.audit.net.formatted-template-string.formatted-template-string",
+                    "subcategory": [
+                        "audit"
+                    ],
+                    "technology": [
+                        "go"
+                    ]
+                },
+                "metavars": {
+                    "$P": {
+                        "abstract_content": "Sprintf",
+                        "end": {
+                            "col": 37,
+                            "line": 77,
+                            "offset": 2073
+                        },
+                        "start": {
+                            "col": 30,
+                            "line": 77,
+                            "offset": 2066
+                        }
+                    }
+                },
+                "severity": "WARNING"
+            },
+            "path": "test.go",
+            "start": {
+                "col": 12,
+                "line": 77,
+                "offset": 2048
+            }
+        }
+    ],
+    "version": "1.30.0"
+}

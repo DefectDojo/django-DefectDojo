@@ -1,0 +1,151 @@
+{
+  "url": "https://www.meterian.com/projects/?pid=a4f21aff-0777-4957-9860-d98fc7757f5e&branch=head&mode=eli",
+  "timestamp": "2021-06-02 10:40:05",
+  "scores": {
+    "stability": "100",
+    "security": "0",
+    "licensing": "100"
+  },
+  "reports": {
+    "security": {
+      "score": 100,
+      "reports": [
+        {
+          "language": "nodejs",
+          "reports": [
+            {
+              "dependency": {
+                "name": "websocket-extensions",
+                "version": "0.1.3",
+                "dependencies": [],
+                "locations": []
+              },
+              "advices": [
+                {
+                  "id": "c28a618f-6a34-341e-a9ea-1fa4ead9b4a2",
+                  "library": {
+                    "name": "websocket-extensions",
+                    "language": "nodejs"
+                  },
+                  "description": "websocket-extensions npm module prior to 0.1.4 allows Denial of Service (DoS) via Regex Backtracking. The extension parser may take quadratic time when parsing a header containing an unclosed string parameter value whose content is a repeating two-byte sequence of a backslash and some other character. This could be abused by an attacker to conduct Regex Denial Of Service (ReDoS) on a single-threaded server by providing a malicious payload with the Sec-WebSocket-Extensions header.",
+                  "severity": "HIGH",
+                  "links": [
+                    {
+                      "type": "CVE",
+                      "url": "CVE-2020-7662"
+                    },
+                    {
+                      "type": "NVD",
+                      "url": "CVE-2020-7662"
+                    },
+                    {
+                      "type": "FIX",
+                      "url": "https://github.com/faye/websocket-extensions-node/commit/29496f6838bfadfe5a2f85dff33ed0ba33873237"
+                    },
+                    {
+                      "type": "INFO",
+                      "url": "https://blog.jcoglan.com/2020/06/02/redos-vulnerability-in-websocket-extensions"
+                    },
+                    {
+                      "type": "INFO",
+                      "url": "https://github.com/faye/websocket-extensions-node/security/advisories/GHSA-g78m-2chm-r7qv"
+                    }
+                  ],
+                  "type": "SECURITY",
+                  "cvss": 7.5,
+                  "versionRange": "[,0.1.4)",
+                  "cve": "CVE-2020-7662"
+                },
+                {
+                  "id": "fc31f67c-dd32-3c86-8a4a-312ff80d830d",
+                  "library": {
+                    "name": "websocket-extensions",
+                    "language": "nodejs"
+                  },
+                  "description": "websocket-extensions ruby module prior to 0.1.5 allows Denial of Service (DoS) via Regex Backtracking. The extension parser may take quadratic time when parsing a header containing an unclosed string parameter value whose content is a repeating two-byte sequence of a backslash and some other character. This could be abused by an attacker to conduct Regex Denial Of Service (ReDoS) on a single-threaded server by providing a malicious payload with the Sec-WebSocket-Extensions header.",
+                  "severity": "HIGH",
+                  "links": [
+                    {
+                      "type": "CVE",
+                      "url": "CVE-2020-7663"
+                    },
+                    {
+                      "type": "NVD",
+                      "url": "CVE-2020-7663"
+                    },
+                    {
+                      "type": "INFO",
+                      "url": "https://blog.jcoglan.com/2020/06/02/redos-vulnerability-in-websocket-extensions"
+                    },
+                    {
+                      "type": "INFO",
+                      "url": "https://github.com/faye/websocket-extensions-ruby/security/advisories/GHSA-g6wq-qcwm-j5g2"
+                    },
+                    {
+                      "type": "FIX",
+                      "url": "https://github.com/faye/websocket-extensions-ruby/commit/aa156a439da681361ed6f53f1a8131892418838b"
+                    },
+                    {
+                      "type": "INFO",
+                      "url": "https://lists.debian.org/debian-lts-announce/2020/08/msg00031.html"
+                    },
+                    {
+                      "type": "INFO",
+                      "url": "https://usn.ubuntu.com/4502-1/"
+                    }
+                  ],
+                  "type": "SECURITY",
+                  "cvss": 7.5,
+                  "versionRange": "[,0.1.5)",
+                  "cve": "CVE-2020-7663"
+                }
+              ],
+              "hierarchy": [
+                "project:--",
+                "websocket-extensions:0.1.3"
+              ],
+              "locations": [],
+              "safeVersions": {},
+              "transitive": false
+            }
+          ]
+        }
+      ]
+    },
+    "stability": {
+      "reports": [
+        {
+          "language": "nodejs",
+          "versions": []
+        }
+      ]
+    },
+    "licensing": {
+      "reports": [
+        {
+          "language": "nodejs",
+          "results": [
+            {
+              "name": "big-integer",
+              "version": "1.6.48",
+              "warnings": [],
+              "violations": [],
+              "licenses": [
+                {
+                  "id": "Unlicense",
+                  "name": "The Unlicense",
+                  "uri": "https://spdx.org/licenses/Unlicense.html",
+                  "wildcard": false
+                }
+              ]
+            }
+          ],
+          "warningsCount": 0,
+          "violationsCount": 0
+        }
+      ],
+      "warningsCount": 0,
+      "violationsCount": 0
+    }
+  }
+}

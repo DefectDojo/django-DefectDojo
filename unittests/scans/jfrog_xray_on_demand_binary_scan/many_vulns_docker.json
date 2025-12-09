@@ -1,0 +1,129 @@
+[
+  {
+    "scan_id": "2c4c3ae7-d57d-4bf0-5afa-f191b309a2e2",
+    "vulnerabilities": [
+      {
+        "cves": [
+          {
+            "cve": "CVE-2023-3446"
+          }
+        ],
+        "summary": "Issue summary: Checking excessively long DH keys or parameters may be very slow.\n\nImpact summary: Applications that use the functions DH_check(), DH_check_ex()\nor EVP_PKEY_param_check() to check a DH key or DH parameters may experience long\ndelays. Where the key or parameters that are being checked have been obtained\nfrom an untrusted source this may lead to a Denial of Service.\n\nThe function DH_check() performs various checks on DH parameters. One of those\nchecks confirms that the modulus ('p' parameter) is not too large. Trying to use\na very large modulus is slow and OpenSSL will not normally use a modulus which\nis over 10,000 bits in length.\n\nHowever the DH_check() function checks numerous aspects of the key or parameters\nthat have been supplied. Some of those checks use the supplied modulus value\neven if it has already been found to be too large.\n\nAn application that calls DH_check() and supplies a key or parameters obtained\nfrom an untrusted source could be vulernable to a Denial of Service attack.\n\nThe function DH_check() is itself called by a number of other OpenSSL functions.\nAn application calling any of those other functions may similarly be affected.\nThe other functions affected by this are DH_check_ex() and\nEVP_PKEY_param_check().\n\nAlso vulnerable are the OpenSSL dhparam and pkeyparam command line applications\nwhen using the '-check' option.\n\nThe OpenSSL SSL/TLS implementation is not affected by this issue.\nThe OpenSSL 3.0 and 3.1 FIPS providers are not affected by this issue.",
+        "severity": "Unknown",
+        "components": {
+          "alpine://3.18:libcrypto3:3.1.1-r1": {
+            "fixed_versions": [
+              "[3.1.1-r3]"
+            ],
+            "impact_paths": [
+              [
+                {
+                  "component_id": "docker://alpine:latest"
+                },
+                {
+                  "component_id": "generic://sha256:78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c/sha256__78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c.tar",
+                  "full_path": "sha256__78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c.tar"
+                },
+                {
+                  "component_id": "alpine://3.18:libcrypto3:3.1.1-r1",
+                  "full_path": "3.18:libcrypto3:3.1.1-r1"
+                }
+              ]
+            ]
+          },
+          "alpine://3.18:libssl3:3.1.1-r1": {
+            "fixed_versions": [
+              "[3.1.1-r3]"
+            ],
+            "impact_paths": [
+              [
+                {
+                  "component_id": "docker://alpine:latest"
+                },
+                {
+                  "component_id": "generic://sha256:78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c/sha256__78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c.tar",
+                  "full_path": "sha256__78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c.tar"
+                },
+                {
+                  "component_id": "alpine://3.18:libssl3:3.1.1-r1",
+                  "full_path": "3.18:libssl3:3.1.1-r1"
+                }
+              ]
+            ]
+          }
+        },
+        "issue_id": "XRAY-526273",
+        "references": [
+          "http://www.openwall.com/lists/oss-security/2023/07/19/4",
+          "http://www.openwall.com/lists/oss-security/2023/07/19/5",
+          "http://www.openwall.com/lists/oss-security/2023/07/19/6",
+          "https://git.openssl.org/gitweb/?p=openssl.git;a=commitdiff;h=1fa20cf2f506113c761777127a38bce5068740eb",
+          "https://git.openssl.org/gitweb/?p=openssl.git;a=commitdiff;h=8780a896543a654e757db1b9396383f9d8095528",
+          "https://git.openssl.org/gitweb/?p=openssl.git;a=commitdiff;h=9a0a4d3c1e7138915563c0df4fe6a3f9377b839c",
+          "https://git.openssl.org/gitweb/?p=openssl.git;a=commitdiff;h=fc9867c1e03c22ebf56943be205202e576aabf23",
+          "https://www.openssl.org/news/secadv/20230719.txt"
+        ]
+      },
+      {
+        "cves": [
+          {
+            "cve": "CVE-2023-2975"
+          }
+        ],
+        "summary": "Issue summary: The AES-SIV cipher implementation contains a bug that causes\nit to ignore empty associated data entries which are unauthenticated as\na consequence.\n\nImpact summary: Applications that use the AES-SIV algorithm and want to\nauthenticate empty data entries as associated data can be mislead by removing\nadding or reordering such empty entries as these are ignored by the OpenSSL\nimplementation. We are currently unaware of any such applications.\n\nThe AES-SIV algorithm allows for authentication of multiple associated\ndata entries along with the encryption. To authenticate empty data the\napplication has to call EVP_EncryptUpdate() (or EVP_CipherUpdate()) with\nNULL pointer as the output buffer and 0 as the input buffer length.\nThe AES-SIV implementation in OpenSSL just returns success for such a call\ninstead of performing the associated data authentication operation.\nThe empty data thus will not be authenticated.\n\nAs this issue does not affect non-empty associated data authentication and\nwe expect it to be rare for an application to use empty associated data\nentries this is qualified as Low severity issue.",
+        "severity": "Unknown",
+        "components": {
+          "alpine://3.18:libcrypto3:3.1.1-r1": {
+            "fixed_versions": [
+              "[3.1.1-r2]"
+            ],
+            "impact_paths": [
+              [
+                {
+                  "component_id": "docker://alpine:latest"
+                },
+                {
+                  "component_id": "generic://sha256:78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c/sha256__78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c.tar",
+                  "full_path": "sha256__78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c.tar"
+                },
+                {
+                  "component_id": "alpine://3.18:libcrypto3:3.1.1-r1",
+                  "full_path": "3.18:libcrypto3:3.1.1-r1"
+                }
+              ]
+            ]
+          },
+          "alpine://3.18:libssl3:3.1.1-r1": {
+            "fixed_versions": [
+              "[3.1.1-r2]"
+            ],
+            "impact_paths": [
+              [
+                {
+                  "component_id": "docker://alpine:latest"
+                },
+                {
+                  "component_id": "generic://sha256:78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c/sha256__78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c.tar",
+                  "full_path": "sha256__78a822fe2a2d2c84f3de4a403188c45f623017d6a4521d23047c9fbb0801794c.tar"
+                },
+                {
+                  "component_id": "alpine://3.18:libssl3:3.1.1-r1",
+                  "full_path": "3.18:libssl3:3.1.1-r1"
+                }
+              ]
+            ]
+          }
+        },
+        "issue_id": "XRAY-523321",
+        "references": [
+          "https://git.openssl.org/gitweb/?p=openssl.git;a=commitdiff;h=00e2f5eea29994d19293ec4e8c8775ba73678598",
+          "https://git.openssl.org/gitweb/?p=openssl.git;a=commitdiff;h=6a83f0c958811f07e0d11dfc6b5a6a98edfd5bdc",
+          "https://www.openssl.org/news/secadv/20230714.txt"
+        ]
+      }
+    ],
+    "component_id": "docker://alpine:latest",
+    "package_type": "Docker",
+    "status": "completed"
+  }
+]

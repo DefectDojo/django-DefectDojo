@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CxXMLResults InitiatorName="Initiator Name" Owner="domain\user" ScanId="1000227" ProjectId="121" ProjectName="Webgoat" TeamFullPathOnReportDate="team\full\path" DeepLink="https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&amp;projectid=121" ScanStart="Sunday, February 25, 2018 11:35:52 AM" Preset="Checkmarx Default" ScanTime="00h:07m:13s" LinesOfCodeScanned="92054" FilesScanned="480" ReportCreationTime="Monday, April 22, 2019 3:12:18 PM" Team="team_name" CheckmarxVersion="8.6.0 HF1" ScanComments="" ScanType="Full" SourceOrigin="LocalPath" Visibility="Public">
+  <Query id="594" categories="PCI DSS v3.2;PCI DSS (3.2) - 6.5.1 - Injection flaws - particularly SQL injection,OWASP Top 10 2013;A1-Injection,FISMA 2014;System And Information Integrity,NIST SP 800-53;SI-10 Information Input Validation (P1),OWASP Top 10 2017;A1-Injection,OWASP Mobile Top 10 2016;M7-Client Code Quality" cweId="89" name="SQL_Injection" group="Java_High_Risk" Severity="High" Language="Java" LanguageHash="0125540914009541" LanguageChangeDate="2018-02-12T00:00:00.0000000" SeverityIndex="3" QueryPath="Java\Cx\Java High Risk\SQL Injection Version:1" QueryVersionCode="56142311">
+    <Result NodeId="10002270020" FileName="WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java" Status="New" Line="38" Column="52" FalsePositive="False" Severity="High" AssignToUser="" state="0" Remark="" DeepLink="https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&amp;projectid=121&amp;pathid=20" SeverityIndex="3">
+      <Path ResultId="1000227" PathId="20" SimilarityId="-1145061043">
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>38</Line>
+          <Column>52</Column>
+          <NodeId>1</NodeId>
+          <Name>username_login</Name>
+          <Type></Type>
+          <Length>14</Length>
+          <Snippet>
+            <Line>
+              <Number>38</Number>
+              <Code>    public AttackResult login(@RequestParam String username_login, @RequestParam String password_login) throws Exception {</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>49</Line>
+          <Column>134</Column>
+          <NodeId>2</NodeId>
+          <Name>username_login</Name>
+          <Type></Type>
+          <Length>14</Length>
+          <Snippet>
+            <Line>
+              <Number>49</Number>
+              <Code>        PreparedStatement statement = connection.prepareStatement("select password from " + USERS_TABLE_NAME + " where userid = '" + username_login + "' and password = '" + password_login + "'");</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>49</Line>
+          <Column>66</Column>
+          <NodeId>3</NodeId>
+          <Name>prepareStatement</Name>
+          <Type></Type>
+          <Length>1</Length>
+          <Snippet>
+            <Line>
+              <Number>49</Number>
+              <Code>        PreparedStatement statement = connection.prepareStatement("select password from " + USERS_TABLE_NAME + " where userid = '" + username_login + "' and password = '" + password_login + "'");</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>49</Line>
+          <Column>27</Column>
+          <NodeId>4</NodeId>
+          <Name>statement</Name>
+          <Type></Type>
+          <Length>9</Length>
+          <Snippet>
+            <Line>
+              <Number>49</Number>
+              <Code>        PreparedStatement statement = connection.prepareStatement("select password from " + USERS_TABLE_NAME + " where userid = '" + username_login + "' and password = '" + password_login + "'");</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>50</Line>
+          <Column>31</Column>
+          <NodeId>5</NodeId>
+          <Name>statement</Name>
+          <Type></Type>
+          <Length>9</Length>
+          <Snippet>
+            <Line>
+              <Number>50</Number>
+              <Code>        ResultSet resultSet = statement.executeQuery();</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>50</Line>
+          <Column>53</Column>
+          <NodeId>6</NodeId>
+          <Name>executeQuery</Name>
+          <Type></Type>
+          <Length>1</Length>
+          <Snippet>
+            <Line>
+              <Number>50</Number>
+              <Code>        ResultSet resultSet = statement.executeQuery();</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="10002270021" FileName="WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java" Status="New" Line="38" Column="89" FalsePositive="False" Severity="High" AssignToUser="" state="0" Remark="" DeepLink="https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&amp;projectid=121&amp;pathid=21" SeverityIndex="3">
+      <Path ResultId="1000227" PathId="21" SimilarityId="-658085948">
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>38</Line>
+          <Column>89</Column>
+          <NodeId>1</NodeId>
+          <Name>password_login</Name>
+          <Type></Type>
+          <Length>14</Length>
+          <Snippet>
+            <Line>
+              <Number>38</Number>
+              <Code>    public AttackResult login(@RequestParam String username_login, @RequestParam String password_login) throws Exception {</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>49</Line>
+          <Column>174</Column>
+          <NodeId>2</NodeId>
+          <Name>password_login</Name>
+          <Type></Type>
+          <Length>14</Length>
+          <Snippet>
+            <Line>
+              <Number>49</Number>
+              <Code>        PreparedStatement statement = connection.prepareStatement("select password from " + USERS_TABLE_NAME + " where userid = '" + username_login + "' and password = '" + password_login + "'");</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>49</Line>
+          <Column>66</Column>
+          <NodeId>3</NodeId>
+          <Name>prepareStatement</Name>
+          <Type></Type>
+          <Length>1</Length>
+          <Snippet>
+            <Line>
+              <Number>49</Number>
+              <Code>        PreparedStatement statement = connection.prepareStatement("select password from " + USERS_TABLE_NAME + " where userid = '" + username_login + "' and password = '" + password_login + "'");</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>49</Line>
+          <Column>27</Column>
+          <NodeId>4</NodeId>
+          <Name>statement</Name>
+          <Type></Type>
+          <Length>9</Length>
+          <Snippet>
+            <Line>
+              <Number>49</Number>
+              <Code>        PreparedStatement statement = connection.prepareStatement("select password from " + USERS_TABLE_NAME + " where userid = '" + username_login + "' and password = '" + password_login + "'");</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>50</Line>
+          <Column>31</Column>
+          <NodeId>5</NodeId>
+          <Name>statement</Name>
+          <Type></Type>
+          <Length>9</Length>
+          <Snippet>
+            <Line>
+              <Number>50</Number>
+              <Code>        ResultSet resultSet = statement.executeQuery();</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge5/challenge6/Assignment5.java</FileName>
+          <Line>50</Line>
+          <Column>53</Column>
+          <NodeId>6</NodeId>
+          <Name>executeQuery</Name>
+          <Type></Type>
+          <Length>1</Length>
+          <Snippet>
+            <Line>
+              <Number>50</Number>
+              <Code>        ResultSet resultSet = statement.executeQuery();</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+    <Result NodeId="10002270022" FileName="WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge6/Assignment6.java" Status="New" Line="43" Column="62" FalsePositive="False" Severity="High" AssignToUser="" state="0" Remark="" DeepLink="https://checkmarxserver.com/CxWebClient/ViewerMain.aspx?scanid=1000227&amp;projectid=121&amp;pathid=22" SeverityIndex="3">
+      <Path ResultId="1000227" PathId="22" SimilarityId="1359889495">
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge6/Assignment6.java</FileName>
+          <Line>43</Line>
+          <Column>62</Column>
+          <NodeId>1</NodeId>
+          <Name>username_reg</Name>
+          <Type></Type>
+          <Length>12</Length>
+          <Snippet>
+            <Line>
+              <Number>43</Number>
+              <Code>    public AttackResult registerNewUser(@RequestParam String username_reg, @RequestParam String email_reg, @RequestParam String password_reg) throws Exception {</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge6/Assignment6.java</FileName>
+          <Line>50</Line>
+          <Column>102</Column>
+          <NodeId>2</NodeId>
+          <Name>username_reg</Name>
+          <Type></Type>
+          <Length>12</Length>
+          <Snippet>
+            <Line>
+              <Number>50</Number>
+              <Code>            String checkUserQuery = "select userid from " + USERS_TABLE_NAME + " where userid = '" + username_reg + "'";</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge6/Assignment6.java</FileName>
+          <Line>50</Line>
+          <Column>20</Column>
+          <NodeId>3</NodeId>
+          <Name>checkUserQuery</Name>
+          <Type></Type>
+          <Length>14</Length>
+          <Snippet>
+            <Line>
+              <Number>50</Number>
+              <Code>            String checkUserQuery = "select userid from " + USERS_TABLE_NAME + " where userid = '" + username_reg + "'";</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge6/Assignment6.java</FileName>
+          <Line>52</Line>
+          <Column>58</Column>
+          <NodeId>4</NodeId>
+          <Name>checkUserQuery</Name>
+          <Type></Type>
+          <Length>14</Length>
+          <Snippet>
+            <Line>
+              <Number>52</Number>
+              <Code>            ResultSet resultSet = statement.executeQuery(checkUserQuery);</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+        <PathNode>
+          <FileName>WebGoat/webgoat-lessons/challenge/src/main/java/org/owasp/webgoat/plugin/challenge6/Assignment6.java</FileName>
+          <Line>52</Line>
+          <Column>57</Column>
+          <NodeId>5</NodeId>
+          <Name>executeQuery</Name>
+          <Type></Type>
+          <Length>1</Length>
+          <Snippet>
+            <Line>
+              <Number>52</Number>
+              <Code>            ResultSet resultSet = statement.executeQuery(checkUserQuery);</Code>
+            </Line>
+          </Snippet>
+        </PathNode>
+      </Path>
+    </Result>
+  </Query>
+</CxXMLResults>

@@ -1,0 +1,21 @@
+name: PR Labeler
+
+# run on pull_request_target because we need write access to the GItHub API
+# don't run any code from PR here!
+on:
+  pull_request_target:
+    types:
+      [opened, synchronize, reopened]
+
+jobs:
+  labeler:
+    permissions:
+      contents: read
+      pull-requests: write
+    name: "Autolabeler"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b # v6.0.1
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          sync-labels: true

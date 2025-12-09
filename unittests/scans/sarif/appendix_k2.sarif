@@ -1,0 +1,65 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeScanner",
+          "rules": [
+            {
+              "id": "C2001",
+              "fullDescription": {
+                "text": "A variable was used without being initialized. This can result in runtime errors such as null reference exceptions."
+              },
+              "messageStrings": {
+                "default": {
+                  "text": "Variable \"{0}\" was used without being initialized."
+                }
+              }
+            }
+          ]
+        }
+      },
+      "artifacts": [
+        {
+          "location": {
+            "uri": "src/collections/list.cpp",
+            "uriBaseId": "SRCROOT"
+          },
+          "sourceLanguage": "c"
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "C2001",
+          "ruleIndex": 0,
+          "message": {
+            "id": "default",
+            "arguments": [
+              "count"
+            ]
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/collections/list.cpp",
+                  "uriBaseId": "SRCROOT",
+                  "index": 0
+                },
+                "region": {
+                  "startLine": 15
+                }
+              },
+              "logicalLocations": [
+                {
+                  "fullyQualifiedName": "collections::list::add"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

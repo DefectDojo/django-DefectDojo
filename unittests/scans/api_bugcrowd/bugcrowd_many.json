@@ -1,0 +1,577 @@
+[
+    {
+        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+        "type": "submission",
+        "attributes": {
+            "bug_url": "https://example.com/1",
+            "custom_fields": {},
+            "description": "Oh no you did an alg none on JWT !",
+            "duplicate": false,
+            "extra_info": null,
+            "http_request": null,
+            "last_transitioned_to_informational_at": "2000-01-01T21:59:56.546Z",
+            "last_transitioned_to_not_applicable_at": null,
+            "last_transitioned_to_not_reproducible_at": null,
+            "last_transitioned_to_out_of_scope_at": null,
+            "last_transitioned_to_resolved_at": null,
+            "last_transitioned_to_triaged_at": null,
+            "last_transitioned_to_unresolved_at": null,
+            "remediation_advice": "Do things properly1",
+            "severity": 5,
+            "source": "external_form",
+            "state": "resolved",
+            "submitted_at": "2000-01-01T06:36:55.721Z",
+            "title": "Big bad problem",
+            "vrt_id": "server_security_misconfiguration.clickjacking.non_sensitive_action",
+            "vrt_version": "1.10.1",
+            "vulnerability_references": "* [https://example.com](https://example.com\n* [https://example.com](https://example.com\n* [https://example.com](https://example.com\n* [https://example.com](https://example.com\n* [https://example.com](https://example.com"
+        },
+        "relationships": {
+            "activities": {
+                "data": [
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 5,
+                            "total_hits": 5
+                        }
+                    }
+                }
+            },
+            "assignee": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            },
+            "claim_ticket": {
+                "data": {
+                    "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                    "type": "claim_ticket"
+                },
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)"
+                    }
+                }
+            },
+            "comments": {
+                "data": [
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "comment"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "duplicate_of": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            },
+            "duplicates": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 0,
+                            "total_hits": 0
+                        }
+                    }
+                }
+            },
+            "external_issues": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "file_attachments": {
+                "data": [
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "file_attachment"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "monetary_rewards": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 0,
+                            "total_hits": 0
+                        }
+                    }
+                }
+            },
+            "program": {
+                "data": {
+                    "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                    "type": "program"
+                },
+                "links": {
+                    "related": {
+                        "href": "/programs/3b0e6b2a-c21e-493e-bd19-de40f525016e"
+                    }
+                }
+            },
+            "researcher": {
+                "data": {
+                    "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                    "type": "identity"
+                },
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)"
+                    }
+                }
+            },
+            "target": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            }
+        },
+        "links": {
+            "self": "/submissions/3b0e6b2a-c21e-493e-bd19-de40f525016e"
+        }
+    },
+    {
+        "id": "b2f1066a-6188-4479-bab8-39cc5434f06f",
+        "type": "submission",
+        "attributes": {
+            "bug_url": "https://example.com/2",
+            "custom_fields": {},
+            "description": "you did something wrong",
+            "duplicate": false,
+            "extra_info": null,
+            "http_request": null,
+            "last_transitioned_to_informational_at": "2000-01-01T20:29:38.096Z",
+            "last_transitioned_to_not_applicable_at": null,
+            "last_transitioned_to_not_reproducible_at": null,
+            "last_transitioned_to_out_of_scope_at": null,
+            "last_transitioned_to_resolved_at": null,
+            "last_transitioned_to_triaged_at": null,
+            "last_transitioned_to_unresolved_at": null,
+            "remediation_advice": "Do things properly2",
+            "severity": 1,
+            "source": "external_form",
+            "state": "unresolved",
+            "submitted_at": "2000-01-02T19:22:10.916Z",
+            "title": "you did something wrong",
+            "vrt_id": "server_security_misconfiguration.clickjacking.non_sensitive_action",
+            "vrt_version": "1.10.1",
+            "vulnerability_references": "* [https://example.com](https://example.com\n* [https://example.com](https://example.com\n* [https://example.com](https://example.com\n* [https://example.com](https://example.com\n* [https://example.com](https://example.com\n* [https://example.com](https://example.com"
+        },
+        "relationships": {
+            "activities": {
+                "data": [
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 5,
+                            "total_hits": 5
+                        }
+                    }
+                }
+            },
+            "assignee": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            },
+            "claim_ticket": {
+                "data": {
+                    "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                    "type": "claim_ticket"
+                },
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)"
+                    }
+                }
+            },
+            "comments": {
+                "data": [
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "comment"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "duplicate_of": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            },
+            "duplicates": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 0,
+                            "total_hits": 0
+                        }
+                    }
+                }
+            },
+            "external_issues": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "file_attachments": {
+                "data": [
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "file_attachment"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "monetary_rewards": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 0,
+                            "total_hits": 0
+                        }
+                    }
+                }
+            },
+            "program": {
+                "data": {
+                    "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                    "type": "program"
+                },
+                "links": {
+                    "related": {
+                        "href": "/programs/3b0e6b2a-c21e-493e-bd19-de40f525016e"
+                    }
+                }
+            },
+            "researcher": {
+                "data": {
+                    "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                    "type": "identity"
+                },
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)"
+                    }
+                }
+            },
+            "target": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            }
+        },
+        "links": {
+            "self": "/submissions/3b0e6b2a-c21e-493e-bd19-de40f525016e"
+        }
+    },
+    {
+        "id": "335a7ba5-57ba-485a-b40e-2f9aa4e19786",
+        "type": "submission",
+        "attributes": {
+            "bug_url": "https://example.com/3",
+            "custom_fields": {},
+            "description": "you did something wrong",
+            "duplicate": false,
+            "extra_info": null,
+            "http_request": null,
+            "last_transitioned_to_informational_at": null,
+            "last_transitioned_to_not_applicable_at": "2000-01-01T05:30:53.463Z",
+            "last_transitioned_to_not_reproducible_at": null,
+            "last_transitioned_to_out_of_scope_at": null,
+            "last_transitioned_to_resolved_at": null,
+            "last_transitioned_to_triaged_at": null,
+            "last_transitioned_to_unresolved_at": null,
+            "remediation_advice": "Do things properly3",
+            "severity": 3,
+            "source": "external_form",
+            "state": "not_applicable",
+            "submitted_at": "2000-01-03T15:08:57.337Z",
+            "title": "you did something wrong (returned)",
+            "vrt_id": "server_security_misconfiguration.clickjacking.non_sensitive_action",
+            "vrt_version": "1.10.1",
+            "vulnerability_references": "* [https://example.com](https://example.com\n* [https://example.com](https://example.com\n* [https://example.com](https://example.com\n* [https://example.com](https://example.com\n* [https://example.com](https://example.com\n* [https://example.com](https://example.com"
+        },
+        "relationships": {
+            "activities": {
+                "data": [
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    },
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "activity"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 4,
+                            "total_hits": 4
+                        }
+                    }
+                }
+            },
+            "assignee": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            },
+            "claim_ticket": {
+                "data": {
+                    "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                    "type": "claim_ticket"
+                },
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)"
+                    }
+                }
+            },
+            "comments": {
+                "data": [
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "comment"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "duplicate_of": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            },
+            "duplicates": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 0,
+                            "total_hits": 0
+                        }
+                    }
+                }
+            },
+            "external_issues": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "file_attachments": {
+                "data": [
+                    {
+                        "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                        "type": "file_attachment"
+                    }
+                ],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 1,
+                            "total_hits": 1
+                        }
+                    }
+                }
+            },
+            "monetary_rewards": {
+                "data": [],
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)",
+                        "meta": {
+                            "count": 0,
+                            "total_hits": 0
+                        }
+                    }
+                }
+            },
+            "program": {
+                "data": {
+                    "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                    "type": "program"
+                },
+                "links": {
+                    "related": {
+                        "href": "/programs/3b0e6b2a-c21e-493e-bd19-de40f525016e"
+                    }
+                }
+            },
+            "researcher": {
+                "data": {
+                    "id": "3b0e6b2a-c21e-493e-bd19-de40f525016e",
+                    "type": "identity"
+                },
+                "links": {
+                    "related": {
+                        "href": "(NOT IMPLEMENTED YET)"
+                    }
+                }
+            },
+            "target": {
+                "data": null,
+                "links": {
+                    "related": {
+                        "href": null
+                    }
+                }
+            }
+        },
+        "links": {
+            "self": "/submissions/3b0e6b2a-c21e-493e-bd19-de40f525016e"
+        }
+    }
+]

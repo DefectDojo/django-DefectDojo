@@ -1,0 +1,1304 @@
+{
+    "schema": 1,
+    "applicationInfo": {
+      "name": "Threat composer",
+      "description": ""
+    },
+    "architecture": {
+      "image": "",
+      "description": ""
+    },
+    "dataflow": {
+      "image": "",
+      "description": ""
+    },
+    "assumptions": [
+      {
+        "id": "2d2a1ddf-5bb8-4a55-8f60-e195bc0b4b90",
+        "numericId": 7,
+        "content": "lorem ipsum",
+        "tags": [
+          "lorem ipsum"
+        ],
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "lorem ipsum"
+          }
+        ],
+        "displayOrder": 7
+      },
+      {
+        "id": "d8edcf30-5c76-49f7-a408-20e071bbea1c",
+        "numericId": 6,
+        "content": "lorem ipsum",
+        "displayOrder": 6,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "lorem ipsum"
+          }
+        ]
+      },
+      {
+        "id": "b7d98386-906f-40ca-a631-194bc3ac709d",
+        "numericId": 5,
+        "displayOrder": 5,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "A consuming customer should have a security awareness program to help to educate their users on how to reuce the likelihood of being socially engineered. See article [Amazon releases free cybersecurity awareness training](https://www.aboutamazon.com/news/community/amazon-releases-free-cybersecurity-awareness-training)"
+          }
+        ],
+        "content": "Security awareness training is the most effective mitigation against social engineering attacks, and one cannot rely solely on technical mitigations"
+      },
+      {
+        "id": "c9b4cc31-3ac4-40f8-82f6-131792f48949",
+        "numericId": 4,
+        "displayOrder": 4,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "[AWS Well-Architected](https://aws.amazon.com/architecture/well-architected/) documentation"
+          }
+        ],
+        "content": "Customer deploying solution will follow AWS Well-Architected best practices"
+      },
+      {
+        "id": "08265978-d2c3-4ced-a530-20e4c84692b8",
+        "numericId": 3,
+        "displayOrder": 3,
+        "metadata": [],
+        "content": "We cannot protect against threats on the client endpoint"
+      },
+      {
+        "id": "930797fb-0611-4f66-b2ab-370ec373c852",
+        "numericId": 2,
+        "displayOrder": 2,
+        "metadata": [],
+        "content": "For general users, modern browsers have adequate protection for access to local browser storage"
+      },
+      {
+        "id": "05ac2926-5464-4071-bb58-e1a56c7ba8f0",
+        "numericId": 1,
+        "displayOrder": 1,
+        "metadata": [],
+        "content": "TLS 1.2 is an adequate mitigation for threats related to tampering and information disclosure of data in transit over the network."
+      }
+    ],
+    "mitigations": [
+      {
+        "id": "bdef5b69-e690-4c9c-bfc1-960390779d3b",
+        "numericId": 21,
+        "content": "lorem ipsum",
+        "tags": [
+          "lorem ipsum"
+        ],
+        "displayOrder": 21,
+        "status": "mitigationResolved"
+      },
+      {
+        "id": "11fb1c71-42f0-4004-89a7-09d8bf6f8b11",
+        "numericId": 20,
+        "content": "lorem ipsum",
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "lorem ipsum"
+          }
+        ],
+        "displayOrder": 20
+      },
+      {
+        "id": "baa86fce-6e2a-406b-a10e-79c30cf94589",
+        "numericId": 19,
+        "displayOrder": 19,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "Implementation in code - [Import and data validation](https://github.com/awslabs/threat-composer/commit/68f6323ac8ada085b48dbe7bc344021fe4c97e13)"
+          }
+        ],
+        "content": "Schema validation on data import"
+      },
+      {
+        "id": "c00b1a9a-6d7a-41e2-9697-7d41244b5990",
+        "numericId": 18,
+        "displayOrder": 18,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "Implementation in code - [PDK Static Website construct - S3 access logging](https://github.com/aws/aws-prototyping-sdk/blob/mainline/packages/static-website/src/static-website.ts#L161)"
+          }
+        ],
+        "content": "Amazon S3 - Access logging"
+      },
+      {
+        "id": "3f93baae-0997-4fe0-9d9d-1b10a1ba7973",
+        "numericId": 17,
+        "displayOrder": 17,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "Implementation in code -  [Custom security headers within CloudFront](https://github.com/awslabs/threat-composer/blob/6023777f95ede74d63bf95d0a0fac8f7787d8b35/packages/threat-composer-infra/src/application-stack.ts#L66)"
+          }
+        ],
+        "tags": [
+          "XSS"
+        ],
+        "content": "Custom security headers (including HTTP Strict Transport Security)"
+      },
+      {
+        "id": "0ce4e65d-c96c-46b1-988d-57016036bc12",
+        "numericId": 16,
+        "displayOrder": 16,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "Implementation in code - [Content Security Policy](https://github.com/awslabs/threat-composer/blob/d1c3848fafb129d19de17db1484cca7055e56a1b/packages/threat-composer-app/public/index.html#L14)"
+          }
+        ],
+        "tags": [
+          "XSS"
+        ],
+        "content": "CSP (Content Security Policy)"
+      },
+      {
+        "id": "f4a2c3a8-f5d1-4302-aba3-4b1d715794be",
+        "numericId": 15,
+        "displayOrder": 15,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "HTTPS is configured as enforced - [documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https)"
+          }
+        ],
+        "tags": [
+          "MiTM"
+        ],
+        "content": "TLS provided by GitHub Pages"
+      },
+      {
+        "id": "0cdff113-4816-496d-aa0d-36466c7331c0",
+        "numericId": 14,
+        "displayOrder": 14,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "Implementation in code - [Default non-routable CIDR](https://github.com/awslabs/threat-composer/blob/main/packages/threat-composer-infra/cdk.context.json#L7)"
+          }
+        ],
+        "tags": [],
+        "content": "Restrictive default for WebACL associated with CloudFront distribution"
+      },
+      {
+        "id": "cda934f6-4148-46cb-8658-5c3f86735a1b",
+        "numericId": 13,
+        "displayOrder": 13,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "See [README.md](https://github.com/awslabs/threat-composer#security-considerations)"
+          }
+        ],
+        "content": "README: Security considerations"
+      },
+      {
+        "id": "5c356be5-1c34-443c-abe2-8d7f7d3c210a",
+        "numericId": 12,
+        "displayOrder": 12,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "By using popular, well-known and industry recognised NPM packages it is believed that this increases the likelihood that any integrity concerns with the package would be discovered more quickly, and that there would be industry and community urgency in disclosing and remediating.\n\nSee [package.json](https://github.com/awslabs/threat-composer/blob/main/package.json) for NPN packages used by this project."
+          }
+        ],
+        "content": "Using well-known and industry recognised NPM packages"
+      },
+      {
+        "id": "e06394d3-7cc6-45a7-b9cc-d3ec621f8957",
+        "numericId": 11,
+        "displayOrder": 11,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "[GitHub DependaBot security updates](https://docs.github.com/en/code-security/dependabot/dependabot-security-updates/configuring-dependabot-security-updates]) documentation"
+          }
+        ],
+        "content": "GitHub Dependabot security updates are configured on the maintainers GitHub repository"
+      },
+      {
+        "id": "c745ffca-00d6-459b-8438-640ec7293e6d",
+        "numericId": 10,
+        "displayOrder": 10,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "GitHub branch protection rules of `main` to ensure that a manual code review by maintainers is required before merge"
+          }
+        ],
+        "content": "GitHub branch protection rules"
+      },
+      {
+        "id": "10cf6702-9cf9-4dd6-b43d-17a2302b590c",
+        "numericId": 9,
+        "displayOrder": 9,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "[Access permissions on GitHub](https://docs.github.com/en/get-started/learning-about-github/access-permissions-on-github) documentation"
+          }
+        ],
+        "content": "Access control to GitHub organization and repository"
+      },
+      {
+        "id": "b255d500-bddf-47dd-acdb-fb9f3edc384c",
+        "numericId": 8,
+        "displayOrder": 8,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "- Implementation in code - [PDK Static Website construct - CloudFront distribution configuration](https://github.com/aws/aws-prototyping-sdk/blob/mainline/packages/static-website/src/static-website.ts#L215)\n\n- Implementation in code - [PDK Static Website construct - S3 Bucket configuration](https://github.com/aws/aws-prototyping-sdk/blob/mainline/packages/static-website/src/static-website.ts#L152)"
+          }
+        ],
+        "content": "TLS provided by CloudFront"
+      },
+      {
+        "id": "f47a2b78-79b1-4371-acc7-e977116b0a90",
+        "numericId": 7,
+        "displayOrder": 7,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "Implementation in code - [threat composer UI warning](https://github.com/awslabs/threat-composer/blob/3e8f5547aed7f7d969dcdf84a9d89cd4fde4a150/packages/threat-composer/src/components/workspaces/FileImport/index.tsx#L136)"
+          }
+        ],
+        "content": "UI import warning 'Only import from trusted sources'"
+      },
+      {
+        "id": "135863f3-64e9-4fd7-8d71-4f141c42747f",
+        "numericId": 6,
+        "displayOrder": 6,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "Implementation in code - [Markdown configuration](https://github.com/awslabs/threat-composer/commit/3e5be78ad1d1fa7d82fabd8069bad9bfa97b3a5e)"
+          }
+        ],
+        "content": "Disable HTML support on Markdown viewer"
+      },
+      {
+        "id": "d3f3befb-b64a-4311-8abf-a19f853a8eed",
+        "numericId": 5,
+        "displayOrder": 5,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "Implementation in code - [sanitizeHtml](https://github.com/awslabs/threat-composer/blob/3e8f5547aed7f7d969dcdf84a9d89cd4fde4a150/packages/threat-composer/src/utils/sanitizeHtml/index.ts#L16)"
+          }
+        ],
+        "content": "HTML sanitisation on import"
+      },
+      {
+        "id": "ba6b8839-3629-423f-8205-76d0d5a69016",
+        "numericId": 4,
+        "displayOrder": 4,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "AWS Shield Standard provides protection for all AWS customers against common and most frequently occurring Infrastructure (layer 3 and 4) attacks like SYN/UDP Floods, Reflection attacks, and others to support high availability of your applications on AWS. [more](https://docs.aws.amazon.com/waf/latest/developerguide/ddos-standard-summary.html)"
+          }
+        ],
+        "content": "AWS Shield Standard (on CloudFront)"
+      },
+      {
+        "id": "84c1299c-27ba-4829-a1a1-c5368a2486a6",
+        "numericId": 2,
+        "displayOrder": 2,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "Implementation in code - [PDK Static Website construct - OAI configuration](https://github.com/aws/aws-prototyping-sdk/blob/mainline/packages/static-website/src/static-website.ts#LL213C13-L213C33)"
+          }
+        ],
+        "content": "CloudFront OAI/OAC"
+      },
+      {
+        "id": "00b07ef0-097c-4082-9a69-55abc5c111e6",
+        "numericId": 1,
+        "displayOrder": 1,
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "Implementation in code - [PDK Static Website construct - S3 Block public access](https://github.com/aws/aws-prototyping-sdk/blob/mainline/packages/static-website/src/static-website.ts#L159)"
+          }
+        ],
+        "content": "S3 Block Public Access"
+      }
+    ],
+    "assumptionLinks": [
+      {
+        "type": "Threat",
+        "assumptionId": "05ac2926-5464-4071-bb58-e1a56c7ba8f0",
+        "linkedId": "fb2ff978-1311-4061-a299-0a7f3421e037"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "c9b4cc31-3ac4-40f8-82f6-131792f48949",
+        "linkedId": "6fb7ef9a-175d-49f1-b85b-652b668581d4"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "b7d98386-906f-40ca-a631-194bc3ac709d",
+        "linkedId": "a394f5d6-9479-40cc-ae88-b1911a269f0a"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "08265978-d2c3-4ced-a530-20e4c84692b8",
+        "linkedId": "a84e701e-b370-44e4-aa1a-2c5e6edcf926"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "930797fb-0611-4f66-b2ab-370ec373c852",
+        "linkedId": "79bc7dc9-1038-4516-8f61-0a724bf4776d"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "c1cf71ce-6162-44cd-ae44-b55a81b74675",
+        "linkedId": "1e829518-ca27-454a-a759-6720349b7d6b"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "c1cf71ce-6162-44cd-ae44-b55a81b74675",
+        "linkedId": "661ab87a-a978-4442-9277-1318906a6d09"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "c1cf71ce-6162-44cd-ae44-b55a81b74675",
+        "linkedId": "19b98451-70ee-4814-af80-c1293b90cb9f"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "c9b4cc31-3ac4-40f8-82f6-131792f48949",
+        "linkedId": "16c0b3de-a08f-418b-9969-9eb905ddd4e8"
+      },
+      {
+        "type": "Mitigation",
+        "assumptionId": "d2268999-20a5-4d5b-a36a-49d6bb7d1bcc",
+        "linkedId": "5c356be5-1c34-443c-abe2-8d7f7d3c210a"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "08265978-d2c3-4ced-a530-20e4c84692b8",
+        "linkedId": "99648023-86fe-4b7d-829a-7011be545fa4"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "08265978-d2c3-4ced-a530-20e4c84692b8",
+        "linkedId": "a0f523b0-bbc0-4e6a-9064-500af1f3836e"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "24057bbe-01ff-43cd-82f8-cb6d423cb070",
+        "linkedId": "fb2ff978-1311-4061-a299-0a7f3421e037"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "c9b4cc31-3ac4-40f8-82f6-131792f48949",
+        "linkedId": "6529dd8d-0b40-4eec-b4c4-5ee4f06619c0"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "d2268999-20a5-4d5b-a36a-49d6bb7d1bcc",
+        "linkedId": "1649e8e4-f100-45f2-8c13-51dafc8a8251"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "d2268999-20a5-4d5b-a36a-49d6bb7d1bcc",
+        "linkedId": "1e829518-ca27-454a-a759-6720349b7d6b"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "d2268999-20a5-4d5b-a36a-49d6bb7d1bcc",
+        "linkedId": "661ab87a-a978-4442-9277-1318906a6d09"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "930797fb-0611-4f66-b2ab-370ec373c852",
+        "linkedId": "7b49bdbd-25e9-446f-b44a-46fa2807e182"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "c1cf71ce-6162-44cd-ae44-b55a81b74675",
+        "linkedId": "7b49bdbd-25e9-446f-b44a-46fa2807e182"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "eafa2db3-85b5-4b58-ae2a-1cec604c451a",
+        "linkedId": "7b49bdbd-25e9-446f-b44a-46fa2807e182"
+      },
+      {
+        "type": "Threat",
+        "assumptionId": "08265978-d2c3-4ced-a530-20e4c84692b8",
+        "linkedId": "f29b9a9f-94d9-4d6e-be3e-5fffb874d2a6"
+      },
+      {
+        "linkedId": "46db1eb4-a451-4d05-afe1-c695491e2387",
+        "assumptionId": "d8edcf30-5c76-49f7-a408-20e071bbea1c",
+        "type": "Threat"
+      },
+      {
+        "linkedId": "11fb1c71-42f0-4004-89a7-09d8bf6f8b11",
+        "assumptionId": "d8edcf30-5c76-49f7-a408-20e071bbea1c",
+        "type": "Mitigation"
+      },
+      {
+        "linkedId": "46db1eb4-a451-4d05-afe1-c695491e2387",
+        "assumptionId": "2d2a1ddf-5bb8-4a55-8f60-e195bc0b4b90",
+        "type": "Threat"
+      },
+      {
+        "linkedId": "11fb1c71-42f0-4004-89a7-09d8bf6f8b11",
+        "assumptionId": "2d2a1ddf-5bb8-4a55-8f60-e195bc0b4b90",
+        "type": "Mitigation"
+      },
+      {
+        "linkedId": "bdef5b69-e690-4c9c-bfc1-960390779d3b",
+        "assumptionId": "2d2a1ddf-5bb8-4a55-8f60-e195bc0b4b90",
+        "type": "Mitigation"
+      },
+      {
+        "linkedId": "bdef5b69-e690-4c9c-bfc1-960390779d3b",
+        "assumptionId": "d8edcf30-5c76-49f7-a408-20e071bbea1c",
+        "type": "Mitigation"
+      }
+    ],
+    "mitigationLinks": [
+      {
+        "mitigationId": "00b07ef0-097c-4082-9a69-55abc5c111e6",
+        "linkedId": "16c0b3de-a08f-418b-9969-9eb905ddd4e8"
+      },
+      {
+        "mitigationId": "84c1299c-27ba-4829-a1a1-c5368a2486a6",
+        "linkedId": "16c0b3de-a08f-418b-9969-9eb905ddd4e8"
+      },
+      {
+        "mitigationId": "ba6b8839-3629-423f-8205-76d0d5a69016",
+        "linkedId": "2ffb1f47-743e-4cbc-94e6-62d10817acc0"
+      },
+      {
+        "mitigationId": "ba6b8839-3629-423f-8205-76d0d5a69016",
+        "linkedId": "cbba3276-5ce2-47e0-bc77-aebc162c519f"
+      },
+      {
+        "mitigationId": "d3f3befb-b64a-4311-8abf-a19f853a8eed",
+        "linkedId": "7820db4a-1043-4dfa-bbc2-59774bb1f2fc"
+      },
+      {
+        "mitigationId": "135863f3-64e9-4fd7-8d71-4f141c42747f",
+        "linkedId": "7820db4a-1043-4dfa-bbc2-59774bb1f2fc"
+      },
+      {
+        "mitigationId": "f47a2b78-79b1-4371-acc7-e977116b0a90",
+        "linkedId": "7820db4a-1043-4dfa-bbc2-59774bb1f2fc"
+      },
+      {
+        "mitigationId": "135863f3-64e9-4fd7-8d71-4f141c42747f",
+        "linkedId": "0a264de2-c2e5-45c0-9075-0d437b9defa0"
+      },
+      {
+        "mitigationId": "b255d500-bddf-47dd-acdb-fb9f3edc384c",
+        "linkedId": "fb2ff978-1311-4061-a299-0a7f3421e037"
+      },
+      {
+        "mitigationId": "10cf6702-9cf9-4dd6-b43d-17a2302b590c",
+        "linkedId": "fec8777c-68b3-4569-84ce-9b9b1b9f5e9c"
+      },
+      {
+        "mitigationId": "c745ffca-00d6-459b-8438-640ec7293e6d",
+        "linkedId": "fec8777c-68b3-4569-84ce-9b9b1b9f5e9c"
+      },
+      {
+        "mitigationId": "e06394d3-7cc6-45a7-b9cc-d3ec621f8957",
+        "linkedId": "1649e8e4-f100-45f2-8c13-51dafc8a8251"
+      },
+      {
+        "mitigationId": "5c356be5-1c34-443c-abe2-8d7f7d3c210a",
+        "linkedId": "1e829518-ca27-454a-a759-6720349b7d6b"
+      },
+      {
+        "mitigationId": "5c356be5-1c34-443c-abe2-8d7f7d3c210a",
+        "linkedId": "661ab87a-a978-4442-9277-1318906a6d09"
+      },
+      {
+        "mitigationId": "5c356be5-1c34-443c-abe2-8d7f7d3c210a",
+        "linkedId": "19b98451-70ee-4814-af80-c1293b90cb9f"
+      },
+      {
+        "mitigationId": "cda934f6-4148-46cb-8658-5c3f86735a1b",
+        "linkedId": "6529dd8d-0b40-4eec-b4c4-5ee4f06619c0"
+      },
+      {
+        "mitigationId": "0cdff113-4816-496d-aa0d-36466c7331c0",
+        "linkedId": "6529dd8d-0b40-4eec-b4c4-5ee4f06619c0"
+      },
+      {
+        "mitigationId": "f4a2c3a8-f5d1-4302-aba3-4b1d715794be",
+        "linkedId": "fb2ff978-1311-4061-a299-0a7f3421e037"
+      },
+      {
+        "mitigationId": "0ce4e65d-c96c-46b1-988d-57016036bc12",
+        "linkedId": "0a264de2-c2e5-45c0-9075-0d437b9defa0"
+      },
+      {
+        "mitigationId": "3f93baae-0997-4fe0-9d9d-1b10a1ba7973",
+        "linkedId": "0a264de2-c2e5-45c0-9075-0d437b9defa0"
+      },
+      {
+        "mitigationId": "0ce4e65d-c96c-46b1-988d-57016036bc12",
+        "linkedId": "7820db4a-1043-4dfa-bbc2-59774bb1f2fc"
+      },
+      {
+        "mitigationId": "3f93baae-0997-4fe0-9d9d-1b10a1ba7973",
+        "linkedId": "7820db4a-1043-4dfa-bbc2-59774bb1f2fc"
+      },
+      {
+        "mitigationId": "c00b1a9a-6d7a-41e2-9697-7d41244b5990",
+        "linkedId": "16c0b3de-a08f-418b-9969-9eb905ddd4e8"
+      },
+      {
+        "mitigationId": "0ce4e65d-c96c-46b1-988d-57016036bc12",
+        "linkedId": "3793c287-f467-4227-9e25-5c53d0e09cec"
+      },
+      {
+        "mitigationId": "baa86fce-6e2a-406b-a10e-79c30cf94589",
+        "linkedId": "782adefc-b480-4e8f-83ee-64f6d680df0a"
+      },
+      {
+        "mitigationId": "cda934f6-4148-46cb-8658-5c3f86735a1b",
+        "linkedId": "3793c287-f467-4227-9e25-5c53d0e09cec"
+      },
+      {
+        "mitigationId": "cda934f6-4148-46cb-8658-5c3f86735a1b",
+        "linkedId": "7b49bdbd-25e9-446f-b44a-46fa2807e182"
+      },
+      {
+        "mitigationId": "cda934f6-4148-46cb-8658-5c3f86735a1b",
+        "linkedId": "782adefc-b480-4e8f-83ee-64f6d680df0a"
+      },
+      {
+        "mitigationId": "cda934f6-4148-46cb-8658-5c3f86735a1b",
+        "linkedId": "1649e8e4-f100-45f2-8c13-51dafc8a8251"
+      },
+      {
+        "mitigationId": "cda934f6-4148-46cb-8658-5c3f86735a1b",
+        "linkedId": "7820db4a-1043-4dfa-bbc2-59774bb1f2fc"
+      },
+      {
+        "mitigationId": "cda934f6-4148-46cb-8658-5c3f86735a1b",
+        "linkedId": "6fb7ef9a-175d-49f1-b85b-652b668581d4"
+      },
+      {
+        "mitigationId": "135863f3-64e9-4fd7-8d71-4f141c42747f",
+        "linkedId": "a0f523b0-bbc0-4e6a-9064-500af1f3836e"
+      },
+      {
+        "mitigationId": "0ce4e65d-c96c-46b1-988d-57016036bc12",
+        "linkedId": "a0f523b0-bbc0-4e6a-9064-500af1f3836e"
+      },
+      {
+        "mitigationId": "0ce4e65d-c96c-46b1-988d-57016036bc12",
+        "linkedId": "2a1052e8-fa0a-499a-9f41-7ae7f860b75e"
+      },
+      {
+        "mitigationId": "135863f3-64e9-4fd7-8d71-4f141c42747f",
+        "linkedId": "2a1052e8-fa0a-499a-9f41-7ae7f860b75e"
+      },
+      {
+        "mitigationId": "3f93baae-0997-4fe0-9d9d-1b10a1ba7973",
+        "linkedId": "2a1052e8-fa0a-499a-9f41-7ae7f860b75e"
+      },
+      {
+        "linkedId": "46db1eb4-a451-4d05-afe1-c695491e2387",
+        "mitigationId": "11fb1c71-42f0-4004-89a7-09d8bf6f8b11"
+      },
+      {
+        "linkedId": "46db1eb4-a451-4d05-afe1-c695491e2387",
+        "mitigationId": "bdef5b69-e690-4c9c-bfc1-960390779d3b"
+      }
+    ],
+    "threats": [
+      {
+        "id": "46db1eb4-a451-4d05-afe1-c695491e2387",
+        "numericId": 23,
+        "statement": "A lorem ipsum lorem ipsum can lorem ipsum, which leads to lorem ipsum, negatively impacting lorem ipsum",
+        "status": "threatResolved",
+        "threatSource": "lorem ipsum",
+        "prerequisites": "lorem ipsum",
+        "threatAction": "lorem ipsum",
+        "threatImpact": "lorem ipsum",
+        "impactedAssets": [
+          "lorem ipsum"
+        ],
+        "displayOrder": 23,
+        "metadata": [
+          {
+            "key": "Priority",
+            "value": "High"
+          },
+          {
+            "key": "STRIDE",
+            "value": [
+              "S",
+              "T",
+              "R",
+              "I",
+              "D",
+              "E"
+            ]
+          },
+          {
+            "key": "Comments",
+            "value": "lorem ipsum. lorem ipsum lorem ipsum"
+          }
+        ],
+        "tags": [
+          "CWE-156",
+          "CVE-45",
+          "lorem ipsum"
+        ]
+      },
+      {
+        "id": "f29b9a9f-94d9-4d6e-be3e-5fffb874d2a6",
+        "numericId": 22,
+        "displayOrder": 22,
+        "metadata": [
+          {
+            "key": "Priority",
+            "value": "Medium"
+          },
+          {
+            "key": "STRIDE",
+            "value": [
+              "I"
+            ]
+          }
+        ],
+        "tags": [
+          "Social engineering"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "that is able to trick a user into installing a malicous userscript extension (e.g. tampermonkey, browser extension)",
+        "threatAction": "read the contents of local browser storage",
+        "threatImpact": "the exfiltration of the contents of browser storage to an endpoint controlled by the actor",
+        "impactedGoal": [
+          "confidentiality"
+        ],
+        "impactedAssets": [
+          "application metadata",
+          "threats",
+          "mitigations",
+          "assumptions"
+        ],
+        "statement": "A threat actor that is able to trick a user into installing a malicous userscript extension (e.g. tampermonkey, browser extension) can read the contents of local browser storage, which leads to the exfiltration of the contents of browser storage to an endpoint controlled by the actor, resulting in reduced confidentiality of application metadata, threats, mitigations and assumptions",
+        "status": "threatResolvedNotUseful"
+      },
+      {
+        "id": "2a1052e8-fa0a-499a-9f41-7ae7f860b75e",
+        "numericId": 21,
+        "displayOrder": 21,
+        "metadata": [
+          {
+            "key": "Priority",
+            "value": "Medium"
+          },
+          {
+            "key": "STRIDE",
+            "value": [
+              "I"
+            ]
+          }
+        ],
+        "tags": [
+          "XSS"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "that is able to target a user already using a benign userscript extension (e.g. tampermonkey) that integrates directly with local browser storage for quickly viewing a Threat Composer export",
+        "threatAction": "trick them into opening a malicious threat model that contains script tags (or similar)",
+        "threatImpact": "the exfiltration of the contents of browser storage via XSS due to the extension bypassing Threat Composers import validation and sanitisation protection",
+        "impactedGoal": [
+          "confidentiality"
+        ],
+        "impactedAssets": [
+          "application metadata",
+          "threats",
+          "mitigations",
+          "assumptions"
+        ],
+        "statement": "A threat actor that is able to target a user already using a benign userscript extension (e.g. tampermonkey) that integrates directly with local browser storage for quickly viewing a Threat Composer export can trick them into opening a malicious threat model that contains script tags (or similar), which leads to the exfiltration of the contents of browser storage via XSS due to the extension bypassing Threat Composers import validation and sanitisation protection, resulting in reduced confidentiality of application metadata, threats, mitigations and assumptions",
+        "status": "threatIdentified"
+      },
+      {
+        "id": "7b49bdbd-25e9-446f-b44a-46fa2807e182",
+        "numericId": 20,
+        "displayOrder": 20,
+        "metadata": [
+          {
+            "key": "Priority",
+            "value": "Low"
+          },
+          {
+            "key": "STRIDE",
+            "value": [
+              "I"
+            ]
+          }
+        ],
+        "tags": [
+          "Risk Accepted"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "with knowledge of a browser image render vulnerability",
+        "threatAction": "trick a user into importing a malicious JSON file containing malicious BASE64 images",
+        "threatImpact": "exfiltration the contents of local storage to and end-point controlled by the actor",
+        "impactedGoal": [
+          "confidentiality"
+        ],
+        "impactedAssets": [
+          "threats",
+          "mitigations",
+          "assumptions",
+          "application metadata"
+        ],
+        "statement": "A threat actor with knowledge of a browser image render vulnerability can trick a user into importing a malicious JSON file containing malicious BASE64 images, which leads to exfiltration the contents of local storage to and end-point controlled by the actor, resulting in reduced confidentiality of threats, mitigations, assumptions and application metadata",
+        "status": "threatResolved"
+      },
+      {
+        "id": "782adefc-b480-4e8f-83ee-64f6d680df0a",
+        "numericId": 19,
+        "displayOrder": 19,
+        "metadata": [
+          {
+            "key": "Priority",
+            "value": "Medium"
+          },
+          {
+            "key": "STRIDE",
+            "value": [
+              "D"
+            ]
+          }
+        ],
+        "tags": [
+          "DoS"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "that can trick a user into importing a JSON file",
+        "threatAction": "input a unexpected data schema",
+        "threatImpact": "the user being unable to use the tool, until they clear the local data (or use a different browser)",
+        "impactedGoal": [],
+        "impactedAssets": [],
+        "statement": "A threat actor that can trick a user into importing a JSON file can input an unexpected data schema, which leads to the user being unable to use the tool, until they clear the local data (or use a different browser)"
+      },
+      {
+        "id": "a0f523b0-bbc0-4e6a-9064-500af1f3836e",
+        "numericId": 18,
+        "displayOrder": 18,
+        "metadata": [
+          {
+            "key": "STRIDE",
+            "value": [
+              "T"
+            ]
+          },
+          {
+            "key": "Priority",
+            "value": "Low"
+          }
+        ],
+        "tags": [
+          "XSS"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "with access the browser DOM (e.g. via Dev Tools)",
+        "threatAction": "disable client-side input validation regex",
+        "threatImpact": "allowing them to demonstrate a Cross-site Script (XSS) vulnerability",
+        "impactedGoal": [
+          "integrity"
+        ],
+        "impactedAssets": [
+          "threat composer"
+        ],
+        "statement": "A threat actor with access the browser DOM (e.g. via Dev Tools) can disable client-side input validation regex, which leads to allowing them to demonstrate a Cross-site Script (XSS) vulnerability, resulting in reduced integrity of threat composer"
+      },
+      {
+        "id": "99648023-86fe-4b7d-829a-7011be545fa4",
+        "numericId": 17,
+        "displayOrder": 17,
+        "metadata": [
+          {
+            "key": "Priority",
+            "value": "Low"
+          },
+          {
+            "key": "STRIDE",
+            "value": [
+              "D"
+            ]
+          }
+        ],
+        "tags": [
+          "DoS"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "with access the browser DOM (e.g. via Dev Tools)",
+        "threatAction": "can input a datatype not expected by the code",
+        "impactedGoal": [
+          "availability"
+        ],
+        "impactedAssets": [
+          "threat composer"
+        ],
+        "statement": "A threat actor with access the browser DOM (e.g. via Dev Tools) can can input a datatype not expected by the code, resulting in reduced availability of threat composer"
+      },
+      {
+        "id": "6529dd8d-0b40-4eec-b4c4-5ee4f06619c0",
+        "numericId": 16,
+        "displayOrder": 16,
+        "metadata": [
+          {
+            "key": "Priority",
+            "value": "High"
+          },
+          {
+            "key": "STRIDE",
+            "value": [
+              "I"
+            ]
+          }
+        ],
+        "threatSource": "valid user",
+        "prerequisites": "who has forked and modified the source code to include their own data (e.g. additional example threat statements)",
+        "threatAction": "deploy Threat composer without network restrictions or authentication",
+        "threatImpact": "discovery of the additional data by an adversary",
+        "impactedGoal": [
+          "confidentiality"
+        ],
+        "statement": "A valid user who has forked and modified the source code to include their own data (e.g. additional example threat statements) can deploy Threat composer without network restrictions or authentication, which leads to discovery of the additional data by an adversary, resulting in reduced confidentiality"
+      },
+      {
+        "id": "1649e8e4-f100-45f2-8c13-51dafc8a8251",
+        "numericId": 15,
+        "displayOrder": 15,
+        "metadata": [
+          {
+            "key": "Priority",
+            "value": "Medium"
+          },
+          {
+            "key": "STRIDE",
+            "value": [
+              "T"
+            ]
+          }
+        ],
+        "tags": [
+          "Supply Chain"
+        ],
+        "threatSource": "threat actor",
+        "threatAction": "take advantage of security vulnerability within a 3rd party package used by Threat Composer",
+        "threatImpact": "",
+        "impactedGoal": [
+          "integrity"
+        ],
+        "impactedAssets": [
+          "threat composer"
+        ],
+        "statement": "A threat actor can take advantage of security vulnerability within a 3rd party package used by Threat Composer, resulting in reduced integrity of threat composer"
+      },
+      {
+        "id": "fec8777c-68b3-4569-84ce-9b9b1b9f5e9c",
+        "numericId": 14,
+        "displayOrder": 14,
+        "metadata": [
+          {
+            "key": "Priority",
+            "value": "High"
+          },
+          {
+            "key": "STRIDE",
+            "value": [
+              "I",
+              "T"
+            ]
+          }
+        ],
+        "tags": [
+          "Supply Chain"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "",
+        "threatAction": "raise a PR (Pull Request) on the source within the Threat Composer GitHub repo",
+        "threatImpact": "merging malicious code that exfiltrates user-supplied input to an end-point that they control",
+        "impactedAssets": [
+          "threats",
+          "mitigations",
+          "assumptions",
+          "application metadata"
+        ],
+        "statement": "A threat actor can raise a PR (Pull Request) on the source within the Threat Composer GitHub repo, which leads to merging malicious code that exfiltrates user-supplied input to an end-point that they control, negatively impacting threats, mitigations, assumptions and application metadata"
+      },
+      {
+        "id": "0a264de2-c2e5-45c0-9075-0d437b9defa0",
+        "numericId": 13,
+        "displayOrder": 13,
+        "metadata": [
+          {
+            "key": "STRIDE",
+            "value": [
+              "T"
+            ]
+          },
+          {
+            "key": "Priority",
+            "value": "Medium"
+          }
+        ],
+        "tags": [
+          "XSS"
+        ],
+        "threatSource": "security researcher",
+        "threatAction": "provide malicious input (e.g. script tags) into the Threat Composer UI",
+        "threatImpact": "to them finding and demonstrating an XSS vulnerability which they make public via social media",
+        "impactedAssets": [
+          "threat composer"
+        ],
+        "statement": "A security researcher can provide malicious input (e.g. script tags) into the Threat Composer UI, which leads to to them finding and demonstrating an XSS vulnerability which they make public via social media, negatively impacting threat composer"
+      },
+      {
+        "id": "7820db4a-1043-4dfa-bbc2-59774bb1f2fc",
+        "numericId": 12,
+        "displayOrder": 12,
+        "metadata": [
+          {
+            "key": "STRIDE",
+            "value": [
+              "I"
+            ]
+          },
+          {
+            "key": "Priority",
+            "value": "High"
+          }
+        ],
+        "tags": [
+          "XSS"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "that can trick a user into importing a malicious JSON file containing script tags (or similar)",
+        "threatAction": "exfiltrate the contents of local storage using XSS",
+        "impactedGoal": [
+          "confidentiality"
+        ],
+        "impactedAssets": [
+          "threats",
+          "mitigations",
+          "assumptions",
+          "application metadata"
+        ],
+        "statement": "A threat actor that can trick a user into importing a malicious JSON file containing script tags (or similar) can exfiltrate the contents of local storage using XSS, resulting in reduced confidentiality of threats, mitigations, assumptions and application metadata"
+      },
+      {
+        "id": "19b98451-70ee-4814-af80-c1293b90cb9f",
+        "numericId": 9,
+        "displayOrder": 9,
+        "metadata": [
+          {
+            "key": "STRIDE",
+            "value": [
+              "T"
+            ]
+          },
+          {
+            "key": "Priority",
+            "value": "High"
+          }
+        ],
+        "tags": [
+          "Supply Chain"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "who has access to a dependent software package on a npm remote registry (e.g. yarnpkg.com, npmjs.com)",
+        "threatAction": "inject malicious code into the CI/CD process",
+        "threatImpact": "untrusted code running in a users browser",
+        "impactedGoal": [
+          "integrity"
+        ],
+        "impactedAssets": [
+          "threat composer"
+        ],
+        "statement": "A threat actor who has access to a dependent software package on a npm remote registry (e.g. yarnpkg.com, npmjs.com) can inject malicious code into the CI/CD process, which leads to untrusted code running in a users browser, resulting in reduced integrity of threat composer"
+      },
+      {
+        "id": "cbba3276-5ce2-47e0-bc77-aebc162c519f",
+        "numericId": 8,
+        "displayOrder": 8,
+        "metadata": [
+          {
+            "key": "STRIDE",
+            "value": [
+              "D"
+            ]
+          },
+          {
+            "key": "Priority",
+            "value": "Low"
+          }
+        ],
+        "tags": [
+          "DDoS"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "with a network path to the CloudFront distribution",
+        "threatAction": "submit a large number of resource intensive requests",
+        "threatImpact": "unnecessary and/or excessive costs",
+        "impactedGoal": [
+          "economy"
+        ],
+        "impactedAssets": [
+          "threat composer"
+        ],
+        "statement": "A threat actor with a network path to the CloudFront distribution can submit a large number of resource intensive requests, which leads to unnecessary and/or excessive costs, resulting in reduced economy of threat composer"
+      },
+      {
+        "id": "2ffb1f47-743e-4cbc-94e6-62d10817acc0",
+        "numericId": 7,
+        "displayOrder": 7,
+        "metadata": [
+          {
+            "key": "STRIDE",
+            "value": [
+              "D"
+            ]
+          },
+          {
+            "key": "Priority",
+            "value": "Low"
+          }
+        ],
+        "tags": [
+          "DDoS"
+        ],
+        "threatSource": "threat actor",
+        "threatAction": "create or orchestrate a distributed denial of service attack against the CloudFront Distribution serving the static content",
+        "threatImpact": "to the web tool being unresponsive to callers",
+        "impactedGoal": [
+          "availability"
+        ],
+        "impactedAssets": [
+          "threat composer"
+        ],
+        "statement": "A threat actor can create or orchestrate a distributed denial of service attack against the CloudFront Distribution serving the static content, which leads to to the web tool being unresponsive to callers, resulting in reduced availability of threat composer"
+      },
+      {
+        "id": "a394f5d6-9479-40cc-ae88-b1911a269f0a",
+        "numericId": 6,
+        "displayOrder": 6,
+        "metadata": [
+          {
+            "key": "STRIDE",
+            "value": [
+              "S"
+            ]
+          },
+          {
+            "key": "Priority",
+            "value": "Low"
+          }
+        ],
+        "tags": [
+          "Social Engineering"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "with possession of a similar domain name",
+        "threatAction": "trick our users into interacting with an illegitimate endpoint",
+        "impactedGoal": [
+          "confidentiality"
+        ],
+        "impactedAssets": [
+          "threats",
+          "mitigations",
+          "assumptions",
+          "application metadata"
+        ],
+        "statement": "A threat actor with possession of a similar domain name can trick our users into interacting with an illegitimate endpoint, resulting in reduced confidentiality of threats, mitigations, assumptions and application metadata"
+      },
+      {
+        "id": "6fb7ef9a-175d-49f1-b85b-652b668581d4",
+        "numericId": 5,
+        "displayOrder": 5,
+        "metadata": [
+          {
+            "key": "STRIDE",
+            "value": [
+              "T"
+            ]
+          },
+          {
+            "key": "Priority",
+            "value": "Medium"
+          }
+        ],
+        "tags": [
+          "Least Privilege"
+        ],
+        "threatSource": "external threat actor",
+        "prerequisites": "who has a sufficiently privileged IAM Principal in the AWS account",
+        "threatAction": "modify the configuration of the CloudFront distribution",
+        "threatImpact": "the distribution serving content from an origin that is unexpected or contains malicious content",
+        "impactedGoal": [
+          "integrity"
+        ],
+        "impactedAssets": [
+          "code running in the user's browser",
+          "application configuration"
+        ],
+        "statement": "An external threat actor who has a sufficiently privileged IAM Principal in the AWS account can modify the configuration of the CloudFront distribution, which leads to the distribution serving content from an origin that is unexpected or contains malicious content, resulting in reduced integrity of code running in the user's browser and application configuration"
+      },
+      {
+        "id": "16c0b3de-a08f-418b-9969-9eb905ddd4e8",
+        "numericId": 4,
+        "displayOrder": 4,
+        "metadata": [
+          {
+            "key": "STRIDE",
+            "value": [
+              "I"
+            ]
+          },
+          {
+            "key": "Priority",
+            "value": "High"
+          }
+        ],
+        "tags": [
+          "Least Privilege"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "with write access to the objects hosted on the static asset S3 Bucket",
+        "threatAction": "modify the code",
+        "threatImpact": "exfiltration of user-supplied input to an attacker controlled endpoint",
+        "impactedGoal": [
+          "confidentiality"
+        ],
+        "impactedAssets": [
+          "threats",
+          "mitigations",
+          "assumptions",
+          "application metadata"
+        ],
+        "statement": "A threat actor with write access to the objects hosted on the static asset S3 Bucket can modify the code, which leads to exfiltration of user-supplied input to an attacker controlled endpoint, resulting in reduced confidentiality of threats, mitigations, assumptions and application metadata"
+      },
+      {
+        "id": "79bc7dc9-1038-4516-8f61-0a724bf4776d",
+        "numericId": 3,
+        "displayOrder": 3,
+        "metadata": [
+          {
+            "key": "STRIDE",
+            "value": [
+              "I"
+            ]
+          },
+          {
+            "key": "Priority",
+            "value": "Low"
+          }
+        ],
+        "tags": [
+          "MiTB"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "who is in a person-in-the-browser position",
+        "threatAction": "read or modify locally stored user input",
+        "impactedGoal": [
+          "confidentiality"
+        ],
+        "impactedAssets": [
+          "threats",
+          "mitigations",
+          "assumptions",
+          "application metadata"
+        ],
+        "statement": "A threat actor who is in a person-in-the-browser position can read or modify locally stored user input, resulting in reduced confidentiality of threats, mitigations, assumptions and application metadata"
+      },
+      {
+        "id": "a84e701e-b370-44e4-aa1a-2c5e6edcf926",
+        "numericId": 2,
+        "displayOrder": 2,
+        "metadata": [
+          {
+            "key": "STRIDE",
+            "value": [
+              "I"
+            ]
+          },
+          {
+            "key": "Priority",
+            "value": "Low"
+          }
+        ],
+        "tags": [
+          "MiTB"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "with local access to a web browser used by a valid user",
+        "threatAction": "read local storage",
+        "impactedGoal": [
+          "confidentiality"
+        ],
+        "impactedAssets": [
+          "threats",
+          "mitigations",
+          "assumptions",
+          "application metadata"
+        ],
+        "statement": "A threat actor with local access to a web browser used by a valid user can read local storage, resulting in reduced confidentiality of threats, mitigations, assumptions and application metadata"
+      },
+      {
+        "id": "fb2ff978-1311-4061-a299-0a7f3421e037",
+        "numericId": 1,
+        "displayOrder": 1,
+        "metadata": [
+          {
+            "key": "Priority",
+            "value": "Low"
+          },
+          {
+            "key": "STRIDE",
+            "value": [
+              "T",
+              "I"
+            ]
+          }
+        ],
+        "tags": [
+          "MiTM"
+        ],
+        "threatSource": "threat actor",
+        "prerequisites": "who is in a person-in-the-middle position between the User and the hosting endpoint",
+        "threatAction": "tamper with, or replace the downloaded client-side code",
+        "threatImpact": "to exfiltrating user-specified input to an attacker controlled endpoint",
+        "impactedGoal": [
+          "confidentiality"
+        ],
+        "impactedAssets": [
+          "threats",
+          "mitigations",
+          "assumptions",
+          "application metadata"
+        ],
+        "statement": "A threat actor who is in a person-in-the-middle position between the User and the hosting endpoint can tamper with, or replace the downloaded client-side code, which leads to to exfiltrating user-specified input to an attacker controlled endpoint, resulting in reduced confidentiality of threats, mitigations, assumptions and application metadata"
+      }
+    ]
+  }

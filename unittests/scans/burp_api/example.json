@@ -1,0 +1,353 @@
+{
+  "task_id": "5",
+  "scan_status": "auditing",
+  "scan_metrics": {
+    "crawl_requests_made": 340,
+    "crawl_network_errors": 0,
+    "crawl_unique_locations_visited": 52,
+    "crawl_requests_queued": 0,
+    "audit_queue_items_completed": 0,
+    "audit_queue_items_waiting": 65,
+    "audit_requests_made": 6980,
+    "audit_network_errors": 0,
+    "issue_events": 5,
+    "crawl_and_audit_caption": "Auditing. 8h remaining",
+    "crawl_and_audit_progress": 7
+  },
+  "message": "",
+  "issue_events": [
+    {
+      "id": "18",
+      "type": "issue_found",
+      "issue": {
+        "name": "TLS cookie without secure flag set",
+        "type_index": 5243392,
+        "serial_number": "5605602767570803712",
+        "origin": "https://whitespots.io",
+        "path": "/build-ssdlc",
+        "severity": "info",
+        "confidence": "certain",
+        "description": "The following cookie was issued by the application and does not have the secure flag set:<ul><li>ipp_uid_tst</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.",
+        "caption": "/build-ssdlc",
+        "evidence": [
+          {
+            "type": "InformationListEvidence",
+            "request_response": {
+              "url": "https://whitespots.io/build-ssdlc",
+              "request": [
+                {
+                  "type": "DataSegment",
+                  "data": "R0VUIC9idWlsZC1zc2RsYyBIVFRQLzEuMQ0KSG9zdDogd2hpdGVzcG90cy5pbw0KQWNjZXB0LUVuY29kaW5nOiBnemlwLCBkZWZsYXRlDQpBY2NlcHQ6ICovKg0KQWNjZXB0LUxhbmd1YWdlOiBlbi1VUyxlbi1HQjtxPTAuOSxlbjtxPTAuOA0KVXNlci1BZ2VudDogTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzg2LjAuNDI0MC4xODMgU2FmYXJpLzUzNy4zNg0KQ29ubmVjdGlvbjogY2xvc2UNCkNhY2hlLUNvbnRyb2w6IG1heC1hZ2U9MA0KDQo=",
+                  "length": 314
+                }
+              ],
+              "response": [
+                {
+                  "type": "DataSegment",
+                  "data": "SFRUUC8xLjEgMzA3IFRlbXBvcmFyeSBSZWRpcmVjdA0KRGF0ZTogVGh1LCAxMCBEZWMgMjAyMCAxNDo1Nzo1MyBHTVQNCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sDQpDb25uZWN0aW9uOiBjbG9zZQ0KU2V0LUNvb2tpZTogX19jZmR1aWQ9ZDJkYzFiZGYxNDM3MDRhNzA3MTkxNzc3NTNjYzgxNDUxMTYwNzYxMjI3MzsgZXhwaXJlcz1TYXQsIDA5LUphbi0yMSAxNDo1Nzo1MyBHTVQ7IHBhdGg9LzsgZG9tYWluPS53aGl0ZXNwb3RzLmlvOyBIdHRwT25seTsgU2FtZVNpdGU9TGF4OyBTZWN1cmUNCkxvY2F0aW9uOiBodHRwOi8vd2hpdGVzcG90cy5pby9idWlsZC1zc2RsYw0K",
+                  "length": 324
+                },
+                {
+                  "type": "HighlightSegment",
+                  "data": "U2V0LUNvb2tpZTogaXBwX3VpZF90c3Q9MTYwNzYxMjI3MzE2Mi9EX0djaF9JVm9lT0dlZkZUWndBcnhBOyBwYXRoPS8=",
+                  "length": 68
+                },
+                {
+                  "type": "DataSegment",
+                  "data": "DQpTZXQtQ29va2llOiByZXJmPUFBQUFBRi9TTjNGSzdsN2tBd1lXQWc9PTsgZXhwaXJlcz1TYXQsIDA5LUphbi0yMSAxNDo1Nzo1MyBHTVQ7IHBhdGg9Lw0KUDNQOiBwb2xpY3lyZWY9Ii93M2MvcDNwLnhtbCIsIENQPSJDVVIgQURNIE9VUiBOT1IgU1RBIE5JRCINCkNGLUNhY2hlLVN0YXR1czogRFlOQU1JQw0KY2YtcmVxdWVzdC1pZDogMDZlZWMxYTlmYjAwMDA0MGI0MGQ4MzQwMDAwMDAwMDENCkV4cGVjdC1DVDogbWF4LWFnZT02MDQ4MDAsIHJlcG9ydC11cmk9Imh0dHBzOi8vcmVwb3J0LXVyaS5jbG91ZGZsYXJlLmNvbS9jZG4tY2dpL2JlYWNvbi9leHBlY3QtY3QiDQpSZXBvcnQtVG86IHsiZW5kcG9pbnRzIjpbeyJ1cmwiOiJodHRwczpcL1wvYS5uZWwuY2xvdWRmbGFyZS5jb21cL3JlcG9ydD9zPUNtandweUYlMkJrOUlUNzRydFE5QXF0d0xVVjFVbXpnTFBjJTJCd2pHcDhTYkolMkZtWW9GdHhHb2I1TWFHVDd6WHVrS3lLVjQyNiUyQnFqU1ZaS0dZMllZNHVudndybHpWQm9ncHphSCUyQlUzVHBjUCJ9XSwiZ3JvdXAiOiJjZi1uZWwiLCJtYXhfYWdlIjo2MDQ4MDB9DQpORUw6IHsicmVwb3J0X3RvIjoiY2YtbmVsIiwibWF4X2FnZSI6NjA0ODAwfQ0KU2VydmVyOiBjbG91ZGZsYXJlDQpDRi1SQVk6IDVmZjdkMjIzMmU3NTQwYjQtTEhSDQpDb250ZW50LUxlbmd0aDogMjM3DQoNCjxodG1sPg0KPGhlYWQ+PHRpdGxlPjMwNyBUZW1wb3JhcnkgUmVkaXJlY3Q8L3RpdGxlPjxzY3JpcHQgc3JjPSIvY2RuLWNnaS9hcHBzL2hlYWQvNi12NWlpaUIxbnpWX0U2MWxlZjlucVFFbWIwLmpzIj48L3NjcmlwdD48L2hlYWQ+DQo8Ym9keT4NCjxjZW50ZXI+PGgxPjMwNyBUZW1wb3JhcnkgUmVkaXJlY3Q8L2gxPjwvY2VudGVyPg0KPGhyPjxjZW50",
+                  "length": 873
+                },
+                {
+                  "type": "SnipSegment",
+                  "length": 37
+                }
+              ],
+              "was_redirect_followed": false,
+              "request_time": "1607612332109"
+            },
+            "information_items": [
+              "Other: ipp_uid_tst"
+            ]
+          }
+        ],
+        "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaXNzdWVfZGV0YWlsc19tYXAiOnsiNDgiOiJPdGhlcjogaXBwX3VpZF90c3QifX0="
+      }
+    },
+    {
+      "id": "19",
+      "type": "issue_found",
+      "issue": {
+        "name": "Cookie without HttpOnly flag set",
+        "type_index": 5244416,
+        "serial_number": "5154288421830076416",
+        "origin": "https://whitespots.io",
+        "path": "/build-ssdlc",
+        "severity": "info",
+        "confidence": "certain",
+        "description": "The following cookie was issued by the application and does not have the HttpOnly flag set:<ul><li>ipp_uid_tst</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.",
+        "caption": "/build-ssdlc",
+        "evidence": [
+          {
+            "type": "InformationListEvidence",
+            "request_response": {
+              "url": "https://whitespots.io/build-ssdlc",
+              "request": [
+                {
+                  "type": "DataSegment",
+                  "data": "R0VUIC9idWlsZC1zc2RsYyBIVFRQLzEuMQ0KSG9zdDogd2hpdGVzcG90cy5pbw0KQWNjZXB0LUVuY29kaW5nOiBnemlwLCBkZWZsYXRlDQpBY2NlcHQ6ICovKg0KQWNjZXB0LUxhbmd1YWdlOiBlbi1VUyxlbi1HQjtxPTAuOSxlbjtxPTAuOA0KVXNlci1BZ2VudDogTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzg2LjAuNDI0MC4xODMgU2FmYXJpLzUzNy4zNg0KQ29ubmVjdGlvbjogY2xvc2UNCkNhY2hlLUNvbnRyb2w6IG1heC1hZ2U9MA0KDQo=",
+                  "length": 314
+                }
+              ],
+              "response": [
+                {
+                  "type": "DataSegment",
+                  "data": "SFRUUC8xLjEgMzA3IFRlbXBvcmFyeSBSZWRpcmVjdA0KRGF0ZTogVGh1LCAxMCBEZWMgMjAyMCAxNDo1Nzo1MyBHTVQNCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sDQpDb25uZWN0aW9uOiBjbG9zZQ0KU2V0LUNvb2tpZTogX19jZmR1aWQ9ZDJkYzFiZGYxNDM3MDRhNzA3MTkxNzc3NTNjYzgxNDUxMTYwNzYxMjI3MzsgZXhwaXJlcz1TYXQsIDA5LUphbi0yMSAxNDo1Nzo1MyBHTVQ7IHBhdGg9LzsgZG9tYWluPS53aGl0ZXNwb3RzLmlvOyBIdHRwT25seTsgU2FtZVNpdGU9TGF4OyBTZWN1cmUNCkxvY2F0aW9uOiBodHRwOi8vd2hpdGVzcG90cy5pby9idWlsZC1zc2RsYw0K",
+                  "length": 324
+                },
+                {
+                  "type": "HighlightSegment",
+                  "data": "U2V0LUNvb2tpZTogaXBwX3VpZF90c3Q9MTYwNzYxMjI3MzE2Mi9EX0djaF9JVm9lT0dlZkZUWndBcnhBOyBwYXRoPS8=",
+                  "length": 68
+                },
+                {
+                  "type": "DataSegment",
+                  "data": "DQpTZXQtQ29va2llOiByZXJmPUFBQUFBRi9TTjNGSzdsN2tBd1lXQWc9PTsgZXhwaXJlcz1TYXQsIDA5LUphbi0yMSAxNDo1Nzo1MyBHTVQ7IHBhdGg9Lw0KUDNQOiBwb2xpY3lyZWY9Ii93M2MvcDNwLnhtbCIsIENQPSJDVVIgQURNIE9VUiBOT1IgU1RBIE5JRCINCkNGLUNhY2hlLVN0YXR1czogRFlOQU1JQw0KY2YtcmVxdWVzdC1pZDogMDZlZWMxYTlmYjAwMDA0MGI0MGQ4MzQwMDAwMDAwMDENCkV4cGVjdC1DVDogbWF4LWFnZT02MDQ4MDAsIHJlcG9ydC11cmk9Imh0dHBzOi8vcmVwb3J0LXVyaS5jbG91ZGZsYXJlLmNvbS9jZG4tY2dpL2JlYWNvbi9leHBlY3QtY3QiDQpSZXBvcnQtVG86IHsiZW5kcG9pbnRzIjpbeyJ1cmwiOiJodHRwczpcL1wvYS5uZWwuY2xvdWRmbGFyZS5jb21cL3JlcG9ydD9zPUNtandweUYlMkJrOUlUNzRydFE5QXF0d0xVVjFVbXpnTFBjJTJCd2pHcDhTYkolMkZtWW9GdHhHb2I1TWFHVDd6WHVrS3lLVjQyNiUyQnFqU1ZaS0dZMllZNHVudndybHpWQm9ncHphSCUyQlUzVHBjUCJ9XSwiZ3JvdXAiOiJjZi1uZWwiLCJtYXhfYWdlIjo2MDQ4MDB9DQpORUw6IHsicmVwb3J0X3RvIjoiY2YtbmVsIiwibWF4X2FnZSI6NjA0ODAwfQ0KU2VydmVyOiBjbG91ZGZsYXJlDQpDRi1SQVk6IDVmZjdkMjIzMmU3NTQwYjQtTEhSDQpDb250ZW50LUxlbmd0aDogMjM3DQoNCjxodG1sPg0KPGhlYWQ+PHRpdGxlPjMwNyBUZW1wb3JhcnkgUmVkaXJlY3Q8L3RpdGxlPjxzY3JpcHQgc3JjPSIvY2RuLWNnaS9hcHBzL2hlYWQvNi12NWlpaUIxbnpWX0U2MWxlZjlucVFFbWIwLmpzIj48L3NjcmlwdD48L2hlYWQ+DQo8Ym9keT4NCjxjZW50ZXI+PGgxPjMwNyBUZW1wb3JhcnkgUmVkaXJlY3Q8L2gxPjwvY2VudGVyPg0KPGhyPjxjZW50",
+                  "length": 873
+                },
+                {
+                  "type": "SnipSegment",
+                  "length": 37
+                }
+              ],
+              "was_redirect_followed": false,
+              "request_time": "1607612332110"
+            },
+            "information_items": [
+              "Other: ipp_uid_tst"
+            ]
+          }
+        ],
+        "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaXNzdWVfZGV0YWlsc19tYXAiOnsiNDgiOiJPdGhlcjogaXBwX3VpZF90c3QifX0="
+      }
+    },
+    {
+      "id": "22",
+      "type": "issue_found",
+      "issue": {
+        "name": "Input returned in response (reflected)",
+        "type_index": 4197376,
+        "serial_number": "6155018851718637568",
+        "origin": "https://whitespots.io",
+        "path": "/page13910250.html/",
+        "severity": "info",
+        "confidence": "certain",
+        "description": "The name of an arbitrarily supplied URL parameter is copied into the application's response.",
+        "caption": "/page13910250.html/ [name of an arbitrarily supplied URL parameter]",
+        "evidence": [
+          {
+            "type": "FirstOrderEvidence",
+            "detail": {
+              "payload": {
+                "bytes": "dnM1NjJodGRncA==",
+                "flags": 0
+              },
+              "band_flags": [
+                "in_band"
+              ]
+            },
+            "request_response": {
+              "url": "https://whitespots.io/page13910250.html/?vs562htdgp=1",
+              "request": [
+                {
+                  "type": "DataSegment",
+                  "data": "R0VUIC9wYWdlMTM5MTAyNTAuaHRtbC8/",
+                  "length": 24
+                },
+                {
+                  "type": "HighlightSegment",
+                  "data": "dnM1NjJodGRncA==",
+                  "length": 10
+                },
+                {
+                  "type": "DataSegment",
+                  "data": "PTEgSFRUUC8xLjENCkhvc3Q6IHdoaXRlc3BvdHMuaW8NCkFjY2VwdC1FbmNvZGluZzogZ3ppcCwgZGVmbGF0ZQ0KQWNjZXB0OiAqLyoNCkFjY2VwdC1MYW5ndWFnZTogZW4tVVMsZW4tR0I7cT0wLjksZW47cT0wLjgNClVzZXItQWdlbnQ6IE1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS84Ni4wLjQyNDAuMTgzIFNhZmFyaS81MzcuMzYNCkNvbm5lY3Rpb246IGNsb3NlDQpDYWNoZS1Db250cm9sOiBtYXgtYWdlPTANCg0K",
+                  "length": 300
+                }
+              ],
+              "response": [
+                {
+                  "type": "DataSegment",
+                  "data": "SFRUUC8xLjEgMzA3IFRlbXBvcmFyeSBSZWRpcmVjdA0KRGF0ZTogVGh1LCAxMCBEZWMgMjAyMCAxNDo1OTo0NiBHTVQNCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sDQpDb25uZWN0aW9uOiBjbG9zZQ0KU2V0LUNvb2tpZTogX19jZmR1aWQ9ZDJhYjQ5MzhlNGJiYjQ1NjRkMDQxMGY5NjJiN2FmZTVkMTYwNzYxMjM4NjsgZXhwaXJlcz1TYXQsIDA5LUphbi0yMSAxNDo1OTo0NiBHTVQ7IHBhdGg9LzsgZG9tYWluPS53aGl0ZXNwb3RzLmlvOyBIdHRwT25seTsgU2FtZVNpdGU9TGF4OyBTZWN1cmUNCkxvY2F0aW9uOiBodHRwOi8vd2hpdGVzcG90cy5pby9wYWdlMTM5MTAyNTAuaHRtbC8/",
+                  "length": 330
+                },
+                {
+                  "type": "HighlightSegment",
+                  "data": "dnM1NjJodGRncA==",
+                  "length": 10
+                },
+                {
+                  "type": "DataSegment",
+                  "data": "PTENClNldC1Db29raWU6IGlwcF91aWRfdHN0PTE2MDc2MTIzODY5NjMvSEUteGtQWDNkSUFZdy1lZWVnYTB6ZzsgcGF0aD0vDQpTZXQtQ29va2llOiByZXJmPUFBQUFBRi9TTitJNEZTYkxBd1k4QWc9PTsgZXhwaXJlcz1TYXQsIDA5LUphbi0yMSAxNDo1OTo0NiBHTVQ7IHBhdGg9Lw0KUDNQOiBwb2xpY3lyZWY9Ii93M2MvcDNwLnhtbCIsIENQPSJDVVIgQURNIE9VUiBOT1IgU1RBIE5JRCINCkNGLUNhY2hlLVN0YXR1czogRFlOQU1JQw0KY2YtcmVxdWVzdC1pZDogMDZlZWMzNjY4NTAwMDA0MDcxNDliNGUwMDAwMDAwMDENCkV4cGVjdC1DVDogbWF4LWFnZT02MDQ4MDAsIHJlcG9ydC11cmk9Imh0dHBzOi8vcmVwb3J0LXVyaS5jbG91ZGZsYXJlLmNvbS9jZG4tY2dpL2JlYWNvbi9leHBlY3QtY3QiDQpSZXBvcnQtVG86IHsiZW5kcG9pbnRzIjpbeyJ1cmwiOiJodHRwczpcL1wvYS5uZWwuY2xvdWRmbGFyZS5jb21cL3JlcG9ydD9zPUNkdUs1WFlVZXlFamdyY2c1WHV6djRkMVRsaFowUFJKdm1mMHlaNWJDMzNmbHFkMUtYJTJGWnhLcksxbG5pJTJCWlNDUmt4b00xNVFiczlSTEVzNTdhUm1NRk5XeGtPU1p2Tm1PSE9pWnVzVCJ9XSwiZ3JvdXAiOiJjZi1uZWwiLCJtYXhfYWdlIjo2MDQ4MDB9DQpORUw6IHsicmVwb3J0X3RvIjoiY2YtbmVsIiwibWF4X2FnZSI6NjA0ODAwfQ0KU2VydmVyOiBjbG91ZGZsYXJlDQpDRi1SQVk6IDVmZjdkNGVhNmIxYzQwNzEtTEhSDQpDb250ZW50LUxlbmd0aDogMjM3DQoNCjxodG1sPg0KPGhlYWQ+PHRpdGxlPjMwNyBUZW1wb3JhcnkgUmVkaXJlY3Q8L3RpdGxlPjxzY3JpcHQgc3JjPSIvY2RuLWNnaS9hcHBzL2hlYWQvNi12NWlpaUIxbnpWX0U2MWxlZjlucVFFbWIwLmpzIj48L3NjcmlwdD48L2hlYWQ+DQo8Ym9keT4NCjxjZW50ZXI+PGgxPjMwNyBUZW1wb3JhcnkgUmVkaXJlY3Q8L2gxPjwvY2VudGVyPg0KPGhyPjxjZW50",
+                  "length": 939
+                },
+                {
+                  "type": "SnipSegment",
+                  "length": 37
+                }
+              ],
+              "was_redirect_followed": false,
+              "request_time": "1607612429381"
+            }
+          }
+        ],
+        "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaW5zZXJ0aW9uX3BvaW50X2tleSI6IjR4MCIsImluc2VydGlvbl9wb2ludF9pZGVudGlmaWVycyI6W3sidHlwZV9pbmRleCI6ODE5MiwibmFtZSI6IiJ9XSwiaXNzdWVfZGV0YWlsc19tYXAiOnt9fQ=="
+      }
+    },
+    {
+      "id": "26",
+      "type": "issue_found",
+      "issue": {
+        "name": "Input returned in response (reflected)",
+        "type_index": 4197376,
+        "serial_number": "9075176183299188736",
+        "origin": "https://whitespots.io",
+        "path": "/page13910250.html/",
+        "severity": "info",
+        "confidence": "certain",
+        "description": "The value of the URL path folder 1 is copied into the application's response.",
+        "caption": "/page13910250.html/ [URL path folder 1]",
+        "evidence": [
+          {
+            "type": "FirstOrderEvidence",
+            "detail": {
+              "payload": {
+                "bytes": "a3JqZHRlbTdxOQ==",
+                "flags": 0
+              },
+              "band_flags": [
+                "in_band"
+              ]
+            },
+            "request_response": {
+              "url": "https://whitespots.io/page13910250.htmlkrjdtem7q9/",
+              "request": [
+                {
+                  "type": "DataSegment",
+                  "data": "R0VUIC9wYWdlMTM5MTAyNTAuaHRtbA==",
+                  "length": 22
+                },
+                {
+                  "type": "HighlightSegment",
+                  "data": "a3JqZHRlbTdxOQ==",
+                  "length": 10
+                },
+                {
+                  "type": "DataSegment",
+                  "data": "LyBIVFRQLzEuMQ0KSG9zdDogd2hpdGVzcG90cy5pbw0KQWNjZXB0LUVuY29kaW5nOiBnemlwLCBkZWZsYXRlDQpBY2NlcHQ6ICovKg0KQWNjZXB0LUxhbmd1YWdlOiBlbi1VUyxlbi1HQjtxPTAuOSxlbjtxPTAuOA0KVXNlci1BZ2VudDogTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzg2LjAuNDI0MC4xODMgU2FmYXJpLzUzNy4zNg0KQ29ubmVjdGlvbjogY2xvc2UNCkNhY2hlLUNvbnRyb2w6IG1heC1hZ2U9MA0KDQo=",
+                  "length": 299
+                }
+              ],
+              "response": [
+                {
+                  "type": "DataSegment",
+                  "data": "SFRUUC8xLjEgMzA3IFRlbXBvcmFyeSBSZWRpcmVjdA0KRGF0ZTogVGh1LCAxMCBEZWMgMjAyMCAxNTowMjo0NCBHTVQNCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sDQpDb25uZWN0aW9uOiBjbG9zZQ0KU2V0LUNvb2tpZTogX19jZmR1aWQ9ZDI4MjY1ZDY1MmRlMTZlZTY0NDJjOTg0NGRkYTRkNzExMTYwNzYxMjU2NDsgZXhwaXJlcz1TYXQsIDA5LUphbi0yMSAxNTowMjo0NCBHTVQ7IHBhdGg9LzsgZG9tYWluPS53aGl0ZXNwb3RzLmlvOyBIdHRwT25seTsgU2FtZVNpdGU9TGF4OyBTZWN1cmUNCkxvY2F0aW9uOiBodHRwOi8vd2hpdGVzcG90cy5pby9wYWdlMTM5MTAyNTAuaHRtbA==",
+                  "length": 328
+                },
+                {
+                  "type": "HighlightSegment",
+                  "data": "a3JqZHRlbTdxOQ==",
+                  "length": 10
+                },
+                {
+                  "type": "DataSegment",
+                  "data": "Lw0KU2V0LUNvb2tpZTogaXBwX3VpZF90c3Q9MTYwNzYxMjU2NDE1MC9OSkNySjBRRzNfYk40bTV5RHhzd2pnOyBwYXRoPS8NClNldC1Db29raWU6IHJlcmY9QUFBQUFGL1NPSlNzeXhMR0F3V2ZBZz09OyBleHBpcmVzPVNhdCwgMDktSmFuLTIxIDE1OjAyOjQ0IEdNVDsgcGF0aD0vDQpQM1A6IHBvbGljeXJlZj0iL3czYy9wM3AueG1sIiwgQ1A9IkNVUiBBRE0gT1VSIE5PUiBTVEEgTklEIg0KQ0YtQ2FjaGUtU3RhdHVzOiBEWU5BTUlDDQpjZi1yZXF1ZXN0LWlkOiAwNmVlYzYxYTlmMDAwMGNlN2I0NjM1ZDAwMDAwMDAwMQ0KRXhwZWN0LUNUOiBtYXgtYWdlPTYwNDgwMCwgcmVwb3J0LXVyaT0iaHR0cHM6Ly9yZXBvcnQtdXJpLmNsb3VkZmxhcmUuY29tL2Nkbi1jZ2kvYmVhY29uL2V4cGVjdC1jdCINClJlcG9ydC1UbzogeyJlbmRwb2ludHMiOlt7InVybCI6Imh0dHBzOlwvXC9hLm5lbC5jbG91ZGZsYXJlLmNvbVwvcmVwb3J0P3M9cTVhbVZhSlY5Vm5sd0gzd2ZmTkMlMkJGYWp4SSUyQmRqZE9YRm1WejJudUZEZXg1ZjdtOVhyY0c1VTBqRVhjQVMxbE0lMkJMM3RqSUdnRiUyQnUyQ1UlMkI4a1IlMkZzUmxsenRyRkxZSldBR1NwRzNsT0kifV0sImdyb3VwIjoiY2YtbmVsIiwibWF4X2FnZSI6NjA0ODAwfQ0KTkVMOiB7InJlcG9ydF90byI6ImNmLW5lbCIsIm1heF9hZ2UiOjYwNDgwMH0NClNlcnZlcjogY2xvdWRmbGFyZQ0KQ0YtUkFZOiA1ZmY3ZDkzZGM4OWFjZTdiLUxIUg0KQ29udGVudC1MZW5ndGg6IDIzNw0KDQo8aHRtbD4NCjxoZWFkPjx0aXRsZT4zMDcgVGVtcG9yYXJ5IFJlZGlyZWN0PC90aXRsZT48c2NyaXB0IHNyYz0iL2Nkbi1jZ2kvYXBwcy9oZWFkLzYtdjVpaWlCMW56Vl9FNjFsZWY5bnFRRW1iMC5qcyI+PC9zY3JpcHQ+PC9oZWFkPg0KPGJvZHk+DQo8Y2VudGVyPjxoMT4zMDcgVGVtcG9yYXJ5IFJlZGlyZWN0PC9oMT48L2NlbnRlcj4NCjxocj48Y2VudA==",
+                  "length": 946
+                },
+                {
+                  "type": "SnipSegment",
+                  "length": 37
+                }
+              ],
+              "was_redirect_followed": false,
+              "request_time": "1607612642801"
+            }
+          }
+        ],
+        "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaW5zZXJ0aW9uX3BvaW50X2tleSI6Ijd4MCIsImluc2VydGlvbl9wb2ludF9pZGVudGlmaWVycyI6W3sidHlwZV9pbmRleCI6NDEwMiwibmFtZSI6IjEifV0sImlzc3VlX2RldGFpbHNfbWFwIjp7fX0="
+      }
+    },
+    {
+      "id": "78",
+      "type": "issue_found",
+      "issue": {
+        "name": "Input returned in response (reflected)",
+        "type_index": 4197376,
+        "serial_number": "8303767990357757952",
+        "origin": "https://whitespots.io",
+        "path": "/cookie-policy",
+        "severity": "info",
+        "confidence": "certain",
+        "description": "The value of the URL path filename is copied into the application's response.",
+        "caption": "/cookie-policy [URL path filename]",
+        "evidence": [
+          {
+            "type": "FirstOrderEvidence",
+            "detail": {
+              "payload": {
+                "bytes": "dTQ5a3Bwajh4NA==",
+                "flags": 0
+              },
+              "band_flags": [
+                "in_band"
+              ]
+            },
+            "request_response": {
+              "url": "https://whitespots.io/u49kppj8x4",
+              "request": [
+                {
+                  "type": "DataSegment",
+                  "data": "R0VUIC8=",
+                  "length": 5
+                },
+                {
+                  "type": "HighlightSegment",
+                  "data": "dTQ5a3Bwajh4NA==",
+                  "length": 10
+                },
+                {
+                  "type": "DataSegment",
+                  "data": "IEhUVFAvMS4xDQpIb3N0OiB3aGl0ZXNwb3RzLmlvDQpBY2NlcHQtRW5jb2Rpbmc6IGd6aXAsIGRlZmxhdGUNCkFjY2VwdDogKi8qDQpBY2NlcHQtTGFuZ3VhZ2U6IGVuLVVTLGVuLUdCO3E9MC45LGVuO3E9MC44DQpVc2VyLUFnZW50OiBNb3ppbGxhLzUuMCAoV2luZG93cyBOVCAxMC4wOyBXaW42NDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvODYuMC40MjQwLjE4MyBTYWZhcmkvNTM3LjM2DQpDb25uZWN0aW9uOiBjbG9zZQ0KQ2FjaGUtQ29udHJvbDogbWF4LWFnZT0wDQoNCg==",
+                  "length": 298
+                }
+              ],
+              "response": [
+                {
+                  "type": "DataSegment",
+                  "data": "SFRUUC8xLjEgMzA3IFRlbXBvcmFyeSBSZWRpcmVjdA0KRGF0ZTogVGh1LCAxMCBEZWMgMjAyMCAxNTowODoyNyBHTVQNCkNvbnRlbnQtVHlwZTogdGV4dC9odG1sDQpDb25uZWN0aW9uOiBjbG9zZQ0KU2V0LUNvb2tpZTogX19jZmR1aWQ9ZDliN2Q0YzVlNTViZmUyNDhjOWI4ZWIyNmFkZTgwZmY4MTYwNzYxMjkwNjsgZXhwaXJlcz1TYXQsIDA5LUphbi0yMSAxNTowODoyNiBHTVQ7IHBhdGg9LzsgZG9tYWluPS53aGl0ZXNwb3RzLmlvOyBIdHRwT25seTsgU2FtZVNpdGU9TGF4OyBTZWN1cmUNCkxvY2F0aW9uOiBodHRwOi8vd2hpdGVzcG90cy5pby8=",
+                  "length": 311
+                },
+                {
+                  "type": "HighlightSegment",
+                  "data": "dTQ5a3Bwajh4NA==",
+                  "length": 10
+                },
+                {
+                  "type": "DataSegment",
+                  "data": "DQpTZXQtQ29va2llOiBpcHBfdWlkX3RzdD0xNjA3NjEyOTA2OTk5L2E1blM4bUhBS2NobmtTcGlwTUtsOGc7IHBhdGg9Lw0KU2V0LUNvb2tpZTogcmVyZj1BQUFBQUYvU09lcEZDbndYQXdTTUFnPT07IGV4cGlyZXM9U2F0LCAwOS1KYW4tMjEgMTU6MDg6MjYgR01UOyBwYXRoPS8NClAzUDogcG9saWN5cmVmPSIvdzNjL3AzcC54bWwiLCBDUD0iQ1VSIEFETSBPVVIgTk9SIFNUQSBOSUQiDQpDRi1DYWNoZS1TdGF0dXM6IERZTkFNSUMNCmNmLXJlcXVlc3QtaWQ6IDA2ZWVjYjU1ZWIwMDAwNDBmNThiOTFkMDAwMDAwMDAxDQpFeHBlY3QtQ1Q6IG1heC1hZ2U9NjA0ODAwLCByZXBvcnQtdXJpPSJodHRwczovL3JlcG9ydC11cmkuY2xvdWRmbGFyZS5jb20vY2RuLWNnaS9iZWFjb24vZXhwZWN0LWN0Ig0KUmVwb3J0LVRvOiB7ImVuZHBvaW50cyI6W3sidXJsIjoiaHR0cHM6XC9cL2EubmVsLmNsb3VkZmxhcmUuY29tXC9yZXBvcnQ/cz1UQldHOEFRWUl6ajRFRFllbG56Szh0eHo3Nm1rMDJjSE0lMkJFV1dRSUMxa2t4aDQ1dnN2RmNnbiUyQmRMNnlvdU8lMkZIVjhKd1FTUXhwNlclMkZ0RFdZd2R6MnRDcG0wb2V1UWNCcjFTJTJCa1RHJTJGdiJ9XSwiZ3JvdXAiOiJjZi1uZWwiLCJtYXhfYWdlIjo2MDQ4MDB9DQpORUw6IHsicmVwb3J0X3RvIjoiY2YtbmVsIiwibWF4X2FnZSI6NjA0ODAwfQ0KU2VydmVyOiBjbG91ZGZsYXJlDQpDRi1SQVk6IDVmZjdlMTljYWE2ZjQwZjUtTEhSDQpDb250ZW50LUxlbmd0aDogMjM3DQoNCjxodG1sPg0KPGhlYWQ+PHRpdGxlPjMwNyBUZW1wb3JhcnkgUmVkaXJlY3Q8L3RpdGxlPjxzY3JpcHQgc3JjPSIvY2RuLWNnaS9hcHBzL2hlYWQvNi12NWlpaUIxbnpWX0U2MWxlZjlucVFFbWIwLmpzIj48L3NjcmlwdD48L2hlYWQ+DQo8Ym9keT4NCjxjZW50ZXI+PGgxPjMwNyBUZW1wb3JhcnkgUmVkaXJlY3Q8L2gxPjwvY2VudGVyPg0KPGhyPjxjZW50",
+                  "length": 945
+                },
+                {
+                  "type": "SnipSegment",
+                  "length": 37
+                }
+              ],
+              "was_redirect_followed": false,
+              "request_time": "1607613920536"
+            }
+          }
+        ],
+        "internal_data": "eyJmbGFncyI6MCwidmFyaWFudCI6MCwiaW5zZXJ0aW9uX3BvaW50X2tleSI6IjEyeDAiLCJpbnNlcnRpb25fcG9pbnRfaWRlbnRpZmllcnMiOlt7InR5cGVfaW5kZXgiOjQxMDUsIm5hbWUiOiIxIn1dLCJpc3N1ZV9kZXRhaWxzX21hcCI6e319"
+      }
+    }
+  ]
+}

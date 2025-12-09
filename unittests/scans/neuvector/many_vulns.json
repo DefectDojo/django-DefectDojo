@@ -1,0 +1,110 @@
+{
+    "report": {
+        "vulnerabilities": [
+            {
+            "name": "CVE-2015-8356",
+            "score": 7.2,
+            "severity": "High",
+            "vectors": "",
+            "description": "The setup_env function in group.c in sshd in OpenSSH allows local users to gain privileges.",
+            "package_name": "openssh",
+            "package_version": "7.2_p2-r0",
+            "fixed_version": "1:7.2p2-3",
+            "link": "https://security-tracker.debian.org/tracker/CVE-2015-8356",
+            "score_v3": 7.3,
+            "vectors_v3": "",
+            "published_timestamp": 1516561260,
+            "last_modified_timestamp": 1516561253,
+            "cpes": [
+                ""
+            ],
+            "cves": [
+                ""
+            ],
+            "feed_rating": "",
+            "in_base_image": true,
+            "tags": [
+                ""
+            ]
+        },{
+            "name": "CVE-2017-18342",
+            "score": 7.5,
+            "severity": "High",
+            "vectors": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+            "description": "STATEMENT: PyYAML in channels for Red Hat MRG Messaging 2 should no longer be used, as a newer version is now available in Red Hat Enterprise Linux. Newer packages should be consumed from Red Hat Enterprise Linux channels. This issue affects the versions of the PyYAML package as shipped with Red Hat Satellite 5. However, this flaw is not known to be exploitable under any supported scenario in Satellite 5. A future update may address this issue. The PyYAML libary that is provided in the Red Hat OpenStack repositories is vulnerable. However, there are no instances where this library is used in a way which exposes the vulnerability. Any updates will be through the RHEL channels.",
+            "package_name": "PyYAML",
+            "package_version": "3.10-11.el7",
+            "link": "https://access.redhat.com/security/cve/CVE-2017-18342",
+            "score_v3": 9.8,
+            "vectors_v3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "published_timestamp": 1638748800,
+            "last_modified_timestamp": 1638748800,
+            "feed_rating": "Moderate"
+        }
+        ],
+        "modules": [
+            {
+            "name": "scanner",
+            "version": "1.011",
+            "source": "github",
+            "cves": [
+                {
+                "name": "",
+                "status": ""
+            }
+            ],
+            "cpes": [
+                ""
+            ]
+        }
+        ],
+        "checks": [
+            {
+            "catalog": "docker",
+            "type": "",
+            "level": "INFO",
+            "test_number": "1",
+            "profile": "Level 1",
+            "scored": true,
+            "automated": true,
+            "description": "General Configuration",
+            "message": [
+                "Host Configuration"
+            ],
+            "remediation": "",
+            "group": "nv.calico"
+        }
+        ],
+        "secrets": [
+            {
+            "type": "",
+            "evidence": "",
+            "path": "",
+            "suggestion": ""
+        }
+        ],
+        "setid_perms": [
+            {
+            "type": "",
+            "evidence": "",
+            "path": ""
+        }
+        ],
+        "envs": [
+            [
+            "PATH=/usr/local/sbin",
+            "GOSU_VERSION=1.12",
+            "REDIS_VERSION=6.0.2"
+        ]
+        ],
+        "labels": {
+            "key": [
+                ""
+            ],
+            "value": ""
+        },
+        "cmds": [
+            ""
+        ]
+    }
+}

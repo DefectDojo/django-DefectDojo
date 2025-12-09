@@ -1,0 +1,744 @@
+[
+  {
+    "id": 158713,
+    "cve": "CVE-2021-30468",
+    "cwe": "CWE-835",
+    "muted": false,
+    "lastModified": "2021/06/16 14:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv2BaseScore": "5",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "A vulnerability in the JsonMapObjectReaderWriter ...",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 1270458,
+        "artifact": "org.apache.cxf:cxf-rt-ws-policy",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Policy",
+        "custom": false
+      },
+      {
+        "id": 1270456,
+        "artifact": "org.apache.cxf:cxf-rt-ws-addr",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Addressing",
+        "custom": false
+      },
+      {
+        "id": 1270592,
+        "artifact": "org.apache.cxf:cxf-rt-ws-security",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Security",
+        "custom": false
+      },
+      {
+        "id": 1270653,
+        "artifact": "org.apache.cxf:cxf-core",
+        "version": "3.3.5",
+        "description": "Apache CXF Core",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 221606,
+    "cve": "CVE-2023-43642",
+    "cwe": "CWE-770",
+    "muted": false,
+    "lastModified": "2023/09/25 22:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "snappy-java is a Java port of the snappy, a fast C++ compresser/decompresser developed by Google. The SnappyInputStream was found to be vulnerable to Denial of Service (DoS) attacks when decompressing data with a too large chunk size. Due to missing upper bound check on chunk length, an unrecoverable fatal error can occur. All versions of snappy-java including the latest released version 1.1.10.3 are vulnerable to this issue. A fix has been introduced in commit `9f8c3cf74` which will be included in the 1.1.10.4 release. Users are advised to upgrade. Users unable to upgrade should only accept compressed data from trusted sources.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4153218,
+        "artifact": "org.xerial.snappy:snappy-java",
+        "version": "1.1.10.1",
+        "description": "snappy-java: A fast compression/decompression library",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 197226,
+    "cve": "CVE-2022-46364",
+    "cwe": "CWE-918",
+    "muted": false,
+    "lastModified": "2022/12/13 18:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "5.9",
+    "cVSSv3BaseScore": "9.8",
+    "securityRisk": "CRITICAL",
+    "description": "A SSRF vulnerability in parsing the\u00a0href attribute of XOP:Include in MTOM requests in versions of Apache CXF before 3.5.5 and 3.4.10 allows an attacker to perform SSRF style attacks on webservices that take at least one parameter of any type.\u00a0",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 1270458,
+        "artifact": "org.apache.cxf:cxf-rt-ws-policy",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Policy",
+        "custom": false
+      },
+      {
+        "id": 1270456,
+        "artifact": "org.apache.cxf:cxf-rt-ws-addr",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Addressing",
+        "custom": false
+      },
+      {
+        "id": 1270592,
+        "artifact": "org.apache.cxf:cxf-rt-ws-security",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Security",
+        "custom": false
+      },
+      {
+        "id": 1270653,
+        "artifact": "org.apache.cxf:cxf-core",
+        "version": "3.3.5",
+        "description": "Apache CXF Core",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 154088,
+    "cve": "CVE-2021-22696",
+    "cwe": "CWE-918",
+    "muted": false,
+    "lastModified": "2021/04/02 12:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv2BaseScore": "5",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "CXF supports (via JwtRequestCodeFilter) passing OAuth 2 parameters via a JWT token as opposed to query parameters (see: The OAuth 2.0 Authorization Framework: JWT Secured Authorization Request (JAR)). Instead of sending a JWT token as a \"request\" parameter, the spec also supports specifying a URI from which to retrieve a JWT token from via the \"request_uri\" parameter. CXF was not validating the \"request_uri\" parameter (apart from ensuring it uses \"https) and was making a REST request to the parameter in the request to retrieve a token. This means that CXF was vulnerable to DDos attacks on the authorization server, as specified in section 10.4.1 of the spec. This issue affects Apache CXF versions prior to 3.4.3; Apache CXF versions prior to 3.3.10.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 1270454,
+        "artifact": "org.apache.cxf:cxf-rt-transports-http",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime HTTP Transport",
+        "custom": false
+      },
+      {
+        "id": 1270653,
+        "artifact": "org.apache.cxf:cxf-core",
+        "version": "3.3.5",
+        "description": "Apache CXF Core",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 220358,
+    "cve": "CVE-2023-42503",
+    "cwe": "",
+    "muted": false,
+    "lastModified": "2023/09/14 10:15",
+    "exploitabilitySubscore": "1.8",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "5.5",
+    "securityRisk": "MEDIUM",
+    "description": "Improper Input Validation, Uncontrolled Resource Consumption vulnerability in Apache Commons Compress in TAR parsing.This issue affects Apache Commons Compress:\u00a0from 1.22 before 1.24.0.\n\nUsers are recommended to upgrade to version 1.24.0, which fixes the issue.\n\nA third party can create a malformed TAR file by manipulating file modification times headers, which when parsed with Apache Commons Compress, will cause a denial of service issue via CPU consumption.\n\nIn version 1.22 of Apache Commons Compress, support was added for file modification times with higher precision (issue # COMPRESS-612 [1]). The format for the PAX extended headers carrying this data consists of two numbers separated by a period [2], indicating seconds and subsecond precision (for example \u201c1647221103.5998539\u201d). The impacted fields are \u201catime\u201d, \u201cctime\u201d, \u201cmtime\u201d and \u201cLIBARCHIVE.creationtime\u201d. No input validation is performed prior to the parsing of header values.\n\nParsing of these numbers uses the BigDecimal [3] class from the JDK which has a publicly known algorithmic complexity issue when doing operations on large numbers, causing denial of service (see issue # JDK-6560193 [4]). A third party can manipulate file time headers in a TAR file by placing a number with a very long fraction (300,000 digits) or a number with exponent notation (such as \u201c9e9999999\u201d) within a file modification time header, and the parsing of files with these headers will take hours instead of seconds, leading to a denial of service via exhaustion of CPU resources. This issue is similar to CVE-2012-2098 [5].\n\n[1]:  https://issues.apache.org/jira/browse/COMPRESS-612 \n[2]:  https://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_05 \n[3]:  https://docs.oracle.com/javase/8/docs/api/java/math/BigDecimal.html \n[4]:  https://bugs.openjdk.org/browse/JDK-6560193 \n[5]:  https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2012-2098 \n\nOnly applications using CompressorStreamFactory class (with auto-detection of file types), TarArchiveInputStream and TarFile classes to parse TAR files are impacted. Since this code was introduced in v1.22, only that version and later versions are impacted.\n\n",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 3974742,
+        "artifact": "org.apache.commons:commons-compress",
+        "version": "1.22",
+        "description": "\nApache Commons Compress software defines an API for working with\ncompression and archive formats.  These include: bzip2, gzip, pack200,\nlzma, xz, Snappy, traditional Unix Compress, DEFLATE, DEFLATE64, LZ4,\nBrotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.\n  ",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 236283,
+    "cve": "CVE-2024-1597",
+    "cwe": "CWE-89",
+    "muted": false,
+    "lastModified": "2024/02/19 14:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "5.9",
+    "cVSSv3BaseScore": "9.8",
+    "securityRisk": "CRITICAL",
+    "description": "pgjdbc, the PostgreSQL JDBC Driver, allows attacker to inject SQL if using PreferQueryMode=SIMPLE. Note this is not the default. In the default mode there is no vulnerability. A placeholder for a numeric value must be immediately preceded by a minus. There must be a second placeholder for a string value after the first placeholder; both must be on the same line. By constructing a matching string payload, the attacker can inject SQL to alter the query,bypassing the protections that parameterized queries bring against SQL Injection attacks. Versions before 42.7.2, 42.6.1, 42.5.5, 42.4.4, 42.3.9, and 42.2.28 are affected.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 3882611,
+        "artifact": "org.postgresql:postgresql",
+        "version": "42.3.8",
+        "description": "PostgreSQL JDBC Driver Postgresql",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 140511,
+    "cve": "CVE-2020-1954",
+    "cwe": "",
+    "muted": false,
+    "lastModified": "2020/04/01 23:15",
+    "exploitabilitySubscore": "1.6",
+    "impactSubscore": "3.6",
+    "cVSSv2BaseScore": "2.9",
+    "cVSSv3BaseScore": "5.3",
+    "securityRisk": "MEDIUM",
+    "description": "Apache CXF has the ability to integrate with JMX by registering an InstrumentationManager extension with the CXF bus. If the \u2018createMBServerConnectorFactory\u2018 property of the default InstrumentationManagerImpl is not disabled, then it is vulnerable to a man-in-the-middle (MITM) style attack. An attacker on the same host can connect to the registry and rebind the entry to another server, thus acting as a proxy to the original. They are then able to gain access to all of the information that is sent and received over JMX.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 1270653,
+        "artifact": "org.apache.cxf:cxf-core",
+        "version": "3.3.5",
+        "description": "Apache CXF Core",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 37106,
+    "cve": "CVE-2007-6059",
+    "cwe": "CWE-399",
+    "muted": false,
+    "lastModified": "2007/11/20 21:46",
+    "exploitabilitySubscore": "10",
+    "impactSubscore": "2.9",
+    "cVSSv2BaseScore": "5",
+    "securityRisk": "MEDIUM",
+    "description": "Javamail does not properly handle a series of invalid login attempts in which the same e-mail address is entered as username and password, and the domain portion of this address yields a Java UnknownHostException error, which allows remote attackers to cause a denial of service (connection pool exhaustion) via a large number of requests, resulting in a SQLNestedException.  NOTE: Sun disputes this issue, stating \"The report makes references to source code and files that do not exist in the mentioned products.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 15280,
+        "artifact": "javax.mail:mail",
+        "version": "1.5.0-b01",
+        "description": "\n    The JavaMail API provides a platform-independent and protocol-independent framework to build mail and messaging applications.\n  ",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 223110,
+    "cve": "CVE-2023-44981",
+    "cwe": "CWE-639",
+    "muted": false,
+    "lastModified": "2023/10/11 14:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "5.2",
+    "cVSSv3BaseScore": "9.1",
+    "securityRisk": "CRITICAL",
+    "description": "Authorization Bypass Through User-Controlled Key vulnerability in Apache ZooKeeper. If SASL Quorum Peer authentication is enabled in ZooKeeper (quorum.auth.enableSasl=true), the authorization is done by verifying that the instance part in SASL authentication ID is listed in zoo.cfg server list. The instance part in SASL auth ID is optional and if it's missing, like 'eve@EXAMPLE.COM', the authorization check will be skipped.\u00a0As a result an arbitrary endpoint could join the cluster and begin propagating counterfeit changes to the leader, essentially giving it complete read-write access to the data tree.\u00a0Quorum Peer authentication is not enabled by default.\n\nUsers are recommended to upgrade to version 3.9.1, 3.8.3, 3.7.2, which fixes the issue.\n\nAlternately ensure the ensemble election/quorum communication is protected by a firewall as this will mitigate the issue.\n\nSee the documentation for more details on correct cluster administration.\n",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4258686,
+        "artifact": "org.apache.zookeeper:zookeeper",
+        "version": "3.9.0",
+        "description": "ZooKeeper server",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 236290,
+    "cve": "CVE-2024-25710",
+    "cwe": "CWE-835",
+    "muted": false,
+    "lastModified": "2024/02/19 10:15",
+    "exploitabilitySubscore": "1.8",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "5.5",
+    "securityRisk": "MEDIUM",
+    "description": "Loop with Unreachable Exit Condition ('Infinite Loop') vulnerability in Apache Commons Compress.This issue affects Apache Commons Compress: from 1.3 through 1.25.0.\n\nUsers are recommended to upgrade to version 1.26.0 which fixes the issue.\n\n",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 3974742,
+        "artifact": "org.apache.commons:commons-compress",
+        "version": "1.22",
+        "description": "\nApache Commons Compress software defines an API for working with\ncompression and archive formats.  These include: bzip2, gzip, pack200,\nlzma, xz, Snappy, traditional Unix Compress, DEFLATE, DEFLATE64, LZ4,\nBrotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.\n  ",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 228949,
+    "cve": "CVE-2023-6378",
+    "cwe": "CWE-502",
+    "muted": false,
+    "lastModified": "2023/11/29 13:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "A serialization vulnerability in logback receiver component part of \nlogback version 1.4.11 allows an attacker to mount a Denial-Of-Service \nattack by sending poisoned data.\n\n",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4237314,
+        "artifact": "ch.qos.logback:logback-core",
+        "version": "1.4.11",
+        "description": "logback-core module",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 222926,
+    "cve": "CVE-2023-36478",
+    "cwe": "CWE-400",
+    "muted": false,
+    "lastModified": "2023/10/10 19:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "Eclipse Jetty provides a web server and servlet container. In versions 11.0.0 through 11.0.15, 10.0.0 through 10.0.15, and 9.0.0 through 9.4.52, an integer overflow in `MetaDataBuilder.checkSize` allows for HTTP/2 HPACK header values to\nexceed their size limit. `MetaDataBuilder.java` determines if a header name or value exceeds the size limit, and throws an exception if the limit is exceeded. However, when length is very large and huffman is true, the multiplication by 4 in line 295\nwill overflow, and length will become negative. `(_size+length)` will now be negative, and the check on line 296 will not be triggered. Furthermore, `MetaDataBuilder.checkSize` allows for user-entered HPACK header value sizes to be negative, potentially leading to a very large buffer allocation later on when the user-entered size is multiplied by 2. This means that if a user provides a negative length value (or, more precisely, a length value which, when multiplied by the 4/3 fudge factor, is negative), and this length value is a very large positive number when multiplied by 2, then the user can cause a very large buffer to be allocated on the server. Users of HTTP/2 can be impacted by a remote denial of service attack. The issue has been fixed in versions 11.0.16, 10.0.16, and 9.4.53. There are no known workarounds.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4073239,
+        "artifact": "org.eclipse.jetty:jetty-http",
+        "version": "9.4.51.v20230217",
+        "custom": false
+      },
+      {
+        "id": 4073234,
+        "artifact": "org.eclipse.jetty:jetty-server",
+        "version": "9.4.51.v20230217",
+        "description": "The core jetty server artifact.",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 165645,
+    "cve": "CVE-2021-40690",
+    "cwe": "CWE-200",
+    "muted": false,
+    "lastModified": "2021/09/19 20:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv2BaseScore": "5",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "All versions of Apache Santuario - XML Security for Java prior to 2.2.3 and 2.1.7 are vulnerable to an issue where the \"secureValidation\" property is not passed correctly when creating a KeyInfo from a KeyInfoReference element. This allows an attacker to abuse an XPath Transform to extract any local .xml files in a RetrievalMethod element.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 864151,
+        "artifact": "org.apache.santuario:xmlsec",
+        "version": "2.1.4",
+        "description": "\n        Apache XML Security for Java supports XML-Signature Syntax and Processing,\n        W3C Recommendation 12 February 2002, and XML Encryption Syntax and\n        Processing, W3C Recommendation 10 December 2002. As of version 1.4,\n        the library supports the standard Java API JSR-105: XML Digital Signature APIs.\n    ",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 208426,
+    "cve": "CVE-2023-26049",
+    "cwe": "CWE-200",
+    "muted": false,
+    "lastModified": "2023/04/18 23:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "1.4",
+    "cVSSv3BaseScore": "5.3",
+    "securityRisk": "MEDIUM",
+    "description": "Jetty is a java based web server and servlet engine. Nonstandard cookie parsing in Jetty may allow an attacker to smuggle cookies within other cookies, or otherwise perform unintended behavior by tampering with the cookie parsing mechanism. If Jetty sees a cookie VALUE that starts with `\"` (double quote), it will continue to read the cookie string until it sees a closing quote -- even if a semicolon is encountered. So, a cookie header such as: `DISPLAY_LANGUAGE=\"b; JSESSIONID=1337; c=d\"` will be parsed as one cookie, with the name DISPLAY_LANGUAGE and a value of b; JSESSIONID=1337; c=d instead of 3 separate cookies. This has security implications because if, say, JSESSIONID is an HttpOnly cookie, and the DISPLAY_LANGUAGE cookie value is rendered on the page, an attacker can smuggle the JSESSIONID cookie into the DISPLAY_LANGUAGE cookie and thereby exfiltrate it. This is significant when an intermediary is enacting some policy based on cookies, so a smuggled cookie can bypass that policy yet still be seen by the Jetty server or its logging system. This issue has been addressed in versions 9.4.51, 10.0.14, 11.0.14, and 12.0.0.beta0 and users are advised to upgrade. There are no known workarounds for this issue.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4073239,
+        "artifact": "org.eclipse.jetty:jetty-http",
+        "version": "9.4.51.v20230217",
+        "custom": false
+      },
+      {
+        "id": 4073237,
+        "artifact": "org.eclipse.jetty:jetty-security",
+        "version": "9.4.51.v20230217",
+        "description": "Jetty security infrastructure",
+        "custom": false
+      },
+      {
+        "id": 4073234,
+        "artifact": "org.eclipse.jetty:jetty-server",
+        "version": "9.4.51.v20230217",
+        "description": "The core jetty server artifact.",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 153944,
+    "cve": "CVE-2020-13954",
+    "cwe": "CWE-79",
+    "muted": false,
+    "lastModified": "2020/11/12 14:15",
+    "exploitabilitySubscore": "2.8",
+    "impactSubscore": "2.7",
+    "cVSSv2BaseScore": "4.3",
+    "cVSSv3BaseScore": "6.1",
+    "securityRisk": "MEDIUM",
+    "description": "By default, Apache CXF creates a /services page containing a listing of the available endpoint names and addresses. This webpage is vulnerable to a reflected Cross-Site Scripting (XSS) attack via the styleSheetPath, which allows a malicious actor to inject javascript into the web page. This vulnerability affects all versions of Apache CXF prior to 3.4.1 and 3.3.8. Please note that this is a separate issue to CVE-2019-17573.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 1270458,
+        "artifact": "org.apache.cxf:cxf-rt-ws-policy",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Policy",
+        "custom": false
+      },
+      {
+        "id": 1270456,
+        "artifact": "org.apache.cxf:cxf-rt-ws-addr",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Addressing",
+        "custom": false
+      },
+      {
+        "id": 1270592,
+        "artifact": "org.apache.cxf:cxf-rt-ws-security",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Security",
+        "custom": false
+      },
+      {
+        "id": 1270653,
+        "artifact": "org.apache.cxf:cxf-core",
+        "version": "3.3.5",
+        "description": "Apache CXF Core",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 197339,
+    "cve": "CVE-2022-46363",
+    "cwe": "CWE-20",
+    "muted": false,
+    "lastModified": "2022/12/13 16:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "A vulnerability in Apache CXF before versions 3.5.5 and 3.4.10 allows an attacker to perform a remote directory listing or code exfiltration. The vulnerability only applies when the\u00a0CXFServlet is configured with both the\u00a0static-resources-list and\u00a0redirect-query-check attributes. These attributes are not supposed to be used together, and so the vulnerability can only arise if the CXF service is misconfigured.\n\n",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 1270458,
+        "artifact": "org.apache.cxf:cxf-rt-ws-policy",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Policy",
+        "custom": false
+      },
+      {
+        "id": 1270456,
+        "artifact": "org.apache.cxf:cxf-rt-ws-addr",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Addressing",
+        "custom": false
+      },
+      {
+        "id": 1270592,
+        "artifact": "org.apache.cxf:cxf-rt-ws-security",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Security",
+        "custom": false
+      },
+      {
+        "id": 1270653,
+        "artifact": "org.apache.cxf:cxf-core",
+        "version": "3.3.5",
+        "description": "Apache CXF Core",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 236289,
+    "cve": "CVE-2024-26308",
+    "cwe": "CWE-770",
+    "muted": false,
+    "lastModified": "2024/02/19 10:15",
+    "exploitabilitySubscore": "1.8",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "5.5",
+    "securityRisk": "MEDIUM",
+    "description": "Allocation of Resources Without Limits or Throttling vulnerability in Apache Commons Compress.This issue affects Apache Commons Compress: from 1.21 before 1.26.\n\nUsers are recommended to upgrade to version 1.26, which fixes the issue.\n\n",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 3974742,
+        "artifact": "org.apache.commons:commons-compress",
+        "version": "1.22",
+        "description": "\nApache Commons Compress software defines an API for working with\ncompression and archive formats.  These include: bzip2, gzip, pack200,\nlzma, xz, Snappy, traditional Unix Compress, DEFLATE, DEFLATE64, LZ4,\nBrotli, Zstandard and ar, cpio, jar, tar, zip, dump, 7z, arj.\n  ",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 152464,
+    "cve": "CVE-2020-13936",
+    "cwe": "",
+    "muted": false,
+    "lastModified": "2021/03/10 09:15",
+    "exploitabilitySubscore": "2.8",
+    "impactSubscore": "5.9",
+    "cVSSv2BaseScore": "9",
+    "cVSSv3BaseScore": "8.8",
+    "securityRisk": "HIGH",
+    "description": "An attacker that is able to modify Velocity templates may execute arbitrary Java code or run arbitrary system commands with the same privileges as the account running the Servlet container. This applies to applications that allow untrusted users to upload/modify velocity templates running Apache Velocity Engine versions up to 2.2.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 581249,
+        "artifact": "org.apache.velocity:velocity-engine-core",
+        "version": "2.1",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 213226,
+    "cve": "CVE-2023-35116",
+    "cwe": "CWE-770",
+    "muted": false,
+    "lastModified": "2023/06/14 16:15",
+    "exploitabilitySubscore": "1",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "4.7",
+    "securityRisk": "MEDIUM",
+    "description": "jackson-databind through 2.15.2 allows attackers to cause a denial of service or other unspecified impact via a crafted object that uses cyclic dependencies. NOTE: the vendor's perspective is that this is not a valid vulnerability report, because the steps of constructing a cyclic data structure and trying to serialize it cannot be achieved by an external attacker.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4122617,
+        "artifact": "com.fasterxml.jackson.core:jackson-databind",
+        "version": "2.14.3",
+        "description": "General data-binding functionality for Jackson: works on core streaming API",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 223902,
+    "cve": "CVE-2023-44483",
+    "cwe": "CWE-532",
+    "muted": false,
+    "lastModified": "2023/10/20 12:15",
+    "exploitabilitySubscore": "2.8",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "6.5",
+    "securityRisk": "MEDIUM",
+    "description": "All versions of Apache Santuario - XML Security for Java prior to 2.2.6, 2.3.4, and 3.0.3, when using the JSR 105 API, are vulnerable to an issue where a private key may be disclosed in log files when generating an XML Signature and logging with debug level is enabled.\u00a0Users are recommended to upgrade to version 2.2.6, 2.3.4, or 3.0.3, which fixes this issue.\n",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 864151,
+        "artifact": "org.apache.santuario:xmlsec",
+        "version": "2.1.4",
+        "description": "\n        Apache XML Security for Java supports XML-Signature Syntax and Processing,\n        W3C Recommendation 12 February 2002, and XML Encryption Syntax and\n        Processing, W3C Recommendation 10 December 2002. As of version 1.4,\n        the library supports the standard Java API JSR-105: XML Digital Signature APIs.\n    ",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 220524,
+    "cve": "CVE-2023-40167",
+    "cwe": "CWE-130",
+    "muted": false,
+    "lastModified": "2023/09/15 22:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "1.4",
+    "cVSSv3BaseScore": "5.3",
+    "securityRisk": "MEDIUM",
+    "description": "Jetty is a Java based web server and servlet engine. Prior to versions 9.4.52, 10.0.16, 11.0.16, and 12.0.1, Jetty accepts the `+` character proceeding the content-length value in a HTTP/1 header field.  This is more permissive than allowed by the RFC and other servers routinely reject such requests with 400 responses.  There is no known exploit scenario, but it is conceivable that request smuggling could result if jetty is used in combination with a server that does not close the connection after sending such a 400 response. Versions 9.4.52, 10.0.16, 11.0.16, and 12.0.1 contain a patch for this issue. There is no workaround as there is no known exploit scenario.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4073239,
+        "artifact": "org.eclipse.jetty:jetty-http",
+        "version": "9.4.51.v20230217",
+        "custom": false
+      },
+      {
+        "id": 4073234,
+        "artifact": "org.eclipse.jetty:jetty-server",
+        "version": "9.4.51.v20230217",
+        "description": "The core jetty server artifact.",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 191038,
+    "cve": "CVE-2022-40152",
+    "cwe": "CWE-787",
+    "muted": false,
+    "lastModified": "2022/09/16 12:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "Those using Woodstox to parse XML data may be vulnerable to Denial of Service attacks (DOS) if DTD support is enabled. If the parser is running on user supplied input, an attacker may supply content that causes the parser to crash by stackoverflow. This effect may support a denial of service attack.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 223381,
+        "artifact": "com.fasterxml.woodstox:woodstox-core",
+        "version": "5.0.3",
+        "description": "Woodstox is a high-performance XML processor that implements Stax (JSR-173), SAX2 and Stax2 APIs",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 213697,
+    "cve": "CVE-2023-34462",
+    "cwe": "CWE-400",
+    "muted": false,
+    "lastModified": "2023/06/23 01:15",
+    "exploitabilitySubscore": "2.8",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "6.5",
+    "securityRisk": "MEDIUM",
+    "description": "Netty is an asynchronous event-driven network application framework for rapid development of maintainable high performance protocol servers & clients. The `SniHandler` can allocate up to 16MB of heap for each channel during the TLS handshake. When the handler or the channel does not have an idle timeout, it can be used to make a TCP server using the `SniHandler` to allocate 16MB of heap. The `SniHandler` class is a handler that waits for the TLS handshake to configure a `SslHandler` according to the indicated server name by the `ClientHello` record. For this matter it allocates a `ByteBuf` using the value defined in the `ClientHello` record. Normally the value of the packet should be smaller than the handshake packet but there are not checks done here and the way the code is written, it is possible to craft a packet that makes the `SslClientHelloHandler`. This vulnerability has been fixed in version 4.1.94.Final.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4079320,
+        "artifact": "io.netty:netty-handler",
+        "version": "4.1.91.Final",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 231524,
+    "cve": "CVE-2023-51074",
+    "cwe": "",
+    "muted": false,
+    "lastModified": "2023/12/27 22:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "1.4",
+    "cVSSv3BaseScore": "5.3",
+    "securityRisk": "MEDIUM",
+    "description": "json-path v2.8.0 was discovered to contain a stack overflow via the Criteria.parse() method.",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4042821,
+        "artifact": "com.jayway.jsonpath:json-path",
+        "version": "2.8.0",
+        "description": "A library to query and verify JSON",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 208427,
+    "cve": "CVE-2023-26048",
+    "cwe": "CWE-400",
+    "muted": false,
+    "lastModified": "2023/04/18 23:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "1.4",
+    "cVSSv3BaseScore": "5.3",
+    "securityRisk": "MEDIUM",
+    "description": "Jetty is a java based web server and servlet engine. In affected versions servlets with multipart support (e.g. annotated with `@MultipartConfig`) that call `HttpServletRequest.getParameter()` or `HttpServletRequest.getParts()` may cause `OutOfMemoryError` when the client sends a multipart request with a part that has a name but no filename and very large content. This happens even with the default settings of `fileSizeThreshold=0` which should stream the whole part content to disk. An attacker client may send a large multipart request and cause the server to throw `OutOfMemoryError`. However, the server may be able to recover after the `OutOfMemoryError` and continue its service -- although it may take some time. This issue has been patched in versions 9.4.51, 10.0.14, and 11.0.14. Users are advised to upgrade. Users unable to upgrade may set the multipart parameter `maxRequestSize` which must be set to a non-negative value, so the whole multipart content is limited (although still read into memory).",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4073239,
+        "artifact": "org.eclipse.jetty:jetty-http",
+        "version": "9.4.51.v20230217",
+        "custom": false
+      },
+      {
+        "id": 4073234,
+        "artifact": "org.eclipse.jetty:jetty-server",
+        "version": "9.4.51.v20230217",
+        "description": "The core jetty server artifact.",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 222106,
+    "cve": "CVE-2023-39410",
+    "cwe": "CWE-502",
+    "muted": false,
+    "lastModified": "2023/09/29 19:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "When deserializing untrusted or corrupted data, it is possible for a reader to consume memory beyond the allowed constraints and thus lead to out of memory on the system.\n\nThis issue affects Java applications using Apache Avro Java SDK up to and including 1.11.2.  Users should update to apache-avro version 1.11.3 which addresses this issue.\n\n",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4204933,
+        "artifact": "org.apache.avro:avro",
+        "version": "1.11.2",
+        "description": "Avro core components",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 220512,
+    "cve": "CVE-2023-41900",
+    "cwe": "CWE-287",
+    "muted": false,
+    "lastModified": "2023/09/15 23:15",
+    "exploitabilitySubscore": "2.8",
+    "impactSubscore": "1.4",
+    "cVSSv3BaseScore": "4.3",
+    "securityRisk": "MEDIUM",
+    "description": "Same",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4073234,
+        "artifact": "org.eclipse.jetty:jetty-server",
+        "version": "9.4.51.v20230217",
+        "description": "The core jetty server artifact.",
+        "custom": false
+      }
+    ]
+  },
+	{
+    "id": 220513,
+    "cve": "CVE-2023-41900",
+    "cwe": "CWE-287",
+    "muted": false,
+    "lastModified": "2023/09/15 23:15",
+    "exploitabilitySubscore": "2.8",
+    "impactSubscore": "1.4",
+    "cVSSv3BaseScore": "4.3",
+    "securityRisk": "MEDIUM",
+    "description": "Same",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4073234,
+        "artifact": "org.eclipse.jetty:jetty-server",
+        "version": "9.4.51.v20230217",
+        "description": "The core jetty server artifact.",
+        "custom": false
+      }
+    ]
+  }
+]

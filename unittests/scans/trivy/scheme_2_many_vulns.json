@@ -1,0 +1,281 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "teamdojo:latest",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "OS": {
+      "Family": "alpine",
+      "Name": "3.9.4"
+    },
+    "RepoTags": [
+      "teamdojo:latest"
+    ]
+  },
+  "Results": [
+    {
+      "Target": "teamdojo:latest (alpine 3.9.4)",
+      "Class": "os-pkgs",
+      "Type": "alpine",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2020-15999",
+          "PkgName": "freetype",
+          "PkgPath": "app/libs/freetype-2.9.1-r2",
+          "InstalledVersion": "2.9.1-r2",
+          "FixedVersion": "2.9.1-r3",
+          "Layer": {
+            "DiffID": "sha256:edd61588d12669e2d71a0de2aab96add3304bf565730e1e6144ec3c3fac339e4"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2020-15999",
+          "Title": "freetype: Heap-based buffer overflow due to integer truncation in Load_SBit_Png",
+          "Description": "Heap buffer overflow in Freetype in Google Chrome prior to 86.0.4240.111 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-787"
+          ],
+          "CVSS": {
+            "nvd": {
+              "V2Vector": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+              "V2Score": 4.3,
+              "V3Score": 6.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H",
+              "V3Score": 8.6
+            }
+          },
+          "References": [
+            "http://lists.opensuse.org/opensuse-security-announce/2020-11/msg00016.html",
+            "http://seclists.org/fulldisclosure/2020/Nov/33",
+            "https://bugs.chromium.org/p/project-zero/issues/detail?id=2103",
+            "https://chromereleases.googleblog.com/2020/10/stable-channel-update-for-desktop_20.html",
+            "https://crbug.com/1139963",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-15999",
+            "https://github.com/advisories/GHSA-pv36-h7jh-qm62",
+            "https://github.com/cefsharp/CefSharp/security/advisories/GHSA-pv36-h7jh-qm62",
+            "https://googleprojectzero.blogspot.com/p/rca-cve-2020-15999.html",
+            "https://linux.oracle.com/cve/CVE-2020-15999.html",
+            "https://linux.oracle.com/errata/ELSA-2020-4952.html",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/J3QVIGAAJ4D62YEJAJJWMCCBCOQ6TVL7/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2020-15999",
+            "https://security.gentoo.org/glsa/202011-12",
+            "https://security.gentoo.org/glsa/202012-04",
+            "https://ubuntu.com/security/notices/USN-4593-1",
+            "https://ubuntu.com/security/notices/USN-4593-2",
+            "https://www.debian.org/security/2021/dsa-4824",
+            "https://www.mozilla.org/en-US/security/advisories/mfsa2020-52/#CVE-2020-15999"
+          ],
+          "PublishedDate": "2020-11-03T03:15:00Z",
+          "LastModifiedDate": "2021-02-11T19:50:00Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2020-28196",
+          "PkgName": "krb5-libs",
+          "PkgPath": "app/libs/krb5-libs-1.15.5-r0",
+          "InstalledVersion": "1.15.5-r0",
+          "FixedVersion": "1.15.5-r1",
+          "Layer": {
+            "DiffID": "sha256:edd61588d12669e2d71a0de2aab96add3304bf565730e1e6144ec3c3fac339e4"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2020-28196",
+          "Title": "krb5: unbounded recursion via an ASN.1-encoded Kerberos message in lib/krb5/asn.1/asn1_encode.c may lead to DoS",
+          "Description": "MIT Kerberos 5 (aka krb5) before 1.17.2 and 1.18.x before 1.18.3 allows unbounded recursion via an ASN.1-encoded Kerberos message because the lib/krb5/asn.1/asn1_encode.c support for BER indefinite lengths lacks a recursion limit.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-674"
+          ],
+          "CVSS": {
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-28196",
+            "https://github.com/krb5/krb5/commit/57415dda6cf04e73ffc3723be518eddfae599bfd",
+            "https://linux.oracle.com/cve/CVE-2020-28196.html",
+            "https://linux.oracle.com/errata/ELSA-2021-9294.html",
+            "https://lists.apache.org/thread.html/r58af02e294bd07f487e2c64ffc0a29b837db5600e33b6e698b9d696b@%3Cissues.bookkeeper.apache.org%3E",
+            "https://lists.apache.org/thread.html/rf4c02775860db415b4955778a131c2795223f61cb8c6a450893651e4@%3Cissues.bookkeeper.apache.org%3E",
+            "https://lists.debian.org/debian-lts-announce/2020/11/msg00011.html",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/45KKOZQWIIIW5C45PJVGQ32AXBSYNBE7/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/73IGOG6CZAVMVNS4GGRMOLOZ7B6QVA7F/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/KPH2V3WSQTELROZK3GFCPQDOFLKIZ6H5/",
+            "https://security.gentoo.org/glsa/202011-17",
+            "https://security.netapp.com/advisory/ntap-20201202-0001/",
+            "https://security.netapp.com/advisory/ntap-20210513-0002/",
+            "https://ubuntu.com/security/notices/USN-4635-1",
+            "https://www.debian.org/security/2020/dsa-4795",
+            "https://www.oracle.com/security-alerts/cpuApr2021.html"
+          ],
+          "PublishedDate": "2020-11-06T08:15:00Z",
+          "LastModifiedDate": "2021-06-29T15:15:00Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2019-12900",
+          "PkgName": "libbz2",
+          "PkgPath": "app/libs/libbz2-1.0.6-r6",
+          "InstalledVersion": "1.0.6-r6",
+          "FixedVersion": "1.0.6-r7",
+          "Layer": {
+            "DiffID": "sha256:edd61588d12669e2d71a0de2aab96add3304bf565730e1e6144ec3c3fac339e4"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2019-12900",
+          "Title": "bzip2: out-of-bounds write in function BZ2_decompress",
+          "Description": "BZ2_decompress in decompress.c in bzip2 through 1.0.6 has an out-of-bounds write when there are many selectors.",
+          "Severity": "CRITICAL",
+          "CweIDs": [
+            "CWE-787"
+          ],
+          "References": [
+            "http://lists.opensuse.org/opensuse-security-announce/2019-07/msg00040.html",
+            "http://lists.opensuse.org/opensuse-security-announce/2019-08/msg00050.html",
+            "http://lists.opensuse.org/opensuse-security-announce/2019-11/msg00078.html",
+            "http://lists.opensuse.org/opensuse-security-announce/2019-12/msg00000.html",
+            "http://packetstormsecurity.com/files/153644/Slackware-Security-Advisory-bzip2-Updates.html",
+            "http://packetstormsecurity.com/files/153957/FreeBSD-Security-Advisory-FreeBSD-SA-19-18.bzip2.html",
+            "https://bugs.launchpad.net/ubuntu/+source/bzip2/+bug/1834494",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-12900",
+            "https://gitlab.com/federicomenaquintero/bzip2/commit/74de1e2e6ffc9d51ef9824db71a8ffee5962cdbc",
+            "https://lists.apache.org/thread.html/ra0adb9653c7de9539b93cc8434143b655f753b9f60580ff260becb2b@%3Cusers.kafka.apache.org%3E",
+            "https://lists.debian.org/debian-lts-announce/2019/06/msg00021.html",
+            "https://lists.debian.org/debian-lts-announce/2019/07/msg00014.html",
+            "https://lists.debian.org/debian-lts-announce/2019/10/msg00012.html",
+            "https://lists.debian.org/debian-lts-announce/2019/10/msg00018.html",
+            "https://seclists.org/bugtraq/2019/Aug/4",
+            "https://seclists.org/bugtraq/2019/Jul/22",
+            "https://security.FreeBSD.org/advisories/FreeBSD-SA-19:18.bzip2.asc",
+            "https://support.f5.com/csp/article/K68713584?utm_source=f5support\u0026amp;utm_medium=RSS",
+            "https://ubuntu.com/security/notices/USN-4038-1",
+            "https://ubuntu.com/security/notices/USN-4038-2",
+            "https://ubuntu.com/security/notices/USN-4038-3",
+            "https://ubuntu.com/security/notices/USN-4038-4",
+            "https://ubuntu.com/security/notices/USN-4146-1",
+            "https://ubuntu.com/security/notices/USN-4146-2",
+            "https://usn.ubuntu.com/4038-1/",
+            "https://usn.ubuntu.com/4038-2/",
+            "https://usn.ubuntu.com/4146-1/",
+            "https://usn.ubuntu.com/4146-2/",
+            "https://www.oracle.com/security-alerts/cpuoct2020.html"
+          ],
+          "PublishedDate": "2019-06-19T23:15:00Z",
+          "LastModifiedDate": "2020-10-20T22:15:00Z"
+        }
+      ]
+    },
+    {
+      "Target": "app/libs/HdrHistogram-2.1.9.jar",
+      "Class": "lang-pkgs",
+      "Type": "jar"
+    },
+    {
+      "Target": "app/libs/commons-compress-1.14.jar",
+      "Class": "lang-pkgs",
+      "Type": "jar",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2018-11771",
+          "PkgName": "org.apache.commons:commons-compress",
+          "PkgPath": "app/libs/commons-compress-1.14",
+          "InstalledVersion": "1.14",
+          "FixedVersion": "1.18",
+          "Layer": {
+            "DiffID": "sha256:7687a0228bb6d371c80b448ede8afb5272dd58e7baae544a259e4ca84ef570b1"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2018-11771",
+          "Title": "apache-commons-compress: ZipArchiveInputStream.read() fails to identify correct EOF allowing for DoS via crafted zip",
+          "Description": "When reading a specially crafted ZIP archive, the read method of Apache Commons Compress 1.7 to 1.17's ZipArchiveInputStream can fail to return the correct EOF indication after the end of the stream has been reached. When combined with a java.io.InputStreamReader this can lead to an infinite stream, which can be used to mount a denial of service attack against services that use Compress' zip package.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-835"
+          ],
+          "CVSS": {
+            "nvd": {
+              "V2Vector": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+              "V3Vector": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+              "V2Score": 4.3,
+              "V3Score": 5.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:L",
+              "V3Score": 4.3
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2018/08/16/2",
+            "http://www.securityfocus.com/bid/105139",
+            "http://www.securitytracker.com/id/1041503",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11771",
+            "https://github.com/advisories/GHSA-hrmr-f5m6-m9pq",
+            "https://lists.apache.org/thread.html/0adb631517766e793e18a59723e2df08ced41eb9a57478f14781c9f7@%3Cdev.tinkerpop.apache.org%3E",
+            "https://lists.apache.org/thread.html/3565494c263dfeb4dcb2a71cb24d09a1ca285cd6ac74edc025a3af8a@%3Ccommits.tinkerpop.apache.org%3E",
+            "https://lists.apache.org/thread.html/35f60d6d0407c13c39411038ba1aca71d92595ed7041beff4d07f2ee@%3Ccommits.tinkerpop.apache.org%3E",
+            "https://lists.apache.org/thread.html/6c79965066c30d4e330e04d911d3761db41b82c89ae38d9a6b37a6f1@%3Cdev.tinkerpop.apache.org%3E",
+            "https://lists.apache.org/thread.html/714c6ac1b1b50f8557e7342903ef45f1538a7bc60a0b47d6e48c273d@%3Ccommits.tinkerpop.apache.org%3E",
+            "https://lists.apache.org/thread.html/b8da751fc0ca949534cdf2744111da6bb0349d2798fac94b0a50f330@%3Cannounce.apache.org%3E",
+            "https://lists.apache.org/thread.html/b8ef29df0f1d55aa741170748352ae8e425c7b1d286b2f257711a2dd@%3Cdev.creadur.apache.org%3E",
+            "https://lists.apache.org/thread.html/b907e70bc422905d7962fd18f863f746bf7b4e7ed9da25c148580c61@%3Cnotifications.commons.apache.org%3E",
+            "https://lists.apache.org/thread.html/c7954dc1e8fafd7ca1449f078953b419ebf8936e087f235f3bd024be@%3Ccommits.tinkerpop.apache.org%3E",
+            "https://lists.apache.org/thread.html/e3eae9e6fc021c4c22dda59a335d21c12eecab480b48115a2f098ef6@%3Ccommits.tinkerpop.apache.org%3E",
+            "https://lists.apache.org/thread.html/eeecc1669242b28a3777ae13c68b376b0148d589d3d8170340d61120@%3Cdev.tinkerpop.apache.org%3E",
+            "https://lists.apache.org/thread.html/f28052d04cb8dbaae39bfd3dc8438e58c2a8be306a3f381f4728d7c1@%3Ccommits.commons.apache.org%3E",
+            "https://lists.apache.org/thread.html/f9cdd32af7d73e943452167d15801db39e8130409ebb9efb243b3f41@%3Ccommits.tinkerpop.apache.org%3E",
+            "https://lists.apache.org/thread.html/ff8dcfe29377088ab655fda9d585dccd5b1f07fabd94ae84fd60a7f8@%3Ccommits.pulsar.apache.org%3E",
+            "https://nvd.nist.gov/vuln/detail/CVE-2018-11771"
+          ],
+          "PublishedDate": "2018-08-16T15:29:00Z",
+          "LastModifiedDate": "2019-10-03T00:03:00Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2018-1324",
+          "PkgName": "org.apache.commons:commons-compress",
+          "PkgPath": "app/libs/commons-compress-1.14",
+          "InstalledVersion": "1.14",
+          "FixedVersion": "1.16",
+          "Layer": {
+            "DiffID": "sha256:7687a0228bb6d371c80b448ede8afb5272dd58e7baae544a259e4ca84ef570b1"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2018-1324",
+          "Title": "apache-commons-compress:  Infinite loop via extra field parser in ZipFile and ZipArchiveInputStream classes",
+          "Description": "A specially crafted ZIP archive can be used to cause an infinite loop inside of Apache Commons Compress' extra field parser used by the ZipFile and ZipArchiveInputStream classes in versions 1.11 to 1.15. This can be used to mount a denial of service attack against services that use Compress' zip package.",
+          "Severity": "MEDIUM",
+          "CweIDs": [
+            "CWE-835"
+          ],
+          "CVSS": {
+            "nvd": {
+              "V2Vector": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+              "V3Vector": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+              "V2Score": 4.3,
+              "V3Score": 5.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.securityfocus.com/bid/103490",
+            "http://www.securitytracker.com/id/1040549",
+            "https://commons.apache.org/proper/commons-compress/security-reports.html",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-1324",
+            "https://github.com/advisories/GHSA-h436-432x-8fvx",
+            "https://lists.apache.org/thread.html/1c7b6df6d1c5c8583518a0afa017782924918e4d6acfaf23ed5b2089@%3Cdev.commons.apache.org%3E",
+            "https://lists.apache.org/thread.html/b8ef29df0f1d55aa741170748352ae8e425c7b1d286b2f257711a2dd@%3Cdev.creadur.apache.org%3E",
+            "https://lists.apache.org/thread.html/ff8dcfe29377088ab655fda9d585dccd5b1f07fabd94ae84fd60a7f8@%3Ccommits.pulsar.apache.org%3E",
+            "https://lists.apache.org/thread.html/r5532dc8d5456b5151e8c286801e2e5769f5c04118b29c3b5d13ea387@%3Cissues.beam.apache.org%3E",
+            "https://nvd.nist.gov/vuln/detail/CVE-2018-1324"
+          ],
+          "PublishedDate": "2018-03-16T13:29:00Z",
+          "LastModifiedDate": "2019-10-03T00:03:00Z"
+        }
+      ]
+    }
+  ]
+}

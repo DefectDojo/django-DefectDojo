@@ -1,0 +1,1931 @@
+﻿<Scan><Name>888</Name><PolicyName>OWASP Top 10 2021</PolicyName><StartTime>2/22/2024 12:01:24 PM</StartTime><Duration>00:04:28.6219672</Duration><Issues><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>11543</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>4720</VulnerabilityID><Severity>2</Severity><Name>Cookie Security: Cookie not Sent Over SSL</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[This policy states that any area of the website or web application that contains sensitive information or access to privileged functionality such as remote site administration requires that all cookies are sent via SSL during an SSL session.  The URL: /accounts/login/ has failed this policy.  If a cookie is marked with the "secure" attribute, it will only be transmitted if the communications channel with the host is a secure one. Currently this means that secure cookies will only be sent to HTTPS (HTTP over SSL) servers.  If secure is not specified, a cookie is considered safe to be sent in the clear over unsecured channels.
+
+<br />]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[<br /><b>For Development:</b><br />This issue will ultimately need to be rectified by your Network or Security Operations team. If necessary, implement the change in your development environment.
+<br /><br /><b>For Security Operations:</b><br /><br />IIS 4.0 and 5.0 Fix Information:<br /><a href="http://support.microsoft.com/default.aspx?scid=kb;en-us;274149">http://support.microsoft.com/default.aspx?scid=kb;en-us;274149</a><br /><br />
+Remediation for IIS 6.x:<br /><a href="http://www.microsoft.com/technet/prodtechnol/WindowsServer2003/Library/IIS/0d49cbc8-10e1-4fa8-ba61-c34e524a3ae6.mspx?mfr=true">http://www.microsoft.com/technet/prodtechnol/WindowsServer2003/Library/IIS/0d49cbc8-10e1-4fa8-ba61-c34e524a3ae6.mspx?mfr=true</a><br /><a href="http://msdn2.microsoft.com/en-us/library/ms998310.aspx">http://msdn2.microsoft.com/en-us/library/ms998310.aspx</a><br /><br />Require SSL for an Authentication Cookie (IIS 7):<br /><a href="http://technet.microsoft.com/en-us/library/cc771633(WS.10).aspx">http://technet.microsoft.com/en-us/library/cc771633(WS.10).aspx</a><br /><br />AnonymousIdentificationSection Class [IIS 7]:<br /><a href="http://msdn.microsoft.com/en-us/library/ms689482.aspx">http://msdn.microsoft.com/en-us/library/ms689482.aspx</a><br /><br />Use the following links to remediate this issue on an Apache server:
+
+
+<a href="http://search.cpan.org/~jkrasnoo/ApacheCookieEncrypted-0.03/Encrypted.pm">http://search.cpan.org/~jkrasnoo/ApacheCookieEncrypted-0.03/Encrypted.pm</a><br /><a href="http://hc.apache.org/httpclient-3.x/apidocs/org/apache/commons/httpclient/class-use/Cookie.html">
+http://hc.apache.org/httpclient-3.x/apidocs/org/apache/commons/httpclient/class-use/Cookie.html</a><br /><br /><b>For QA:</b><br />This issue will ultimately need to be rectified by your Network or Security Operations team. If necessary, implement the change in your testing environment.]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br />General Information:<br /><a href="http://www.cookiecentral.com/faq/">The Unofficial Cookie FAQ</a><br />]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Info</CheckTypeID><EngineType>10028</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/ HTTP/1.1
+Referer: https://omnis.deltaww.com/accounts/login/favicon.ico
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Audit.Attack";SID="EB5F6D4173E83B323B3DF5B6C329A410";PSID="8962D5AA562BEAD1F5E31A5C9655B967";SessionType="PathTruncation";CrawlType="None";AttackType="None";OriginatingEngineID="398bfe9e-1b77-4458-9691-603eea06e341";AttackSequence="0";AttackParamDesc="";AttackParamIndex="0";AttackParamSubIndex="0";CheckId="0";Engine="Path+Truncation";SmartMode="4";tht="11";
+X-RequestManager-Memo: stid="19";stmi="0";sc="1";rid="d9372420";
+X-Request-Memo: rid="d678000f";sc="1";thid="38";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>10302</VulnerabilityID><Severity>0</Severity><Name>Cache Management: Headers</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[The web server sent a Vary header, which indicates that server-driven negotiation was done to determine which content should be delivered. This may indicate that different content is available based on the headers in the HTTP request. Scan configuration  recommendations include viewing the HTTP response to determine what criteria is used to negotiate content, and appending custom headers and values according to the negotiate criteria being used.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[<br /><b>For Development:</b><br />
+Verify your application does not display different content based on headers, and if necessary, re-scan with appropriate headers to ensure good coverage.<br /><br /><b>For Security Operations:</b><br />
+Evaluate if content negotiation is truly being used, and disable if it is unnecessary. Re-scan with appropriate headers to ensure good coverage.
+<br /><br /><b>For QA:</b><br />This requires a server or application configuration change. Contact Security Operations for assistance with the server.]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br /><b>W3C RFC 2616 Header Field Definitions</b><br /><a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.44">http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.44</a>]]></SectionText></ReportSection><HighlightSelections><Selection><Index>4</Index><Length>16</Length></Selection></HighlightSelections><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:50 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5740
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=xQ2E2HuXGwn9wzGrJFQ1kmheEOQt34eU8O04hKWlvq4dquv3A1n6DDe4m5RRFwMW; expires=Thu, 20-Feb-2025 04:01:50 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=fht4r0uy2lqzerxqapp0sqmp7okgyk1a; expires=Thu, 07-Mar-2024 04:01:50 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='Ay10VaUDl4X4F2FO0TlD0nh64FE8ZfLzbwZqadm1aYE8zXuqRfSIjEeWMWFwBHjB' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>11543</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>10543</VulnerabilityID><Severity>1</Severity><Name>Cookie Security: HTTPOnly not Set</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[The web application does not utilize HTTP only cookies. This is a new security feature introduced by Microsoft in IE 6 SP1 to mitigate the possibility of a successful Cross-Site scripting attack by not allowing cookies with the HTTP only attribute to be accessed via client-side scripts. Recommendations include adopting a development policy that includes the utilization of HTTP only cookies, and performing other actions such as ensuring proper filtration of user-supplied data, utilizing client-side validation of user supplied data, and encoding all user supplied data to prevent inserted scripts being sent to end users in a format that can be executed.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br /><b> References: </b><br /><a href="https://social.msdn.microsoft.com/Search/en-US?query=HTTPOnly%20Cookie&amp;emptyWatermark=true&amp;ac=5">https://social.msdn.microsoft.com/Search/en-US?query=HTTPOnly%20Cookie&amp;emptyWatermark=true&amp;ac=5</a>]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>10028</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11306</VulnerabilityID><Severity>1</Severity><Name>Cache Management: Insecure Policy</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[WebInspect has detected a potentially unsafe cache control policy for secure content. While content transmitted over an SSL/TLS channel is expected to guarantee confidentiality, administrators must ensure that caching of sensitive content is disabled unless absolutely needed. The misconception that secure content caching is disabled by default by user-agents could cause the application to fail the organization’s cache policy.  An unsafe specification such as Cache-Control: public instructs the browser to persistently cache the content on the hard drive.  Cache-Control with no-store in the value must be set to prevent browsers from persisting content. Browsers and intermediate proxies will still persists with the no-cache directive. However, they will revalidate the content with the server before serving content from cache. The private directive prevents intermediate proxies from caching content and can be used in addition to no-store. Missing Cache-Control policy header results in browsers caching content regardless of whether it is served over HTTP or HTTPS.<br /><ul><li><font face="courier new">Cache-Control: no-store</font></li></ul>]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[Insecure caching policies could lead to content spoofing or information theft. <br /><br />
+
+SSL provides secure encrypted channel to transfer information from source to user. The information served over SSL is considered sensitive and trusted to be only available to the requestor. However, caching this content on disk in temporary internet files or on an intermediate proxy server can compromise that trust by exposing it to anyone who has access to the temporary storage or proxy cache. Content served over SSL should have cache disabled.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[Send a request to /accounts/login/ and inspect the <font face="courier new">Cache-Control</font> header value.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Set the <font face="courier new">Cache-Control</font> directive to <font face="courier new">private</font> and <font face="courier new">no-store</font>.
+<br /><br /><b><em>private</em></b><br />
+This directive allows the server to prevent a shared cache from caching responses that are intended for a single user. You can use this mechanism to ensure that privileged information is not accidentally leaked to unauthorized users. The directive may still allow caching of responses by non-shared caches. 
+<br /><br /><b><em>no-cache</em></b><br />
+For sensitive resources requiring user authentication, servers can send the no-cache directive to prevent caches from serving a cached response without first requiring the user-agent to validate the user identity. This directive can be specified with or without field names. When no field names are included, this directive applies to the entire request or response.<br />
+When one or more field names are specified in the no-cache directive, the response is cached but the specified fields must be excluded. If the response must include the specified field, then the cache must ensure that the request triggers a revalidation with the origin server.
+<br />
+Example: <font face="courier new">Cache-Control: no-cache="Set-Cookie"</font><br />
+This directive can be used to prevent sensitive information leakage by requiring the server to confirm the user identity before serving the protected information. While content is not served using the browser’s history or back button, a user with disk access can retrieve the content. 
+
+<br /><br /><b><em>no-store</em></b><br />
+To completely disable the caching of requests or responses, the server must specify the no-store directive in the <font face="courier new">Cache-Control</font> header. This directive applies to the entire request and response regardless of whether the directive is sent in the request or the response.]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br /><b>Server Configuration:</b><br /><a href="http://support.microsoft.com/kb/247404">IIS</a><br /><a href="http://httpd.apache.org/docs/2.2/caching.html">Apache</a><br /><br /><b>HTTP 1.1 Specification:</b><br /><a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html">HTTP Header Field Definitions</a><br /><br /><b>OWASP:</b><br /><a href="https://www.owasp.org/index.php/OWASP_Application_Security_FAQ#Browser_Cache">Browser Cache FAQ</a><br /><br /><b>HTTP Caching:</b><br /><a href="http://www.mnot.net/cache_docs/">Tutorial</a><br />]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>CUSTOM</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>4728</VulnerabilityID><Severity>2</Severity><Name>Cookie Security: Persistent Cookie</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[Cookies are small bits of data that are sent by the web application but stored locally in the browser.  This lets the application use the cookie to pass information between pages and store variable information. The web application controls what information is stored in a cookie and how it is used. Typical types of information stored in cookies are session Identifiers, personalization and customization information, and in rare cases even usernames to enable automated logins. There are two different types of cookies: <i>session cookies</i> and <i>persistent cookies</i>.  Session cookies only live in the browser's memory, and are not stored anywhere.  Persistent cookies, however, are stored on the browser's hard drive.  This can cause security and privacy issues depending on the information stored in the cookie and how it is accessed.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[<br />Persistent cookies are stored on the browsing clients hard drive even when that client is no longer browsing the Web site that set the client.  Depending on what information is stored in the cookie, this could lead to security and privacy violations.   The Office of Management and Budget has decreed that no federal websites shall use persistent cookies except in very specific situations.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[<br />All cookies are set by the server via the Set-Cookie HTTP Header.  A browser knows to store that cookie as a persistent cookie when it finds the keyword 'Expires=' followed by a date in the future.  If there is no 'Expires=' tag, or if the specified date has already passed, then the browser will keep the cookie in memory only as a session cookie. <br /><br />To view the persistent cookie set on this page, view the <b>HTTP  response</b> and examine the Set-Cookie header.  You should see the 'Expires=' tag with a future date specified.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[<br />From a coding perspective, the only distinction between a session cookie and a persistent cookie is the 'Expires=' tag that specifies when a persistent cookie should expire.  If a cookie has no 'Expires=' tag, then it is automatically interpreted as a session cookie.  Removing the expiration  date from the code that sets the cookie will change it to a session cookie.]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<b><a href="https://vulncat.fortify.com/en/detail?id=desc.semantic.java.cookie_security_persistent_cookie">Cookie Security: Persistent Cookie</a></b>]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>11551</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11309</VulnerabilityID><Severity>1</Severity><Name>Web Server Misconfiguration: Insecure Content-Type Setting</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[Almost all browsers are designed to use a mime sniffing technique to guess the content type of the HTTP response instead of adhering to the <font face="courier new">Content-Type</font> specified by the application in specific cases or ignoring the content when no mime type is specified. Inconsistencies introduced by the mime sniffing techniques could allow attackers to conduct Cross-Site Scripting attacks or steal sensitive user data. WebInspect has determined that the application fails to instruct the browser to strictly enforce the <font face="courier-new">Content-Type</font> specification supplied in the response.<br /><br />
+Web server misconfiguration can cause an application to send HTTP responses with the missing <font face="courier new">Content-Type</font> header or specify a mime type that does not match up accurately with the response content. When a browser receives such a response, it attempts to programmatically determine the mime type based on the content returned in the response. The mime type derived by the browser, however, might not accurately match the one intended by the application developer. Such inconsistencies have historically allowed attackers to conduct Cross-Site Scripting or data theft using Cascading Style Sheets (CSS) by letting them bypass server-side filters using mime type checking and yet have the malicious payload with misleading mime type specification executed on the client-side due to the browser mime sniffing policies.<br /><br />
+Microsoft Internet Explorer (IE) introduced the <font face="courier new">X-Content-Type-Options: nosniff</font> specification that application developers can include in all responses to ensure that mime sniffing does not occur on the client-side. This protection mechanism is limited to Microsoft Internet Explorer versions 9 and above.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[By failing to dictate the suitable browser interpretation of the response content, application developers can expose their users to Cross-Site Scripting or information stealing attacks.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[<ul><ol>1. Build a test page that includes a reference to an external JavaScript or CSS resource</ol><ol>2. Configure the server to return the external resource with an incorrect mime type specification</ol><ol>3. Visit the test page using an old version of Microsoft’s Internet Explorer (version  IE 8) browser</ol><ol>4. Interpretation of the external content as JavaScript or CSS by the browser despite the misleading mime type specification indicates a potential for compromise.</ol></ul>]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Configure the web server to always send the <font face="courier new">X-Content-Type-Options: nosniff</font> specification in the response headers. In addition, ensure that following safety precautions are also put in place: 
+<ul><ol>1. Verify that the web server configuration will send the accurate mime type information in the <font face="courier new">Content-Type</font> header of each HTTP response</ol><ol>2. Configure the server to send a default <font face="courier new">Content-Type</font> of <font face="courier new">text-plain</font> or <font face="courier-new">application/octet-stream</font> to tackle failure scenarios</ol><ol>3. Ensure that appropriate <font face="courier new"> Character Set </font> is specified in the <font face="courier new"> Content-Type </font>header</ol><ol>4. Configure the server to send <font face="courier new">Content-Disposition: attachment; filename=name; </font>for content without an explicit content type specification.</ol></ul>]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br /><b>Microsoft Internet Explorer: </b><br /><a href="http://msdn.microsoft.com/en-us/library/ie/gg622941(v=vs.85).aspx">MIME-Handling Change: X-Content-Type-Options: nosniff</a><br /><a href="http://blogs.msdn.com/b/ie/archive/2010/10/26/mime-handling-changes-in-internet-explorer.aspx">MIME-Handling Changes in Internet Explorer</a><br /><br /><b>OWASP: </b><br /><a href="https://www.owasp.org/index.php/OWASP_Testing_Guide_Appendix_D:_Encoded_Injection">OWASP Testing Guide Appendix D: Encoded Injection</a><br /><a href="https://www.owasp.org/index.php/List_of_useful_HTTP_headers">List of Useful HTTP Headers</a><br /><br /><b>CSS Data Theft: </b><br /><a href="http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2010-0654">CVE-2010-0654</a>]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Info</CheckTypeID><EngineType>11608</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11606</VulnerabilityID><Severity>0</Severity><Name>HTML5: Missing Content Security Policy</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[Content Security Policy (CSP) is an HTTP response security header that developers and security architects can leverage to create an allow list of domains from which the site is allowed to load resources. This header provides an in-depth security protection from critical vulnerabilities such as cross-site scripting and clickjacking. Additionally, CSP restricts execution of inline JavaScript, dynamic JavaScript code evaluation from strings, and framing of the site from external domains. While CSP is not a replacement for input validation, it can help to significantly reduce the risk of XSS from unknown weaknesses. The CSP frame-ancestors directive is equivalent to X-Frame-Options and restricts the domain that are allowed to frame the site’s content.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[Security  architects and developers can leverage CSP to significantly reduce the risk of XSS and clickjacking attacks. CSP headers can restrict leakage of information to external domains by restricting which domains the site is allowed to load contents from when rendered in browser .]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[Access link /accounts/login/ through a proxy and notice the missing CSP header in the response. By default, WebInspect flags only one instance of this vulnerability per host because it is typical to set this header at the host level in a server configuration. <br /><br />
+Perform the following steps to flag all instances of this issue:<br /><ul><li>Create a new policy with the selection of checks that you want to include in a rescan. We recommend using the Blank or Passive policy as a base. </li><li>Select this check and uncheck the “FlagAtHost” check input from standard description.</li><li>Save the policy.</li><li>Rescan with this new custom policy.</li></ul>]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Define a CSP policy suitable for your site. The policy can be set either with an HTTP response header or &lt;meta /&gt; tag. <br /><br />
+For example:<br /><code>Content-Security-Policy: default-src https://example.net; child-src 'none';</code><br />
+Or<br /><code>&lt;meta http-equiv="Content-Security-Policy" content="default-src https://cdn.example.net; child-src 'none'; object-src 'none'"&gt;</code><br /><br />
+Content-Security-Policy 2 is the recommended standard. Content-Security-Policy 3 is in draft. The following is a snapshot of modern browser support for the CSP header:<br /><ul><li>Edge: Versions 15-18; supported with a nonce bug. Version 75 and later; fully supported. </li><li>Chrome: Versions 36-38; missing the plugin-types, child-src, frame-ancestors, base-uri, and form-action directives. Version 39; missing the plugin-types, child-src, base-uri, and form-action directives. Version 40 and later; fully supported. </li><li>Firefox: Versions 31-34; missing the plugin-types, child-src, frame-ancestors, base-uri, and form-action directives. Version 35; missing the plugin-types, child-src, frame-ancestors, and form-action directives. Versions 36-44; missing the plugin-types and child-src directives. Version 45 and later; missing the plugin-types directive.</li></ul>
+Furthermore, the report-uri directive can be configured to receive reports of attempts to violate the policy. These reports can be used as an early indication of security issues in the site as well as to optimize the policy.]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br /><a href="http://www.w3.org/TR/CSP/">Content Security Policy Level 3</a><br /><a href="https://www.owasp.org/index.php/Content_Security_Policy">OWASP Content Security Policy</a><br /><a href="https://developer.mozilla.org/en-US/docs/Web/Security/CSP/Introducing_Content_Security_Policy">MDN web docs</a><br /><a href="https://content-security-policy.com">Content Security Policy (CSP) Quick Reference Guide</a><br />]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>CUSTOM</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/	HTTP/1.1/../../?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/	HTTP/1.1/../../?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Referer: https://omnis.deltaww.com/accounts/login/?next=/
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Audit.Attack";SID="C5D0DC1B498A596B07176D26EDB4BA7E";PSID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="AuditAttack";CrawlType="None";AttackType="HeaderParamManipulation";OriginatingEngineID="8e739e86-5425-4711-b78f-07d113702573";AttackSequence="0";AttackParamDesc="ControChars";AttackParamIndex="0";AttackParamSubIndex="0";CheckId="11699";Engine="Control+Chars+Detection";SmartMode="4";tht="40";
+X-RequestManager-Memo: stid="25";stmi="0";sc="1";rid="d14dd4cd";
+X-Request-Memo: rid="222d27f0";sc="1";thid="41";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5;sessionid=cb3kk4gt6az3rpbnzcy3wfxtgfq7iobn;csrftoken=KreLPQj9a8BpDzSVpuEZati0QbFqbwom0RfIJNnQVcax3oCDwQJh79PNhaMOuwtJ
+
+]]></VulnerableSession><TriggerSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></TriggerSession><VulnerabilityID>11699</VulnerabilityID><Severity>2</Severity><Name>Path Manipulation: Special Characters</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[Control characters such as 0x09 should not be allowed in a URL path and must be percent-encoded by clients. The inconsistent parsing of these control characters between proxy and backend server might introduce various threats.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[Attackers might manipulate control characters in the URL path. The implication varies depending on the context of the vulnerability, and the business logic of the application. However, in most cases, attackers insert control characters in different positions of the URL path to bypass authentication or restrictions.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[The following is an example of how a simple attack might occur. Suppose there is an Gunicorn application that is behind a proxy server. The proxy server accepts control characters such as 0x09 in the URL path. In the proxy configuration, access of the endpoint <code>/secret</code> is not allowed. <br /> When an attacker sends the following request <code>http://example.com/secret0x09HTTP/1.1/../../public</code><br />, the proxy normalizes the URL to <code>http://example.com/public</code>, which is allowed access. The proxy then forwards the original request to the backend Gunicorn application. The backend application considers the 0x09 character as a separator between the URL path and HTTP protocol version. The application therefore believes that the user is trying to access <code>http://example.com/secret</code> and returns the content of the endpoint <code>/secret</code> to the attacker. <br /> In the current scan, user can request the URL <code>/accounts/login/?next=/0x09HTTP/1.1/../../</code> to check if  could be allowed to be inserted in the URL path. If the remote server respond with same page as requesting the original URL, then the control character is allowed to be inserted in the URL path. This example shows that an attacker can bypass authentication or achieve other successful attacks by manipulating the control characters in the URL path.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Disable all possible control characters (0x00 – 0x1f, 0x7f) in the URL path.<br />For example, the following configuration could be added into nginx.conf file to forbid control character 0x09.<br /><code>if ($request_uri ~* .*[\x09]+.*) {return 435;}</code><br /> It is also accepted if add similar access control policy in the firewall which is deployed before the backend application server.]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<a href="https://github.com/nginx/nginx/commit/0b66bd4be777a5b79c5ae0e7dff89fc6429da0fe">Disabled control characters in URIs.</a><br /><a href="https://github.com/CHYbeta/OddProxyDemo/tree/master/nginx/demo1"> CHYbeta/OddProxyDemo</a>]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:02:12 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=KreLPQj9a8BpDzSVpuEZati0QbFqbwom0RfIJNnQVcax3oCDwQJh79PNhaMOuwtJ; expires=Thu, 20-Feb-2025 04:02:12 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=cb3kk4gt6az3rpbnzcy3wfxtgfq7iobn; expires=Thu, 07-Mar-2024 04:02:12 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='k5O4bIN7esSiU8ANchzoVwXHGpzgPwC0AvP15FROZwrqkXkvjDEGScuu7oGE8wHn' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>11284</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11285</VulnerabilityID><Severity>3</Severity><Name>Insecure Transport: Weak SSL Cipher</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[WebInspect has detected support for weak TLS/SSL ciphers on the server <b>https://omnis.deltaww.com:443/</b>. A weak cipher suite is one that uses a cryptographic algorithm that does not provide adequate security. This could be because the algorithm is outdated, or because it has been shown to be vulnerable to certain types of attacks that are not trivial.
+<br /><br />
+The Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols provide a mechanism to help protect authenticity, confidentiality, and integrity of the data transmitted between a client and web server. The strength of this protection mechanism is determined by the authentication, encryption, and hashing algorithms. These are collectively known as a cipher suite - chosen for the transmission of sensitive information over the TLS/SSL channel. Most web servers support a range of such cipher suites of varying strengths. Using a weak cipher or an encryption key of insufficient length, for example, could enable an attacker to defeat the protection mechanism and steal or modify sensitive information. 
+<br /><br />
+If misconfigured, a web server could be manipulated into choosing weak cipher suites. Also, new versions of the TLS protocols are backward compatible and provide support for older cipher suites defined in previous versions of the SSL/TLS protocols. For example, it is possible to configure TLS 1.2 to use older and weak ciphers that use CBC.
+<br /><br />
+We recommend updating the web server configuration to remove weak ciphers and to always choose the strongest ciphers for encryption.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[<br />A weak encryption scheme can be subjected to brute force attacks that have a reasonable chance of succeeding using current methods and resources. An attacker could possibly execute a man-in-the-middle attack which would allow them to intercept, monitor and tamper with sensitive data.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[<br />Each weak cipher was detected by establishing an SSL connection with the target host and specifying the cipher to test in the Client Hello message of the SSL handshake.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Disable support for weak ciphers on the server. Weak ciphers are generally defined as:
+<ul><li>Any cipher with key length less than 128 bits</li><li>Cipher suites that do not have Perfect Forward Secrecy (PFS)</li><li>All CBC mode ciphers due to POODLE, Zombie POODLE, GOLDENDOODLE, 0-Length OpenSSL, and Sleeping POODLE vulnerabilities</li><li>All ciphers that use SHA1 for cryptographic hash functions</li></ul>
+
+The following ciphers supported by the server are weak and should be disabled:<br /><b><ul><li>TLS_RSA_WITH_AES_128_CBC_SHA (0x2f)</li><li>TLS_RSA_WITH_AES_256_CBC_SHA (0x35)</li><li>TLS_DHE_RSA_WITH_AES_128_CBC_SHA (0x33)</li><li>TLS_DHE_RSA_WITH_AES_256_CBC_SHA (0x39)</li><li>TLS_RSA_WITH_CAMELLIA_128_CBC_SHA (0x41)</li><li>TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA (0x45)</li><li>TLS_RSA_WITH_CAMELLIA_256_CBC_SHA (0x84)</li><li>TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA (0x88)</li><li>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA (0xc013)</li><li>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA (0xc014)</li><li>TLS_RSA_WITH_AES_128_CBC_SHA (0x2f)</li><li>TLS_RSA_WITH_AES_256_CBC_SHA (0x35)</li><li>TLS_DHE_RSA_WITH_AES_128_CBC_SHA (0x33)</li><li>TLS_DHE_RSA_WITH_AES_256_CBC_SHA (0x39)</li><li>TLS_RSA_WITH_CAMELLIA_128_CBC_SHA (0x41)</li><li>TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA (0x45)</li><li>TLS_RSA_WITH_CAMELLIA_256_CBC_SHA (0x84)</li><li>TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA (0x88)</li><li>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA (0xc013)</li><li>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA (0xc014)</li><li>TLS_RSA_WITH_AES_128_CBC_SHA (0x2f)</li><li>TLS_RSA_WITH_AES_128_CBC_SHA256 (0x3c)</li><li>TLS_RSA_WITH_AES_256_CBC_SHA (0x35)</li><li>TLS_RSA_WITH_AES_256_CBC_SHA256 (0x3d)</li><li>TLS_DHE_RSA_WITH_AES_128_CBC_SHA (0x33)</li><li>TLS_DHE_RSA_WITH_AES_256_CBC_SHA (0x39)</li><li>TLS_RSA_WITH_CAMELLIA_128_CBC_SHA (0x41)</li><li>TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA (0x45)</li><li>TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 (0x67)</li><li>TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 (0x6b)</li><li>TLS_RSA_WITH_CAMELLIA_256_CBC_SHA (0x84)</li><li>TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA (0x88)</li><li>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA (0xc013)</li><li>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256 (0xc027)</li><li>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA (0xc014)</li><li>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384 (0xc028)</li></ul></b><ul><li>For Apache, modify the following lines in httpd.conf or ssl.conf:</li><ul><li>
+SSLCipherSuite ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:!NULL:!RC4:!RC2:!DES:!3DES:!SHA:!SHA256:!SHA384:!MD5+HIGH:+MEDIUM
+</li></ul><li>
+
+For IIS, refer to the following Microsoft Knowledge Base articles:</li><ul><li>Article ID: 187498</li><li>Article ID: 245030 and</li><li>Security Guidance for IIS</li><li>Article ID: 2868725</li></ul><li>For other servers, refer to vendor specific documentation.</li></ul><br />
+The following ciphers supported by the server should provide adequate protection and are safe to leave enabled:<br /><b><ul><li>TLS_RSA_WITH_AES_128_GCM_SHA256 (0x9c)</li><li>TLS_RSA_WITH_AES_256_GCM_SHA384 (0x9d)</li></ul></b>]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br /><b>OWASP:</b><br /><a href="https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html">Transport Layer Protection Cheat Sheet</a><br /><br /><b>PCI Security Standards Council:</b><br /><a href="https://docs-prv.pcisecuritystandards.org/PCI%20DSS/Standard/PCI-DSS-v4_0.pdf">PCI DSS v4.0</a><br /><br /><b>CVE</b><br /><a href="https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2013-2566f">CVE-2013-2566</a><br /><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-2183">CVE-2016-2183</a><br /><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-6329">CVE-2016-6329</a><br /><br /><b>NIST</b><br /><a href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar2.pdf">NIST Special Publication 800-131A Revision 2</a><br /><br /><b>Microsoft:</b><br /><a href="https://support.microsoft.com/en-us/kb/2868725">Knowledge Base Article ID: 2868725</a><br /><a href="http://support.microsoft.com/kb/187498">Knowledge Base Article ID: 187498</a><br /><a href="http://support.microsoft.com/kb/245030/">Knowledge Base Article ID: 245030</a><br /><a href="http://technet.microsoft.com/en-us/library/dd450371%28WS.10%29.aspx">Security Guidance for IIS</a><br /><br /><b>Apache:</b><br /><a href="http://httpd.apache.org/docs/2.0/ssl/ssl_faq.html">SSL/TLS Strong Encryption: FAQ</a><br /><br /><b>RC4:</b><br /><a href="https://www.schneier.com/blog/archives/2013/03/new_rc4_attack.html">New RC4 Attack</a><br /><br /><b>ACM CCS '16</b><br /><a href="http://dl.acm.org/citation.cfm?id=2978423">On the Practical (In-)Security of 64-bit Block Ciphers: Collision Attacks on HTTP over TLS and OpenVPN</a><br /><br /><b>SHA-1</b><br /><a href="http://shattered.io/static/shattered.pdf">The first collision for full SHA-1</a><br /><br /><b>MD5</b><br /><a href="https://tools.ietf.org/html/rfc6151">Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms</a>]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>11284</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11395</VulnerabilityID><Severity>3</Severity><Name>Insecure Transport: Weak SSL Protocol</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[<br />
+The Transport Layer Security (TLS) protocol provides a protection mechanism to better protect authenticity, confidentiality and integrity of the data transmitted between a client and a web server.  The TLS protocol has undergone various revisions resulting in periodic version updates. Each revision tries to address security weakness in prior versions and incorporate support for the latest in security measures.  It is strongly recommended to use the latest version of the available protocol, whenever possible. 
+<br /><br />
+TLS 1.0 is considered insecure as it lacks support for strong ciphersuites and is known to be plagued by several known vulnerabilities.  It either uses RC4 cipher, which is prone to bias attacks or uses Cipher Block Chaining (CBC) mode cipher, which enables condition for POODLE (Padding Oracle On Downgraded Legacy Encryption) attacks. 
+<br /><br />
+NIST Special Publication 800-52 Revision 1 no longer considers TLS 1.0 as strong cryptography.  TLS 1.0 is also no longer in compliance with PCI DSS v3.2.1 requirements.  PCI does not consider TLS 1.0 to be adequate to protect cardholder data and has deprecated its use starting June 2016. Use of insecure protocol versions will weaken the strength of the transport protection and could allow an attacker to compromise, steal or modify sensitive information. Configuring the web server to use the most secure protocol, TLS 1.2 and above is highly recommended.
+<br />]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[<br />Use of a weak protocol such as TLS 1.0 leaves the connection vulnerable to man-in-the-middle attacks.  This would allow the attacker to read and modify data on a secure TLS connection, thus compromising user security and privacy.  Its use would also limit the use of strong cipher suites that help protect data integrity and confidentiality.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[<br />Disable support for the TLS 1.0 protocol on the server.  Both NIST 800-52  and PCI DSS v3.1 strongly recommend upgrade to the latest version of TLS available, TLS 1.2.    Or, at a minimum an upgrade to TLS 1.1.
+
+<ul><li>For Apache, modify the following lines in the server configuration</li><ul><li>SSLProtocol ALL –SSLv2 -SSLv3 -TLSv1</li></ul><li>For Nginx, modify the following lines in server configuration:</li><ul><li>ssl_protocols TLSv1.1 TLSv1.2;</li></ul><li>For IIS, please refer to Microsoft Knowledge Base Articles:</li><ul><li><a href="’https://technet.microsoft.com/library/security/3009008’">https://technet.microsoft.com/library/security/3009008</a></li></ul><li>For other servers, please refer to vendor specific documentation.</li></ul>Please Note: Not all implementations of TLS are affected by POODLE.  Please ensure the TLS implementation in use on the target server is not vulnerable to POODLE. Remove CBC mode ciphers to prevent the POODLE attack if applicable.]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br /><b>OWASP:</b><br /><a href="https://www.owasp.org/index.php/Transport_Layer_Protection_Cheat_Sheet">Transport Layer Protection Cheat Sheet</a><br /><br /><b>NIST:</b><br /><a href="http://www.nist.gov/customcf/get_pdf.cfm?pub_id=915856">NIST SP 800-52 Revision 1</a><br /><br /><b>PCI Security Standards Council:</b><br /><a href="https://www.pcisecuritystandards.org/documents/PCI_DSS_v3-1.pdf">PCI DSS v3.1</a><br /><a href="https://www.pcisecuritystandards.org/documents/Migrating_from_SSL_Early_TLS_Information%20Supplement_v1.pdf">Migrating from SSL and Early TLS</a><br /><a href="https://www.pcisecuritystandards.org/pdfs/15_03_25_PCI_SSC_FAQ_SSL_Protocol_Vulnerability_Revisions_to_PCI_DSS_PAD.pdf">PCI SSC FAQ on impending revisions to PCI DSS, PA-DSS to address SSL protocol vulnerability</a><br /><br /><b>Microsoft:</b><br /><a href="http://support.microsoft.com/kb/187498">Knowledge Base Article ID: 187498</a><br /><a href="http://support.microsoft.com/kb/245030/">Knowledge Base Article ID: 245030</a><br /><a href="http://technet.microsoft.com/en-us/library/dd450371%28WS.10%29.aspx">Security Guidance for IIS</a><br /><br /><b>Apache:</b><br /><a href="http://httpd.apache.org/docs/2.0/ssl/ssl_faq.html">SSL/TLS Strong Encryption: FAQ</a><br /><br /><b>CVE-2014-8730</b><br /><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-8730">CVE-2014-8730</a><br /><br /><b>POODLE Vulnerability Expands Beyond SSLv3 to TLS 1.0 and 1.1</b><br /><a href="https://www.globalsign.com/en/blog/poodle-vulnerability-expands-beyond-sslv3-to-tls/">https://www.globalsign.com/en/blog/poodle-vulnerability-expands-beyond-sslv3-to-tls/</a><br /><br /><b>TLS Fallback Signaling Cipher Suite Value (SCSV) for Preventing Protocol Downgrade Attacks</b><br /><a href="https://tools.ietf.org/html/draft-ietf-tls-downgrade-scsv-00">https://tools.ietf.org/html/draft-ietf-tls-downgrade-scsv-00l</a><br />]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>11284</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11516</VulnerabilityID><Severity>2</Severity><Name>Insecure Transport: Weak SSL Protocol</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[Fortify WebInspect has detected support for Transport Layer Security Protocol (TLS) 1.1 protocol on the target server. NIST publication 800-52 revision 1 recommends all web applications to prefer Transport Layer Security Protocol version 1.2 (TLS 1.2) and mandates government agencies to develop a migration plan for TLS1.2 by January 2015.  TLS1.1 mandates a combination of MD5 and SHA1 for the hash function, which leads to conclusion that strength of TLS1.1 depends largely on the strength of SHA1. MD5 is generally known to be weak. SHA1 use is being phased out. NIST Special Publication 800-131A deprecated the use of SHA-1 in digital signature starting January 2014.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[Weak TLS/SSL protocols may exhibit any or all of the following properties: 
+<ul><li>
+No protection against man-in-the-middle (MitM) attacks 
+</li><li>
+Same key used for authentication and encryption 
+</li><li>
+Weak message authentication control 
+</li><li>
+No protection against TCP connection closing
+</li></ul>
+
+These properties can allow an attacker to intercept, modify and tamper with sensitive data.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[The list of supported SSL/TLS protocols can be obtained by running the server analyzer tool from Fortify Security Toolkit supplied with Fortify WebInspect against the target server.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Have a migration plan in place for all sites to exclusively use TLS1.2 and above. 
+
+Disable support for the TLS 1.1 protocol on the server. Instead, TLSv1.2 and above should be used. 
+<ul><li>
+For Apache, modify the following lines in the server configuration 
+<ul><li>
+SSL Protocol ALL –SSLv2 -SSLv3 -TLSv1 –TLSv1.1
+</li></ul></li><li>
+For Nginx, modify the following lines in server configuration: 
+<ul><li>
+SSL_Protocols TLSv1.2
+</li></ul></li><li>
+For IIS, please refer to Microsoft Knowledge Base Articles: 
+<ul><li>
+https://technet.microsoft.com/library/security/3009008
+</li></ul></li></ul>
+For other servers, please refer to vendor specific documentation.]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<a href="http://csrc.nist.gov/publications/nistpubs/800-131A/sp800-131A.pdf">NIST Special Publication 800-131A</a><br /><a href="http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-52r1.pdf">NIST Special Publication 800-52r1</a><br />]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Best Practices</CheckTypeID><EngineType>11284</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11364</VulnerabilityID><Severity>0</Severity><Name>Insecure Transport: Missing Perfect Forward Secrecy</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[<br />Perfect Forward Secrecy (PFS) assures the secrecy of encrypted communications into the future in case SSL/TLS private key is compromised. PFS is a function of key-exchange protocols used for the establishment of shared secret between the client and the server [1]. On a non-forward secrecy server, both the authentication of the server and the encryption is done using  long-term private key. Hence, compromised long-term private key can jeopardize all communications. PFS mitigates this by achieving authentication using a long-term private key and session data encryption using a short-term private key. PFS is commonly achieved using Diffie-Hellman in ephemeral-static mode (DHE) or Elliptic Curve Diffie-Hellman key agreement scheme with ephemeral keys (ECDHE) [2, 3, 4]. For every TLS session established with DHE- or ECDHE- as key exchange algorithm in cipher suite, the server is required to use a new Diffie-Hellman public/private key for the generation of the TLS master secret [8]. The server signs this Diffie-Hellman public key using the long-term private key to guarantee authenticity. The long-term private key is not used for the encryption of session contents. While a stolen ephemeral private key could allow an attacker to decipher encrypted communication, the compromise is confined to the specific session for which the ephemeral key was generated. It is recommended that ephemeral keys are not logged.
+<br /><br />WebInspect has determined that omnis.deltaww.com:443 target server configuration contains following issues:<br/>1. Target server supports  ECDHE DHE PFS cipher suites but it also uses 8 other cipher suites which do not support PFS:<br/><b><ul><li>TLS_RSA_WITH_AES_128_GCM_SHA256 (0x9c)</li>
+<li>TLS_RSA_WITH_AES_256_GCM_SHA384 (0x9d)</li>
+<li>TLS_RSA_WITH_AES_128_CBC_SHA (0x2f)</li>
+<li>TLS_RSA_WITH_AES_256_CBC_SHA (0x35)</li>
+<li>TLS_RSA_WITH_CAMELLIA_128_CBC_SHA (0x41)</li>
+<li>TLS_RSA_WITH_CAMELLIA_256_CBC_SHA (0x84)</li>
+<li>TLS_RSA_WITH_AES_128_CBC_SHA256 (0x3c)</li>
+<li>TLS_RSA_WITH_AES_256_CBC_SHA256 (0x3d)</li>
+</ul></b>]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[<br />A stolen long-term private key can be used by an attacker to decrypt past intercepted communication putting user data at risk where data is still relevant. This shortcoming in SSL/TLS was accentuated in the wake of Heartbleed [4] vulnerability, a vulnerability in Openssl library[4], that allowed attackers to steal server’s private keys among other sensitive data.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[<br />A list of supported ciphers by this server can be obtained by running ServerAnalyzer tool from WebInspect toolkit. Notice the absence of “DHE“ and “ECDHE“ in the list of supported cipher-suite names.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[1. PFS is enabled by turning on Diffie-Hellman Ephemeral (DHE) or Elliptic-Curve-Diffie-Hellman Ephemeral (ECDHE) based cipher suites on the server [2]. 
+e.g. 
+<ul><li>
+For Apache – Modify SSLCipherSuite parameter in server configuration to add ECDHE or DHE key exchange algorithm. 
+</li><li>
+
+For nginx – Modify ssl_ciphers in server configuration to add ECDHE or DHE  key exchange algorithm.  
+</li><li>
+For IIS please refer to following knowledge base articles:
+<ul><li>
+http://msdn.microsoft.com/en-us/library/windows/desktop/aa374757(v=vs.85).aspx
+</li><li>
+http://support.microsoft.com/kb/245030
+</li></ul></li></ul>
+
+2. Make sure that all other cipher suites which do not provide PFS are disabled on the server.]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<ol><li><a href="http://en.wikipedia.org/wiki/Forward_secrecy">http://en.wikipedia.org/wiki/Forward_secrecy</a></li><li><a href="http://tools.ietf.org/html/rfc5246">
+Dierks, T. and E. Rescorla, "The Transport Layer Security (TLS) Protocol Version 1.2", RFC 5246, August 2008.
+</a></li><li><a href="http://www.ietf.org/rfc/rfc2631">Rescorla, E., "Diffie-Hellman Key Agreement Method", RFC 2631, June 1999.</a></li><li><a href="http://tools.ietf.org/html/rfc4492">Blake-Wilson, S., Bolyard, N., Gupta, V., Hawk, C., and B. Moeller, "Elliptic Curve Cryptography (ECC) Cipher Suites for Transport Layer Security (TLS)", RFC 4492, May 2006.</a></li><li><a href="http://tools.ietf.org/html/rfc4492">http://tools.ietf.org/html/rfc4492</a></li><li><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0160">https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0160</a></li><li><a href="http://www.openssl.org/">http://www.openssl.org/</a></li><li><a href="http://en.wikipedia.org/wiki/Diffie–Hellman_key_exchange">http://en.wikipedia.org/wiki/Diffie–Hellman_key_exchange</a></li><li><a href="http://nginx.org/en/docs/http/ngx_http_ssl_module.html">http://nginx.org/en/docs/http/ngx_http_ssl_module.html</a></li><li><a href="http://httpd.apache.org/docs/2.2/mod/mod_ssl.html">http://httpd.apache.org/docs/2.2/mod/mod_ssl.html</a></li></ol>]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>11284</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11520</VulnerabilityID><Severity>4</Severity><Name>Insecure Transport: Insufficient Diffie Hellman Strength</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[<br />Using Diffie Hellman group with prime (<i>p</i> or small prime) of size 1024-bit or less, leaves the server vulnerable to man-in-the middle attack (MitM).<br /><br />Diffie-Hellman key exchange algorithm uses fixed primes as a base for computing the secret key used to secure the communication channel.  The size of the small prime <i>p</i> deployed dictates the security level of the generated key. This in turn defines the effective security provided by the Diffie-Helman key exchange algorithm.   Research indicates that Diffie-Hellman group using prime size of 1024-bit provides only about 77-80 bits of security. Communication channels that are secured using this key are vulnerable to man-in-the-middle attack.  All anonymous, ephermeral and fixed Diffie-Hellman key exchange algorithms <b>except</b> for Elliptical-Curve Diffie-Hellman (ECDHE) key exchange are vulnerable to this attack.<br /><br />
+
+WebInspect has detected the target server using Diffie-Hellman small prime <i>p</i> of size <b>1024</b> bits  in ciphersuite:<br /><b>TLS_DHE_RSA_WITH_AES_128_CBC_SHA (0x33)</b>. <br /><br />  The server may thus be vulnerable to eavesdropping and/or man-in-the-middle attacks. <br /><br />
+
+NOTE: The following ciphersuites, detected by WebInspect during the scan, may also be affected by the insufficient size of the Diffie-Hellman small prime <i>p</i>:
+<b><ul><li>TLS_DHE_RSA_WITH_AES_128_CBC_SHA (0x33)</li><li>TLS_DHE_RSA_WITH_AES_256_CBC_SHA (0x39)</li><li>TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA (0x45)</li><li>TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA (0x88)</li><li>TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 (0x67)</li><li>TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 (0x6b)</li><li>TLS_DHE_RSA_WITH_AES_128_GCM_SHA256 (0x9e)</li><li>TLS_DHE_RSA_WITH_AES_256_GCM_SHA384 (0x9f)</li></ul></b>]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[<br />Using Diffie Hellman group with prime (<i>p</i> or small prime) of size 1024-bit or less, leaves the server vulnerable to man-in-the middle attack (MitM).]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[<br /><ul><li>Disable the use of export cipher suites.</li><li>Ensure that the servers use strong Diffie Hellman group with prime of size 2048-bit or more.</li><li>Reject any connections that accept Diffie-Hellman primes smaller than 1024-bit.</li><li>Deploy Elliptic-Curve Diffie-Hellman (ECDHE) key exchange.</li></ul>]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br /><a href="http://dl.acm.org/citation.cfm?id=2813707">Imperfect Forward Secrecy: How Difﬁe-Hellman Fails in Practice </a><br /><br />]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>11554</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11369</VulnerabilityID><Severity>2</Severity><Name>Insecure Deployment: OpenSSL</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[<br />WebInspect has detected an SSL/TLS man-in-the-middle (MitM) vulnerability caused by a specially crafted SSL handshake message. Also known as OpenSSL ChangeCipherSpec (CCS) injection vulnerability, this bug is known to manifest in the OpenSSL implementation of the secure socket layer for versions earlier than 0.9.8za, 1.0.0 before 1.0.0m and 1.0.1 before 1.0.1h. A ChangeCipherSpec message signals peers to switch to a symmetric encryption during SSL handshake process after negotiating a master key to use for symmetric encryption. However, vulnerable versions of OpenSSL allow a CCS message before the master key is negotiated resulting in a zero length master key.   <br />]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[Man-in-the-middle attackers may use this vulnerability to hijack and intercept secure SSL/TLS communication by issuing an early CCS message to client and server when both are using vulnerable instance of OpenSSL. This may allow the attacker to compromise the confidentiality of sensitive session data.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[To verify the vulnerability, determine the version of the OpenSSL library deployed on the application servers. The version information can be obtained by running the command openssl version. Note that the client needs to be directly connected to the server in order to test for the vulnerability. If a proxy server is present in the environment, it is recommended to test both the proxy and the application server for the vulnerability.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Upgrade to latest OpenSSL version.
+<br /><ul><li>
+OpenSSL 0.9.8 SSL/TLS users should upgrade to 0.9.8za or later.
+</li><li>
+OpenSSL 1.0.0 SSL/TLS users  should upgrade to 1.0.0m or later.
+</li><li>
+OpenSSL 1.0.1 SSL/TLS users should upgrade to 1.0.1h or later.
+</li></ul>
+Additionally, users should check for the possibility of an indirect dependency on the OpenSSL library via third party software. Upgrade any such instances according to vendor recommendations.<br />]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<ul><li>
+https://www.openssl.org/news/secadv_20140605.txt
+</li><li>
+http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-0224
+</li></ul>]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue><Issue><CheckTypeID>Vulnerability</CheckTypeID><EngineType>CUSTOM</EngineType><URL>https://omnis.deltaww.com:443/accounts/login/?next=/</URL><Scheme>https</Scheme><Host>omnis.deltaww.com</Host><Port>443</Port><VulnerableSession><![CDATA[GET /accounts/login/?next=/ HTTP/1.1
+Accept: */*
+Pragma: no-cache
+Accept-Encoding: gzip, deflate
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0
+Host: omnis.deltaww.com
+Connection: Keep-Alive
+X-WIPP: AscVersion=23.1.0.107
+X-Scan-Memo: Category="Crawl";SID="32493FC5625DFA8ACBFFD911FEC52CA8";SessionType="ExternalAddedToCrawl";CrawlType="None";AttackType="None";OriginatingEngineID="00000000-0000-0000-0000-000000000000";tht="31";
+X-RequestManager-Memo: stid="15";stmi="0";sc="1";rid="d41ff414";
+X-Request-Memo: rid="24a2ad80";sc="1";thid="36";
+Cookie: CustomCookie=WebInspect171134ZX46004EABF54B44B3A4BD7151377552B3Y91A5
+
+]]></VulnerableSession><TriggerSession null="1" /><VulnerabilityID>11365</VulnerabilityID><Severity>1</Severity><Name>Insecure Transport: HSTS not Set</Name><ReportSection><Name>Summary</Name><SectionText><![CDATA[<br />Http Strict Transport Security  (HSTS) policy enables web applications to enforce web browsers to restrict communication with the server over an encrypted SSL/TLS connection for a set period. Policy is declared via special Strict Transport Security response header. Encrypted connection protects sensitive user and session data from attackers eavesdropping on network connection. 
+<br /> 
+Consider following attack scenarios:
+<br /><ul><li>Users often omit the URI scheme i.e. https:// when typing a URL in location bar to access a website. Also third party websites can link to the site using the “http” scheme instead of "”https”. This could result in an initial connection to a HTTPS-enabled site over an unencrypted channel. An eavesdropping attacker can hijack this unencrypted connection and replace the intended use of HTTPS protocol with HTTP in an attack known as SSLStrip, granting unauthorized access to all subsequent traffic. </li><li>Websites often transfer non-sensitive resources such as help documents over an unencrypted HTTP connection. Any cookies without a secure flag are sent along with such requests potentially disclosing sensitive user and session data to eavesdropper.</li><li>Man-in-the-Middle attacks that exploit user tendencies to override invalid certification warnings, e.g. SSLSniff. </li></ul><br />
+For web sites configured with an accurate HSTS policy, browsers automatically upgrade any HTTP connections to HTTPS. Furthermore, browsers prevent users from overriding any host certificate warnings. HSTS offers an effective defense against above attack scenarios.]]></SectionText></ReportSection><ReportSection><Name>Implication</Name><SectionText><![CDATA[A successful MiTM attack such as SSLStrip or SSLsniff can lead to the compromise of sensitive user data such as financial information, Social Security Number, personal information etc. as well as grant unauthorized access to user accounts enabling attackers to perform privileged actions on client’s behalf.]]></SectionText></ReportSection><ReportSection><Name>Execution</Name><SectionText><![CDATA[Access location /accounts/login/ and notice the absence of the  Strict Transport Security header in the HTTP response.]]></SectionText></ReportSection><ReportSection><Name>Fix</Name><SectionText><![CDATA[Configure the web application under test to include Strict Transport Security header in every response generated by an HTTPS-enabled site. Any HTTP version of site on the same domain should permanently redirect to the secure encrypted site. Header should not be added to HTTP response as browsers will ignore it.
+<br /><br />
+It is important to note that this header does not prevent from above mentioned attack scenarios during the very first connection to the site or any connections established after the set period has expired. To prevent such a scenario, the site must be added to the pre-loaded HSTS hosts list embedded in both Google Chrome and Mozilla Firefox browsers.]]></SectionText></ReportSection><ReportSection><Name>Reference Info</Name><SectionText><![CDATA[<br /><a href="http://tools.ietf.org/html/rfc6797">http://tools.ietf.org/html/rfc6797</a>]]></SectionText></ReportSection><RawResponse><![CDATA[HTTP/1.1 200 OK
+Server: nginx/1.12.1
+Date: Thu, 22 Feb 2024 04:01:39 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 5747
+Connection: keep-alive
+Vary: Cookie
+X-Frame-Options: SAMEORIGIN
+Set-Cookie: csrftoken=oMZ7QfcaU6IEJlJlHdCQwCbqCnQgf2Cl5PxF9Q6qIGxhpqJI8EuKcmrsljhuYKc4; expires=Thu, 20-Feb-2025 04:01:39 GMT; Max-Age=31449600; Path=/
+Set-Cookie: sessionid=0t5bhlpu5wnjhhm8tk0zn5qdzb7b4nhf; expires=Thu, 07-Mar-2024 04:01:39 GMT; httponly; Max-Age=1209600; Path=/
+
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Delta Network Portal</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/font-awesome/css/font-awesome.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/simple-line-icons/simple-line-icons.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap/css/bootstrap.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css " rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <link href="/static/assets/global/plugins/select2/css/select2.min.css " rel="stylesheet" type="text/css" />
+        <link href="/static/assets/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="/static/assets/global/css/components-rounded.min.css " rel="stylesheet" id="style_components" type="text/css" />
+        <link href="/static/assets/global/css/plugins.min.css " rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN PAGE LEVEL STYLES -->
+        <link href="/static/assets/pages/css/login.min.css " rel="stylesheet" type="text/css" />
+        <!-- END PAGE LEVEL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="favicon.ico" /> </head>
+    <!-- END HEAD -->
+
+    <body class=" login">
+        <!-- BEGIN LOGO -->
+        <div class="logo">
+                <img src="/static/images/delta_omnis.png" alt="logo" />
+        </div>
+        <!-- END LOGO -->
+        <!-- BEGIN LOGIN -->
+        <div class="content">
+            <!-- BEGIN LOGIN FORM -->
+            <form class="login-form" action="/accounts/login/?next=/" method="POST">
+                <h3 class="form-title font-green">Sign In</h3>
+                
+                <input type='hidden' name='csrfmiddlewaretoken' value='7TjgbBhzUVB4r6osuCdaUZeEDGwrv3zFOWROucbPIvqH7boPV354AJuGmCXFeL9o' />
+                <div class="form-group">
+                    <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
+                    <label class="control-label visible-ie8 visible-ie9">Username</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="Username" name="username" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">Password</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="Password" name="password" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green btn-block uppercase">Login</button>
+                </div>
+            </form>
+            <!-- END LOGIN FORM -->
+        </div>
+        <div class="copyright"> 2018 © Delta ITNetwork.</div>
+
+        <!--[if lt IE 9]>
+<script src="/static/assets/global/plugins/respond.min.js "></script>
+<script src="/static/assets/global/plugins/excanvas.min.js "></script>
+<script src="/static/assets/global/plugins/ie8.fix.min.js "></script>
+<![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap/js/bootstrap.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/js.cookie.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery.blockui.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js " type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        <script src="/static/assets/global/plugins/jquery-validation/js/jquery.validate.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/jquery-validation/js/additional-methods.min.js " type="text/javascript"></script>
+        <script src="/static/assets/global/plugins/select2/js/select2.full.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="/static/assets/global/scripts/app.min.js " type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        <script src="/static/assets/pages/scripts/login.min.js " type="text/javascript"></script>
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+
+</html>]]></RawResponse></Issue></Issues></Scan>

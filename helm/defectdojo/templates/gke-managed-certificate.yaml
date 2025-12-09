@@ -1,0 +1,23 @@
+{{- if .Values.gke.useManagedCertificate | and (.Capabilities.APIVersions.Has "networking.gke.io/v1") }}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  {{- with .Values.extraAnnotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
+  {{- with .Values.extraLabels }}
+  labels:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
+  name: {{ $fullName }}-django
+  namespace: {{ .Release.Namespace }}
+spec:
+  domains:
+  - {{ .Values.host }}
+{{- end }}

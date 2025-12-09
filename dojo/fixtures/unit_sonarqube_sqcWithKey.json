@@ -1,0 +1,11 @@
+[
+  {
+    "model": "dojo.product_api_scan_configuration",
+    "pk": 2,
+    "fields": {
+      "product": 1,
+      "service_key_1": "someKey",
+      "tool_configuration": 1
+    }
+  }
+]

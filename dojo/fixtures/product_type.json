@@ -1,0 +1,19 @@
+[
+  {
+    "fields": {
+      "name": "Research and Development",
+      "critical_product": true
+    },
+    "model": "dojo.product_type",
+    "pk": 1
+  },
+  {
+    "fields": {
+      "product_type": 1,
+      "user": 1,
+      "role": 4
+    },
+    "model": "dojo.product_type_member",
+    "pk": 1
+  }
+]

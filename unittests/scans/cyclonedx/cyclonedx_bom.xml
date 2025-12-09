@@ -1,0 +1,1210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.0" version="1">
+    <components>
+        <component type="library">
+            <publisher>Matthew Newville</publisher>
+            <name>asteval</name>
+            <version>0.9.23</version>
+            <description>Safe, minimalistic evaluator of python expression using ast module</description>
+            <hashes>
+                <hash alg="MD5">5383f946e4970a34af90d0842af1c034</hash>
+                <hash alg="SHA-256">f5096a924b1d2f147e70327245d95fc8f534dbe94277b6828ce2a8c049d3a438</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>OSI Approved :: MIT License</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/asteval@0.9.23</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>bleach</name>
+            <version>3.3.0</version>
+            <description>An easy safelist-based HTML-sanitizing tool.</description>
+            <hashes>
+                <hash alg="MD5">b57b6fc0bf66f8814f5a966087fdf7bc</hash>
+                <hash alg="SHA-256">6123ddc1052673e52bab52cdc955bcb57a015264a1c57d37bea2f6b817af0125</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>Apache Software License</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/bleach@3.3.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Ask Solem</publisher>
+            <name>celery</name>
+            <version>4.4.7</version>
+            <description>Distributed Task Queue.</description>
+            <hashes>
+                <hash alg="MD5">47e3db7a5255406eda40645cf6d62409</hash>
+                <hash alg="SHA-256">a92e1d56e650781fb747032a3997d16236d037c8199eacd5217d1a72893bca45</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/celery@4.4.7</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Ned Batchelder and 142 others</publisher>
+            <name>coverage</name>
+            <version>5.5</version>
+            <description>Code coverage measurement for Python</description>
+            <hashes>
+                <hash alg="MD5">87e39b17cbb1788b372f9a16db4db5df</hash>
+                <hash alg="SHA-256">2a3859cb82dcbda1cfd3e6f71c27081d18aa251d20a17d87d26d4cd216fb0af4</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>Apache 2.0</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/coverage@5.5</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Christian Heimes</publisher>
+            <name>defusedxml</name>
+            <version>0.7.0</version>
+            <description>XML bomb protection for Python stdlib modules</description>
+            <hashes>
+                <hash alg="MD5">a942d0b4f621c09fd5064331a0a61fac</hash>
+                <hash alg="SHA-256">a290cad10346ed366c8a0133d868eaf6585ec6afdd0c511286cdb11f5fc3d285</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>PSFL</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/defusedxml@0.7.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Asif Saif Uddin, Ask Solem</publisher>
+            <name>django_celery_results</name>
+            <version>2.0.1</version>
+            <description>Celery result backends for Django.</description>
+            <hashes>
+                <hash alg="MD5">49b0e554c477d265fa58f268cdb1e024</hash>
+                <hash alg="SHA-256">a2f7d172f7f57dd972538acc6e80a5bf50c673fb4d82fe027189c8659c60dfce</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-celery-results@2.0.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Jan-Jelle Kester</publisher>
+            <name>django-auditlog</name>
+            <version>1.0a1</version>
+            <description>Audit log app for Django</description>
+            <hashes>
+                <hash alg="MD5">7ea7fd2cabc70b3e8258c12b1e9efee8</hash>
+                <hash alg="SHA-256">bd09ffd19e92c3fe12780ed197f451cd565e1128f69c406e5e1e12f521d7958e</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-auditlog@1.0a1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Michael Shepanski</publisher>
+            <name>django-dbbackup</name>
+            <version>3.3.0</version>
+            <description>Management commands to help backup and restore a project database and media</description>
+            <hashes>
+                <hash alg="MD5">3152a27b4d488a0f6dc1929242ffce1d</hash>
+                <hash alg="SHA-256">bb109735cae98b64ad084e5b461b7aca2d7b39992f10c9ed9435e3ebb6fb76c8</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-dbbackup@3.3.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>joke2k</publisher>
+            <name>django-environ</name>
+            <version>0.4.5</version>
+            <description>Django-environ allows you to utilize 12factor inspired environment variables to configure your Django application.</description>
+            <hashes>
+                <hash alg="MD5">6877c282082fb4e3a7bd90ef18cf1623</hash>
+                <hash alg="SHA-256">c57b3c11ec1f319d9474e3e5a79134f40174b17c7cc024bbb2fad84646b120c4</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-environ@0.4.5</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Alex Gaynor</publisher>
+            <name>django-filter</name>
+            <version>2.4.0</version>
+            <description>Django-filter is a reusable Django application for allowing users to filter querysets dynamically.</description>
+            <hashes>
+                <hash alg="MD5">8fa5aff9a048b227464b1512fc1edd0d</hash>
+                <hash alg="SHA-256">e00d32cebdb3d54273c48f4f878f898dced8d5dfaad009438fe61ebdf535ace1</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-filter@2.4.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Bryan Veloso</publisher>
+            <name>django-imagekit</name>
+            <version>4.0.2</version>
+            <description>Automated image processing for Django models.</description>
+            <hashes>
+                <hash alg="MD5">0b29f9f221b022aa6d2b1689c822b7aa</hash>
+                <hash alg="SHA-256">304c3379f6a5cac387e47ace11195a603ad3cb01e3e951b45489824d25b00359</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-imagekit@4.0.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Pablo Martin</publisher>
+            <name>django-multiselectfield</name>
+            <version>0.1.12</version>
+            <description>Django multiple select field</description>
+            <hashes>
+                <hash alg="MD5">8df35b7d128ea206f8ffcdf8d3590950</hash>
+                <hash alg="SHA-256">c270faa7f80588214c55f2d68cbddb2add525c2aa830c216b8a198de914eb470</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>LGPL 3</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-multiselectfield@0.1.12</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Bert Constantin</publisher>
+            <name>django-polymorphic</name>
+            <version>3.0.0</version>
+            <description>Seamless polymorphic inheritance for Django models</description>
+            <hashes>
+                <hash alg="MD5">2d2c6c94326148b0fb138bf72084e7d9</hash>
+                <hash alg="SHA-256">73b75eb44ea302bd32820f8661e469509d245ce7f7ff09cd2ad149e5c42034ff</hash>
+            </hashes>
+            <purl>pkg:pypi/django-polymorphic@3.0.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Miguel Araujo</publisher>
+            <name>django-crispy-forms</name>
+            <version>1.11.1</version>
+            <description>Best way to have Django DRY forms</description>
+            <hashes>
+                <hash alg="MD5">4380fcf4ccf1422571fa3902b2efe1ea</hash>
+                <hash alg="SHA-256">2ea206f35a9554597b89315ea52737d32d2fd9f5304e79a469a08887aa0824b0</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-crispy-forms@1.11.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Michael Trier</publisher>
+            <name>django_extensions</name>
+            <version>3.1.1</version>
+            <description>Extensions for Django</description>
+            <hashes>
+                <hash alg="MD5">1f9ab69337264fa76fdffd17dda7ee67</hash>
+                <hash alg="SHA-256">9507f8761ee760748938fd8af766d0608fb2738cf368adfa1b2451f61c15ae35</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT License</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-extensions@3.1.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Marc Gibbons</publisher>
+            <name>django-rest-swagger</name>
+            <version>2.2.0</version>
+            <description>Swagger UI for Django REST Framework 3.5+</description>
+            <hashes>
+                <hash alg="MD5">cbe2e2ea46b86e8f28ad869020e7b208</hash>
+                <hash alg="SHA-256">b039b0288bab4665cd45dc5d16f94b13911bc4ad0ed55f74ad3b90aa31c87c17</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>FreeBSD License</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-rest-swagger@2.2.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Chris Lamb</publisher>
+            <name>django-slack</name>
+            <version>5.16.0</version>
+            <description>Provides easy-to-use integration between Django projects and the Slack group chat and IM tool.</description>
+            <hashes>
+                <hash alg="MD5">274673e910bb19b2cbd6ded7431b9050</hash>
+                <hash alg="SHA-256">96f565844b4f634d4a0e43633131f84a558aee77a7b7302f3a57ccb0d2a9deb1</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD-3-Clause</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-slack@5.16.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Jonathan Buchanan</publisher>
+            <name>django-tagging</name>
+            <version>0.5.0</version>
+            <description>Generic tagging application for Django</description>
+            <hashes>
+                <hash alg="MD5">dd0a7a2bec2eb8cac7cff030b47e2204</hash>
+                <hash alg="SHA-256">5932ddcac9aec67cf605eeee06e9c498a022d145fa38d00c82088510d221f315</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD License</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-tagging@0.5.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Daniel Lindsley</publisher>
+            <name>django-tastypie</name>
+            <version>0.14.2</version>
+            <description>A flexible &amp; capable API layer for Django.</description>
+            <hashes>
+                <hash alg="MD5">e15f7edee34ee1ada15ea1ee9171cf2f</hash>
+                <hash alg="SHA-256">a3a2413510009649e0eac885ead96891c783ced788fd94231dc2f72b7a1b4c04</hash>
+            </hashes>
+            <purl>pkg:pypi/django-tastypie@0.14.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Dave Hall</publisher>
+            <name>django-watson</name>
+            <version>1.5.5</version>
+            <description>Full-text multi-table search application for Django. Easy to install and use, with good performance.</description>
+            <hashes>
+                <hash alg="MD5">60e35c067899c334e9fcde17e39d8c8c</hash>
+                <hash alg="SHA-256">456123d1601f275ef222d9ccbb3b73e7dcb70f1370e4d45651aa2d359ee6e0e3</hash>
+            </hashes>
+            <purl>pkg:pypi/django-watson@1.5.5</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Uriel Corfa</publisher>
+            <name>django-prometheus</name>
+            <version>2.1.0</version>
+            <description>Django middlewares to monitor your application with Prometheus.io.</description>
+            <hashes>
+                <hash alg="MD5">fe225fdf2d7bd9acd69d94b881bde5cb</hash>
+                <hash alg="SHA-256">c338d6efde1ca336e90c540b5e87afe9287d7bcc82d651a778f302b0be17a933</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>Apache</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-prometheus@2.1.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Django Software Foundation</publisher>
+            <name>Django</name>
+            <version>2.2.17</version>
+            <description>A high-level Python Web framework that encourages rapid development and clean, pragmatic design.</description>
+            <hashes>
+                <hash alg="MD5">5587ac4b0e4863cbfaa6a8d9158d1e75</hash>
+                <hash alg="SHA-256">558cb27930defd9a6042133258caf797b2d1dee233959f537e3dc475cb49bd7c</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django@2.2.17</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Tom Christie</publisher>
+            <name>djangorestframework</name>
+            <version>3.12.2</version>
+            <description>Web APIs for Django, made easy.</description>
+            <hashes>
+                <hash alg="MD5">4a4e64af330feaf2df783b8778f6dac3</hash>
+                <hash alg="SHA-256">0209bafcb7b5010fdfec784034f059d512256424de2a0f084cb82b096d6dd6a7</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/djangorestframework@3.12.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Benoit Chesneau</publisher>
+            <name>gunicorn</name>
+            <version>20.0.4</version>
+            <description>WSGI HTTP Server for UNIX</description>
+            <hashes>
+                <hash alg="MD5">c3ab53cefe85687d3b5ffa2018695ad2</hash>
+                <hash alg="SHA-256">cd4a810dd51bf497552cf3f863b575dabd73d6ad6a91075b65936b151cbf4f9c</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/gunicorn@20.0.4</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Aaron Swartz</publisher>
+            <name>html2text</name>
+            <version>2020.1.16</version>
+            <description>Turn HTML into equivalent Markdown-structured text.</description>
+            <hashes>
+                <hash alg="MD5">e0eef217433eee606fbc2fd77b2298eb</hash>
+                <hash alg="SHA-256">c7c629882da0cf377d66f073329ccf34a12ed2adf0169b9285ae4e63ef54c82b</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>GNU GPL 3</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/html2text@2020.1.16</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Jason Moiron</publisher>
+            <name>humanize</name>
+            <version>3.2.0</version>
+            <description>Python humanize utilities</description>
+            <hashes>
+                <hash alg="MD5">bb7a14c919fe15726e38fb724d570c23</hash>
+                <hash alg="SHA-256">d47d80cd47c1511ed3e49ca5f10c82ed940ea020b45b49ab106ed77fa8bb9d22</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/humanize@3.2.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Sorin Sbarnea</publisher>
+            <name>jira</name>
+            <version>2.0.0</version>
+            <description>Python library for interacting with JIRA via REST APIs.</description>
+            <hashes>
+                <hash alg="MD5">7859eb1d7fbad976006521cd3506d841</hash>
+                <hash alg="SHA-256">9adeead4d5f5a6aff74c630787f8bd2d4b0e154f3a3036641298064e91b2d25d</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/jira@2.0.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Vincent Jacques</publisher>
+            <name>PyGithub</name>
+            <version>1.54.1</version>
+            <description>Use the full Github API v3</description>
+            <hashes>
+                <hash alg="MD5">ef7a1cf268e989c81db645b60fcaae3a</hash>
+                <hash alg="SHA-256">87afd6a67ea582aa7533afdbf41635725f13d12581faed7e3e04b1579c0c0627</hash>
+            </hashes>
+            <purl>pkg:pypi/pygithub@1.54.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>lxml dev team</publisher>
+            <name>lxml</name>
+            <version>4.6.2</version>
+            <description>Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API.</description>
+            <hashes>
+                <hash alg="MD5">b431cd10e9233bb0ba5a14d1321c385f</hash>
+                <hash alg="SHA-256">535332fe9d00c3cd455bd3dd7d4bacab86e2d564bdf7606079160fa6251caacf</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/lxml@4.6.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Manfred Stienstra, Yuri takhteyev and Waylan limberg</publisher>
+            <name>Markdown</name>
+            <version>3.3.4</version>
+            <description>Python implementation of Markdown.</description>
+            <hashes>
+                <hash alg="MD5">99de91534b8df789312a16ebcb18813e</hash>
+                <hash alg="SHA-256">96c3ba1261de2f7547b46a00ea8463832c921d3f9d6aba3f255a6f71386db20c</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD License</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/markdown@3.3.4</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Inada Naoki</publisher>
+            <name>mysqlclient</name>
+            <version>2.0.3</version>
+            <description>Python interface to MySQL</description>
+            <hashes>
+                <hash alg="MD5">9ee9582f2bc0e984bc244363606d890c</hash>
+                <hash alg="SHA-256">fc575093cf81b6605bed84653e48b277318b880dc9becf42dd47fa11ffd3e2b6</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>GPL</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/mysqlclient@2.0.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>See AUTHORS</publisher>
+            <name>openpyxl</name>
+            <version>3.0.6</version>
+            <description>A Python library to read/write Excel 2010 xlsx/xlsm files</description>
+            <hashes>
+                <hash alg="MD5">3af6783453a07262c9560433f05cd502</hash>
+                <hash alg="SHA-256">1a4b3869c2500b5c713e8e28341cdada49ecfcff1b10cd9006945f5bcefc090d</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/openpyxl@3.0.6</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>John Machin</publisher>
+            <name>xlrd</name>
+            <version>1.2.0</version>
+            <description>Library for developers to extract data from Microsoft Excel (tm) spreadsheet files</description>
+            <hashes>
+                <hash alg="MD5">fb371d8d34601af02abb84696c9b2645</hash>
+                <hash alg="SHA-256">e551fb498759fa3a5384a94ccd4c3c02eb7c00ea424426e212ac0c57be9dfbde</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/xlrd@1.2.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Golovanov Stanislav</publisher>
+            <name>pdfkit</name>
+            <version>0.6.1</version>
+            <description>Wkhtmltopdf python wrapper to convert html to pdf using the webkit rendering engine and qt</description>
+            <hashes>
+                <hash alg="MD5">072809304c878774cb78bb78b7a23f9b</hash>
+                <hash alg="SHA-256">05f1c631e8d9ab877886955da825e48b459e097886a21448ab17b34c60cfd66c</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/pdfkit@0.6.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Alex Clark (PIL Fork Author)</publisher>
+            <name>Pillow</name>
+            <version>8.1.2</version>
+            <description>Python Imaging Library (Fork)</description>
+            <hashes>
+                <hash alg="MD5">adcbaa85275763ae69afa1eb6a4d498a</hash>
+                <hash alg="SHA-256">f36c3ff63d6fc509ce599a2f5b0d0732189eed653420e7294c039d342c6e204a</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>HPND</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/pillow@8.1.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Federico Di Gregorio</publisher>
+            <name>psycopg2-binary</name>
+            <version>2.8.6</version>
+            <description>psycopg2 - Python-PostgreSQL Database Adapter</description>
+            <hashes>
+                <hash alg="MD5">0222f16c8c39596e4617e8325c330a3c</hash>
+                <hash alg="SHA-256">15978a1fbd225583dd8cdaf37e67ccc278b5abecb4caf6b2d6b8e2b948e953f6</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>LGPL with exceptions</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/psycopg2-binary@2.8.6</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>The Python Cryptographic Authority and individual contributors</publisher>
+            <name>cryptography</name>
+            <version>3.4.6</version>
+            <description>cryptography is a package which provides cryptographic recipes and primitives to Python developers.</description>
+            <hashes>
+                <hash alg="MD5">563c00a0c371e20b8074bb8e86cbb045</hash>
+                <hash alg="SHA-256">9e98b452132963678e3ac6c73f7010fe53adf72209a32854d55690acac3f6724</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD or Apache License, Version 2.0</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/cryptography@3.4.6</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Gustavo Niemeyer</publisher>
+            <name>python-dateutil</name>
+            <version>2.8.1</version>
+            <description>Extensions to the standard Python datetime module</description>
+            <hashes>
+                <hash alg="MD5">36ae406e144ce50dfa6950a6db17b1d9</hash>
+                <hash alg="SHA-256">75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>Dual License</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/python-dateutil@2.8.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Stuart Bishop</publisher>
+            <name>pytz</name>
+            <version>2021.1</version>
+            <description>World timezone definitions, modern and historical</description>
+            <hashes>
+                <hash alg="MD5">2e039ef05cc965ffe161b3a8af018431</hash>
+                <hash alg="SHA-256">eb10ce3e7736052ed3623d49975ce333bcd712c7bb19a58b9e2089d4057d0798</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/pytz@2021.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Andy McCurdy</publisher>
+            <name>redis</name>
+            <version>3.5.3</version>
+            <description>Python client for Redis key-value store</description>
+            <hashes>
+                <hash alg="MD5">c37ac6eeeb79559fe0c4cfe23d79b754</hash>
+                <hash alg="SHA-256">432b788c4530cfe16d8d943a09d40ca6c16149727e4afe8c2c9d5580c59d9f24</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/redis@3.5.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Kenneth Reitz</publisher>
+            <name>requests</name>
+            <version>2.25.1</version>
+            <description>Python HTTP for Humans.</description>
+            <hashes>
+                <hash alg="MD5">ec79209809129bf13cb002a0a573ef45</hash>
+                <hash alg="SHA-256">c210084e36a42ae6b9219e00e48287def368a26d03a048ddad7bfee44f75871e</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>Apache 2.0</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/requests@2.25.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Mike Bayer</publisher>
+            <name>sqlalchemy</name>
+            <version>1.3.23</version>
+            <description>Database Abstraction Library</description>
+            <hashes>
+                <hash alg="MD5">37dccf4c94c6eef3af337d531743a040</hash>
+                <hash alg="SHA-256">f4d972139d5000105fcda9539a76452039434013570d6059993120dc2a65e447</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/sqlalchemy@1.3.23</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Chris McDonough</publisher>
+            <name>supervisor</name>
+            <version>4.2.2</version>
+            <description>A system for controlling process state under UNIX</description>
+            <hashes>
+                <hash alg="MD5">a413ef042f828a209238d50ca9a6f6fb</hash>
+                <hash alg="SHA-256">4adf63c8f18cf42313171ce06a73c9ae2c5e88ef27c2bb0de3b8405368595c04</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD-derived (http://www.repoze.org/LICENSE.txt)</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/supervisor@4.2.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Andrey Petrov</publisher>
+            <name>urllib3</name>
+            <version>1.26.3</version>
+            <description>HTTP library with thread-safe connection pooling, file post, and more.</description>
+            <hashes>
+                <hash alg="MD5">cc7896adc3f4f590c139745b4fa770e3</hash>
+                <hash alg="SHA-256">1b465e494e3e0d8939b50680403e3aedaa2bc434b7d5af64dfd3c958d7f5ae80</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/urllib3@1.26.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Unbit</publisher>
+            <name>uWSGI</name>
+            <version>2.0.19.1</version>
+            <description>The uWSGI server</description>
+            <hashes>
+                <hash alg="MD5">25a0f76cdd5b059b37f91fb2bc1b6c82</hash>
+                <hash alg="SHA-256">faa85e053c0b1be4d5585b0858d3a511d2cd10201802e8676060fd0a109e5869</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>GPL2</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/uwsgi@2.0.19.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Sameen Karim</publisher>
+            <name>vobject</name>
+            <version>0.9.6.1</version>
+            <description>A full-featured Python package for parsing and creating iCalendar and vCard files</description>
+            <hashes>
+                <hash alg="MD5">06357e96a84d55de2a71b36d39f6853e</hash>
+                <hash alg="SHA-256">96512aec74b90abb71f6b53898dd7fe47300cc940104c4f79148f0671f790101</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>Apache</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/vobject@0.9.6.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>David Evans</publisher>
+            <name>whitenoise</name>
+            <version>5.2.0</version>
+            <description>Radically simplified static file serving for WSGI applications</description>
+            <hashes>
+                <hash alg="MD5">85de25d8eeae75c0dd1f955063a7ce16</hash>
+                <hash alg="SHA-256">05d00198c777028d72d8b0bbd234db605ef6d60e9410125124002518a48e515d</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/whitenoise@5.2.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Pat Pannuto, Stuart Colville, John Gruber</publisher>
+            <name>titlecase</name>
+            <version>2.0.0</version>
+            <description>Python Port of John Gruber's titlecase.pl</description>
+            <hashes>
+                <hash alg="MD5">e5dac8b831203247997ba5db0f2f2dd6</hash>
+                <hash alg="SHA-256">d6b24c4bfce6b05ee55da48901a1aa39eac20f223160b7872dcf1b8182214bec</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/titlecase@2.0.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Matias Aguirre</publisher>
+            <name>social-auth-app-django</name>
+            <version>4.0.0</version>
+            <description>Python Social Authentication, Django integration.</description>
+            <hashes>
+                <hash alg="MD5">aa84cf448a09d770f63879b52ea6b473</hash>
+                <hash alg="SHA-256">567ad0e028311541d7dfed51d3bf2c60440a6fd236d5d4d06c5a618b3d6c57c5</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/social-auth-app-django@4.0.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Matias Aguirre</publisher>
+            <name>social-auth-core</name>
+            <version>4.1.0</version>
+            <description>Python social authentication made simple.</description>
+            <hashes>
+                <hash alg="MD5">54d725a418d271021d8cc7d4c7d5110b</hash>
+                <hash alg="SHA-256">983b53167ac56e7ba4909db555602a6e7a98c97ca47183bb222eb85ba627bf2b</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/social-auth-core@4.1.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Michael Davis</publisher>
+            <name>Python-jose</name>
+            <version>3.2.0</version>
+            <description>JOSE implementation in Python</description>
+            <hashes>
+                <hash alg="MD5">1d3583203d42ab9df25f13081de001f3</hash>
+                <hash alg="SHA-256">67d7dfff599df676b04a996520d9be90d6cdb7e6dd10b4c7cacc0c3e2e92f2be</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/python-jose@3.2.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Sebastian Thiel, Michael Trier</publisher>
+            <name>gitpython</name>
+            <version>3.1.14</version>
+            <description>Python Git Library</description>
+            <hashes>
+                <hash alg="MD5">020c4697335110886e270066fb861e9d</hash>
+                <hash alg="SHA-256">3283ae2fba31c913d857e12e5ba5f9a7772bbc064ae2bb09efafa71b0dd4939b</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/gitpython@3.1.14</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Microsoft Corporation</publisher>
+            <name>ptvsd</name>
+            <version>4.3.2</version>
+            <description>Remote debugging server for Python support in Visual Studio and Visual Studio Code</description>
+            <hashes>
+                <hash alg="MD5">e5312f655af320d84623e319ef90d751</hash>
+                <hash alg="SHA-256">459137736068bb02515040b2ed2738169cb30d69a38e0fd5dffcba255f41e68d</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/ptvsd@4.3.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Gauvain Pocentek</publisher>
+            <name>python-gitlab</name>
+            <version>2.6.0</version>
+            <description>Interact with GitLab API</description>
+            <hashes>
+                <hash alg="MD5">ba405106c28d63f7bdc27e39cf1d0081</hash>
+                <hash alg="SHA-256">8f6a62b2804021416f13e91f359085f1071fb7adedfb292ef0d0877df777a075</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>LGPLv3</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/python-gitlab@2.6.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Google Cloud Platform</publisher>
+            <name>google-auth</name>
+            <version>1.27.1</version>
+            <description>Google Authentication Library</description>
+            <hashes>
+                <hash alg="MD5">a0ee248b128aa47472bbc3f4dbc616b8</hash>
+                <hash alg="SHA-256">63a5636d7eacfe6ef5b7e36e112b3149fa1c5b5ad77dd6df54910459bcd6b89f</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>Apache 2.0</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/google-auth@1.27.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Google LLC</publisher>
+            <name>google-api-python-client</name>
+            <version>1.12.8</version>
+            <description>Google API Client Library for Python</description>
+            <hashes>
+                <hash alg="MD5">17d37f499abce29a269f9f650adc21c5</hash>
+                <hash alg="SHA-256">3c4c4ca46b5c21196bec7ee93453443e477d82cbfa79234d1ce0645f81170eaf</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>Apache 2.0</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/google-api-python-client@1.12.8</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Google Cloud Platform</publisher>
+            <name>google-auth-oauthlib</name>
+            <version>0.4.3</version>
+            <description>Google Authentication Library</description>
+            <hashes>
+                <hash alg="MD5">ab3f3d5595c8f7b66742f17b3d6a9f34</hash>
+                <hash alg="SHA-256">dabffbf594a6be2fd6d054060846d1201569252efb10dfb749b504a7591f8af0</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>Apache 2.0</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/google-auth-oauthlib@0.4.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Joel Lefkowitz</publisher>
+            <name>drf_yasg2</name>
+            <version>1.19.4</version>
+            <description>Automated generation of real Swagger/OpenAPI 2.0 schemas from Django Rest Framework code</description>
+            <hashes>
+                <hash alg="MD5">c282d646f55ef511fb2f6539dc036729</hash>
+                <hash alg="SHA-256">75e661ca5cf15eb44fcfab408c7b864f87c20794f564aa08b3a31817a857f19d</hash>
+            </hashes>
+            <purl>pkg:pypi/drf-yasg2@1.19.4</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Fang Li</publisher>
+            <name>django-saml2-auth</name>
+            <version>2.2.1</version>
+            <description>Django SAML2 Authentication Made Easy. Easily integrate with SAML2 SSO identity providers like Okta</description>
+            <hashes>
+                <hash alg="MD5">d1fd1336b7e0944c23afaf40f9cb5a51</hash>
+                <hash alg="SHA-256">d7251ba209f4f2805b6218ac21972c742499778b8f78664b273a8ebb2beb202e</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>Apache 2.0</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-saml2-auth@2.2.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Roberto Abdelkader Martínez Pérez</publisher>
+            <name>cpe</name>
+            <version>1.2.1</version>
+            <description>CPE: Common Platform Enumeration for Python</description>
+            <hashes>
+                <hash alg="MD5">b14407bc5074141e0b122d0345789e75</hash>
+                <hash alg="SHA-256">e742635e13cc0f6e02cb62a367dc789fb0e7dba1317822a8760c8de312e36ec9</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>LGPLv3</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/cpe@1.2.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>the purl authors</publisher>
+            <name>packageurl-python</name>
+            <version>0.9.4</version>
+            <description>A "purl" aka. Package URL parser and builder</description>
+            <hashes>
+                <hash alg="MD5">a46f08abfc9a8c278b2c3d95ca7b24aa</hash>
+                <hash alg="SHA-256">65f1eade0f3f412bdc77401e76725e9fc21d0c742ba0f2d066113cb19ccd8b61</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/packageurl-python@0.9.4</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Nine More Minutes, Inc.</publisher>
+            <name>django-crum</name>
+            <version>0.7.9</version>
+            <description>Django middleware to capture current request and user.</description>
+            <hashes>
+                <hash alg="MD5">365784792117f1150dcfd4644587945e</hash>
+                <hash alg="SHA-256">037cc8b822975bb1d41cd24269b59a512cc77448fadc3f34ab9a17b229b4b471</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-crum@0.7.9</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Marsel Mavletkulov</publisher>
+            <name>JSON-log-formatter</name>
+            <version>0.3.0</version>
+            <description>JSON log formatter</description>
+            <hashes>
+                <hash alg="MD5">b757c635dc55cf02371c01552c6068f5</hash>
+                <hash alg="SHA-256">ee187c9a80936cbf1259f73573973450fc24b84a4fb54e53eb0dcff86ea1e759</hash>
+            </hashes>
+            <purl>pkg:pypi/json-log-formatter@0.3.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>sobolevn</publisher>
+            <name>django-split-settings</name>
+            <version>1.0.1</version>
+            <description>Organize Django settings into multiple files and directories. Easily override and modify settings. Use wildcards and optional settings files.</description>
+            <hashes>
+                <hash alg="MD5">536919103fe25a592aa1e862fc248a8c</hash>
+                <hash alg="SHA-256">8d636649023289d0ef0ba08b0a4f37761adc94a29ee0ebfe65922c3cb0594ede</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD-2-Clause</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-split-settings@1.0.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Rob Hudson</publisher>
+            <name>django-debug-toolbar</name>
+            <version>3.2</version>
+            <description>A configurable set of panels that display various debug information about the current request/response.</description>
+            <hashes>
+                <hash alg="MD5">97340beb186087ce5d051422e794898c</hash>
+                <hash alg="SHA-256">9e5a25d0c965f7e686f6a8ba23613ca9ca30184daa26487706d4829f5cfb697a</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-debug-toolbar@3.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>David Sutherland</publisher>
+            <name>django-debug-toolbar-request-history</name>
+            <version>0.1.3</version>
+            <description>Request History Panel for Django Debug Toolbar</description>
+            <hashes>
+                <hash alg="MD5">6ce1064ea0b6091d8504fa0104a853c3</hash>
+                <hash alg="SHA-256">6bc86251e283be3f9c94b8e70a63c3783eb20bf320fad363adbfa8e1e698149b</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-debug-toolbar-request-history@0.1.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Kevin McCarthy</publisher>
+            <name>vcrpy</name>
+            <version>4.1.1</version>
+            <description>Automatically mock your HTTP interactions to simplify and speed up testing</description>
+            <hashes>
+                <hash alg="MD5">9fe883c46df3bb34f75e94684e8d39ba</hash>
+                <hash alg="SHA-256">12c3fcdae7b88ecf11fc0d3e6d77586549d4575a2ceee18e82eee75c1f626162</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/vcrpy@4.1.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Aron Griffis</publisher>
+            <name>vcrpy-unittest</name>
+            <version>0.1.7</version>
+            <description>Python unittest integration for vcr.py</description>
+            <hashes>
+                <hash alg="MD5">e76bfa4568d103516ae886f6031fd446</hash>
+                <hash alg="SHA-256">b5e2d78bf4c13bc04dca04061dda934abba5f2c9d5201f148747800ff80a762b</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/vcrpy-unittest@0.1.7</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Richard Terry</publisher>
+            <name>django-tagulous</name>
+            <version>1.1.0</version>
+            <description>Fabulous Tagging for Django</description>
+            <hashes>
+                <hash alg="MD5">2f930e019050e2e04ba56f81a20d2e1d</hash>
+                <hash alg="SHA-256">de2a56ed92374b79358275ac0b7910af2c3d2823f44a847bef91ca9e456353ba</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-tagulous@1.1.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Jose Padilla</publisher>
+            <name>PyJWT</name>
+            <version>2.0.1</version>
+            <description>JSON Web Token implementation in Python</description>
+            <hashes>
+                <hash alg="MD5">170acc19eae3a4337df4aed539e2bbad</hash>
+                <hash alg="SHA-256">b70b15f89dc69b993d8a8d32c299032d5355c82f9b5b7e851d1a6d706dffe847</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>MIT</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/pyjwt@2.0.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Stanislav Kontar, Red Hat Product Security</publisher>
+            <name>cvss</name>
+            <version>2.2</version>
+            <description>CVSS2/3 library with interactive calculator for Python 2 and Python 3</description>
+            <hashes>
+                <hash alg="MD5">4a93d353536fc7cf6b04cea008806828</hash>
+                <hash alg="SHA-256">404c27c04b097c3068d09173ae87a50168c5864996947fd655d53939c8aaf04c</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>LGPLv3+</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/cvss@2.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>sage</publisher>
+            <name>django-jsonfield-backport</name>
+            <version>1.0.3</version>
+            <description>Backport of the cross-DB JSONField model and form fields from Django 3.1.</description>
+            <hashes>
+                <hash alg="MD5">9c200d34b1edd97d7fdff75fd1ea0c97</hash>
+                <hash alg="SHA-256">c2a559a32b95406a08f02fabc0aec08efa9ce677f4e206ababb6a303359419a8</hash>
+            </hashes>
+            <licenses>
+                <license>
+                    <name>BSD</name>
+                </license>
+            </licenses>
+            <purl>pkg:pypi/django-jsonfield-backport@1.0.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <publisher>Craig de Stigter</publisher>
+            <name>django-fieldsignals</name>
+            <version>0.6.0</version>
+            <description>Django fieldsignals simply makes it easy to tell when the fields on your model have changed.</description>
+            <hashes>
+                <hash alg="MD5">aab96dc355fb92b3c85205c726064839</hash>
+                <hash alg="SHA-256">57df963ad045c1cc26c7cedfbcdc2ac403481d519c77b6d16091239b2059ff3d</hash>
+            </hashes>
+            <purl>pkg:pypi/django-fieldsignals@0.6.0</purl>
+            <modified>false</modified>
+        </component>
+    </components>
+</bom>

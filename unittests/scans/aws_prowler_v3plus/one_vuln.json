@@ -1,0 +1,92 @@
+[{
+    "AssessmentStartTime": "2023-04-25T23:49:42.744599",
+    "FindingUniqueId": "prowler-aws-acm_certificates_expiration_check-999999999999-us-east-1-api.sandbox.partner.teste.com",
+    "Provider": "aws",
+    "CheckID": "acm_certificates_expiration_check",
+    "CheckTitle": "Check if ACM Certificates are about to expire in specific days or less",
+    "CheckType": [
+        "Data Protection"
+    ],
+    "ServiceName": "acm",
+    "SubServiceName": "",
+    "Status": "FAIL",
+    "StatusExtended": "ACM Certificate for api.sandbox.partner.teste.com is about to expire in 7 days.",
+    "Severity": "high",
+    "ResourceType": "AwsCertificateManagerCertificate",
+    "ResourceDetails": "",
+    "Description": "Check if ACM Certificates are about to expire in specific days or less",
+    "Risk": "Expired certificates can impact service availability.",
+    "RelatedUrl": "https://docs.aws.amazon.com/config/latest/developerguide/acm-certificate-expiration-check.html",
+    "Remediation": {
+        "Code": {
+            "NativeIaC": "",
+            "Terraform": "",
+            "CLI": "",
+            "Other": ""
+        },
+        "Recommendation": {
+            "Text": "Monitor certificate expiration and take automated action to renew; replace or remove. Having shorter TTL for any security artifact is a general recommendation; but requires additional automation in place. If not longer required delete certificate. Use AWS config using the managed rule: acm-certificate-expiration-check.",
+            "Url": "https://docs.aws.amazon.com/config/latest/developerguide/acm-certificate-expiration-check.html"
+        }
+    },
+    "Compliance": {
+        "FedRAMP-Low-Revision-4": [
+            "ac-17",
+            "sc-12"
+        ],
+        "NIST-800-53-Revision-4": [
+            "ac_4",
+            "ac_17_2",
+            "sc_12"
+        ],
+        "NIST-CSF-1.1": [
+            "ac_5",
+            "ds_2"
+        ],
+        "NIST-800-53-Revision-5": [
+            "sc_7_12",
+            "sc_7_16"
+        ],
+        "FedRamp-Moderate-Revision-4": [
+            "ac-4",
+            "ac-17-2",
+            "sc-12"
+        ],
+        "RBI-Cyber-Security-Framework": [
+            "annex_i_1_3"
+        ],
+        "SOC2": [
+            "cc_6_7"
+        ],
+        "FFIEC": [
+            "d3-pc-im-b-1"
+        ],
+        "CISA": [
+            "your-data-2"
+        ],
+        "HIPAA": [
+            "164_308_a_4_ii_a",
+            "164_312_e_1"
+        ],
+        "NIST-800-171-Revision-2": [
+            "3_13_1",
+            "3_13_2",
+            "3_13_8",
+            "3_13_11"
+        ],
+        "GDPR": [
+            "article_32"
+        ]
+    },
+    "Categories": [],
+    "DependsOn": [],
+    "RelatedTo": [],
+    "Notes": "",
+    "Profile": null,
+    "AccountId": "999999999999",
+    "OrganizationsInfo": null,
+    "Region": "us-east-1",
+    "ResourceId": "api.teste.teste.com",
+    "ResourceArn": "arn:aws:acm:us-east-1:999999999999:certificate/ffffffff-0000-0000-0000-000000000000",
+    "ResourceTags": {}
+}]

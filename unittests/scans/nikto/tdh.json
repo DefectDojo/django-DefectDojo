@@ -1,0 +1,64 @@
+{
+    "host": "www.tdh.com",
+    "ip": "64.220.43.153",
+    "port": "443",
+    "banner": "nginx",
+    "vulnerabilities": [
+        {
+            "id": "999100",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/",
+            "msg": "Uncommon header 'x-cacheable' found, with contents: YES"
+        },
+        {
+            "id": "999100",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/",
+            "msg": "Uncommon header 'x-cache' found, with contents: HIT"
+        },
+        {
+            "id": "999100",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/tldH5dDP.",
+            "msg": "Uncommon header 'x-redirect-by' found, with contents: WordPress"
+        },
+        {
+            "id": "999997",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/wp-admin/",
+            "msg": "Entry '/wp-admin/' in robots.txt returned a non-forbidden or redirect HTTP code (302)"
+        },
+        {
+            "id": "999996",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/robots.txt",
+            "msg": "\"robots.txt\" contains 2 entries which should be manually viewed."
+        },
+        {
+            "id": "999966",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/",
+            "msg": "The Content-Encoding header is set to \"deflate\" this may mean that the server is vulnerable to the BREACH attack."
+        },
+        {
+            "id": "999967",
+            "OSVDB": "0",
+            "method": "SOWBGYUF",
+            "url": "/",
+            "msg": "Web Server returns a valid response with junk HTTP methods, this may cause false positives."
+        },
+        {
+            "id": "700007",
+            "OSVDB": "0",
+            "method": "GET",
+            "url": "/status",
+            "msg": "Default account found for 'Restricted' at /status (ID '', PW 'cisco'). Cisco device."
+        }
+    ]
+}

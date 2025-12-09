@@ -1,0 +1,861 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+
+<xml-report name="AppScan Report" technology="DAST" xmlExportVersion="2.7">
+  <content>
+    <executive-summary>CENSURED</executive-summary>
+    <issues>CENSURED</issues>
+    <table-of-content>CENSURED</table-of-content>
+    <introduction>CENSURED</introduction>
+    <by-url>CENSURED</by-url>
+    <fix-recommendations>CENSURED</fix-recommendations>
+    <variants>CENSURED</variants>
+    <request-response>CENSURED</request-response>
+    <differences>CENSURED</differences>
+    <advisories>CENSURED</advisories>
+    <advisories-dot-net>CENSURED</advisories-dot-net>
+    <advisories-j2ee>CENSURED</advisories-j2ee>
+    <advisories-php>CENSURED</advisories-php>
+    <application-data>CENSURED</application-data>
+    <visited-urls>CENSURED</visited-urls>
+    <filtered-urls>CENSURED</filtered-urls>
+    <script-parameters>CENSURED</script-parameters>
+    <broken-links>CENSURED</broken-links>
+    <comments>CENSURED</comments>
+    <java-scripts>CENSURED</java-scripts>
+    <cookies>CENSURED</cookies>
+    <components>CENSURED</components>
+    <issue-information>CENSURED</issue-information>
+    <page-break-after-each-issue-url>CENSURED</page-break-after-each-issue-url>
+    <cover-page>CENSURED</cover-page>
+    <regulations>CENSURED</regulations>
+    <delta-analysis>CENSURED</delta-analysis>
+    <is-rtf-report>CENSURED</is-rtf-report>
+  </content>
+  <dictionary>
+    <item id="secure">CENSURED</item>
+    <item id="scheme">CENSURED</item>
+    <item id="SameSite">CENSURED</item>
+    <item id="comments">CENSURED</item>
+    <item id="scanDateColon">CENSURED</item>
+    <item id="issueTypesDiscovered">CENSURED</item>
+    <item id="threatClassificationColon">CENSURED</item>
+    <item id="reportTagLine">CENSURED</item>
+    <item id="FilteredUrl.Untrusted">CENSURED</item>
+    <item id="urlColon">CENSURED</item>
+    <item id="originalResponseLabel">CENSURED</item>
+    <item id="threatClassification">CENSURED</item>
+    <item id="unwantedLabel">CENSURED</item>
+    <item id="testOptimizationColon">CENSURED</item>
+    <item id="affectedProductsColon">CENSURED</item>
+    <item id="urlsStatus">CENSURED</item>
+    <item id="issuesByURL">CENSURED</item>
+    <item id="allowConcurrentLogins">CENSURED</item>
+    <item id="responseLabel">CENSURED</item>
+    <item id="xssBlurb">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.NoneOrUnknown">CENSURED</item>
+    <item id="documentMap">CENSURED</item>
+    <item id="components">CENSURED</item>
+    <item id="fixRecommendationsColon">CENSURED</item>
+    <item id="BinaryDataNotIncluded">CENSURED</item>
+    <item id="executiveSummary">CENSURED</item>
+    <item id="entityColon">CENSURED</item>
+    <item id="general">CENSURED</item>
+    <item id="detectedCookies">CENSURED</item>
+    <item id="trialVersionMessage">CENSURED</item>
+    <item id="cvssScoreColon">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.TextArea">CENSURED</item>
+    <item id="informational">CENSURED</item>
+    <item id="sessionVerifierPattern">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Image">CENSURED</item>
+    <item id="differenceColon">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Radio">CENSURED</item>
+    <item id="detailedSummaryContent">CENSURED</item>
+    <item id="fixedIssues">CENSURED</item>
+    <item id="testDescriptionColon">CENSURED</item>
+    <item id="sessionManagementMode">CENSURED</item>
+    <item id="totalIssuesInScanColon">CENSURED</item>
+    <item id="referencesColon">CENSURED</item>
+    <item id="cvssVersionColon">CENSURED</item>
+    <item id="ScanSummary">CENSURED</item>
+    <item id="brokenLinks">CENSURED</item>
+    <item id="testPolicyColon">CENSURED</item>
+    <item id="parameters">CENSURED</item>
+    <item id="introductionAndObjectivesContent">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Simple_Link">CENSURED</item>
+    <item id="FilteredUrl.PathLimit">CENSURED</item>
+    <item id="rulesColon">CENSURED</item>
+    <item id="newUrls">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Post_Data">CENSURED</item>
+    <item id="openIssues">CENSURED</item>
+    <item id="filteredLinks">CENSURED</item>
+    <item id="operatingSystemColon">CENSURED</item>
+    <item id="documentMapContent">CENSURED</item>
+    <item id="scanBaseStartedColon">CENSURED</item>
+    <item id="securityIssuesBySections">CENSURED</item>
+    <item id="testLoginLabel">CENSURED</item>
+    <item id="InformationalSeverityIssues">CENSURED</item>
+    <item id="javaScripts">CENSURED</item>
+    <item id="dictionarySessionManagementModeUnknown">CENSURED</item>
+    <item id="FilteredUrl.Path">CENSURED</item>
+    <item id="vulnerableURLs">CENSURED</item>
+    <item id="sniqueIssuesDetectedAcrossRegulation">CENSURED</item>
+    <item id="highSeverityIssues">CENSURED</item>
+    <item id="FilteredUrl.PredictableUrl">CENSURED</item>
+    <item id="fixColon">CENSURED</item>
+    <item id="dictionaryTrue">CENSURED</item>
+    <item id="dictionaryNone">CENSURED</item>
+    <item id="comment">CENSURED</item>
+    <item id="cookies">CENSURED</item>
+    <item id="firstSet">CENSURED</item>
+    <item id="hostColon">CENSURED</item>
+    <item id="objectivesContent">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Checkbox">CENSURED</item>
+    <item id="bodyparameter">CENSURED</item>
+    <item id="benignLabel">CENSURED</item>
+    <item id="cipherSuiteId">CENSURED</item>
+    <item id="attackNotSupported">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Button">CENSURED</item>
+    <item id="rawTestResponseLabel">CENSURED</item>
+    <item id="loginSettings">CENSURED</item>
+    <item id="createdByAppScan">CENSURED</item>
+    <item id="nodePathColon">CENSURED</item>
+    <item id="additionalDataColon">CENSURED</item>
+    <item id="issuesStatus">CENSURED</item>
+    <item id="testResponseNextToLastLabel">CENSURED</item>
+    <item id="applicationServerColon">CENSURED</item>
+    <item id="generalInformation">CENSURED</item>
+    <item id="testTypeColon">CENSURED</item>
+    <item id="executiveSummaryContent">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.XML">CENSURED</item>
+    <item id="deltaAnalysis">CENSURED</item>
+    <item id="testResponseLastLabel">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Hidden">CENSURED</item>
+    <item id="cweColon">CENSURED</item>
+    <item id="cveColon">CENSURED</item>
+    <item id="of">CENSURED</item>
+    <item id="addedToRequestColon">CENSURED</item>
+    <item id="numberOfIssues">CENSURED</item>
+    <item id="FilteredUrl.DomSimilarity">CENSURED</item>
+    <item id="exploitExampleColon">CENSURED</item>
+    <item id="trialVersionWatermark">CENSURED</item>
+    <item id="scanNumComplianceIssuesFoundColon">CENSURED</item>
+    <item id="malwareLabel">CENSURED</item>
+    <item id="dictionarySessionManagementModeAutomatic">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Submit">CENSURED</item>
+    <item id="added">CENSURED</item>
+    <item id="fixed">CENSURED</item>
+    <item id="cause">CENSURED</item>
+    <item id="index">CENSURED</item>
+    <item id="issue">CENSURED</item>
+    <item id="query">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Select">CENSURED</item>
+    <item id="value">CENSURED</item>
+    <item id="cipherSuitesTitle">CENSURED</item>
+    <item id="fix">CENSURED</item>
+    <item id="low">CENSURED</item>
+    <item id="new">CENSURED</item>
+    <item id="toc">CENSURED</item>
+    <item id="url">CENSURED</item>
+    <item id="php">CENSURED</item>
+    <item id="lowSeverityIssues">CENSURED</item>
+    <item id="visitedLinks">CENSURED</item>
+    <item id="sampleReportWatermark">CENSURED</item>
+    <item id="remaining">CENSURED</item>
+    <item id="expires">CENSURED</item>
+    <item id="removedUrls">CENSURED</item>
+    <item id="targetScan">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Custom_Parameter">CENSURED</item>
+    <item id="howToFix">CENSURED</item>
+    <item id="mediumSeverityIssues">CENSURED</item>
+    <item id="FilteredUrl.FileExtension">CENSURED</item>
+    <item id="issueType">CENSURED</item>
+    <item id="FilteredUrl.LogoutFilter">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Password">CENSURED</item>
+    <item id="scanFileNameColon">CENSURED</item>
+    <item id="enableJsxInLoginReplay">CENSURED</item>
+    <item id="JsStackStrace">CENSURED</item>
+    <item id="dictionarySessionManagementModePrompt">CENSURED</item>
+    <item id="webServerColon">CENSURED</item>
+    <item id="dictionaryEnabled">CENSURED</item>
+    <item id="objectives">CENSURED</item>
+    <item id="xfidColon">CENSURED</item>
+    <item id="introductionContent">CENSURED</item>
+    <item id="testTechnicalDescriptionColon">CENSURED</item>
+    <item id="variant">CENSURED</item>
+    <item id="appScanSeverity">CENSURED</item>
+    <item id="FilteredUrl.RequestMethod">CENSURED</item>
+    <item id="issuesDetectedAcrossRegulation">CENSURED</item>
+    <item id="totalIssuesInReportColon">CENSURED</item>
+    <item id="tableOfContents">CENSURED</item>
+    <item id="introductionAndObjectives">CENSURED</item>
+    <item id="FilteredUrl.DepthLimit">CENSURED</item>
+    <item id="version">CENSURED</item>
+    <item id="detectedParameters">CENSURED</item>
+    <item id="originalRequestsAndResponsesColon">CENSURED</item>
+    <item id="sessionVerifierEnabled">CENSURED</item>
+    <item id="FilteredUrl.TotVisitedLinksLimit">CENSURED</item>
+    <item id="newIssues">CENSURED</item>
+    <item id="HttpOnly">CENSURED</item>
+    <item id="TotalSecurityIssues">CENSURED</item>
+    <item id="introduction">CENSURED</item>
+    <item id="dictionarySessionManagementModeRecorded">CENSURED</item>
+    <item id="scanTargetStartedColon">CENSURED</item>
+    <item id="baseScan">CENSURED</item>
+    <item id="testResponseFirstLabel">CENSURED</item>
+    <item id="causesColon">CENSURED</item>
+    <item id="sectionViolation">CENSURED</item>
+    <item id="critical">CENSURED</item>
+    <item id="portColon">CENSURED</item>
+    <item id="testOptimizationFast">CENSURED</item>
+    <item id="validLoginLabel">CENSURED</item>
+    <item id="severityColon">CENSURED</item>
+    <item id="parameter">CENSURED</item>
+    <item id="severity">CENSURED</item>
+    <item id="applicationData">CENSURED</item>
+    <item id="testRequestLabel">CENSURED</item>
+    <item id="fixRecommendations">CENSURED</item>
+    <item id="reasoningColon">CENSURED</item>
+    <item id="domain">CENSURED</item>
+    <item id="dotNet">CENSURED</item>
+    <item id="advisories">CENSURED</item>
+    <item id="entity">CENSURED</item>
+    <item id="riskColon">CENSURED</item>
+    <item id="createdBySaaS">CENSURED</item>
+    <item id="criticalSeverityIssues">CENSURED</item>
+    <item id="sectionViolationGdprArticles">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.File">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.JSON">CENSURED</item>
+    <item id="ApplicationData.HttpParamType.Text">CENSURED</item>
+    <item id="reportName">CENSURED</item>
+    <item id="issueTypes">CENSURED</item>
+    <item id="scanNumSecurityEntitiesTestedColon">CENSURED</item>
+    <item id="regulations">CENSURED</item>
+    <item id="removed">CENSURED</item>
+    <item id="queryparameter">CENSURED</item>
+    <item id="FilteredUrl.ImageContext">CENSURED</item>
+    <item id="removedLabel">CENSURED</item>
+    <item id="medium">CENSURED</item>
+    <item id="method">CENSURED</item>
+    <item id="FilteredUrl.MaxLengthExceeded">CENSURED</item>
+    <item id="sslVersion">CENSURED</item>
+    <item id="testOptimizationFaster">CENSURED</item>
+    <item id="dictionaryTestPolicyModified">CENSURED</item>
+    <item id="sections">CENSURED</item>
+    <item id="causes">CENSURED</item>
+    <item id="cookie">CENSURED</item>
+    <item id="scanNumPagesScannedColon">CENSURED</item>
+    <item id="header">CENSURED</item>
+    <item id="GeneralInformation.Unknown">CENSURED</item>
+    <item id="FilteredUrl.RegExp">CENSURED</item>
+    <item id="testOptimizationFastest">CENSURED</item>
+    <item id="dictionaryDisabled">CENSURED</item>
+    <item id="affectedURLs">CENSURED</item>
+    <item id="manipulatedFromColon">CENSURED</item>
+    <item id="issueDistributionByScan">CENSURED</item>
+    <item id="threat">CENSURED</item>
+    <item id="testOptimizationNormal">CENSURED</item>
+    <item id="securityRisks">CENSURED</item>
+    <item id="securityRisksColon">CENSURED</item>
+    <item id="requestedURL">CENSURED</item>
+    <item id="testRequestsResponsesColon">CENSURED</item>
+    <item id="numberOfAffectedIssues">CENSURED</item>
+    <item id="requestLabel">CENSURED</item>
+    <item id="trialVersionHeader">CENSURED</item>
+    <item id="remediationTask">CENSURED</item>
+    <item id="detailedSummary">CENSURED</item>
+    <item id="issuesByIssueType">CENSURED</item>
+    <item id="remainingUrls">CENSURED</item>
+    <item id="cipherSuiteName">CENSURED</item>
+    <item id="toColon">CENSURED</item>
+    <item id="FilteredUrl.NestingLimit">CENSURED</item>
+    <item id="testResponseLabel">CENSURED</item>
+    <item id="removedFromRequestColon">CENSURED</item>
+    <item id="FilteredUrl.BodySimilar">CENSURED</item>
+    <item id="originalRequestLabel">CENSURED</item>
+    <item id="body">CENSURED</item>
+    <item id="code">CENSURED</item>
+    <item id="high">CENSURED</item>
+    <item id="name">CENSURED</item>
+    <item id="open">CENSURED</item>
+    <item id="type">CENSURED</item>
+    <item id="j2ee">CENSURED</item>
+    <item id="path">CENSURED</item>
+    <item id="port">CENSURED</item>
+    <item id="risk">CENSURED</item>
+    <item id="sectionViolationByIssue">CENSURED</item>
+    <item id="dictionaryFalse">CENSURED</item>
+    <item id="GeneralInformation.Any">CENSURED</item>
+    <item id="recordedRequestSequence">CENSURED</item>
+    <item id="willFix">CENSURED</item>
+    <item id="reason">CENSURED</item>
+  </dictionary>
+  <layout>
+    <rules-number>CENSURED</rules-number>
+    <title />
+    <report-type />
+    <description />
+    <header />
+    <footer />
+    <include-date>CENSURED</include-date>
+    <report-date-and-time>CENSURED</report-date-and-time>
+    <company-logo-path />
+    <additional-logo-path />
+    <margins>CENSURED</margins>
+    <node-path />
+    <coverage>CENSURED</coverage>
+  </layout>
+  <scan-information>
+    <scan-name>CENSURED</scan-name>
+    <scan-file-name>CENSURED</scan-file-name>
+    <scan-date-and-time>CENSURED</scan-date-and-time>
+    <scan-date-and-time-iso>CENSURED</scan-date-and-time-iso>
+    <product-name>CENSURED</product-name>
+    <product-version>CENSURED</product-version>
+    <cvss-version>CENSURED</cvss-version>
+  </scan-information>
+  <scan-configuration>
+    <login-settings-group>
+      <allow-concurrent-logins>CENSURED</allow-concurrent-logins>
+      <enable-Jsx-In-login-replay>CENSURED</enable-Jsx-In-login-replay>
+      <session-management-mode>CENSURED</session-management-mode>
+      <session-verifier-enabled>CENSURED</session-verifier-enabled>
+      <session-verifier-pattern>CENSURED</session-verifier-pattern>
+      <tracked-cookies>
+        <cookie>CENSURED</cookie>
+        <cookie>CENSURED</cookie>
+      </tracked-cookies>
+      <tracked-parameters />
+      <recorded-urls-sequence>
+        <url>CENSURED</url>
+        <url>CENSURED</url>
+      </recorded-urls-sequence>
+    </login-settings-group>
+    <test-policy-name>CENSURED</test-policy-name>
+    <test-optimization-level>CENSURED</test-optimization-level>
+    <starting-url>CENSURED</starting-url>
+    <link-limit-state>CENSURED</link-limit-state>
+    <link-limit>CENSURED</link-limit>
+    <depth-limit-state>CENSURED</depth-limit-state>
+    <depth-limit>CENSURED</depth-limit>
+    <path-limit-state>CENSURED</path-limit-state>
+    <path-limit>CENSURED</path-limit>
+    <form-filler-state>CENSURED</form-filler-state>
+    <java-script-links-execution>CENSURED</java-script-links-execution>
+    <java-script-links-extraction>CENSURED</java-script-links-extraction>
+    <flash-execution-state>CENSURED</flash-execution-state>
+    <flash-links-extraction-state>CENSURED</flash-links-extraction-state>
+    <additional-servers-and-domains />
+    <multi-phase-operation-names />
+    <path-filters>
+      <path-filter>
+        <path>CENSURED</path>
+        <type>CENSURED</type>
+        <matching>CENSURED</matching>
+      </path-filter>
+      <path-filter>
+        <path>CENSURED</path>
+        <type>CENSURED</type>
+        <matching>CENSURED</matching>
+      </path-filter>
+      <path-filter>
+        <path>CENSURED</path>
+        <type>CENSURED</type>
+        <matching>CENSURED</matching>
+      </path-filter>
+      <path-filter>
+        <path>CENSURED</path>
+        <type>CENSURED</type>
+        <matching>CENSURED</matching>
+      </path-filter>
+      <path-filter>
+        <path>CENSURED</path>
+        <type>CENSURED</type>
+        <matching>CENSURED</matching>
+      </path-filter>
+      <path-filter>
+        <path>CENSURED</path>
+        <type>CENSURED</type>
+        <matching>CENSURED</matching>
+      </path-filter>
+      <path-filter>
+        <path>CENSURED</path>
+        <type>CENSURED</type>
+        <matching>CENSURED</matching>
+      </path-filter>
+      <path-filter>
+        <path>CENSURED</path>
+        <type>CENSURED</type>
+        <matching>CENSURED</matching>
+      </path-filter>
+      <path-filter>
+        <path>CENSURED</path>
+        <type>CENSURED</type>
+        <matching>CENSURED</matching>
+      </path-filter>
+    </path-filters>
+    <custom-proxy-settings>CENSURED</custom-proxy-settings>
+    <use-ie-proxy-settings>CENSURED</use-ie-proxy-settings>
+    <proxy-settings-ip-address />
+    <proxy-settings-port>CENSURED</proxy-settings-port>
+    <scanned-hosts>
+      <item>
+        <host>CENSURED</host>
+        <port>CENSURED</port>
+        <operating-system>CENSURED</operating-system>
+        <web-server>CENSURED</web-server>
+        <application-server>CENSURED</application-server>
+      </item>
+    </scanned-hosts>
+  </scan-configuration>
+  <scan-summary>
+    <scan-Duration>CENSURED</scan-Duration>
+    <num-pages-scanned>CENSURED</num-pages-scanned>
+    <total-num-pages>CENSURED</total-num-pages>
+    <num-security-entities-tested>CENSURED</num-security-entities-tested>
+    <total-num-security-entities>CENSURED</total-num-security-entities>
+    <num-issues-found>CENSURED</num-issues-found>
+    <total-issues-severity-critical>CENSURED</total-issues-severity-critical>
+    <total-issues-severity-high>CENSURED</total-issues-severity-high>
+    <total-issues-severity-medium>CENSURED</total-issues-severity-medium>
+    <total-issues-severity-low>CENSURED</total-issues-severity-low>
+    <total-issues-severity-informational>CENSURED</total-issues-severity-informational>
+    <test-policy>CENSURED</test-policy>
+  </scan-summary>
+  <issue-type-group>
+    <item id="attBlindSqlInjectionStrings" count="4" maxIssueSeverity="6">
+      <name>CENSURED</name>
+      <cve />
+      <cwe>123</cwe>
+      <xfid>CENSURED</xfid>
+      <remediation>
+        <ref>CENSURED</ref>
+      </remediation>
+      <advisory>
+        <ref>CENSURED</ref>
+      </advisory>
+      <threat-class>
+        <ref>CENSURED</ref>
+      </threat-class>
+      <fix-recommendation>
+        <ref>CENSURED</ref>
+      </fix-recommendation>
+      <causes>
+        <ref>CENSURED</ref>
+      </causes>
+      <security-risks>
+        <ref>CENSURED</ref>
+      </security-risks>
+      <affected-products />
+    </item>
+    <item id="attIntegerOverflow" count="65" maxIssueSeverity="3">
+      <name>CENSURED</name>
+      <cve />
+      <cwe>123</cwe>
+      <xfid>CENSURED</xfid>
+      <remediation>
+        <ref>CENSURED</ref>
+      </remediation>
+      <advisory>
+        <ref>CENSURED</ref>
+      </advisory>
+      <threat-class>
+        <ref>CENSURED</ref>
+      </threat-class>
+      <fix-recommendation>
+        <ref>CENSURED</ref>
+      </fix-recommendation>
+      <causes>
+        <ref>CENSURED</ref>
+      </causes>
+      <security-risks>
+        <ref>CENSURED</ref>
+      </security-risks>
+      <affected-products />
+    </item>
+    <item id="attAPIImproperAssetsManagement" count="1" maxIssueSeverity="3">
+      <name>CENSURED</name>
+      <cve />
+      <cwe>123</cwe>
+      <xfid>CENSURED</xfid>
+      <remediation>
+        <ref>CENSURED</ref>
+      </remediation>
+      <advisory>
+        <ref>CENSURED</ref>
+      </advisory>
+      <threat-class>
+        <ref>CENSURED</ref>
+      </threat-class>
+      <fix-recommendation>
+        <ref>CENSURED</ref>
+      </fix-recommendation>
+      <causes>
+        <ref>CENSURED</ref>
+      </causes>
+      <security-risks>
+        <ref>CENSURED</ref>
+      </security-risks>
+      <affected-products />
+    </item>
+    <item id="attJSCookie" count="1" maxIssueSeverity="0">
+      <name>CENSURED</name>
+      <cve />
+      <cwe>123</cwe>
+      <xfid>CENSURED</xfid>
+      <remediation>
+        <ref>CENSURED</ref>
+      </remediation>
+      <advisory>
+        <ref>CENSURED</ref>
+      </advisory>
+      <threat-class>
+        <ref>CENSURED</ref>
+      </threat-class>
+      <fix-recommendation>
+        <ref>CENSURED</ref>
+      </fix-recommendation>
+      <causes>
+        <ref>CENSURED</ref>
+      </causes>
+      <security-risks>
+        <ref>CENSURED</ref>
+      </security-risks>
+      <affected-products />
+    </item>
+  </issue-type-group>
+  <fix-recommendation-group>
+    <item id="attBlindSqlInjectionStrings">
+      <general>
+        <fixRecommendation type="General">
+          <link target="http://msdn2.microsoft.com/en-us/library/ms533046.aspx">http://msdn2.microsoft.com/en-us/library/ms533046.aspx</link>
+          <text>CENSURED</text>
+          <link target="http://phpsec.org/">http://phpsec.org/</link>
+          <text>CENSURED</text>
+          <link target="http://shiflett.org/">http://shiflett.org/</link>
+        </fixRecommendation>
+      </general>
+    </item>
+    <item id="attIntegerOverflow">
+      <general>
+        <fixRecommendation type="General">
+          <text>CENSURED</text>
+        </fixRecommendation>
+      </general>
+    </item>
+    <item id="attAPIImproperAssetsManagement">
+      <general>
+        <fixRecommendation type="General">
+          <text>CENSURED</text>
+        </fixRecommendation>
+      </general>
+    </item>
+    <item id="attNXDOMAIN">
+      <general>
+        <fixRecommendation type="General">
+          <text>CENSURED</text>
+          <text>CENSURED</text>
+        </fixRecommendation>
+      </general>
+    </item>
+    <item id="attLoginNotOverSSL">
+      <general>
+        <fixRecommendation type="General">
+          <text />
+          <text>CENSURED</text>
+        </fixRecommendation>
+      </general>
+    </item>
+    <item id="attSameSiteCookie">
+      <general>
+        <fixRecommendation type="General">
+          <text>CENSURED</text>
+          <text>CENSURED</text>
+        </fixRecommendation>
+      </general>
+    </item>
+    <item id="GV_SQLErr">
+      <general>
+        <fixRecommendation type="General">
+          <text>CENSURED</text>
+          <link target="http://msdn2.microsoft.com/en-us/library/ms533046.aspx">http://msdn2.microsoft.com/en-us/library/ms533046.aspx</link>
+          <text>CENSURED</text>
+          <link target="http://phpsec.org/">http://phpsec.org/</link>
+          <text>CENSURED</text>
+          <link target="http://shiflett.org/">http://shiflett.org/</link>
+        </fixRecommendation>
+      </general>
+    </item>
+    <item id="attReferrerPolicyHeaderExist">
+      <general>
+        <fixRecommendation type="General">
+          <text>CENSURED</text>
+          <text>CENSURED</text>
+          <text>CENSURED</text>
+          <text />
+          <text>CENSURED</text>
+          <link target="https://developers.google.com/web/updates/2020/07/referrer-policy-new-chrome-default">https://developers.google.com/web/updates/2020/07/referrer-policy-new-chrome-default</link>
+          <text>CENSURED</text>
+          <link target="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy.">https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy.</link>
+        </fixRecommendation>
+      </general>
+    </item>
+    <item id="attJSCookie">
+      <general>
+        <fixRecommendation type="General">
+          <text>CENSURED</text>
+          <text>CENSURED</text>
+        </fixRecommendation>
+      </general>
+    </item>
+  </fix-recommendation-group>
+  <threat-class-group>
+    <item id="catSQLInjection" href="">CENSURED</item>
+    <item id="catIntegerOverflow" href="http://projects.webappsec.org/Integer-Overflows">Desbordamiento de enteros</item>
+    <item id="catAPIImproperAssetsManagement" href="">CENSURED</item>
+    <item id="catURLRedirectoryAbuse" href="http://projects.webappsec.org/URL-Redirector-Abuse">Abuso de redireccionamiento URL</item>
+    <item id="catInsufficientTransLayerProtection" href="http://projects.webappsec.org/Insufficient-Transport-Layer-Protection">Protección de capa de transporte insuficiente</item>
+    <item id="catServerMisconfiguration" href="http://projects.webappsec.org/Server-Misconfiguration">Error de configuración del servidor</item>
+    <item id="catCrossSiteRequestForgery" href="http://projects.webappsec.org/Cross-Site-Request-Forgery">Falsificación de solicitud entre sitios</item>
+    <item id="catXPathInjection" href="">CENSURED</item>
+    <item id="catInformationLeakage" href="http://projects.webappsec.org/Information-Leakage">Filtraje de información</item>
+    <item id="catAbuseOfFunctionality" href="">CENSURED</item>
+  </threat-class-group>
+  <issue-group total="384">
+    <item id="-4714581656683135232" id-v2="626236621786310400">
+      <severity />
+      <severity-id>CENSURED</severity-id>
+      <cvss-score>CENSURED</cvss-score>
+      <cvss-vector>
+        <vector>CENSURED</vector>
+      </cvss-vector>
+      <cwe>123</cwe>
+      <issue-type>
+        <ref>CENSURED</ref>
+      </issue-type>
+      <remediation>
+        <ref>CENSURED</ref>
+      </remediation>
+      <advisory>
+        <ref>CENSURED</ref>
+      </advisory>
+      <threat-class>
+        <ref>CENSURED</ref>
+      </threat-class>
+      <entity>
+        <ref>CENSURED</ref>
+      </entity>
+      <url original_request_method="POST">
+        <ref>CENSURED</ref>
+      </url>
+      <security-risks>
+        <ref>CENSURED</ref>
+      </security-risks>
+      <cause-id>
+        <ref>CENSURED</ref>
+        <ref>CENSURED</ref>
+      </cause-id>
+      <user-image-group />
+      <variant-group>
+        <item id="74517">
+          <issue-information>
+            <template>CENSURED</template>
+            <variant-id>CENSURED</variant-id>
+            <issue-tip>CENSURED</issue-tip>
+            <issue-tips>
+              <issue-tip>CENSURED</issue-tip>
+            </issue-tips>
+            <variantID>CENSURED</variantID>
+            <testResponseChunk>CENSURED</testResponseChunk>
+          </issue-information>
+          <comments />
+          <reasoning id="3002">CENSURED</reasoning>
+          <additional-data />
+          <cwe />
+          <image-comment />
+          <differences>
+            <item altered="%00" original="2019-01-01" name="DateTime$DDD$C$TE" difference-type="changed" difference-element="parameter" />
+          </differences>
+          <iast-info />
+          <test-http-traffic>CENSURED</test-http-traffic>
+        </item>
+      </variant-group>
+    </item>
+    <item id="1444716459353270272" id-v2="-7755935851978403328">
+      <severity>High</severity>
+      <severity-id>CENSURED</severity-id>
+      <cvss-score>CENSURED</cvss-score>
+      <cvss-vector>
+        <vector>CENSURED</vector>
+      </cvss-vector>
+      <cwe>123</cwe>
+      <issue-type>
+        <ref>CENSURED</ref>
+      </issue-type>
+      <remediation>
+        <ref>CENSURED</ref>
+      </remediation>
+      <advisory>
+        <ref>CENSURED</ref>
+      </advisory>
+      <threat-class>
+        <ref>CENSURED</ref>
+      </threat-class>
+      <entity>
+        <ref>CENSURED</ref>
+      </entity>
+      <url original_request_method="POST">
+        <ref>CENSURED</ref>
+      </url>
+      <security-risks>
+        <ref>CENSURED</ref>
+      </security-risks>
+      <cause-id>
+        <ref>CENSURED</ref>
+        <ref>CENSURED</ref>
+      </cause-id>
+      <user-image-group />
+      <variant-group>
+        <item id="75906">
+          <issue-information>
+            <template>CENSURED</template>
+            <variant-id>CENSURED</variant-id>
+            <issue-tip>CENSURED</issue-tip>
+            <issue-tips>
+              <issue-tip>CENSURED</issue-tip>
+            </issue-tips>
+            <variantID>CENSURED</variantID>
+            <testResponseChunk>CENSURED</testResponseChunk>
+          </issue-information>
+          <comments />
+          <reasoning id="3002">CENSURED</reasoning>
+          <additional-data />
+          <cwe />
+          <image-comment />
+          <differences>
+            <item altered="%00" original="C" name="cklValidTypes$RB3" difference-type="changed" difference-element="parameter" />
+          </differences>
+          <iast-info />
+          <test-http-traffic>CENSURED</test-http-traffic>
+        </item>
+      </variant-group>
+    </item>
+    <item id="-3181974832126986240" id-v2="1677351463514414080">
+      <severity>High</severity>
+      <severity-id>CENSURED</severity-id>
+      <cvss-score>CENSURED</cvss-score>
+      <cvss-vector>
+        <vector>CENSURED</vector>
+      </cvss-vector>
+      <cwe>123</cwe>
+      <issue-type>
+        <ref>CENSURED</ref>
+      </issue-type>
+      <remediation>
+        <ref>CENSURED</ref>
+      </remediation>
+      <advisory>
+        <ref>CENSURED</ref>
+      </advisory>
+      <threat-class>
+        <ref>CENSURED</ref>
+      </threat-class>
+      <entity>
+        <ref>CENSURED</ref>
+      </entity>
+      <url original_request_method="POST">
+        <ref>CENSURED</ref>
+      </url>
+      <security-risks>
+        <ref>CENSURED</ref>
+      </security-risks>
+      <cause-id>
+        <ref>CENSURED</ref>
+        <ref>CENSURED</ref>
+      </cause-id>
+      <user-image-group />
+      <variant-group>
+        <item id="75769">
+          <issue-information>
+            <template>CENSURED</template>
+            <variant-id>CENSURED</variant-id>
+            <issue-tip>CENSURED</issue-tip>
+            <issue-tips>
+              <issue-tip>CENSURED</issue-tip>
+            </issue-tips>
+            <variantID>CENSURED</variantID>
+            <testResponseChunk>CENSURED</testResponseChunk>
+          </issue-information>
+          <comments />
+          <reasoning id="3002">CENSURED</reasoning>
+          <additional-data />
+          <cwe />
+          <image-comment />
+          <differences>
+            <item altered="%00" original="I" name="cklValidTypes$RB9" difference-type="changed" difference-element="parameter" />
+          </differences>
+          <iast-info />
+          <test-http-traffic>CENSURED</test-http-traffic>
+        </item>
+      </variant-group>
+    </item>
+    <item id="-4966231569722402304" id-v2="5278767978099256320">
+      <severity>High</severity>
+      <severity-id>CENSURED</severity-id>
+      <cvss-score>CENSURED</cvss-score>
+      <cvss-vector>
+        <vector>CENSURED</vector>
+      </cvss-vector>
+      <cwe>123</cwe>
+      <issue-type>
+        <ref>CENSURED</ref>
+      </issue-type>
+      <remediation>
+        <ref>CENSURED</ref>
+      </remediation>
+      <advisory>
+        <ref>CENSURED</ref>
+      </advisory>
+      <threat-class>
+        <ref>CENSURED</ref>
+      </threat-class>
+      <entity>
+        <ref>CENSURED</ref>
+      </entity>
+      <url original_request_method="POST">
+        <ref>CENSURED</ref>
+      </url>
+      <security-risks>
+        <ref>CENSURED</ref>
+      </security-risks>
+      <cause-id>
+        <ref>CENSURED</ref>
+        <ref>CENSURED</ref>
+      </cause-id>
+      <user-image-group />
+      <variant-group>
+        <item id="75868">
+          <issue-information>
+            <template>CENSURED</template>
+            <variant-id>CENSURED</variant-id>
+            <issue-tip>CENSURED</issue-tip>
+            <issue-tips>
+              <issue-tip>CENSURED</issue-tip>
+            </issue-tips>
+            <variantID>CENSURED</variantID>
+            <testResponseChunk>CENSURED</testResponseChunk>
+          </issue-information>
+          <comments />
+          <reasoning id="3002">CENSURED</reasoning>
+          <additional-data />
+          <cwe />
+          <image-comment />
+          <differences>
+            <item altered="%00" original="1234" name="ReportSchedule.ExportPath" difference-type="changed" difference-element="parameter" />
+          </differences>
+          <iast-info />
+          <test-http-traffic>CENSURED</test-http-traffic>
+        </item>
+      </variant-group>
+    </item>
+  </issue-group>
+</xml-report>

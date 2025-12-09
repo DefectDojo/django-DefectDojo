@@ -1,0 +1,102 @@
+{
+  "content-security-policy": {
+    "expectation": "csp-implemented-with-no-unsafe",
+    "name": "content-security-policy",
+    "output": {
+      "data": null,
+      "http": false,
+      "meta": false,
+      "policy": null
+    },
+    "pass": false,
+    "result": "csp-not-implemented",
+    "score_description": "Content Security Policy (CSP) header not implemented",
+    "score_modifier": -25
+  },
+  "cookies": {
+    "expectation": "cookies-secure-with-httponly-sessions",
+    "name": "cookies",
+    "output": {
+      "data": {
+        "1P_JAR": {
+          "domain": ".google.com",
+          "expires": 1562546850,
+          "httponly": false,
+          "max-age": null,
+          "path": "/",
+          "port": null,
+          "samesite": false,
+          "secure": false
+        },
+        "NID": {
+          "domain": ".google.com",
+          "expires": 1575766050,
+          "httponly": true,
+          "max-age": null,
+          "path": "/",
+          "port": null,
+          "samesite": false,
+          "secure": false
+        }
+      },
+      "sameSite": null
+    },
+    "pass": false,
+    "result": "cookies-without-secure-flag-but-protected-by-hsts",
+    "score_description": "Cookies set without using the Secure flag, but transmission over HTTP prevented by HSTS",
+    "score_modifier": -5
+  },
+  "redirection": {
+    "expectation": "redirection-to-https",
+    "name": "redirection",
+    "output": {
+      "destination": "https://www.google.com/?gws_rd=ssl",
+      "redirects": true,
+      "route": [
+        "http://google.com/",
+        "http://www.google.com/",
+        "https://www.google.com/?gws_rd=ssl"
+      ],
+      "status_code": 200
+    },
+    "pass": false,
+    "result": "redirection-not-to-https-on-initial-redirection",
+    "score_description": "Redirects to HTTPS eventually, but initial redirection is to another HTTP URL",
+    "score_modifier": -10
+  },
+  "referrer-policy": {
+    "expectation": "referrer-policy-private",
+    "name": "referrer-policy",
+    "output": {
+      "data": "origin",
+      "http": false,
+      "meta": true
+    },
+    "pass": false,
+    "result": "referrer-policy-unsafe",
+    "score_description": "Referrer-Policy header set unsafely to \"origin\", \"origin-when-cross-origin\", or \"unsafe-url\"",
+    "score_modifier": -5
+  },
+  "x-content-type-options": {
+    "expectation": "x-content-type-options-nosniff",
+    "name": "x-content-type-options",
+    "output": {
+      "data": null
+    },
+    "pass": false,
+    "result": "x-content-type-options-not-implemented",
+    "score_description": "X-Content-Type-Options header not implemented",
+    "score_modifier": -5
+  },
+  "x-xss-protection": {
+    "expectation": "x-xss-protection-1-mode-block",
+    "name": "x-xss-protection",
+    "output": {
+      "data": "0"
+    },
+    "pass": false,
+    "result": "x-xss-protection-disabled",
+    "score_description": "X-XSS-Protection header set to \"0\" (disabled)",
+    "score_modifier": -10
+  }
+}

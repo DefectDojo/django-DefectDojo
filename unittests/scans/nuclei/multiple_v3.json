@@ -1,0 +1,196 @@
+[
+    {
+      "template": "dns/dns-saas-service-detection.yaml",
+      "template-url": "https://templates.nuclei.sh/public/dns-saas-service-detection",
+      "template-id": "dns-saas-service-detection",
+      "template-path": "asdf/dns-saas-service-detection.yaml",
+      "info": {
+        "name": "DNS SaaS Service Detection",
+        "author": [
+          "noah @thesubtlety",
+          "pdteam"
+        ],
+        "tags": [
+          "dns",
+          "service"
+        ],
+        "description": "A CNAME DNS record was discovered",
+        "reference": [
+          "https://ns1.com/resources/cname",
+          "https://www.theregister.com/2021/02/24/dns_cname_tracking/",
+          "https://www.ionos.com/digitalguide/hosting/technical-matters/cname-record/"
+        ],
+        "severity": "info",
+        "metadata": {
+          "max-request": 1
+        }
+      },
+      "matcher-name": "wix",
+      "type": "dns",
+      "host": "www.asdf.de",
+      "matched-at": "www.asdf.de",
+      "extracted-results": [
+        "pointing.wixdns.net"
+      ],
+      "request": ";; opcode: QUERY, status: NOERROR, id: 9778\n;; flags: rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags:; udp: 4096\n\n;; QUESTION SECTION:\n;www.asdf.de.\tIN\t CNAME\n",
+      "response": ";; opcode: QUERY, status: NOERROR, id: 9778\n;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags:; udp: 512\n\n;; QUESTION SECTION:\n;www.asdf.de.\tIN\t CNAME\n\n;; ANSWER SECTION:\nwww.asdf.de.\t3093\tIN\tCNAME\tpointing.wixdns.net.\n",
+      "timestamp": "2023-11-06T14:48:31.559886+01:00",
+      "matcher-status": true
+    },
+    {
+      "template": "dns/caa-fingerprint.yaml",
+      "template-url": "https://templates.nuclei.sh/public/caa-fingerprint",
+      "template-id": "caa-fingerprint",
+      "template-path": "asdf/caa-fingerprint.yaml",
+      "info": {
+        "name": "CAA Record",
+        "author": [
+          "pdteam"
+        ],
+        "tags": [
+          "dns",
+          "caa"
+        ],
+        "description": "A CAA record was discovered. A CAA record is used to specify which certificate authorities (CAs) are allowed to issue certificates for a domain.",
+        "reference": [
+          "https://support.dnsimple.com/articles/caa-record/#whats-a-caa-record"
+        ],
+        "severity": "info",
+        "metadata": {
+          "max-request": 1
+        },
+        "classification": {
+          "cve-id": null,
+          "cwe-id": [
+            "cwe-200"
+          ]
+        }
+      },
+      "type": "dns",
+      "host": "www.asdf.de",
+      "matched-at": "www.asdf.de",
+      "request": ";; opcode: QUERY, status: NOERROR, id: 9301\n;; flags: rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags:; udp: 4096\n\n;; QUESTION SECTION:\n;www.asdf.de.\tIN\t CAA\n",
+      "response": ";; opcode: QUERY, status: NOERROR, id: 9301\n;; flags: qr rd ra; QUERY: 1, ANSWER: 4, AUTHORITY: 1, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags:; udp: 512\n\n;; QUESTION SECTION:\n;www.asdf.de.\tIN\t CAA\n\n;; ANSWER SECTION:\nwww.asdf.de.\t3093\tIN\tCNAME\tpointing.wixdns.net.\npointing.wixdns.net.\t300\tIN\tCNAME\tcdn1.wixdns.net.\ncdn1.wixdns.net.\t300\tIN\tCNAME\tbalancer-ccm.wixdns.net.\nbalancer-ccm.wixdns.net.\t300\tIN\tCNAME\ttd-balancer-199-15-163-148.wixdns.net.\n\n;; AUTHORITY SECTION:\nwixdns.net.\t600\tIN\tSOA\tdns1.p02.nsone.net. hostmaster.nsone.net. 1659255375 3600 600 604800 600\n",
+      "timestamp": "2023-11-06T14:48:31.591398+01:00",
+      "matcher-status": true
+    },
+    {
+      "template": "ssl/detect-ssl-issuer.yaml",
+      "template-url": "https://templates.nuclei.sh/public/ssl-issuer",
+      "template-id": "ssl-issuer",
+      "template-path": "asdf/ssl/detect-ssl-issuer.yaml",
+      "info": {
+        "name": "Detect SSL Certificate Issuer",
+        "author": [
+          "lingtren"
+        ],
+        "tags": [
+          "ssl"
+        ],
+        "description": "Extract the issuer's organization from the target's certificate. Issuers are entities which sign and distribute certificates.\n",
+        "severity": "info",
+        "metadata": {
+          "max-request": 1
+        }
+      },
+      "type": "ssl",
+      "host": "www.asdf.de",
+      "matched-at": "www.asdf.de:443",
+      "extracted-results": [
+        "Sectigo Limited"
+      ],
+      "ip": "8.8.8.8",
+      "timestamp": "2023-11-06T14:58:55.774697+01:00",
+      "matcher-status": true
+    },
+    {
+      "template": "ssl/ssl-dns-names.yaml",
+      "template-url": "https://templates.nuclei.sh/public/ssl-dns-names",
+      "template-id": "ssl-dns-names",
+      "template-path": "asdf/ssl/ssl-dns-names.yaml",
+      "info": {
+        "name": "SSL DNS Names",
+        "author": [
+          "pdteam"
+        ],
+        "tags": [
+          "ssl"
+        ],
+        "description": "Extract the Subject Alternative Name (SAN) from the target's certificate. SAN facilitates the usage of additional hostnames with the same certificate.\n",
+        "severity": "info",
+        "metadata": {
+          "max-request": 1
+        }
+      },
+      "type": "ssl",
+      "host": "www.asdf.de",
+      "matched-at": "www.asdf.de:443",
+      "extracted-results": [
+        "asdf.de",
+        "www.asdf.de"
+      ],
+      "ip": "8.8.8.8",
+      "timestamp": "2023-11-06T14:58:55.775854+01:00",
+      "matcher-status": true
+    },
+    {
+      "template": "ssl/tls-version.yaml",
+      "template-url": "https://templates.nuclei.sh/public/tls-version",
+      "template-id": "tls-version",
+      "template-path": "asdf/ssl/tls-version.yaml",
+      "info": {
+        "name": "TLS Version - Detect",
+        "author": [
+          "pdteam",
+          "pussycat0x"
+        ],
+        "tags": [
+          "ssl"
+        ],
+        "description": "TLS version detection is a security process used to determine the version of the Transport Layer Security (TLS) protocol used by a computer or server.\nIt is important to detect the TLS version in order to ensure secure communication between two computers or servers.\n",
+        "severity": "info",
+        "metadata": {
+          "max-request": 4
+        }
+      },
+      "type": "ssl",
+      "host": "www.asdf.de",
+      "matched-at": "www.asdf.de:443",
+      "extracted-results": [
+        "tls12"
+      ],
+      "ip": "8.8.8.8",
+      "timestamp": "2023-11-06T14:58:57.693551+01:00",
+      "matcher-status": true
+    },
+    {
+      "template": "ssl/tls-version.yaml",
+      "template-url": "https://templates.nuclei.sh/public/tls-version",
+      "template-id": "tls-version",
+      "template-path": "asdf/ssl/tls-version.yaml",
+      "info": {
+        "name": "TLS Version - Detect",
+        "author": [
+          "pdteam",
+          "pussycat0x"
+        ],
+        "tags": [
+          "ssl"
+        ],
+        "description": "TLS version detection is a security process used to determine the version of the Transport Layer Security (TLS) protocol used by a computer or server.\nIt is important to detect the TLS version in order to ensure secure communication between two computers or servers.\n",
+        "severity": "info",
+        "metadata": {
+          "max-request": 4
+        }
+      },
+      "type": "ssl",
+      "host": "www.asdf.de",
+      "matched-at": "www.asdf.de:443",
+      "extracted-results": [
+        "tls13"
+      ],
+      "ip": "8.8.8.8",
+      "timestamp": "2023-11-06T14:58:58.56985+01:00",
+      "matcher-status": true
+    }
+  ]

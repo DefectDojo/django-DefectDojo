@@ -1,0 +1,655 @@
+{% extends "base.html" %}
+{% load event_tags %}
+{% load display_tags %}
+{% load static %}
+{% block add_styles %}
+    {{ block.super }}
+    #chart_div3 .flot-x-axis .tickLabel, #chart_div4 .flot-x-axis .tickLabel
+    {   top: 290px !important;
+    font-size: 10px;
+    transform: rotate(-15deg);
+    -ms-transform:rotate(-15deg); /* IE 9 */
+    -moz-transform:rotate(-15deg); /* Firefox */
+    -webkit-transform:rotate(-15deg); /* Safari and Chrome */
+    -o-transform:rotate(-15deg); /* Opera */
+    }
+    #chart_div, #chart_div2, #chart_div3, #chart_div4 {height: 300px}
+{% endblock %}
+{% block content %}
+    {{ block.super }}
+    <h2> {{ name }}</h2>
+    <div class="row metric-data">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Open Bug Count by Month
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="chart_div"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Risk Accepted Bug Count by Month
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="chart_div2"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Open Bug Count by Week
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="chart_div3"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Risk Accepted Bug Count by Week
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="chart_div4"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    Detail Breakdown
+                </div>
+                <!-- /.panel-heading -->
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Team</th>
+                        <th class="nowrap">Application Name</th>
+                        <th>Severity</th>
+                        <th class="nowrap">Short Description</th>
+                        <th class="nowrap">Days Open</th>
+                        <th>Status</th>
+                        <th> Engineer</th>
+
+                    </tr>
+                    {% for detail in details %}
+                        <tr>
+                            <td>{{ detail.0 }}</td>
+                            <td>{{ detail.1 }}</td>
+                            <td>{{ detail.2 }}</td>
+                            <td>{{ detail.3 }}</td>
+                            <td>{{ detail.4 }}</td>
+                            <td>{{ detail.5 }}</td>
+                            <td>{{ detail.6 }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <!-- /.panel -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    Top 10 products by bug severity
+                </div>
+                <!-- /.panel-heading -->
+                {% if  metric %}
+                    <table class="table table-striped ">
+                        <tr>
+                            <th>Product</th>
+                            <th>Critical</th>
+                            <th>High</th>
+                            <th>Medium</th>
+                            <th>Low</th>
+                            <th>Total</th>
+                        </tr>
+                        {% for t in update %}
+                            <tr>
+                                <td>{{ t.0|safe }}</td>
+                                <td>{{ t.1 }}</td>
+                                <td>{{ t.2 }}</td>
+                                <td>{{ t.3 }}</td>
+                                <td>{{ t.4 }}</td>
+                                <td>{{ t.5 }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    Opened This Week
+                </div>
+                <!-- /.panel-heading -->
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+                    </tr>
+                    <tr>
+                        <td>{{ open_week_count.crit }}</td>
+                        <td>{{ open_week_count.high }}</td>
+                        <td>{{ open_week_count.med }}</td>
+                        <td>{{ open_week_count.low }}</td>
+                        <td> {{ open_week | length }} </td>
+                    </tr>
+                </table>
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <th> Product</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+
+                    </tr>
+                    {% for key, value in o_week_dict.items %}
+                        <tr>
+                            <td> {{ key }} </td>
+                            {% for i in value %}
+                                <td> {{ i }} </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <div class="col-lg-6">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    Opened This Month
+                </div>
+                <!-- /.panel-heading -->
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+                    </tr>
+                    <tr>
+                        <td>{{ critical_open_month }}</td>
+                        <td>{{ high_open_month }}</td>
+                        <td>{{ medium_open_month }}</td>
+                        <td>{{ low_open_month }}</td>
+                        <td> {{ open_month | length }} </td>
+                    </tr>
+                </table>
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <th> Product</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+
+                    </tr>
+                    {% for key, value in o_dict.items %}
+                        <tr>
+                            <td> {{ key }} </td>
+                            {% for i in value %}
+                                <td> {{ i }} </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    Risk Accepted This Week
+                </div>
+                <!-- /.panel-heading -->
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+                    </tr>
+                    <tr>
+                        <td>{{ accepted_week_count.crit }}</td>
+                        <td>{{ accepted_week_count.high }}</td>
+                        <td>{{ accepted_week_count.med }}</td>
+                        <td>{{ accepted_week_count.low }}</td>
+                        <td> {{ accepted_week | length }} </td>
+                    </tr>
+                </table>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th> Product</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+
+                    </tr>
+                    {% for key, value in a_week_dict.items %}
+                        <tr>
+                            <td> {{ key }} </td>
+                            {% for i in value %}
+                                <td> {{ i }} </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+            <!-- /.panel -->
+        </div>
+        <div class="col-lg-6">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    Risk Accepted This Month
+                </div>
+                <!-- /.panel-heading -->
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+                    </tr>
+                    <tr>
+                        <td>{{ critical_a_month }}</td>
+                        <td>{{ high_a_month }}</td>
+                        <td>{{ medium_a_month }}</td>
+                        <td>{{ low_a_month }}</td>
+                        <td> {{ a_month | length }} </td>
+                    </tr>
+                </table>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th> Product</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+
+                    </tr>
+                    {% for key, value in a_dict.items %}
+                        <tr>
+                            <td> {{ key }} </td>
+                            {% for i in value %}
+                                <td> {{ i }} </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+            <!-- /.panel -->
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="col-lg-6">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    Closed This Week
+                </div>
+                <!-- /.panel-heading -->
+                <table class="table table-bordered  table-striped">
+                    <tr>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+                    </tr>
+                    <tr>
+                        <td>{{ closed_week_count.crit }}</td>
+                        <td>{{ closed_week_count.high }}</td>
+                        <td>{{ closed_week_count.med }}</td>
+                        <td>{{ closed_week_count.low }}</td>
+                        <td> {{ closed_week | length }} </td>
+                    </tr>
+                </table>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th> Product</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+
+                    </tr>
+                    {% for key, value in c_week_dict.items %}
+                        <tr>
+                            <td> {{ key }} </td>
+                            {% for i in value %}
+                                <td> {{ i }} </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <div class="col-lg-6">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    Closed This Month
+                </div>
+                <!-- /.panel-heading -->
+                <table class="table table-bordered table-striped ">
+                    <tr>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+                    </tr>
+                    <tr>
+                        <td>{{ critical_c_month }}</td>
+                        <td>{{ high_c_month }}</td>
+                        <td>{{ medium_c_month }}</td>
+                        <td>{{ low_c_month }}</td>
+                        <td> {{ closed_month | length }} </td>
+                    </tr>
+                </table>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th> Product</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+
+                    </tr>
+                    {% for key, value in c_dict.items %}
+                        <tr>
+                            <td> {{ key }} </td>
+                            {% for i in value %}
+                                <td> {{ i }} </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    Trending Open Bug Count
+                </div>
+                <table class="table table-bordered  table-striped">
+                    <tr>
+                        <th>Weekly</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+                        <th>Closed</th>
+                    </tr>
+                    {% for items in week_stuff %}
+                        <tr>
+                            {% for item in items %}
+                                <td>{{ item }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Monthly</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+                        <th>Closed</th>
+                    </tr>
+                    {% for items in total %}
+                        <tr>
+                            {% for item in items %}
+                                <td>{{ item }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    Trending Risk Accepted Bug Count
+                </div>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>By Week</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+                    </tr>
+                    {% for items in week_a_stuff %}
+                        <tr>
+                            {% for item in items %}
+                                <td>{{ item }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>By Month</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
+                        <th>Total</th>
+                    </tr>
+                    {% for items in a_total %}
+                        <tr>
+                            {% for item in items %}
+                                <td>{{ item }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        {% if metric %}
+            <div class="col-lg-6">
+                <div class="panel panel-default table-responsive">
+                    <div class="panel-heading">
+                        All Issues
+                    </div>
+                    <table class="table table-bordered table-striped">
+                        <tr>
+                            <th>Product</th>
+                            <th>Critical</th>
+                            <th>High</th>
+                            <th>Medium</th>
+                            <th>Low</th>
+                            <th>Total</th>
+                        </tr>
+                        {% for t in total_update %}
+                            <tr>
+                                <td>{{ t.0|safe }}</td>
+                                <td>{{ t.1 }}</td>
+                                <td>{{ t.2 }}</td>
+                                <td>{{ t.3 }}</td>
+                                <td>{{ t.4 }}</td>
+                                <td>{{ t.5 }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+        <div class="col-lg-6">
+            <div class="panel panel-default table-responsive">
+                <div class="panel-heading">
+                    Age of Open Issues (Critical and High Only)
+                </div>
+                <table class="table table-bordered table-striped">
+                    <tr>
+                        <th>Days</th>
+                        <th>Bug Count</th>
+                    </tr>
+                    <tr>
+                        <td>0 - 30 Days</td>
+                        <td>{{ lt }}</td>
+                    </tr>
+                    <tr>
+                        <td>31 - 60 Days</td>
+                        <td>{{ ls }}</td>
+                    </tr>
+                    <tr>
+                        <td>61 - 90 Days</td>
+                        <td>{{ ln }}</td>
+                    </tr>
+                    <tr>
+                        <td>91+ Days</td>
+                        <td>{{ mn }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <br/>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+    <!-- Flot Charts JavaScript -->
+    <script src="{% static "flot/excanvas.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
+    <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
+    <script>
+        $(function () {
+            var critical = [];
+            var high = [];
+            var medium = [];
+            var low = [];
+            var ticks = [];
+            {% for month in chart_data|slice:'1:' %}
+                month = {{month|safe}};
+                ttp = {{forloop.counter}};
+                ticks.push(month[0]);
+                critical.push([ttp, month[1]]);
+                high.push([ttp, month[2]]);
+                medium.push([ttp, month[3]]);
+                low.push([ttp, month[4]]);
+            {% endfor %}
+            open_bug_count_by_month(critical, high, medium, low, ticks);
+
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            ticks = [];
+            {% for month in a_chart_data|slice:"1:" %}
+                month = {{month|safe}};
+                ttp = {{forloop.counter}}
+                        ticks.push(month[0]);
+                critical.push([ttp, month[1]]);
+                high.push([ttp, month[2]]);
+                medium.push([ttp, month[3]]);
+                low.push([ttp, month[4]]);
+            {% endfor %}
+            accepted_bug_count_by_month(critical, high, medium, low, ticks);
+
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            ticks = [];
+            {% for month in week_chart_data|slice:"1:" %}
+                month = {{month|safe}};
+                ttp = {{forloop.counter}}
+                        critical.push([ttp, month[1]]);
+                high.push([ttp, month[2]]);
+                medium.push([ttp, month[3]]);
+                low.push([ttp, month[4]]);
+                ticks.push(month[0].replace(' - ', '-'))
+            {% endfor %}
+            open_bug_count_by_week(critical, high, medium, low, ticks);
+
+            critical = [];
+            high = [];
+            medium = [];
+            low = [];
+            ticks = [];
+            {% for month in week_a_chart_data|slice:"1:" %}
+                month = {{month|safe}};
+                ttp = {{forloop.counter}}
+                        critical.push([ttp, month[1]]);
+                high.push([ttp, month[2]]);
+                medium.push([ttp, month[3]]);
+                low.push([ttp, month[4]]);
+                ticks.push(month[0].replace(' - ', '-'));
+            {% endfor %}
+            accepted_bug_count_by_week(critical, high, medium, low, ticks);
+        });
+
+    </script>
+{% endblock %}

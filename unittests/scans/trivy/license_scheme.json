@@ -1,0 +1,239 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "alpine:3.11",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "OS": {
+      "Family": "alpine",
+      "Name": "3.11.13"
+    },
+    "ImageID": "sha256:a787cb9865032e5b5a407ecdf34b57a23a4a076aaa043d71742ddb6726ec9229",
+    "DiffIDs": [
+      "sha256:69715584ec78c168981b0925dd7c50f4537bc598dcbce814db2803a10b777b5c"
+    ],
+    "RepoTags": [
+      "alpine:3.11"
+    ],
+    "RepoDigests": [
+      "alpine@sha256:bcae378eacedab83da66079d9366c8f5df542d7ed9ab23bf487e3e1a8481375d"
+    ],
+    "ImageConfig": {
+      "architecture": "amd64",
+      "container": "9a36cae78f6934ef1807fa6d7fbe783ef8ef7c719438a53c5ce3d6cabd0ad551",
+      "created": "2021-11-12T17:20:17.61716938Z",
+      "docker_version": "20.10.7",
+      "history": [
+        {
+          "created": "2021-11-12T17:20:17Z",
+          "created_by": "/bin/sh -c #(nop) ADD file:efe2d94a88cdbbd01c3ef095f0a2473cec9e74804b49cd6fb9b837d362631409 in / "
+        },
+        {
+          "created": "2021-11-12T17:20:17Z",
+          "created_by": "/bin/sh -c #(nop)  CMD [\"/bin/sh\"]",
+          "empty_layer": true
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:69715584ec78c168981b0925dd7c50f4537bc598dcbce814db2803a10b777b5c"
+        ]
+      },
+      "config": {
+        "Cmd": [
+          "/bin/sh"
+        ],
+        "Env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        ],
+        "Image": "sha256:ff3f29274d45b1bf9ebf7c6df3a8021bb2396803c7644ee8306b9f45732a61ea"
+      }
+    }
+  },
+  "Results": [
+    {
+      "Target": "OS Packages",
+      "Class": "license",
+      "Licenses": [
+        {
+          "Severity": "HIGH",
+          "Category": "restricted",
+          "PkgName": "alpine-baselayout",
+          "FilePath": "",
+          "Name": "GPL-2.0",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "LOW",
+          "Category": "notice",
+          "PkgName": "alpine-keys",
+          "FilePath": "",
+          "Name": "MIT",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "HIGH",
+          "Category": "restricted",
+          "PkgName": "apk-tools",
+          "FilePath": "",
+          "Name": "GPL-2.0",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "HIGH",
+          "Category": "restricted",
+          "PkgName": "busybox",
+          "FilePath": "",
+          "Name": "GPL-2.0",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "MEDIUM",
+          "Category": "reciprocal",
+          "PkgName": "ca-certificates-cacert",
+          "FilePath": "",
+          "Name": "MPL-2.0",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "HIGH",
+          "Category": "restricted",
+          "PkgName": "ca-certificates-cacert",
+          "FilePath": "",
+          "Name": "GPL-2.0",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "LOW",
+          "Category": "notice",
+          "PkgName": "libc-utils",
+          "FilePath": "",
+          "Name": "BSD-3-Clause",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "LOW",
+          "Category": "notice",
+          "PkgName": "libcrypto1.1",
+          "FilePath": "",
+          "Name": "OpenSSL",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "LOW",
+          "Category": "notice",
+          "PkgName": "libssl1.1",
+          "FilePath": "",
+          "Name": "OpenSSL",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "LOW",
+          "Category": "notice",
+          "PkgName": "libtls-standalone",
+          "FilePath": "",
+          "Name": "ISC",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "LOW",
+          "Category": "notice",
+          "PkgName": "musl",
+          "FilePath": "",
+          "Name": "MIT",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "LOW",
+          "Category": "notice",
+          "PkgName": "musl-utils",
+          "FilePath": "",
+          "Name": "MIT",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "LOW",
+          "Category": "notice",
+          "PkgName": "musl-utils",
+          "FilePath": "",
+          "Name": "BSD-3-Clause",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "HIGH",
+          "Category": "restricted",
+          "PkgName": "musl-utils",
+          "FilePath": "",
+          "Name": "GPL-2.0",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "HIGH",
+          "Category": "restricted",
+          "PkgName": "scanelf",
+          "FilePath": "",
+          "Name": "GPL-2.0",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "HIGH",
+          "Category": "restricted",
+          "PkgName": "ssl_client",
+          "FilePath": "",
+          "Name": "GPL-2.0",
+          "Confidence": 1,
+          "Link": ""
+        },
+        {
+          "Severity": "LOW",
+          "Category": "notice",
+          "PkgName": "zlib",
+          "FilePath": "",
+          "Name": "Zlib",
+          "Confidence": 1,
+          "Link": ""
+        }
+      ]
+    },
+    {
+      "Target": "Loose File License(s)",
+      "Class": "license-file",
+      "Licenses": [
+        {
+          "Severity": "LOW",
+          "Category": "notice",
+          "PkgName": "",
+          "FilePath": "/etc/ssl/misc/CA.pl",
+          "Name": "OpenSSL",
+          "Confidence": 1,
+          "Link": "https://spdx.org/licenses/OpenSSL.html"
+        },
+        {
+          "Severity": "LOW",
+          "Category": "notice",
+          "PkgName": "",
+          "FilePath": "/etc/ssl/misc/tsget.pl",
+          "Name": "OpenSSL",
+          "Confidence": 1,
+          "Link": "https://spdx.org/licenses/OpenSSL.html"
+        }
+      ]
+    }
+  ]
+}

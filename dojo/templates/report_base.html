@@ -1,0 +1,208 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ report_name }}</title>
+    <link rel="stylesheet" href="{% static "dojo/css/bootswatch/yeti/bootstrap.min.css" %}">
+    <!-- Custom Fonts -->
+    <link href="{% static "font-awesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
+
+    <style type="text/css">
+        @import url(https://fonts.googleapis.com/css?family=Roboto+Slab:400,700);
+
+        .label {
+          border-color: #DEE1E6;
+          color: #ffffff !important;
+        }
+
+        .container {
+            margin: 0 auto;
+            max-width: 960px;
+        }
+
+        .page-cover {
+            margin-bottom: 600px !important;
+        }
+
+        .page-cover-spacer {
+            height: 400px !important;
+        }
+
+        .panel-default {
+            border-color: #A1C0D7 !important;
+        }
+
+        .panel-default > .panel-heading {
+            color: #333 !important;
+            background-color: rgba(32, 166, 216, 0.75)!important;
+            border-color: rgba(32, 166, 216, 0.75) !important;
+            border-radius: 0px !important;
+        }
+
+        .panel-info {
+            border-color: #DEE1E6 !important;
+            border-radius: 0px !important;
+        }
+
+        .panel-info > .panel-heading {
+            color: #333 !important;
+            background-color: #DEE1E6 !important;
+            border-color: #DEE1E6 !important;
+            border-radius: 0px !important;
+        }
+
+        .panel-body {
+            border-radius: 0px !important;
+        }
+
+        .severity {
+            font-size: 100%;
+        }
+
+        .severity- {
+            color: black !important;
+        }
+
+        .severity-Info {
+            background-color: #888888 !important;
+        }
+
+        .severity-Low {
+            background-color: #337ab7 !important;
+        }
+
+        .severity-Medium {
+            background-color: #FBE413 !important;
+        }
+
+        .severity-High {
+            background-color: #f09835 !important;
+        }
+
+        .severity-Critical {
+            background-color: #d9534f !important;
+        }
+
+        .panel-heading {
+            padding: 1px 5px;
+        }
+
+        .page-cover {
+            page-break-after: always
+        }
+
+        .keep-together {
+            page-break-inside: avoid
+        }
+
+        #findings, #executive {
+            page-break-before: always;
+        }
+
+        .graph {
+            height: 250px;
+            width: 418px;
+        }
+
+        .graph-2x {
+            height: 250px;
+            width: 898px;
+        }
+
+        h6{
+            font-size: 120%;
+            border-bottom: 1px solid black;
+            padding-bottom: 8px;
+        }
+
+        .panel-heading h6{
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        pre, p {
+            padding: 0;
+            border: 0;
+            background-color: transparent;
+            page-break-inside: auto;
+            margin-bottom: 15px !important;
+        }
+
+        pre {
+            white-space: pre-wrap !important;
+            padding: 0 !important;
+            overflow: visible !important;
+            word-break: normal !important;
+        }
+
+        ul{
+            margin-bottom: 15px !important;
+        }
+
+        h4, .h4, h5, .h5, h6, .h6 {
+            margin-top: 20px;
+            margin-bottom: 11px;
+        }
+
+        .panel-heading h5 {
+          color: white !important;
+        }
+
+        div.pretty-graphs, .panel, .panel-body {
+            page-break-inside: avoid;
+        }
+
+        *, pre {
+            font-family: 'Roboto Slab', monospace !important;
+            font-size: 13px;
+        }
+
+        .flot-tick-label.tickLabel {
+            font-size: 11px;
+        }
+
+        .raw_request {
+            font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace !important;
+        }
+
+        .panel-warning .panel-heading h4{
+            color: #fff;
+        }
+
+        @media not print {
+            .report-page-break {
+                display: flex;
+                align-items: center;
+                text-align: center;
+            }
+            .report-page-break::before,
+            .report-page-break::after {
+                content: '';
+                flex: 1;
+                border-bottom: 1px dashed #000;
+            }
+            .report-page-break:not(:empty)::before {
+                margin-right: 0.25em;
+            }
+            .report-page-break:not(:empty)::after {
+                margin-left: 0.25em;
+            }
+        }
+
+        @media print {
+            .report-page-break {
+                page-break-after: always;
+                visibility: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+{% block content %}
+    {{ block.super }}
+{% endblock %}
+{% block js %}
+{% endblock %}
+</body>
+</html>

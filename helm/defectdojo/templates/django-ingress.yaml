@@ -1,0 +1,59 @@
+{{- if .Values.django.ingress.enabled -}}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  {{- if or .Values.extraAnnotations .Values.django.ingress.annotations .Values.gke.useGKEIngress }}
+  annotations:
+  {{- range $key, $value := .Values.extraAnnotations }}
+    {{ $key }}: {{ quote $value }}
+  {{- end }}
+  {{- range $key, $value := .Values.django.ingress.annotations }}
+    {{ $key }}: {{ quote $value }}
+  {{- end }}
+  {{- if .Values.gke.useGKEIngress }}
+    {{- if .Values.gke.useManagedCertificate }}
+    kubernetes.io/ingress.allow-http: "false"
+    networking.gke.io/managed-certificates: {{ $fullName }}-django
+    {{- end }}
+  {{- end }}
+  {{- end }}
+  labels:
+    defectdojo.org/component: django
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  name: {{ $fullName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  {{- if .Values.django.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.django.ingress.ingressClassName }}
+  {{- end }}
+{{- if .Values.django.ingress.activateTLS }}
+  tls:
+  - hosts:
+    - {{ .Values.host }}
+  {{- if .Values.django.ingress.secretName }}
+    secretName: {{ .Values.django.ingress.secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  - host: {{ .Values.host }}
+    http:
+      paths:
+        - pathType: Prefix
+          {{- if .Values.django.ingress.path }}
+          path: {{ .Values.django.ingress.path }}
+          {{- else }}
+          path: "/"
+          {{- end }}
+          backend:
+            service:
+              name: {{ $fullName }}-django
+              port:
+                name: http
+{{- end }}

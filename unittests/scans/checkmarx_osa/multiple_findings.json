@@ -1,0 +1,1056 @@
+[
+  [
+    {
+      "id": "2A3E02E74053088617923D6FE19F14E8188B5271",
+      "cveName": "CVE-2020-25649",
+      "score": 7.5,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2020-12-03T17:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-25649",
+      "description": "A flaw was found in FasterXML Jackson Databind before 2.6.7.4, 2.7.0 through 2.9.10.6, and 2.10.0 through 2.10.5, where it did not have entity expansion secured properly. This flaw makes it vulnerable to XML external entity (XXE) attacks. The highest threat from this vulnerability is data integrity.",
+      "recommendations": "Upgrade to 2.10.5.1",
+      "sourceFileName": "",
+      "libraryId": "76F59F68DE2C8064E535A70E5874405EC654031E",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "DAB1B4530230A4C874E93AE209A22F4D30423A07",
+      "cveName": "CVE-2021-20190",
+      "score": 8.1,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2021-01-19T17:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-20190",
+      "description": "A flaw was found in jackson-databind before 2.9.10.7, 2.10.x before 2.10.5.1 and 2.11.x before 2.11.3. FasterXML mishandles the interaction between serialization gadgets and typing. The highest threat from this vulnerability is to data confidentiality and integrity as well as system availability.",
+      "recommendations": "Upgrade to 2.10.5.1",
+      "sourceFileName": "",
+      "libraryId": "76F59F68DE2C8064E535A70E5874405EC654031E",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "AD9F2E9622359A831D7EBEEFA6B2E5B7119ABC86",
+      "cveName": "CVE-2020-13935",
+      "score": 7.5,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2020-07-14T15:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-13935",
+      "description": "The payload length in a WebSocket frame was not correctly validated in Apache Tomcat 10.0.0-M1 to 10.0.0-M6, 9.0.0.M1 to 9.0.36, 8.0.x to 8.5.56 and 7.0.27 to 7.0.104. Invalid payload lengths could trigger an infinite loop. Multiple requests with invalid payload lengths could lead to a denial of service.",
+      "recommendations": "Upgrade to 9.0.37",
+      "sourceFileName": "",
+      "libraryId": "13454261AAB9A9E4F9F85EE0A380F137790E4621",
+      "state": {
+        "id": 5,
+        "actionType": "Regular",
+        "name": "PROPOSED_NOT_EXPLOITABLE"
+      },
+      "commentsAmount": 1
+    },
+    {
+      "id": "F8B4271199997C126AE3D57286BB2C77BF0DCEDE",
+      "cveName": "CVE-2020-5421",
+      "score": 6.5,
+      "severity": {
+        "name": "Medium",
+        "id": 1
+      },
+      "publishDate": "2020-09-19T04:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-5421",
+      "description": "In Spring Framework versions 5.2.0 - 5.2.8, 5.1.0 - 5.1.17, 5.0.0 - 5.0.18, 4.3.0 - 4.3.28, and older unsupported versions, the protections against RFD attacks from CVE-2015-5211 may be bypassed depending on the browser used through the use of a jsessionid path parameter.",
+      "recommendations": "Upgrade to 5.2.9.RELEASE",
+      "sourceFileName": "",
+      "libraryId": "2E21BBD6CEAFF429413CADB0218D3A3CE7959366",
+      "state": {
+        "id": 2,
+        "actionType": "NotExploitable",
+        "name": "NOT_EXPLOITABLE"
+      },
+      "commentsAmount": 1
+    },
+    {
+      "id": "C06646186A1038AC377289FC80518E08A7E5C12A",
+      "cveName": "CVE-2016-1000027",
+      "score": 9.8,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2020-01-02T23:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2016-1000027",
+      "description": "org.springframework:spring, org.springframework:remoting, org.springframework:spring-web and org.springframework:webmvc suffer from a potential remote code execution (RCE) issue if used for Java deserialization of untrusted data. Depending on how the library is implemented within a product, this issue may or not occur, and authentication may be required.",
+      "recommendations": "Fix unavailable",
+      "sourceFileName": "",
+      "libraryId": "6ACEC8BFD03AD7B0315C0054496B8F501A498694",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "BBFA122B28C1E6B24DF221756D79A436FC199F7D",
+      "cveName": "CVE-2020-10693",
+      "score": 5.3,
+      "severity": {
+        "name": "Medium",
+        "id": 1
+      },
+      "publishDate": "2020-05-06T14:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-10693",
+      "description": "A flaw was found in Hibernate Validator up to 6.1.2.Final. A bug in the message interpolation processor enables invalid EL expressions to be evaluated as if they were valid. This flaw allows attackers to bypass input sanitation (escaping, stripping) controls that developers may have put in place when handling user-controlled data in error messages.",
+      "recommendations": "Upgrade to 6.0.21.Final",
+      "sourceFileName": "",
+      "libraryId": "3C2AB544359964D6DDF6E7F6691766DA897D673C",
+      "state": {
+        "id": 3,
+        "actionType": "Regular",
+        "name": "CONFIRMED"
+      },
+      "commentsAmount": 1
+    },
+    {
+      "id": "6EBA3B6286D9CC97C6C1DE7F1AC7D89EEC92DAAE",
+      "cveName": "CVE-2017-18640",
+      "score": 7.5,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2019-12-12T03:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2017-18640",
+      "description": "The Alias feature in SnakeYAML allows entity expansion during a load operation, a related issue to CVE-2003-1564.",
+      "recommendations": "Upgrade to 1.26",
+      "sourceFileName": "",
+      "libraryId": "2B6CFB67178C6F244052DE786DF51CD564AD1064",
+      "state": {
+        "id": 4,
+        "actionType": "Regular",
+        "name": "URGENT"
+      },
+      "commentsAmount": 1
+    },
+    {
+      "id": "906A40814A8D81B2EDA7D6433CD0879B5949F334",
+      "cveName": "CVE-2020-13934",
+      "score": 7.5,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2020-07-14T15:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-13934",
+      "description": "An h2c direct connection to Apache Tomcat 10.0.0-M1 to 10.0.0-M6, 9.0.0.M1 to 9.0.36, 8.0.x to 8.5.56 and 7.x did not release the HTTP/1.1 processor after the upgrade to HTTP/2. If a sufficient number of such requests were made, an OutOfMemoryException could occur leading to a denial of service.",
+      "recommendations": "Upgrade to 9.0.40",
+      "sourceFileName": "",
+      "libraryId": "9FA92C3955F42B037287488BF5EE991B645DF9FF",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "A5459B380DC56186AD3FC189835E22D7CE24BB46",
+      "cveName": "CVE-2020-11996",
+      "score": 7.5,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2020-06-26T17:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-11996",
+      "description": "A specially crafted sequence of HTTP/2 requests sent to Apache Tomcat 10.0.0-M1 to 10.0.0-M5, 9.0.0.M1 to 9.0.35 and 8.5.0 to 8.5.55 could trigger high CPU usage for several seconds. If a sufficient number of such requests were made on concurrent HTTP/2 connections, the server could become unresponsive.",
+      "recommendations": "Upgrade to 9.0.40",
+      "sourceFileName": "",
+      "libraryId": "9FA92C3955F42B037287488BF5EE991B645DF9FF",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "3282176A97DE35F082B728D8924A32678BBC8F22",
+      "cveName": "CVE-2020-17527",
+      "score": 7.5,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2020-12-03T19:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-17527",
+      "description": "While investigating bug 64830 it was discovered that Apache Tomcat 10.0.0-M1 to 10.0.0-M9, 9.0.0-M1 to 9.0.39 and 8.5.0 to 8.5.59 could re-use an HTTP request header value from the previous stream received on an HTTP/2 connection for the request associated with the subsequent stream. While this would most likely lead to an error and the closure of the HTTP/2 connection, it is possible that information could leak between requests.",
+      "recommendations": "Upgrade to 9.0.40",
+      "sourceFileName": "",
+      "libraryId": "9FA92C3955F42B037287488BF5EE991B645DF9FF",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "643F240F077CC565F90569CEEB5C35338F30BD9A",
+      "cveName": "CVE-2020-1935",
+      "score": 4.8,
+      "severity": {
+        "name": "Medium",
+        "id": 1
+      },
+      "publishDate": "2020-02-24T22:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-1935",
+      "description": "In Apache Tomcat 9.0.0.M1 to 9.0.30, 8.5.0 to 8.5.50 and 7.0.0 to 7.0.99 the HTTP header parsing code used an approach to end-of-line parsing that allowed some invalid HTTP headers to be parsed as valid. This led to a possibility of HTTP Request Smuggling if Tomcat was located behind a reverse proxy that incorrectly handled the invalid Transfer-Encoding header in a particular manner. Such a reverse proxy is considered unlikely.",
+      "recommendations": "Upgrade to 9.0.40",
+      "sourceFileName": "",
+      "libraryId": "9FA92C3955F42B037287488BF5EE991B645DF9FF",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "9F477FDE416360A3294372240583282EFB837E39",
+      "cveName": "CVE-2020-1938",
+      "score": 9.8,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2020-02-24T22:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-1938",
+      "description": "When using the Apache JServ Protocol (AJP), care must be taken when trusting incoming connections to Apache Tomcat. Tomcat treats AJP connections as having higher trust than, for example, a similar HTTP connection. If such connections are available to an attacker, they can be exploited in ways that may be surprising. In Apache Tomcat 9.0.0.M1 to 9.0.0.30, 8.5.0 to 8.5.50 and 7.0.0 to 7.0.99, Tomcat shipped with an AJP Connector enabled by default that listened on all configured IP addresses. It was expected (and recommended in the security guide) that this Connector would be disabled if not required. This vulnerability report identified a mechanism that allowed: - returning arbitrary files from anywhere in the web application - processing any file in the web application as a JSP Further, if the web application allowed file upload and stored those files within the web application (or the attacker was able to control the content of the web application by some other means) then this, along with the ability to process a file as a JSP, made remote code execution possible. It is important to note that mitigation is only required if an AJP port is accessible to untrusted users. Users wishing to take a defence-in-depth approach and block the vector that permits returning arbitrary files and execution as JSP may upgrade to Apache Tomcat 9.0.31, 8.5.51 or 7.0.100 or later. A number of changes were made to the default AJP Connector configuration in 9.0.31 to harden the default configuration. It is likely that users upgrading to 9.0.31, 8.5.51 or 7.0.100 or later will need to make small changes to their configurations.",
+      "recommendations": "Upgrade to 9.0.40",
+      "sourceFileName": "",
+      "libraryId": "9FA92C3955F42B037287488BF5EE991B645DF9FF",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "91461A4BCB1D12B14D437858133A1C9C1BB9B059",
+      "cveName": "CVE-2020-13943",
+      "score": 4.3,
+      "severity": {
+        "name": "Medium",
+        "id": 1
+      },
+      "publishDate": "2020-10-12T14:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-13943",
+      "description": "If an HTTP/2 client connecting to Apache Tomcat between 10.0.0-M1 and 10.0.0-M7, between 9.0.0.M1 and 9.0.37, and between 8.5.0 and 8.5.57 exceeded the agreed maximum number of concurrent streams for a connection (in violation of the HTTP/2 protocol), it was possible that a subsequent request made on that connection could contain HTTP headers - including HTTP/2 pseudo headers - from a previous request rather than the intended headers. This could lead to users seeing responses for unexpected resources.",
+      "recommendations": "Upgrade to 9.0.40",
+      "sourceFileName": "",
+      "libraryId": "9FA92C3955F42B037287488BF5EE991B645DF9FF",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "EAC79CD9AD6019599DAB31FE29A111AC16250EF8",
+      "cveName": "CVE-2021-24122",
+      "score": 5.9,
+      "severity": {
+        "name": "Medium",
+        "id": 1
+      },
+      "publishDate": "2021-01-14T15:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-24122",
+      "description": "When serving resources from a network location using the NTFS file system, Apache Tomcat versions 10.0.0-M1 to 10.0.0-M9, 9.0.0.M1 to 9.0.39, 8.x to 8.5.59 and 7.0.0 to 7.0.106 were susceptible to JSP source code disclosure in some configurations. The root cause was the unexpected behaviour of the JRE API File.getCanonicalPath() which in turn was caused by the inconsistent behaviour of the Windows API (FindFirstFileW) in some circumstances.",
+      "recommendations": "Upgrade to 9.0.40",
+      "sourceFileName": "",
+      "libraryId": "9FA92C3955F42B037287488BF5EE991B645DF9FF",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "FD9E678CFA6FA9C5BD3BB49F90B790F87D081860",
+      "cveName": "CVE-2020-9484",
+      "score": 9.8,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2020-05-20T19:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-9484",
+      "description": "When using Apache Tomcat versions 10.0.0-M1 through 10.0.0-M4, 9.0.0.M1 through 9.0.34, 8.5.0 through 8.5.54, 8.0.x and 7.0.0 through 7.0.103 if a) an attacker is able to control the contents and name of a file on the server; and b) the server is configured to use the PersistenceManager with a FileStore; and c) the PersistenceManager is configured with sessionAttributeValueClassNameFilter=\"null\" (the default unless a SecurityManager is used) or a sufficiently lax filter to allow the attacker provided object to be deserialized; and d) the attacker knows the relative file path from the storage location used by FileStore to the file the attacker has control over; then, using a specifically crafted request, the attacker will be able to trigger remote code execution via deserialization of the file under their control. Note that all of conditions a) to d) must be true for the attack to succeed.",
+      "recommendations": "Upgrade to 9.0.40",
+      "sourceFileName": "",
+      "libraryId": "9FA92C3955F42B037287488BF5EE991B645DF9FF",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "282C1908749071866261D31828B076DCA669E860",
+      "cveName": "CVE-2019-17569",
+      "score": 4.8,
+      "severity": {
+        "name": "Medium",
+        "id": 1
+      },
+      "publishDate": "2020-02-24T22:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2019-17569",
+      "description": "The refactoring present in Apache Tomcat before 8.5.51 and 9.x before 9.0.31 introduced a regression. The result of the regression was that invalid Transfer-Encoding headers were incorrectly processed leading to a possibility of HTTP Request Smuggling if Tomcat was located behind a reverse proxy that incorrectly handled the invalid Transfer-Encoding header in a particular manner. Such a reverse proxy is considered unlikely.",
+      "recommendations": "Upgrade to 9.0.40",
+      "sourceFileName": "",
+      "libraryId": "9FA92C3955F42B037287488BF5EE991B645DF9FF",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    },
+    {
+      "id": "175FD3B2BF72962DEAEDDA3ED8A8950FFCB3BDC4",
+      "cveName": "CVE-2020-5421",
+      "score": 6.5,
+      "severity": {
+        "name": "Medium",
+        "id": 1
+      },
+      "publishDate": "2020-09-19T04:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-5421",
+      "description": "In Spring Framework versions 5.2.0 - 5.2.8, 5.1.0 - 5.1.17, 5.0.0 - 5.0.18, 4.3.0 - 4.3.28, and older unsupported versions, the protections against RFD attacks from CVE-2015-5211 may be bypassed depending on the browser used through the use of a jsessionid path parameter.",
+      "recommendations": "Fix unavailable",
+      "sourceFileName": "",
+      "libraryId": "D17FCCED2DDE5DC2CC018E24BC7B8DF0283A2CE9",
+      "state": {
+        "id": 2,
+        "actionType": "NotExploitable",
+        "name": "NOT_EXPLOITABLE"
+      },
+      "commentsAmount": 1
+    },
+    {
+      "id": "98B6F1C31CD3242B1781D93012F4A139956D6702",
+      "cveName": "CVE-2016-1000027",
+      "score": 9.8,
+      "severity": {
+        "name": "High",
+        "id": 2
+      },
+      "publishDate": "2020-01-02T23:15:00",
+      "url": "https://nvd.nist.gov/vuln/detail/CVE-2016-1000027",
+      "description": "org.springframework:spring, org.springframework:remoting, org.springframework:spring-web and org.springframework:webmvc suffer from a potential remote code execution (RCE) issue if used for Java deserialization of untrusted data. Depending on how the library is implemented within a product, this issue may or not occur, and authentication may be required.",
+      "recommendations": "Fix unavailable",
+      "sourceFileName": "",
+      "libraryId": "D17FCCED2DDE5DC2CC018E24BC7B8DF0283A2CE9",
+      "state": {
+        "id": 1,
+        "actionType": "Regular",
+        "name": "TO_VERIFY"
+      },
+      "commentsAmount": 0
+    }
+  ],
+  [
+    {
+      "id": "87226C7432618AAC19348A4A3E444EEF32CD1154",
+      "name": "org.apache.commons:commons-lang3",
+      "version": "3.9",
+      "newestVersion": "3.11",
+      "newestVersionReleaseDate": "2020-07-12T13:32:02",
+      "numberOfVersionsSinceLastUpdate": 2,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "DF1319C0FE3C5DEBA1414A3ADEE0E919AE32FE7D",
+      "name": "org.springframework:spring-beans",
+      "version": "5.2.3.RELEASE",
+      "newestVersion": "5.2.13.RELEASE",
+      "newestVersionReleaseDate": "2021-02-16T12:06:47",
+      "numberOfVersionsSinceLastUpdate": 15,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "1CE50A3ECFA6FDDF88EEDD0B03B9C045AB10324C",
+      "name": "org.springframework.boot:spring-boot-starter-logging",
+      "version": "2.2.4.RELEASE",
+      "newestVersion": "2.4.3",
+      "newestVersionReleaseDate": "2021-02-18T15:07:14",
+      "numberOfVersionsSinceLastUpdate": 23,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "76F59F68DE2C8064E535A70E5874405EC654031E",
+      "name": "com.fasterxml.jackson.core:jackson-databind",
+      "version": "2.10.2",
+      "newestVersion": "2.12.1",
+      "newestVersionReleaseDate": "2021-01-09T01:30:57",
+      "numberOfVersionsSinceLastUpdate": 12,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 2,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "6FAEF33604D9F13BE7504118C32610506071B2D4",
+      "name": "com.ibm.mq:com.ibm.mq.allclient",
+      "version": "9.1.4.0",
+      "newestVersion": "9.2.1.0",
+      "newestVersionReleaseDate": "2020-12-07T23:11:43",
+      "numberOfVersionsSinceLastUpdate": 4,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "3A17185EF501660AA1FF40436C838D9214E0833A",
+      "name": "org.apache.camel:camel-spring-boot",
+      "version": "2.25.0",
+      "newestVersion": "2.25.2",
+      "newestVersionReleaseDate": "2020-07-18T15:11:04",
+      "numberOfVersionsSinceLastUpdate": 2,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "AAA43ECAF5D41A8E0FB244F38219F1E3CA8514B1",
+      "name": "org.bouncycastle:bcprov-jdk15on",
+      "version": "1.64",
+      "newestVersion": "1.68",
+      "newestVersionReleaseDate": "2020-12-23T00:28:17",
+      "numberOfVersionsSinceLastUpdate": 5,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "78204043A8C3B0B0C832879BB6A85C046AECF5DA",
+      "name": "org.netbeans.external:bcprov",
+      "version": "RELEASE113",
+      "newestVersion": null,
+      "newestVersionReleaseDate": null,
+      "numberOfVersionsSinceLastUpdate": 0,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "939A9023FD5B857699DED7365B4F7A57FEA6D3CD",
+      "name": "org.springframework.boot:spring-boot-starter-json",
+      "version": "2.2.4.RELEASE",
+      "newestVersion": "2.4.3",
+      "newestVersionReleaseDate": "2021-02-18T15:07:16",
+      "numberOfVersionsSinceLastUpdate": 23,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "91C6AE5C76B2534BE22715E970968D0D8FF969AC",
+      "name": "org.springframework.boot:spring-boot",
+      "version": "2.2.4.RELEASE",
+      "newestVersion": "2.4.3",
+      "newestVersionReleaseDate": "2021-02-18T15:07:08",
+      "numberOfVersionsSinceLastUpdate": 23,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "3D209827CB5072E51F28B814C911E9CEA43F05EB",
+      "name": "org.apache.camel:camel-spring",
+      "version": "2.25.0",
+      "newestVersion": "3.6.0",
+      "newestVersionReleaseDate": "2020-10-16T06:19:08",
+      "numberOfVersionsSinceLastUpdate": 12,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "13454261AAB9A9E4F9F85EE0A380F137790E4621",
+      "name": "org.apache.tomcat.embed:tomcat-embed-websocket",
+      "version": "9.0.30",
+      "newestVersion": "9.0.40",
+      "newestVersionReleaseDate": "2020-11-12T15:56:17",
+      "numberOfVersionsSinceLastUpdate": 18,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 1,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "137CF544CF2154BBCB68BAB8713E91472A987EB8",
+      "name": "org.springframework.boot:spring-boot-autoconfigure",
+      "version": "2.2.4.RELEASE",
+      "newestVersion": "2.4.3",
+      "newestVersionReleaseDate": "2021-02-18T15:07:02",
+      "numberOfVersionsSinceLastUpdate": 23,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "74875B138A789617DB027A38D4E4ACBD1170A330",
+      "name": "org.springframework:spring-jms",
+      "version": "5.2.3.RELEASE",
+      "newestVersion": "5.2.13.RELEASE",
+      "newestVersionReleaseDate": "2021-02-16T12:06:48",
+      "numberOfVersionsSinceLastUpdate": 15,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "2E21BBD6CEAFF429413CADB0218D3A3CE7959366",
+      "name": "org.springframework:spring-core",
+      "version": "5.2.3.RELEASE",
+      "newestVersion": "5.2.13.RELEASE",
+      "newestVersionReleaseDate": "2021-02-16T12:06:48",
+      "numberOfVersionsSinceLastUpdate": 15,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "1DD1537CF42BE74F66B835158BDA6C356C0D0170",
+      "name": "com.fasterxml.jackson.core:jackson-annotations",
+      "version": "2.10.2",
+      "newestVersion": "2.12.1",
+      "newestVersionReleaseDate": "2021-01-09T01:14:34",
+      "numberOfVersionsSinceLastUpdate": 11,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "0DBAA949C0267A28D9DBE0A02784147CE1DD3582",
+      "name": "com.sun.xml.bind:jaxb-impl",
+      "version": "2.3.0",
+      "newestVersion": "3.0.0-M5",
+      "newestVersionReleaseDate": "2020-08-28T11:49:36",
+      "numberOfVersionsSinceLastUpdate": 13,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "43061BACEEB10A1033933C42CF879D22279AB4B1",
+      "name": "org.bouncycastle:bcpkix-jdk15on",
+      "version": "1.64",
+      "newestVersion": "1.68",
+      "newestVersionReleaseDate": "2020-12-23T00:16:04",
+      "numberOfVersionsSinceLastUpdate": 4,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "B54AF2EEC2B165165FBC931E5A36F6DF0B0BBED9",
+      "name": "com.fasterxml:classmate",
+      "version": "1.5.1",
+      "newestVersion": null,
+      "newestVersionReleaseDate": null,
+      "numberOfVersionsSinceLastUpdate": 0,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "4470702F62D4ECC1EBBA98616628CDADBFD737B3",
+      "name": "org.apache.tomcat.embed:tomcat-embed-el",
+      "version": "9.0.30",
+      "newestVersion": "9.0.40",
+      "newestVersionReleaseDate": "2020-11-12T15:56:10",
+      "numberOfVersionsSinceLastUpdate": 18,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "D945A6B08E4523A8BE176B00309C7CCEC84DC1D7",
+      "name": "org.jboss.logging:jboss-logging",
+      "version": "3.4.1.Final",
+      "newestVersion": null,
+      "newestVersionReleaseDate": null,
+      "numberOfVersionsSinceLastUpdate": 0,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "DE6A975E6D349333E6BF8654743AD225C4AB5425",
+      "name": "jakarta.annotation:jakarta.annotation-api",
+      "version": "1.3.5",
+      "newestVersion": "2.0.0",
+      "newestVersionReleaseDate": "2020-10-12T14:07:10",
+      "numberOfVersionsSinceLastUpdate": 1,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "AEA3C5074AF1CFDD21ECF5FD1F6451F892DC3128",
+      "name": "jakarta.validation:jakarta.validation-api",
+      "version": "2.0.2",
+      "newestVersion": "3.0.0",
+      "newestVersionReleaseDate": "2020-07-04T14:42:53",
+      "numberOfVersionsSinceLastUpdate": 2,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "57E995D5995F7687C9339FB9FBA7B72118F5750D",
+      "name": "javax.jms:javax.jms-api",
+      "version": "2.0.1",
+      "newestVersion": null,
+      "newestVersionReleaseDate": null,
+      "numberOfVersionsSinceLastUpdate": 0,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "9349045F174A665BF75DDBA007E35484DBC2F47B",
+      "name": "org.apache.camel:camel-core-starter",
+      "version": "2.25.0",
+      "newestVersion": "2.25.2",
+      "newestVersionReleaseDate": "2020-07-18T15:58:33",
+      "numberOfVersionsSinceLastUpdate": 2,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "733395A25F53554420A1BB09D62C479C02EA4B0F",
+      "name": "org.springframework:spring-messaging",
+      "version": "5.2.3.RELEASE",
+      "newestVersion": "5.2.13.RELEASE",
+      "newestVersionReleaseDate": "2021-02-16T12:06:32",
+      "numberOfVersionsSinceLastUpdate": 15,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "6FD47655659CBF6586D5896F40E1F3FD9C8092DC",
+      "name": "com.fasterxml.jackson.core:jackson-core",
+      "version": "2.10.2",
+      "newestVersion": "2.12.1",
+      "newestVersionReleaseDate": "2021-01-09T01:13:16",
+      "numberOfVersionsSinceLastUpdate": 11,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "6ACEC8BFD03AD7B0315C0054496B8F501A498694",
+      "name": "org.springframework:spring-webmvc",
+      "version": "5.2.3.RELEASE",
+      "newestVersion": "5.2.13.RELEASE",
+      "newestVersionReleaseDate": "2021-02-16T12:06:45",
+      "numberOfVersionsSinceLastUpdate": 15,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 1,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "81384606DC8E09C112964B997543E0C1C5D0265E",
+      "name": "org.springframework.boot:spring-boot-starter-tomcat",
+      "version": "2.2.4.RELEASE",
+      "newestVersion": "2.4.3",
+      "newestVersionReleaseDate": "2021-02-18T15:07:15",
+      "numberOfVersionsSinceLastUpdate": 23,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "89A9872D9CD1A8827E0843790866E0E57D1B942C",
+      "name": "org.springframework:spring-context",
+      "version": "5.2.3.RELEASE",
+      "newestVersion": "5.2.13.RELEASE",
+      "newestVersionReleaseDate": "2021-02-16T12:06:30",
+      "numberOfVersionsSinceLastUpdate": 15,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "43597286A56A1C8A3BCEE3F173E87F03C4E8CAC9",
+      "name": "org.springframework.boot:spring-boot-starter",
+      "version": "2.2.4.RELEASE",
+      "newestVersion": "2.4.3",
+      "newestVersionReleaseDate": "2021-02-18T15:07:22",
+      "numberOfVersionsSinceLastUpdate": 23,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "B0AB58BCCC9A0D038117F0F28556D4308429711F",
+      "name": "ch.qos.logback:logback-classic",
+      "version": "1.2.3",
+      "newestVersion": null,
+      "newestVersionReleaseDate": null,
+      "numberOfVersionsSinceLastUpdate": 0,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "3C2AB544359964D6DDF6E7F6691766DA897D673C",
+      "name": "org.hibernate.validator:hibernate-validator",
+      "version": "6.0.18.Final",
+      "newestVersion": "7.0.1.Final",
+      "newestVersionReleaseDate": "2021-02-06T18:26:43",
+      "numberOfVersionsSinceLastUpdate": 23,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 1,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "30C1559F4E90B04CDD22C04ECC305ADE24097DAB",
+      "name": "ch.qos.logback:logback-core",
+      "version": "1.2.3",
+      "newestVersion": null,
+      "newestVersionReleaseDate": null,
+      "numberOfVersionsSinceLastUpdate": 0,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "2B6CFB67178C6F244052DE786DF51CD564AD1064",
+      "name": "org.yaml:snakeyaml",
+      "version": "1.25",
+      "newestVersion": "1.28",
+      "newestVersionReleaseDate": "2021-02-22T05:56:30",
+      "numberOfVersionsSinceLastUpdate": 3,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 1,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "1DFAD1F5BF3A20FAC12575F3E5C7750563086477",
+      "name": "org.apache.geronimo.specs:geronimo-jms_2.0_spec",
+      "version": "1.0-alpha-2",
+      "newestVersion": null,
+      "newestVersionReleaseDate": null,
+      "numberOfVersionsSinceLastUpdate": 0,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "5DF76A16F6D5148A9FDB1666A1922B1DABA61E10",
+      "name": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
+      "version": "2.10.2",
+      "newestVersion": "2.12.1",
+      "newestVersionReleaseDate": "2021-01-09T01:49:51",
+      "numberOfVersionsSinceLastUpdate": 11,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "671D7F098790B25895206C266E086DF020E39066",
+      "name": "org.springframework:spring-tx",
+      "version": "5.2.3.RELEASE",
+      "newestVersion": "5.2.13.RELEASE",
+      "newestVersionReleaseDate": "2021-02-16T12:06:50",
+      "numberOfVersionsSinceLastUpdate": 15,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "0B9E757E4F2AF1991B69DCD320ADB9E1F416CCEC",
+      "name": "org.springframework:spring-aop",
+      "version": "5.2.3.RELEASE",
+      "newestVersion": "5.2.13.RELEASE",
+      "newestVersionReleaseDate": "2021-02-16T12:06:23",
+      "numberOfVersionsSinceLastUpdate": 15,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "97ADAC59A1B0922308AC3D4DF030C103158AEA07",
+      "name": "org.apache.logging.log4j:log4j-api",
+      "version": "2.12.1",
+      "newestVersion": "2.14.0",
+      "newestVersionReleaseDate": "2020-11-06T21:02:52",
+      "numberOfVersionsSinceLastUpdate": 5,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "9FA92C3955F42B037287488BF5EE991B645DF9FF",
+      "name": "org.apache.tomcat.embed:tomcat-embed-core",
+      "version": "9.0.30",
+      "newestVersion": "9.0.40",
+      "newestVersionReleaseDate": "2020-11-12T15:55:33",
+      "numberOfVersionsSinceLastUpdate": 18,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 5,
+      "mediumUniqueVulnerabilityCount": 4,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "CA82B4A74002F84D50E73E0895F760D13A5B3CEF",
+      "name": "org.slf4j:slf4j-api",
+      "version": "1.7.30",
+      "newestVersion": null,
+      "newestVersionReleaseDate": null,
+      "numberOfVersionsSinceLastUpdate": 0,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "A2E71759FF67E73B786F517857D4525BBC088C78",
+      "name": "org.springframework.boot:spring-boot-starter-validation",
+      "version": "2.2.4.RELEASE",
+      "newestVersion": "2.4.3",
+      "newestVersionReleaseDate": "2021-02-18T15:07:00",
+      "numberOfVersionsSinceLastUpdate": 23,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "A4F8600BA24183653FDA65E10295B27E12C0A452",
+      "name": "com.sun.xml.bind:jaxb-core",
+      "version": "2.3.0",
+      "newestVersion": "3.0.0-M5",
+      "newestVersionReleaseDate": "2020-08-28T11:49:37",
+      "numberOfVersionsSinceLastUpdate": 5,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "6E7E9D197C387A19AC50755713779B5750D8F4BB",
+      "name": "org.springframework:spring-expression",
+      "version": "5.2.3.RELEASE",
+      "newestVersion": "5.2.13.RELEASE",
+      "newestVersionReleaseDate": "2021-02-16T12:06:41",
+      "numberOfVersionsSinceLastUpdate": 15,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "21C52A21E69CFC1ECE6C2E9ABFD465576413DF1B",
+      "name": "com.fasterxml.jackson.module:jackson-module-parameter-names",
+      "version": "2.10.2",
+      "newestVersion": "2.12.1",
+      "newestVersionReleaseDate": "2021-01-09T01:49:49",
+      "numberOfVersionsSinceLastUpdate": 11,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "512065BBFEB2AEEABF8D0B1510CCBBF406C7E07D",
+      "name": "org.slf4j:jul-to-slf4j",
+      "version": "1.7.30",
+      "newestVersion": null,
+      "newestVersionReleaseDate": null,
+      "numberOfVersionsSinceLastUpdate": 0,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "F148B5D3D8872A0D1354E96978F5024609D73A8A",
+      "name": "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
+      "version": "2.10.2",
+      "newestVersion": "2.12.1",
+      "newestVersionReleaseDate": "2021-01-09T01:49:53",
+      "numberOfVersionsSinceLastUpdate": 11,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "D17FCCED2DDE5DC2CC018E24BC7B8DF0283A2CE9",
+      "name": "org.springframework:spring-web",
+      "version": "5.2.3.RELEASE",
+      "newestVersion": "5.2.13.RELEASE",
+      "newestVersionReleaseDate": "2021-02-16T12:06:40",
+      "numberOfVersionsSinceLastUpdate": 15,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 1,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "052C72BE06C21BFFB2198E01681D465D6B2531EB",
+      "name": "org.apache.logging.log4j:log4j-to-slf4j",
+      "version": "2.12.1",
+      "newestVersion": "2.14.0",
+      "newestVersionReleaseDate": "2020-11-06T21:04:24",
+      "numberOfVersionsSinceLastUpdate": 5,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "47535C64A429CA5EEE727D2D0C95D37B14ACA5C1",
+      "name": "org.apache.camel:camel-jms",
+      "version": "2.25.0",
+      "newestVersion": "3.6.0",
+      "newestVersionReleaseDate": "2020-10-16T06:28:55",
+      "numberOfVersionsSinceLastUpdate": 12,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "363F6972F0F726B1793FFEDD9FD3B544769ED8E6",
+      "name": "org.apache.camel:camel-spring-boot-starter",
+      "version": "2.25.0",
+      "newestVersion": "2.25.2",
+      "newestVersionReleaseDate": "2020-07-18T15:58:40",
+      "numberOfVersionsSinceLastUpdate": 2,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "6F80111379B1D95099E5FF1F8E04BD519857A727",
+      "name": "org.springframework.boot:spring-boot-starter-web",
+      "version": "2.2.4.RELEASE",
+      "newestVersion": "2.4.3",
+      "newestVersionReleaseDate": "2021-02-18T15:07:18",
+      "numberOfVersionsSinceLastUpdate": 23,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "61DADEB518563AA21C9CD458E4B9E8CA1E8D31F1",
+      "name": "org.apache.camel:camel-core",
+      "version": "2.25.0",
+      "newestVersion": "3.6.0",
+      "newestVersionReleaseDate": "2020-10-16T06:13:29",
+      "numberOfVersionsSinceLastUpdate": 12,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "DFF7AC0B37ED56EBB07EAE2FA0FC21C963F6C668",
+      "name": "org.json:json",
+      "version": "20201115",
+      "newestVersion": null,
+      "newestVersionReleaseDate": null,
+      "numberOfVersionsSinceLastUpdate": 0,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    },
+    {
+      "id": "0A3A6CB66514C7329D5C2AB579A7AF27C1F0BD26",
+      "name": "org.springframework:spring-jcl",
+      "version": "5.2.3.RELEASE",
+      "newestVersion": "5.2.13.RELEASE",
+      "newestVersionReleaseDate": "2021-02-16T12:06:37",
+      "numberOfVersionsSinceLastUpdate": 15,
+      "confidenceLevel": 100,
+      "highUniqueVulnerabilityCount": 0,
+      "mediumUniqueVulnerabilityCount": 0,
+      "lowUniqueVulnerabilityCount": 0
+    }
+  ]
+]

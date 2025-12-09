@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Vulnerabilities>
+	<Vulnerability>
+		<ID></ID>
+		<Name>Matching title and Endpoints (DUPE)</Name>
+		<Date></Date>
+		<Status></Status>
+		<Type></Type>
+		<CWE-ID>CWE-23</CWE-ID>
+		<CVE-ID></CVE-ID>
+		<CVSSv3></CVSSv3>
+		<Risk>CRITICAL</Risk>
+		<URL>https://www.same.com/samesies</URL>
+		<Description>Test Description</Description>
+		<PoC></PoC>
+	</Vulnerability>
+
+	<Vulnerability>
+		<ID></ID>
+		<Name>Matching title not Description</Name>
+		<Date></Date>
+		<Status></Status>
+		<Type></Type>
+		<CWE-ID>CWE-23</CWE-ID>
+		<CVE-ID></CVE-ID>
+		<CVSSv3></CVSSv3>
+		<Risk>CRITICAL</Risk>
+		<URL>https://www.same.com/samesies</URL>
+		<Description>Different Description</Description>
+		<PoC></PoC>
+	</Vulnerability>
+
+	<Vulnerability>
+		<ID></ID>
+		<Name>Different title and Endpoints</Name>
+		<Date></Date>
+		<Status></Status>
+		<Type></Type>
+		<CWE-ID>CWE-23</CWE-ID>
+		<CVE-ID></CVE-ID>
+		<CVSSv3></CVSSv3>
+		<Risk>CRITICAL</Risk>
+		<URL>https://www.same.com/samesies</URL>
+		<Description>Test Description</Description>
+		<PoC></PoC>
+	</Vulnerability>
+	
+</Vulnerabilities>

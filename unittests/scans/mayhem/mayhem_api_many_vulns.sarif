@@ -1,0 +1,1705 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "semanticVersion": "2.31.2",
+          "name": "mAPI",
+          "fullName": "Mayhem for API",
+          "rules": [
+            {
+              "id": "internal-server-error (com.fasterxml.jackson.databind.JsonMappingException)",
+              "shortDescription": {
+                "text": "Internal Server Error (com.fasterxml.jackson.databind.JsonMappingException)"
+              },
+              "fullDescription": {
+                "text": "The API returned an Internal Server Error, indicating an unhandled exception."
+              },
+              "help": {
+                "text": "Add additional error handling mechanisms for the errors encountered. Ideally, \nthe error would return a 4xx status like '400 Bad Request', and provide \nmeaningful details to end-users.\n\nAlso, ensure that in production those error messages are not providing\ninformation useful to an attacker, like a stacktrace.\n"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "CWE-20",
+                  "CWE-391",
+                  "CWE-550"
+                ]
+              }
+            },
+            {
+              "id": "internal-server-error (io.swagger.oas.inflector.utils.ApiException)",
+              "shortDescription": {
+                "text": "Internal Server Error (io.swagger.oas.inflector.utils.ApiException)"
+              },
+              "fullDescription": {
+                "text": "The API returned an Internal Server Error, indicating an unhandled exception."
+              },
+              "help": {
+                "text": "Add additional error handling mechanisms for the errors encountered. Ideally, \nthe error would return a 4xx status like '400 Bad Request', and provide \nmeaningful details to end-users.\n\nAlso, ensure that in production those error messages are not providing\ninformation useful to an attacker, like a stacktrace.\n"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "CWE-20",
+                  "CWE-391",
+                  "CWE-550"
+                ]
+              }
+            },
+            {
+              "id": "invalid-request-spec ($.complete: expected boolean)",
+              "shortDescription": {
+                "text": "Invalid Request Spec ($.complete: expected boolean)"
+              },
+              "fullDescription": {
+                "text": "The server accepted a payload which wasn't valid according to the provided spec."
+              },
+              "help": {
+                "text": "\nMake extra sure that unexpectedly successful payloads don't represent more\nserious defects, security or otherwise. Once you're satisfied, adjust the\naffected endoint's \"requestBody\" field to be in sync with what the code actually\nallows.\n"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "Security",
+                  "CWE-573",
+                  "CWE-20",
+                  "OWASP-API6"
+                ]
+              }
+            },
+            {
+              "id": "invalid-request-spec ($.petId: expected integer)",
+              "shortDescription": {
+                "text": "Invalid Request Spec ($.petId: expected integer)"
+              },
+              "fullDescription": {
+                "text": "The server accepted a payload which wasn't valid according to the provided spec."
+              },
+              "help": {
+                "text": "\nMake extra sure that unexpectedly successful payloads don't represent more\nserious defects, security or otherwise. Once you're satisfied, adjust the\naffected endoint's \"requestBody\" field to be in sync with what the code actually\nallows.\n"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "Security",
+                  "CWE-573",
+                  "CWE-20",
+                  "OWASP-API6"
+                ]
+              }
+            },
+            {
+              "id": "invalid-request-spec ($.shipDate: expected string)",
+              "shortDescription": {
+                "text": "Invalid Request Spec ($.shipDate: expected string)"
+              },
+              "fullDescription": {
+                "text": "The server accepted a payload which wasn't valid according to the provided spec."
+              },
+              "help": {
+                "text": "\nMake extra sure that unexpectedly successful payloads don't represent more\nserious defects, security or otherwise. Once you're satisfied, adjust the\naffected endoint's \"requestBody\" field to be in sync with what the code actually\nallows.\n"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "Security",
+                  "CWE-573",
+                  "CWE-20",
+                  "OWASP-API6"
+                ]
+              }
+            },
+            {
+              "id": "invalid-response-spec ($: expected object)",
+              "shortDescription": {
+                "text": "Invalid Response ($: expected object)"
+              },
+              "fullDescription": {
+                "text": "The response from the API was not described in the provided spec."
+              },
+              "help": {
+                "text": "\nMake sure that each specified endpoint's \"responses\" field is in sync with\nwhat the code actually produces:\n * HTTP status codes that the endpoint returns are specified\n * Content-Type that the endpoint returns are specified\n"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "OWASP-API3",
+                  "CWE-573",
+                  "Security"
+                ]
+              }
+            },
+            {
+              "id": "invalid-response-spec (got a non-empty response when an empty response was specified)",
+              "shortDescription": {
+                "text": "Invalid Response (got a non-empty response when an empty response was specified)"
+              },
+              "fullDescription": {
+                "text": "The response from the API was not described in the provided spec."
+              },
+              "help": {
+                "text": "\nMake sure that each specified endpoint's \"responses\" field is in sync with\nwhat the code actually produces:\n * HTTP status codes that the endpoint returns are specified\n * Content-Type that the endpoint returns are specified\n"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "OWASP-API3",
+                  "CWE-573",
+                  "Security"
+                ]
+              }
+            },
+            {
+              "id": "invalid-response-spec (unable to parse body as json)",
+              "shortDescription": {
+                "text": "Invalid Response (unable to parse body as json)"
+              },
+              "fullDescription": {
+                "text": "The response from the API was not described in the provided spec."
+              },
+              "help": {
+                "text": "\nMake sure that each specified endpoint's \"responses\" field is in sync with\nwhat the code actually produces:\n * HTTP status codes that the endpoint returns are specified\n * Content-Type that the endpoint returns are specified\n"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "OWASP-API3",
+                  "CWE-573",
+                  "Security"
+                ]
+              }
+            },
+            {
+              "id": "invalid-response-spec (unspecified status code: 200)",
+              "shortDescription": {
+                "text": "Invalid Response (unspecified status code: 200)"
+              },
+              "fullDescription": {
+                "text": "The response from the API was not described in the provided spec."
+              },
+              "help": {
+                "text": "\nMake sure that each specified endpoint's \"responses\" field is in sync with\nwhat the code actually produces:\n * HTTP status codes that the endpoint returns are specified\n * Content-Type that the endpoint returns are specified\n"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "OWASP-API3",
+                  "CWE-573",
+                  "Security"
+                ]
+              }
+            },
+            {
+              "id": "invalid-response-spec (unspecified status code: 400)",
+              "shortDescription": {
+                "text": "Invalid Response (unspecified status code: 400)"
+              },
+              "fullDescription": {
+                "text": "The response from the API was not described in the provided spec."
+              },
+              "help": {
+                "text": "\nMake sure that each specified endpoint's \"responses\" field is in sync with\nwhat the code actually produces:\n * HTTP status codes that the endpoint returns are specified\n * Content-Type that the endpoint returns are specified\n"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "OWASP-API3",
+                  "CWE-573",
+                  "Security"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "internal-server-error (io.swagger.oas.inflector.utils.ApiException)",
+          "message": {
+            "text": "Internal Server Error in 'PUT /pet'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2633478)",
+            "markdown": "Internal Server Error (io.swagger.oas.inflector.utils.ApiException) in 'PUT /pet'.\n\n# Sample Request\n\n```http\nPUT /api/v3/pet HTTP/1.1\ncontent-type: application/json\napi_key: <REDACTED>\nx-mapi-program-uuid: 338a637b-7eb6-41fd-9fb5-b205c8fcd119\n\n{\"name\":\"http://127.127.127.127:39711\",\"photoUrls\":[]}\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 500 Internal Server Error\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 2de2d8fb127fbe8694a2dd06d540df0a\ndate: Mon, 16 Jun 2025 22:46:47 GMT\nserver: Google Frontend\ncontent-length: 6327\n\n{\n  \"code\": 500,\n  \"message\": \"There was an error processing your request. It has been logged (ID: 73145dfa268dcf99)\",\n  \"stacktrace\": \"io.swagger.oas.inflector.utils.ApiException: There was an error processing your request. It has been logged (ID: 73145dfa268dcf99)\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:497)\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:79)\\n\\tat sun.reflect.GeneratedMethodAccessor123.invoke(Unknown Source)\\n\\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\\n\\tat java.lang.reflect.Method.invoke(Method.java:498)\\n\\tat org.glassfish.jersey.server.model.internal.ResourceMethodInvocationHandlerFactory.lambda$static$0(ResourceMethodInvocationHandlerFactory.java:76)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher$1.run(AbstractJavaResourceMethodDispatcher.java:148)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.invoke(AbstractJavaResourceMethodDispatcher.java:191)\\n\\tat org.glassfish.jersey.server.model.internal.JavaResourceMethodDispatcherProvider$ResponseOutInvoker.doDispatch(JavaResourceMethodDispatcherProvider.java:200)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.dispatch(AbstractJavaResourceMethodDispatcher.java:103)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:493)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:415)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:104)\\n\\tat org.glassfish.jersey.server.ServerRuntime$1.run(ServerRuntime.java:277)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:272)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:268)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:316)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:298)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:268)\\n\\tat org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:289)\\n\\tat org.glassfish.jersey.server.ServerRuntime.process(ServerRuntime.java:256)\\n\\tat org.glassfish.jersey.server.ApplicationHandler.handle(ApplicationHandler.java:703)\\n\\tat org.glassfish.jersey.servlet.WebComponent.serviceImpl(WebComponent.java:416)\\n\\tat org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:370)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:389)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:342)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:229)\\n\\tat org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:864)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1655)\\n\\tat io.swagger.oas.inflector.utils.CORSFilter.doFilter(CORSFilter.java:36)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1634)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:533)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:146)\\n\\tat org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:548)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:257)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1595)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:255)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1253)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:203)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:473)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1564)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:201)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1155)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:144)\\n\\tat org.eclipse.jetty.server.handler.ContextHandlerCollection.handle(ContextHandlerCollection.java:219)\\n\\tat org.eclipse.jetty.server.handler.HandlerCollection.handle(HandlerCollection.java:126)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.Server.handle(Server.java:531)\\n\\tat org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:352)\\n\\tat org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:260)\\n\\tat org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:281)\\n\\tat org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:102)\\n\\tat org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:118)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:319)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:175)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:133)\\n\\tat org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:366)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:754)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:672)\\n\\tat java.lang.Thread.run(Thread.java:748)\\nCaused by: java.lang.reflect.InvocationTargetException\\n\\tat sun.reflect.GeneratedMethodAccessor131.invoke(Unknown Source)\\n\\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\\n\\tat java.lang.reflect.Method.invoke(Method.java:498)\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:426)\\n\\t... 60 more\\nCaused by: java.lang.NullPointerException\\n\\tat io.swagger.petstore.model.Pet.getId(Pet.java:38)\\n\\tat io.swagger.petstore.controller.PetController.updatePet(PetController.java:184)\\n\\t... 64 more\\n\"\n}\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2633478)\n"
+          },
+          "codeFlows": [
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "io/swagger/oas/inflector/controllers/OpenAPIOperationController.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 497,
+                            "endLine": 497
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "io/swagger/oas/inflector/controllers/OpenAPIOperationController.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 79,
+                            "endLine": 79
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "io/swagger/oas/inflector/controllers/OpenAPIOperationController.java",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 497,
+                  "endLine": 497
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (got a non-empty response when an empty response was specified)",
+          "message": {
+            "text": "Invalid Response in 'GET /user/logout'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2556731)",
+            "markdown": "Invalid Response (got a non-empty response when an empty response was specified) in 'GET /user/logout'.\n\n# Sample Request\n\n```http\nGET /api/v3/user/logout HTTP/1.1\ncontent-length: 0\napi_key: <REDACTED>\nx-mapi-program-uuid: d0769da1-c1a8-4f48-b735-c52affc3b81d\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: abe56e75d013d4f46e0117543acd51fd\ndate: Mon, 16 Jun 2025 22:46:46 GMT\nserver: Google Frontend\ncontent-length: 15\n\nUser logged out\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2556731)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "internal-server-error (com.fasterxml.jackson.databind.JsonMappingException)",
+          "message": {
+            "text": "Internal Server Error in 'GET /store/inventory'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2556732)",
+            "markdown": "Internal Server Error (com.fasterxml.jackson.databind.JsonMappingException) in 'GET /store/inventory'.\n\n# Sample Request\n\n```http\nGET /api/v3/store/inventory HTTP/1.1\ncontent-length: 0\napi_key: <REDACTED>\nx-mapi-program-uuid: e1d1554c-e37d-4175-907f-39615509de79\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 500 Internal Server Error\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: e2a2058aa189c234433c495d4adad7fe\ndate: Mon, 16 Jun 2025 22:46:47 GMT\nserver: Google Frontend\ncontent-length: 6883\n\n{\n  \"code\": 500,\n  \"message\": \"There was an error processing your request. It has been logged (ID: 9b0d850598d2684f)\",\n  \"stacktrace\": \"com.fasterxml.jackson.databind.JsonMappingException: Null key for a Map not allowed in JSON (use a converting NullKeySerializer?) (through reference chain: java.util.HashMap[\\\"null\\\"])\\n\\tat com.fasterxml.jackson.databind.JsonMappingException.from(JsonMappingException.java:288)\\n\\tat com.fasterxml.jackson.databind.SerializerProvider.mappingException(SerializerProvider.java:1337)\\n\\tat com.fasterxml.jackson.databind.SerializerProvider.reportMappingProblem(SerializerProvider.java:1231)\\n\\tat com.fasterxml.jackson.databind.ser.impl.FailingSerializer.serialize(FailingSerializer.java:35)\\n\\tat com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeOptionalFields(MapSerializer.java:785)\\n\\tat com.fasterxml.jackson.databind.ser.std.MapSerializer.serializeWithoutTypeInfo(MapSerializer.java:677)\\n\\tat com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:637)\\n\\tat com.fasterxml.jackson.databind.ser.std.MapSerializer.serialize(MapSerializer.java:33)\\n\\tat com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:480)\\n\\tat com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:319)\\n\\tat com.fasterxml.jackson.databind.ObjectWriter$Prefetch.serialize(ObjectWriter.java:1513)\\n\\tat com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1005)\\n\\tat com.fasterxml.jackson.jaxrs.base.ProviderBase.writeTo(ProviderBase.java:626)\\n\\tat org.glassfish.jersey.message.internal.WriterInterceptorExecutor$TerminalWriterInterceptor.invokeWriteTo(WriterInterceptorExecutor.java:266)\\n\\tat org.glassfish.jersey.message.internal.WriterInterceptorExecutor$TerminalWriterInterceptor.aroundWriteTo(WriterInterceptorExecutor.java:251)\\n\\tat org.glassfish.jersey.message.internal.WriterInterceptorExecutor.proceed(WriterInterceptorExecutor.java:163)\\n\\tat org.glassfish.jersey.server.internal.JsonWithPaddingInterceptor.aroundWriteTo(JsonWithPaddingInterceptor.java:109)\\n\\tat org.glassfish.jersey.message.internal.WriterInterceptorExecutor.proceed(WriterInterceptorExecutor.java:163)\\n\\tat org.glassfish.jersey.server.internal.MappableExceptionWrapperInterceptor.aroundWriteTo(MappableExceptionWrapperInterceptor.java:85)\\n\\tat org.glassfish.jersey.message.internal.WriterInterceptorExecutor.proceed(WriterInterceptorExecutor.java:163)\\n\\tat org.glassfish.jersey.message.internal.MessageBodyFactory.writeTo(MessageBodyFactory.java:1135)\\n\\tat org.glassfish.jersey.server.ServerRuntime$Responder.writeResponse(ServerRuntime.java:662)\\n\\tat org.glassfish.jersey.server.ServerRuntime$Responder.processResponse(ServerRuntime.java:395)\\n\\tat org.glassfish.jersey.server.ServerRuntime$Responder.process(ServerRuntime.java:385)\\n\\tat org.glassfish.jersey.server.ServerRuntime$1.run(ServerRuntime.java:280)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:272)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:268)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:316)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:298)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:268)\\n\\tat org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:289)\\n\\tat org.glassfish.jersey.server.ServerRuntime.process(ServerRuntime.java:256)\\n\\tat org.glassfish.jersey.server.ApplicationHandler.handle(ApplicationHandler.java:703)\\n\\tat org.glassfish.jersey.servlet.WebComponent.serviceImpl(WebComponent.java:416)\\n\\tat org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:370)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:389)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:342)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:229)\\n\\tat org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:864)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1655)\\n\\tat io.swagger.oas.inflector.utils.CORSFilter.doFilter(CORSFilter.java:36)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1634)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:533)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:146)\\n\\tat org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:548)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:257)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1595)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:255)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1253)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:203)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:473)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1564)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:201)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1155)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:144)\\n\\tat org.eclipse.jetty.server.handler.ContextHandlerCollection.handle(ContextHandlerCollection.java:219)\\n\\tat org.eclipse.jetty.server.handler.HandlerCollection.handle(HandlerCollection.java:126)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.Server.handle(Server.java:531)\\n\\tat org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:352)\\n\\tat org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:260)\\n\\tat org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:281)\\n\\tat org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:102)\\n\\tat org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:118)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:319)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:175)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:133)\\n\\tat org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:366)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:754)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:672)\\n\\tat java.lang.Thread.run(Thread.java:748)\\n\"\n}\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2556732)\n"
+          },
+          "codeFlows": [
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/JsonMappingException.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 288,
+                            "endLine": 288
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/SerializerProvider.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 1337,
+                            "endLine": 1337
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/SerializerProvider.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 1231,
+                            "endLine": 1231
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/ser/impl/FailingSerializer.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 35,
+                            "endLine": 35
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/ser/std/MapSerializer.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 785,
+                            "endLine": 785
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/ser/std/MapSerializer.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 677,
+                            "endLine": 677
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/ser/std/MapSerializer.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 637,
+                            "endLine": 637
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/ser/std/MapSerializer.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 33,
+                            "endLine": 33
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/ser/DefaultSerializerProvider.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 480,
+                            "endLine": 480
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/ser/DefaultSerializerProvider.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 319,
+                            "endLine": 319
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/ObjectWriter.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 1513,
+                            "endLine": 1513
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/databind/ObjectWriter.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 1005,
+                            "endLine": 1005
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "com/fasterxml/jackson/jaxrs/base/ProviderBase.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 626,
+                            "endLine": 626
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/message/internal/WriterInterceptorExecutor.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 266,
+                            "endLine": 266
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/message/internal/WriterInterceptorExecutor.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 251,
+                            "endLine": 251
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/message/internal/WriterInterceptorExecutor.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 163,
+                            "endLine": 163
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/server/internal/JsonWithPaddingInterceptor.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 109,
+                            "endLine": 109
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/message/internal/WriterInterceptorExecutor.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 163,
+                            "endLine": 163
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/server/internal/MappableExceptionWrapperInterceptor.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 85,
+                            "endLine": 85
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/message/internal/WriterInterceptorExecutor.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 163,
+                            "endLine": 163
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/message/internal/MessageBodyFactory.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 1135,
+                            "endLine": 1135
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/server/ServerRuntime.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 662,
+                            "endLine": 662
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/server/ServerRuntime.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 395,
+                            "endLine": 395
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/server/ServerRuntime.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 385,
+                            "endLine": 385
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/server/ServerRuntime.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 280,
+                            "endLine": 280
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/internal/Errors.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 272,
+                            "endLine": 272
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/internal/Errors.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 268,
+                            "endLine": 268
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/internal/Errors.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 316,
+                            "endLine": 316
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/internal/Errors.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 298,
+                            "endLine": 298
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/internal/Errors.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 268,
+                            "endLine": 268
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/process/internal/RequestScope.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 289,
+                            "endLine": 289
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/server/ServerRuntime.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 256,
+                            "endLine": 256
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/server/ApplicationHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 703,
+                            "endLine": 703
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/servlet/WebComponent.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 416,
+                            "endLine": 416
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/servlet/WebComponent.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 370,
+                            "endLine": 370
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/servlet/ServletContainer.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 389,
+                            "endLine": 389
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/servlet/ServletContainer.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 342,
+                            "endLine": 342
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/glassfish/jersey/servlet/ServletContainer.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 229,
+                            "endLine": 229
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/servlet/ServletHolder.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 864,
+                            "endLine": 864
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/servlet/ServletHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 1655,
+                            "endLine": 1655
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "io/swagger/oas/inflector/utils/CORSFilter.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 36,
+                            "endLine": 36
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/servlet/ServletHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 1634,
+                            "endLine": 1634
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/servlet/ServletHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 533,
+                            "endLine": 533
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/ScopedHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 146,
+                            "endLine": 146
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/security/SecurityHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 548,
+                            "endLine": 548
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/HandlerWrapper.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 132,
+                            "endLine": 132
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/ScopedHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 257,
+                            "endLine": 257
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/session/SessionHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 1595,
+                            "endLine": 1595
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/ScopedHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 255,
+                            "endLine": 255
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/ContextHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 1253,
+                            "endLine": 1253
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/ScopedHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 203,
+                            "endLine": 203
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/servlet/ServletHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 473,
+                            "endLine": 473
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/session/SessionHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 1564,
+                            "endLine": 1564
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/ScopedHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 201,
+                            "endLine": 201
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/ContextHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 1155,
+                            "endLine": 1155
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/ScopedHandler.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 144,
+                            "endLine": 144
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/ContextHandlerCollection.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 219,
+                            "endLine": 219
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/HandlerCollection.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 126,
+                            "endLine": 126
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/handler/HandlerWrapper.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 132,
+                            "endLine": 132
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/Server.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 531,
+                            "endLine": 531
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/HttpChannel.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 352,
+                            "endLine": 352
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/server/HttpConnection.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 260,
+                            "endLine": 260
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/io/AbstractConnection.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 281,
+                            "endLine": 281
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/io/FillInterest.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 102,
+                            "endLine": 102
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/io/ChannelEndPoint.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 118,
+                            "endLine": 118
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/util/thread/strategy/EatWhatYouKill.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 319,
+                            "endLine": 319
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/util/thread/strategy/EatWhatYouKill.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 175,
+                            "endLine": 175
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/util/thread/strategy/EatWhatYouKill.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 133,
+                            "endLine": 133
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/util/thread/ReservedThreadExecutor.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 366,
+                            "endLine": 366
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/util/thread/QueuedThreadPool.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 754,
+                            "endLine": 754
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "org/eclipse/jetty/util/thread/QueuedThreadPool.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 672,
+                            "endLine": 672
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "java/lang/Thread.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 748,
+                            "endLine": 748
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "com/fasterxml/jackson/databind/JsonMappingException.java",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 288,
+                  "endLine": 288
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (unspecified status code: 200)",
+          "message": {
+            "text": "Invalid Response in 'DELETE /pet/{petId}'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1244959)",
+            "markdown": "Invalid Response (unspecified status code: 200) in 'DELETE /pet/{petId}'.\n\n# Sample Request\n\n```http\nDELETE /api/v3/pet/-7 HTTP/1.1\ncontent-length: 0\napi_key: <REDACTED>\nx-mapi-program-uuid: 6e886ad5-83b2-4e1f-a8d5-392fe1e1b5c8\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 1a93d7210a896b7e568cee6ce4fa06e4\ndate: Mon, 16 Jun 2025 22:46:47 GMT\nserver: Google Frontend\ncontent-length: 11\n\nPet deleted\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1244959)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (got a non-empty response when an empty response was specified)",
+          "message": {
+            "text": "Invalid Response in 'GET /pet/findByStatus'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1244983)",
+            "markdown": "Invalid Response (got a non-empty response when an empty response was specified) in 'GET /pet/findByStatus'.\n\n# Sample Request\n\n```http\nGET /api/v3/pet/findByStatus?status=a}3CLnJ6@d& HTTP/1.1\ncontent-length: 0\napi_key: <REDACTED>\nx-mapi-program-uuid: 69212dd4-0829-4747-9089-2ec78be5be34\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 400 Bad Request\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 21e4e01855b793dcb80c42387b1cf742\ndate: Mon, 16 Jun 2025 22:46:48 GMT\nserver: Google Frontend\ncontent-length: 5790\n\n{\n  \"code\": 400,\n  \"message\": \"Input error: query parameter `status value `a}3CLnJ6@d` is not in the allowable values `[available, pending, sold]`\",\n  \"stacktrace\": \"io.swagger.oas.inflector.utils.ApiException: Input error: query parameter `status value `a}3CLnJ6@d` is not in the allowable values `[available, pending, sold]`\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:419)\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:79)\\n\\tat sun.reflect.GeneratedMethodAccessor123.invoke(Unknown Source)\\n\\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\\n\\tat java.lang.reflect.Method.invoke(Method.java:498)\\n\\tat org.glassfish.jersey.server.model.internal.ResourceMethodInvocationHandlerFactory.lambda$static$0(ResourceMethodInvocationHandlerFactory.java:76)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher$1.run(AbstractJavaResourceMethodDispatcher.java:148)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.invoke(AbstractJavaResourceMethodDispatcher.java:191)\\n\\tat org.glassfish.jersey.server.model.internal.JavaResourceMethodDispatcherProvider$ResponseOutInvoker.doDispatch(JavaResourceMethodDispatcherProvider.java:200)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.dispatch(AbstractJavaResourceMethodDispatcher.java:103)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:493)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:415)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:104)\\n\\tat org.glassfish.jersey.server.ServerRuntime$1.run(ServerRuntime.java:277)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:272)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:268)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:316)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:298)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:268)\\n\\tat org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:289)\\n\\tat org.glassfish.jersey.server.ServerRuntime.process(ServerRuntime.java:256)\\n\\tat org.glassfish.jersey.server.ApplicationHandler.handle(ApplicationHandler.java:703)\\n\\tat org.glassfish.jersey.servlet.WebComponent.serviceImpl(WebComponent.java:416)\\n\\tat org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:370)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:389)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:342)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:229)\\n\\tat org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:864)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1655)\\n\\tat io.swagger.oas.inflector.utils.CORSFilter.doFilter(CORSFilter.java:36)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1634)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:533)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:146)\\n\\tat org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:548)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:257)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1595)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:255)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1253)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:203)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:473)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1564)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:201)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1155)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:144)\\n\\tat org.eclipse.jetty.server.handler.ContextHandlerCollection.handle(ContextHandlerCollection.java:219)\\n\\tat org.eclipse.jetty.server.handler.HandlerCollection.handle(HandlerCollection.java:126)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.Server.handle(Server.java:531)\\n\\tat org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:352)\\n\\tat org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:260)\\n\\tat org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:281)\\n\\tat org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:102)\\n\\tat org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:118)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:319)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:175)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:133)\\n\\tat org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:366)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:754)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:672)\\n\\tat java.lang.Thread.run(Thread.java:748)\\n\"\n}\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1244983)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (got a non-empty response when an empty response was specified)",
+          "message": {
+            "text": "Invalid Response in 'POST /store/order'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1244973)",
+            "markdown": "Invalid Response (got a non-empty response when an empty response was specified) in 'POST /store/order'.\n\n# Sample Request\n\n```http\nPOST /api/v3/store/order HTTP/1.1\ncontent-type: application/json\napi_key: <REDACTED>\nx-mapi-program-uuid: a6cb18ac-6643-4404-83c0-3a3e5b57e2a2\n\n{\"id\":10,\"petId\":198772,\"shipDate\":\"'&&exec 3<>/dev/tcp/localhost/45573; echo 7ce019ee-3fec-42bb-83ce-11208f7f6198 >&3\\u0000\"}\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 400 Bad Request\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 1fa66920f02f11a68a1834871b8d9593\ndate: Mon, 16 Jun 2025 22:46:48 GMT\nserver: Google Frontend\ncontent-length: 5702\n\n{\n  \"code\": 400,\n  \"message\": \"Input error: unable to convert input to io.swagger.petstore.model.Order\",\n  \"stacktrace\": \"io.swagger.oas.inflector.utils.ApiException: Input error: unable to convert input to io.swagger.petstore.model.Order\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:419)\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:79)\\n\\tat sun.reflect.GeneratedMethodAccessor123.invoke(Unknown Source)\\n\\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\\n\\tat java.lang.reflect.Method.invoke(Method.java:498)\\n\\tat org.glassfish.jersey.server.model.internal.ResourceMethodInvocationHandlerFactory.lambda$static$0(ResourceMethodInvocationHandlerFactory.java:76)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher$1.run(AbstractJavaResourceMethodDispatcher.java:148)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.invoke(AbstractJavaResourceMethodDispatcher.java:191)\\n\\tat org.glassfish.jersey.server.model.internal.JavaResourceMethodDispatcherProvider$ResponseOutInvoker.doDispatch(JavaResourceMethodDispatcherProvider.java:200)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.dispatch(AbstractJavaResourceMethodDispatcher.java:103)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:493)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:415)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:104)\\n\\tat org.glassfish.jersey.server.ServerRuntime$1.run(ServerRuntime.java:277)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:272)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:268)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:316)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:298)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:268)\\n\\tat org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:289)\\n\\tat org.glassfish.jersey.server.ServerRuntime.process(ServerRuntime.java:256)\\n\\tat org.glassfish.jersey.server.ApplicationHandler.handle(ApplicationHandler.java:703)\\n\\tat org.glassfish.jersey.servlet.WebComponent.serviceImpl(WebComponent.java:416)\\n\\tat org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:370)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:389)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:342)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:229)\\n\\tat org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:864)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1655)\\n\\tat io.swagger.oas.inflector.utils.CORSFilter.doFilter(CORSFilter.java:36)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1634)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:533)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:146)\\n\\tat org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:548)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:257)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1595)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:255)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1253)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:203)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:473)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1564)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:201)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1155)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:144)\\n\\tat org.eclipse.jetty.server.handler.ContextHandlerCollection.handle(ContextHandlerCollection.java:219)\\n\\tat org.eclipse.jetty.server.handler.HandlerCollection.handle(HandlerCollection.java:126)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.Server.handle(Server.java:531)\\n\\tat org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:352)\\n\\tat org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:260)\\n\\tat org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:281)\\n\\tat org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:102)\\n\\tat org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:118)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:319)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:175)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:133)\\n\\tat org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:366)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:754)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:672)\\n\\tat java.lang.Thread.run(Thread.java:748)\\n\"\n}\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1244973)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (unspecified status code: 200)",
+          "message": {
+            "text": "Invalid Response in 'DELETE /user/{username}'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1244991)",
+            "markdown": "Invalid Response (unspecified status code: 200) in 'DELETE /user/{username}'.\n\n# Sample Request\n\n```http\nDELETE /api/v3/user/Dr.%20%D8%B1%D9%8A%D9%85%D8%A7%D9%86%20%D8%A2%D9%84%20%D8%B3%D8%B9%D9%88%D8%AF HTTP/1.1\ncontent-length: 0\napi_key: <REDACTED>\nx-mapi-program-uuid: db468dd7-4d2f-41ca-b042-e51d301c8b80\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\nx-cloud-trace-context: 23a7d2cbd69cbb5ccb0802388fc038ea\ndate: Mon, 16 Jun 2025 22:46:49 GMT\ncontent-type: text/html\nserver: Google Frontend\ncontent-length: 0\n\nEmpty response\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1244991)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "internal-server-error (io.swagger.oas.inflector.utils.ApiException)",
+          "message": {
+            "text": "Internal Server Error in 'POST /pet'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2633484)",
+            "markdown": "Internal Server Error (io.swagger.oas.inflector.utils.ApiException) in 'POST /pet'.\n\n# Sample Request\n\n```http\nPOST /api/v3/pet HTTP/1.1\ncontent-type: application/json\napi_key: <REDACTED>\nx-mapi-program-uuid: 25d89b51-8b2e-40bf-9945-11ee3bab3b85\n\n{\"name\":\"doggie\",\"photoUrls\":[\"X$H-834~L8Q\\\\\\\"6k\",\"򞢑񂐟򖘨󙘼쐐򠟟\",\"du4o;L+\\\"k7#(}E5H\",\"𭀝󊕭򨷦񽃏񁇌𻂊򝕨\",\"񔢺򠈧񈯁񖿂􌔄񱅨󵉈\",\"\",\"Hg@FY~xHnX\",\"󒐶񽌨򐅶􋑖򃠡񅖈򺠧\",\"ZQ\",\"%25%32%65%25%32%65\\\\\\\\%25%32%65%25%32%65\\\\\\\\%25%32%65%25%32%65\\\\\\\\%25%32%65%25%32%65\\\\\\\\%25%32%65%25%32%65\\\\\\\\%25%32%65%25%32%65\\\\\\\\%25%32%65%25%32%65\\\\\\\\%25%32%65%25%32%65\\\\\\\\%25%32%65%25%32%65\\\\\\\\etc/passwd\"],\"category\":{}}\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 500 Internal Server Error\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 2633c7c7f7767a9f9641249756b97b3c\ndate: Mon, 16 Jun 2025 22:46:50 GMT\nserver: Google Frontend\ncontent-length: 6388\n\n{\n  \"code\": 500,\n  \"message\": \"There was an error processing your request. It has been logged (ID: 4974fcbf91d3b22f)\",\n  \"stacktrace\": \"io.swagger.oas.inflector.utils.ApiException: There was an error processing your request. It has been logged (ID: 4974fcbf91d3b22f)\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:497)\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:79)\\n\\tat sun.reflect.GeneratedMethodAccessor123.invoke(Unknown Source)\\n\\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\\n\\tat java.lang.reflect.Method.invoke(Method.java:498)\\n\\tat org.glassfish.jersey.server.model.internal.ResourceMethodInvocationHandlerFactory.lambda$static$0(ResourceMethodInvocationHandlerFactory.java:76)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher$1.run(AbstractJavaResourceMethodDispatcher.java:148)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.invoke(AbstractJavaResourceMethodDispatcher.java:191)\\n\\tat org.glassfish.jersey.server.model.internal.JavaResourceMethodDispatcherProvider$ResponseOutInvoker.doDispatch(JavaResourceMethodDispatcherProvider.java:200)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.dispatch(AbstractJavaResourceMethodDispatcher.java:103)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:493)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:415)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:104)\\n\\tat org.glassfish.jersey.server.ServerRuntime$1.run(ServerRuntime.java:277)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:272)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:268)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:316)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:298)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:268)\\n\\tat org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:289)\\n\\tat org.glassfish.jersey.server.ServerRuntime.process(ServerRuntime.java:256)\\n\\tat org.glassfish.jersey.server.ApplicationHandler.handle(ApplicationHandler.java:703)\\n\\tat org.glassfish.jersey.servlet.WebComponent.serviceImpl(WebComponent.java:416)\\n\\tat org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:370)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:389)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:342)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:229)\\n\\tat org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:864)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1655)\\n\\tat io.swagger.oas.inflector.utils.CORSFilter.doFilter(CORSFilter.java:36)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1634)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:533)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:146)\\n\\tat org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:548)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:257)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1595)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:255)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1253)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:203)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:473)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1564)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:201)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1155)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:144)\\n\\tat org.eclipse.jetty.server.handler.ContextHandlerCollection.handle(ContextHandlerCollection.java:219)\\n\\tat org.eclipse.jetty.server.handler.HandlerCollection.handle(HandlerCollection.java:126)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.Server.handle(Server.java:531)\\n\\tat org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:352)\\n\\tat org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:260)\\n\\tat org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:281)\\n\\tat org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:102)\\n\\tat org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:118)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:319)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:175)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:133)\\n\\tat org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:366)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:754)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:672)\\n\\tat java.lang.Thread.run(Thread.java:748)\\nCaused by: java.lang.reflect.InvocationTargetException\\n\\tat sun.reflect.GeneratedMethodAccessor182.invoke(Unknown Source)\\n\\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\\n\\tat java.lang.reflect.Method.invoke(Method.java:498)\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:426)\\n\\t... 60 more\\nCaused by: java.lang.NullPointerException\\n\\tat io.swagger.petstore.model.Pet.getId(Pet.java:38)\\n\\tat io.swagger.petstore.data.PetData.addPet(PetData.java:104)\\n\\tat io.swagger.petstore.controller.PetController.addPet(PetController.java:164)\\n\\t... 64 more\\n\"\n}\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2633484)\n"
+          },
+          "codeFlows": [
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "io/swagger/oas/inflector/controllers/OpenAPIOperationController.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 497,
+                            "endLine": 497
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "io/swagger/oas/inflector/controllers/OpenAPIOperationController.java",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 79,
+                            "endLine": 79
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "io/swagger/oas/inflector/controllers/OpenAPIOperationController.java",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 497,
+                  "endLine": 497
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-request-spec ($.shipDate: expected string)",
+          "message": {
+            "text": "Invalid Request Spec in 'POST /store/order'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1284267)",
+            "markdown": "Invalid Request Spec ($.shipDate: expected string) in 'POST /store/order'.\n\n# Sample Request\n\n```http\nPOST /api/v3/store/order HTTP/1.1\ncontent-type: application/json\napi_key: <REDACTED>\nx-mapi-program-uuid: 683ffb52-d478-486f-8b3a-bc503f1de1a2\n\n{\"petId\":198772,\"id\":10,\"shipDate\":null,\"status\":\"laceQ\"}\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 3c7959148c25b67ba3e158221cc1a773\ndate: Mon, 16 Jun 2025 22:46:50 GMT\nserver: Google Frontend\ncontent-length: 71\n\n{\n  \"id\": 10,\n  \"petId\": 198772,\n  \"quantity\": 0,\n  \"status\": \"laceQ\",\n  \"complete\": false\n}\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1284267)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (unspecified status code: 200)",
+          "message": {
+            "text": "Invalid Response in 'DELETE /store/order/{orderId}'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1357961)",
+            "markdown": "Invalid Response (unspecified status code: 200) in 'DELETE /store/order/{orderId}'.\n\n# Sample Request\n\n```http\nDELETE /api/v3/store/order/10 HTTP/1.1\ncontent-length: 0\napi_key: <REDACTED>\nx-mapi-program-uuid: 1d772090-fba7-4101-9617-0e16dae85548\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\nx-cloud-trace-context: 21964b4bcd417884a8ae9933fbcdfeb5\ndate: Mon, 16 Jun 2025 22:46:49 GMT\ncontent-type: text/html\nserver: Google Frontend\ncontent-length: 0\n\nEmpty response\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1357961)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec ($: expected object)",
+          "message": {
+            "text": "Invalid Response in 'POST /user/createWithList'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2634466)",
+            "markdown": "Invalid Response ($: expected object) in 'POST /user/createWithList'.\n\n# Sample Request\n\n```http\nPOST /api/v3/user/createWithList HTTP/1.1\ncontent-type: application/json\napi_key: <REDACTED>\nx-mapi-program-uuid: f8975815-0dd0-4f6f-bf35-14cfcc09edfb\n\n[{\"firstName\":\"str\",\"password\":\"12345\"},{\"firstName\":\"str\",\"userStatus\":1},{\"password\":\"str\"},{\"password\":\"str\"}]\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 3fbe37401a8079e01bb6391d45bec8f5\ndate: Mon, 16 Jun 2025 22:46:51 GMT\nserver: Google Frontend\ncontent-length: 186\n\n[\n  {\n    \"id\": 0,\n    \"firstName\": \"str\",\n    \"password\": \"12345\",\n    \"userStatus\": 0\n  },\n  {\n    \"id\": 0,\n    \"firstName\": \"str\",\n    \"userStatus\": 1\n  },\n  {\n    \"id\": 0,\n    \"password\": \"str\",\n    \"userStatus\": 0\n  },\n  {\n    \"id\": 0,\n    \"password\": \"str\",\n    \"userStatus\": 0\n  }\n]\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2634466)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-request-spec ($.complete: expected boolean)",
+          "message": {
+            "text": "Invalid Request Spec in 'POST /store/order'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1320926)",
+            "markdown": "Invalid Request Spec ($.complete: expected boolean) in 'POST /store/order'.\n\n# Sample Request\n\n```http\nPOST /api/v3/store/order HTTP/1.1\ncontent-type: application/json\napi_key: <REDACTED>\nx-mapi-program-uuid: 199f604a-3693-4ccb-8e12-f59b05e4c86c\n\n{\"complete\":null,\"quantity\":-6}\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 7f05980a6e20992917ad2159f73ddc15\ndate: Mon, 16 Jun 2025 22:46:52 GMT\nserver: Google Frontend\ncontent-length: 49\n\n{\n  \"id\": 0,\n  \"petId\": 0,\n  \"quantity\": -6,\n  \"complete\": false\n}\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1320926)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (got a non-empty response when an empty response was specified)",
+          "message": {
+            "text": "Invalid Response in 'GET /pet/findByTags'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1245004)",
+            "markdown": "Invalid Response (got a non-empty response when an empty response was specified) in 'GET /pet/findByTags'.\n\n# Sample Request\n\n```http\nGET /api/v3/pet/findByTags HTTP/1.1\ncontent-length: 0\napi_key: <REDACTED>\nx-mapi-program-uuid: 6639c45e-2306-42b5-a19f-d7a1d1154b1e\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 400 Bad Request\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 18eb5a816717ffed8c3b9bdb12463691\ndate: Mon, 16 Jun 2025 22:46:54 GMT\nserver: Google Frontend\ncontent-length: 28\n\nNo tags provided. Try again?\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1245004)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-request-spec ($.petId: expected integer)",
+          "message": {
+            "text": "Invalid Request Spec in 'POST /store/order'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1320909)",
+            "markdown": "Invalid Request Spec ($.petId: expected integer) in 'POST /store/order'.\n\n# Sample Request\n\n```http\nPOST /api/v3/store/order HTTP/1.1\ncontent-type: application/json\napi_key: <REDACTED>\nx-mapi-program-uuid: f6b40945-a8a2-48cf-a574-0d4d18768d47\n\n{\"petId\":null,\"id\":10,\"shipDate\":\"2008-06-20T02:12:30.213927950+00:00\"}\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 58ec3e724a49e54f3a5a0711f495c453\ndate: Mon, 16 Jun 2025 22:46:54 GMT\nserver: Google Frontend\ncontent-length: 92\n\n{\n  \"id\": 10,\n  \"petId\": 0,\n  \"quantity\": 0,\n  \"shipDate\": \"2008-06-20T02:12:30.213+00:00\",\n  \"complete\": false\n}\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1320909)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (unable to parse body as json)",
+          "message": {
+            "text": "Invalid Response in 'GET /user/login'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2556735)",
+            "markdown": "Invalid Response (unable to parse body as json) in 'GET /user/login'.\n\n# Sample Request\n\n```http\nGET /api/v3/user/login?username=Willa Herzog& HTTP/1.1\ncontent-length: 0\napi_key: <REDACTED>\nx-mapi-program-uuid: da52b8b9-e937-48be-a370-750369364353\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\nx-rate-limit: 5000\nx-expires-after: Mon Jun 16 23:46:54 GMT 2025\ncontent-type: application/json\nx-cloud-trace-context: 627920cfa1ef35f1303251aa0816ece3\ndate: Mon, 16 Jun 2025 22:46:54 GMT\nserver: Google Frontend\ncontent-length: 43\n\nLogged in user session: 9055842670202532864\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2556735)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (unspecified status code: 200)",
+          "message": {
+            "text": "Invalid Response in 'POST /pet/{petId}'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1244968)",
+            "markdown": "Invalid Response (unspecified status code: 200) in 'POST /pet/{petId}'.\n\n# Sample Request\n\n```http\nPOST /api/v3/pet/6?name=9%VwIo|!o\"9{ia1w%&status=\";exec 3<>/dev/tcp/localhost/45573; echo 539bf285-c152-446a-91cf-0acd0d9f8b6e >&3\u0000& HTTP/1.1\ncontent-length: 0\napi_key: <REDACTED>\nx-mapi-program-uuid: 5091312c-f3da-4044-b935-a6a0b5b346fc\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 5d6439523cd49996d8696f0629bdbb3d\ndate: Mon, 16 Jun 2025 22:46:57 GMT\nserver: Google Frontend\ncontent-length: 314\n\n{\n  \"id\": 6,\n  \"category\": {\n    \"id\": 0\n  },\n  \"name\": \"9%VwIo|!o\\\"9{ia1w%\",\n  \"photoUrls\": [\n    \"J#Ziia:m5WuL\\\\$\",\n    \"'9JAslL'3YwUv\",\n    \"c~BebqgWxFm\",\n    \"}qQ\",\n    \"WMf3>k;x\",\n    \"str\",\n    \"^F_>>>lw(J{z-h!N]6\",\n    \"http://[0:0:0:0:0:ffff:127.0.0.1]:34213\"\n  ],\n  \"tags\": [],\n  \"status\": \"\\\";exec 3<>/dev/tcp/localhost/45573; echo 539bf285-c152-446a-91cf-0acd0d9f8b6e >&3\\u0000\"\n}\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1244968)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (unspecified status code: 400)",
+          "message": {
+            "text": "Invalid Response in 'POST /pet/{petId}'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1512637)",
+            "markdown": "Invalid Response (unspecified status code: 400) in 'POST /pet/{petId}'.\n\n# Sample Request\n\n```http\nPOST /api/v3/pet/198772?status=񜚏񌧛󭮍󓔓񛂮𴛈􇸄& HTTP/1.1\ncontent-length: 0\napi_key: <REDACTED>\nx-mapi-program-uuid: d9d18fe3-1077-43f6-a46f-8164dd39c2dc\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 400 Bad Request\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 084d65046e4e959386457488ea618ef3\ndate: Mon, 16 Jun 2025 22:46:58 GMT\nserver: Google Frontend\ncontent-length: 28\n\nNo Name provided. Try again?\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1512637)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (got a non-empty response when an empty response was specified)",
+          "message": {
+            "text": "Invalid Response in 'DELETE /user/{username}'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2633489)",
+            "markdown": "Invalid Response (got a non-empty response when an empty response was specified) in 'DELETE /user/{username}'.\n\n# Sample Request\n\n```http\nDELETE /api/v3/user/Dr.%20Judson%20GvslaZ1(fl9$j'n0%22fon7J%7DT8H]cY1Yv5%3C'I@K%!Q@m:pecy[5hv%fDoV7Z* HTTP/1.1\ncontent-length: 0\napi_key: <REDACTED>\nx-mapi-program-uuid: ab96b290-172c-4b11-9996-ed910810ed42\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 400 Bad Request\ncontent-type: text/html;charset=iso-8859-1\nx-cloud-trace-context: 116ced021a0083a14479bdc4b1e5f343\ndate: Mon, 16 Jun 2025 22:47:04 GMT\nserver: Google Frontend\ncontent-length: 54\n\n<h1>Bad Message 400</h1><pre>reason: Bad Request</pre>\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/2633489)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (got a non-empty response when an empty response was specified)",
+          "message": {
+            "text": "Invalid Response in 'POST /user/createWithList'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1245015)",
+            "markdown": "Invalid Response (got a non-empty response when an empty response was specified) in 'POST /user/createWithList'.\n\n# Sample Request\n\n```http\nPOST /api/v3/user/createWithList HTTP/1.1\ncontent-type: application/json\napi_key: <REDACTED>\nx-mapi-program-uuid: cd4cf8f2-66fe-41b3-a96a-2597315dcfb2\n\n[{\"email\":\"str\",\"password\":\"str\",\"phone\":\"str\"},{\"id\":3,\"username\":\"Cat 3\",\"lastName\":\"tag4\"},{\"username\":\"Cats\",\"phone\":\"#jiKV%P%JPLes=(j\"},{\"firstName\":\"Cats\"},{\"email\":\"󭓧╏𼍥򯬃𐛬򐭤䡗\",\"userStatus\":\"pending\"},{\"username\":\"Cat 3\",\"id\":3,\"phone\":\"VY&SH1~4pdNx|U^\"}]\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 400 Bad Request\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 55e93e450fd8443267807b55d4b209e0\ndate: Mon, 16 Jun 2025 22:47:05 GMT\nserver: Google Frontend\ncontent-length: 5704\n\n{\n  \"code\": 400,\n  \"message\": \"Input error: unable to convert input to io.swagger.petstore.model.User[]\",\n  \"stacktrace\": \"io.swagger.oas.inflector.utils.ApiException: Input error: unable to convert input to io.swagger.petstore.model.User[]\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:419)\\n\\tat io.swagger.oas.inflector.controllers.OpenAPIOperationController.apply(OpenAPIOperationController.java:79)\\n\\tat sun.reflect.GeneratedMethodAccessor123.invoke(Unknown Source)\\n\\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\\n\\tat java.lang.reflect.Method.invoke(Method.java:498)\\n\\tat org.glassfish.jersey.server.model.internal.ResourceMethodInvocationHandlerFactory.lambda$static$0(ResourceMethodInvocationHandlerFactory.java:76)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher$1.run(AbstractJavaResourceMethodDispatcher.java:148)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.invoke(AbstractJavaResourceMethodDispatcher.java:191)\\n\\tat org.glassfish.jersey.server.model.internal.JavaResourceMethodDispatcherProvider$ResponseOutInvoker.doDispatch(JavaResourceMethodDispatcherProvider.java:200)\\n\\tat org.glassfish.jersey.server.model.internal.AbstractJavaResourceMethodDispatcher.dispatch(AbstractJavaResourceMethodDispatcher.java:103)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:493)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:415)\\n\\tat org.glassfish.jersey.server.model.ResourceMethodInvoker.apply(ResourceMethodInvoker.java:104)\\n\\tat org.glassfish.jersey.server.ServerRuntime$1.run(ServerRuntime.java:277)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:272)\\n\\tat org.glassfish.jersey.internal.Errors$1.call(Errors.java:268)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:316)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:298)\\n\\tat org.glassfish.jersey.internal.Errors.process(Errors.java:268)\\n\\tat org.glassfish.jersey.process.internal.RequestScope.runInScope(RequestScope.java:289)\\n\\tat org.glassfish.jersey.server.ServerRuntime.process(ServerRuntime.java:256)\\n\\tat org.glassfish.jersey.server.ApplicationHandler.handle(ApplicationHandler.java:703)\\n\\tat org.glassfish.jersey.servlet.WebComponent.serviceImpl(WebComponent.java:416)\\n\\tat org.glassfish.jersey.servlet.WebComponent.service(WebComponent.java:370)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:389)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:342)\\n\\tat org.glassfish.jersey.servlet.ServletContainer.service(ServletContainer.java:229)\\n\\tat org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:864)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1655)\\n\\tat io.swagger.oas.inflector.utils.CORSFilter.doFilter(CORSFilter.java:36)\\n\\tat org.eclipse.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1634)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doHandle(ServletHandler.java:533)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:146)\\n\\tat org.eclipse.jetty.security.SecurityHandler.handle(SecurityHandler.java:548)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:257)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doHandle(SessionHandler.java:1595)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:255)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1253)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:203)\\n\\tat org.eclipse.jetty.servlet.ServletHandler.doScope(ServletHandler.java:473)\\n\\tat org.eclipse.jetty.server.session.SessionHandler.doScope(SessionHandler.java:1564)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:201)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1155)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:144)\\n\\tat org.eclipse.jetty.server.handler.ContextHandlerCollection.handle(ContextHandlerCollection.java:219)\\n\\tat org.eclipse.jetty.server.handler.HandlerCollection.handle(HandlerCollection.java:126)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:132)\\n\\tat org.eclipse.jetty.server.Server.handle(Server.java:531)\\n\\tat org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:352)\\n\\tat org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:260)\\n\\tat org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:281)\\n\\tat org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:102)\\n\\tat org.eclipse.jetty.io.ChannelEndPoint$2.run(ChannelEndPoint.java:118)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:319)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:175)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:133)\\n\\tat org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:366)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:754)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:672)\\n\\tat java.lang.Thread.run(Thread.java:748)\\n\"\n}\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1245015)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "invalid-response-spec (got a non-empty response when an empty response was specified)",
+          "message": {
+            "text": "Invalid Response in 'PUT /user/{username}'. [Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1284204)",
+            "markdown": "Invalid Response (got a non-empty response when an empty response was specified) in 'PUT /user/{username}'.\n\n# Sample Request\n\n```http\nPUT /api/v3/user/str HTTP/1.1\ncontent-type: application/json\napi_key: <REDACTED>\nx-mapi-program-uuid: 8eac8fed-4f50-47fc-a072-79a14a0182c8\n\n{\"email\":\"john@email.com\",\"firstName\":\"John\"}\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\naccess-control-allow-origin: *\naccess-control-allow-methods: GET, POST, DELETE, PUT\naccess-control-allow-headers: Content-Type, api_key, Authorization\naccess-control-expose-headers: Content-Disposition\ncontent-type: application/json\nx-cloud-trace-context: 3001eedd2c4adafa7ecec5055d94df0e\ndate: Mon, 16 Jun 2025 22:47:09 GMT\nserver: Google Frontend\ncontent-length: 67\n\n{\n  \"id\": 0,\n  \"firstName\": \"John\",\n  \"email\": \"john@email.com\",\n  \"userStatus\": 0\n}\n```\n\n[Details](https://app.mayhem.security/training/petstore/petstore/-/defects/1284204)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

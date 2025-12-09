@@ -1,0 +1,380 @@
+{
+    "imageDigest": "sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "vulnerabilities": [
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "apt-1.4.9",
+            "package_cpe": "None",
+            "package_name": "apt",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "1.4.9",
+            "severity": "Negligible",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2011-3374",
+            "vuln": "CVE-2011-3374"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "libgnutls30-3.5.8-5+deb9u4",
+            "package_cpe": "None",
+            "package_name": "libgnutls30",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "3.5.8-5+deb9u4",
+            "severity": "Medium",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2011-3389",
+            "vuln": "CVE-2011-3389"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "libgnutls30-3.5.8-5+deb9u4",
+            "package_cpe": "None",
+            "package_name": "libgnutls30",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "3.5.8-5+deb9u4",
+            "severity": "Low",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2018-16868",
+            "vuln": "CVE-2018-16868"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "232-25+deb9u10",
+            "package": "libsystemd0-232-25+deb9u9",
+            "package_cpe": "None",
+            "package_name": "libsystemd0",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "232-25+deb9u9",
+            "severity": "High",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2018-15686",
+            "vuln": "CVE-2018-15686"
+        },
+        
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "232-25+deb9u10",
+            "package": "libudev1-232-25+deb9u9",
+            "package_cpe": "None",
+            "package_name": "libudev1",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "232-25+deb9u9",
+            "severity": "High",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2018-15686",
+            "vuln": "CVE-2018-15686"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "232-25+deb9u11",
+            "package": "libudev1-232-25+deb9u9",
+            "package_cpe": "None",
+            "package_name": "libudev1",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "232-25+deb9u9",
+            "severity": "Medium",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2019-3842",
+            "vuln": "CVE-2019-3842"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "login-1:4.4-4.1",
+            "package_cpe": "None",
+            "package_name": "login",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "1:4.4-4.1",
+            "severity": "Negligible",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2007-5686",
+            "vuln": "CVE-2007-5686"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "login-1:4.4-4.1",
+            "package_cpe": "None",
+            "package_name": "login",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "1:4.4-4.1",
+            "severity": "Negligible",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2013-4235",
+            "vuln": "CVE-2013-4235"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "mercurial-4.0-1+deb9u1",
+            "package_cpe": "None",
+            "package_name": "mercurial",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "4.0-1+deb9u1",
+            "severity": "High",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2017-17458",
+            "vuln": "CVE-2017-17458"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "mercurial-4.0-1+deb9u1",
+            "package_cpe": "None",
+            "package_name": "mercurial",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "4.0-1+deb9u1",
+            "severity": "Medium",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2018-1000132",
+            "vuln": "CVE-2018-1000132"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "mercurial-4.0-1+deb9u1",
+            "package_cpe": "None",
+            "package_name": "mercurial",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "4.0-1+deb9u1",
+            "severity": "Medium",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2018-13346",
+            "vuln": "CVE-2018-13346"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "mercurial-4.0-1+deb9u1",
+            "package_cpe": "None",
+            "package_name": "mercurial",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "4.0-1+deb9u1",
+            "severity": "High",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2018-13347",
+            "vuln": "CVE-2018-13347"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "mercurial-4.0-1+deb9u1",
+            "package_cpe": "None",
+            "package_name": "mercurial",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "4.0-1+deb9u1",
+            "severity": "Medium",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2018-13348",
+            "vuln": "CVE-2018-13348"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "mercurial-4.0-1+deb9u1",
+            "package_cpe": "None",
+            "package_name": "mercurial",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "4.0-1+deb9u1",
+            "severity": "Medium",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2018-17983",
+            "vuln": "CVE-2018-17983"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "mercurial-common-4.0-1+deb9u1",
+            "package_cpe": "None",
+            "package_name": "mercurial-common",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "4.0-1+deb9u1",
+            "severity": "High",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2017-17458",
+            "vuln": "CVE-2017-17458"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "mercurial-common-4.0-1+deb9u1",
+            "package_cpe": "None",
+            "package_name": "mercurial-common",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "4.0-1+deb9u1",
+            "severity": "Medium",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2018-1000132",
+            "vuln": "CVE-2018-1000132"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "mercurial-common-4.0-1+deb9u1",
+            "package_cpe": "None",
+            "package_name": "mercurial-common",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "4.0-1+deb9u1",
+            "severity": "Medium",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2018-13346",
+            "vuln": "CVE-2018-13346"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "None",
+            "package": "tar-1.29b-1.1",
+            "package_cpe": "None",
+            "package_name": "tar",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "1.29b-1.1",
+            "severity": "Negligible",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2019-9923",
+            "vuln": "CVE-2019-9923"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "1.18-5+deb9u3",
+            "package": "wget-1.18-5+deb9u2",
+            "package_cpe": "None",
+            "package_name": "wget",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "1.18-5+deb9u2",
+            "severity": "Unknown",
+            "url": "https://security-tracker.debian.org/tracker/CVE-2019-5953",
+            "vuln": "CVE-2019-5953"
+        },
+        {
+            "feed": "vulnerabilities",
+            "feed_group": "debian:9",
+            "fix": "virtual-fix-test",
+            "package": "test-critical-pkg-1.0",
+            "package_cpe": "None",
+            "package_name": "test-critical",
+            "package_path": "None",
+            "package_type": "dpkg",
+            "package_version": "1.0",
+            "severity": "Critical",
+            "url": "https://whatever-tracker-/tracker/CVE-9999-0000",
+            "vuln": "CVE-9999-0000"
+        },
+        {
+            "feed": "vulndb",
+            "feed_group": "vulndb:vulnerabilities",
+            "fix": "1.18",
+            "nvd_data": [],
+            "package": "jersey-1.13",
+            "package_cpe": "cpe:/a:-:jersey:1.13:-:-",
+            "package_cpe23": "cpe:2.3:a:-:jersey:1.13:-:-:-:-:-:-:-",
+            "package_name": "jersey",
+            "package_path": "/usr/share/myapp/myapp.war:sources/jersey-apache-client-1.13-sources-jar/jersey-apache-client-1.13-sources.jar",
+            "package_type": "java",
+            "package_version": "1.13",
+            "severity": "Medium",
+            "url": "http://dev-anchore-engine-api:8228/v1/query/vulnerabilities?id=VULNDB-103881",
+            "vendor_data": [
+                {
+                    "cvss_v2": {
+                        "base_score": 5.0,
+                        "exploitability_score": 10.0,
+                        "impact_score": 2.9
+                    },
+                    "cvss_v3": {
+                        "base_score": -1.0,
+                        "exploitability_score": -1.0,
+                        "impact_score": -1.0
+                    },
+                    "id": "VULNDB-103881"
+                }
+            ],
+            "vuln": "VULNDB-103881"
+        },
+        {
+            "feed": "vulndb",
+            "feed_group": "vulndb:vulnerabilities",
+            "fix": "1.18",
+            "nvd_data": [],
+            "package": "jersey-1.13",
+            "package_cpe": "cpe:/a:-:jersey:1.13:-:-",
+            "package_cpe23": "cpe:2.3:a:-:jersey:1.13:-:-:-:-:-:-:-",
+            "package_name": "jersey",
+            "package_path": "/usr/share/myapp/myapp.war:sources/jersey-client-1.13-sources-jar/jersey-client-1.13-sources.jar",
+            "package_type": "java",
+            "package_version": "1.13",
+            "severity": "Medium",
+            "url": "http://dev-anchore-engine-api:8228/v1/query/vulnerabilities?id=VULNDB-103881",
+            "vendor_data": [
+                {
+                    "cvss_v2": {
+                        "base_score": 5.0,
+                        "exploitability_score": 10.0,
+                        "impact_score": 2.9
+                    },
+                    "cvss_v3": {
+                        "base_score": -1.0,
+                        "exploitability_score": -1.0,
+                        "impact_score": -1.0
+                    },
+                    "id": "VULNDB-103881"
+                }
+            ],
+            "vuln": "VULNDB-103881"
+        },
+        {
+            "feed": "vulndb",
+            "feed_group": "vulndb:vulnerabilities",
+            "fix": "1.18",
+            "nvd_data": [],
+            "package": "jersey-1.13",
+            "package_cpe": "cpe:/a:-:jersey:1.13:-:-",
+            "package_cpe23": "cpe:2.3:a:-:jersey:1.13:-:-:-:-:-:-:-",
+            "package_name": "jersey",
+            "package_path": "/usr/share/myapp/myapp.war:sources/jersey-core-1.13-sources-jar/jersey-core-1.13-sources.jar",
+            "package_type": "java",
+            "package_version": "1.13",
+            "severity": "Medium",
+            "url": "http://dev-anchore-engine-api:8228/v1/query/vulnerabilities?id=VULNDB-103881",
+            "vendor_data": [
+                {
+                    "cvss_v2": {
+                        "base_score": 5.0,
+                        "exploitability_score": 10.0,
+                        "impact_score": 2.9
+                    },
+                    "cvss_v3": {
+                        "base_score": -1.0,
+                        "exploitability_score": -1.0,
+                        "impact_score": -1.0
+                    },
+                    "id": "VULNDB-103881"
+                }
+            ],
+            "vuln": "VULNDB-103881"
+        }
+],
+    "vulnerability_type": "os"
+}

@@ -1,0 +1,82 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Dockle",
+          "informationUri": "https://github.com/goodwithtech/dockle",
+          "rules": [
+            {
+              "id": "CIS-DI-0010",
+              "shortDescription": {
+                "text": "Do not store credential in ENVIRONMENT vars/files"
+              },
+              "help": {
+                "text": "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0010"
+              }
+            },
+            {
+              "id": "CIS-DI-0005",
+              "shortDescription": {
+                "text": "Enable Content trust for Docker"
+              },
+              "help": {
+                "text": "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0005"
+              }
+            },
+            {
+              "id": "CIS-DI-0006",
+              "shortDescription": {
+                "text": "Add HEALTHCHECK instruction to the container image"
+              },
+              "help": {
+                "text": "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0006"
+              }
+            },
+            {
+              "id": "CIS-DI-0008",
+              "shortDescription": {
+                "text": "Confirm safety of setuid/setgid files"
+              },
+              "help": {
+                "text": "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0008"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "CIS-DI-0010",
+          "level": "error",
+          "message": {
+            "text": "Suspicious ENV key found : DD_ADMIN_PASSWORD, Suspicious ENV key found : DD_CELERY_BROKER_PASSWORD, Suspicious ENV key found : DD_DATABASE_PASSWORD"
+          }
+        },
+        {
+          "ruleId": "CIS-DI-0005",
+          "level": "note",
+          "message": {
+            "text": "export DOCKER_CONTENT_TRUST=1 before docker pull/build"
+          }
+        },
+        {
+          "ruleId": "CIS-DI-0006",
+          "level": "note",
+          "message": {
+            "text": "not found HEALTHCHECK statement"
+          }
+        },
+        {
+          "ruleId": "CIS-DI-0008",
+          "level": "note",
+          "message": {
+            "text": "setuid file: urwxr-xr-x usr/bin/chfn, setuid file: urwxr-xr-x usr/bin/chsh, setuid file: urwxr-xr-x usr/bin/passwd, setuid file: urwxr-xr-x bin/umount, setuid file: urwxr-xr-x bin/mount, setgid file: grwxr-xr-x usr/bin/wall, setgid file: grwxr-xr-x usr/bin/expiry, setuid file: urwxr-xr-x bin/su, setgid file: grwxr-xr-x sbin/unix_chkpwd, setuid file: urwxr-xr-x usr/bin/gpasswd, setgid file: grwxr-xr-x usr/bin/chage, setuid file: urwxr-xr-x usr/bin/newgrp"
+          }
+        }
+      ]
+    }
+  ]
+}

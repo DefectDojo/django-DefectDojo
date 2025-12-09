@@ -1,0 +1,27 @@
+{{- if .Values.serviceAccount.create -}}
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  annotations:
+    {{- if (not .Values.disableHooks) }}
+    helm.sh/resource-policy: keep
+    helm.sh/hook: "pre-install"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    {{- end }}
+    {{- range $key, $value := mergeOverwrite dict .Values.extraAnnotations .Values.serviceAccount.annotations }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+    {{- if ne .Values.gke.workloadIdentityEmail "" }}
+    iam.gke.io/gcp-service-account: {{ .Values.gke.workloadIdentityEmail }}
+    {{- end }}
+  labels:
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- range $key, $value := mergeOverwrite dict .Values.extraLabels .Values.serviceAccount.labels }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  name: {{ include "defectdojo.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}

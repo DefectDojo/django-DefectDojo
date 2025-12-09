@@ -1,0 +1,164 @@
+[
+    {
+        "source_name": [
+            "$sql"
+        ],
+        "source_line": [
+            610
+        ],
+        "source_column": [
+            26536
+        ],
+        "source_file": [
+            "\/mnt\/c\/Users\/User\/Downloads\/OrderController (1).php"
+        ],
+        "tainted_flow": [
+            [
+                {
+                    "flow_name": "$dni",
+                    "flow_line": 608,
+                    "flow_column": 26514,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/OrderController (1).php"
+                },
+                {
+                    "flow_name": "$getValue_return",
+                    "flow_line": 585,
+                    "flow_column": 25732,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/OrderController (1).php"
+                }
+            ]
+        ],
+        "sink_name": "executeS",
+        "sink_line": 613,
+        "sink_column": 26684,
+        "sink_file": "\/mnt\/c\/Users\/User\/Downloads\/OrderController (1).php",
+        "vuln_name": "sql_injection",
+        "vuln_cwe": "CWE_89",
+        "vuln_id": "49aff3865be911c68dd971f0108c74acac9c1db772eb0a17bb455b2232993e22",
+        "vuln_type": "taint-style"
+    },
+    {
+        "source_name": [
+            "$sql"
+        ],
+        "source_line": [
+            610
+        ],
+        "source_column": [
+            26536
+        ],
+        "source_file": [
+            "\/mnt\/c\/Users\/User\/Downloads\/OrderController (1).php"
+        ],
+        "tainted_flow": [
+            [
+                {
+                    "flow_name": "$dni",
+                    "flow_line": 608,
+                    "flow_column": 26514,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/OrderController (1).php"
+                },
+                {
+                    "flow_name": "$getValue_return",
+                    "flow_line": 565,
+                    "flow_column": 25050,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/OrderController.php"
+                }
+            ]
+        ],
+        "sink_name": "executeS",
+        "sink_line": 613,
+        "sink_column": 26684,
+        "sink_file": "\/mnt\/c\/Users\/User\/Downloads\/OrderController (1).php",
+        "vuln_name": "sql_injection",
+        "vuln_cwe": "CWE_89",
+        "vuln_id": "7cf37b7671cc8c7d72adadad7d173158ed0b808a445d8cac800a6a16463a4b18",
+        "vuln_type": "taint-style"
+    },
+    {
+        "source_name": [
+            "$json_encode_return"
+        ],
+        "source_line": [
+            61
+        ],
+        "source_column": [
+            1590
+        ],
+        "source_file": [
+            "\/mnt\/c\/Users\/User\/Downloads\/ajax.php"
+        ],
+        "tainted_flow": [
+            [
+                {
+                    "flow_name": "$json_encode_param0_line61_column1590_progpilot",
+                    "flow_line": 61,
+                    "flow_column": 1590,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/ajax.php"
+                },
+                {
+                    "flow_name": "$response",
+                    "flow_line": 59,
+                    "flow_column": 1561,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/ajax.php"
+                },
+                {
+                    "flow_name": "$resp",
+                    "flow_line": 26,
+                    "flow_column": 765,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/ajax.php"
+                },
+                {
+                    "flow_name": "$validateAmount_return",
+                    "flow_line": 26,
+                    "flow_column": 773,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/ajax.php"
+                },
+                {
+                    "flow_name": "$validateAmount_param0_line26_column773_progpilot",
+                    "flow_line": 26,
+                    "flow_column": 773,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/ajax.php"
+                },
+                {
+                    "flow_name": "$vals",
+                    "flow_line": 8,
+                    "flow_column": 281,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/ajax.php"
+                },
+                {
+                    "flow_name": "$json_decode_return",
+                    "flow_line": 8,
+                    "flow_column": 289,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/ajax.php"
+                },
+                {
+                    "flow_name": "$json_decode_param0_line8_column289_progpilot",
+                    "flow_line": 8,
+                    "flow_column": 289,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/ajax.php"
+                },
+                {
+                    "flow_name": "$frontRequest",
+                    "flow_line": 7,
+                    "flow_column": 231,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/ajax.php"
+                },
+                {
+                    "flow_name": "$file_get_contents_return",
+                    "flow_line": 7,
+                    "flow_column": 247,
+                    "flow_file": "\/mnt\/c\/Users\/User\/Downloads\/ajax.php"
+                }
+            ]
+        ],
+        "sink_name": "echo",
+        "sink_line": 61,
+        "sink_column": 1590,
+        "sink_file": "\/mnt\/c\/Users\/User\/Downloads\/ajax.php",
+        "vuln_name": "xss",
+        "vuln_cwe": "CWE_79",
+        "vuln_id": "ec40abc277f125bcbef6c07d0fa9996e65e58dbce75957fb162dd86139d8b615",
+        "vuln_type": "taint-style"
+    }
+]

@@ -1,0 +1,97 @@
+name: "release-X: Release docker containers"
+
+env:
+  GIT_USERNAME: "DefectDojo release bot"
+  GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
+
+on:
+  workflow_dispatch:
+    inputs:
+      # the actual branch that can be chosen on the UI is made irrelevant by further steps
+      # because someone will forget one day to change it.
+      release_number:
+        type: string
+        description: 'Release version (x.y.z format)'
+        required: true
+      platform:
+        type: string
+        default: "linux/amd64"
+  workflow_call:
+    inputs:
+      # the actual branch that can be chosen on the UI is made irrelevant by further steps
+      # because someone will forget one day to change it.
+      release_number:
+        type: string
+        description: 'Release version (x.y.z format)'
+        required: true
+      platform:
+        type: string
+        default: "linux/amd64"
+
+jobs:
+  job-build-and-push:
+    runs-on: ${{ inputs.platform ==  'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+          docker-image: [django, nginx]
+          os: [alpine, debian]
+          exclude:
+              - docker-image: nginx
+                os: debian
+    steps:
+      # Replace slashes so we can use this in filenames
+      - name: Set-platform
+        run: |
+          platform=${{ inputs.platform }}
+          echo "PLATFORM=${platform//\//-}" >> $GITHUB_ENV
+          echo $GITHUB_ENV
+
+        # deduce docker org name from git repo to make the build also work in forks
+      - id: Set-docker-org
+        run: echo "DOCKER_ORG=$(echo ${GITHUB_REPOSITORY%%/*} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Login to DockerHub
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Checkout tag
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          ref: ${{ inputs.release_number }}
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+
+        # we cannot set any tags here, those are set on the merged digest in release-x-manual-merge-container-digests.yml
+      - name: Build and push images
+        id: build
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        env:
+          DOCKER_BUILD_CHECKS_ANNOTATIONS: false
+        with:
+          push: true
+          file: ./Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
+          context: .
+          outputs: type=image,"name=${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}",push-by-digest=true,name-canonical=true
+          cache-from: type=gha,scope=${{ matrix.docker-image}}-${{ matrix.os }}-${{ env.PLATFORM }}-${{ github.head_ref || github.ref_name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image}}-${{ matrix.os }}-${{ env.PLATFORM }}-${{ github.head_ref || github.ref_name }}
+
+        # export the digest to a file
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+        # upload the digest file as artifact
+      - name: Upload digest
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: digests-${{ matrix.docker-image}}-${{ matrix.os }}-${{ env.PLATFORM }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1

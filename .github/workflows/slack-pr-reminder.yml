@@ -1,0 +1,19 @@
+name: Daily PR Review Reminder
+
+on:
+  schedule:
+    - cron: "0 16 * * 1-5" # 11:00 AM CT M-F
+  workflow_dispatch:
+
+jobs:
+  notify-reviewers:
+    runs-on: ubuntu-latest
+    if: github.repository == 'DefectDojo/django-DefectDojo' # Notify only in core repo, not in forks - it would just fail in fork
+    steps:
+      - name: Notify reviewers in Slack
+        uses: DefectDojo-Inc/notify-pr-reviewers-action@master # Do not use a specific version to always get the latest updates
+        with:
+          owner: "DefectDojo"
+          repository: "django-DefectDojo"
+          gh_token: ${{ secrets.GH_TOKEN }}
+          slack_token: ${{ secrets.SLACK_TOKEN }}

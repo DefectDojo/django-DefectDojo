@@ -1,0 +1,624 @@
+from datetime import date, datetime, timedelta
+
+from crum import impersonate
+from django.utils.timezone import is_naive, now
+
+from dojo.finding.helper import close_finding
+from dojo.models import (
+    DojoMeta,
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Finding,
+    Note_Type,
+    Notes,
+    Product,
+    Product_Type,
+    Test,
+    Test_Type,
+    User,
+)
+
+from .dojo_test_case import DojoTestCase
+
+
+class TestFindingModel(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.user = User.objects.first()  # Use a user from fixtures
+        self.product_type = Product_Type.objects.create(name="Test Product Type")
+        self.product = Product.objects.create(name="Test Product", prod_type=self.product_type)
+        self.engagement = Engagement.objects.create(
+            name="Test Engagement",
+            product=self.product,
+            target_start=now(),
+            target_end=now(),
+        )
+        self.test_type = Test_Type.objects.create(name="Unit Test Type")
+        self.test = Test.objects.create(
+            engagement=self.engagement,
+            test_type=self.test_type,
+            title="Test for Finding",
+            target_start=now(),
+            target_end=now(),
+        )
+        self.finding = Finding.objects.create(title="Close Finding Test", active=True, test=self.test)
+        self.endpoint = Endpoint.objects.create(host="test.local")
+        self.endpoint_status = Endpoint_Status.objects.create(finding=self.finding, endpoint=self.endpoint)
+        self.finding.status_finding.add(self.endpoint_status)
+
+    def test_close_finding_with_naive_date(self):
+        note_type_obj = Note_Type.objects.create(name="General")
+        naive_date = date.today()  # No timezone
+        close_finding(
+            finding=self.finding,
+            user=self.user,
+            is_mitigated=True,
+            mitigated=naive_date,
+            mitigated_by=None,
+            false_p=False,
+            out_of_scope=False,
+            duplicate=False,
+            note_entry="Mitigation note",
+            note_type=note_type_obj,
+        )
+        self.assertFalse(is_naive(self.finding.mitigated))
+        note = Notes.objects.filter(finding=self.finding).first()
+        self.assertIsNotNone(note)
+        self.assertFalse(is_naive(note.date))
+        status = Endpoint_Status.objects.filter(finding=self.finding).first()
+        self.assertTrue(status.mitigated)
+        self.assertFalse(is_naive(status.mitigated_time))
+
+    def test_close_finding_with_naive_datetime(self):
+        naive_datetime = datetime(2025, 11, 12, 0, 0, 0)
+        close_finding(
+            finding=self.finding,
+            user=self.user,
+            is_mitigated=True,
+            mitigated=naive_datetime,
+            mitigated_by=None,
+            false_p=False,
+            out_of_scope=False,
+            duplicate=False,
+        )
+        self.assertFalse(is_naive(self.finding.mitigated))
+
+    def test_close_finding_with_none_mitigated(self):
+        close_finding(
+            finding=self.finding,
+            user=self.user,
+            is_mitigated=True,
+            mitigated=None,
+            mitigated_by=None,
+            false_p=False,
+            out_of_scope=False,
+            duplicate=False,
+        )
+        self.assertFalse(is_naive(self.finding.mitigated))
+
+    def test_get_sast_source_file_path_with_link_no_file_path(self):
+        finding = Finding()
+        self.assertEqual(None, finding.get_sast_source_file_path_with_link())
+
+    def test_get_sast_source_file_path_with_link_no_source_code_management_uri(self):
+        test = Test()
+        engagement = Engagement()
+        test.engagement = engagement
+        finding = Finding()
+        finding.test = test
+        finding.sast_source_file_path = "SastSourceFilePath"
+        self.assertEqual("SastSourceFilePath", finding.get_sast_source_file_path_with_link())
+
+    def test_get_sast_source_file_path_with_link_and_source_code_management_uri(self):
+        test = Test()
+        engagement = Engagement()
+        test.engagement = engagement
+        finding = Finding()
+        finding.test = test
+        finding.sast_source_file_path = "SastSourceFilePath"
+        engagement.source_code_management_uri = "URL"
+        self.assertEqual('<a href="URL/SastSourceFilePath" target="_blank" title="SastSourceFilePath">SastSourceFilePath</a>', finding.get_sast_source_file_path_with_link())
+
+    def test_get_file_path_with_link_no_file_path(self):
+        finding = Finding()
+        self.assertEqual(None, finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_no_source_code_management_uri(self):
+        test = Test()
+        engagement = Engagement()
+        test.engagement = engagement
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "FilePath"
+        self.assertEqual("FilePath", finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_and_source_code_management_uri(self):
+        test = Test()
+        engagement = Engagement()
+        test.engagement = engagement
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "FilePath"
+        engagement.source_code_management_uri = "URL"
+        self.assertEqual('<a href="URL/FilePath" target="_blank" title="FilePath">FilePath</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_and_source_code_management_uri_github_no_scm_type_with_details_and_line(self):
+        # checks that for github.com in uri dojo makes correct url to browse on github
+
+        test = Test()
+        engagement = Engagement()
+        test.engagement = engagement
+        engagement.commit_hash = "some-commit-hash"
+        engagement.branch_tag = "some-branch"
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "some-folder/some-file.ext"
+        finding.line = 5432
+        engagement.source_code_management_uri = "https://github.com/some-test-account/some-test-repo"
+        self.assertEqual('<a href="https://github.com/some-test-account/some-test-repo/blob/some-commit-hash/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_and_source_code_management_uri_github_with_scm_type_with_details_and_line(self):
+        # checks that for github in custom field dojo makes correct url to browse on github
+
+        # create scm-type custom field with value "github"
+        product_type = self.create_product_type("test_product_type")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product_metadata = DojoMeta(product=product, name="scm-type", value="github")
+        product_metadata.save()
+
+        # create finding with scm uri and commit hash, branch and line
+        test = Test()
+        engagement = Engagement()
+        engagement.product = product
+        test.engagement = engagement
+        engagement.commit_hash = "some-commit-hash"
+        engagement.branch_tag = "some-branch"
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "some-folder/some-file.ext"
+        finding.line = 5432
+
+        engagement.source_code_management_uri = "https://github.com/some-test-account/some-test-repo"
+        self.assertEqual('<a href="https://github.com/some-test-account/some-test-repo/blob/some-commit-hash/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_and_source_code_management_uri_bitbucket_public_project_with_no_details_and_line(self):
+        # checks that for public bitbucket (bitbucket.org) in custom field
+        # dojo makes correct url to browse on public bitbucket (for project uri)
+
+        # create scm-type custom field with value "bitbucket"
+        product_type = self.create_product_type("test_product_type")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product_metadata = DojoMeta(product=product, name="scm-type", value="bitbucket")
+        product_metadata.save()
+
+        # create finding with scm uri line
+        test = Test()
+        engagement = Engagement()
+        engagement.product = product
+        test.engagement = engagement
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "some-folder/some-file.ext"
+        finding.line = 5432
+
+        engagement.source_code_management_uri = "https://bb.example.com/some-test-user/some-test-repo.git"
+        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/master/some-folder/some-file.ext#lines-5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_and_source_code_management_uri_bitbucket_public_project_with_commithash_and_line(self):
+        # checks that for public bitbucket (bitbucket.org) in custom field  and existing commit hash in finding
+        # dojo makes correct url to browse on public bitbucket (for project uri)
+
+        # create scm-type custom field with value "bitbucket"
+        product_type = self.create_product_type("test_product_type")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product_metadata = DojoMeta(product=product, name="scm-type", value="bitbucket")
+        product_metadata.save()
+
+        # create finding with scm uri and commit hash, branch and line
+        test = Test()
+        engagement = Engagement()
+        engagement.product = product
+        test.engagement = engagement
+        engagement.commit_hash = "some-commit-hash"
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "some-folder/some-file.ext"
+        finding.line = 5432
+
+        engagement.source_code_management_uri = "https://bb.example.com/some-test-user/some-test-repo.git"
+        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/some-commit-hash/some-folder/some-file.ext#lines-5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_and_source_code_management_uri_bitbucket_standalone_project_with_commithash_and_line(self):
+        # checks that for standalone bitbucket in custom field  and existing commit hash in finding
+        # dojo makes correct url to browse on standalone/onpremise bitbucket (for project uri)
+
+        # create scm-type custom field with value "bitbucket-standalone"
+        product_type = self.create_product_type("test_product_type")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product_metadata = DojoMeta(product=product, name="scm-type", value="bitbucket-standalone")
+        product_metadata.save()
+
+        # create finding with scm uri and commit hash, branch and line
+        test = Test()
+        engagement = Engagement()
+        engagement.product = product
+        test.engagement = engagement
+        engagement.commit_hash = "some-commit-hash"
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "some-folder/some-file.ext"
+        finding.line = 5432
+
+        engagement.source_code_management_uri = "https://bb.example.com/scm/some-test-project/some-test-repo.git"
+        self.assertEqual('<a href="https://bb.example.com/projects/some-test-project/repos/some-test-repo/browse/some-folder/some-file.ext?at=some-commit-hash#5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_and_source_code_management_uri_bitbucket_standalone_project_with_branchtag_and_line(self):
+        # checks that for standalone bitbucket in custom field  and existing branch/tag in finding
+        # dojo makes correct url to browse on standalone/onpremise bitbucket (for project uri)
+
+        # create scm-type custom field with value "bitbucket-standalone"
+        product_type = self.create_product_type("test_product_type")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product_metadata = DojoMeta(product=product, name="scm-type", value="bitbucket-standalone")
+        product_metadata.save()
+
+        # create finding with scm uri and commit hash, branch and line
+        test = Test()
+        engagement = Engagement()
+        engagement.product = product
+        test.engagement = engagement
+        engagement.branch_tag = "some-branch"
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "some-folder/some-file.ext"
+        finding.line = 5432
+
+        engagement.source_code_management_uri = "https://bb.example.com/scm/some-test-project/some-test-repo.git"
+        self.assertEqual('<a href="https://bb.example.com/projects/some-test-project/repos/some-test-repo/browse/some-folder/some-file.ext?at=some-branch#5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_and_source_code_management_uri_bitbucket_standalone_user_with_branchtag_and_line(self):
+        # checks that for standalone bitbucket in custom field  and existing branch/tag in finding
+        # dojo makes correct url to browse on standalone/onpremise bitbucket (for user uri)
+
+        # create scm-type custom field with value "bitbucket-standalone"
+        product_type = self.create_product_type("test_product_type")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product_metadata = DojoMeta(product=product, name="scm-type", value="bitbucket-standalone")
+        product_metadata.save()
+
+        # create finding with scm uri and commit hash, branch and line
+        test = Test()
+        engagement = Engagement()
+        engagement.product = product
+        test.engagement = engagement
+        engagement.branch_tag = "some-branch"
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "some-folder/some-file.ext"
+        finding.line = 5432
+
+        engagement.source_code_management_uri = "https://bb.example.com/scm/~some-user/some-test-repo.git"
+
+        self.assertEqual('<a href="https://bb.example.com/users/some-user/repos/some-test-repo/browse/some-folder/some-file.ext?at=some-branch#5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_and_source_code_management_uri_gitea_or_codeberg_project_with_no_details_and_line(self):
+        # checks that for gitea and codeberg in custom field
+        # dojo makes correct url
+
+        # create scm-type custom field with value "gitea"
+        product_type = self.create_product_type("test_product_type")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product_metadata = DojoMeta(product=product, name="scm-type", value="gitea")
+        product_metadata.save()
+
+        # create finding with scm uri line
+        test = Test()
+        engagement = Engagement()
+        engagement.product = product
+        test.engagement = engagement
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "some-folder/some-file.ext"
+        finding.line = 5432
+
+        engagement.source_code_management_uri = "https://bb.example.com/some-test-user/some-test-repo.git"
+        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/master/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_link_and_source_code_management_uri_gitea_or_codeberg_project_with_commithash_and_line(self):
+        # checks that for gitea and codeberg in custom field  and existing commit hash in finding
+        # dojo makes correct url
+
+        # create scm-type custom field with value "gitea"
+        product_type = self.create_product_type("test_product_type")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product_metadata = DojoMeta(product=product, name="scm-type", value="gitea")
+        product_metadata.save()
+
+        # create finding with scm uri and commit hash, branch and line
+        test = Test()
+        engagement = Engagement()
+        engagement.product = product
+        test.engagement = engagement
+        engagement.commit_hash = "some-commit-hash"
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "some-folder/some-file.ext"
+        finding.line = 5432
+
+        engagement.source_code_management_uri = "https://bb.example.com/some-test-user/some-test-repo.git"
+        self.assertEqual('<a href="https://bb.example.com/some-test-user/some-test-repo/src/some-commit-hash/some-folder/some-file.ext#L5432" target="_blank" title="some-folder/some-file.ext">some-folder/some-file.ext</a>', finding.get_file_path_with_link())
+
+    def test_get_file_path_with_xss_attack(self):
+        test = Test()
+        engagement = Engagement()
+        test.engagement = engagement
+        finding = Finding()
+        finding.test = test
+        finding.file_path = "<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>"
+        engagement.source_code_management_uri = "<IMG SRC=javascript:alert('XSS')>"
+        self.assertEqual('<a href="&lt;IMG SRC=javascript:alert(\'XSS\')>/&lt;SCRIPT SRC=http://xss.rocks/xss.js>&lt;/SCRIPT>" target="_blank" title="&lt;SCRIPT SRC=http://xss.rocks/xss.js>&lt;/SCRIPT>">&lt;SCRIPT SRC=http://xss.rocks/xss.js&gt;&lt;/SCRIPT&gt;</a>', finding.get_file_path_with_link())
+
+    def test_get_references_with_links_no_references(self):
+        finding = Finding()
+        self.assertEqual(None, finding.get_references_with_links())
+
+    def test_get_references_with_links_no_links(self):
+        finding = Finding()
+        finding.references = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr"
+        self.assertEqual("Lorem ipsum dolor sit amet, consetetur sadipscing elitr", finding.get_references_with_links())
+
+    def test_get_references_with_links_simple_url(self):
+        finding = Finding()
+        finding.references = "URL: https://www.example.com"
+        self.assertEqual('URL: <a href="https://www.example.com" target="_blank" title="https://www.example.com">https://www.example.com</a>', finding.get_references_with_links())
+
+    def test_get_references_with_links_url_with_port(self):
+        finding = Finding()
+        finding.references = "http://www.example.com:8080"
+        self.assertEqual('<a href="http://www.example.com:8080" target="_blank" title="http://www.example.com:8080">http://www.example.com:8080</a>', finding.get_references_with_links())
+
+    def test_get_references_with_links_url_with_path(self):
+        finding = Finding()
+        finding.references = "URL https://www.example.com/path/part2 behind URL"
+        self.assertEqual('URL <a href="https://www.example.com/path/part2" target="_blank" title="https://www.example.com/path/part2">https://www.example.com/path/part2</a> behind URL', finding.get_references_with_links())
+
+    def test_get_references_with_links_complicated_url_with_parameter(self):
+        finding = Finding()
+        finding.references = "URL:https://www.example.com/path?param1=abc&_param2=xyz"
+        self.assertEqual('URL:<a href="https://www.example.com/path?param1=abc&amp;_param2=xyz" target="_blank" title="https://www.example.com/path?param1=abc&amp;_param2=xyz">https://www.example.com/path?param1=abc&amp;_param2=xyz</a>', finding.get_references_with_links())
+
+    def test_get_references_with_links_two_urls(self):
+        finding = Finding()
+        finding.references = "URL1: https://www.example.com URL2: https://info.example.com"
+        self.assertEqual('URL1: <a href="https://www.example.com" target="_blank" title="https://www.example.com">https://www.example.com</a> URL2: <a href="https://info.example.com" target="_blank" title="https://info.example.com">https://info.example.com</a>', finding.get_references_with_links())
+
+    def test_get_references_with_links_linebreak(self):
+        finding = Finding()
+        finding.references = "https://www.example.com\nhttps://info.example.com"
+        self.assertEqual('<a href="https://www.example.com" target="_blank" title="https://www.example.com">https://www.example.com</a>\n<a href="https://info.example.com" target="_blank" title="https://info.example.com">https://info.example.com</a>', finding.get_references_with_links())
+
+    def test_get_references_with_links_markdown(self):
+        finding = Finding()
+        finding.references = "URL: [https://www.example.com](https://www.example.com)"
+        self.assertEqual("URL: [https://www.example.com](https://www.example.com)", finding.get_references_with_links())
+
+    # See https://github.com/DefectDojo/django-DefectDojo/issues/8264
+    # Capturing current behavior which might not be the desired one yet
+    # This test saves vectors without any validation. This is capturing current behavior.
+    def test_cvssv3(self):
+        """Tests if the CVSSv3 score is calculated correctly"""
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("test_product_type")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        engagement = self.create_engagement("test_eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan", title="test_test")
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title="test_finding",
+            severity="Critical",
+            date=datetime.now().date())
+        finding.cvssv3 = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+        finding.save()
+
+        self.assertEqual(finding.cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
+        self.assertEqual(finding.cvssv3_score, 9.8)
+        finding_id = finding.id
+
+        finding = Finding.objects.get(id=finding_id)
+        finding.cvssv3 = "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+        finding.save()
+
+        self.assertEqual(finding.cvssv3, "AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
+        # invalid vector, so score still 9.8 from previous save (and not 8.8)
+        self.assertEqual(finding.cvssv3_score, 9.8)
+
+        finding = Finding.objects.get(id=finding_id)
+        finding.cvssv3 = "happy little vector"
+        finding.save()
+
+        self.assertEqual(finding.cvssv3, "happy little vector")
+        # invalid vector, so score still 9.8 from previous save
+        self.assertEqual(finding.cvssv3_score, 9.8)
+
+        # we already have more cvssv3 test in test_rest_framework.py and finding_test.py
+        # the above here only shows that invalid vectors can be saved
+
+
+class TestFindingSLAExpiration(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def run(self, result=None):
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.save()
+
+        # unit tests are running without any user, which will result in actions like dedupe happening in the celery process
+        # this doesn't work in unittests as unittests are using an in memory sqlite database and celery can't see the data
+        # so we're running the test under the admin user context and set block_execution to True
+        with impersonate(testuser):
+            super().run(result)
+
+    def test_sla_expiration_date(self):
+        """
+        Tests if the SLA expiration date and SLA days remaining are calculated correctly
+        after a finding's severity is updated
+        """
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("test_product_type")
+        sla_config = self.create_sla_configuration(name="test_sla_config")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product.sla_configuration = sla_config
+        product.save()
+        engagement = self.create_engagement("test_eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan", title="test_test")
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title="test_finding",
+            severity="Critical",
+            date=datetime.now().date())
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+    def test_sla_expiration_date_after_finding_severity_updated(self):
+        """
+        Tests if the SLA expiration date and SLA days remaining are calculated correctly
+        after a finding's severity is updated
+        """
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("test_product_type")
+        sla_config = self.create_sla_configuration(name="test_sla_config")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product.sla_configuration = sla_config
+        product.save()
+        engagement = self.create_engagement("test_eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan", title="test_test")
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title="test_finding",
+            severity="Critical",
+            date=datetime.now().date())
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+        finding.severity = "Medium"
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+    def test_sla_expiration_date_after_product_updated(self):
+        """
+        Tests if the SLA expiration date and SLA days remaining are calculated correctly
+        after a product changed from one SLA configuration to another
+        """
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("test_product_type")
+        sla_config_1 = self.create_sla_configuration(name="test_sla_config_1")
+        sla_config_2 = self.create_sla_configuration(
+            name="test_sla_config_2",
+            critical=1,
+            high=2,
+            medium=3,
+            low=4)
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product.sla_configuration = sla_config_1
+        product.save()
+        engagement = self.create_engagement("test_eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan", title="test_test")
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title="test_finding",
+            severity="Critical",
+            date=datetime.now().date())
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+        product.sla_configuration = sla_config_2
+        product.save()
+
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+    def test_sla_expiration_date_after_sla_configuration_updated(self):
+        """
+        Tests if the SLA expiration date and SLA days remaining are calculated correctly
+        after the SLA configuration on a product was updated to a different number of SLA days
+        """
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("test_product_type")
+        sla_config = self.create_sla_configuration(name="test_sla_config")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product.sla_configuration = sla_config
+        product.save()
+        engagement = self.create_engagement("test_eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan", title="test_test")
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title="test_finding",
+            severity="Critical",
+            date=datetime.now().date())
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+        sla_config.critical = 10
+        sla_config.save()
+
+        finding.set_sla_expiration_date()
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+    def test_sla_expiration_date_after_sla_not_enforced(self):
+        """
+        Tests if the SLA expiration date is none after the after the SLA configuration on a
+        product was updated to not enforce all SLA remediation days
+        """
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("test_product_type")
+        sla_config = self.create_sla_configuration(name="test_sla_config")
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product.sla_configuration = sla_config
+        product.save()
+        engagement = self.create_engagement("test_eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan", title="test_test")
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title="test_finding",
+            severity="Critical",
+            date=datetime.now().date())
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+        sla_config.enforce_critical = False
+        sla_config.save()
+
+        finding.set_sla_expiration_date()
+
+        self.assertEqual(finding.sla_expiration_date, None)
+        self.assertEqual(finding.sla_days_remaining(), None)
+        self.assertEqual(finding.sla_deadline(), None)

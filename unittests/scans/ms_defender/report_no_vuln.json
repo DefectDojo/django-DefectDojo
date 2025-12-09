@@ -1,0 +1,5 @@
+{
+    "@odata.context": "https://api-eu.securitycenter.windows.com/api/asfDto)",
+    "value": [],
+    "@odata.nextLink": "https://apiofazure?$skip=10000"
+  }

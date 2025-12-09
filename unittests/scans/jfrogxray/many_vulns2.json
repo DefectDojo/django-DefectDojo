@@ -1,0 +1,62 @@
+{
+   "total_count": 2,
+   "data": [
+      {
+         "id": "",
+         "severity": "High",
+         "summary": "pip PyPI (Python Packaging Index) PipXmlrpcTransport._download_http_url() Function Content-Disposition Header Path Traversal Arbitrary File Write Weakness",
+         "issue_type": "security",
+         "provider": "JFrog",
+         "component": "pip",
+         "source_id": "pypi://pip",
+         "source_comp_id": "pypi://pip:9.0.1",
+         "component_versions": {
+            "more_details": {
+               "cves": [
+                  {
+                     "cvss_v2": "7.6/AV:N/AC:H/Au:N/C:C/I:C/A:C",
+                     "cvss_v3": "7.5/CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H"
+                  }
+               ],
+               "provider": "JFrog"
+            }
+         },
+         "edited": "2020-11-04T19:26:15Z",
+         "is_source_root": false
+      },
+      {
+         "id": "",
+         "severity": "High",
+         "summary": "A flaw was found in the Linux kernel before 5.9-rc4. Memory corruption can be exploited to gain root privileges from unprivileged processes. The highest threat from this vulnerability is to data confidentiality and integrity.",
+         "issue_type": "security",
+         "provider": "JFrog",
+         "component": "ubuntu:bionic:linux",
+         "source_id": "deb://ubuntu:bionic:linux",
+         "source_comp_id": "deb://ubuntu:bionic:linux:4.15.0-88.88",
+         "component_versions": {
+            "id": "ubuntu:bionic:linux",
+            "vulnerable_versions": [
+               "< 4.15.0-117.118"
+            ],
+            "fixed_versions": [
+               "≥ 4.15.0-117.118"
+            ],
+            "more_details": {
+               "cves": [
+                  {
+                     "cve": "CVE-2020-14386",
+                     "cwe": [
+                        "CWE-787"
+                     ],
+                     "cvss_v2": "7.2/CVSS:2.0/AV:L/AC:L/Au:N/C:C/I:C/A:C",
+                     "cvss_v3": "7.8/CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+                  }
+               ],
+               "provider": "JFrog"
+            }
+         },
+         "edited": "2020-12-29T10:08:57Z",
+         "is_source_root": false
+      }
+   ]
+}

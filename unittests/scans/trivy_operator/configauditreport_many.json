@@ -1,0 +1,192 @@
+{
+    "apiVersion": "aquasecurity.github.io/v1alpha1",
+    "kind": "ConfigAuditReport",
+    "metadata": {
+        "annotations": {
+            "trivy-operator.aquasecurity.github.io/report-ttl": "24h0m0s"
+        },
+        "creationTimestamp": "2023-03-23T16:22:54Z",
+        "generation": 1,
+        "labels": {
+            "plugin-config-hash": "659b7b9c46",
+            "resource-spec-hash": "fc85b485f",
+            "trivy-operator.resource.kind": "ReplicaSet",
+            "trivy-operator.resource.name": "nginx-deployment-965685897",
+            "trivy-operator.resource.namespace": "default"
+        },
+        "name": "replicaset-nginx-deployment-965685897",
+        "namespace": "default",
+        "ownerReferences": [
+            {
+                "apiVersion": "apps/v1",
+                "blockOwnerDeletion": false,
+                "controller": true,
+                "kind": "ReplicaSet",
+                "name": "nginx-deployment-965685897",
+                "uid": "d19c7f74-b4c3-429d-9a45-1b2f5efc3c88"
+            }
+        ],
+        "resourceVersion": "1268",
+        "uid": "a92e0951-e988-419d-8602-6852f920ce06"
+    },
+    "report": {
+        "checks": [
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV014",
+                "description": "An immutable root file system prevents applications from writing to their local disk. This can limit intrusions, as attackers will not be able to tamper with the file system or write foreign executables to disk.",
+                "messages": [
+                    "Container 'nginx' of ReplicaSet 'nginx-deployment-965685897' should set 'securityContext.readOnlyRootFilesystem' to true"
+                ],
+                "severity": "LOW",
+                "success": false,
+                "title": "Root file system is not read-only"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV016",
+                "description": "When containers have memory requests specified, the scheduler can make better decisions about which nodes to place pods on, and how to deal with resource contention.",
+                "messages": [
+                    "Container 'nginx' of ReplicaSet 'nginx-deployment-965685897' should set 'resources.requests.memory'"
+                ],
+                "severity": "LOW",
+                "success": false,
+                "title": "Memory requests not specified"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV030",
+                "description": "The RuntimeDefault/Localhost seccomp profile must be required, or allow specific additional profiles.",
+                "messages": [
+                    "Either Pod or Container should set 'securityContext.seccompProfile.type' to 'RuntimeDefault'"
+                ],
+                "severity": "LOW",
+                "success": false,
+                "title": "Default Seccomp profile not set"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV015",
+                "description": "When containers have resource requests specified, the scheduler can make better decisions about which nodes to place pods on, and how to deal with resource contention.",
+                "messages": [
+                    "Container 'nginx' of ReplicaSet 'nginx-deployment-965685897' should set 'resources.requests.cpu'"
+                ],
+                "severity": "LOW",
+                "success": false,
+                "title": "CPU requests not specified"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV011",
+                "description": "Enforcing CPU limits prevents DoS via resource exhaustion.",
+                "messages": [
+                    "Container 'nginx' of ReplicaSet 'nginx-deployment-965685897' should set 'resources.limits.cpu'"
+                ],
+                "severity": "LOW",
+                "success": false,
+                "title": "CPU not limited"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV012",
+                "description": "'runAsNonRoot' forces the running image to run as a non-root user to ensure least privileges.",
+                "messages": [
+                    "Container 'nginx' of ReplicaSet 'nginx-deployment-965685897' should set 'securityContext.runAsNonRoot' to true"
+                ],
+                "severity": "MEDIUM",
+                "success": false,
+                "title": "Runs as root user"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV018",
+                "description": "Enforcing memory limits prevents DoS via resource exhaustion.",
+                "messages": [
+                    "Container 'nginx' of ReplicaSet 'nginx-deployment-965685897' should set 'resources.limits.memory'"
+                ],
+                "severity": "LOW",
+                "success": false,
+                "title": "Memory not limited"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV110",
+                "description": "ensure that default namespace should not be used",
+                "messages": [
+                    "ReplicaSet 'nginx-deployment-965685897' should not be set with 'default' namespace"
+                ],
+                "severity": "LOW",
+                "success": false,
+                "title": "The default namespace should not be used"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV003",
+                "description": "The container should drop all default capabilities and add only those that are needed for its execution.",
+                "messages": [
+                    "Container 'nginx' of ReplicaSet 'nginx-deployment-965685897' should add 'ALL' to 'securityContext.capabilities.drop'"
+                ],
+                "severity": "LOW",
+                "success": false,
+                "title": "Default capabilities not dropped"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV021",
+                "description": "Force the container to run with group ID \u003e 10000 to avoid conflicts with the host’s user table.",
+                "messages": [
+                    "Container 'nginx' of ReplicaSet 'nginx-deployment-965685897' should set 'securityContext.runAsGroup' \u003e 10000"
+                ],
+                "severity": "LOW",
+                "success": false,
+                "title": "Runs with low group ID"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV001",
+                "description": "A program inside the container can elevate its own privileges and run as root, which might give the program control over the container and node.",
+                "messages": [
+                    "Container 'nginx' of ReplicaSet 'nginx-deployment-965685897' should set 'securityContext.allowPrivilegeEscalation' to false"
+                ],
+                "severity": "MEDIUM",
+                "success": false,
+                "title": "Process can elevate its own privileges"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV106",
+                "description": "Containers must drop ALL capabilities, and are only permitted to add back the NET_BIND_SERVICE capability.",
+                "messages": [
+                    "container should drop all"
+                ],
+                "severity": "LOW",
+                "success": false,
+                "title": "Container capabilities must only include NET_BIND_SERVICE"
+            },
+            {
+                "category": "Kubernetes Security Check",
+                "checkID": "KSV020",
+                "description": "Force the container to run with user ID \u003e 10000 to avoid conflicts with the host’s user table.",
+                "messages": [
+                    "Container 'nginx' of ReplicaSet 'nginx-deployment-965685897' should set 'securityContext.runAsUser' \u003e 10000"
+                ],
+                "severity": "LOW",
+                "success": false,
+                "title": "Runs with low user ID"
+            }
+        ],
+        "scanner": {
+            "name": "Trivy",
+            "vendor": "Aqua Security",
+            "version": "dev"
+        },
+        "summary": {
+            "criticalCount": 0,
+            "highCount": 0,
+            "lowCount": 11,
+            "mediumCount": 2
+        },
+        "updateTimestamp": "2023-03-23T16:22:54Z"
+    }
+}
+

@@ -1,0 +1,179 @@
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.celery.annotations .Values.celery.beat.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
+  labels:
+    defectdojo.org/component: celery
+    defectdojo.org/subcomponent: beat
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  name: {{ $fullName }}-celery-beat
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.celery.beat.replicas }}
+  {{- with .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ . }}
+  {{- end }}
+  selector:
+    matchLabels:
+      defectdojo.org/component: celery
+      defectdojo.org/subcomponent: beat
+      app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        defectdojo.org/component: celery
+        defectdojo.org/subcomponent: beat
+        app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- range $key, $value := mergeOverwrite dict .Values.extraLabels .Values.podLabels }}
+        {{ $key }}: {{ quote $value }}
+        {{- end }}
+      annotations:
+      {{- range $key, $value := mergeOverwrite dict .Values.extraAnnotations .Values.celery.annotations .Values.celery.beat.podAnnotations }}
+        {{ $key }}: {{ quote $value }}
+      {{- end }}
+      {{- if eq (.Values.trackConfig | default "disabled") "enabled" }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/esecret: {{ include (print $.Template.BasePath "/extra-secret.yaml") . | sha256sum }}
+      {{- end }}
+    spec:
+      {{- if .Values.securityContext.enabled }} 
+      securityContext:
+        {{- include "helpers.securityContext" (list
+          .Values
+          "securityContext.podSecurityContext"
+          "celery.beat.podSecurityContext"
+        ) | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.celery.beat.automountServiceAccountToken }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ . }}
+      {{- end }}
+      volumes:
+      - name: run
+        emptyDir: {}
+      {{- if .Values.localsettingspy }}
+      - name: localsettingspy
+        configMap:
+          name: {{ $fullName }}-localsettingspy
+      {{- end }}
+      {{- if .Values.django.uwsgi.certificates.enabled }}
+      - name: cert-mount
+        configMap:
+          name: {{ .Values.django.uwsgi.certificates.configName }}
+      {{- end }}
+      {{- with .Values.celery.beat.extraVolumes }}
+        {{- . | toYaml | nindent 6 }}
+      {{- end }}
+      {{- if coalesce .Values.dbMigrationChecker.enabled .Values.cloudsql.enabled .Values.celery.beat.extraInitContainers }}
+      initContainers:
+      {{- range .Values.celery.beat.extraInitContainers }}
+      - {{- . | toYaml | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.cloudsql.enabled }}
+      {{- include "cloudsqlProxy" . | nindent 6 }}
+      {{- end }}
+      {{- if .Values.dbMigrationChecker.enabled }}
+      {{$data := dict "fullName" $fullName }}
+      {{- $newContext := merge . (dict "fullName" $fullName) }}
+      {{- include "dbMigrationChecker" $newContext | nindent 6 }}
+      {{- end }}
+      containers:
+      - command:
+        - /entrypoint-celery-beat.sh
+        name: celery
+        image: "{{ template "celery.beat.image" . }}"
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with .Values.celery.beat.livenessProbe }}
+        livenessProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.celery.beat.readinessProbe }}
+        readinessProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.celery.beat.startupProbe }}
+        startupProbe: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          {{- include "helpers.securityContext" (list
+            .Values
+            "securityContext.containerSecurityContext"
+            "celery.beat.containerSecurityContext"
+          ) | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: run
+          mountPath: /run/defectdojo
+        {{- if .Values.localsettingspy }}
+        - name: localsettingspy
+          readOnly: true
+          mountPath: /app/dojo/settings/local_settings.py
+          subPath: file
+        {{- end }}
+        {{- if .Values.django.uwsgi.certificates.enabled }}
+        - name: cert-mount
+          mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
+        {{- end }}
+        {{- with .Values.celery.beat.extraVolumeMounts }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}-extrasecrets
+            optional: true
+        env:
+        - name: DD_CELERY_BROKER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.valkey.auth.existingSecret | default "defectdojo-valkey-specific" }}
+              key: {{ .Values.valkey.auth.existingSecretPasswordKey | default "valkey-password" }}
+        - name: DD_DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
+              key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
+        - name: DD_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: DD_SECRET_KEY
+              optional: true
+        {{- with .Values.extraEnv }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
+        {{- with .Values.celery.beat.extraEnv }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.celery.beat.resources | nindent 10 }}
+      {{- with .Values.celery.beat.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.celery.beat.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.celery.beat.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

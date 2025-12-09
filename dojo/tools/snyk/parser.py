@@ -1,0 +1,282 @@
+import io
+import json
+
+from cvss.cvss3 import CVSS3
+
+from dojo.models import Finding
+from dojo.tools.snyk_code.parser import SnykCodeParser
+
+
+class SnykParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Snyk Parser.
+
+        Fields:
+        - title: Made from vulnerability and vulnerability title.
+        - severity: Set to cvssScore from Snyk Scanner and translated into DefectDojo format.
+        - severity_justification: Made from combining data about the cvssScore.
+        - description: Made from details on vulnerability.
+        - mitigation: Made from combining data about the cvssScore.
+        - component_name: Set to vulnerability packageName from Snyk Parser.
+        - component_version: Set to vulnerability version from Snyk Parser.
+        - false_p: Set to false.
+        - duplicate: Set to false.
+        - out_of_scope: Set to false.
+        - impact: Set to value of severity.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
+        - file_path: Made by Snyk parser while removing versions.
+        - vuln_id_from_tool: Set to vulnerability id from Snyk Scanner.
+        - cvssv3: Set to cvssv3 from Scanner if present.
+        - epss_score: Set to epss_score from Scanner if "epssDetails" are present.
+        - epss_percentile: Set to epss_percentile from Scanner if "epssDetails" are present.
+        - cwe: Set to cwe from scanner if present.
+        """
+        return [
+            "title",
+            "severity",
+            "severity_justification",
+            "description",
+            "mitigation",
+            "component_name"
+            "component_version",
+            "false_p",
+            "duplicate",
+            "out_of_scope",
+            "impact",
+            "static_finding",
+            "dynamic_finding",
+            "file_path",
+            "vuln_id_from_tool",
+            "cvssv3",
+            "epss_score",
+            "epss_percentile",
+            "cwe",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Snyk Parser.
+
+        Fields:
+        - vuln_id_from_tool: Set to vulnerability id from Snyk Scanner.
+        - file_path: Made by Snyk parser while removing versions.
+        - component_name: Set to vulnerability packageName from Snyk Parser.
+        - component_version: Set to vulnerability version from Snyk Parser.
+        """
+        return [
+            "vuln_id_from_tool",
+            "file_path",
+            "component_name",
+            "component_version",
+        ]
+
+    def get_scan_types(self):
+        return ["Snyk Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Snyk output file (snyk test --json > snyk.json) can be imported in JSON format. SARIF format is automatically delegated to the Snyk Code parser."
+
+    def get_findings(self, json_output, test):
+        reportTree = self.parse_json(json_output)
+
+        if isinstance(reportTree, list):
+            temp = []
+            for moduleTree in reportTree:
+                temp += self.process_tree(moduleTree, test)
+            return temp
+        return self.process_tree(reportTree, test)
+
+    def process_tree(self, tree, test):
+        return list(self.get_items(tree, test)) if tree else []
+
+    def parse_json(self, json_output):
+        try:
+            data = json_output.read()
+            try:
+                tree = json.loads(str(data, "utf-8"))
+            except Exception:
+                tree = json.loads(data)
+        except Exception:
+            msg = "Invalid format"
+            raise ValueError(msg)
+
+        return tree
+
+    def get_items(self, tree, test):
+        items = []
+        if "vulnerabilities" in tree:
+            target_file = tree.get("displayTargetFile", None)
+            upgrades = tree.get("remediation", {}).get("upgrade", None)
+            vulnerabilityTree = tree["vulnerabilities"]
+            for node in vulnerabilityTree:
+                item = self.get_item(
+                    node, test, target_file=target_file, upgrades=upgrades,
+                )
+                items.append(item)
+            return items
+        if "runs" in tree and tree["runs"][0].get("results"):
+            # Delegate SARIF handling to Snyk Code parser
+            snyk_code_parser = SnykCodeParser()
+            json_output = io.StringIO(json.dumps(tree))
+            findings = snyk_code_parser.get_findings(json_output, test)
+            items.extend(findings)
+            return findings
+        return []
+
+    def get_item(self, vulnerability, test, target_file=None, upgrades=None):
+        # vulnerable and unaffected versions can be in string format for a single vulnerable version,
+        # or an array for multiple versions depending on the language.
+        if isinstance(vulnerability["semver"]["vulnerable"], list):
+            vulnerable_versions = ", ".join(
+                vulnerability["semver"]["vulnerable"],
+            )
+        else:
+            vulnerable_versions = vulnerability["semver"]["vulnerable"]
+
+        # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss
+        if "cvssScore" in vulnerability:
+            if vulnerability["cvssScore"] is None:
+                severity = vulnerability["severity"].title()
+            # If we're dealing with a license finding, there will be no
+            # cvssScore
+            elif vulnerability["cvssScore"] <= 3.9:
+                severity = "Low"
+            elif (
+                vulnerability["cvssScore"] >= 4.0
+                and vulnerability["cvssScore"] <= 6.9
+            ):
+                severity = "Medium"
+            elif (
+                vulnerability["cvssScore"] >= 7.0
+                and vulnerability["cvssScore"] <= 8.9
+            ):
+                severity = "High"
+            else:
+                severity = "Critical"
+        else:
+            # Re-assign 'severity' directly
+            severity = vulnerability["severity"].title()
+
+        # Construct "file_path" removing versions
+        vulnPath = ""
+        for index, item in enumerate(vulnerability["from"]):
+            if index == 0:
+                vulnPath += "@".join(item.split("@")[0:-1])
+            else:
+                vulnPath += " > " + "@".join(item.split("@")[0:-1])
+
+        # create the finding object
+        finding = Finding(
+            title=vulnerability["from"][0] + ": " + vulnerability["title"],
+            test=test,
+            severity=severity,
+            severity_justification="Issue severity of: **"
+            + severity
+            + "** from a base "
+            + "CVSS score of: **"
+            + str(vulnerability.get("cvssScore"))
+            + "**",
+            description="## Component Details\n - **Vulnerable Package**: "
+            + vulnerability["packageName"]
+            + "\n- **Current Version**: "
+            + str(vulnerability["version"])
+            + "\n- **Vulnerable Version(s)**: "
+            + vulnerable_versions
+            + "\n- **Vulnerable Path**: "
+            + " > ".join(vulnerability["from"])
+            + "\n"
+            + vulnerability["description"],
+            mitigation="A fix (if available) will be provided in the description.",
+            component_name=vulnerability["packageName"],
+            component_version=vulnerability["version"],
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            impact=severity,
+            static_finding=True,
+            dynamic_finding=False,
+            file_path=vulnPath,
+            vuln_id_from_tool=vulnerability["id"],
+        )
+        finding.unsaved_tags = []
+
+        # CVSSv3 vector
+        if vulnerability.get("CVSSv3"):
+            finding.cvssv3 = CVSS3(vulnerability["CVSSv3"]).clean_vector()
+
+        if vulnerability.get("epssDetails") is not None:
+            finding.epss_score = vulnerability["epssDetails"]["probability"]
+            finding.epss_percentile = vulnerability["epssDetails"]["percentile"]
+
+        # manage CVE and CWE with idnitifiers
+        cwe_references = ""
+        if "identifiers" in vulnerability:
+            if "CVE" in vulnerability["identifiers"]:
+                vulnerability_ids = vulnerability["identifiers"]["CVE"]
+                if vulnerability_ids:
+                    finding.unsaved_vulnerability_ids = vulnerability_ids
+
+            if "CWE" in vulnerability["identifiers"]:
+                cwes = vulnerability["identifiers"]["CWE"]
+                if cwes:
+                    # Per the current json format, if several CWEs, take the
+                    # first one.
+                    finding.cwe = int(cwes[0].split("-")[1])
+                    if len(vulnerability["identifiers"]["CWE"]) > 1:
+                        cwe_references = ", ".join(cwes)
+                else:
+                    finding.cwe = 1035
+
+        references = ""
+        if "id" in vulnerability:
+            references = "**SNYK ID**: https://app.snyk.io/vuln/{}\n\n".format(
+                vulnerability["id"],
+            )
+
+        if cwe_references:
+            references += f"Several CWEs were reported: \n\n{cwe_references}\n"
+
+        # Append vuln references to references section
+        for item in vulnerability.get("references", []):
+            references += "**" + item["title"] + "**: " + item["url"] + "\n"
+
+        finding.references = references
+
+        finding.description = finding.description.strip()
+
+        # Find remediation string limit indexes
+        remediation_index = finding.description.find("## Remediation")
+        references_index = finding.description.find("## References")
+
+        # Add the remediation substring to mitigation section
+        if (remediation_index != -1) and (references_index != -1):
+            finding.mitigation = finding.description[
+                remediation_index:references_index
+            ]
+
+        # Add Target file if supplied
+        if target_file:
+            finding.unsaved_tags.append(f"target_file:{target_file}")
+            finding.mitigation += f"\nUpgrade Location: {target_file}"
+
+        # Add the upgrade libs list to the mitigation section
+        if upgrades:
+            for current_pack_version, meta_dict in upgrades.items():
+                upgraded_pack = meta_dict["upgradeTo"]
+                tertiary_upgrade_list = meta_dict["upgrades"]
+                if any(
+                    lib.split("@")[0] in finding.mitigation
+                    for lib in tertiary_upgrade_list
+                ):
+                    finding.unsaved_tags.append(
+                        f"upgrade_to:{upgraded_pack}",
+                    )
+                    finding.mitigation += f"\nUpgrade from {current_pack_version} to {upgraded_pack} to fix this issue, as well as updating the following:\n - "
+                    finding.mitigation += "\n - ".join(tertiary_upgrade_list)
+        return finding

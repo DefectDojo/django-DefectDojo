@@ -1,0 +1,195 @@
+{
+    "findings": [
+        {
+            "SchemaVersion": "2018-10-08",
+            "Id": "arn:aws:securityhub:us-east-1:012345678912:subscription/aws-foundational-security-best-practices/v/1.0.0/IAM.5/finding/de861909-2d26-4e45-bd86-19d2ab6ceef1",
+            "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/securityhub",
+            "GeneratorId": "aws-foundational-security-best-practices/v/1.0.0/IAM.5",
+            "AwsAccountId": "012345678912",
+            "Types": [
+                "Software and Configuration Checks/Industry and Regulatory Standards/AWS-Foundational-Security-Best-Practices"
+            ],
+            "FirstObservedAt": "2020-06-08T14:33:07.560Z",
+            "LastObservedAt": "2020-06-14T21:02:53.940Z",
+            "CreatedAt": "2020-06-08T14:33:07.560Z",
+            "UpdatedAt": "2020-06-14T21:02:53.454Z",
+            "Severity": {
+                "Product": 0,
+                "Label": "INFORMATIONAL",
+                "Normalized": 0,
+                "Original": "INFORMATIONAL"
+            },
+            "Title": "IAM.5 MFA should be enabled for all IAM users that have console password",
+            "Description": "This AWS control checks whether AWS Multi-Factor Authentication (MFA) is enabled for all AWS Identity and Access Management (IAM) users that use a console password.",
+            "Remediation": {
+                "Recommendation": {
+                    "Text": "For directions on how to fix this issue, please consult the AWS Security Hub Foundational Security Best Practices documentation.",
+                    "Url": "https://docs.aws.amazon.com/console/securityhub/IAM.5/remediation"
+                }
+            },
+            "ProductFields": {
+                "StandardsArn": "arn:aws:securityhub:::standards/aws-foundational-security-best-practices/v/1.0.0",
+                "StandardsSubscriptionArn": "arn:aws:securityhub:us-east-1:012345678912:subscription/aws-foundational-security-best-practices/v/1.0.0",
+                "ControlId": "IAM.5",
+                "RecommendationUrl": "https://docs.aws.amazon.com/console/securityhub/IAM.5/remediation",
+                "RelatedAWSResources:0/name": "securityhub-mfa-enabled-for-iam-console-access-9ae73a2f",
+                "RelatedAWSResources:0/type": "AWS::Config::ConfigRule",
+                "StandardsControlArn": "arn:aws:securityhub:us-east-1:012345678912:control/aws-foundational-security-best-practices/v/1.0.0/IAM.5",
+                "aws/securityhub/SeverityLabel": "INFORMATIONAL",
+                "aws/securityhub/ProductName": "Security Hub",
+                "aws/securityhub/CompanyName": "AWS",
+                "aws/securityhub/annotation": "AWS Config evaluated your resources against the rule. The rule did not apply to the AWS resources in its scope, the specified resources were deleted, or the evaluation results were deleted.",
+                "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/securityhub/arn:aws:securityhub:us-east-1:012345678912:subscription/aws-foundational-security-best-practices/v/1.0.0/IAM.5/finding/de861909-2d26-4e45-bd86-19d2ab6ceef1"
+            },
+            "Resources": [
+                {
+                    "Type": "AwsAccount",
+                    "Id": "AWS::::Account:012345678912",
+                    "Partition": "aws",
+                    "Region": "us-east-1"
+                }
+            ],
+            "Compliance": {
+                "Status": "PASSED",
+                "StatusReasons": [
+                    {
+                        "ReasonCode": "CONFIG_EVALUATIONS_EMPTY",
+                        "Description": "AWS Config evaluated your resources against the rule. The rule did not apply to the AWS resources in its scope, the specified resources were deleted, or the evaluation results were deleted."
+                    }
+                ]
+            },
+            "WorkflowState": "NEW",
+            "Workflow": {
+                "Status": "NEW"
+            },
+            "RecordState": "ACTIVE"
+        },
+        {
+            "SchemaVersion": "2018-10-08",
+            "Id": "arn:aws:securityhub:us-east-1:012345678912:subscription/aws-foundational-security-best-practices/v/1.0.0/SSM.2/finding/c3c9b6b4-4f33-4d9c-b81a-646e6c187a99",
+            "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/securityhub",
+            "GeneratorId": "aws-foundational-security-best-practices/v/1.0.0/SSM.2",
+            "AwsAccountId": "012345678912",
+            "Types": [
+                "Software and Configuration Checks/Industry and Regulatory Standards/AWS-Foundational-Security-Best-Practices"
+            ],
+            "FirstObservedAt": "2020-06-08T14:32:42.981Z",
+            "LastObservedAt": "2020-06-14T21:02:45.329Z",
+            "CreatedAt": "2020-06-08T14:32:42.981Z",
+            "UpdatedAt": "2020-06-14T21:02:44.496Z",
+            "Severity": {
+                "Product": 0,
+                "Label": "INFORMATIONAL",
+                "Normalized": 0,
+                "Original": "INFORMATIONAL"
+            },
+            "Title": "SSM.2 EC2 instances managed by Systems Manager should have a patch compliance status of COMPLIANT after a patch installation",
+            "Description": "This AWS control checks whether the compliance status of the Amazon EC2 Systems Manager patch compliance is COMPLIANT or NON_COMPLIANT after the patch installation on the instance. It only checks instances that are managed by AWS Systems Manager Patch Manager.",
+            "Remediation": {
+                "Recommendation": {
+                    "Text": "For directions on how to fix this issue, please consult the AWS Security Hub Foundational Security Best Practices documentation.",
+                    "Url": "https://docs.aws.amazon.com/console/securityhub/SSM.2/remediation"
+                }
+            },
+            "ProductFields": {
+                "StandardsArn": "arn:aws:securityhub:::standards/aws-foundational-security-best-practices/v/1.0.0",
+                "StandardsSubscriptionArn": "arn:aws:securityhub:us-east-1:012345678912:subscription/aws-foundational-security-best-practices/v/1.0.0",
+                "ControlId": "SSM.2",
+                "RecommendationUrl": "https://docs.aws.amazon.com/console/securityhub/SSM.2/remediation",
+                "RelatedAWSResources:0/name": "securityhub-ec2-managedinstance-patch-compliance-bea86e27",
+                "RelatedAWSResources:0/type": "AWS::Config::ConfigRule",
+                "StandardsControlArn": "arn:aws:securityhub:us-east-1:012345678912:control/aws-foundational-security-best-practices/v/1.0.0/SSM.2",
+                "aws/securityhub/SeverityLabel": "INFORMATIONAL",
+                "aws/securityhub/ProductName": "Security Hub",
+                "aws/securityhub/CompanyName": "AWS",
+                "aws/securityhub/annotation": "AWS Config evaluated your resources against the rule. The rule did not apply to the AWS resources in its scope, the specified resources were deleted, or the evaluation results were deleted.",
+                "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/securityhub/arn:aws:securityhub:us-east-1:012345678912:subscription/aws-foundational-security-best-practices/v/1.0.0/SSM.2/finding/c3c9b6b4-4f33-4d9c-b81a-646e6c187a99"
+            },
+            "Resources": [
+                {
+                    "Type": "AwsAccount",
+                    "Id": "AWS::::Account:012345678912",
+                    "Partition": "aws",
+                    "Region": "us-east-1"
+                }
+            ],
+            "Compliance": {
+                "Status": "PASSED",
+                "StatusReasons": [
+                    {
+                        "ReasonCode": "CONFIG_EVALUATIONS_EMPTY",
+                        "Description": "AWS Config evaluated your resources against the rule. The rule did not apply to the AWS resources in its scope, the specified resources were deleted, or the evaluation results were deleted."
+                    }
+                ]
+            },
+            "WorkflowState": "NEW",
+            "Workflow": {
+                "Status": "NEW"
+            },
+            "RecordState": "ACTIVE"
+        },
+        {
+            "SchemaVersion": "2018-10-08",
+            "Id": "arn:aws:securityhub:us-east-1:012345678912:subscription/aws-foundational-security-best-practices/v/1.0.0/ELBv2.1/finding/27aa50f4-d793-4e54-8649-4522e876230f",
+            "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/securityhub",
+            "GeneratorId": "aws-foundational-security-best-practices/v/1.0.0/ELBv2.1",
+            "AwsAccountId": "012345678912",
+            "Types": [
+                "Software and Configuration Checks/Industry and Regulatory Standards/AWS-Foundational-Security-Best-Practices"
+            ],
+            "FirstObservedAt": "2020-06-08T14:33:35.245Z",
+            "CreatedAt": "2020-06-08T14:33:35.245Z",
+            "UpdatedAt": "2020-06-14T21:02:32.493Z",
+            "Severity": {
+                "Product": 0,
+                "Label": "INFORMATIONAL",
+                "Normalized": 0,
+                "Original": "INFORMATIONAL"
+            },
+            "Title": "ELBv2.1 Application Load Balancer should be configured to redirect all HTTP requests to HTTPS",
+            "Description": "This AWS control checks whether HTTP to HTTPS redirection is configured on all HTTP listeners of Application Load Balancers. The control will fail if one or more HTTP listeners of Application Load Balancers do not have HTTP to HTTPS redirection configured.",
+            "Remediation": {
+                "Recommendation": {
+                    "Text": "For directions on how to fix this issue, please consult the AWS Security Hub Foundational Security Best Practices documentation.",
+                    "Url": "https://docs.aws.amazon.com/console/securityhub/ELBv2.1/remediation"
+                }
+            },
+            "ProductFields": {
+                "StandardsArn": "arn:aws:securityhub:::standards/aws-foundational-security-best-practices/v/1.0.0",
+                "StandardsSubscriptionArn": "arn:aws:securityhub:us-east-1:012345678912:subscription/aws-foundational-security-best-practices/v/1.0.0",
+                "ControlId": "ELBv2.1",
+                "RecommendationUrl": "https://docs.aws.amazon.com/console/securityhub/ELBv2.1/remediation",
+                "RelatedAWSResources:0/name": "securityhub-alb-http-to-https-redirection-check-c641319b",
+                "RelatedAWSResources:0/type": "AWS::Config::ConfigRule",
+                "StandardsControlArn": "arn:aws:securityhub:us-east-1:012345678912:control/aws-foundational-security-best-practices/v/1.0.0/ELBv2.1",
+                "aws/securityhub/SeverityLabel": "INFORMATIONAL",
+                "aws/securityhub/ProductName": "Security Hub",
+                "aws/securityhub/CompanyName": "AWS",
+                "aws/securityhub/annotation": "AWS Config evaluated your resources against the rule. The rule did not apply to the AWS resources in its scope, the specified resources were deleted, or the evaluation results were deleted.",
+                "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/securityhub/arn:aws:securityhub:us-east-1:012345678912:subscription/aws-foundational-security-best-practices/v/1.0.0/ELBv2.1/finding/27aa50f4-d793-4e54-8649-4522e876230f"
+            },
+            "Resources": [
+                {
+                    "Type": "AwsAccount",
+                    "Id": "AWS::::Account:012345678912",
+                    "Partition": "aws",
+                    "Region": "us-east-1"
+                }
+            ],
+            "Compliance": {
+                "Status": "PASSED",
+                "StatusReasons": [
+                    {
+                        "ReasonCode": "CONFIG_EVALUATIONS_EMPTY",
+                        "Description": "AWS Config evaluated your resources against the rule. The rule did not apply to the AWS resources in its scope, the specified resources were deleted, or the evaluation results were deleted."
+                    }
+                ]
+            },
+            "WorkflowState": "NEW",
+            "Workflow": {
+                "Status": "NEW"
+            },
+            "RecordState": "ACTIVE"
+        }
+    ]
+}

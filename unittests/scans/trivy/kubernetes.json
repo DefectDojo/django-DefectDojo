@@ -1,0 +1,1742 @@
+{
+    "ClusterName": "arn:aws:eks:us-east-1:576036489467:cluster/monitoring-test-cluster",
+    "Vulnerabilities": [
+      {
+        "Namespace": "default",
+        "Kind": "Deployment",
+        "Name": "redis-follower",
+        "Results": [
+          {
+            "Target": "gcr.io/google_samples/gb-redis-follower:v2 (debian 10.4)",
+            "Class": "os-pkgs",
+            "Type": "debian",
+            "Vulnerabilities": [
+              {
+                "VulnerabilityID": "CVE-2020-27350",
+                "VendorIDs": [
+                  "DSA-4808-1"
+                ],
+                "PkgName": "apt",
+                "InstalledVersion": "1.8.2.1",
+                "FixedVersion": "1.8.2.2",
+                "Layer": {
+                  "Digest": "sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df",
+                  "DiffID": "sha256:13cb14c2acd34e45446a50af25cb05095a17624678dbafbcc9e26086547c1d74"
+                },
+                "SeveritySource": "nvd",
+                "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2020-27350",
+                "DataSource": {
+                  "ID": "debian",
+                  "Name": "Debian Security Tracker",
+                  "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+                },
+                "Title": "apt: integer overflows and underflows while parsing .deb packages",
+                "Description": "APT had several integer overflows and underflows while parsing .deb packages, aka GHSL-2020-168 GHSL-2020-169, in files apt-pkg/contrib/extracttar.cc, apt-pkg/deb/debfile.cc, and apt-pkg/contrib/arfile.cc. This issue affects: apt 1.2.32ubuntu0 versions prior to 1.2.32ubuntu0.2; 1.6.12ubuntu0 versions prior to 1.6.12ubuntu0.2; 2.0.2ubuntu0 versions prior to 2.0.2ubuntu0.2; 2.1.10ubuntu0 versions prior to 2.1.10ubuntu0.1;",
+                "Severity": "MEDIUM",
+                "CweIDs": [
+                  "CWE-190"
+                ],
+                "CVSS": {
+                  "nvd": {
+                    "V2Vector": "AV:L/AC:L/Au:N/C:P/I:P/A:P",
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:C/C:L/I:L/A:L",
+                    "V2Score": 4.6,
+                    "V3Score": 5.7
+                  },
+                  "redhat": {
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:C/C:L/I:L/A:L",
+                    "V3Score": 5.7
+                  }
+                },
+                "References": [
+                  "https://access.redhat.com/security/cve/CVE-2020-27350",
+                  "https://bugs.launchpad.net/bugs/1899193",
+                  "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-27350",
+                  "https://security.netapp.com/advisory/ntap-20210108-0005/",
+                  "https://ubuntu.com/security/notices/USN-4667-1",
+                  "https://ubuntu.com/security/notices/USN-4667-2",
+                  "https://usn.ubuntu.com/usn/usn-4667-1",
+                  "https://www.debian.org/security/2020/dsa-4808"
+                ],
+                "PublishedDate": "2020-12-10T04:15:00Z",
+                "LastModifiedDate": "2021-01-08T12:15:00Z"
+              },
+              {
+                "VulnerabilityID": "CVE-2011-3374",
+                "PkgName": "apt",
+                "InstalledVersion": "1.8.2.1",
+                "Layer": {
+                  "Digest": "sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df",
+                  "DiffID": "sha256:13cb14c2acd34e45446a50af25cb05095a17624678dbafbcc9e26086547c1d74"
+                },
+                "SeveritySource": "debian",
+                "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2011-3374",
+                "DataSource": {
+                  "ID": "debian",
+                  "Name": "Debian Security Tracker",
+                  "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+                },
+                "Title": "It was found that apt-key in apt, all versions, do not correctly valid ...",
+                "Description": "It was found that apt-key in apt, all versions, do not correctly validate gpg keys with the master keyring, leading to a potential man-in-the-middle attack.",
+                "Severity": "LOW",
+                "CweIDs": [
+                  "CWE-347"
+                ],
+                "CVSS": {
+                  "nvd": {
+                    "V2Vector": "AV:N/AC:M/Au:N/C:N/I:P/A:N",
+                    "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+                    "V2Score": 4.3,
+                    "V3Score": 3.7
+                  }
+                },
+                "References": [
+                  "https://access.redhat.com/security/cve/cve-2011-3374",
+                  "https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=642480",
+                  "https://people.canonical.com/~ubuntu-security/cve/2011/CVE-2011-3374.html",
+                  "https://seclists.org/fulldisclosure/2011/Sep/221",
+                  "https://security-tracker.debian.org/tracker/CVE-2011-3374",
+                  "https://snyk.io/vuln/SNYK-LINUX-APT-116518",
+                  "https://ubuntu.com/security/CVE-2011-3374"
+                ],
+                "PublishedDate": "2019-11-26T00:15:00Z",
+                "LastModifiedDate": "2021-02-09T16:08:00Z"
+              },
+              {
+                "VulnerabilityID": "CVE-2019-18276",
+                "PkgName": "bash",
+                "InstalledVersion": "5.0-4",
+                "Layer": {
+                  "Digest": "sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df",
+                  "DiffID": "sha256:13cb14c2acd34e45446a50af25cb05095a17624678dbafbcc9e26086547c1d74"
+                },
+                "SeveritySource": "debian",
+                "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2019-18276",
+                "DataSource": {
+                  "ID": "debian",
+                  "Name": "Debian Security Tracker",
+                  "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+                },
+                "Title": "bash: when effective UID is not equal to its real UID the saved UID is not dropped",
+                "Description": "An issue was discovered in disable_priv_mode in shell.c in GNU Bash through 5.0 patch 11. By default, if Bash is run with its effective UID not equal to its real UID, it will drop privileges by setting its effective UID to its real UID. However, it does so incorrectly. On Linux and other systems that support \"saved UID\" functionality, the saved UID is not dropped. An attacker with command execution in the shell can use \"enable -f\" for runtime loading of a new builtin, which can be a shared object that calls setuid() and therefore regains privileges. However, binaries running with an effective UID of 0 are unaffected.",
+                "Severity": "LOW",
+                "CweIDs": [
+                  "CWE-273"
+                ],
+                "CVSS": {
+                  "nvd": {
+                    "V2Vector": "AV:L/AC:L/Au:N/C:C/I:C/A:C",
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                    "V2Score": 7.2,
+                    "V3Score": 7.8
+                  },
+                  "redhat": {
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                    "V3Score": 7.8
+                  }
+                },
+                "References": [
+                  "http://packetstormsecurity.com/files/155498/Bash-5.0-Patch-11-Privilege-Escalation.html",
+                  "https://access.redhat.com/security/cve/CVE-2019-18276",
+                  "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-18276",
+                  "https://github.com/bminor/bash/commit/951bdaad7a18cc0dc1036bba86b18b90874d39ff",
+                  "https://linux.oracle.com/cve/CVE-2019-18276.html",
+                  "https://linux.oracle.com/errata/ELSA-2021-1679.html",
+                  "https://lists.apache.org/thread.html/rf9fa47ab66495c78bb4120b0754dd9531ca2ff0430f6685ac9b07772@%3Cdev.mina.apache.org%3E",
+                  "https://nvd.nist.gov/vuln/detail/CVE-2019-18276",
+                  "https://security.gentoo.org/glsa/202105-34",
+                  "https://security.netapp.com/advisory/ntap-20200430-0003/",
+                  "https://ubuntu.com/security/notices/USN-5380-1",
+                  "https://www.oracle.com/security-alerts/cpuapr2022.html",
+                  "https://www.youtube.com/watch?v=-wGtxJ8opa8"
+                ],
+                "PublishedDate": "2019-11-28T01:15:00Z",
+                "LastModifiedDate": "2022-06-07T18:41:00Z"
+              },
+              {
+                "VulnerabilityID": "CVE-2021-37600",
+                "PkgName": "bsdutils",
+                "InstalledVersion": "2.33.1-0.1",
+                "Layer": {
+                  "Digest": "sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df",
+                  "DiffID": "sha256:13cb14c2acd34e45446a50af25cb05095a17624678dbafbcc9e26086547c1d74"
+                },
+                "SeveritySource": "debian",
+                "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2021-37600",
+                "DataSource": {
+                  "ID": "debian",
+                  "Name": "Debian Security Tracker",
+                  "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+                },
+                "Title": "util-linux: integer overflow can lead to buffer overflow in get_sem_elements() in sys-utils/ipcutils.c",
+                "Description": "** DISPUTED ** An integer overflow in util-linux through 2.37.1 can potentially cause a buffer overflow if an attacker were able to use system resources in a way that leads to a large number in the /proc/sysvipc/sem file. NOTE: this is unexploitable in GNU C Library environments, and possibly in all realistic environments.",
+                "Severity": "LOW",
+                "CweIDs": [
+                  "CWE-190"
+                ],
+                "CVSS": {
+                  "nvd": {
+                    "V2Vector": "AV:L/AC:H/Au:N/C:N/I:N/A:P",
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                    "V2Score": 1.2,
+                    "V3Score": 5.5
+                  },
+                  "redhat": {
+                    "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                    "V3Score": 4.7
+                  }
+                },
+                "References": [
+                  "https://access.redhat.com/security/cve/CVE-2021-37600",
+                  "https://github.com/karelzak/util-linux/commit/1c9143d0c1f979c3daf10e1c37b5b1e916c22a1c",
+                  "https://github.com/karelzak/util-linux/issues/1395",
+                  "https://nvd.nist.gov/vuln/detail/CVE-2021-37600",
+                  "https://security.netapp.com/advisory/ntap-20210902-0002/"
+                ],
+                "PublishedDate": "2021-07-30T14:15:00Z",
+                "LastModifiedDate": "2021-10-18T12:18:00Z"
+              },
+              {
+                "VulnerabilityID": "CVE-2022-0563",
+                "PkgName": "bsdutils",
+                "InstalledVersion": "2.33.1-0.1",
+                "Layer": {
+                  "Digest": "sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df",
+                  "DiffID": "sha256:13cb14c2acd34e45446a50af25cb05095a17624678dbafbcc9e26086547c1d74"
+                },
+                "SeveritySource": "debian",
+                "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-0563",
+                "DataSource": {
+                  "ID": "debian",
+                  "Name": "Debian Security Tracker",
+                  "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+                },
+                "Title": "util-linux: partial disclosure of arbitrary files in chfn and chsh when compiled with libreadline",
+                "Description": "A flaw was found in the util-linux chfn and chsh utilities when compiled with Readline support. The Readline library uses an \"INPUTRC\" environment variable to get a path to the library config file. When the library cannot parse the specified file, it prints an error message containing data from the file. This flaw allows an unprivileged user to read root-owned files, potentially leading to privilege escalation. This flaw affects util-linux versions prior to 2.37.4.",
+                "Severity": "LOW",
+                "CweIDs": [
+                  "CWE-209"
+                ],
+                "CVSS": {
+                  "nvd": {
+                    "V2Vector": "AV:L/AC:M/Au:N/C:P/I:N/A:N",
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+                    "V2Score": 1.9,
+                    "V3Score": 5.5
+                  },
+                  "redhat": {
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+                    "V3Score": 5.5
+                  }
+                },
+                "References": [
+                  "https://access.redhat.com/security/cve/CVE-2022-0563",
+                  "https://lore.kernel.org/util-linux/20220214110609.msiwlm457ngoic6w@ws.net.home/T/#u",
+                  "https://nvd.nist.gov/vuln/detail/CVE-2022-0563",
+                  "https://security.netapp.com/advisory/ntap-20220331-0002/"
+                ],
+                "PublishedDate": "2022-02-21T19:15:00Z",
+                "LastModifiedDate": "2022-06-03T14:15:00Z"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Namespace": "default",
+        "Kind": "Deployment",
+        "Name": "redis-leader",
+        "Results": [
+          {
+            "Target": "docker.io/redis:6.0.5 (debian 10.4)",
+            "Class": "os-pkgs",
+            "Type": "debian",
+            "Vulnerabilities": [
+              {
+                "VulnerabilityID": "CVE-2020-27350",
+                "VendorIDs": [
+                  "DSA-4808-1"
+                ],
+                "PkgName": "apt",
+                "InstalledVersion": "1.8.2.1",
+                "FixedVersion": "1.8.2.2",
+                "Layer": {
+                  "Digest": "sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df",
+                  "DiffID": "sha256:13cb14c2acd34e45446a50af25cb05095a17624678dbafbcc9e26086547c1d74"
+                },
+                "SeveritySource": "nvd",
+                "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2020-27350",
+                "DataSource": {
+                  "ID": "debian",
+                  "Name": "Debian Security Tracker",
+                  "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+                },
+                "Title": "apt: integer overflows and underflows while parsing .deb packages",
+                "Description": "APT had several integer overflows and underflows while parsing .deb packages, aka GHSL-2020-168 GHSL-2020-169, in files apt-pkg/contrib/extracttar.cc, apt-pkg/deb/debfile.cc, and apt-pkg/contrib/arfile.cc. This issue affects: apt 1.2.32ubuntu0 versions prior to 1.2.32ubuntu0.2; 1.6.12ubuntu0 versions prior to 1.6.12ubuntu0.2; 2.0.2ubuntu0 versions prior to 2.0.2ubuntu0.2; 2.1.10ubuntu0 versions prior to 2.1.10ubuntu0.1;",
+                "Severity": "MEDIUM",
+                "CweIDs": [
+                  "CWE-190"
+                ],
+                "CVSS": {
+                  "nvd": {
+                    "V2Vector": "AV:L/AC:L/Au:N/C:P/I:P/A:P",
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:C/C:L/I:L/A:L",
+                    "V2Score": 4.6,
+                    "V3Score": 5.7
+                  },
+                  "redhat": {
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:C/C:L/I:L/A:L",
+                    "V3Score": 5.7
+                  }
+                },
+                "References": [
+                  "https://access.redhat.com/security/cve/CVE-2020-27350",
+                  "https://bugs.launchpad.net/bugs/1899193",
+                  "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-27350",
+                  "https://security.netapp.com/advisory/ntap-20210108-0005/",
+                  "https://ubuntu.com/security/notices/USN-4667-1",
+                  "https://ubuntu.com/security/notices/USN-4667-2",
+                  "https://usn.ubuntu.com/usn/usn-4667-1",
+                  "https://www.debian.org/security/2020/dsa-4808"
+                ],
+                "PublishedDate": "2020-12-10T04:15:00Z",
+                "LastModifiedDate": "2021-01-08T12:15:00Z"
+              },
+              {
+                "VulnerabilityID": "CVE-2011-3374",
+                "PkgName": "apt",
+                "InstalledVersion": "1.8.2.1",
+                "Layer": {
+                  "Digest": "sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df",
+                  "DiffID": "sha256:13cb14c2acd34e45446a50af25cb05095a17624678dbafbcc9e26086547c1d74"
+                },
+                "SeveritySource": "debian",
+                "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2011-3374",
+                "DataSource": {
+                  "ID": "debian",
+                  "Name": "Debian Security Tracker",
+                  "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+                },
+                "Title": "It was found that apt-key in apt, all versions, do not correctly valid ...",
+                "Description": "It was found that apt-key in apt, all versions, do not correctly validate gpg keys with the master keyring, leading to a potential man-in-the-middle attack.",
+                "Severity": "LOW",
+                "CweIDs": [
+                  "CWE-347"
+                ],
+                "CVSS": {
+                  "nvd": {
+                    "V2Vector": "AV:N/AC:M/Au:N/C:N/I:P/A:N",
+                    "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+                    "V2Score": 4.3,
+                    "V3Score": 3.7
+                  }
+                },
+                "References": [
+                  "https://access.redhat.com/security/cve/cve-2011-3374",
+                  "https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=642480",
+                  "https://people.canonical.com/~ubuntu-security/cve/2011/CVE-2011-3374.html",
+                  "https://seclists.org/fulldisclosure/2011/Sep/221",
+                  "https://security-tracker.debian.org/tracker/CVE-2011-3374",
+                  "https://snyk.io/vuln/SNYK-LINUX-APT-116518",
+                  "https://ubuntu.com/security/CVE-2011-3374"
+                ],
+                "PublishedDate": "2019-11-26T00:15:00Z",
+                "LastModifiedDate": "2021-02-09T16:08:00Z"
+              },
+              {
+                "VulnerabilityID": "CVE-2019-18276",
+                "PkgName": "bash",
+                "InstalledVersion": "5.0-4",
+                "Layer": {
+                  "Digest": "sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df",
+                  "DiffID": "sha256:13cb14c2acd34e45446a50af25cb05095a17624678dbafbcc9e26086547c1d74"
+                },
+                "SeveritySource": "debian",
+                "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2019-18276",
+                "DataSource": {
+                  "ID": "debian",
+                  "Name": "Debian Security Tracker",
+                  "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+                },
+                "Title": "bash: when effective UID is not equal to its real UID the saved UID is not dropped",
+                "Description": "An issue was discovered in disable_priv_mode in shell.c in GNU Bash through 5.0 patch 11. By default, if Bash is run with its effective UID not equal to its real UID, it will drop privileges by setting its effective UID to its real UID. However, it does so incorrectly. On Linux and other systems that support \"saved UID\" functionality, the saved UID is not dropped. An attacker with command execution in the shell can use \"enable -f\" for runtime loading of a new builtin, which can be a shared object that calls setuid() and therefore regains privileges. However, binaries running with an effective UID of 0 are unaffected.",
+                "Severity": "LOW",
+                "CweIDs": [
+                  "CWE-273"
+                ],
+                "CVSS": {
+                  "nvd": {
+                    "V2Vector": "AV:L/AC:L/Au:N/C:C/I:C/A:C",
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                    "V2Score": 7.2,
+                    "V3Score": 7.8
+                  },
+                  "redhat": {
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                    "V3Score": 7.8
+                  }
+                },
+                "References": [
+                  "http://packetstormsecurity.com/files/155498/Bash-5.0-Patch-11-Privilege-Escalation.html",
+                  "https://access.redhat.com/security/cve/CVE-2019-18276",
+                  "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-18276",
+                  "https://github.com/bminor/bash/commit/951bdaad7a18cc0dc1036bba86b18b90874d39ff",
+                  "https://linux.oracle.com/cve/CVE-2019-18276.html",
+                  "https://linux.oracle.com/errata/ELSA-2021-1679.html",
+                  "https://lists.apache.org/thread.html/rf9fa47ab66495c78bb4120b0754dd9531ca2ff0430f6685ac9b07772@%3Cdev.mina.apache.org%3E",
+                  "https://nvd.nist.gov/vuln/detail/CVE-2019-18276",
+                  "https://security.gentoo.org/glsa/202105-34",
+                  "https://security.netapp.com/advisory/ntap-20200430-0003/",
+                  "https://ubuntu.com/security/notices/USN-5380-1",
+                  "https://www.oracle.com/security-alerts/cpuapr2022.html",
+                  "https://www.youtube.com/watch?v=-wGtxJ8opa8"
+                ],
+                "PublishedDate": "2019-11-28T01:15:00Z",
+                "LastModifiedDate": "2022-06-07T18:41:00Z"
+              },
+              {
+                "VulnerabilityID": "CVE-2021-37600",
+                "PkgName": "bsdutils",
+                "InstalledVersion": "2.33.1-0.1",
+                "Layer": {
+                  "Digest": "sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df",
+                  "DiffID": "sha256:13cb14c2acd34e45446a50af25cb05095a17624678dbafbcc9e26086547c1d74"
+                },
+                "SeveritySource": "debian",
+                "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2021-37600",
+                "DataSource": {
+                  "ID": "debian",
+                  "Name": "Debian Security Tracker",
+                  "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+                },
+                "Title": "util-linux: integer overflow can lead to buffer overflow in get_sem_elements() in sys-utils/ipcutils.c",
+                "Description": "** DISPUTED ** An integer overflow in util-linux through 2.37.1 can potentially cause a buffer overflow if an attacker were able to use system resources in a way that leads to a large number in the /proc/sysvipc/sem file. NOTE: this is unexploitable in GNU C Library environments, and possibly in all realistic environments.",
+                "Severity": "LOW",
+                "CweIDs": [
+                  "CWE-190"
+                ],
+                "CVSS": {
+                  "nvd": {
+                    "V2Vector": "AV:L/AC:H/Au:N/C:N/I:N/A:P",
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                    "V2Score": 1.2,
+                    "V3Score": 5.5
+                  },
+                  "redhat": {
+                    "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                    "V3Score": 4.7
+                  }
+                },
+                "References": [
+                  "https://access.redhat.com/security/cve/CVE-2021-37600",
+                  "https://github.com/karelzak/util-linux/commit/1c9143d0c1f979c3daf10e1c37b5b1e916c22a1c",
+                  "https://github.com/karelzak/util-linux/issues/1395",
+                  "https://nvd.nist.gov/vuln/detail/CVE-2021-37600",
+                  "https://security.netapp.com/advisory/ntap-20210902-0002/"
+                ],
+                "PublishedDate": "2021-07-30T14:15:00Z",
+                "LastModifiedDate": "2021-10-18T12:18:00Z"
+              },
+              {
+                "VulnerabilityID": "CVE-2022-0563",
+                "PkgName": "bsdutils",
+                "InstalledVersion": "2.33.1-0.1",
+                "Layer": {
+                  "Digest": "sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df",
+                  "DiffID": "sha256:13cb14c2acd34e45446a50af25cb05095a17624678dbafbcc9e26086547c1d74"
+                },
+                "SeveritySource": "debian",
+                "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2022-0563",
+                "DataSource": {
+                  "ID": "debian",
+                  "Name": "Debian Security Tracker",
+                  "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+                },
+                "Title": "util-linux: partial disclosure of arbitrary files in chfn and chsh when compiled with libreadline",
+                "Description": "A flaw was found in the util-linux chfn and chsh utilities when compiled with Readline support. The Readline library uses an \"INPUTRC\" environment variable to get a path to the library config file. When the library cannot parse the specified file, it prints an error message containing data from the file. This flaw allows an unprivileged user to read root-owned files, potentially leading to privilege escalation. This flaw affects util-linux versions prior to 2.37.4.",
+                "Severity": "LOW",
+                "CweIDs": [
+                  "CWE-209"
+                ],
+                "CVSS": {
+                  "nvd": {
+                    "V2Vector": "AV:L/AC:M/Au:N/C:P/I:N/A:N",
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+                    "V2Score": 1.9,
+                    "V3Score": 5.5
+                  },
+                  "redhat": {
+                    "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+                    "V3Score": 5.5
+                  }
+                },
+                "References": [
+                  "https://access.redhat.com/security/cve/CVE-2022-0563",
+                  "https://lore.kernel.org/util-linux/20220214110609.msiwlm457ngoic6w@ws.net.home/T/#u",
+                  "https://nvd.nist.gov/vuln/detail/CVE-2022-0563",
+                  "https://security.netapp.com/advisory/ntap-20220331-0002/"
+                ],
+                "PublishedDate": "2022-02-21T19:15:00Z",
+                "LastModifiedDate": "2022-06-03T14:15:00Z"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Misconfigurations": [
+      {
+        "Namespace": "default",
+        "Kind": "Deployment",
+        "Name": "redis-follower",
+        "Results": [
+          {
+            "Target": "Deployment/redis-follower",
+            "Class": "config",
+            "Type": "kubernetes",
+            "MisconfSummary": {
+              "Successes": 23,
+              "Failures": 8,
+              "Exceptions": 0
+            },
+            "Misconfigurations": [
+              {
+                "Type": "Kubernetes Security Check",
+                "ID": "KSV001",
+                "Title": "Process can elevate its own privileges",
+                "Description": "A program inside the container can elevate its own privileges and run as root, which might give the program control over the container and node.",
+                "Message": "Container 'follower' of Deployment 'redis-follower' should set 'securityContext.allowPrivilegeEscalation' to false",
+                "Namespace": "builtin.kubernetes.KSV001",
+                "Query": "data.builtin.kubernetes.KSV001.deny",
+                "Resolution": "Set 'set containers[].securityContext.allowPrivilegeEscalation' to 'false'.",
+                "Severity": "MEDIUM",
+                "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv001",
+                "References": [
+                  "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+                  "https://avd.aquasec.com/misconfig/ksv001"
+                ],
+                "Status": "FAIL",
+                "Layer": {},
+                "CauseMetadata": {
+                  "Provider": "Kubernetes",
+                  "Service": "general",
+                  "StartLine": 132,
+                  "EndLine": 143,
+                  "Code": {
+                    "Lines": [
+                      {
+                        "Number": 132,
+                        "Content": "                - image: gcr.io/google_samples/gb-redis-follower:v2",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": true,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 133,
+                        "Content": "                  imagePullPolicy: IfNotPresent",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 134,
+                        "Content": "                  name: follower",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 135,
+                        "Content": "                  ports:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 136,
+                        "Content": "                    - containerPort: 6379",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 137,
+                        "Content": "                      protocol: TCP",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 138,
+                        "Content": "                  resources:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 139,
+                        "Content": "                    requests:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 140,
+                        "Content": "                        cpu: 100m",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": true
+                      },
+                      {
+                        "Number": 141,
+                        "Content": "",
+                        "IsCause": false,
+                        "Annotation": "",
+                        "Truncated": true,
+                        "FirstCause": false,
+                        "LastCause": false
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "Type": "Kubernetes Security Check",
+                "ID": "KSV003",
+                "Title": "Default capabilities not dropped",
+                "Description": "The container should drop all default capabilities and add only those that are needed for its execution.",
+                "Message": "Container 'follower' of Deployment 'redis-follower' should add 'ALL' to 'securityContext.capabilities.drop'",
+                "Namespace": "builtin.kubernetes.KSV003",
+                "Query": "data.builtin.kubernetes.KSV003.deny",
+                "Resolution": "Add 'ALL' to containers[].securityContext.capabilities.drop.",
+                "Severity": "LOW",
+                "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv003",
+                "References": [
+                  "https://kubesec.io/basics/containers-securitycontext-capabilities-drop-index-all/",
+                  "https://avd.aquasec.com/misconfig/ksv003"
+                ],
+                "Status": "FAIL",
+                "Layer": {},
+                "CauseMetadata": {
+                  "Provider": "Kubernetes",
+                  "Service": "general",
+                  "StartLine": 132,
+                  "EndLine": 143,
+                  "Code": {
+                    "Lines": [
+                      {
+                        "Number": 132,
+                        "Content": "                - image: gcr.io/google_samples/gb-redis-follower:v2",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": true,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 133,
+                        "Content": "                  imagePullPolicy: IfNotPresent",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 134,
+                        "Content": "                  name: follower",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 135,
+                        "Content": "                  ports:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 136,
+                        "Content": "                    - containerPort: 6379",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 137,
+                        "Content": "                      protocol: TCP",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 138,
+                        "Content": "                  resources:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 139,
+                        "Content": "                    requests:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 140,
+                        "Content": "                        cpu: 100m",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": true
+                      },
+                      {
+                        "Number": 141,
+                        "Content": "",
+                        "IsCause": false,
+                        "Annotation": "",
+                        "Truncated": true,
+                        "FirstCause": false,
+                        "LastCause": false
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "Type": "Kubernetes Security Check",
+                "ID": "KSV011",
+                "Title": "CPU not limited",
+                "Description": "Enforcing CPU limits prevents DoS via resource exhaustion.",
+                "Message": "Container 'follower' of Deployment 'redis-follower' should set 'resources.limits.cpu'",
+                "Namespace": "builtin.kubernetes.KSV011",
+                "Query": "data.builtin.kubernetes.KSV011.deny",
+                "Resolution": "Set a limit value under 'containers[].resources.limits.cpu'.",
+                "Severity": "LOW",
+                "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv011",
+                "References": [
+                  "https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-resource-requests-and-limits",
+                  "https://avd.aquasec.com/misconfig/ksv011"
+                ],
+                "Status": "FAIL",
+                "Layer": {},
+                "CauseMetadata": {
+                  "Provider": "Kubernetes",
+                  "Service": "general",
+                  "StartLine": 132,
+                  "EndLine": 143,
+                  "Code": {
+                    "Lines": [
+                      {
+                        "Number": 132,
+                        "Content": "                - image: gcr.io/google_samples/gb-redis-follower:v2",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": true,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 133,
+                        "Content": "                  imagePullPolicy: IfNotPresent",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 134,
+                        "Content": "                  name: follower",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 135,
+                        "Content": "                  ports:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 136,
+                        "Content": "                    - containerPort: 6379",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 137,
+                        "Content": "                      protocol: TCP",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 138,
+                        "Content": "                  resources:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 139,
+                        "Content": "                    requests:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 140,
+                        "Content": "                        cpu: 100m",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": true
+                      },
+                      {
+                        "Number": 141,
+                        "Content": "",
+                        "IsCause": false,
+                        "Annotation": "",
+                        "Truncated": true,
+                        "FirstCause": false,
+                        "LastCause": false
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "Type": "Kubernetes Security Check",
+                "ID": "KSV012",
+                "Title": "Runs as root user",
+                "Description": "'runAsNonRoot' forces the running image to run as a non-root user to ensure least privileges.",
+                "Message": "Container 'follower' of Deployment 'redis-follower' should set 'securityContext.runAsNonRoot' to true",
+                "Namespace": "builtin.kubernetes.KSV012",
+                "Query": "data.builtin.kubernetes.KSV012.deny",
+                "Resolution": "Set 'containers[].securityContext.runAsNonRoot' to true.",
+                "Severity": "MEDIUM",
+                "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv012",
+                "References": [
+                  "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+                  "https://avd.aquasec.com/misconfig/ksv012"
+                ],
+                "Status": "FAIL",
+                "Layer": {},
+                "CauseMetadata": {
+                  "Provider": "Kubernetes",
+                  "Service": "general",
+                  "StartLine": 132,
+                  "EndLine": 143,
+                  "Code": {
+                    "Lines": [
+                      {
+                        "Number": 132,
+                        "Content": "                - image: gcr.io/google_samples/gb-redis-follower:v2",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": true,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 133,
+                        "Content": "                  imagePullPolicy: IfNotPresent",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 134,
+                        "Content": "                  name: follower",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 135,
+                        "Content": "                  ports:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 136,
+                        "Content": "                    - containerPort: 6379",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 137,
+                        "Content": "                      protocol: TCP",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 138,
+                        "Content": "                  resources:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 139,
+                        "Content": "                    requests:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 140,
+                        "Content": "                        cpu: 100m",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": true
+                      },
+                      {
+                        "Number": 141,
+                        "Content": "",
+                        "IsCause": false,
+                        "Annotation": "",
+                        "Truncated": true,
+                        "FirstCause": false,
+                        "LastCause": false
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "Type": "Kubernetes Security Check",
+                "ID": "KSV014",
+                "Title": "Root file system is not read-only",
+                "Description": "An immutable root file system prevents applications from writing to their local disk. This can limit intrusions, as attackers will not be able to tamper with the file system or write foreign executables to disk.",
+                "Message": "Container 'follower' of Deployment 'redis-follower' should set 'securityContext.readOnlyRootFilesystem' to true",
+                "Namespace": "builtin.kubernetes.KSV014",
+                "Query": "data.builtin.kubernetes.KSV014.deny",
+                "Resolution": "Change 'containers[].securityContext.readOnlyRootFilesystem' to 'true'.",
+                "Severity": "LOW",
+                "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv014",
+                "References": [
+                  "https://kubesec.io/basics/containers-securitycontext-readonlyrootfilesystem-true/",
+                  "https://avd.aquasec.com/misconfig/ksv014"
+                ],
+                "Status": "FAIL",
+                "Layer": {},
+                "CauseMetadata": {
+                  "Provider": "Kubernetes",
+                  "Service": "general",
+                  "StartLine": 132,
+                  "EndLine": 143,
+                  "Code": {
+                    "Lines": [
+                      {
+                        "Number": 132,
+                        "Content": "                - image: gcr.io/google_samples/gb-redis-follower:v2",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": true,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 133,
+                        "Content": "                  imagePullPolicy: IfNotPresent",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 134,
+                        "Content": "                  name: follower",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 135,
+                        "Content": "                  ports:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 136,
+                        "Content": "                    - containerPort: 6379",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 137,
+                        "Content": "                      protocol: TCP",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 138,
+                        "Content": "                  resources:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 139,
+                        "Content": "                    requests:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 140,
+                        "Content": "                        cpu: 100m",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": true
+                      },
+                      {
+                        "Number": 141,
+                        "Content": "",
+                        "IsCause": false,
+                        "Annotation": "",
+                        "Truncated": true,
+                        "FirstCause": false,
+                        "LastCause": false
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Namespace": "default",
+        "Kind": "Deployment",
+        "Name": "redis-leader",
+        "Results": [
+          {
+            "Target": "Deployment/redis-leader",
+            "Class": "config",
+            "Type": "kubernetes",
+            "MisconfSummary": {
+              "Successes": 23,
+              "Failures": 8,
+              "Exceptions": 0
+            },
+            "Misconfigurations": [
+              {
+                "Type": "Kubernetes Security Check",
+                "ID": "KSV001",
+                "Title": "Process can elevate its own privileges",
+                "Description": "A program inside the container can elevate its own privileges and run as root, which might give the program control over the container and node.",
+                "Message": "Container 'leader' of Deployment 'redis-leader' should set 'securityContext.allowPrivilegeEscalation' to false",
+                "Namespace": "builtin.kubernetes.KSV001",
+                "Query": "data.builtin.kubernetes.KSV001.deny",
+                "Resolution": "Set 'set containers[].securityContext.allowPrivilegeEscalation' to 'false'.",
+                "Severity": "MEDIUM",
+                "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv001",
+                "References": [
+                  "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+                  "https://avd.aquasec.com/misconfig/ksv001"
+                ],
+                "Status": "FAIL",
+                "Layer": {},
+                "CauseMetadata": {
+                  "Provider": "Kubernetes",
+                  "Service": "general",
+                  "StartLine": 132,
+                  "EndLine": 143,
+                  "Code": {
+                    "Lines": [
+                      {
+                        "Number": 132,
+                        "Content": "                - image: docker.io/redis:6.0.5",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": true,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 133,
+                        "Content": "                  imagePullPolicy: IfNotPresent",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 134,
+                        "Content": "                  name: leader",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 135,
+                        "Content": "                  ports:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 136,
+                        "Content": "                    - containerPort: 6379",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 137,
+                        "Content": "                      protocol: TCP",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 138,
+                        "Content": "                  resources:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 139,
+                        "Content": "                    requests:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 140,
+                        "Content": "                        cpu: 100m",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": true
+                      },
+                      {
+                        "Number": 141,
+                        "Content": "",
+                        "IsCause": false,
+                        "Annotation": "",
+                        "Truncated": true,
+                        "FirstCause": false,
+                        "LastCause": false
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "Type": "Kubernetes Security Check",
+                "ID": "KSV003",
+                "Title": "Default capabilities not dropped",
+                "Description": "The container should drop all default capabilities and add only those that are needed for its execution.",
+                "Message": "Container 'leader' of Deployment 'redis-leader' should add 'ALL' to 'securityContext.capabilities.drop'",
+                "Namespace": "builtin.kubernetes.KSV003",
+                "Query": "data.builtin.kubernetes.KSV003.deny",
+                "Resolution": "Add 'ALL' to containers[].securityContext.capabilities.drop.",
+                "Severity": "LOW",
+                "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv003",
+                "References": [
+                  "https://kubesec.io/basics/containers-securitycontext-capabilities-drop-index-all/",
+                  "https://avd.aquasec.com/misconfig/ksv003"
+                ],
+                "Status": "FAIL",
+                "Layer": {},
+                "CauseMetadata": {
+                  "Provider": "Kubernetes",
+                  "Service": "general",
+                  "StartLine": 132,
+                  "EndLine": 143,
+                  "Code": {
+                    "Lines": [
+                      {
+                        "Number": 132,
+                        "Content": "                - image: docker.io/redis:6.0.5",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": true,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 133,
+                        "Content": "                  imagePullPolicy: IfNotPresent",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 134,
+                        "Content": "                  name: leader",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 135,
+                        "Content": "                  ports:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 136,
+                        "Content": "                    - containerPort: 6379",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 137,
+                        "Content": "                      protocol: TCP",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 138,
+                        "Content": "                  resources:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 139,
+                        "Content": "                    requests:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 140,
+                        "Content": "                        cpu: 100m",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": true
+                      },
+                      {
+                        "Number": 141,
+                        "Content": "",
+                        "IsCause": false,
+                        "Annotation": "",
+                        "Truncated": true,
+                        "FirstCause": false,
+                        "LastCause": false
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "Type": "Kubernetes Security Check",
+                "ID": "KSV011",
+                "Title": "CPU not limited",
+                "Description": "Enforcing CPU limits prevents DoS via resource exhaustion.",
+                "Message": "Container 'leader' of Deployment 'redis-leader' should set 'resources.limits.cpu'",
+                "Namespace": "builtin.kubernetes.KSV011",
+                "Query": "data.builtin.kubernetes.KSV011.deny",
+                "Resolution": "Set a limit value under 'containers[].resources.limits.cpu'.",
+                "Severity": "LOW",
+                "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv011",
+                "References": [
+                  "https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-resource-requests-and-limits",
+                  "https://avd.aquasec.com/misconfig/ksv011"
+                ],
+                "Status": "FAIL",
+                "Layer": {},
+                "CauseMetadata": {
+                  "Provider": "Kubernetes",
+                  "Service": "general",
+                  "StartLine": 132,
+                  "EndLine": 143,
+                  "Code": {
+                    "Lines": [
+                      {
+                        "Number": 132,
+                        "Content": "                - image: docker.io/redis:6.0.5",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": true,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 133,
+                        "Content": "                  imagePullPolicy: IfNotPresent",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 134,
+                        "Content": "                  name: leader",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 135,
+                        "Content": "                  ports:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 136,
+                        "Content": "                    - containerPort: 6379",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 137,
+                        "Content": "                      protocol: TCP",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 138,
+                        "Content": "                  resources:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 139,
+                        "Content": "                    requests:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 140,
+                        "Content": "                        cpu: 100m",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": true
+                      },
+                      {
+                        "Number": 141,
+                        "Content": "",
+                        "IsCause": false,
+                        "Annotation": "",
+                        "Truncated": true,
+                        "FirstCause": false,
+                        "LastCause": false
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "Type": "Kubernetes Security Check",
+                "ID": "KSV012",
+                "Title": "Runs as root user",
+                "Description": "'runAsNonRoot' forces the running image to run as a non-root user to ensure least privileges.",
+                "Message": "Container 'leader' of Deployment 'redis-leader' should set 'securityContext.runAsNonRoot' to true",
+                "Namespace": "builtin.kubernetes.KSV012",
+                "Query": "data.builtin.kubernetes.KSV012.deny",
+                "Resolution": "Set 'containers[].securityContext.runAsNonRoot' to true.",
+                "Severity": "MEDIUM",
+                "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv012",
+                "References": [
+                  "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+                  "https://avd.aquasec.com/misconfig/ksv012"
+                ],
+                "Status": "FAIL",
+                "Layer": {},
+                "CauseMetadata": {
+                  "Provider": "Kubernetes",
+                  "Service": "general",
+                  "StartLine": 132,
+                  "EndLine": 143,
+                  "Code": {
+                    "Lines": [
+                      {
+                        "Number": 132,
+                        "Content": "                - image: docker.io/redis:6.0.5",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": true,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 133,
+                        "Content": "                  imagePullPolicy: IfNotPresent",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 134,
+                        "Content": "                  name: leader",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 135,
+                        "Content": "                  ports:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 136,
+                        "Content": "                    - containerPort: 6379",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 137,
+                        "Content": "                      protocol: TCP",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 138,
+                        "Content": "                  resources:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 139,
+                        "Content": "                    requests:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 140,
+                        "Content": "                        cpu: 100m",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": true
+                      },
+                      {
+                        "Number": 141,
+                        "Content": "",
+                        "IsCause": false,
+                        "Annotation": "",
+                        "Truncated": true,
+                        "FirstCause": false,
+                        "LastCause": false
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "Type": "Kubernetes Security Check",
+                "ID": "KSV014",
+                "Title": "Root file system is not read-only",
+                "Description": "An immutable root file system prevents applications from writing to their local disk. This can limit intrusions, as attackers will not be able to tamper with the file system or write foreign executables to disk.",
+                "Message": "Container 'leader' of Deployment 'redis-leader' should set 'securityContext.readOnlyRootFilesystem' to true",
+                "Namespace": "builtin.kubernetes.KSV014",
+                "Query": "data.builtin.kubernetes.KSV014.deny",
+                "Resolution": "Change 'containers[].securityContext.readOnlyRootFilesystem' to 'true'.",
+                "Severity": "LOW",
+                "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv014",
+                "References": [
+                  "https://kubesec.io/basics/containers-securitycontext-readonlyrootfilesystem-true/",
+                  "https://avd.aquasec.com/misconfig/ksv014"
+                ],
+                "Status": "FAIL",
+                "Layer": {},
+                "CauseMetadata": {
+                  "Provider": "Kubernetes",
+                  "Service": "general",
+                  "StartLine": 132,
+                  "EndLine": 143,
+                  "Code": {
+                    "Lines": [
+                      {
+                        "Number": 132,
+                        "Content": "                - image: docker.io/redis:6.0.5",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": true,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 133,
+                        "Content": "                  imagePullPolicy: IfNotPresent",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 134,
+                        "Content": "                  name: leader",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 135,
+                        "Content": "                  ports:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 136,
+                        "Content": "                    - containerPort: 6379",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 137,
+                        "Content": "                      protocol: TCP",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 138,
+                        "Content": "                  resources:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 139,
+                        "Content": "                    requests:",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": false
+                      },
+                      {
+                        "Number": 140,
+                        "Content": "                        cpu: 100m",
+                        "IsCause": true,
+                        "Annotation": "",
+                        "Truncated": false,
+                        "FirstCause": false,
+                        "LastCause": true
+                      },
+                      {
+                        "Number": 141,
+                        "Content": "",
+                        "IsCause": false,
+                        "Annotation": "",
+                        "Truncated": true,
+                        "FirstCause": false,
+                        "LastCause": false
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "Namespace": "default",
+        "Kind": "Service",
+        "Name": "redis-follower",
+        "Results": [
+          {
+            "Target": "Service/redis-follower",
+            "Class": "config",
+            "Type": "kubernetes",
+            "MisconfSummary": {
+              "Successes": 31,
+              "Failures": 0,
+              "Exceptions": 0
+            }
+          }
+        ]
+      },
+      {
+        "Namespace": "default",
+        "Kind": "Service",
+        "Name": "redis-leader",
+        "Results": [
+          {
+            "Target": "Service/redis-leader",
+            "Class": "config",
+            "Type": "kubernetes",
+            "MisconfSummary": {
+              "Successes": 31,
+              "Failures": 0,
+              "Exceptions": 0
+            }
+          }
+        ]
+      }
+    ]
+  }
+  

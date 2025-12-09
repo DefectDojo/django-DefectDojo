@@ -1,0 +1,475 @@
+{
+  "actions": [
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1064972,
+          "path": "@company.frontend/eslint-config-es6>eslint-plugin-import>resolve>path-parse",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1064972,
+          "path": "@company.frontend/eslint-config-es6>eslint-plugin-import>eslint-import-resolver-node>resolve>path-parse",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1064972,
+          "path": "@company.frontend/eslint-config-es6>eslint-plugin-import>read-pkg-up>read-pkg>normalize-package-data>resolve>path-parse",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "path-parse",
+      "target": "1.0.7",
+      "depth": 7
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1065159,
+          "path": "@company.frontend/eslint-config-es6>eslint>ajv",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1065159,
+          "path": "@company.frontend/eslint-config-es6>eslint>table>ajv",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "ajv",
+      "target": "6.12.6",
+      "depth": 4
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1065169,
+          "path": "@company.frontend/eslint-config-es6>eslint-plugin-import>read-pkg-up>read-pkg>normalize-package-data>hosted-git-info",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "hosted-git-info",
+      "target": "2.8.9",
+      "depth": 6
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1065345,
+          "path": "@company.frontend/eslint-config-es6>eslint>inquirer>lodash",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1065345,
+          "path": "@company.frontend/eslint-config-es6>eslint>lodash",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1065345,
+          "path": "@company.frontend/eslint-config-es6>eslint>table>lodash",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1065345,
+          "path": "@company.frontend/eslint-config-es6>eslint-plugin-import>lodash",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1065397,
+          "path": "@company.frontend/eslint-config-es6>eslint>inquirer>lodash",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1065397,
+          "path": "@company.frontend/eslint-config-es6>eslint>lodash",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1065397,
+          "path": "@company.frontend/eslint-config-es6>eslint>table>lodash",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1065397,
+          "path": "@company.frontend/eslint-config-es6>eslint-plugin-import>lodash",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "lodash",
+      "target": "4.17.21",
+      "depth": 4
+    },
+    {
+      "action": "review",
+      "module": "ansi-regex",
+      "resolves": [
+        {
+          "id": 1064843,
+          "path": "@company.frontend/eslint-config-es6>eslint>inquirer>string-width>strip-ansi>ansi-regex",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1064843,
+          "path": "@company.frontend/eslint-config-es6>eslint>inquirer>strip-ansi>ansi-regex",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1064843,
+          "path": "@company.frontend/eslint-config-es6>eslint>strip-ansi>ansi-regex",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1064843,
+          "path": "@company.frontend/eslint-config-es6>eslint>table>string-width>strip-ansi>ansi-regex",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    }
+  ],
+  "advisories": {
+    "1064843": {
+      "findings": [
+        {
+          "version": "3.0.0",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint>inquirer>string-width>strip-ansi>ansi-regex"
+          ]
+        },
+        {
+          "version": "4.1.0",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint>inquirer>strip-ansi>ansi-regex"
+          ]
+        },
+        {
+          "version": "3.0.0",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint>strip-ansi>ansi-regex"
+          ]
+        },
+        {
+          "version": "4.1.0",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint>table>string-width>strip-ansi>ansi-regex"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": ">2.1.1 <5.0.1",
+      "module_name": "ansi-regex",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-93q8-gq69-wqmw",
+      "cves": [
+        "CVE-2021-3807"
+      ],
+      "access": "public",
+      "patched_versions": ">=5.0.1",
+      "cvss": {
+        "score": 7.5,
+        "vectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+      },
+      "updated": "2021-09-23T15:45:50.000Z",
+      "recommendation": "Upgrade to version 5.0.1 or later",
+      "cwe": [
+        "CWE-918",
+        "CWE-1333"
+      ],
+      "found_by": null,
+      "deleted": null,
+      "id": 1064843,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-3807\n- https://github.com/chalk/ansi-regex/commit/8d1d7cdb586269882c4bdc1b7325d0c58c8f76f9\n- https://huntr.dev/bounties/5b3cf33b-ede0-4398-9974-800876dfd994\n- https://github.com/chalk/ansi-regex/issues/38#issuecomment-924086311\n- https://app.snyk.io/vuln/SNYK-JS-ANSIREGEX-1583908\n- https://github.com/chalk/ansi-regex/issues/38#issuecomment-925924774\n- https://github.com/advisories/GHSA-93q8-gq69-wqmw",
+      "created": "2022-03-11T08:00:43.795Z",
+      "reported_by": null,
+      "title": " Inefficient Regular Expression Complexity in chalk/ansi-regex",
+      "npm_advisory_id": null,
+      "overview": "ansi-regex is vulnerable to Inefficient Regular Expression Complexity",
+      "url": "https://github.com/advisories/GHSA-93q8-gq69-wqmw"
+    },
+    "1064972": {
+      "findings": [
+        {
+          "version": "1.0.6",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint-plugin-import>resolve>path-parse",
+            "@company.frontend/eslint-config-es6>eslint-plugin-import>eslint-import-resolver-node>resolve>path-parse",
+            "@company.frontend/eslint-config-es6>eslint-plugin-import>read-pkg-up>read-pkg>normalize-package-data>resolve>path-parse"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.0.7",
+      "module_name": "path-parse",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-hj48-42vr-x3v9",
+      "cves": [
+        "CVE-2021-23343"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.0.7",
+      "cvss": {
+        "score": 5.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+      },
+      "updated": "2021-08-10T15:33:31.000Z",
+      "recommendation": "Upgrade to version 1.0.7 or later",
+      "cwe": [
+        "CWE-400"
+      ],
+      "found_by": null,
+      "deleted": null,
+      "id": 1064972,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-23343\n- https://github.com/jbgutierrez/path-parse/issues/8\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1279028\n- https://snyk.io/vuln/SNYK-JS-PATHPARSE-1077067\n- https://lists.apache.org/thread.html/r6a32cb3eda3b19096ad48ef1e7aa8f26e005f2f63765abb69ce08b85@%3Cdev.myfaces.apache.org%3E\n- https://github.com/jbgutierrez/path-parse/pull/10\n- https://github.com/jbgutierrez/path-parse/commit/eca63a7b9a473bf6978a2f5b7b3343662d1506f7\n- https://github.com/advisories/GHSA-hj48-42vr-x3v9",
+      "created": "2022-03-11T08:00:43.817Z",
+      "reported_by": null,
+      "title": "Regular Expression Denial of Service in path-parse",
+      "npm_advisory_id": null,
+      "overview": "Affected versions of npm package `path-parse` are vulnerable to Regular Expression Denial of Service (ReDoS) via splitDeviceRe, splitTailRe, and splitPathRe regular expressions. ReDoS exhibits polynomial worst-case time complexity.",
+      "url": "https://github.com/advisories/GHSA-hj48-42vr-x3v9"
+    },
+    "1065159": {
+      "findings": [
+        {
+          "version": "6.10.0",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint>ajv",
+            "@company.frontend/eslint-config-es6>eslint>table>ajv"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<6.12.3",
+      "module_name": "ajv",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-v88g-cgmw-v5xw",
+      "cves": [
+        "CVE-2020-15366"
+      ],
+      "access": "public",
+      "patched_versions": ">=6.12.3",
+      "cvss": {
+        "score": 5.6,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L"
+      },
+      "updated": "2021-05-10T21:23:42.000Z",
+      "recommendation": "Upgrade to version 6.12.3 or later",
+      "cwe": [
+        "CWE-915"
+      ],
+      "found_by": null,
+      "deleted": null,
+      "id": 1065159,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-15366\n- https://github.com/ajv-validator/ajv/commit/65b2f7d76b190ac63a0d4e9154c712d7aa37049f\n- https://github.com/ajv-validator/ajv/releases/tag/v6.12.3\n- https://hackerone.com/bugs?subject=user&report_id=894259\n- https://github.com/ajv-validator/ajv/tags\n- https://github.com/advisories/GHSA-v88g-cgmw-v5xw",
+      "created": "2022-03-11T08:00:43.828Z",
+      "reported_by": null,
+      "title": "Prototype Pollution in Ajv",
+      "npm_advisory_id": null,
+      "overview": "An issue was discovered in ajv.validate() in Ajv (aka Another JSON Schema Validator) 6.12.2. A carefully crafted JSON schema could be provided that allows execution of other code by prototype pollution. (While untrusted schemas are recommended against, the worst case of an untrusted schema should be a denial of service, not execution of code.)",
+      "url": "https://github.com/advisories/GHSA-v88g-cgmw-v5xw"
+    },
+    "1065169": {
+      "findings": [
+        {
+          "version": "2.7.1",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint-plugin-import>read-pkg-up>read-pkg>normalize-package-data>hosted-git-info"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<2.8.9",
+      "module_name": "hosted-git-info",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-43f8-2h32-f4cj",
+      "cves": [
+        "CVE-2021-23362"
+      ],
+      "access": "public",
+      "patched_versions": ">=2.8.9",
+      "cvss": {
+        "score": 5.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+      },
+      "updated": "2021-05-07T17:39:04.000Z",
+      "recommendation": "Upgrade to version 2.8.9 or later",
+      "cwe": [
+        "CWE-400"
+      ],
+      "found_by": null,
+      "deleted": null,
+      "id": 1065169,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-23362\n- https://github.com/npm/hosted-git-info/commit/bede0dc38e1785e732bf0a48ba6f81a4a908eba3\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1088356\n- https://snyk.io/vuln/SNYK-JS-HOSTEDGITINFO-1088355\n- https://github.com/npm/hosted-git-info/pull/76\n- https://github.com/npm/hosted-git-info/commit/29adfe5ef789784c861b2cdeb15051ec2ba651a7\n- https://github.com/npm/hosted-git-info/commit/8d4b3697d79bcd89cdb36d1db165e3696c783a01\n- https://github.com/npm/hosted-git-info/commits/v2\n- https://github.com/advisories/GHSA-43f8-2h32-f4cj",
+      "created": "2022-03-11T08:00:43.828Z",
+      "reported_by": null,
+      "title": "Regular Expression Denial of Service in hosted-git-info",
+      "npm_advisory_id": null,
+      "overview": "The npm package `hosted-git-info` before 3.0.8 are vulnerable to Regular Expression Denial of Service (ReDoS) via regular expression shortcutMatch in the fromUrl function in index.js. The affected regular expression exhibits polynomial worst-case time complexity",
+      "url": "https://github.com/advisories/GHSA-43f8-2h32-f4cj"
+    },
+    "1065345": {
+      "findings": [
+        {
+          "version": "4.17.19",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint>inquirer>lodash"
+          ]
+        },
+        {
+          "version": "4.17.19",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint>lodash"
+          ]
+        },
+        {
+          "version": "4.17.19",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint>table>lodash"
+          ]
+        },
+        {
+          "version": "4.17.19",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint-plugin-import>lodash"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<4.17.21",
+      "module_name": "lodash",
+      "severity": "high",
+      "github_advisory_id": "GHSA-35jh-r3h4-6jhm",
+      "cves": [
+        "CVE-2021-23337"
+      ],
+      "access": "public",
+      "patched_versions": ">=4.17.21",
+      "cvss": {
+        "score": 7.2,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H"
+      },
+      "updated": "2021-03-31T23:59:26.000Z",
+      "recommendation": "Upgrade to version 4.17.21 or later",
+      "cwe": [
+        "CWE-77"
+      ],
+      "found_by": null,
+      "deleted": null,
+      "id": 1065345,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-23337\n- https://github.com/lodash/lodash/commit/3469357cff396a26c363f8c1b5a91dde28ba4b1c\n- https://security.netapp.com/advisory/ntap-20210312-0006/\n- https://snyk.io/vuln/SNYK-JS-LODASH-1040724\n- https://github.com/lodash/lodash/blob/ddfd9b11a0126db2302cb70ec9973b66baec0975/lodash.js#L14851\n- https://github.com/lodash/lodash/blob/ddfd9b11a0126db2302cb70ec9973b66baec0975/lodash.js%23L14851\n- https://snyk.io/vuln/SNYK-JAVA-ORGFUJIONWEBJARS-1074932\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARS-1074930\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSBOWER-1074928\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSBOWERGITHUBLODASH-1074931\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1074929\n- https://www.oracle.com//security-alerts/cpujul2021.html\n- https://www.oracle.com/security-alerts/cpuoct2021.html\n- https://www.oracle.com/security-alerts/cpujan2022.html\n- https://github.com/advisories/GHSA-35jh-r3h4-6jhm",
+      "created": "2022-03-11T08:00:43.837Z",
+      "reported_by": null,
+      "title": "Command Injection in lodash",
+      "npm_advisory_id": null,
+      "overview": "`lodash` versions prior to 4.17.21 are vulnerable to Command Injection via the template function.",
+      "url": "https://github.com/advisories/GHSA-35jh-r3h4-6jhm"
+    },
+    "1065397": {
+      "findings": [
+        {
+          "version": "4.17.19",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint>inquirer>lodash"
+          ]
+        },
+        {
+          "version": "4.17.19",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint>lodash"
+          ]
+        },
+        {
+          "version": "4.17.19",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint>table>lodash"
+          ]
+        },
+        {
+          "version": "4.17.19",
+          "paths": [
+            "@company.frontend/eslint-config-es6>eslint-plugin-import>lodash"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<4.17.21",
+      "module_name": "lodash",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-29mw-wpgm-hmr9",
+      "cves": [
+        "CVE-2020-28500"
+      ],
+      "access": "public",
+      "patched_versions": ">=4.17.21",
+      "cvss": {
+        "score": 5.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+      },
+      "updated": "2021-03-19T22:45:29.000Z",
+      "recommendation": "Upgrade to version 4.17.21 or later",
+      "cwe": [],
+      "found_by": null,
+      "deleted": null,
+      "id": 1065397,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-28500\n- https://github.com/lodash/lodash/pull/5065\n- https://github.com/lodash/lodash/pull/5065/commits/02906b8191d3c100c193fe6f7b27d1c40f200bb7\n- https://github.com/lodash/lodash/blob/npm/trimEnd.js%23L8\n- https://security.netapp.com/advisory/ntap-20210312-0006/\n- https://snyk.io/vuln/SNYK-JS-LODASH-1018905\n- https://snyk.io/vuln/SNYK-JAVA-ORGFUJIONWEBJARS-1074896\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARS-1074894\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSBOWER-1074892\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSBOWERGITHUBLODASH-1074895\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1074893\n- https://www.oracle.com//security-alerts/cpujul2021.html\n- https://www.oracle.com/security-alerts/cpuoct2021.html\n- https://www.oracle.com/security-alerts/cpujan2022.html\n- https://github.com/advisories/GHSA-29mw-wpgm-hmr9",
+      "created": "2022-03-11T08:00:43.839Z",
+      "reported_by": null,
+      "title": "Regular Expression Denial of Service (ReDoS) in lodash",
+      "npm_advisory_id": null,
+      "overview": "All versions of package lodash prior to 4.17.21 are vulnerable to Regular Expression Denial of Service (ReDoS) via the toNumber, trim and trimEnd functions. Steps to reproduce (provided by reporter Liyuan Chen): var lo = require('lodash'); function build_blank (n) { var ret = \"1\" for (var i = 0; i < n; i++) { ret += \" \" } return ret + \"1\"; } var s = build_blank(50000) var time0 = Date.now(); lo.trim(s) var time_cost0 = Date.now() - time0; console.log(\"time_cost0: \" + time_cost0) var time1 = Date.now(); lo.toNumber(s) var time_cost1 = Date.now() - time1; console.log(\"time_cost1: \" + time_cost1) var time2 = Date.now(); lo.trimEnd(s) var time_cost2 = Date.now() - time2; console.log(\"time_cost2: \" + time_cost2)",
+      "url": "https://github.com/advisories/GHSA-29mw-wpgm-hmr9"
+    }
+  },
+  "muted": [],
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 14,
+      "high": 4,
+      "critical": 0
+    },
+    "dependencies": 19,
+    "devDependencies": 175,
+    "optionalDependencies": 0,
+    "totalDependencies": 194
+  },
+  "runId": "9394affc-7252-4392-8ce0-3e0e323df119"
+}

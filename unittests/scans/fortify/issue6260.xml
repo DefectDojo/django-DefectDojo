@@ -1,0 +1,1832 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReportDefinition type="standard">
+    <TemplateName>Fortify Security Report</TemplateName>
+    <TemplatePath></TemplatePath>
+    <LogoPath>/MF_logo.jpg</LogoPath>
+    <Footnote>Copyright 2018 Micro Focus or one of its affiliates.</Footnote>
+    <UserName></UserName>
+    <ReportSection enabled="true" optionalSubsections="false">
+        <Title>Executive Summary</Title>
+        <SubSection enabled="true">
+            <Title>Issues Overview</Title>
+            <Description>This section provides an overview of the issues uncovered during analysis. The report covers a summary of vulnerability categories discovered by the tool. The auditor should augment this section with higher-level conclusions derived from human review of the application (including architecture reviews,	black-box testing, compliance issues, etc.)</Description>
+            <Text>On 2022-5-9, a source code review was performed over the untitile code base. 7 files, 29 LOC (Executable) were scanned and reviewed for defects that could lead to potential security vulnerabilities. A total of 16 reviewed findings were uncovered during the analysis.</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Issue Summary by Fortify Priority Order</Title>
+            <Description>A table summarizing the number of issues found and the breakdown of issues in each Fortify Priority Level</Description>
+            <IssueListing listing="false" limit="-1">
+                <Refinement></Refinement>
+                <Chart chartType="table">
+                    <Axis>Fortify Priority Order</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                    <GroupingSection count="12">
+                        <groupTitle>Low</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="4">
+                        <groupTitle>High</groupTitle>
+                    </GroupingSection>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Recommendations and Conclusions</Title>
+            <Description>This section gives some high-level recommendations on remediating the issues discussed in the Issues Summary sub section. Recommendations will vary based on deployment scenarios, risk appetite, and existing mitigating strategies. The auditor should supplement the Fortify generic recommendations with specific information that takes into account the application specific variables.</Description>
+            <Text>The Issues Category section provides Fortify recommendations for addressing issues at a generic level.  The recommendations for specific fixes can be extrapolated from those generic recommendations by the development group.</Text>
+        </SubSection>
+    </ReportSection>
+    <ReportSection enabled="true" optionalSubsections="true">
+        <Title>Project Summary</Title>
+        <SubSection enabled="true">
+            <Title>Code Base Summary</Title>
+            <Description>Summary of the Codebase that was analyzed</Description>
+            <Text>Code location: D:/code/cecloud_code/untitled1
+Number of Files: 7
+Lines of Code: 29
+Build Label: &lt;No Build Label&gt;</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Scan Information</Title>
+            <Description>Details of the analysis</Description>
+            <Text>Scan time: 00:11
+SCA Engine version: 20.1.1.0007
+Machine Name: LAPTOP-R8EIHNHP
+Username running scan: admin</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Results Certification</Title>
+            <Description>A full summary of the Results Certification for this project</Description>
+            <Text>Results Certification Valid
+
+Details:
+
+Results Signature:
+
+	SCA Analysis Results has Valid signature
+	
+
+Rules Signature:
+
+	There were no custom rules used in this scan</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Attack Surface</Title>
+            <Description>A full summary of the attack surface for this project</Description>
+            <Text>Attack Surface:
+Command Line Arguments:
+	null.command.main
+
+System Information:
+	null.null.null
+</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Filter Set Summary</Title>
+            <Description>A brief summary of the filterset used to create this report</Description>
+            <Text>Current Enabled Filter Set:
+Security Auditor View
+
+Filter Set Details:
+
+Folder Filters:
+If [fortify priority order] contains critical Then set folder to Critical
+If [fortify priority order] contains high Then set folder to High
+If [fortify priority order] contains medium Then set folder to Medium
+If [fortify priority order] contains low Then set folder to Low</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Audit Guide Summary</Title>
+            <Description>Summary of the impact of the audit guide</Description>
+            <Text>Audit guide not enabled</Text>
+        </SubSection>
+    </ReportSection>
+    <ReportSection enabled="true" optionalSubsections="true">
+        <Title>Results Outline</Title>
+        <SubSection enabled="true">
+            <Title>Overall number of results</Title>
+            <Description>Results count</Description>
+            <Text>The scan found 16 issues.</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Vulnerability Examples by Category</Title>
+            <Description>Results summary for critical and high priority issues.  Vulnerability examples are provided by category.</Description>
+            <IssueListing listing="true" limit="-1">
+                <Refinement></Refinement>
+                <Chart chartType="list">
+                    <Axis>Category</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                    <GroupingSection count="5">
+                        <groupTitle>Command Injection</groupTitle>
+                        <MajorAttributeSummary>
+                            <MetaInfo>
+<Name>Abstract</Name>
+<Value>command.java 中的 callCmd() 方法会利用由不可信赖的数据构建的命令来调用 exec()。这种调用会导致程序以攻击者的名义执行恶意命令。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Explanation</Name>
+<Value>Command Injection 漏洞主要表现为以下两种形式：
+
+－ 攻击者能够篡改程序执行的命令：攻击者直接控制了所执行的命令。
+
+－ 攻击者能够篡改命令的执行环境：攻击者间接地控制了所执行的命令。
+
+在这种情况下，我们着重关注第一种情况，即攻击者有可能控制所执行命令。这种类型的 Command Injection 漏洞会在以下情况下出现：
+
+1. 数据从不可信赖的数据源进入应用程序。
+
+
+2. 数据被用作代表应用程序所执行命令的字符串，或字符串的一部分。 
+
+3. 通过命令的执行，应用程序会授予攻击者一种原本不该拥有的特权或能力。 
+
+例 1：下面这段来自系统实用程序的代码根据系统属性 APPHOME 来决定其安装目录，然后根据指定目录的相对路径执行一个初始化脚本。
+
+
+	...
+	String home = System.getProperty("APPHOME");
+	String cmd = home + INITCMD;
+	java.lang.Runtime.getRuntime().exec(cmd);
+	...
+
+
+Example 1 中的代码可以使攻击者通过修改系统属性 APPHOME 以指向包含恶意版本 INITCMD 的其他路径来提高自己在应用程序中的权限，继而随心所欲地执行命令。由于程序不会验证从环境中读取的值，因此如果攻击者能够控制系统属性 APPHOME 的值，他们就能欺骗应用程序去运行恶意代码，从而取得系统控制权。
+
+例 2：下面的代码来自一个管理 Web 应用程序，旨在使用户能够使用一个围绕 rman 实用程序的批处理文件封装器来启动 Oracle 数据库备份，然后运行一个 cleanup.bat 脚本来删除一些临时文件。脚本 rmanDB.bat 接受单个命令行参数，该参数指定了要执行的备份类型。由于访问数据库受限，所以应用程序执行备份需要具有较高权限的用户。
+
+
+...
+String btype = request.getParameter("backuptype");
+String cmd = new String("cmd.exe /K
+\"c:\\util\\rmanDB.bat "+btype+"&amp;&amp;c:\\util\\cleanup.bat\"")
+System.Runtime.getRuntime().exec(cmd);
+...
+
+
+这里的问题是：程序没有对读取自用户的 backuptype参数进行任何验证。通常情况下 Runtime.exec() 函数不会执行多条命令，但在这种情况下，程序会首先运行 cmd.exe shell，从而可以通过调用一次 Runtime.exec() 来执行多条命令。在调用该 shell 之后，它即会允许执行用两个与号分隔的多条命令。如果攻击者传递了一个形式为 "&amp;&amp; del c:\\dbms\\*.*" 的字符串，那么应用程序将随程序指定的其他命令一起执行此命令。由于该应用程序的特性，运行该应用程序需要具备与数据库进行交互所需的权限，这就意味着攻击者注入的任何命令都将通过这些权限得以运行。
+
+示例 3：下面的代码来自一个 Web 应用程序，用户可通过该应用程序提供的界面在系统上更新他们的密码。在某些网络环境中更新密码时，其中的一个步骤就是在 /var/yp 目录中运行 make 命令。
+
+
+...
+System.Runtime.getRuntime().exec("make");
+...
+
+
+这里的问题在于程序没有在它的构造中指定一个绝对路径，并且没能在执行 Runtime.exec() 调用前清除它的环境变量。如果攻击者能够修改 $PATH 变量，把它指向名为 make 恶意二进制代码，程序就会在其指定的环境下执行，然后加载该恶意二进制代码，而非原本期望的代码。由于应用程序自身的特性，运行该应用程序需要具备执行系统操作所需的权限，这意味着攻击者会利用这些权限执行自己的 make，从而可能导致攻击者完全控制系统。
+
+有些人认为在移动世界中，典型的漏洞（如 Command Injection）是无意义的 -- 为什么用户要攻击自己？但是，谨记移动平台的本质是从各种来源下载并在相同设备上运行的应用程序。恶意软件在银行应用程序附近运行的可能性很高，它们会强制扩展移动应用程序的攻击面（包括跨进程通信）。
+
+例 4：以下代码可从 Android Intent 中读取要执行的命令。
+
+
+...
+        String[] cmds = this.getIntent().getStringArrayExtra("commands");
+        Process p = Runtime.getRuntime().exec("su");
+        DataOutputStream os = new DataOutputStream(p.getOutputStream());
+        for (String cmd : cmds) {
+                os.writeBytes(cmd+"\n");
+        }
+        os.writeBytes("exit\n");
+        os.flush();
+...
+
+
+在经过 root 的设备上，恶意应用程序会强迫受攻击应用程序使用超级用户权限执行任意命令。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Recommendations</Name>
+<Value>应当禁止用户直接控制由程序执行的命令。在用户的输入会影响命令执行的情况下，应将用户输入限制为从预定的安全命令集合中进行选择。如果输入中出现了恶意的内容，传递到命令执行函数的值将默认从安全命令集合中选择，或者程序将拒绝执行任何命令。 
+
+在需要将用户的输入用作程序命令中的参数时，由于合法的参数集合实在很大，或是难以跟踪，使得这个方法通常都不切实际。开发者通常的做法是使用黑名单。在输入之前，黑名单会有选择地拒绝或避免潜在的危险字符。但是，任何一个定义不安全内容的列表都很可能是不完整的，并且会严重地依赖于执行命令的环境。更好的方法是创建一份白名单，允许其中的字符出现在输入中，并且只接受完全由这些经认可的字符组成的输入。
+
+攻击者可以通过修改程序运行命令的环境来间接控制这些命令的执行。我们不应当完全信赖环境，还需采取预防措施，防止攻击者利用某些控制环境的手段进行攻击。无论何时，只要有可能，都应由应用程序来控制命令，并使用绝对路径执行命令。如果编译时尚不了解路径（如在跨平台应用程序中），应该在执行过程中利用可信赖的值构建一个绝对路径。应对照一系列定义有效值的常量，仔细地检查从配置文件或者环境中读取的命令值和路径。
+
+有时还可以执行其他检验，以检查这些来源是否已被恶意篡改。例如，如果一个配置文件为可写，程序可能会拒绝运行。如果能够预先得知有关要执行的二进制代码的信息，程序就会进行检测，以检验这个二进制代码的合法性。如果一个二进制代码始终属于某个特定的用户，或者被指定了一组特定的访问权限，这些属性就会在执行二进制代码前通过程序进行检验。
+
+尽管可能无法完全阻止强大的攻击者为了控制程序执行的命令而对系统进行的攻击，但只要程序执行外部命令，就务必使用最小授权原则：不给予超过执行该命令所必需的权限。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Tips</Name>
+<Value>1. 许多现代 Web 框架都会提供对用户输入执行验证的机制（包括 Struts 和 Spring MVC）。为了突出显示未经验证的输入源，Fortify 安全编码规则包会对 Fortify Static Code Analyzer（Fortify 静态代码分析器）报告的问题动态重新调整优先级，即在采用框架验证机制时降低这些问题被利用的几率并提供指向相应证据的指针。我们将这种功能称之为上下文敏感排序。为了进一步帮助 Fortify 用户执行审计过程，Fortify 软件安全研究团队开发了 Data Validation（数据验证）项目模板，该模板根据应用于输入源的验证机制按文件夹对问题进行了分组。
+
+2. Fortify RTA adds protection against this category.</Value>
+                            </MetaInfo>
+                            <AttributeValue>
+<Name>&lt;Unaudited&gt;</Name>
+<Count>5</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Not an Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Reliability Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Bad Practice</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Suspicious</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Exploitable</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                        </MajorAttributeSummary>
+                        <Issue iid="7A2F1C728BDDBB17C7CB31CEDF5D8F85" ruleID="D3B3048A-AC55-49CD-81FD-C6678EDC6B23">
+                            <Category>Command Injection</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>Input Validation and Representation</Kingdom>
+                            <Abstract>command.java 中的 main() 方法调用 ProcessBuilder() 来执行命令。通过这种调用，攻击者可能会向应用程序中注入恶意命令。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>40</LineStart>
+<Snippet>        String line = "";
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            cmt.validate(args[0]);
+            Process proc = processBuilder.command(args[0]).start();</Snippet>
+<TargetFunction>ProcessBuilder()</TargetFunction>
+                            </Primary>
+                        </Issue>
+                        <Issue iid="57C7F3C0590D4427CD9EFFAD095E7E30" ruleID="5760613C-9AF8-41EF-8431-66B6FBD4717A">
+                            <Category>Command Injection</Category>
+                            <Folder>High</Folder>
+                            <Kingdom>Input Validation and Representation</Kingdom>
+                            <Abstract>command.java 中的 main() 方法会利用由不可信赖的数据构建的命令来调用 exec()。这种调用会导致程序以攻击者的名义执行恶意命令。</Abstract>
+                            <Friority>High</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>55</LineStart>
+<Snippet>        }
+        String[][] cmd = {args, args};
+        Process proc = Runtime.getRuntime().exec(args);
+
+        String s = cmt.callCmd(cmd);</Snippet>
+<TargetFunction>java.lang.Runtime.exec()</TargetFunction>
+                            </Primary>
+                            <Source>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>33</LineStart>
+<Snippet>        return result;
+    }
+    public static void main(String[] args) throws IOException {
+
+</Snippet>
+<TargetFunction>main(0)</TargetFunction>
+                            </Source>
+                        </Issue>
+                        <Issue iid="3928A40F0DA3F269AB7C271C4C9A8FF3" ruleID="5760613C-9AF8-41EF-8431-66B6FBD4717A">
+                            <Category>Command Injection</Category>
+                            <Folder>High</Folder>
+                            <Kingdom>Input Validation and Representation</Kingdom>
+                            <Abstract>command.java 中的 callCmd() 方法会利用由不可信赖的数据构建的命令来调用 exec()。这种调用会导致程序以攻击者的名义执行恶意命令。</Abstract>
+                            <Friority>High</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>21</LineStart>
+<Snippet>        try {
+            for (int i = 0;i &lt;cmd.length ;i++) {
+                Process proc = Runtime.getRuntime().exec(cmd[i]);
+                InputStreamReader is = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(is);</Snippet>
+<TargetFunction>java.lang.Runtime.exec()</TargetFunction>
+                            </Primary>
+                            <Source>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>33</LineStart>
+<Snippet>        return result;
+    }
+    public static void main(String[] args) throws IOException {
+
+</Snippet>
+<TargetFunction>main(0)</TargetFunction>
+                            </Source>
+                        </Issue>
+                        <Issue iid="4E47EECB5B98BE8D986163EBE3F4DB94" ruleID="C2388850-FF2A-494F-9E37-71DDDA3B7F61">
+                            <Category>Command Injection</Category>
+                            <Folder>High</Folder>
+                            <Kingdom>Input Validation and Representation</Kingdom>
+                            <Abstract>command.java 中的 main() 方法会利用由不可信赖的数据构建的命令来调用 command()。这种调用会导致程序以攻击者的名义执行恶意命令。</Abstract>
+                            <Friority>High</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>42</LineStart>
+<Snippet>            ProcessBuilder processBuilder = new ProcessBuilder();
+            cmt.validate(args[0]);
+            Process proc = processBuilder.command(args[0]).start();
+            proc.waitFor(); // 宸茬粡鎵ц瀹岀涓�涓懡浠わ紝鍑嗗鎵ц绗簩涓懡浠�
+            proc = processBuilder.command(args[1]).start();</Snippet>
+<TargetFunction>java.lang.ProcessBuilder.command()</TargetFunction>
+                            </Primary>
+                            <Source>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>33</LineStart>
+<Snippet>        return result;
+    }
+    public static void main(String[] args) throws IOException {
+
+</Snippet>
+<TargetFunction>main(0)</TargetFunction>
+                            </Source>
+                        </Issue>
+                        <Issue iid="B8F1AAA5ACC1CE707C5D27BBC0EF6E52" ruleID="C2388850-FF2A-494F-9E37-71DDDA3B7F61">
+                            <Category>Command Injection</Category>
+                            <Folder>High</Folder>
+                            <Kingdom>Input Validation and Representation</Kingdom>
+                            <Abstract>command.java 中的 main() 方法会利用由不可信赖的数据构建的命令来调用 command()。这种调用会导致程序以攻击者的名义执行恶意命令。</Abstract>
+                            <Friority>High</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>44</LineStart>
+<Snippet>            Process proc = processBuilder.command(args[0]).start();
+            proc.waitFor(); // 宸茬粡鎵ц瀹岀涓�涓懡浠わ紝鍑嗗鎵ц绗簩涓懡浠�
+            proc = processBuilder.command(args[1]).start();
+            InputStreamReader is = new InputStreamReader(proc.getInputStream());
+            BufferedReader br = new BufferedReader(is);</Snippet>
+<TargetFunction>java.lang.ProcessBuilder.command()</TargetFunction>
+                            </Primary>
+                            <Source>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>33</LineStart>
+<Snippet>        return result;
+    }
+    public static void main(String[] args) throws IOException {
+
+</Snippet>
+<TargetFunction>main(0)</TargetFunction>
+                            </Source>
+                        </Issue>
+                    </GroupingSection>
+                    <GroupingSection count="3">
+                        <groupTitle>Denial of Service</groupTitle>
+                        <MajorAttributeSummary>
+                            <MetaInfo>
+<Name>Abstract</Name>
+<Value>调用 command.java 中第 24 行的 readLine() 可能会使攻击者造成程序崩溃或让合法用户无法进行使用。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Explanation</Name>
+<Value>攻击者可能通过对应用程序发送大量请求，而使它拒绝对合法用户的服务，但是这种攻击形式经常会在网络层就被排除掉了。更加严重的是那些只需要使用少量请求就可以使得攻击者让应用程序过载的 bug。这种 bug 允许攻击者去指定请求使用系统资源的数量，或者是持续使用这些系统资源的时间。
+
+示例 1：通过以下代码，用户可以指定线程处于休眠状态的时长。通过指定一个较大的数值，攻击者可以无限期地占用该线程。因此，只需少量的请求，攻击者就能耗尽应用程序的线程池。
+
+
+  int usrSleepTime = Integer.parseInt(usrInput);
+  Thread.sleep(usrSleepTime);
+
+
+示例 2：以下代码从一个 zip 文件中读取字符串。因为它使用 readLine() 方法，所以可以读取一批极大量的输入。攻击者能够利用该代码引发一个 OutOfMemoryException 异常，或者消耗大量的内存，从而致使程序需要更多的时间去执行垃圾信息的收集，或在随后的操作过程中用完内存资源。
+
+
+  InputStream zipInput = zipFile.getInputStream(zipEntry);
+  Reader zipReader = new InputStreamReader(zipInput);
+  BufferedReader br = new BufferedReader(zipReader);
+  String line = br.readLine();
+</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Recommendations</Name>
+<Value>校验用户输入以确保它不会引起不适当的资源利用。
+
+示例 3：以下代码允许用户指定线程休眠的时间量，就像Example 1 中一样，但前提是该值处于合理范围内。
+
+  int usrSleepTime = Integer.parseInt(usrInput);
+  if (usrSleepTime &gt;= SLEEP_MIN &amp;&amp;
+      usrSleepTime &lt;= SLEEP_MAX) {
+    Thread.sleep(usrSleepTime);
+  } else {
+    throw new Exception("Invalid sleep duration");
+  }
+}
+
+
+示例 4：以下代码会从 zip 文件中读取字符串，就像在Example 2 中一样，但它读取的最大字符串长度为 MAX_STR_LEN 个字符。
+
+  InputStream zipInput = zipFile.getInputStream(zipEntry);
+  Reader zipReader = new InputStreamReader(zipInput);
+  BufferedReader br = new BufferedReader(zipReader);
+  StringBuffer sb = new StringBuffer();
+  int intC;
+  while ((intC = br.read()) != -1) {
+    char c = (char) intC;
+    if (c == '\n') {
+      break;
+    }
+    if (sb.length() &gt;= MAX_STR_LEN) {
+      throw new Exception("input too long");
+    }
+    sb.append(c);
+  }
+  String line = sb.toString();
+</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Tips</Name>
+<Value>1. 即使消耗的系统资源总量或持续使用这些系统资源的时间未被黑客控制或至少未被直接控制，仍有可能发生 Denial of service。相反，程序员可能选择不安全的常量指定这些参数。Fortify 安全编码规则包会将此类情况作为潜在 Denial of Service 漏洞报告。</Value>
+                            </MetaInfo>
+                            <AttributeValue>
+<Name>&lt;Unaudited&gt;</Name>
+<Count>3</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Not an Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Reliability Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Bad Practice</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Suspicious</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Exploitable</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                        </MajorAttributeSummary>
+                        <Issue iid="78DA196D9A5393741021479B26AC461C" ruleID="5c0b56c2-93d3-48e6-b061-c89dbffb2628">
+                            <Category>Denial of Service</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>Input Validation and Representation</Kingdom>
+                            <Abstract>调用 command.java 中第 43 行的 waitFor() 可能会使攻击者造成程序崩溃或让合法用户无法进行使用。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>43</LineStart>
+<Snippet>            cmt.validate(args[0]);
+            Process proc = processBuilder.command(args[0]).start();
+            proc.waitFor(); // 宸茬粡鎵ц瀹岀涓�涓懡浠わ紝鍑嗗鎵ц绗簩涓懡浠�
+            proc = processBuilder.command(args[1]).start();
+            InputStreamReader is = new InputStreamReader(proc.getInputStream());</Snippet>
+<TargetFunction>waitFor()</TargetFunction>
+                            </Primary>
+                        </Issue>
+                        <Issue iid="28375A8B097D159F12510733423D5B47" ruleID="24023E22-D6C7-4D5C-B049-38B7EFC8B408">
+                            <Category>Denial of Service</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>Input Validation and Representation</Kingdom>
+                            <Abstract>调用 command.java 中第 24 行的 readLine() 可能会使攻击者造成程序崩溃或让合法用户无法进行使用。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>24</LineStart>
+<Snippet>                InputStreamReader is = new InputStreamReader(proc.getInputStream());
+                BufferedReader br = new BufferedReader(is);
+                while ((line = br.readLine()) != null) {
+                    result += line;
+                }</Snippet>
+<TargetFunction>readLine()</TargetFunction>
+                            </Primary>
+                        </Issue>
+                        <Issue iid="B138DD4A1EF6D025348DC15611F375C3" ruleID="24023E22-D6C7-4D5C-B049-38B7EFC8B408">
+                            <Category>Denial of Service</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>Input Validation and Representation</Kingdom>
+                            <Abstract>调用 command.java 中第 47 行的 readLine() 可能会使攻击者造成程序崩溃或让合法用户无法进行使用。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>47</LineStart>
+<Snippet>            InputStreamReader is = new InputStreamReader(proc.getInputStream());
+            BufferedReader br = new BufferedReader(is);
+            while ((line = br.readLine()) != null) {
+                result += line;
+            }</Snippet>
+<TargetFunction>readLine()</TargetFunction>
+                            </Primary>
+                        </Issue>
+                    </GroupingSection>
+                    <GroupingSection count="2">
+                        <groupTitle>Poor Style: Value Never Read</groupTitle>
+                        <MajorAttributeSummary>
+                            <MetaInfo>
+<Name>Abstract</Name>
+<Value>command.java 中的 main() 方法从来不会使用赋给第 55 行中变量 proc 的值。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Explanation</Name>
+<Value>没有使用该变量的值。赋值之后，变量或者被重新赋值，或者超出范围之外。
+
+示例：以下摘录的代码为变量 r 赋值，并在没有使用所赋数值的情况下，对其加以重写。
+
+
+  r = getName();
+  r = getNewBuffer(buf);
+</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Recommendations</Name>
+<Value>为了使代码易于理解和维护，删除不必要的赋值。</Value>
+                            </MetaInfo>
+                            <AttributeValue>
+<Name>&lt;Unaudited&gt;</Name>
+<Count>2</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Not an Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Reliability Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Bad Practice</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Suspicious</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Exploitable</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                        </MajorAttributeSummary>
+                        <Issue iid="D1BD1C79E06C952553C2DA222B206D6B" ruleID="B30AA17C-87EC-42CF-9160-CFDF122CE28E">
+                            <Category>Poor Style: Value Never Read</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>Code Quality</Kingdom>
+                            <Abstract>command.java 中的 main() 方法从来不会使用赋给第 55 行中变量 proc 的值。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>55</LineStart>
+<Snippet>        }
+        String[][] cmd = {args, args};
+        Process proc = Runtime.getRuntime().exec(args);
+
+        String s = cmt.callCmd(cmd);</Snippet>
+<TargetFunction>VariableAccess: proc</TargetFunction>
+                            </Primary>
+                        </Issue>
+                        <Issue iid="553BD891D7A3A74D0E7FAF1F87D11EA3" ruleID="B30AA17C-87EC-42CF-9160-CFDF122CE28E">
+                            <Category>Poor Style: Value Never Read</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>Code Quality</Kingdom>
+                            <Abstract>command.java 中的 main() 方法从来不会使用赋给第 57 行中变量 s 的值。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>57</LineStart>
+<Snippet>        Process proc = Runtime.getRuntime().exec(args);
+
+        String s = cmt.callCmd(cmd);
+
+    }</Snippet>
+<TargetFunction>VariableAccess: s</TargetFunction>
+                            </Primary>
+                        </Issue>
+                    </GroupingSection>
+                    <GroupingSection count="2">
+                        <groupTitle>System Information Leak</groupTitle>
+                        <MajorAttributeSummary>
+                            <MetaInfo>
+<Name>Abstract</Name>
+<Value>command.java 中的 callCmd() 函数可能通过调用第 29 行的 printStackTrace() 来揭示系统数据或调试信息。由 printStackTrace() 揭示的信息有助于攻击者制定攻击计划。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Explanation</Name>
+<Value>当系统数据或调试信息通过输出流或者日志功能流出程序时，就会发生信息泄漏。
+
+
+
+示例 1：以下代码会将一个异常写入标准错误流：
+
+
+try {
+    ...
+} catch (Exception e) {
+    e.printStackTrace();
+}
+
+
+依据这一系统配置，该信息可转储到控制台，写成日志文件，或者显示给远程用户。例如，凭借脚本机制，可以轻松将输出信息从"标准错误"或"标准输出"重定向至文件或其他程序。或者，运行程序的系统可能具有将日志发送至远程设备的远程日志记录系统，例如 "syslog" 服务器。在开发过程中，您将无法知道此信息最终可能显示的位置。
+
+在某些情况下，该错误消息恰好可以告诉攻击者入侵这一系统的可能性究竟有多大。例如，一则数据库错误消息可以揭示应用程序容易受到 SQL Injection 攻击。其他的错误消息可以揭示有关该系统的更多间接线索。在Example 1 中，泄露的信息可能会暗示有关操作系统类型、系统上安装了哪些应用程序以及管理员在配置程序时采取了哪些保护措施的信息。
+
+这是另一种情况，特定于移动世界。大多数移动设备现在执行的是“近场通信”(NFC) 协议，以便使用无线电通信在设备之间快速共享信息。它在设备极为贴近或互相接触时有效。即使 NFC 的通信范围仅局限于几厘米，也可能发生窃听、修改数据以及各种其他类型的攻击情况，因为 NFC 本身并不能确保通信安全。
+
+示例 2：Android 平台提供对 NFC 的支持。以下代码将创建一条消息，该消息会被发送给所在范围内的其他设备。
+
+...
+public static final String TAG = "NfcActivity";
+private static final String DATA_SPLITTER = "__:DATA:__";
+private static final String MIME_TYPE = "application/my.applications.mimetype";
+...
+public NdefMessage createNdefMessage(NfcEvent event) {
+    TelephonyManager tm = (TelephonyManager)Context.getSystemService(Context.TELEPHONY_SERVICE);
+    String VERSION = tm.getDeviceSoftwareVersion();
+    String text = TAG + DATA_SPLITTER + VERSION;
+    NdefRecord record = new NdefRecord(NdefRecord.TNF_MIME_MEDIA,
+            MIME_TYPE.getBytes(), new byte[0], text.getBytes());
+    NdefRecord[] records = { record };
+    NdefMessage msg = new NdefMessage(records);
+    return msg;
+}
+...
+
+
+NFC 数据交换格式 (NDEF) 消息包含类型化数据、URI 或自定义应用程序有效负载。如果该消息包含与应用程序有关的信息（如其名称、MIME 类型或设备软件版本），则此信息可能会泄露给窃听者。在Example 2 中，Fortify Static Code Analyzer（Fortify 静态代码分析器）会在返回语句中报告 System Information Leak 漏洞。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Recommendations</Name>
+<Value>编写错误消息时，始终要牢记安全性。在编码的过程中，尽量避免使用繁复的消息，提倡使用简短的错误消息。限制生成与存储繁复的输出数据将有助于管理员和程序员诊断问题的所在。此外，还要留意有关调试的跟踪信息，有时它可能出现在不明显的位置（例如嵌入在错误页 HTML 代码的注释行中）。
+
+即便是并未揭示栈踪迹或数据库转储的简短错误消息，也有可能帮助攻击者发起攻击。例如，“Access Denied”（拒绝访问）消息可以揭示系统中存在一个文件或用户。
+
+如果您担心 Android 设备上的系统数据会通过 NFC 泄露，那么您可以采取以下三种措施之一。不把系统数据包括在发送到范围内其他设备的消息中，或加密消息负载，或在更高层中建立安全通信通道。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Tips</Name>
+<Value>1. 不要依赖于封装器脚本、组织内部的 IT 策略或是思维敏捷的系统管理员来避免 System Information Leak 漏洞。编写安全的软件才是关键。
+
+2. 这类漏洞并不适用于所有类型的程序。例如，如果您在一个客户机上执行应用程序，而攻击者已经获取了该客户机上的系统信息，或者如果您仅把系统信息打印到一个可信赖的日志文件中，就可以使用 AuditGuide 来过滤这一类别。
+
+3. Fortify RTA adds protection against this category.</Value>
+                            </MetaInfo>
+                            <AttributeValue>
+<Name>&lt;Unaudited&gt;</Name>
+<Count>2</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Not an Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Reliability Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Bad Practice</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Suspicious</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Exploitable</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                        </MajorAttributeSummary>
+                        <Issue iid="A3B7906C01DE8C3DF74ED8024F1B4452" ruleID="FE4EADF2-7055-4C36-863E-5A01C4A0E1A4">
+                            <Category>System Information Leak</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>Encapsulation</Kingdom>
+                            <Abstract>command.java 中的 main() 函数可能通过调用第 52 行的 printStackTrace() 来揭示系统数据或调试信息。由 printStackTrace() 揭示的信息有助于攻击者制定攻击计划。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>52</LineStart>
+<Snippet>
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String[][] cmd = {args, args};</Snippet>
+<TargetFunction>printStackTrace()</TargetFunction>
+                            </Primary>
+                        </Issue>
+                        <Issue iid="7EB90ED24A43255B98AD5B93FD6F4739" ruleID="FE4EADF2-7055-4C36-863E-5A01C4A0E1A4">
+                            <Category>System Information Leak</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>Encapsulation</Kingdom>
+                            <Abstract>command.java 中的 callCmd() 函数可能通过调用第 29 行的 printStackTrace() 来揭示系统数据或调试信息。由 printStackTrace() 揭示的信息有助于攻击者制定攻击计划。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>29</LineStart>
+<Snippet>            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;</Snippet>
+<TargetFunction>printStackTrace()</TargetFunction>
+                            </Primary>
+                        </Issue>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>Build Misconfiguration: External Maven Dependency Repository</groupTitle>
+                        <MajorAttributeSummary>
+                            <MetaInfo>
+<Name>Abstract</Name>
+<Value>这一 Maven 编译脚本依赖于外部数据源，这会导致攻击者能够将恶意代码插入最终产品中，或者控制编译计算机。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Explanation</Name>
+<Value>可通过 Java 开发环境中的几个工具来帮助进行依赖项管理：Apache Ant 和 Apache Maven 编译系统都包含专门用来管理依赖项的功能，而 Apache Ivy 则是明确作为依赖项管理器而开发的。尽管这些工具在行为方式上存在差异，但它们都有一种通用的功能，即会自动下载在编译过程中指定的外部依赖项。这样一来，两个不同的开发人员用同一种方式来编译软件就容易得多。开发人员只需在编译文件中存储依赖项信息即可，这意味着，每个开发人员和编译工程师都可通过同一种方式来获得依赖项、编译代码并进行部署，而不需要手动进行繁琐的依赖项管理。以下示例演示了如何使用 Ivy、Ant 和 Maven 在编译过程中管理外部依赖项。
+
+采用 Maven 时，开发人员将具体指定 dependency 的名称和版本，而不是列出从中检索 dependency 的显式 URL，Maven 依靠其底层配置来识别要从中检索 dependency 的服务器。通用组件使得开发人员不必花时间探查 dependency 的具体位置。 
+
+例 1：以下内容摘自 Maven pom.xml 文件，这些内容显示了开发人员如何用名称和版本来指定多个外部 dependency：
+
+
+&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;commons-logging&lt;/groupId&gt;
+    &lt;artifactId&gt;commons-logging&lt;/artifactId&gt;
+    &lt;version&gt;1.1&lt;/version&gt;
+  &lt;/dependency&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;javax.jms&lt;/groupId&gt;
+    &lt;artifactId&gt;jms&lt;/artifactId&gt;
+    &lt;version&gt;1.1&lt;/version&gt;
+  &lt;/dependency&gt;
+  ...
+&lt;/dependencies&gt;
+
+
+两种截然不同的攻击情形会影响这些系统：攻击者可能会危害托管 dependency 的服务器，也可能危害 DNS 服务器，编译计算机用它将对托管 dependency 的服务器主机名的请求重定向到被攻击者控制的计算机。这两种攻击情形都会导致攻击者能够将恶意的 dependency 版本注入到一个未受到危害的计算机上所运行的编译中。
+
+不管攻击者用来投递 Trojan dependency 的攻击手段是什么，这些情形均存在一种共同的因素，即 build system 盲目地接受恶意二进制码并且将其包含在编译中。因为 build system 无法拒绝恶意的二进制码和现有安全机制（如代码审查），所以通常会关注内部开发地代码而不是外部 dependency，这种攻击深潜于内部，不易察觉，它会传播到开发环境各处并有可能传入产品中。 
+
+虽然手动编译过程中存在一定的 dependency 受到危害的风险，但是由于自动化 build system 存在从一个外部数据源检索 dependency 的趋势，每当 build system 运行在新环境下时，会大大增加攻击者的攻击机会。攻击者只需在 dependency 服务器或 DNS 服务器多次提取 dependency 时造成一次危害，即会危害发生编译的计算机。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Recommendations</Name>
+<Value>最简单的解决方案是完全避免采用自动化的依赖项管理系统。手动管理依赖项可防止发生可能因编译系统而导致的意外行为。很显然，攻击者仍然能针对手动检索依赖项发动如前所述的某种攻击，但限制需要检索依赖项的频率会极大地减少攻击者的攻击机会。最终，该解决方法会迫使开发组织采用一个看起来十分陈旧的编译系统。采用手动依赖项管理的系统往往更难使用和维护，并且在一些软件开发环境中可能不被接受。
+
+第二种解决方法综合了传统的手动 dependency 管理方法和全自动化解决方法，这是现在流行的一种做法。手动编译过程的最大优势是减小了攻击机会，它可以通过从内部复制外部 dependency 服务器来实现一个半自动化系统。这样，任何需要利用外部 dependency 的 build system 都能用硬编码的内部 IP 地址来指向内部服务器，以此避开基于 DNS 的攻击风险。如果添加了新的 dependency 并发布了新的版本，可以一次性下载它们，并将其包含在内部存储库中。这一解决方法减小了攻击机会，并且使组织能够充分利用现有的内部网络安全基础架构。
+
+要通过 Maven 实施这一解决方法，项目应该在 pom.xml 中对一个内部存储库的 IP 地址进行硬编码。在 pom.xml 中明确指定 IP 地址可确保编译使用其相应的内部存储库，内部存储库与具体的项目相关联。或者，也可以在 settings.xml 中指定 IP 地址，这样使得多个项目更容易共享配置。 
+
+例 2：以下 Maven pom.xml 演示了显式内部 IP 地址的用法（这些条目也可以用在 settings.xml 中）：
+
+
+&lt;project&gt;
+  ...
+  &lt;repositories&gt;
+    &lt;repository&gt;
+      &lt;releases&gt;
+        &lt;enabled&gt;true&lt;/enabled&gt;
+        &lt;updatePolicy&gt;always&lt;/updatePolicy&gt;
+        &lt;checksumPolicy&gt;warn&lt;/checksumPolicy&gt;
+      &lt;/releases&gt;
+      &lt;snapshots&gt;
+        &lt;enabled&gt;true&lt;/enabled&gt;
+        &lt;updatePolicy&gt;never&lt;/updatePolicy&gt;
+        &lt;checksumPolicy&gt;fail&lt;/checksumPolicy&gt;
+      &lt;/snapshots&gt;
+      &lt;id&gt;central&lt;/id&gt;
+      &lt;name&gt;Internal Repository&lt;/name&gt;
+      &lt;url&gt;http://172.16.1.13/maven2&lt;/url&gt;
+      &lt;layout&gt;default&lt;/layout&gt;
+    &lt;/repository&gt;
+  &lt;/repositories&gt;
+  &lt;pluginRepositories&gt;
+    ...
+  &lt;/pluginRepositories&gt;
+  ...
+&lt;/project&gt;
+</Value>
+                            </MetaInfo>
+                            <AttributeValue>
+<Name>&lt;Unaudited&gt;</Name>
+<Count>1</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Not an Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Reliability Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Bad Practice</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Suspicious</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Exploitable</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                        </MajorAttributeSummary>
+                        <Issue iid="87E3EC5CC8154C006783CC461A6DDEEB" ruleID="FF57412F-DD28-44DE-8F4F-0AD39620768C">
+                            <Category>Build Misconfiguration: External Maven Dependency Repository</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>Environment</Kingdom>
+                            <Abstract>这一 Maven 编译脚本依赖于外部数据源，这会导致攻击者能够将恶意代码插入最终产品中，或者控制编译计算机。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>pom.xml</FileName>
+<FilePath>pom.xml</FilePath>
+<LineStart>4</LineStart>
+<Snippet>&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+</Snippet>
+<TargetFunction>//project/repositories()</TargetFunction>
+                            </Primary>
+                        </Issue>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>J2EE Bad Practices: Leftover Debug Code</groupTitle>
+                        <MajorAttributeSummary>
+                            <MetaInfo>
+<Name>Abstract</Name>
+<Value>类 command 包含调试代码，它可以在部署的 web 应用程序中建立一些意想不到的入口点。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Explanation</Name>
+<Value>开发过程中一般会为了调试和测试目的增加一些“后门”代码，这些代码不会随应用程序一起提供或部署。如果这类调试代码无意中被保留在应用程序中，则会导致应用程序向计划外的交互模式开放。这些后门入口点很容易产生安全隐患，因为它们不在当初的设计或者测试的考虑之内，并且不会出现在应用程序设计中的操作环境里。
+
+遗忘调试代码中最常见例子出现在 web 应用程序中的 main() 方法。尽管这在产品的开发过程中是完全可以接受的，但是属于 J2EE 应用程序中的那部分类不应该定义 main()。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Recommendations</Name>
+<Value>务必在部署应用程序的产品版之前删除调试代码。无论是否存在直接的安全威胁，一旦早期开发阶段结束，就没有任何理由将这样的代码保留在应用程序中。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Tips</Name>
+<Value>1. 出现方法 main() 可能预示着一个十分严重安全问题。在查找调用 main() 的操作时，请检查是否存在其他迹象，表明开发者编程时过于仓促，或者出于其他情况没能正常地结束工作。
+
+2. 如果您审计一个非 J2EE Java 应用程序，J2EE Bad Practices 分类可能不适用于您的环境。在这种情况下，您可以使用 AuditGuide 来消除这些问题。</Value>
+                            </MetaInfo>
+                            <AttributeValue>
+<Name>&lt;Unaudited&gt;</Name>
+<Count>1</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Not an Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Reliability Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Bad Practice</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Suspicious</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Exploitable</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                        </MajorAttributeSummary>
+                        <Issue iid="6688A6452832F9EAD579337DF4906FC3" ruleID="625EEE1F-464F-42DC-85D6-269A637EF747">
+                            <Category>J2EE Bad Practices: Leftover Debug Code</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>Encapsulation</Kingdom>
+                            <Abstract>类 command 包含调试代码，它可以在部署的 web 应用程序中建立一些意想不到的入口点。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>33</LineStart>
+<Snippet>        return result;
+    }
+    public static void main(String[] args) throws IOException {
+
+</Snippet>
+<TargetFunction>Function: main()</TargetFunction>
+                            </Primary>
+                        </Issue>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>Poor Error Handling: Overly Broad Catch</groupTitle>
+                        <MajorAttributeSummary>
+                            <MetaInfo>
+<Name>Abstract</Name>
+<Value>command.java 中第 28 行的 catch 块可以处理的异常种类很多，但往往会由于过多的考虑不应该在此位置处理的各种问题或故障而困扰不已。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Explanation</Name>
+<Value>多个 catch 块看上去繁琐，但使用一个“简约”的 catch 块捕获高级别的异常类（如 Exception），可能会混淆那些需要特殊处理的异常，或是捕获了不应在程序中这一点捕获的异常。本质上，捕获范围过大的异常与“Java 分类定义异常”这一目的是相违背的，随着程序的增加而抛出新异常时，这种做法会十分危险。而新发生的异常类型也不会被注意到。
+
+示例：以下代码使用了同一方式来处理三种不同的异常类型。
+
+
+  try {
+    doExchange();
+  }
+  catch (IOException e) {
+    logger.error("doExchange failed", e);
+  }
+  catch (InvocationTargetException e) {
+    logger.error("doExchange failed", e);
+  }
+  catch (SQLException e) {
+    logger.error("doExchange failed", e);
+  }
+
+
+其实，与其这样，还不如使用一个单独的 catch 块来处理这三种异常，如下所示：
+
+
+  try {
+    doExchange();
+  }
+  catch (Exception e) {
+    logger.error("doExchange failed", e);
+  }
+
+
+但是如果修改 doExchange()，以抛出需要以某种不同的方式处理的新异常类型，则范围过大的 catch 块会阻止编译器指出这一情况（有新的异常抛出）。此外，新 catch 块也将处理那些来自于 RuntimeException 的异常，比如 ClassCastException 和 NullPointerException，而这些异常的发生是不在程序员的计划之内的。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Recommendations</Name>
+<Value>不要捕获范围过大的异常类，比如 Exception、Throwable、Error 或 RuntimeException，除非是级别非常高的程序或线程。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Tips</Name>
+<Value>1. 如果有问题的 catch 块立即抛出一个新异常，Fortify 安全编码规则包将不会标记出 overly broad catch 块。</Value>
+                            </MetaInfo>
+                            <AttributeValue>
+<Name>&lt;Unaudited&gt;</Name>
+<Count>1</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Not an Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Reliability Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Bad Practice</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Suspicious</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Exploitable</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                        </MajorAttributeSummary>
+                        <Issue iid="F75E66380CFBE10FF82118BB93317F97" ruleID="85E603E0-2933-4F38-851F-341604F75CB9">
+                            <Category>Poor Error Handling: Overly Broad Catch</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>Errors</Kingdom>
+                            <Abstract>command.java 中第 28 行的 catch 块可以处理的异常种类很多，但往往会由于过多的考虑不应该在此位置处理的各种问题或故障而困扰不已。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>28</LineStart>
+<Snippet>                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }</Snippet>
+<TargetFunction>CatchBlock()</TargetFunction>
+                            </Primary>
+                        </Issue>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>Unchecked Return Value</groupTitle>
+                        <MajorAttributeSummary>
+                            <MetaInfo>
+<Name>Abstract</Name>
+<Value>command.java 中的 main() 方法忽略了第 43 行的 waitFor() 返回的值，这可能会导致程序无法发现意外状况和情况。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Explanation</Name>
+<Value>Java 程序员常常会误解包含在许多 java.io 类中的 read() 及相关方法。在 Java 结果中，将大部分错误和异常事件都作为异常抛出。（这是 Java 相对于 C 语言等编程语言的优势：各种异常更加便于程序员考虑是哪里出现了问题。）但是，如果只有少量的数据可用，stream 和 reader 类并不认为这是异常的情况。这些类只是将这些少量的数据添加到返回值缓冲区，并且将返回值设置为读取的字节或字符数。所以，并不能保证返回的数据量一定等于请求的数据量。
+
+这样，程序员就需要检查 read() 和其他 IO 方法的返回值，以确保接收到期望的数据量。
+
+
+
+示例：下列代码会在一组用户中进行循环，读取每个用户的私人数据文件。程序员假设这些文件总是正好 1000 字节，从而忽略了检查 read() 的返回值。如果攻击者能够创建一个较小的文件，程序就会重复利用前一个用户的剩余数据，并对这些数据进行处理，就像这些数据属于攻击者一样。
+
+
+FileInputStream fis;
+byte[] byteArray = new byte[1024];
+for (Iterator i=users.iterator(); i.hasNext();) {
+    String userName = (String) i.next();
+    String pFileName = PFILE_ROOT + "/" + userName;
+    FileInputStream fis = new FileInputStream(pFileName);
+    fis.read(byteArray); // the file is always 1k bytes
+    fis.close();
+    processPFile(userName, byteArray);
+}
+</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Recommendations</Name>
+<Value>
+  FileInputStream fis;
+  byte[] byteArray = new byte[1024];
+  for (Iterator i=users.iterator(); i.hasNext();) {
+    String userName = (String) i.next();
+    String pFileName = PFILE_ROOT + "/" + userName;
+    fis = new FileInputStream(pFileName);
+    int bRead = 0;
+    while (bRead &lt; 1024) {
+        int rd = fis.read(byteArray, bRead, 1024 - bRead);
+        if (rd == -1) {
+          throw new IOException("file is unusually small");
+        }
+        bRead += rd;
+    }
+    // could add check to see if file is too large here
+    fis.close();
+    processPFile(userName, byteArray);
+  }
+
+
+注：因为该问题的修复相当地复杂，您可能试图使用一个更简单的方法，例如在开始阅读前检查文件的大小。这种方法将导致应用程序容易受到文件系统 race condition 的攻击，凭借这个攻击者可以在文件大小检查和从文件调用读取数据之间使用恶意文件替换结构良好的文件。</Value>
+                            </MetaInfo>
+                            <MetaInfo>
+<Name>Tips</Name>
+<Value>1. 为了对此类问题进行辩解，某些程序员这样解释道：“这是绝对不可能会发生的，因为...”，对此我们必须加以提防。如今，程序员能够利用自己的开发环境来拓展对系统运行方式的直观认识。如果软件最终运行在不同种类或版本的操作系统上、采用不同的硬件配置或运行时环境，那么原有的直观认识可能就不再适用了。</Value>
+                            </MetaInfo>
+                            <AttributeValue>
+<Name>&lt;Unaudited&gt;</Name>
+<Count>1</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Not an Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Reliability Issue</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Bad Practice</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Suspicious</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                            <AttributeValue>
+<Name>Exploitable</Name>
+<Count>0</Count>
+                            </AttributeValue>
+                        </MajorAttributeSummary>
+                        <Issue iid="8468F343811CE24CFB05C74BC1A36C2D" ruleID="3CF981BF-7B7D-44C9-B7F9-39512C581C10">
+                            <Category>Unchecked Return Value</Category>
+                            <Folder>Low</Folder>
+                            <Kingdom>API Abuse</Kingdom>
+                            <Abstract>command.java 中的 main() 方法忽略了第 43 行的 waitFor() 返回的值，这可能会导致程序无法发现意外状况和情况。</Abstract>
+                            <Friority>Low</Friority>
+                            <Primary>
+<FileName>command.java</FileName>
+<FilePath>src/main/java/command.java</FilePath>
+<LineStart>43</LineStart>
+<Snippet>            cmt.validate(args[0]);
+            Process proc = processBuilder.command(args[0]).start();
+            proc.waitFor(); // 宸茬粡鎵ц瀹岀涓�涓懡浠わ紝鍑嗗鎵ц绗簩涓懡浠�
+            proc = processBuilder.command(args[1]).start();
+            InputStreamReader is = new InputStreamReader(proc.getInputStream());</Snippet>
+<TargetFunction>waitFor()</TargetFunction>
+                            </Primary>
+                        </Issue>
+                    </GroupingSection>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+    <ReportSection enabled="false" optionalSubsections="true">
+        <Title>Detailed Project Summary</Title>
+        <SubSection enabled="true">
+            <Title>Files Scanned</Title>
+            <Description>A detailed listing of all scanned files.  Files are listed with paths relative to the Source Base Path</Description>
+            <Text>Code base location: D:/code/cecloud_code/untitled1
+Files Scanned:
+src/main/java/command.java		java	29 Lines	1.8 KB	2022-5-9 15:30:33
+.idea/jarRepositories.xml		xml			2022-5-9 15:24:18
+.idea/workspace.xml		xml		2.7 KB	2022-5-9 15:39:38
+.idea/compiler.xml		xml			2022-5-9 15:24:18
+.idea/synopsys_code_sight_state.xml		xml			2022-5-9 15:24:18
+pom.xml		xml			2022-5-9 15:30:17
+.idea/misc.xml		xml			2022-5-9 15:23:39</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Reference Elements</Title>
+            <Description>A Listing of all libraries used for the translation phase of the analysis</Description>
+            <Text>Classpath:
+
+No classpath specified during translation
+
+Libdirs:
+
+No libdirs specified during translation</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Rulepacks</Title>
+            <Description>A listing of all rulepacks used in the analysis</Description>
+            <Text>Valid Rulepacks:
+
+Name: 		Fortify 安全编码规则、核心、Android
+Version: 	2019.4.1.0002
+ID: 				5EF8CC97-4634-4E13-B357-C1C33629D474
+SKU: 			RUL13105
+
+Name: 		Fortify 安全编码规则、核心、Annotations
+Version: 	2019.4.1.0002
+ID: 				915E3017-FDC9-4494-8DFA-E61B0ED7B726
+SKU: 			RUL13081
+
+Name: 		Fortify 安全编码规则、核心、Java
+Version: 	2019.4.1.0002
+ID: 				D044EBBB-7081-4451-BDD6-5A163AD639C3
+SKU: 			RUL13040
+
+Name: 		Fortify 安全编码规则、扩展、配置
+Version: 	2019.4.1.0002
+ID: 				8DA5519F-A16E-492A-81CC-750AFB8A8D3F
+SKU: 			RUL13042
+
+Name: 		Fortify 安全编码规则、扩展、内容
+Version: 	2019.4.1.0002
+ID: 				E5468AFF-F0AB-4F60-A2F8-65CBE5167BCA
+SKU: 			RUL13076
+
+Name: 		Fortify 安全编码规则、扩展、Java
+Version: 	2019.4.1.0002
+ID: 				908C68F5-D8DB-4D23-8AB5-FAAD5C53F11B
+SKU: 			RUL13045
+
+Name: 		Fortify 安全编码规则、扩展、JSP
+Version: 	2019.4.1.0002
+ID: 				E9341D69-1DF9-45B6-A19C-454863D1694D
+SKU: 			RUL13046
+
+External Metadata:
+Version: 2019.4.1.0002
+
+Name: 		CWE
+ID: 				3ADB9EE4-5761-4289-8BD3-CBFCC593EBBC
+由 MITRE 参与制定并维护的通用缺陷列表 (CWE) 在全球范围内免费供公众使用。CWE 提供了一组统一的可度量软件缺陷，以便更高效地讨论、描述、选择和使用可用于在源代码和可操作系统中查找这些缺陷的软件安全工具和服务，并更好地了解和管理与体系结构和设计相关的软件缺陷。
+
+Name: 		CWE Top 25 2019
+ID: 				7AF935C9-15AA-45B2-8EEC-0EAE4194ACDE
+2019 CWE Top 25 最危险的软件错误列举了最普遍、最危险的缺陷，其中的错误可导致软件漏洞（如国家漏洞数据库 (National Vulnerability Database) 所示）。这些缺陷出现频繁、容易查找且易于被利用。由于它们将频繁地允许攻击者完全控制软件、窃取数据或使软件完全无法运行，因此具有危险性。此列表是 CWE 团队将启发式公式与数据驱动型方法结合使用而得出的，数据驱动型方法利用的是常见的漏洞和风险 (CVE)、国家漏洞数据库 (National Vulnerability Database, NVD) 和常见的漏洞评分系统 (CVSS)。因 CWE 分类具有层次结构，Fortify 将 Top 25 条目子项的所有 CWE ID 视作条目上下文的一部分，因为层次结构中存在 "CHILD-OF" 关系。只使用此 Top 25 列表来合理分配审核尝试时，应小心谨慎，因为接受分析的软件可能与用于定义 Top 25 的启发式假设不一致。例如，这些缺陷中的许多缺陷与 C 类语言相关，接受分析的软件可能并不属于语言的 C 系列。因此，许多 CWE 不在范围内。
+
+Name: 		DISA CCI 2
+ID: 				7F037130-41E5-40F0-B653-7819A4B3E241
+美国国防信息系统局 (DISA) 控制关联标识符 (CCI) 的目的是为基于策略的要求提供标准标识符，这些要求将高级策略表达式与低级技术实施相关联。 与每个 CCI 相关联的是对影响信息保证 (IA) 控制或 IA 最佳实践的每个单一、可操作语句的描述。 使用 CCI，可以分解高级策略框架安全要求，并与低级实施明确关联，从而能够评估涵盖异构技术的相关合规性评估结果。 可以使用 DISA STIG Viewer 查看 NIST SP 800-53 修订版 4 中指定的与每个 CCI 关联的当前 IA 控制和最佳实践。  &lt;br /&gt;下表汇总了按 Fortify Priority Order 细分的不同 CCI 中发现的问题数量。 当未针对给定 CCI 报告问题时，则认为 CCI 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的结果，则 CCI-003187 不被视为“就位”。 类似地，如果项目缺少 Micro Focus Fortify WebInspect 扫描，或者扫描中包含任何重要结果，则 CCI-000366 和 CCI-000256 不被视为“就位”。
+
+Name: 		FISMA
+ID: 				B40F9EE0-3824-4879-B9FE-7A789C89307C
+联邦信息处理标准 (FIPS) 200 文档是由国家标准与技术研究所 (NIST) 发行的一系列官方出版物的组成部分，与根据联邦信息安全管理法案 (FISMA) 条款采用并颁布的标准和准则相关。尤其是，FIPS 出版物 200 规定了“联邦信息和信息系统的最低安全性要求”。
+
+Name: 		GDPR
+ID: 				771C470C-9274-4580-8556-C12F5E4BEC51
+欧盟通用数据保护条例 (GDPR) 将取代数据保护指令 95/46/EC，并且旨在统一整个欧洲的数据隐私法，以保护和加强所有欧盟公民的数据隐私，并重塑该地区的组织处理数据隐私的方式。 GDPR 将于 2018 年 5 月 25 日生效，它为各组织提供有关如何处理个人数据的框架。        根据 GDPR 条例，个人数据“表示与已识别或可识别的自然人（“数据主体”）相关的任何信息；可识别的自然人为可直接或间接识别的自然人，尤其是通过引用如姓名、身份证号码、位置数据、网络标识等标识或引用特定于该自然人的身体、生理、遗传、心理、经济、文化或社会身份的一个或多个因素进行识别。”      与应用程序安全相关并要求企业在其产品和服务的设计和开发期间保护个人数据的 GDPR 条款包括：&lt;br /&gt;&lt;br /&gt;   - 第 25 条，依据设计的默认数据保护 - 要求“控制器应实施适当的技术和组织措施，以确保默认仅处理为实现每个特定处理目的所需的个人数据。”&lt;br /&gt;   - 第 32 条，安全处理 - 要求企业保护其系统和应用程序“免遭意外或非法的破坏、损失、更改、未经授权的个人数据披露或访问”。       此报告可能由各组织用作帮助识别和保护与应用程序安全相关的个人数据的框架。
+
+Name: 		MISRA C 2012
+ID: 				555A3A66-A0E1-47AF-910C-3F19A6FB2506
+现在，在第三版中，《汽车工业软件可靠性协会 (MISRA) C 指南》描述了一个 C 编程语言子集，使用这种编程语言，在关键系统中引入错误的风险会显著降低。尽管《MISRA C 指南》专注于安全相关的软件开发，但规则子集也反应了安全属性。Fortify 在安全上下文中解析《MISRA C 指南》，提供安全漏洞类别到 MISRA 定义的规则的相互关联。Fortify 提供这些以安全为中心的检测机制以及标准规则包，然而，与安全相关的《MISRA C 指南》的进一步支持可以通过使用自定义规则来添加。本报告中的结果有助于为 MISRA 创建合规性矩阵。
+
+Name: 		MISRA C++ 2008
+ID: 				5D4B75A1-FC91-4B4B-BD4D-C81BBE9604FA
+《汽车工业软件可靠性协会 (MISRA) C++ 指南》(Motor Industry Software Reliability Association (MISRA) C++ Guidelines) 描述了一个 C++ 编程语言子集，使用这种编程语言，在关键系统中引入错误的风险会显著降低。尽管《MISRA C++ 指南》专注于安全相关的软件开发，但规则子集也反应了安全属性。Fortify 在安全上下文中解析《MISRA C++ 指南》，提供安全漏洞类别到 MISRA 定义的规则的相互关联。Fortify 提供这些以安全为中心的检测机制以及标准规则包，然而，与安全相关的《MISRA C++ 指南》的进一步支持可以通过使用自定义规则来添加。本报告中的结果有助于为 MISRA 创建合规性矩阵。
+
+Name: 		NIST SP 800-53 Rev.4
+ID: 				1114583B-EA24-45BE-B7F8-B61201BACDD0
+NIST Special Publication 800-53 Revision 4 提供一系列安全和隐私控制，旨在保护联邦组织和信息系统免受安全威胁。下表汇总了不同控制发现且区分过 Fortify 优先级的问题数量。
+
+Name: 		OWASP Mobile 2014
+ID: 				EEE3F9E7-28D6-4456-8761-3DA56C36F4EE
+OWASP Mobile Top 10 Risks 2014 提供了有关移动应用程序安全威胁的重要宣传文档。OWASP Mobile Top 10 代表就最严重的移动应用程序安全缺陷所达成的广泛共识。项目成员包括来自世界各地的安全专家，他们结合自身专业知识共同敲定这一安全威胁榜单。
+
+Name: 		OWASP Top 10 2004
+ID: 				771C470C-9274-4580-8556-C023E4D3ADB4
+OWASP Top Ten 2004 提供了有关 Web 应用程序安全威胁的重要文档。OWASP Top Ten 代表就最危险 Web 应用程序安全缺陷所达成的普遍共识。项目成员包括来自世界各地的安全专家，他们结合自身专业知识共同敲定这一安全威胁榜单。
+
+Name: 		OWASP Top 10 2007
+ID: 				1EB1EC0E-74E6-49A0-BCE5-E6603802987A
+OWASP Top Ten 2007 提供了有关 Web 应用程序安全威胁的重要文档。OWASP Top Ten 代表就最危险 Web 应用程序安全缺陷所达成的普遍共识。项目成员包括来自世界各地的安全专家，他们结合自身专业知识共同敲定这一安全威胁榜单。
+
+Name: 		OWASP Top 10 2010
+ID: 				FDCECA5E-C2A8-4BE8-BB26-76A8ECD0ED59
+OWASP Top Ten 2010 提供了有关 Web 应用程序安全威胁的重要文档。OWASP Top Ten 代表就最危险 Web 应用程序安全缺陷所达成的普遍共识。项目成员包括来自世界各地的安全专家，他们结合自身专业知识共同敲定这一安全威胁榜单。
+
+Name: 		OWASP Top 10 2013
+ID: 				1A2B4C7E-93B0-4502-878A-9BE40D2A25C4
+OWASP Top Ten 2013 提供了有关 Web 应用程序安全威胁的重要文档。OWASP Top Ten 代表就最危险 Web 应用程序安全缺陷所达成的普遍共识。项目成员包括来自世界各地的安全专家，他们结合自身专业知识共同敲定这一安全威胁榜单。
+
+Name: 		OWASP Top 10 2017
+ID: 				3C6ECB67-BBD9-4259-A8DB-B49328927248
+OWASP Top Ten 2017 提供了有关如何提高 Web 应用程序安全意识的强大文档，聚焦于告知社区团体最常见和最重要的 Web 应用程序安全缺陷所造成的后果。 OWASP Top Ten 代表就数据收集和调查结果中存在的最危险 Web 应用程序安全漏洞所达成的广泛共识。 项目成员包括来自世界各地的安全专家，他们结合自身专业知识共同敲定这一安全威胁榜单。
+
+Name: 		PCI 1.1
+ID: 				CBDB9D4D-FC20-4C04-AD58-575901CAB531
+支付卡行业 (PCI) 数据安全标准 (DSS) 1.1 合规性标准列出了 12 项要求，按逻辑分成 6 个相关组，称作“控制目标”。如果系统存储、处理或传输了主帐号 (PAN)，则 PCI DSS 要求适用。
+
+Name: 		PCI 1.2
+ID: 				57940BDB-99F0-48BF-BF2E-CFC42BA035E5
+支付卡行业数据安全标准版本 1.2 说明
+
+Name: 		PCI 2.0
+ID: 				8970556D-7F9F-4EA7-8033-9DF39D68FF3E
+PCI DSS 2.0 合规性标准（尤其是 6.3、6.5 和 6.6 部分）将 OWASP Top 10 漏洞目录作为必须检测和修复的核心目录。下表汇总了按照不同 PCI DSS 要求发现且区分过 Fortify 优先级的问题数量。
+
+Name: 		PCI 3.0
+ID: 				E2FB0D38-0192-4F03-8E01-FE2A12680CA3
+下面是支付卡行业 (PCI) 数据安全标准 (DSS) v3.0 的应用程序安全部分摘要。Fortify 会针对 PCI DSS 的第 1、2、3、4、6、7、8 和 10 部分的 32 项应用程序安全性相关的要求进行测试，并报告每项要求是处于“就位”还是“未就位”状态，以指示是否符合这些要求。此报告旨在度量特定应用程序处理的符合性级别（与 PCI DSS 3.0 合规性进行比较），而不是作为综合合规性 (ROC) 报告。本报告中包含的信息主要面向项目经理、安全审计人员和合规性审计人员。
+
+Name: 		PCI 3.1
+ID: 				AC0D18CF-C1DA-47CF-9F1A-E8EC0A4A717E
+下面是支付卡行业 (PCI) 数据安全标准 (DSS) v3.1 的应用程序安全部分摘要。Fortify 会针对 PCI DSS 的第 1、2、3、4、6、7、8 和 10 部分的 31 项应用程序安全性相关的要求进行测试，并报告每项要求是处于“就位”还是“未就位”状态，以指示是否符合这些要求。此报告旨在度量特定应用程序处理的符合性级别（与 PCI DSS 3.1 合规性进行比较），而不是作为综合合规性 (ROC) 报告。本报告中包含的信息主要面向项目经理、安全审计人员和合规性审计人员。
+
+Name: 		PCI 3.2
+ID: 				4E8431F9-1BA1-41A8-BDBD-087D5826751A
+下面是支付卡行业 (PCI) 数据安全标准 (DSS) v3.2 的应用程序安全部分摘要。Fortify 会针对 PCI DSS 的第 1、2、3、4、6、7、8 和 10 部分的 31 项应用程序安全性相关的要求进行测试，并报告每项要求是处于“就位”还是“未就位”状态，以指示是否符合这些要求。此报告旨在度量特定应用程序处理的符合性级别（与 PCI DSS 3.2 合规性进行比较），而不是作为综合合规性 (ROC) 报告。本报告中包含的信息主要面向项目经理、安全审计人员和合规性审计人员。
+
+Name: 		PCI 3.2.1
+ID: 				EADE255F-6561-4EFE-AD31-2914F6BFA329
+下面是支付卡行业 (PCI) 数据安全标准 (DSS) v3.2.1 的应用程序安全部分摘要。Fortify 会针对 PCI DSS 的第 1、2、3、4、6、7、8 和 10 部分的 31 项应用程序安全性相关的要求进行测试，并报告每项要求是处于“就位”还是“未就位”状态，以指示是否符合这些要求。此报告旨在测量特定应用程序具备的符合性级别（与 PCI DSS 3.2.1 合规性进行比较），而不是作为综合合规性报告 (ROC)。此报告中包含的信息面向项目经理、安全审计员和合规性审计员。
+
+Name: 		PCI SSF 1.0
+ID: 				0F551543-AF0E-4334-BEDF-1DDCD5F4BF74
+下面是支付卡行业 (PCI) 软件安全框架 (SSF) v1.0 中定义的“安全软件要求和评估程序”应用程序安全部分的摘要。Fortify 会针对 PCI SSF 的控制目标部分 2、3、4、5、6、7、8 和 A.2 的 23 项应用程序安全性相关的控制目标进行测试，并报告每个控制目标是处于“就位”还是“未就位”状态，以指示是否符合这些要求。此报告旨在衡量特定应用程序与 PCI SSF 1.0 合规性相比的符合性程度，并不用作全面的合规性报告 (ROC)。此报告中包含的信息面向项目经理、安全审计员和合规性审计员。
+
+Name: 		SANS Top 25 2009
+ID: 				939EF193-507A-44E2-ABB7-C00B2168B6D8
+2009 CWE/SANS Top 25 编程错误列出了最严重的编程错误，这些错误可能会导致严重的软件漏洞。它们出现频繁、容易查找且易于被利用。由于它们将频繁地允许攻击者完全控制软件、窃取数据或使软件完全无法运行，因此具有危险性。此列表是系统网络安全协会、MITRE 和许多顶尖的软件安全专家共同协作的成果。
+
+Name: 		SANS Top 25 2010
+ID: 				72688795-4F7B-484C-88A6-D4757A6121CA
+SANS Top 25 2010 最危险的软件错误列举了最普遍、最危险的错误，以通用缺陷列表 (CWE) 标识符分类，其中的错误可导致软件漏洞 (http://cwe.mitre.org/)。这些软件错误通常很容易找到和被利用。这些错误的根本危险在于它们可以使攻击者完全控制软件、窃取数据或使软件完全无法运行。
+
+Name: 		SANS Top 25 2011
+ID: 				92EB4481-1FD9-4165-8E16-F2DE6CB0BD63
+SANS Top 25 2011 最危险的软件错误列举了最普遍、最危险的错误，以通用缺陷列表 (CWE) 标识符分类，其中的错误可导致软件漏洞 (http://cwe.mitre.org/)。这些软件错误通常很容易找到和被利用。这些错误的根本危险在于它们可以使攻击者完全控制软件、窃取数据或使软件完全无法运行。
+
+Name: 		STIG 3.1
+ID: 				F2FA57EA-5AAA-4DDE-90A5-480BE65CE7E7
+安全技术实施指南版本 3.1 说明
+
+Name: 		STIG 3.10
+ID: 				788A87FE-C9F9-4533-9095-0379A9B35B12
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了区分过 Fortify 优先级的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APP5080: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APP5100: CAT II 不会被视为“就位”。
+
+Name: 		STIG 3.4
+ID: 				58E2C21D-C70F-4314-8994-B859E24CF855
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 可识别漏洞的严重性：&lt;br /&gt;    
+&lt;LI&gt;CAT I：允许攻击者立即访问机器，允许超级用户访问或绕过防火墙。&lt;/LI&gt; 
+&lt;LI&gt;CAT II：提供很可能帮助入侵者获得访问权限的信息。&lt;/LI&gt; 
+&lt;LI&gt;CAT III：提供可能危及安全的信息。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了区分过 Fortify 优先级的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。
+
+Name: 		STIG 3.5
+ID: 				DD18E81F-3507-41FA-9DFA-2A9A15B5479F
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 可识别漏洞的严重性：&lt;br /&gt;    
+&lt;LI&gt;CAT I：允许攻击者立即访问机器，允许超级用户访问或绕过防火墙。&lt;/LI&gt; 
+&lt;LI&gt;CAT II：提供很可能帮助入侵者获得访问权限的信息。&lt;/LI&gt; 
+&lt;LI&gt;CAT III：提供可能危及安全的信息。&lt;/LI&gt; &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了区分过 Fortify 优先级的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。
+
+Name: 		STIG 3.6
+ID: 				000CA760-0FED-4374-8AA2-6FA3968A07B1
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 可识别漏洞的严重性：&lt;br /&gt;    
+&lt;LI&gt;CAT I：允许攻击者立即访问机器，允许超级用户访问或绕过防火墙。&lt;/LI&gt; 
+&lt;LI&gt;CAT II：提供很可能帮助入侵者获得访问权限的信息。&lt;/LI&gt; 
+&lt;LI&gt;CAT III：提供可能危及安全的信息。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了区分过 Fortify 优先级的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APP5080: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APP5100: CAT II 不会被视为“就位”。
+
+Name: 		STIG 3.7
+ID: 				E69C07C0-81D8-4B04-9233-F3E74167C3D2
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 可识别漏洞的严重性：&lt;br /&gt;    
+&lt;LI&gt;CAT I：允许攻击者立即访问机器，允许超级用户访问或绕过防火墙。&lt;/LI&gt; 
+&lt;LI&gt;CAT II：提供很可能帮助入侵者获得访问权限的信息。&lt;/LI&gt; 
+&lt;LI&gt;CAT III：提供可能危及安全的信息。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了区分过 Fortify 优先级的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APP5080: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APP5100: CAT II 不会被视为“就位”。
+
+Name: 		STIG 3.9
+ID: 				1A9D736B-2D4A-49D1-88CA-DF464B40D732
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APP&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了区分过 Fortify 优先级的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APP5080: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APP5100: CAT II 不会被视为“就位”。
+
+Name: 		STIG 4.1
+ID: 				95227C50-A9E4-4C9D-A8AF-FD98ABAE1F3C
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了区分过 Fortify 优先级的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APSC-DV-003170: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APSC-DV-001460: CAT II 和 STIGID APSC-DV-002930: CAT II 不会被视为“就位”。
+
+Name: 		STIG 4.10
+ID: 				EF1FF442-1673-4CF1-B7C4-920F1A96A8150
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了由 Fortify Priority Order 细分的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APSC-DV-003170：CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APSC-DV-001460: CAT II 和 STIGID APSC-DV-002930: CAT II 不会被视为“就位”。
+
+Name: 		STIG 4.2
+ID: 				672C15F8-8822-4E05-8C9E-1A4BAAA7A373
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了区分过 Fortify 优先级的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APSC-DV-003170: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APSC-DV-001460: CAT II 和 STIGID APSC-DV-002930: CAT II 不会被视为“就位”。
+
+Name: 		STIG 4.3
+ID: 				A0B313F0-29BD-430B-9E34-6D10F1178506
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了区分过 Fortify 优先级的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APSC-DV-003170: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APSC-DV-001460: CAT II 和 STIGID APSC-DV-002930: CAT II 不会被视为“就位”。
+
+Name: 		STIG 4.4
+ID: 				ECEC5CA2-7ACA-4B70-BF44-3248B9C6F4F8
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了由 Fortify Priority Order 细分的不同 STIGID 发现的问题数量。 当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APSC-DV-003170: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APSC-DV-001460: CAT II 和 STIGID APSC-DV-002930: CAT II 不会被视为“就位”。
+
+Name: 		STIG 4.5
+ID: 				E6010E0A-7F71-4388-B8B7-EE9A02143474
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了由 Fortify Priority Order 细分的不同 STIGID 发现的问题数量。 当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APSC-DV-003170: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APSC-DV-001460: CAT II 和 STIGID APSC-DV-002930: CAT II 不会被视为“就位”。
+
+Name: 		STIG 4.6
+ID: 				EFB9B012-44D6-456D-B197-03D2FD7C7AD6
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了由 Fortify Priority Order 细分的不同 STIGID 发现的问题数量。 当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APSC-DV-003170: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APSC-DV-001460: CAT II 和 STIGID APSC-DV-002930: CAT II 不会被视为“就位”。
+
+Name: 		STIG 4.7
+ID: 				B04A1E01-F1C1-48D3-A827-0F70872182D7
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了由 Fortify Priority Order 细分的不同 STIGID 发现的问题数量。 当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APSC-DV-003170: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APSC-DV-001460: CAT II 和 STIGID APSC-DV-002930: CAT II 不会被视为“就位”。
+
+Name: 		STIG 4.8
+ID: 				E6805D9F-D5B5-4192-962C-46828FF68507
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了由 Fortify Priority Order 细分的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer (SCA) 扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APSC-DV-003170: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APSC-DV-001460: CAT II 和 STIGID APSC-DV-002930: CAT II 不会被视为“就位”。
+
+Name: 		STIG 4.9
+ID: 				7B9F7B3B-07FC-4B61-99A1-70E3BB23A6A0
+由美国国防信息系统局 (DISA) STIG 识别的每个要求或建议以 STIG 标识符 (STIGID) 表示，并且标识符与清单项和严重性代码 [APSC-DV-&lt;I&gt;ID&lt;/I&gt;: CAT &lt;I&gt;SEV&lt;/I&gt;] 相对应。DISA STIG 根据以下情况定义了漏洞的三种严重性：&lt;br /&gt;    
+&lt;LI&gt;对漏洞加以利用会直接和立即导致机密性、可用性或完整性丧失 (CAT I)。&lt;/LI&gt; 
+&lt;LI&gt;对漏洞加以利用可能会导致机密性、可用性或完整性丧失 (CAT II)。&lt;/LI&gt; 
+&lt;LI&gt;如果存在这些漏洞，会削弱针对防止机密性、可用性或完整性丧失的保护 (CAT III)。&lt;/LI&gt;  &lt;/UL&gt;
+  &lt;br /&gt;下表汇总了由 Fortify Priority Order 细分的不同 STIGID 发现的问题数量。当未针对给定 STIGID 报告问题时，则认为 STIGID 的状态为“就位”。  &lt;br /&gt;&lt;br /&gt;如果项目缺少 Fortify Static Code Analyzer（SCA）扫描，或者扫描中包含尚未修复、隐藏或抑制的发现，则 STIGID APSC-DV-003170: CAT II 不会被视为“就位”。类似地，如果项目缺少 Fortify WebInspect 扫描，或者扫描中包含任何重要发现，则 STIGID APSC-DV-001460: CAT II 和 STIGID APSC-DV-002930: CAT II 不会被视为“就位”。
+
+Name: 		WASC 2.00
+ID: 				74f8081d-dd49-49da-880f-6830cebe9777
+共同努力创建 Web 应用安全联盟 (WASC) 的目的是对 Web 站点的安全威胁进行标准化、阐明和整理。威胁分类版本 2.00 概述了通常会导致网站被破坏的攻击和缺陷。
+
+Name: 		WASC 24 + 2
+ID: 				9DC61E7F-1A48-4711-BBFD-E9DFF537871F
+共同努力创建 Web 应用安全联盟 (WASC) 的目的是对 Web 站点的安全威胁进行标准化、阐明和整理。
+
+</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Properties</Title>
+            <Description>A complete listing of all properties set during analysis phase</Description>
+            <Text>WinForms.CollectionMutationMonitor.Label=WinFormsDataSource
+awt.toolkit=sun.awt.windows.WToolkit
+com.fortify.AuthenticationKey=C:\Users\admin\AppData\Local/Fortify/config/tools
+com.fortify.Core=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core
+com.fortify.InstallRoot=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1
+com.fortify.InstallationUserName=admin
+com.fortify.SCAExecutablePath=D:/Program Files/Fortify/Fortify_SCA_and_Apps_20.1.1/bin/sourceanalyzer.exe
+com.fortify.TotalPhysicalMemory=42739228672
+com.fortify.VS.RequireASPPrecompilation=true
+com.fortify.WorkingDirectory=C:\Users\admin\AppData\Local/Fortify
+com.fortify.locale=zh_CN
+com.fortify.log.console=true
+com.fortify.sca.AddImpliedMethods=true
+com.fortify.sca.AntCompilerClass=com.fortify.dev.ant.SCACompiler
+com.fortify.sca.AppendLogFile=true
+com.fortify.sca.AspnetTranslator=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core/private-bin/sca/aspcodegen.exe
+com.fortify.sca.BuildID=untitile
+com.fortify.sca.BuildOptions=-b untitile .
+com.fortify.sca.BundleControlflowIssues=true
+com.fortify.sca.BytecodePreview=true
+com.fortify.sca.CollectPerformanceData=true
+com.fortify.sca.CustomRulesDir=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core\config\customrules
+com.fortify.sca.DaemonCompilers=com.fortify.sca.util.compilers.GppCompiler,com.fortify.sca.util.compilers.GccCompiler,com.fortify.sca.util.compilers.AppleGppCompiler,com.fortify.sca.util.compilers.AppleGccCompiler,com.fortify.sca.util.compilers.MicrosoftCompiler,com.fortify.sca.util.compilers.MicrosoftLinker,com.fortify.sca.util.compilers.LdCompiler,com.fortify.sca.util.compilers.ArUtil,com.fortify.sca.util.compilers.SunCCompiler,com.fortify.sca.util.compilers.SunCppCompiler,com.fortify.sca.util.compilers.IntelCompiler,com.fortify.sca.util.compilers.ExternalCppAdapter,com.fortify.sca.util.compilers.ClangCompiler
+com.fortify.sca.DeadCodeFilter=true
+com.fortify.sca.DeadCodeIgnoreTrivialPredicates=true
+com.fortify.sca.DefaultAnalyzers=semantic:dataflow:controlflow:nullptr:configuration:content:structural:buffer
+com.fortify.sca.DefaultFileTypes=java,rb,erb,jsp,jspx,jspf,tag,tagx,tld,sql,cfm,php,phtml,ctp,pks,pkh,pkb,xml,config,Config,settings,properties,dll,exe,winmd,cs,vb,asax,ascx,ashx,asmx,aspx,master,Master,xaml,baml,cshtml,vbhtml,inc,asp,vbscript,js,jsx,ini,bas,cls,vbs,frm,ctl,html,htm,xsd,wsdd,xmi,py,cfml,cfc,abap,xhtml,cpx,xcfg,jsff,as,mxml,cbl,cscfg,csdef,wadcfg,wadcfgx,appxmanifest,wsdl,plist,bsp,ABAP,BSP,swift,page,trigger,scala,ts,tsx,conf,json,yaml,yml,go,kt,kts
+com.fortify.sca.DefaultJarsDirs=default_jars
+com.fortify.sca.DefaultRulesDir=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core\config\rules
+com.fortify.sca.DisableDeadCodeElimination=false
+com.fortify.sca.DisableFunctionPointers=false
+com.fortify.sca.DisableGlobals=false
+com.fortify.sca.DisableInferredConstants=false
+com.fortify.sca.DotnetDecompiler=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core/private-bin/sca/dotnet-decompiler.exe
+com.fortify.sca.DotnetTranslator=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core/private-bin/sca/dotnet-translator.exe
+com.fortify.sca.EnableInterproceduralConstantResolution=true
+com.fortify.sca.EnableNestedWrappers=true
+com.fortify.sca.EnableStructuralMatchCache=true
+com.fortify.sca.EnableWrapperDetection=true
+com.fortify.sca.FVDLDisableDescriptions=false
+com.fortify.sca.FVDLDisableProgramData=false
+com.fortify.sca.FVDLDisableSnippets=false
+com.fortify.sca.FVDLStylesheet=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core/resources/sca/fvdl2html.xsl
+com.fortify.sca.GoTranslator=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core/private-bin/sca/golang.exe
+com.fortify.sca.IndirectCallGraphBuilders=WinFormsAdHocFunctionBuilder,VirtualCGBuilder,J2EEIndirectCGBuilder,JNICGBuilder,StoredProcedureResolver,JavaWSCGBuilder,StrutsCGBuilder,DotNetWSCGBuilder,SqlServerSPResolver,ASPCGBuilder,ScriptedCGBuilder,NewJspCustomTagCGBuilder,DotNetCABCGBuilder,StateInjectionCGBuilder,SqlServerSPResolver2,PHPLambdaResolver,JavaWebCGBuilder
+com.fortify.sca.JVMArgs=-XX:SoftRefLRUPolicyMSPerMB=3000 -Xmx34359738367 -Xss16M
+com.fortify.sca.JavaSourcepathSearch=true
+com.fortify.sca.JdkVersion=1.8
+com.fortify.sca.LogFile=C:\Users\admin\AppData\Local\Fortify\sca20.1\log\sca
+com.fortify.sca.LogFileDir=C:\Users\admin\AppData\Local\Fortify\sca20.1\log
+com.fortify.sca.LogFileExt=.log
+com.fortify.sca.LogFileName=sca.log
+com.fortify.sca.LogFileNameNoExt=sca
+com.fortify.sca.LogFilePath=C:\Users\admin\AppData\Local\Fortify\sca20.1\log\sca.log
+com.fortify.sca.LogLevel=INFO
+com.fortify.sca.LowSeverityCutoff=1.0
+com.fortify.sca.MultithreadedAnalysis=true
+com.fortify.sca.NoNestedOutTagOutput=org.apache.taglibs.standard.tag.rt.core.RemoveTag,org.apache.taglibs.standard.tag.rt.core.SetTag
+com.fortify.sca.OldVbNetExcludeFileTypes=vb,asax,ascx,ashx,asmx,aspx,xaml,cshtml,vbhtml
+com.fortify.sca.PID=5308
+com.fortify.sca.Phase0HigherOrder.Languages=python,ruby,swift,javascript,typescript
+com.fortify.sca.Phase0HigherOrder.Level=1
+com.fortify.sca.PrintPerformanceDataAfterScan=false
+com.fortify.sca.ProjectRoot=C:\Users\admin\AppData\Local/Fortify
+com.fortify.sca.ProjectRoot=C:\Users\admin\AppData\Local/Fortify
+com.fortify.sca.RequireMapKeys=classrule
+com.fortify.sca.ResultsFile=untitile.fpr
+com.fortify.sca.ScaMSBuild=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core/private-bin/sca/msbuild/current/bin/msbuild.exe
+com.fortify.sca.SolverTimeout=15
+com.fortify.sca.SqlLanguage=TSQL
+com.fortify.sca.SuppressLowSeverity=true
+com.fortify.sca.ThreadCount.NameTableLoading=1
+com.fortify.sca.TypeInferenceFunctionTimeout=60
+com.fortify.sca.TypeInferenceLanguages=javascript,typescript,python,ruby
+com.fortify.sca.TypeInferencePhase0Timeout=300
+com.fortify.sca.UnicodeInputFile=true
+com.fortify.sca.UniversalBlacklist=.*yyparse.*
+com.fortify.sca.alias.mode.csharp=fs
+com.fortify.sca.alias.mode.javascript=fi
+com.fortify.sca.alias.mode.scala=fi
+com.fortify.sca.alias.mode.swift=fi
+com.fortify.sca.alias.mode.typescript=fi
+com.fortify.sca.alias.mode.vb=fs
+com.fortify.sca.analyzer.controlflow.EnableLivenessOptimization=false
+com.fortify.sca.analyzer.controlflow.EnableMachineFiltering=false
+com.fortify.sca.analyzer.controlflow.EnableRefRuleOptimization=false
+com.fortify.sca.analyzer.controlflow.EnableTimeOut=true
+com.fortify.sca.compilers.ant=com.fortify.sca.util.compilers.AntAdapter
+com.fortify.sca.compilers.ar=com.fortify.sca.util.compilers.ArUtil
+com.fortify.sca.compilers.armcc=com.fortify.sca.util.compilers.ArmCcCompiler
+com.fortify.sca.compilers.armcpp=com.fortify.sca.util.compilers.ArmCppCompiler
+com.fortify.sca.compilers.c++=com.fortify.sca.util.compilers.GppCompiler
+com.fortify.sca.compilers.c89=com.fortify.sca.util.compilers.C89Compiler
+com.fortify.sca.compilers.cc=com.fortify.sca.util.compilers.GccCompiler
+com.fortify.sca.compilers.cl=com.fortify.sca.util.compilers.MicrosoftCompiler
+com.fortify.sca.compilers.clearmake=com.fortify.sca.util.compilers.TouchlessCompiler
+com.fortify.sca.compilers.devenv=com.fortify.sca.util.compilers.DevenvAdapter
+com.fortify.sca.compilers.fortify=com.fortify.sca.util.compilers.FortifyCompiler
+com.fortify.sca.compilers.g++=com.fortify.sca.util.compilers.GppCompiler
+com.fortify.sca.compilers.g++-*=com.fortify.sca.util.compilers.GppCompiler
+com.fortify.sca.compilers.g++2*=com.fortify.sca.util.compilers.GppCompiler
+com.fortify.sca.compilers.g++3*=com.fortify.sca.util.compilers.GppCompiler
+com.fortify.sca.compilers.g++4*=com.fortify.sca.util.compilers.GppCompiler
+com.fortify.sca.compilers.gcc=com.fortify.sca.util.compilers.GccCompiler
+com.fortify.sca.compilers.gcc-*=com.fortify.sca.util.compilers.GccCompiler
+com.fortify.sca.compilers.gcc2*=com.fortify.sca.util.compilers.GccCompiler
+com.fortify.sca.compilers.gcc3*=com.fortify.sca.util.compilers.GccCompiler
+com.fortify.sca.compilers.gcc4*=com.fortify.sca.util.compilers.GccCompiler
+com.fortify.sca.compilers.gmake=com.fortify.sca.util.compilers.TouchlessCompiler
+com.fortify.sca.compilers.gradle=com.fortify.sca.util.compilers.GradleAdapter
+com.fortify.sca.compilers.gradlew=com.fortify.sca.util.compilers.GradleAdapter
+com.fortify.sca.compilers.icc=com.fortify.sca.util.compilers.IntelCompiler
+com.fortify.sca.compilers.icl=com.fortify.sca.util.compilers.MicrosoftCompiler
+com.fortify.sca.compilers.icpc=com.fortify.sca.util.compilers.IntelCompiler
+com.fortify.sca.compilers.jam=com.fortify.sca.util.compilers.TouchlessCompiler
+com.fortify.sca.compilers.javac=com.fortify.sca.util.compilers.JavacCompiler
+com.fortify.sca.compilers.ld=com.fortify.sca.util.compilers.LdCompiler
+com.fortify.sca.compilers.link=com.fortify.sca.util.compilers.MicrosoftLinker
+com.fortify.sca.compilers.make=com.fortify.sca.util.compilers.TouchlessCompiler
+com.fortify.sca.compilers.msbuild=com.fortify.sca.util.compilers.MSBuildAdapter
+com.fortify.sca.compilers.msdev=com.fortify.sca.util.compilers.MSDevAdapter
+com.fortify.sca.compilers.mvn=com.fortify.sca.util.compilers.MavenAdapter
+com.fortify.sca.compilers.nmake=com.fortify.sca.util.compilers.TouchlessCompiler
+com.fortify.sca.compilers.scalac=com.fortify.sca.util.compilers.ScalacCompiler
+com.fortify.sca.compilers.tcc=com.fortify.sca.util.compilers.ArmCcCompiler
+com.fortify.sca.compilers.tcpp=com.fortify.sca.util.compilers.ArmCppCompiler
+com.fortify.sca.compilers.touchless=com.fortify.sca.util.compilers.FortifyCompiler
+com.fortify.sca.compilers.xilink=com.fortify.sca.util.compilers.MicrosoftLinker
+com.fortify.sca.cpfe.441.command=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core/private-bin/sca/cpfe441.rfct
+com.fortify.sca.cpfe.command=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core/private-bin/sca/cpfe48.exe
+com.fortify.sca.cpfe.file.option=--gen_c_file_name
+com.fortify.sca.cpfe.options=--remove_unneeded_entities --suppress_vtbl -tused
+com.fortify.sca.cpfe.options=--remove_unneeded_entities --suppress_vtbl -tused
+com.fortify.sca.env.exesearchpath=D:\code\cecloud_code\untitled1;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\bin;C:\Python39\Scripts\;C:\Python39\;C:\Program Files\Python38\Scripts\;C:\Program Files\Python38\;C:\Program Files\Java\jdk1.8.0_202\bin\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;D:\install\cmder\vendor\git-for-windows\mingw64\bin;D:\Program Files\TortoiseGit\bin;D:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;D:\Program Files\Go\bin;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;D:\SAST_POC_CODE\代码卫士\02_C#前端\SkyNet;D:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin;D:\Program Files\CodeTestFront\bin;C:\Program Files\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;D:\install\apache-tomcat-8.5.77\bin;D:\install\cmder\vendor\git-for-windows\bin\;D:\install\python3.9.2\Scripts\;D:\install\python3.9.2\;C:\Program Files\MySQL\MySQL Shell 8.0\bin\;C:\Program Files\Java\jdk1.8.0_202\bin;D:\Program Files\Python\Python38\Scripts\;D:\Program Files\Python\Python38\;C:\Users\admin\AppData\Local\Microsoft\WindowsApps;D:\install\sonar-scanner-cli-4.6.0.2311-windows\sonar-scanner-4.6.0.2311-windows\bin;D:\install\apache-maven-3.8.1-bin\apache-maven-3.8.1\bin;D:\install\cmder\vendor\git-for-windows\mingw64\bin;C:\Program Files\JetBrains\PyCharm 2020.1.2\bin;;D:\Program Files\JetBrains\GoLand 2021.1.1\bin;;D:\install\apache-ant-1.10.10\bin;D:\install\gradle-7.0.1\bin;C:\Program Files\JetBrains\IntelliJ IDEA 2020.1.2\bin;;D:\Program Files\Microsoft VS Code\bin;C:\Users\admin\AppData\Roaming\npm;C:\Users\admin\go\bin;D:\Program Files\Go\bin\;C:\Users\admin\.dotnet\tools;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\Hostx86\x64;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\bin;
+com.fortify.sca.fileextensions.ABAP=ABAP
+com.fortify.sca.fileextensions.BSP=ABAP
+com.fortify.sca.fileextensions.Config=XML
+com.fortify.sca.fileextensions.Master=ASPNET
+com.fortify.sca.fileextensions.abap=ABAP
+com.fortify.sca.fileextensions.appxmanifest=XML
+com.fortify.sca.fileextensions.as=ACTIONSCRIPT
+com.fortify.sca.fileextensions.asax=ASPNET
+com.fortify.sca.fileextensions.ascx=ASPNET
+com.fortify.sca.fileextensions.ashx=ASPNET
+com.fortify.sca.fileextensions.asmx=ASPNET
+com.fortify.sca.fileextensions.asp=ASP
+com.fortify.sca.fileextensions.aspx=ASPNET
+com.fortify.sca.fileextensions.axml=ASPNET
+com.fortify.sca.fileextensions.baml=MSIL
+com.fortify.sca.fileextensions.bas=VB6
+com.fortify.sca.fileextensions.bsp=ABAP
+com.fortify.sca.fileextensions.cfc=CFML
+com.fortify.sca.fileextensions.cfm=CFML
+com.fortify.sca.fileextensions.cfml=CFML
+com.fortify.sca.fileextensions.cls=VB6
+com.fortify.sca.fileextensions.conf=HOCON
+com.fortify.sca.fileextensions.config=XML
+com.fortify.sca.fileextensions.cpx=XML
+com.fortify.sca.fileextensions.cs=CSHARP
+com.fortify.sca.fileextensions.cscfg=XML
+com.fortify.sca.fileextensions.csdef=XML
+com.fortify.sca.fileextensions.cshtml=ASPNET
+com.fortify.sca.fileextensions.ctl=VB6
+com.fortify.sca.fileextensions.ctp=PHP
+com.fortify.sca.fileextensions.dll=MSIL
+com.fortify.sca.fileextensions.erb=RUBY_ERB
+com.fortify.sca.fileextensions.exe=MSIL
+com.fortify.sca.fileextensions.faces=JSPX
+com.fortify.sca.fileextensions.frm=VB6
+com.fortify.sca.fileextensions.go=GO
+com.fortify.sca.fileextensions.htm=HTML
+com.fortify.sca.fileextensions.html=HTML
+com.fortify.sca.fileextensions.ini=JAVA_PROPERTIES
+com.fortify.sca.fileextensions.java=JAVA
+com.fortify.sca.fileextensions.js=TYPESCRIPT
+com.fortify.sca.fileextensions.jsff=JSPX
+com.fortify.sca.fileextensions.json=JSON
+com.fortify.sca.fileextensions.jsp=JSP
+com.fortify.sca.fileextensions.jspf=JSP
+com.fortify.sca.fileextensions.jspx=JSPX
+com.fortify.sca.fileextensions.jsx=TYPESCRIPT
+com.fortify.sca.fileextensions.kt=KOTLIN
+com.fortify.sca.fileextensions.kts=KOTLIN
+com.fortify.sca.fileextensions.master=ASPNET
+com.fortify.sca.fileextensions.mdl=MSIL
+com.fortify.sca.fileextensions.mod=MSIL
+com.fortify.sca.fileextensions.mxml=MXML
+com.fortify.sca.fileextensions.page=VISUAL_FORCE
+com.fortify.sca.fileextensions.php=PHP
+com.fortify.sca.fileextensions.phtml=PHP
+com.fortify.sca.fileextensions.pkb=PLSQL
+com.fortify.sca.fileextensions.pkh=PLSQL
+com.fortify.sca.fileextensions.pks=PLSQL
+com.fortify.sca.fileextensions.plist=XML
+com.fortify.sca.fileextensions.properties=JAVA_PROPERTIES
+com.fortify.sca.fileextensions.py=PYTHON
+com.fortify.sca.fileextensions.rb=RUBY
+com.fortify.sca.fileextensions.scala=SCALA
+com.fortify.sca.fileextensions.settings=XML
+com.fortify.sca.fileextensions.sql=SQL
+com.fortify.sca.fileextensions.swift=SWIFT
+com.fortify.sca.fileextensions.tag=JSP
+com.fortify.sca.fileextensions.tagx=JSP
+com.fortify.sca.fileextensions.tld=TLD
+com.fortify.sca.fileextensions.trigger=APEX_TRIGGER
+com.fortify.sca.fileextensions.ts=TYPESCRIPT
+com.fortify.sca.fileextensions.tsx=TYPESCRIPT
+com.fortify.sca.fileextensions.vb=VB
+com.fortify.sca.fileextensions.vbhtml=ASPNET
+com.fortify.sca.fileextensions.vbs=VBSCRIPT
+com.fortify.sca.fileextensions.vbscript=VBSCRIPT
+com.fortify.sca.fileextensions.wadcfg=XML
+com.fortify.sca.fileextensions.wadcfgx=XML
+com.fortify.sca.fileextensions.winmd=MSIL
+com.fortify.sca.fileextensions.wsdd=XML
+com.fortify.sca.fileextensions.wsdl=XML
+com.fortify.sca.fileextensions.xaml=ASPNET
+com.fortify.sca.fileextensions.xcfg=XML
+com.fortify.sca.fileextensions.xhtml=JSPX
+com.fortify.sca.fileextensions.xmi=XML
+com.fortify.sca.fileextensions.xml=XML
+com.fortify.sca.fileextensions.xsd=XML
+com.fortify.sca.fileextensions.yaml=YAML
+com.fortify.sca.fileextensions.yml=YAML
+com.fortify.sca.jsp.UseNativeParser=true
+com.fortify.sca.parser.python.ignore.module.1=test.badsyntax_future3
+com.fortify.sca.parser.python.ignore.module.2=test.badsyntax_future4
+com.fortify.sca.parser.python.ignore.module.3=test.badsyntax_future5
+com.fortify.sca.parser.python.ignore.module.4=test.badsyntax_future6
+com.fortify.sca.parser.python.ignore.module.5=test.badsyntax_future7
+com.fortify.sca.parser.python.ignore.module.6=test.badsyntax_future8
+com.fortify.sca.parser.python.ignore.module.7=test.badsyntax_future9
+com.fortify.sca.parser.python.ignore.module.8=test.badsyntax_nocaret
+com.fortify.sca.skip.libraries.AngularJS=angular.js,angular.min.js,angular-animate.js,angular-aria.js,angular_1_router.js,angular-cookies.js,angular-message-format.js,angular-messages.js,angular-mocks.js,angular-parse-ext.js,angular-resource.js,angular-route.js,angular-sanitize.js,angular-touch.js
+com.fortify.sca.skip.libraries.ES6=es6-shim.min.js,system-polyfills.js,shims_for_IE.js
+com.fortify.sca.skip.libraries.jQuery=jquery.js,jquery.min.js,jquery-migrate.js,jquery-migrate.min.js,jquery-ui.js,jquery-ui.min.js,jquery.mobile.js,jquery.mobile.min.js,jquery.color.js,jquery.color.min.js,jquery.color.svg-names.js,jquery.color.svg-names.min.js,jquery.color.plus-names.js,jquery.color.plus-names.min.js,jquery.tools.min.js
+com.fortify.sca.skip.libraries.javascript=bootstrap.js,bootstrap.min.js,typescript.js,typescriptServices.js
+com.fortify.sca.skip.libraries.typescript=typescript.d.ts,typescriptServices.d.ts
+com.fortify.search.defaultSyntaxVer=2
+com.sun.management.jmxremote=true
+dotnet.install.dir=C:\Windows\Microsoft.NET\Framework64\
+dotnet.sdk.v11.install.dir=
+dotnet.sdk.v20.install.dir=
+dotnet.sdk.v3x.install.dir=
+dotnet.v30.referenceAssemblies=
+dotnet.v35.referenceAssemblies=
+file.encoding=GBK
+file.encoding.pkg=sun.io
+file.separator=\
+java.awt.graphicsenv=sun.awt.Win32GraphicsEnvironment
+java.awt.headless=true
+java.awt.printerjob=sun.awt.windows.WPrinterJob
+java.class.path=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core\lib\exe\sca-exe.jar
+java.class.version=52.0
+java.endorsed.dirs=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre\lib\endorsed
+java.ext.dirs=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre\lib\ext;C:\WINDOWS\Sun\Java\lib\ext
+java.home=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre
+java.io.tmpdir=C:\Users\admin\AppData\Local\Temp\
+java.library.path=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\bin;C:\Python39\Scripts\;C:\Python39\;C:\Program Files\Python38\Scripts\;C:\Program Files\Python38\;C:\Program Files\Java\jdk1.8.0_202\bin\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;D:\install\cmder\vendor\git-for-windows\mingw64\bin;D:\Program Files\TortoiseGit\bin;D:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;D:\Program Files\Go\bin;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;D:\SAST_POC_CODE\代码卫士\02_C#前端\SkyNet;D:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin;D:\Program Files\CodeTestFront\bin;C:\Program Files\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;D:\install\apache-tomcat-8.5.77\bin;D:\install\cmder\vendor\git-for-windows\bin\;D:\install\python3.9.2\Scripts\;D:\install\python3.9.2\;C:\Program Files\MySQL\MySQL Shell 8.0\bin\;C:\Program Files\Java\jdk1.8.0_202\bin;D:\Program Files\Python\Python38\Scripts\;D:\Program Files\Python\Python38\;C:\Users\admin\AppData\Local\Microsoft\WindowsApps;D:\install\sonar-scanner-cli-4.6.0.2311-windows\sonar-scanner-4.6.0.2311-windows\bin;D:\install\apache-maven-3.8.1-bin\apache-maven-3.8.1\bin;D:\install\cmder\vendor\git-for-windows\mingw64\bin;C:\Program Files\JetBrains\PyCharm 2020.1.2\bin;;D:\Program Files\JetBrains\GoLand 2021.1.1\bin;;D:\install\apache-ant-1.10.10\bin;D:\install\gradle-7.0.1\bin;C:\Program Files\JetBrains\IntelliJ IDEA 2020.1.2\bin;;D:\Program Files\Microsoft VS Code\bin;C:\Users\admin\AppData\Roaming\npm;C:\Users\admin\go\bin;D:\Program Files\Go\bin\;C:\Users\admin\.dotnet\tools;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\Hostx86\x64;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\bin;;.
+java.rmi.server.randomIDs=true
+java.runtime.name=OpenJDK Runtime Environment
+java.runtime.version=1.8.0_181-b02
+java.specification.name=Java Platform API Specification
+java.specification.vendor=Oracle Corporation
+java.specification.version=1.8
+java.vendor=Azul Systems, Inc.
+java.vendor.url=http://www.azulsystems.com/
+java.vendor.url.bug=http://www.azulsystems.com/support/
+java.version=1.8.0_181
+java.vm.info=mixed mode
+java.vm.name=OpenJDK 64-Bit Server VM
+java.vm.specification.name=Java Virtual Machine Specification
+java.vm.specification.vendor=Oracle Corporation
+java.vm.specification.version=1.8
+java.vm.vendor=Azul Systems, Inc.
+java.vm.version=25.181-b02
+line.separator=&#13;
+
+log4j.configurationFile=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core\config\log4j2.xml
+log4j.isThreadContextMapInheritable=true
+max.file.path.length=255
+os.arch=amd64
+os.name=Windows 10
+os.version=10.0
+path.separator=;
+stderr.isatty=true
+stdout.isatty=true
+sun.arch.data.model=64
+sun.boot.class.path=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre\lib\resources.jar;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre\lib\rt.jar;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre\lib\sunrsasign.jar;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre\lib\jsse.jar;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre\lib\jce.jar;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre\lib\charsets.jar;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre\lib\jfr.jar;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre\classes
+sun.boot.library.path=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\jre\bin
+sun.cpu.endian=little
+sun.cpu.isalist=amd64
+sun.desktop=windows
+sun.io.unicode.encoding=UnicodeLittle
+sun.java.command=sourceanalyzer -Djava.awt.headless=true -Dcom.sun.management.jmxremote=true -XX:SoftRefLRUPolicyMSPerMB=3000 -Dwin32.LocalAppdata=C:\Users\admin\AppData\Local -Ddotnet.install.dir=C:\Windows\Microsoft.NET\Framework64\ -Ddotnet.sdk.v11.install.dir= -Ddotnet.sdk.v20.install.dir= -Ddotnet.sdk.v3x.install.dir= -Ddotnet.v30.referenceAssemblies= -Ddotnet.v35.referenceAssemblies= -Dcom.fortify.sca.env.exesearchpath=D:\code\cecloud_code\untitled1;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\bin;C:\Python39\Scripts\;C:\Python39\;C:\Program Files\Python38\Scripts\;C:\Program Files\Python38\;C:\Program Files\Java\jdk1.8.0_202\bin\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;D:\install\cmder\vendor\git-for-windows\mingw64\bin;D:\Program Files\TortoiseGit\bin;D:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;D:\Program Files\Go\bin;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;D:\SAST_POC_CODE\代码卫士\02_C#前端\SkyNet;D:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin;D:\Program Files\CodeTestFront\bin;C:\Program Files\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;D:\install\apache-tomcat-8.5.77\bin;D:\install\cmder\vendor\git-for-windows\bin\;D:\install\python3.9.2\Scripts\;D:\install\python3.9.2\;C:\Program Files\MySQL\MySQL Shell 8.0\bin\;C:\Program Files\Java\jdk1.8.0_202\bin;D:\Program Files\Python\Python38\Scripts\;D:\Program Files\Python\Python38\;C:\Users\admin\AppData\Local\Microsoft\WindowsApps;D:\install\sonar-scanner-cli-4.6.0.2311-windows\sonar-scanner-4.6.0.2311-windows\bin;D:\install\apache-maven-3.8.1-bin\apache-maven-3.8.1\bin;D:\install\cmder\vendor\git-for-windows\mingw64\bin;C:\Program Files\JetBrains\PyCharm 2020.1.2\bin;;D:\Program Files\JetBrains\GoLand 2021.1.1\bin;;D:\install\apache-ant-1.10.10\bin;D:\install\gradle-7.0.1\bin;C:\Program Files\JetBrains\IntelliJ IDEA 2020.1.2\bin;;D:\Program Files\Microsoft VS Code\bin;C:\Users\admin\AppData\Roaming\npm;C:\Users\admin\go\bin;D:\Program Files\Go\bin\;C:\Users\admin\.dotnet\tools;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\Hostx86\x64;D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\bin; -Dcom.fortify.sca.ProjectRoot=C:\Users\admin\AppData\Local/Fortify -Dstdout.isatty=true -Dstderr.isatty=true -Dcom.fortify.sca.PID=5308 -Xmx34359738367 -Dcom.fortify.TotalPhysicalMemory=42739228672 -Xss16M -Dcom.fortify.sca.JVMArgs=-XX:SoftRefLRUPolicyMSPerMB=3000 -Xmx34359738367 -Xss16M -Djava.class.path=D:\Program Files\Fortify\Fortify_SCA_and_Apps_20.1.1\Core\lib\exe\sca-exe.jar -b untitile -scan -f untitile.fpr
+sun.jnu.encoding=GBK
+sun.management.compiler=HotSpot 64-Bit Tiered Compilers
+sun.os.patch.level=
+sun.stderr.encoding=ms936
+sun.stdout.encoding=ms936
+user.country=CN
+user.dir=D:\code\cecloud_code\untitled1
+user.home=C:\Users\admin
+user.language=zh
+user.name=admin
+user.script=
+user.timezone=Asia/Shanghai
+user.variant=
+win32.LocalAppdata=C:\Users\admin\AppData\Local
+</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Commandline Arguments</Title>
+            <Description>A listing of all arguments passed to SCA during the analysis phase</Description>
+            <Text>-b
+untitile
+-scan
+-f
+untitile.fpr
+</Text>
+        </SubSection>
+        <SubSection enabled="true">
+            <Title>Warnings</Title>
+            <Description>A listing of all warnings that occurred during the scan, during both translation and analysis phase</Description>
+            <Text>[12003] Assuming Java source level to be 1.8 as it was not specified. Note that the default value may change in future versions.</Text>
+        </SubSection>
+    </ReportSection>
+    <ReportSection enabled="true" optionalSubsections="false">
+        <Title>Issue Count by Category</Title>
+        <SubSection enabled="true">
+            <Title>Issues By Category</Title>
+            <IssueListing listing="false" limit="-1">
+                <Refinement></Refinement>
+                <Chart chartType="table">
+                    <Axis>Category</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                    <GroupingSection count="5">
+                        <groupTitle>Command Injection</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="3">
+                        <groupTitle>Denial of Service</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="2">
+                        <groupTitle>Poor Style: Value Never Read</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="2">
+                        <groupTitle>System Information Leak</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>Build Misconfiguration: External Maven Dependency Repository</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>J2EE Bad Practices: Leftover Debug Code</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>Poor Error Handling: Overly Broad Catch</groupTitle>
+                    </GroupingSection>
+                    <GroupingSection count="1">
+                        <groupTitle>Unchecked Return Value</groupTitle>
+                    </GroupingSection>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+    <ReportSection enabled="true" optionalSubsections="false">
+        <Title>Issue Breakdown by Analysis</Title>
+        <SubSection enabled="true">
+            <Title>Issue by Analysis</Title>
+            <IssueListing listing="false" limit="-1">
+                <Refinement></Refinement>
+                <Chart chartType="pie">
+                    <Axis>Analysis</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                    <GroupingSection count="16">
+                        <groupTitle>&lt;none&gt;</groupTitle>
+                    </GroupingSection>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+    <ReportSection enabled="false" optionalSubsections="false">
+        <Title>New Issues</Title>
+        <SubSection enabled="true">
+            <Title>New Issues</Title>
+            <Description>A list of issues discovered since the previous analysis.</Description>
+            <Text>The following issues have been discovered since the last scan.</Text>
+            <IssueListing listing="false" limit="-1">
+                <Refinement></Refinement>
+                <Chart chartType="pie">
+                    <Axis>New Issue</Axis>
+                    <MajorAttribute>Analysis</MajorAttribute>
+                    <GroupingSection count="16">
+                        <groupTitle>Issue New: 2022-5-9</groupTitle>
+                    </GroupingSection>
+                </Chart>
+            </IssueListing>
+        </SubSection>
+    </ReportSection>
+</ReportDefinition>

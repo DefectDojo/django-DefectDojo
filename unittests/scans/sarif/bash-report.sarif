@@ -1,0 +1,1348 @@
+{
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Shell Script Analysis",
+          "rules": [
+            {
+              "id": "2076",
+              "help": {
+                "text": "Don't quote right-hand side of =~, it'll match literally rather than as a regex.",
+                "markdown": "Don't quote right-hand side of =~, it'll match literally rather than as a regex."
+              },
+              "name": "",
+              "properties": {
+                "tags": [
+                  "Scan"
+                ],
+                "precision": "high"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "fullDescription": {
+                "text": "Don't quote right-hand side of =~, it'll match literally rather than as a regex."
+              },
+              "helpUri": "https://github.com/koalaman/shellcheck/wiki/SC2076",
+              "shortDescription": {
+                "text": "Don't quote right-hand side of =~, it'll match literally rather than as a regex."
+              }
+            },
+            {
+              "id": "2071",
+              "help": {
+                "text": "> is for string comparisons. Use -gt instead.",
+                "markdown": "> is for string comparisons. Use -gt instead."
+              },
+              "name": "",
+              "properties": {
+                "tags": [
+                  "Scan"
+                ],
+                "precision": "high"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "fullDescription": {
+                "text": "> is for string comparisons. Use -gt instead."
+              },
+              "helpUri": "https://github.com/koalaman/shellcheck/wiki/SC2071",
+              "shortDescription": {
+                "text": "> is for string comparisons"
+              }
+            },
+            {
+              "id": "2072",
+              "help": {
+                "text": "Decimals are not supported. Either use integers only, or use bc or awk to compare.",
+                "markdown": "Decimals are not supported. Either use integers only, or use bc or awk to compare."
+              },
+              "name": "",
+              "properties": {
+                "tags": [
+                  "Scan"
+                ],
+                "precision": "high"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "fullDescription": {
+                "text": "Decimals are not supported. Either use integers only, or use bc or awk to compare."
+              },
+              "helpUri": "https://github.com/koalaman/shellcheck/wiki/SC2072",
+              "shortDescription": {
+                "text": "Decimals are not supported"
+              }
+            },
+            {
+              "id": "2077",
+              "help": {
+                "text": "You need spaces around the comparison operator.",
+                "markdown": "You need spaces around the comparison operator."
+              },
+              "name": "",
+              "properties": {
+                "tags": [
+                  "Scan"
+                ],
+                "precision": "high"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "fullDescription": {
+                "text": "You need spaces around the comparison operator."
+              },
+              "helpUri": "https://github.com/koalaman/shellcheck/wiki/SC2077",
+              "shortDescription": {
+                "text": "You need spaces around the comparison operator."
+              }
+            },
+            {
+              "id": "1035",
+              "help": {
+                "text": "You are missing a required space here.",
+                "markdown": "You are missing a required space here."
+              },
+              "name": "",
+              "properties": {
+                "tags": [
+                  "Scan"
+                ],
+                "precision": "high"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "fullDescription": {
+                "text": "You are missing a required space here."
+              },
+              "helpUri": "https://github.com/koalaman/shellcheck/wiki/SC1035",
+              "shortDescription": {
+                "text": "You are missing a required space here."
+              }
+            }
+          ],
+          "version": "1.0.0-scan",
+          "fullName": "Shell Script Analysis"
+        }
+      },
+      "conversion": {
+        "tool": {
+          "driver": {
+            "name": "@ShiftLeft/sast-scan"
+          }
+        },
+        "invocation": {
+          "arguments": [
+            "-a",
+            "--shell=bash",
+            "-f",
+            "json",
+            "-S",
+            "error",
+            "--color=never",
+            "/app/legacy-setup.bash",
+            "/app/test.sh",
+            "/app/upgrade.bash",
+            "/app/entrypoint_scripts/os/ubuntu.sh",
+            "/app/entrypoint_scripts/os/linux.sh",
+            "/app/entrypoint_scripts/common/config-vars.sh",
+            "/app/entrypoint_scripts/common/install-dojo.sh",
+            "/app/entrypoint_scripts/common/common-os.sh",
+            "/app/entrypoint_scripts/common/dojo-shared-resources.sh",
+            "/app/entrypoint_scripts/common/cmd-args.sh",
+            "/app/entrypoint_scripts/common/prompt.sh",
+            "/app/entrypoint_scripts/run/startup-docker.bash",
+            "/app/entrypoint_scripts/run/run-local-dojo.bash",
+            "/app/setup/setup.bash",
+            "/app/setup/upgrade.bash",
+            "/app/setup/scripts/os/ubuntu.sh",
+            "/app/setup/scripts/os/linux.sh",
+            "/app/setup/scripts/common/config-vars.sh",
+            "/app/setup/scripts/common/install-dojo.sh",
+            "/app/setup/scripts/common/common-os.sh",
+            "/app/setup/scripts/common/dojo-shared-resources.sh",
+            "/app/setup/scripts/common/cmd-args.sh",
+            "/app/setup/scripts/common/prompt.sh",
+            "/app/setup/scripts/run/startup-docker.bash",
+            "/app/setup/scripts/run/run-local-dojo.bash",
+            "/app/docker/entrypoint-uwsgi-dev.sh",
+            "/app/docker/entrypoint.sh",
+            "/app/docker/entrypoint-uwsgi.sh",
+            "/app/docker/entrypoint-uwsgi-ptvsd.sh",
+            "/app/docker/wait-for-it.sh",
+            "/app/docker/entrypoint-celery.sh",
+            "/app/docker/entrypoint-unit-tests.sh",
+            "/app/docker/entrypoint-nginx.sh",
+            "/app/docker/dojo-data.bash",
+            "/app/docker/entrypoint-unit-tests-devDocker.sh",
+            "/app/docker/setEnv.sh",
+            "/app/docker/entrypoint-celery-worker.sh",
+            "/app/docker/entrypoint-initializer.sh",
+            "/app/docker/entrypoint-celery-beat.sh",
+            "/app/docker/entrypoint-integration-tests.sh",
+            "/app/docker/unit-tests.sh"
+          ],
+          "executionSuccessful": true,
+          "commandLine": "-a --shell=bash -f json -S error --color=never /app/legacy-setup.bash /app/test.sh /app/upgrade.bash /app/entrypoint_scripts/os/ubuntu.sh /app/entrypoint_scripts/os/linux.sh /app/entrypoint_scripts/common/config-vars.sh /app/entrypoint_scripts/common/install-dojo.sh /app/entrypoint_scripts/common/common-os.sh /app/entrypoint_scripts/common/dojo-shared-resources.sh /app/entrypoint_scripts/common/cmd-args.sh /app/entrypoint_scripts/common/prompt.sh /app/entrypoint_scripts/run/startup-docker.bash /app/entrypoint_scripts/run/run-local-dojo.bash /app/setup/setup.bash /app/setup/upgrade.bash /app/setup/scripts/os/ubuntu.sh /app/setup/scripts/os/linux.sh /app/setup/scripts/common/config-vars.sh /app/setup/scripts/common/install-dojo.sh /app/setup/scripts/common/common-os.sh /app/setup/scripts/common/dojo-shared-resources.sh /app/setup/scripts/common/cmd-args.sh /app/setup/scripts/common/prompt.sh /app/setup/scripts/run/startup-docker.bash /app/setup/scripts/run/run-local-dojo.bash /app/docker/entrypoint-uwsgi-dev.sh /app/docker/entrypoint.sh /app/docker/entrypoint-uwsgi.sh /app/docker/entrypoint-uwsgi-ptvsd.sh /app/docker/wait-for-it.sh /app/docker/entrypoint-celery.sh /app/docker/entrypoint-unit-tests.sh /app/docker/entrypoint-nginx.sh /app/docker/dojo-data.bash /app/docker/entrypoint-unit-tests-devDocker.sh /app/docker/setEnv.sh /app/docker/entrypoint-celery-worker.sh /app/docker/entrypoint-initializer.sh /app/docker/entrypoint-celery-beat.sh /app/docker/entrypoint-integration-tests.sh /app/docker/unit-tests.sh",
+          "endTimeUtc": "2021-03-08T15:39:40Z",
+          "workingDirectory": {
+            "uri": "file:///home/damien/dd"
+          }
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "endTimeUtc": "2021-03-08T15:39:40Z",
+          "workingDirectory": {
+            "uri": "file:///home/damien/dd"
+          }
+        }
+      ],
+      "properties": {
+        "metrics": {
+          "total": 27,
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 27
+        }
+      },
+      "results": [
+        {
+          "message": {
+            "markdown": "",
+            "text": "Don't quote right-hand side of =~, it'll match literally rather than as a regex."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "if [ ${#} -eq 1 ] && [[ 'dev unit_tests unit_tests_cicd integration_tests release ptvsd' =~ \"${1}\" ]]\n"
+                  },
+                  "startLine": 134
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/docker/setEnv.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "\nif [ ${#} -eq 1 ] && [[ 'dev unit_tests unit_tests_cicd integration_tests release ptvsd' =~ \"${1}\" ]]\n"
+                  },
+                  "endLine": 134,
+                  "startLine": 133
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "47f57f9669991906",
+            "scanFileHash": "f196e70ba8d8dace"
+          },
+          "ruleId": "2076",
+          "ruleIndex": 0
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "> is for string comparisons. Use -gt instead."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "if [ $# > 1 ]\n"
+                  },
+                  "startLine": 4
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/docker/dojo-data.bash"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "\nif [ $# > 1 ]\n"
+                  },
+                  "endLine": 4,
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "6960f23d58e5c029",
+            "scanFileHash": "4ff774b6997d0eef"
+          },
+          "ruleId": "2071",
+          "ruleIndex": 1
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "Decimals are not supported. Either use integers only, or use bc or awk to compare."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "startLine": 143
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    PYV=`python -c \"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)\";`\n    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "endLine": 143,
+                  "startLine": 142
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "4d655189c485c086",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2072",
+          "ruleIndex": 2
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "startLine": 410
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "  read DBTYPE DBNAME SQLUSER SQLPWD SQLHOST SQLPORT<<<\"$PARSE_DB_URL\"\n  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "endLine": 410,
+                  "startLine": 409
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "e65e9fa644d89079",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "startLine": 412
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    DBTYPE=$MYSQL\n  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "endLine": 412,
+                  "startLine": 411
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "8cc16cd3309ad473",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You are missing a required space here."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "startLine": 142
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/setup/scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    PYV=`python -c \"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)\";`\n    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "endLine": 142,
+                  "startLine": 141
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "4d655189c485c086",
+            "scanFileHash": "5b05533780915bfc"
+          },
+          "ruleId": "1035",
+          "ruleIndex": 4
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "Decimals are not supported. Either use integers only, or use bc or awk to compare."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "startLine": 142
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/setup/scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    PYV=`python -c \"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)\";`\n    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "endLine": 142,
+                  "startLine": 141
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "4d655189c485c086",
+            "scanFileHash": "5b05533780915bfc"
+          },
+          "ruleId": "2072",
+          "ruleIndex": 2
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "startLine": 458
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/setup/scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "  read DBTYPE DBNAME SQLUSER SQLPWD SQLHOST SQLPORT<<<\"$PARSE_DB_URL\"\n  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "endLine": 458,
+                  "startLine": 457
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "e65e9fa644d89079",
+            "scanFileHash": "5b05533780915bfc"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "startLine": 460
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/setup/scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    DBTYPE=$MYSQL\n  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "endLine": 460,
+                  "startLine": 459
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "8cc16cd3309ad473",
+            "scanFileHash": "5b05533780915bfc"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "Decimals are not supported. Either use integers only, or use bc or awk to compare."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "startLine": 143
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    PYV=`python -c \"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)\";`\n    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "endLine": 143,
+                  "startLine": 142
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "4d655189c485c086",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2072",
+          "ruleIndex": 2
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "startLine": 410
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "  read DBTYPE DBNAME SQLUSER SQLPWD SQLHOST SQLPORT<<<\"$PARSE_DB_URL\"\n  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "endLine": 410,
+                  "startLine": 409
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "e65e9fa644d89079",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "startLine": 412
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    DBTYPE=$MYSQL\n  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "endLine": 412,
+                  "startLine": 411
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "8cc16cd3309ad473",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "Decimals are not supported. Either use integers only, or use bc or awk to compare."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "startLine": 143
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    PYV=`python -c \"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)\";`\n    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "endLine": 143,
+                  "startLine": 142
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "4d655189c485c086",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2072",
+          "ruleIndex": 2
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "startLine": 410
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "  read DBTYPE DBNAME SQLUSER SQLPWD SQLHOST SQLPORT<<<\"$PARSE_DB_URL\"\n  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "endLine": 410,
+                  "startLine": 409
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "e65e9fa644d89079",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "startLine": 412
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    DBTYPE=$MYSQL\n  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "endLine": 412,
+                  "startLine": 411
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "8cc16cd3309ad473",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You are missing a required space here."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "startLine": 143
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    PYV=`python -c \"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)\";`\n    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "endLine": 143,
+                  "startLine": 142
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "4d655189c485c086",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "1035",
+          "ruleIndex": 4
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "Decimals are not supported. Either use integers only, or use bc or awk to compare."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "startLine": 143
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    PYV=`python -c \"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)\";`\n    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "endLine": 143,
+                  "startLine": 142
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "4d655189c485c086",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2072",
+          "ruleIndex": 2
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "startLine": 410
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "  read DBTYPE DBNAME SQLUSER SQLPWD SQLHOST SQLPORT<<<\"$PARSE_DB_URL\"\n  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "endLine": 410,
+                  "startLine": 409
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "e65e9fa644d89079",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "startLine": 412
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    DBTYPE=$MYSQL\n  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "endLine": 412,
+                  "startLine": 411
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "8cc16cd3309ad473",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You are missing a required space here."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "startLine": 130
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/common-os.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    PYV=`python -c \"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)\";`\n    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "endLine": 130,
+                  "startLine": 129
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "4d655189c485c086",
+            "scanFileHash": "9c20679991da249c"
+          },
+          "ruleId": "1035",
+          "ruleIndex": 4
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "Decimals are not supported. Either use integers only, or use bc or awk to compare."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "startLine": 130
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/common-os.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    PYV=`python -c \"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)\";`\n    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "endLine": 130,
+                  "startLine": 129
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "4d655189c485c086",
+            "scanFileHash": "9c20679991da249c"
+          },
+          "ruleId": "2072",
+          "ruleIndex": 2
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "Decimals are not supported. Either use integers only, or use bc or awk to compare."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "startLine": 143
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    PYV=`python -c \"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)\";`\n    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "endLine": 143,
+                  "startLine": 142
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "4d655189c485c086",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2072",
+          "ruleIndex": 2
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "startLine": 410
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "  read DBTYPE DBNAME SQLUSER SQLPWD SQLHOST SQLPORT<<<\"$PARSE_DB_URL\"\n  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "endLine": 410,
+                  "startLine": 409
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "e65e9fa644d89079",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "startLine": 412
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    DBTYPE=$MYSQL\n  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "endLine": 412,
+                  "startLine": 411
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "8cc16cd3309ad473",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "Decimals are not supported. Either use integers only, or use bc or awk to compare."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "startLine": 143
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    PYV=`python -c \"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)\";`\n    if [[ \"$PYV\"<\"2.7\" ]]; then\n"
+                  },
+                  "endLine": 143,
+                  "startLine": 142
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "4d655189c485c086",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2072",
+          "ruleIndex": 2
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "startLine": 410
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "  read DBTYPE DBNAME SQLUSER SQLPWD SQLHOST SQLPORT<<<\"$PARSE_DB_URL\"\n  if [ $DBTYPE==\"mysql\" ]; then\n"
+                  },
+                  "endLine": 410,
+                  "startLine": 409
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "e65e9fa644d89079",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "You need spaces around the comparison operator."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "startLine": 412
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/entrypoint_scripts/common/dojo-shared-resources.sh"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "    DBTYPE=$MYSQL\n  elif [ $DBTYPE==\"postgres\" ]; then\n"
+                  },
+                  "endLine": 412,
+                  "startLine": 411
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_tags": {}
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "8cc16cd3309ad473",
+            "scanFileHash": "4ee28649c65c392d"
+          },
+          "ruleId": "2077",
+          "ruleIndex": 3
+        }
+      ],
+      "automationDetails": {
+        "description": {
+          "text": "Static Analysis Security Test results using @ShiftLeft/sast-scan"
+        },
+        "guid": "70d0f865-f0e4-406c-8837-40852afccaeb"
+      },
+      "versionControlProvenance": [
+        {
+          "branch": "dev",
+          "repositoryUri": "https://github.com/damiencarol/django-DefectDojo",
+          "revisionId": "288c68d1ba1f35ebeff1d1bdb032186a23f0ea5b"
+        }
+      ]
+    }
+  ],
+  "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "inlineExternalProperties": [
+    {
+      "guid": "70d0f865-f0e4-406c-8837-40852afccaeb",
+      "runGuid": "fbb1392e-e657-4572-ac07-0e107d1ff3f1"
+    }
+  ]
+}

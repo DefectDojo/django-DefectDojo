@@ -1,0 +1,56 @@
+# Django Debug, don't enable on production!
+DD_DEBUG=False
+
+# Enables Django Admin
+DD_DJANGO_ADMIN_ENABLED=True
+
+# A secret key for a particular Django installation.
+DD_SECRET_KEY=#DD_SECRET_KEY#
+
+# Key for encrypting credentials in the manager
+DD_CREDENTIAL_AES_256_KEY=#DD_CREDENTIAL_AES_256_KEY#
+
+# Database URL, options: postgres://, to use unsafe characters encode with urllib.parse.encode
+DD_DATABASE_URL=#DD_DATABASE_URL#
+
+# Hosts/domain names that are valid for this site;
+DD_ALLOWED_HOSTS=#DD_ALLOWED_HOSTS#
+
+# WhiteNoise allows your web app to serve its own static files,
+# making it a self-contained unit that can be deployed anywhere without relying on nginx,
+# if using nginx then disable Whitenoise
+DD_WHITENOISE=True
+
+# -------------------------------------------------------
+# Additional Settings / Override defaults in settings.py
+# -------------------------------------------------------
+
+# Timezone
+# DD_TIME_ZONE=America/New_York
+
+# Track migrations through source control rather than making migrations locally
+# DD_TRACK_MIGRATIONS=False
+
+# Whether to use HTTPOnly flag on the session cookie.
+# DD_SESSION_COOKIE_HTTPONLY=True
+
+# Whether to use HttpOnly flag on the CSRF cookie.
+# DD_CSRF_COOKIE_HTTPONLY=True
+
+# If True, the SecurityMiddleware redirects all non-HTTPS requests to HTTPS
+# DD_SECURE_SSL_REDIRECT=False
+
+# Whether to use a secure cookie for the CSRF cookie.
+# DD_CSRF_COOKIE_SECURE=False
+
+# If True, the SecurityMiddleware sets the X-Content-Type-Options: nosniff;
+# DD_SECURE_CONTENT_TYPE_NOSNIFF=True
+
+# Change the default language set
+# DD_LANG=en-us
+
+# Security team name, used for outgoing emails
+# DD_TEAM_NAME=Security
+
+# Admins for log emails
+# DD_ADMINS=Aaron:aaron@localhost,Greg:greg@localhost

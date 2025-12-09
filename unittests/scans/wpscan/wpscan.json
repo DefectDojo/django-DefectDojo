@@ -1,0 +1,539 @@
+{
+  "banner": {
+    "description": "WordPress Security Scanner by the WPScan Team",
+    "version": "3.8.15",
+    "authors": [
+      "@_WPScan_",
+      "@ethicalhack3r",
+      "@erwan_lr",
+      "@firefart"
+    ],
+    "sponsor": "Sponsored by Automattic - https://automattic.com/"
+  },
+  "db_update_started": true,
+  "db_files_updated": [],
+  "db_update_finished": true,
+  "start_time": 1615983666,
+  "start_memory": 45322240,
+  "target_url": "http://example/",
+  "target_ip": "123.123.123.123",
+  "effective_url": "http://example/",
+  "interesting_findings": [
+    {
+      "url": "http://example/",
+      "to_s": "Headers",
+      "type": "headers",
+      "found_by": "Headers (Passive Detection)",
+      "confidence": 100,
+      "confirmed_by": {},
+      "references": {},
+      "interesting_entries": [
+        "Server: Apache",
+        "X-Powered-By: PHP/7.1.32",
+        "Upgrade: h2c"
+      ]
+    },
+    {
+      "url": "http://example/robots.txt",
+      "to_s": "robots.txt found: http://example/robots.txt",
+      "type": "robots_txt",
+      "found_by": "Robots Txt (Aggressive Detection)",
+      "confidence": 100,
+      "confirmed_by": {},
+      "references": {},
+      "interesting_entries": [
+        "/wp-admin/",
+        "/wp-admin/admin-ajax.php"
+      ]
+    },
+    {
+      "url": "http://example/xmlrpc.php",
+      "to_s": "XML-RPC seems to be enabled: http://example/xmlrpc.php",
+      "type": "xmlrpc",
+      "found_by": "Headers (Passive Detection)",
+      "confidence": 100,
+      "confirmed_by": {
+        "Link Tag (Passive Detection)": {
+          "confidence": 30
+        },
+        "Direct Access (Aggressive Detection)": {
+          "confidence": 100
+        }
+      },
+      "references": {
+        "url": [
+          "http://codex.wordpress.org/XML-RPC_Pingback_API"
+        ],
+        "metasploit": [
+          "auxiliary/scanner/http/wordpress_ghost_scanner",
+          "auxiliary/dos/http/wordpress_xmlrpc_dos",
+          "auxiliary/scanner/http/wordpress_xmlrpc_login",
+          "auxiliary/scanner/http/wordpress_pingback_access"
+        ]
+      },
+      "interesting_entries": []
+    },
+    {
+      "url": "http://example/readme.html",
+      "to_s": "WordPress readme found: http://example/readme.html",
+      "type": "readme",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 100,
+      "confirmed_by": {},
+      "references": {},
+      "interesting_entries": []
+    },
+    {
+      "url": "http://example/wp-cron.php",
+      "to_s": "The external WP-Cron seems to be enabled: http://example/wp-cron.php",
+      "type": "wp_cron",
+      "found_by": "Direct Access (Aggressive Detection)",
+      "confidence": 60,
+      "confirmed_by": {},
+      "references": {
+        "url": [
+          "https://www.iplocation.net/defend-wordpress-from-ddos",
+          "https://github.com/wpscanteam/wpscan/issues/1299"
+        ]
+      },
+      "interesting_entries": []
+    }
+  ],
+  "version": {
+    "number": "5.5.3",
+    "release_date": "2020-10-30",
+    "status": "latest",
+    "found_by": "Rss Generator (Passive Detection)",
+    "confidence": 100,
+    "interesting_entries": [
+      "http://example/feed/, <generator>https://wordpress.org/?v=5.5.3</generator>",
+      "http://example/comments/feed/, <generator>https://wordpress.org/?v=5.5.3</generator>",
+      "http://example/beispiel-seite/feed/, <generator>https://wordpress.org/?v=5.5.3</generator>"
+    ],
+    "confirmed_by": {},
+    "vulnerabilities": []
+  },
+  "main_theme": {
+    "slug": "onepress",
+    "location": "http://example/wp-content/themes/onepress/",
+    "latest_version": "2.2.7",
+    "last_updated": "2021-03-05T00:00:00.000Z",
+    "outdated": true,
+    "readme_url": "http://example/wp-content/themes/onepress/readme.txt",
+    "directory_listing": false,
+    "error_log_url": null,
+    "style_url": "http://example/wp-content/themes/onepress/style.css?ver=5.5.3",
+    "style_name": "OnePress",
+    "style_uri": "https://www.famethemes.com/themes/onepress/",
+    "description": "OnePress is an outstanding creative and flexible WordPress one page theme well suited for business website, portfolio, digital agency, product showcase, freelancers and everyone else who appreciate good design. The theme overall is an elegant and classic one, a fine example of Bootstrap 4 WordPress theme which compatibility with latest version of WooCommerce. (Live preview : https://demos.famethemes.com/onepress)",
+    "author": "FameThemes",
+    "author_uri": "http://www.famethemes.com",
+    "template": null,
+    "license": "GNU General Public License v2 or later",
+    "license_uri": "http://www.gnu.org/licenses/gpl-2.0.html",
+    "tags": "one-column, two-columns, left-sidebar, right-sidebar, custom-menu, featured-images, full-width-template, sticky-post, theme-options, threaded-comments, translation-ready, e-commerce, blog, portfolio",
+    "text_domain": "onepress",
+    "found_by": "Css Style In Homepage (Passive Detection)",
+    "confidence": 100,
+    "interesting_entries": [],
+    "confirmed_by": {
+      "Css Style In 404 Page (Passive Detection)": {
+        "confidence": 70,
+        "interesting_entries": []
+      }
+    },
+    "vulnerabilities": [],
+    "version": {
+      "number": "2.2.4",
+      "confidence": 80,
+      "found_by": "Style (Passive Detection)",
+      "interesting_entries": [
+        "http://example/wp-content/themes/onepress/style.css?ver=5.5.3, Match: 'Version: 2.2.4'"
+      ],
+      "confirmed_by": {}
+    },
+    "parents": []
+  },
+  "plugins": {
+    "complianz-gdpr": {
+      "slug": "complianz-gdpr",
+      "location": "http://example/wp-content/plugins/complianz-gdpr/",
+      "latest_version": "4.9.10",
+      "last_updated": "2021-03-11T09:12:00.000Z",
+      "outdated": true,
+      "readme_url": null,
+      "directory_listing": null,
+      "error_log_url": null,
+      "found_by": "Urls In Homepage (Passive Detection)",
+      "confidence": 100,
+      "interesting_entries": [],
+      "confirmed_by": {
+        "Urls In 404 Page (Passive Detection)": {
+          "confidence": 80,
+          "interesting_entries": []
+        }
+      },
+      "vulnerabilities": [],
+      "version": {
+        "number": "4.8.0",
+        "confidence": 100,
+        "found_by": "Readme - Stable Tag (Aggressive Detection)",
+        "interesting_entries": [
+          "http://example/wp-content/plugins/complianz-gdpr/readme.txt"
+        ],
+        "confirmed_by": {
+          "Readme - ChangeLog Section (Aggressive Detection)": {
+            "confidence": 50,
+            "interesting_entries": [
+              "http://example/wp-content/plugins/complianz-gdpr/readme.txt"
+            ]
+          }
+        }
+      }
+    },
+    "contact-form-7": {
+      "slug": "contact-form-7",
+      "location": "http://example/wp-content/plugins/contact-form-7/",
+      "latest_version": "5.4",
+      "last_updated": "2021-02-24T12:24:00.000Z",
+      "outdated": true,
+      "readme_url": null,
+      "directory_listing": null,
+      "error_log_url": null,
+      "found_by": "Urls In Homepage (Passive Detection)",
+      "confidence": 100,
+      "interesting_entries": [],
+      "confirmed_by": {
+        "Urls In 404 Page (Passive Detection)": {
+          "confidence": 80,
+          "interesting_entries": []
+        },
+        "Hidden Input (Passive Detection)": {
+          "confidence": 40,
+          "interesting_entries": []
+        }
+      },
+      "vulnerabilities": [
+        {
+          "title": "Contact Form 7 < 5.3.2 - Unrestricted File Upload",
+          "fixed_in": "5.3.2",
+          "references": {
+            "cve": [
+              "2020-35489"
+            ],
+            "url": [
+              "https://www.getastra.com/blog/911/plugin-exploit/contact-form-7-unrestricted-file-upload-vulnerability/",
+              "https://www.jinsonvarghese.com/unrestricted-file-upload-in-contact-form-7/",
+              "https://contactform7.com/2020/12/17/contact-form-7-532/#more-38314"
+            ],
+            "wpvulndb": [
+              "7391118e-eef5-4ff8-a8ea-f6b65f442c63"
+            ]
+          }
+        }
+      ],
+      "version": {
+        "number": "5.3",
+        "confidence": 100,
+        "found_by": "Query Parameter (Passive Detection)",
+        "interesting_entries": [
+          "http://example/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=5.3",
+          "http://example/wp-content/plugins/contact-form-7/includes/js/scripts.js?ver=5.3"
+        ],
+        "confirmed_by": {
+          "Hidden Input (Passive Detection)": {
+            "confidence": 60,
+            "interesting_entries": [
+              "http://example/, Match: '5.3'"
+            ]
+          },
+          "Readme - Stable Tag (Aggressive Detection)": {
+            "confidence": 80,
+            "interesting_entries": [
+              "http://example/wp-content/plugins/contact-form-7/readme.txt"
+            ]
+          },
+          "Readme - ChangeLog Section (Aggressive Detection)": {
+            "confidence": 50,
+            "interesting_entries": [
+              "http://example/wp-content/plugins/contact-form-7/readme.txt"
+            ]
+          }
+        }
+      }
+    },
+    "download-manager": {
+      "slug": "download-manager",
+      "location": "http://example/wp-content/plugins/download-manager/",
+      "latest_version": "3.1.15",
+      "last_updated": "2021-02-24T03:31:00.000Z",
+      "outdated": true,
+      "readme_url": null,
+      "directory_listing": null,
+      "error_log_url": null,
+      "found_by": "Urls In Homepage (Passive Detection)",
+      "confidence": 100,
+      "interesting_entries": [],
+      "confirmed_by": {
+        "Urls In 404 Page (Passive Detection)": {
+          "confidence": 80,
+          "interesting_entries": []
+        },
+        "Meta Generator (Passive Detection)": {
+          "confidence": 40,
+          "interesting_entries": []
+        }
+      },
+      "vulnerabilities": [],
+      "version": {
+        "number": "3.1.11",
+        "confidence": 100,
+        "found_by": "Meta Generator (Passive Detection)",
+        "interesting_entries": [
+          "http://example/, Match: 'WordPress Download Manager 3.1.11'"
+        ],
+        "confirmed_by": {
+          "Readme - ChangeLog Section (Aggressive Detection)": {
+            "confidence": 50,
+            "interesting_entries": [
+              "http://example/wp-content/plugins/download-manager/readme.txt"
+            ]
+          }
+        }
+      }
+    },
+    "onepress-plus": {
+      "slug": "onepress-plus",
+      "location": "http://example/wp-content/plugins/onepress-plus/",
+      "latest_version": null,
+      "last_updated": null,
+      "outdated": false,
+      "readme_url": null,
+      "directory_listing": null,
+      "error_log_url": null,
+      "found_by": "Urls In Homepage (Passive Detection)",
+      "confidence": 100,
+      "interesting_entries": [],
+      "confirmed_by": {
+        "Urls In 404 Page (Passive Detection)": {
+          "confidence": 80,
+          "interesting_entries": []
+        }
+      },
+      "vulnerabilities": [],
+      "version": {
+        "number": "2.0.8",
+        "confidence": 80,
+        "found_by": "Readme - Stable Tag (Aggressive Detection)",
+        "interesting_entries": [
+          "http://example/wp-content/plugins/onepress-plus/readme.txt"
+        ],
+        "confirmed_by": {}
+      }
+    },
+    "post-content-shortcodes": {
+      "slug": "post-content-shortcodes",
+      "location": "http://example/wp-content/plugins/post-content-shortcodes/",
+      "latest_version": "1.0.1.1",
+      "last_updated": "2018-04-03T19:13:00.000Z",
+      "outdated": false,
+      "readme_url": null,
+      "directory_listing": null,
+      "error_log_url": null,
+      "found_by": "Urls In Homepage (Passive Detection)",
+      "confidence": 100,
+      "interesting_entries": [],
+      "confirmed_by": {
+        "Urls In 404 Page (Passive Detection)": {
+          "confidence": 80,
+          "interesting_entries": []
+        }
+      },
+      "vulnerabilities": [],
+      "version": {
+        "number": "1.0.1.1",
+        "confidence": 100,
+        "found_by": "Readme - Stable Tag (Aggressive Detection)",
+        "interesting_entries": [
+          "http://example/wp-content/plugins/post-content-shortcodes/readme.txt"
+        ],
+        "confirmed_by": {
+          "Readme - ChangeLog Section (Aggressive Detection)": {
+            "confidence": 50,
+            "interesting_entries": [
+              "http://example/wp-content/plugins/post-content-shortcodes/readme.txt"
+            ]
+          }
+        }
+      }
+    },
+    "widgets-on-pages": {
+      "slug": "widgets-on-pages",
+      "location": "http://example/wp-content/plugins/widgets-on-pages/",
+      "latest_version": "1.5.0",
+      "last_updated": "2021-02-08T10:45:00.000Z",
+      "outdated": true,
+      "readme_url": null,
+      "directory_listing": null,
+      "error_log_url": null,
+      "found_by": "Urls In Homepage (Passive Detection)",
+      "confidence": 100,
+      "interesting_entries": [],
+      "confirmed_by": {
+        "Urls In 404 Page (Passive Detection)": {
+          "confidence": 80,
+          "interesting_entries": []
+        }
+      },
+      "vulnerabilities": [],
+      "version": {
+        "number": "1.4",
+        "confidence": 100,
+        "found_by": "Readme - Stable Tag (Aggressive Detection)",
+        "interesting_entries": [
+          "http://example/wp-content/plugins/widgets-on-pages/readme.txt"
+        ],
+        "confirmed_by": {
+          "Readme - ChangeLog Section (Aggressive Detection)": {
+            "confidence": 50,
+            "interesting_entries": [
+              "http://example/wp-content/plugins/widgets-on-pages/readme.txt"
+            ]
+          }
+        }
+      }
+    },
+    "wp-miniaudioplayer": {
+      "slug": "wp-miniaudioplayer",
+      "location": "http://example/wp-content/plugins/wp-miniaudioplayer/",
+      "latest_version": "1.9.5",
+      "last_updated": "2021-03-13T13:22:00.000Z",
+      "outdated": true,
+      "readme_url": null,
+      "directory_listing": null,
+      "error_log_url": null,
+      "found_by": "Urls In Homepage (Passive Detection)",
+      "confidence": 100,
+      "interesting_entries": [],
+      "confirmed_by": {
+        "Urls In 404 Page (Passive Detection)": {
+          "confidence": 80,
+          "interesting_entries": []
+        }
+      },
+      "vulnerabilities": [],
+      "version": {
+        "number": "1.9.4",
+        "confidence": 100,
+        "found_by": "Query Parameter (Passive Detection)",
+        "interesting_entries": [
+          "http://example/wp-content/plugins/wp-miniaudioplayer/css/miniplayer.css?ver=1.9.4",
+          "http://example/wp-content/plugins/wp-miniaudioplayer/js/map_overwrite_default_me.js?ver=1.9.4"
+        ],
+        "confirmed_by": {
+          "Readme - Stable Tag (Aggressive Detection)": {
+            "confidence": 80,
+            "interesting_entries": [
+              "http://example/wp-content/plugins/wp-miniaudioplayer/readme.txt"
+            ]
+          },
+          "Readme - ChangeLog Section (Aggressive Detection)": {
+            "confidence": 50,
+            "interesting_entries": [
+              "http://example/wp-content/plugins/wp-miniaudioplayer/readme.txt"
+            ]
+          }
+        }
+      }
+    },
+    "wp-smushit": {
+      "slug": "wp-smushit",
+      "location": "http://example/wp-content/plugins/wp-smushit/",
+      "latest_version": "3.8.3",
+      "last_updated": "2021-03-11T23:03:00.000Z",
+      "outdated": true,
+      "readme_url": null,
+      "directory_listing": null,
+      "error_log_url": null,
+      "found_by": "Urls In Homepage (Passive Detection)",
+      "confidence": 100,
+      "interesting_entries": [],
+      "confirmed_by": {
+        "Urls In 404 Page (Passive Detection)": {
+          "confidence": 80,
+          "interesting_entries": []
+        }
+      },
+      "vulnerabilities": [],
+      "version": {
+        "number": "3.7.3",
+        "confidence": 100,
+        "found_by": "Readme - Stable Tag (Aggressive Detection)",
+        "interesting_entries": [
+          "http://example/wp-content/plugins/wp-smushit/readme.txt"
+        ],
+        "confirmed_by": {
+          "Readme - ChangeLog Section (Aggressive Detection)": {
+            "confidence": 50,
+            "interesting_entries": [
+              "http://example/wp-content/plugins/wp-smushit/readme.txt"
+            ]
+          }
+        }
+      }
+    },
+    "wp-statistics": {
+      "slug": "wp-statistics",
+      "location": "http://example/wp-content/plugins/wp-statistics/",
+      "latest_version": "13.0.7",
+      "last_updated": "2021-03-14T17:11:00.000Z",
+      "outdated": true,
+      "readme_url": null,
+      "directory_listing": null,
+      "error_log_url": null,
+      "found_by": "Comment (Passive Detection)",
+      "confidence": 30,
+      "interesting_entries": [],
+      "confirmed_by": {},
+      "vulnerabilities": [],
+      "version": {
+        "number": "12.6.13",
+        "confidence": 100,
+        "found_by": "Comment (Passive Detection)",
+        "interesting_entries": [
+          "http://example/, Match: 'Analytics by WP-Statistics v12.6.13'"
+        ],
+        "confirmed_by": {
+          "Readme - Stable Tag (Aggressive Detection)": {
+            "confidence": 80,
+            "interesting_entries": [
+              "http://example/wp-content/plugins/wp-statistics/readme.txt"
+            ]
+          },
+          "Readme - ChangeLog Section (Aggressive Detection)": {
+            "confidence": 50,
+            "interesting_entries": [
+              "http://example/wp-content/plugins/wp-statistics/readme.txt"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "config_backups": {},
+  "vuln_api": {
+    "plan": "free",
+    "requests_done_during_scan": 11,
+    "requests_remaining": 9
+  },
+  "stop_time": 1615983695,
+  "elapsed": 28,
+  "requests_done": 93,
+  "cached_requests": 7,
+  "data_sent": 23650,
+  "data_sent_humanised": "23.096 KB",
+  "data_received": 738299,
+  "data_received_humanised": "720.995 KB",
+  "used_memory": 242847744,
+  "used_memory_humanised": "231.598 MB"
+}

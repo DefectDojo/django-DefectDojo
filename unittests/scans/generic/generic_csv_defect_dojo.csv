@@ -1,0 +1,5 @@
+Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive,Duplicate
+01/30/2018,"Server leaks inodes via ETags, header found with file /, fields: 0xW/109b 0xpqG8TolgxCnpM/7cGOOI0GRS+rc ",0,https://192.168.1.1/,Low,"Server leaks inodes via ETags, header found with file /, fields: 0xW/109b 0xpqG8TolgxCnpM/7cGOOI0GRS+rc ",,,,False,False,False,False
+01/30/2018,The anti-clickjacking X-Frame-Options header is not present.,0,https://192.168.1.1/,Low,The anti-clickjacking X-Frame-Options header is not present.,,,,False,False,False,False
+01/30/2018,Cookie connect.sid created without the secure flag,0,https://192.168.1.1/,Low,Cookie connect.sid created without the secure flag,,,,False,False,False,False
+01/30/2018,Cookie connect.sid created without the httponly flag,0,https://192.168.1.1/,Low,Cookie connect.sid created without the httponly flag,,,,False,False,False,False

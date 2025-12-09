@@ -1,0 +1,113 @@
+{
+    "findings": [
+      {
+        "EpssScore": "0.00239",
+        "SchemaVersion": "2018-10-08",
+        "Id": "arn:aws:inspector2:us-east-1:1234567:finding/12344bc",
+        "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/inspector",
+        "ProductName": "Inspector",
+        "CompanyName": "Amazon",
+        "Region": "us-east-1",
+        "GeneratorId": "AWSInspector",
+        "AwsAccountId": "1234567",
+        "Types": [
+          "Software and Configuration Checks/Vulnerabilities/CVE"
+        ],
+        "FirstObservedAt": "2024-07-30T12:17:32.646Z",
+        "LastObservedAt": "2024-09-18T05:16:44.106Z",
+        "CreatedAt": "2024-07-30T12:17:32.646Z",
+        "UpdatedAt": "2024-09-18T05:16:44.106Z",
+        "Severity": {
+          "Label": "MEDIUM",
+          "Normalized": 50
+        },
+        "Title": "CVE-2024-123 - fdd",
+        "Description": "A vulnerability was found in sdd.",
+        "Remediation": {
+          "Recommendation": {
+            "Text": "None Provided"
+          }
+        },
+        "ProductFields": {
+          "aws/inspector/FindingStatus": "ACTIVE",
+          "aws/inspector/inspectorScore": "5.1",
+          "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "AMAZON_LINUX_2023",
+          "aws/inspector/ProductVersion": "1",
+          "aws/inspector/instanceId": "i-1234xxyy",
+          "aws/securityhub/FindingId": "arn:aws:inspector2:us-east-1:1234567:finding/addfss",
+          "aws/securityhub/ProductName": "Inspector",
+          "aws/securityhub/CompanyName": "Amazon"
+        },
+        "Resources": [
+          {
+            "Type": "AwsEc2Instance",
+            "Id": "i-1234xxyy",
+            "Partition": "aws",
+            "Region": "us-east-1",
+            "Tags": {
+              "Name": "Name:xx-123-yy"
+            },
+            "Details": {
+              "AwsEc2Instance": {
+                "Type": "tt",
+                "ImageId": "ami-1234",
+                "IpV4Addresses": [
+                  "0.0.0.0"
+                ],
+                "IamInstanceProfileArn": "arn:aws:iam::1234567:instance-profile/something",
+                "VpcId": "vpc-1234",
+                "SubnetId": "subnet-xxxxxxx",
+                "LaunchedAt": "2024-09-18T05:16:44.106Z"
+              }
+            }
+          }
+        ],
+        "WorkflowState": "NEW",
+        "Workflow": {
+          "Status": "NEW"
+        },
+        "RecordState": "ACTIVE",
+        "Vulnerabilities": [
+          {
+            "Id": "CVE-2024-1234",
+            "VulnerablePackages": [
+              {
+                "Name": "aa",
+                "Version": "1.2.0",
+                "Architecture": "X86_64]",
+                "PackageManager": "OS",
+                "FixedInVersion": "abc[2.0]"
+              }
+            ],
+            "Cvss": [
+              {
+                "Version": "3.1",
+                "BaseScore": "7.5",
+                "BaseVector": "CVSS:9.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                "Source": "NVD"
+              }
+            ],
+            "Vendor": {
+              "Name": "AMAZON_CVE",
+              "Url": "https://alas.aws.amazon.com/cve/json/v1/CVE-2024-1234.json",
+              "VendorSeverity": "Medium",
+              "VendorCreatedAt": "2024-01-16T00:00:00Z",
+              "VendorUpdatedAt": "2024-09-18T05:16:44.106Z"
+            },
+            "ReferenceUrls": [
+              "https://alas.aws.amazon.com"
+            ],
+            "FixAvailable": "YES"
+          }
+        ],
+        "FindingProviderFields": {
+          "Severity": {
+            "Label": "MEDIUM"
+          },
+          "Types": [
+            "Software and Configuration Checks/Vulnerabilities/CVE"
+          ]
+        }
+      }
+    ]
+  }

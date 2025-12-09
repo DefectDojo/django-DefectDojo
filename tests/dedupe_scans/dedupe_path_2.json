@@ -1,0 +1,45 @@
+{
+  "generated_at": "2018-04-03T06:29:57Z",
+
+  "results": [
+    {
+      "code": "523         cred = Cred_Mapping.objects.get(pk=ttid)\n524     except:\n525         pass\n",
+      "filename": "/opt/appsecpipeline/source/dojo/cred/views.py",
+      "issue_confidence": "HIGH",
+      "issue_severity": "LOW",
+      "issue_text": "BANDIT Matching Title, Matching Line Number/Path (DUPE)",
+      "line_number": 524,
+      "line_range": [
+        524
+      ],
+      "test_id": "B110",
+      "test_name": "try_except_pass"
+    },
+    {
+      "code": "523         cred = Cred_Mapping.objects.get(pk=ttid)\n524     except:\n525         pass\n",
+      "filename": "/opt/appsecpipeline/source/dojo/cred/views.py",
+      "issue_confidence": "HIGH",
+      "issue_severity": "LOW",
+      "issue_text": "BANDIT Matching Title, Not Matching Line Number/Path",
+      "line_number": 525,
+      "line_range": [
+        525
+      ],
+      "test_id": "B110",
+      "test_name": "try_except_pass"
+    },
+    {
+      "code": "523         cred = Cred_Mapping.objects.get(pk=ttid)\n524     except:\n525         pass\n",
+      "filename": "/opt/appsecpipeline/source/dojo/cred/views.py",
+      "issue_confidence": "HIGH",
+      "issue_severity": "LOW",
+      "issue_text": "BANDIT Differing Title, Matching Line Number/Path",
+      "line_number": 524,
+      "line_range": [
+        524
+      ],
+      "test_id": "B110",
+      "test_name": "try_except_pass"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.13-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="www.target.com" sniname="www.target.com" port="443">
+  <fallback supported="1" />
+  <renegotiation supported="0" secure="0" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="1" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-GCM-SHA384" id="0xC030" curve="P-256" ecdhebits="256" strength="strong" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" curve="P-256" ecdhebits="256" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-GCM-SHA384" id="0x9F" dhebits="2048" strength="strong" />
+  <cipher status="not accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA256" id="0x6B" dhebits="2048" strength="weak" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-GCM-SHA384" id="0x9D" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA256" id="0x3D" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x35" strength="acceptable" />
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[*.service.target.com]]></subject>
+   <altnames><![CDATA[DNS:*.service.target.com, DNS:service.target.com]]></altnames>
+   <issuer><![CDATA[GlobalSign Organization Validation CA - SHA256 - G2]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Mar 13 11:59:45 2018 GMT</not-valid-before>
+   <not-valid-after>Mar 13 11:59:45 2019 GMT</not-valid-after>
+   <expired>true</expired>
+  </certificate>
+ </ssltest>
+</document>

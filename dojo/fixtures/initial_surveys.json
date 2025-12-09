@@ -1,0 +1,806 @@
+[
+  {
+    "fields": {
+      "created": "2015-03-30T19:31:16Z",
+      "text": "What kind of infrastructure will you be using (cloud servers, load balancers, dedicated hardware, etc)?",
+      "modified": "2015-03-30T19:31:16Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 3
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:31:30Z",
+      "text": "Will there be a staging/pre-prod environment?",
+      "modified": "2015-03-30T19:31:30Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 4
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:31:45Z",
+      "text": "How many servers/regions will be used for production?",
+      "modified": "2015-03-30T19:31:45Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 5
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:52:57Z",
+      "text": "What kind of OS and other software will these servers run?",
+      "modified": "2015-03-30T19:52:57Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 6
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:53:37Z",
+      "text": "Where does the product live? (Public cloud, private cloud, dedicated, etc.)",
+      "modified": "2015-03-30T19:53:37Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 7
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:54:20Z",
+      "text": "If public cloud, are regions and environments separated into different accounts? Who manages the accounts?",
+      "modified": "2015-03-30T19:54:20Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 8
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:54:34Z",
+      "text": "How will your servers talk to one another, if at all?",
+      "modified": "2015-03-30T19:54:34Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 9
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:54:48Z",
+      "text": "How will you manage this infrastructure?",
+      "modified": "2015-03-30T19:54:48Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 10
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:55:00Z",
+      "text": "What is your patching schedule?",
+      "modified": "2015-03-30T19:55:00Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 11
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:55:20Z",
+      "text": "How will admin users (e.g., Ops) authenticate to the servers (LDAP based login, SSH Keys, local access)?",
+      "modified": "2015-03-30T19:55:20Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 12
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:56:24Z",
+      "text": "What components do you have as part of your product (Web UI, REST API, command line app, mobile app, etc.)?",
+      "modified": "2015-03-30T19:56:24Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 13
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:57:22Z",
+      "text": "What access control limitations are in place?",
+      "modified": "2015-03-30T19:57:22Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 14
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:57:34Z",
+      "text": "How is access control enforced? (IP whitelists, role-based access controls, etc.)",
+      "modified": "2015-03-30T19:57:34Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 15
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:57:55Z",
+      "text": "What Identity roles (if any) are utilized by the app and how many people are estimated to be inside those groups?",
+      "modified": "2015-03-30T19:57:55Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 16
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T19:58:36Z",
+      "text": "What is the criteria for being added to these groups?  Are they audited and auto-purged?",
+      "modified": "2015-03-30T19:58:36Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 17
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:00:35Z",
+      "text": "Are you logging all sensitive user actions, such as user registration, permission modification, login attempts, admin functions, etc.?",
+      "modified": "2015-03-30T20:00:35Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 18
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:00:46Z",
+      "text": "What identifying information are you logging?",
+      "modified": "2015-03-30T20:00:46Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 19
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:00:58Z",
+      "text": "Where are these logs stored?",
+      "modified": "2015-03-30T20:00:58Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 20
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:02:18Z",
+      "text": "How does an end user interact with the product? Do they visit it in their browser, use a proxy or a special CLI tool, log in through a terminal server, etc?",
+      "modified": "2015-03-30T20:02:18Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 21
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:02:32Z",
+      "text": "How public-facing is this product? (customer tool, open source project, etc.)",
+      "modified": "2015-03-30T20:02:32Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 22
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:02:46Z",
+      "text": "When does information cross a privacy boundary within your application flow? For instance public cloud -> private cloud, public internet -> public cloud, etc.",
+      "modified": "2015-03-30T20:02:46Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 23
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:02:57Z",
+      "text": "What services/products does your product consume? What services/products consume it?",
+      "modified": "2015-03-30T20:02:57Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 24
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:04:46Z",
+      "text": "What customer or corporate information does your product consume?",
+      "modified": "2015-03-30T20:04:46Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 25
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:05:10Z",
+      "text": "What information does the product store?",
+      "modified": "2015-03-30T20:05:10Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 26
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:05:22Z",
+      "text": "Where, how, and for how long is it stored?",
+      "modified": "2015-03-30T20:05:22Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 27
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:05:32Z",
+      "text": "Is encryption / hashing used where appropriate?",
+      "modified": "2015-03-30T20:05:32Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 28
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:05:43Z",
+      "text": "Are you rolling your own identification system? If so, have you considered integrating with SSO instead?",
+      "modified": "2015-03-30T20:05:43Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 29
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:05:57Z",
+      "text": "What information does the product send to the user?",
+      "modified": "2015-03-30T20:05:57Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 30
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:06:15Z",
+      "text": "If you\u2019re managing passwords or keys across multiple servers/endpoints, where and how is that information stored?",
+      "modified": "2015-03-30T20:06:15Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 31
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:08:08Z",
+      "text": "What third party tools and libraries are you using? Please provide a package dump as well (apt, pip, bower, etc.)",
+      "modified": "2015-03-30T20:08:08Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 32
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:08:19Z",
+      "text": "What ports should be open on each node, and what services do they expose?",
+      "modified": "2015-03-30T20:08:19Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 33
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:08:30Z",
+      "text": "What service accounts are you utilizing, and what roles do they have?",
+      "modified": "2015-03-30T20:08:30Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 34
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:08:43Z",
+      "text": "What DNS entries do you have set up? (Most importantly, public-facing systems)",
+      "modified": "2015-03-30T20:08:43Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 35
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:08:54Z",
+      "text": "What type of monitoring are you doing? (IDS, cloud monitoring, custom log parsing script, etc.)",
+      "modified": "2015-03-30T20:08:54Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 36
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:10:15Z",
+      "text": "List the IPs for all infrastructure utilized for the environment in question.",
+      "modified": "2015-03-30T20:10:15Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 37
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:10:30Z",
+      "text": "List of endpoints and documentation for any APIs created by your product.",
+      "modified": "2015-03-30T20:10:30Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 38
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:10:42Z",
+      "text": "Locations of any web UIs or other important URLs",
+      "modified": "2015-03-30T20:10:42Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 39
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:10:52Z",
+      "text": "List of any service accounts or other access requests relevant to your product",
+      "modified": "2015-03-30T20:10:52Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 40
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:11:04Z",
+      "text": "The contact information of QE who are testing the products.",
+      "modified": "2015-03-30T20:11:04Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 41
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:11:17Z",
+      "text": "The list of people that should be notified for our security testing.",
+      "modified": "2015-03-30T20:11:17Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 42
+  },
+  {
+    "fields": {
+      "created": "2015-03-30T20:11:30Z",
+      "text": "Any security testing that we should not run, and/or times when you would prefer we not test.",
+      "modified": "2015-03-30T20:11:30Z",
+      "optional": false,
+      "order": 1,
+      "polymorphic_ctype": 18
+    },
+    "model": "dojo.question",
+    "pk": 43
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 3
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 4
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 5
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 6
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 7
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 8
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 9
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 10
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 11
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 12
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 13
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 14
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 15
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 16
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 17
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 18
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 19
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 20
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 21
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 22
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 23
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 24
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 25
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 26
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 27
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 28
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 29
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 30
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 31
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 32
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 33
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 34
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 35
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 36
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 37
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 38
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 39
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 40
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 41
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 42
+  },
+  {
+    "fields": {},
+    "model": "dojo.textquestion",
+    "pk": 43
+  },
+  {
+    "fields": {
+      "active": true,
+      "name": "Infrastructure",
+      "questions": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "description": "Questions regarding the products physical infrastructure."
+    },
+    "model": "dojo.engagement_survey",
+    "pk": 2
+  },
+  {
+    "fields": {
+      "active": true,
+      "name": "Testing Preparation",
+      "questions": [
+        13,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43
+      ],
+      "description": "Tell us about the specific components that make up your application."
+    },
+    "model": "dojo.engagement_survey",
+    "pk": 3
+  },
+  {
+    "fields": {
+      "active": true,
+      "name": "Access Control",
+      "questions": [
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "description": "Tell us about the access control configured for your application."
+    },
+    "model": "dojo.engagement_survey",
+    "pk": 4
+  },
+  {
+    "fields": {
+      "active": true,
+      "name": "Information Flow / Dependency Modeling",
+      "questions": [
+        21,
+        22,
+        23,
+        24
+      ],
+      "description": "Tell us how is your application used."
+    },
+    "model": "dojo.engagement_survey",
+    "pk": 5
+  },
+  {
+    "fields": {
+      "active": true,
+      "name": "Information Management",
+      "questions": [
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ],
+      "description": "Tell us what kind of data you are storing/managing."
+    },
+    "model": "dojo.engagement_survey",
+    "pk": 6
+  },
+  {
+    "fields": {
+      "active": true,
+      "name": "Inventory",
+      "questions": [
+        32,
+        33,
+        34,
+        35,
+        36
+      ],
+      "description": "Give us detail about your application."
+    },
+    "model": "dojo.engagement_survey",
+    "pk": 7
+  }
+]

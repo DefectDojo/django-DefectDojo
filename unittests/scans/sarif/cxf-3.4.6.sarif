@@ -1,0 +1,877 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0-rtm.5.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Grype",
+          "version": "0.34.7",
+          "informationUri": "https://github.com/anchore/grype",
+          "rules": [
+            {
+              "id": "CVE-2008-0732-geronimo-j2ee-management_1.1_spec",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2008-0732 low vulnerability for geronimo-j2ee-management_1.1_spec package"
+              },
+              "fullDescription": {
+                "text": "The init script for Apache Geronimo on SUSE Linux follows symlinks when performing a chown operation, which might allow local users to obtain access to unspecified files or directories."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2008-0732\nSeverity: low\nPackage: geronimo-j2ee-management_1.1_spec\nVersion: 1.0.1\nFix Version: \nType: java-archive\nLocation: lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar\nData Namespace: nvd\nLink: [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)",
+                "markdown": "**Vulnerability CVE-2008-0732**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| low  | geronimo-j2ee-management_1.1_spec  | 1.0.1  |   | java-archive  | lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar  | nvd  | [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)  |\n"
+              },
+              "properties": {
+                "security-severity": "2.1"
+              }
+            },
+            {
+              "id": "CVE-2008-0732-geronimo-javamail_1.4_mail",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2008-0732 low vulnerability for geronimo-javamail_1.4_mail package"
+              },
+              "fullDescription": {
+                "text": "The init script for Apache Geronimo on SUSE Linux follows symlinks when performing a chown operation, which might allow local users to obtain access to unspecified files or directories."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2008-0732\nSeverity: low\nPackage: geronimo-javamail_1.4_mail\nVersion: 1.8.4\nFix Version: \nType: java-archive\nLocation: lib/geronimo-javamail_1.4_mail-1.8.4.jar\nData Namespace: nvd\nLink: [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)",
+                "markdown": "**Vulnerability CVE-2008-0732**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| low  | geronimo-javamail_1.4_mail  | 1.8.4  |   | java-archive  | lib/geronimo-javamail_1.4_mail-1.8.4.jar  | nvd  | [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)  |\n"
+              },
+              "properties": {
+                "security-severity": "2.1"
+              }
+            },
+            {
+              "id": "CVE-2008-0732-geronimo-javamail_1.4_provider",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2008-0732 low vulnerability for geronimo-javamail_1.4_provider package"
+              },
+              "fullDescription": {
+                "text": "The init script for Apache Geronimo on SUSE Linux follows symlinks when performing a chown operation, which might allow local users to obtain access to unspecified files or directories."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2008-0732\nSeverity: low\nPackage: geronimo-javamail_1.4_provider\nVersion: 1.8.4\nFix Version: \nType: java-archive\nLocation: lib/geronimo-javamail_1.4_mail-1.8.4.jar\nData Namespace: nvd\nLink: [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)",
+                "markdown": "**Vulnerability CVE-2008-0732**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| low  | geronimo-javamail_1.4_provider  | 1.8.4  |   | java-archive  | lib/geronimo-javamail_1.4_mail-1.8.4.jar  | nvd  | [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)  |\n"
+              },
+              "properties": {
+                "security-severity": "2.1"
+              }
+            },
+            {
+              "id": "CVE-2008-0732-geronimo-javamail_1.4_spec",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2008-0732 low vulnerability for geronimo-javamail_1.4_spec package"
+              },
+              "fullDescription": {
+                "text": "The init script for Apache Geronimo on SUSE Linux follows symlinks when performing a chown operation, which might allow local users to obtain access to unspecified files or directories."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2008-0732\nSeverity: low\nPackage: geronimo-javamail_1.4_spec\nVersion: 1.7.1\nFix Version: \nType: java-archive\nLocation: lib/geronimo-javamail_1.4_mail-1.8.4.jar\nData Namespace: nvd\nLink: [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)",
+                "markdown": "**Vulnerability CVE-2008-0732**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| low  | geronimo-javamail_1.4_spec  | 1.7.1  |   | java-archive  | lib/geronimo-javamail_1.4_mail-1.8.4.jar  | nvd  | [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)  |\n"
+              },
+              "properties": {
+                "security-severity": "2.1"
+              }
+            },
+            {
+              "id": "CVE-2008-0732-geronimo-jms_1.1_spec",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2008-0732 low vulnerability for geronimo-jms_1.1_spec package"
+              },
+              "fullDescription": {
+                "text": "The init script for Apache Geronimo on SUSE Linux follows symlinks when performing a chown operation, which might allow local users to obtain access to unspecified files or directories."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2008-0732\nSeverity: low\nPackage: geronimo-jms_1.1_spec\nVersion: 1.1.1\nFix Version: \nType: java-archive\nLocation: lib/geronimo-jms_1.1_spec-1.1.1.jar\nData Namespace: nvd\nLink: [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)",
+                "markdown": "**Vulnerability CVE-2008-0732**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| low  | geronimo-jms_1.1_spec  | 1.1.1  |   | java-archive  | lib/geronimo-jms_1.1_spec-1.1.1.jar  | nvd  | [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)  |\n"
+              },
+              "properties": {
+                "security-severity": "2.1"
+              }
+            },
+            {
+              "id": "CVE-2008-0732-geronimo-jta_1.1_spec",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2008-0732 low vulnerability for geronimo-jta_1.1_spec package"
+              },
+              "fullDescription": {
+                "text": "The init script for Apache Geronimo on SUSE Linux follows symlinks when performing a chown operation, which might allow local users to obtain access to unspecified files or directories."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2008-0732\nSeverity: low\nPackage: geronimo-jta_1.1_spec\nVersion: 1.1.1\nFix Version: \nType: java-archive\nLocation: lib/geronimo-jta_1.1_spec-1.1.1.jar\nData Namespace: nvd\nLink: [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)",
+                "markdown": "**Vulnerability CVE-2008-0732**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| low  | geronimo-jta_1.1_spec  | 1.1.1  |   | java-archive  | lib/geronimo-jta_1.1_spec-1.1.1.jar  | nvd  | [CVE-2008-0732](https://nvd.nist.gov/vuln/detail/CVE-2008-0732)  |\n"
+              },
+              "properties": {
+                "security-severity": "2.1"
+              }
+            },
+            {
+              "id": "CVE-2011-5034-geronimo-j2ee-management_1.1_spec",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2011-5034 high vulnerability for geronimo-j2ee-management_1.1_spec package"
+              },
+              "fullDescription": {
+                "text": "Apache Geronimo 2.2.1 and earlier computes hash values for form parameters without restricting the ability to trigger hash collisions predictably, which allows remote attackers to cause a denial of service (CPU consumption) by sending many crafted parameters.  NOTE: this might overlap CVE-2011-4461."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2011-5034\nSeverity: high\nPackage: geronimo-j2ee-management_1.1_spec\nVersion: 1.0.1\nFix Version: \nType: java-archive\nLocation: lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar\nData Namespace: nvd\nLink: [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)",
+                "markdown": "**Vulnerability CVE-2011-5034**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| high  | geronimo-j2ee-management_1.1_spec  | 1.0.1  |   | java-archive  | lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar  | nvd  | [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)  |\n"
+              },
+              "properties": {
+                "security-severity": "7.8"
+              }
+            },
+            {
+              "id": "CVE-2011-5034-geronimo-javamail_1.4_mail",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2011-5034 high vulnerability for geronimo-javamail_1.4_mail package"
+              },
+              "fullDescription": {
+                "text": "Apache Geronimo 2.2.1 and earlier computes hash values for form parameters without restricting the ability to trigger hash collisions predictably, which allows remote attackers to cause a denial of service (CPU consumption) by sending many crafted parameters.  NOTE: this might overlap CVE-2011-4461."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2011-5034\nSeverity: high\nPackage: geronimo-javamail_1.4_mail\nVersion: 1.8.4\nFix Version: \nType: java-archive\nLocation: lib/geronimo-javamail_1.4_mail-1.8.4.jar\nData Namespace: nvd\nLink: [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)",
+                "markdown": "**Vulnerability CVE-2011-5034**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| high  | geronimo-javamail_1.4_mail  | 1.8.4  |   | java-archive  | lib/geronimo-javamail_1.4_mail-1.8.4.jar  | nvd  | [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)  |\n"
+              },
+              "properties": {
+                "security-severity": "7.8"
+              }
+            },
+            {
+              "id": "CVE-2011-5034-geronimo-javamail_1.4_provider",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2011-5034 high vulnerability for geronimo-javamail_1.4_provider package"
+              },
+              "fullDescription": {
+                "text": "Apache Geronimo 2.2.1 and earlier computes hash values for form parameters without restricting the ability to trigger hash collisions predictably, which allows remote attackers to cause a denial of service (CPU consumption) by sending many crafted parameters.  NOTE: this might overlap CVE-2011-4461."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2011-5034\nSeverity: high\nPackage: geronimo-javamail_1.4_provider\nVersion: 1.8.4\nFix Version: \nType: java-archive\nLocation: lib/geronimo-javamail_1.4_mail-1.8.4.jar\nData Namespace: nvd\nLink: [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)",
+                "markdown": "**Vulnerability CVE-2011-5034**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| high  | geronimo-javamail_1.4_provider  | 1.8.4  |   | java-archive  | lib/geronimo-javamail_1.4_mail-1.8.4.jar  | nvd  | [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)  |\n"
+              },
+              "properties": {
+                "security-severity": "7.8"
+              }
+            },
+            {
+              "id": "CVE-2011-5034-geronimo-javamail_1.4_spec",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2011-5034 high vulnerability for geronimo-javamail_1.4_spec package"
+              },
+              "fullDescription": {
+                "text": "Apache Geronimo 2.2.1 and earlier computes hash values for form parameters without restricting the ability to trigger hash collisions predictably, which allows remote attackers to cause a denial of service (CPU consumption) by sending many crafted parameters.  NOTE: this might overlap CVE-2011-4461."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2011-5034\nSeverity: high\nPackage: geronimo-javamail_1.4_spec\nVersion: 1.7.1\nFix Version: \nType: java-archive\nLocation: lib/geronimo-javamail_1.4_mail-1.8.4.jar\nData Namespace: nvd\nLink: [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)",
+                "markdown": "**Vulnerability CVE-2011-5034**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| high  | geronimo-javamail_1.4_spec  | 1.7.1  |   | java-archive  | lib/geronimo-javamail_1.4_mail-1.8.4.jar  | nvd  | [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)  |\n"
+              },
+              "properties": {
+                "security-severity": "7.8"
+              }
+            },
+            {
+              "id": "CVE-2011-5034-geronimo-jms_1.1_spec",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2011-5034 high vulnerability for geronimo-jms_1.1_spec package"
+              },
+              "fullDescription": {
+                "text": "Apache Geronimo 2.2.1 and earlier computes hash values for form parameters without restricting the ability to trigger hash collisions predictably, which allows remote attackers to cause a denial of service (CPU consumption) by sending many crafted parameters.  NOTE: this might overlap CVE-2011-4461."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2011-5034\nSeverity: high\nPackage: geronimo-jms_1.1_spec\nVersion: 1.1.1\nFix Version: \nType: java-archive\nLocation: lib/geronimo-jms_1.1_spec-1.1.1.jar\nData Namespace: nvd\nLink: [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)",
+                "markdown": "**Vulnerability CVE-2011-5034**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| high  | geronimo-jms_1.1_spec  | 1.1.1  |   | java-archive  | lib/geronimo-jms_1.1_spec-1.1.1.jar  | nvd  | [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)  |\n"
+              },
+              "properties": {
+                "security-severity": "7.8"
+              }
+            },
+            {
+              "id": "CVE-2011-5034-geronimo-jta_1.1_spec",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2011-5034 high vulnerability for geronimo-jta_1.1_spec package"
+              },
+              "fullDescription": {
+                "text": "Apache Geronimo 2.2.1 and earlier computes hash values for form parameters without restricting the ability to trigger hash collisions predictably, which allows remote attackers to cause a denial of service (CPU consumption) by sending many crafted parameters.  NOTE: this might overlap CVE-2011-4461."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2011-5034\nSeverity: high\nPackage: geronimo-jta_1.1_spec\nVersion: 1.1.1\nFix Version: \nType: java-archive\nLocation: lib/geronimo-jta_1.1_spec-1.1.1.jar\nData Namespace: nvd\nLink: [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)",
+                "markdown": "**Vulnerability CVE-2011-5034**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| high  | geronimo-jta_1.1_spec  | 1.1.1  |   | java-archive  | lib/geronimo-jta_1.1_spec-1.1.1.jar  | nvd  | [CVE-2011-5034](https://nvd.nist.gov/vuln/detail/CVE-2011-5034)  |\n"
+              },
+              "properties": {
+                "security-severity": "7.8"
+              }
+            },
+            {
+              "id": "CVE-2019-12406-cxf-xjc-runtime",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2019-12406 medium vulnerability for cxf-xjc-runtime package"
+              },
+              "fullDescription": {
+                "text": "Apache CXF before 3.3.4 and 3.2.11 does not restrict the number of message attachments present in a given message. This leaves open the possibility of a denial of service type attack, where a malicious user crafts a message containing a very large number of message attachments. From the 3.3.4 and 3.2.11 releases, a default limit of 50 message attachments is enforced. This is configurable via the message property \"attachment-max-count\"."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2019-12406\nSeverity: medium\nPackage: cxf-xjc-runtime\nVersion: 3.3.1\nFix Version: \nType: java-archive\nLocation: lib/cxf-xjc-runtime-3.3.1.jar\nData Namespace: nvd\nLink: [CVE-2019-12406](https://nvd.nist.gov/vuln/detail/CVE-2019-12406)",
+                "markdown": "**Vulnerability CVE-2019-12406**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| medium  | cxf-xjc-runtime  | 3.3.1  |   | java-archive  | lib/cxf-xjc-runtime-3.3.1.jar  | nvd  | [CVE-2019-12406](https://nvd.nist.gov/vuln/detail/CVE-2019-12406)  |\n"
+              },
+              "properties": {
+                "security-severity": "6.5"
+              }
+            },
+            {
+              "id": "CVE-2019-12419-cxf-xjc-runtime",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2019-12419 critical vulnerability for cxf-xjc-runtime package"
+              },
+              "fullDescription": {
+                "text": "Apache CXF before 3.3.4 and 3.2.11 provides all of the components that are required to build a fully fledged OpenId Connect service. There is a vulnerability in the access token services, where it does not validate that the authenticated principal is equal to that of the supplied clientId parameter in the request. If a malicious client was able to somehow steal an authorization code issued to another client, then they could exploit this vulnerability to obtain an access token for the other client."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2019-12419\nSeverity: critical\nPackage: cxf-xjc-runtime\nVersion: 3.3.1\nFix Version: \nType: java-archive\nLocation: lib/cxf-xjc-runtime-3.3.1.jar\nData Namespace: nvd\nLink: [CVE-2019-12419](https://nvd.nist.gov/vuln/detail/CVE-2019-12419)",
+                "markdown": "**Vulnerability CVE-2019-12419**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| critical  | cxf-xjc-runtime  | 3.3.1  |   | java-archive  | lib/cxf-xjc-runtime-3.3.1.jar  | nvd  | [CVE-2019-12419](https://nvd.nist.gov/vuln/detail/CVE-2019-12419)  |\n"
+              },
+              "properties": {
+                "security-severity": "9.8"
+              }
+            },
+            {
+              "id": "CVE-2019-12423-cxf-xjc-runtime",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2019-12423 high vulnerability for cxf-xjc-runtime package"
+              },
+              "fullDescription": {
+                "text": "Apache CXF ships with a OpenId Connect JWK Keys service, which allows a client to obtain the public keys in JWK format, which can then be used to verify the signature of tokens issued by the service. Typically, the service obtains the public key from a local keystore (JKS/PKCS12) by specifing the path of the keystore and the alias of the keystore entry. This case is not vulnerable. However it is also possible to obtain the keys from a JWK keystore file, by setting the configuration parameter \"rs.security.keystore.type\" to \"jwk\". For this case all keys are returned in this file \"as is\", including all private key and secret key credentials. This is an obvious security risk if the user has configured the signature keystore file with private or secret key credentials. From CXF 3.3.5 and 3.2.12, it is mandatory to specify an alias corresponding to the id of the key in the JWK file, and only this key is returned. In addition, any private key information is omitted by default. \"oct\" keys, which contain secret keys, are not returned at all."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2019-12423\nSeverity: high\nPackage: cxf-xjc-runtime\nVersion: 3.3.1\nFix Version: \nType: java-archive\nLocation: lib/cxf-xjc-runtime-3.3.1.jar\nData Namespace: nvd\nLink: [CVE-2019-12423](https://nvd.nist.gov/vuln/detail/CVE-2019-12423)",
+                "markdown": "**Vulnerability CVE-2019-12423**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| high  | cxf-xjc-runtime  | 3.3.1  |   | java-archive  | lib/cxf-xjc-runtime-3.3.1.jar  | nvd  | [CVE-2019-12423](https://nvd.nist.gov/vuln/detail/CVE-2019-12423)  |\n"
+              },
+              "properties": {
+                "security-severity": "7.5"
+              }
+            },
+            {
+              "id": "CVE-2019-17573-cxf-xjc-runtime",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2019-17573 medium vulnerability for cxf-xjc-runtime package"
+              },
+              "fullDescription": {
+                "text": "By default, Apache CXF creates a /services page containing a listing of the available endpoint names and addresses. This webpage is vulnerable to a reflected Cross-Site Scripting (XSS) attack, which allows a malicious actor to inject javascript into the web page. Please note that the attack exploits a feature which is not typically not present in modern browsers, who remove dot segments before sending the request. However, Mobile applications may be vulnerable."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2019-17573\nSeverity: medium\nPackage: cxf-xjc-runtime\nVersion: 3.3.1\nFix Version: \nType: java-archive\nLocation: lib/cxf-xjc-runtime-3.3.1.jar\nData Namespace: nvd\nLink: [CVE-2019-17573](https://nvd.nist.gov/vuln/detail/CVE-2019-17573)",
+                "markdown": "**Vulnerability CVE-2019-17573**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| medium  | cxf-xjc-runtime  | 3.3.1  |   | java-archive  | lib/cxf-xjc-runtime-3.3.1.jar  | nvd  | [CVE-2019-17573](https://nvd.nist.gov/vuln/detail/CVE-2019-17573)  |\n"
+              },
+              "properties": {
+                "security-severity": "6.1"
+              }
+            },
+            {
+              "id": "CVE-2020-13954-cxf-xjc-runtime",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2020-13954 medium vulnerability for cxf-xjc-runtime package"
+              },
+              "fullDescription": {
+                "text": "By default, Apache CXF creates a /services page containing a listing of the available endpoint names and addresses. This webpage is vulnerable to a reflected Cross-Site Scripting (XSS) attack via the styleSheetPath, which allows a malicious actor to inject javascript into the web page. This vulnerability affects all versions of Apache CXF prior to 3.4.1 and 3.3.8. Please note that this is a separate issue to CVE-2019-17573."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2020-13954\nSeverity: medium\nPackage: cxf-xjc-runtime\nVersion: 3.3.1\nFix Version: \nType: java-archive\nLocation: lib/cxf-xjc-runtime-3.3.1.jar\nData Namespace: nvd\nLink: [CVE-2020-13954](https://nvd.nist.gov/vuln/detail/CVE-2020-13954)",
+                "markdown": "**Vulnerability CVE-2020-13954**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| medium  | cxf-xjc-runtime  | 3.3.1  |   | java-archive  | lib/cxf-xjc-runtime-3.3.1.jar  | nvd  | [CVE-2020-13954](https://nvd.nist.gov/vuln/detail/CVE-2020-13954)  |\n"
+              },
+              "properties": {
+                "security-severity": "6.1"
+              }
+            },
+            {
+              "id": "CVE-2020-1954-cxf-xjc-runtime",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2020-1954 medium vulnerability for cxf-xjc-runtime package"
+              },
+              "fullDescription": {
+                "text": "Apache CXF has the ability to integrate with JMX by registering an InstrumentationManager extension with the CXF bus. If the ‘createMBServerConnectorFactory‘ property of the default InstrumentationManagerImpl is not disabled, then it is vulnerable to a man-in-the-middle (MITM) style attack. An attacker on the same host can connect to the registry and rebind the entry to another server, thus acting as a proxy to the original. They are then able to gain access to all of the information that is sent and received over JMX."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2020-1954\nSeverity: medium\nPackage: cxf-xjc-runtime\nVersion: 3.3.1\nFix Version: \nType: java-archive\nLocation: lib/cxf-xjc-runtime-3.3.1.jar\nData Namespace: nvd\nLink: [CVE-2020-1954](https://nvd.nist.gov/vuln/detail/CVE-2020-1954)",
+                "markdown": "**Vulnerability CVE-2020-1954**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| medium  | cxf-xjc-runtime  | 3.3.1  |   | java-archive  | lib/cxf-xjc-runtime-3.3.1.jar  | nvd  | [CVE-2020-1954](https://nvd.nist.gov/vuln/detail/CVE-2020-1954)  |\n"
+              },
+              "properties": {
+                "security-severity": "5.3"
+              }
+            },
+            {
+              "id": "CVE-2020-36518-jackson-databind",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2020-36518 high vulnerability for jackson-databind package"
+              },
+              "fullDescription": {
+                "text": "jackson-databind before 2.13.0 allows a Java StackOverflow exception and denial of service via a large depth of nested objects."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2020-36518\nSeverity: high\nPackage: jackson-databind\nVersion: 2.11.4\nFix Version: \nType: java-archive\nLocation: lib/jackson-databind-2.11.4.jar\nData Namespace: nvd\nLink: [CVE-2020-36518](https://nvd.nist.gov/vuln/detail/CVE-2020-36518)",
+                "markdown": "**Vulnerability CVE-2020-36518**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| high  | jackson-databind  | 2.11.4  |   | java-archive  | lib/jackson-databind-2.11.4.jar  | nvd  | [CVE-2020-36518](https://nvd.nist.gov/vuln/detail/CVE-2020-36518)  |\n"
+              },
+              "properties": {
+                "security-severity": "7.5"
+              }
+            },
+            {
+              "id": "CVE-2021-22696-cxf-xjc-runtime",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2021-22696 high vulnerability for cxf-xjc-runtime package"
+              },
+              "fullDescription": {
+                "text": "CXF supports (via JwtRequestCodeFilter) passing OAuth 2 parameters via a JWT token as opposed to query parameters (see: The OAuth 2.0 Authorization Framework: JWT Secured Authorization Request (JAR)). Instead of sending a JWT token as a \"request\" parameter, the spec also supports specifying a URI from which to retrieve a JWT token from via the \"request_uri\" parameter. CXF was not validating the \"request_uri\" parameter (apart from ensuring it uses \"https) and was making a REST request to the parameter in the request to retrieve a token. This means that CXF was vulnerable to DDos attacks on the authorization server, as specified in section 10.4.1 of the spec. This issue affects Apache CXF versions prior to 3.4.3; Apache CXF versions prior to 3.3.10."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2021-22696\nSeverity: high\nPackage: cxf-xjc-runtime\nVersion: 3.3.1\nFix Version: \nType: java-archive\nLocation: lib/cxf-xjc-runtime-3.3.1.jar\nData Namespace: nvd\nLink: [CVE-2021-22696](https://nvd.nist.gov/vuln/detail/CVE-2021-22696)",
+                "markdown": "**Vulnerability CVE-2021-22696**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| high  | cxf-xjc-runtime  | 3.3.1  |   | java-archive  | lib/cxf-xjc-runtime-3.3.1.jar  | nvd  | [CVE-2021-22696](https://nvd.nist.gov/vuln/detail/CVE-2021-22696)  |\n"
+              },
+              "properties": {
+                "security-severity": "7.5"
+              }
+            },
+            {
+              "id": "CVE-2021-30468-cxf-xjc-runtime",
+              "name": "JavaMatcherCpeMatch",
+              "shortDescription": {
+                "text": "CVE-2021-30468 high vulnerability for cxf-xjc-runtime package"
+              },
+              "fullDescription": {
+                "text": "A vulnerability in the JsonMapObjectReaderWriter of Apache CXF allows an attacker to submit malformed JSON to a web service, which results in the thread getting stuck in an infinite loop, consuming CPU indefinitely. This issue affects Apache CXF versions prior to 3.4.4; Apache CXF versions prior to 3.3.11."
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability CVE-2021-30468\nSeverity: high\nPackage: cxf-xjc-runtime\nVersion: 3.3.1\nFix Version: \nType: java-archive\nLocation: lib/cxf-xjc-runtime-3.3.1.jar\nData Namespace: nvd\nLink: [CVE-2021-30468](https://nvd.nist.gov/vuln/detail/CVE-2021-30468)",
+                "markdown": "**Vulnerability CVE-2021-30468**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| high  | cxf-xjc-runtime  | 3.3.1  |   | java-archive  | lib/cxf-xjc-runtime-3.3.1.jar  | nvd  | [CVE-2021-30468](https://nvd.nist.gov/vuln/detail/CVE-2021-30468)  |\n"
+              },
+              "properties": {
+                "security-severity": "7.5"
+              }
+            },
+            {
+              "id": "GHSA-57j2-w4cx-62h2-jackson-databind",
+              "name": "JavaMatcherExactDirectMatch",
+              "shortDescription": {
+                "text": "GHSA-57j2-w4cx-62h2 high vulnerability for jackson-databind package"
+              },
+              "fullDescription": {
+                "text": "Deeply nested json in jackson-databind"
+              },
+              "helpUri": "https://github.com/anchore/grype",
+              "help": {
+                "text": "Vulnerability GHSA-57j2-w4cx-62h2\nSeverity: high\nPackage: jackson-databind\nVersion: 2.11.4\nFix Version: 2.12.6.1\nType: java-archive\nLocation: lib/jackson-databind-2.11.4.jar\nData Namespace: github:java\nLink: [GHSA-57j2-w4cx-62h2](https://github.com/advisories/GHSA-57j2-w4cx-62h2)",
+                "markdown": "**Vulnerability GHSA-57j2-w4cx-62h2**\n| Severity | Package | Version | Fix Version | Type | Location | Data Namespace | Link |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| high  | jackson-databind  | 2.11.4  | 2.12.6.1  | java-archive  | lib/jackson-databind-2.11.4.jar  | github:java  | [GHSA-57j2-w4cx-62h2](https://github.com/advisories/GHSA-57j2-w4cx-62h2)  |\n"
+              },
+              "properties": {
+                "security-severity": "7.5"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "CVE-2008-0732-geronimo-j2ee-management_1.1_spec",
+          "message": {
+            "text": "The path lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar reports geronimo-j2ee-management_1.1_spec at version 1.0.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2008-0732-geronimo-javamail_1.4_mail",
+          "message": {
+            "text": "The path lib/geronimo-javamail_1.4_mail-1.8.4.jar reports geronimo-javamail_1.4_mail at version 1.8.4  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-javamail_1.4_mail-1.8.4.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2008-0732-geronimo-javamail_1.4_provider",
+          "message": {
+            "text": "The path lib/geronimo-javamail_1.4_mail-1.8.4.jar reports geronimo-javamail_1.4_provider at version 1.8.4  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-javamail_1.4_mail-1.8.4.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2008-0732-geronimo-javamail_1.4_spec",
+          "message": {
+            "text": "The path lib/geronimo-javamail_1.4_mail-1.8.4.jar reports geronimo-javamail_1.4_spec at version 1.7.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-javamail_1.4_mail-1.8.4.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2008-0732-geronimo-jms_1.1_spec",
+          "message": {
+            "text": "The path lib/geronimo-jms_1.1_spec-1.1.1.jar reports geronimo-jms_1.1_spec at version 1.1.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-jms_1.1_spec-1.1.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2008-0732-geronimo-jta_1.1_spec",
+          "message": {
+            "text": "The path lib/geronimo-jta_1.1_spec-1.1.1.jar reports geronimo-jta_1.1_spec at version 1.1.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-jta_1.1_spec-1.1.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2011-5034-geronimo-j2ee-management_1.1_spec",
+          "message": {
+            "text": "The path lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar reports geronimo-j2ee-management_1.1_spec at version 1.0.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2011-5034-geronimo-javamail_1.4_mail",
+          "message": {
+            "text": "The path lib/geronimo-javamail_1.4_mail-1.8.4.jar reports geronimo-javamail_1.4_mail at version 1.8.4  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-javamail_1.4_mail-1.8.4.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2011-5034-geronimo-javamail_1.4_provider",
+          "message": {
+            "text": "The path lib/geronimo-javamail_1.4_mail-1.8.4.jar reports geronimo-javamail_1.4_provider at version 1.8.4  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-javamail_1.4_mail-1.8.4.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2011-5034-geronimo-javamail_1.4_spec",
+          "message": {
+            "text": "The path lib/geronimo-javamail_1.4_mail-1.8.4.jar reports geronimo-javamail_1.4_spec at version 1.7.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-javamail_1.4_mail-1.8.4.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2011-5034-geronimo-jms_1.1_spec",
+          "message": {
+            "text": "The path lib/geronimo-jms_1.1_spec-1.1.1.jar reports geronimo-jms_1.1_spec at version 1.1.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-jms_1.1_spec-1.1.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2011-5034-geronimo-jta_1.1_spec",
+          "message": {
+            "text": "The path lib/geronimo-jta_1.1_spec-1.1.1.jar reports geronimo-jta_1.1_spec at version 1.1.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/geronimo-jta_1.1_spec-1.1.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2019-12406-cxf-xjc-runtime",
+          "message": {
+            "text": "The path lib/cxf-xjc-runtime-3.3.1.jar reports cxf-xjc-runtime at version 3.3.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/cxf-xjc-runtime-3.3.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2019-12419-cxf-xjc-runtime",
+          "message": {
+            "text": "The path lib/cxf-xjc-runtime-3.3.1.jar reports cxf-xjc-runtime at version 3.3.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/cxf-xjc-runtime-3.3.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2019-12423-cxf-xjc-runtime",
+          "message": {
+            "text": "The path lib/cxf-xjc-runtime-3.3.1.jar reports cxf-xjc-runtime at version 3.3.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/cxf-xjc-runtime-3.3.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2019-17573-cxf-xjc-runtime",
+          "message": {
+            "text": "The path lib/cxf-xjc-runtime-3.3.1.jar reports cxf-xjc-runtime at version 3.3.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/cxf-xjc-runtime-3.3.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2020-13954-cxf-xjc-runtime",
+          "message": {
+            "text": "The path lib/cxf-xjc-runtime-3.3.1.jar reports cxf-xjc-runtime at version 3.3.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/cxf-xjc-runtime-3.3.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2020-1954-cxf-xjc-runtime",
+          "message": {
+            "text": "The path lib/cxf-xjc-runtime-3.3.1.jar reports cxf-xjc-runtime at version 3.3.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/cxf-xjc-runtime-3.3.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2020-36518-jackson-databind",
+          "message": {
+            "text": "The path lib/jackson-databind-2.11.4.jar reports jackson-databind at version 2.11.4  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/jackson-databind-2.11.4.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2021-22696-cxf-xjc-runtime",
+          "message": {
+            "text": "The path lib/cxf-xjc-runtime-3.3.1.jar reports cxf-xjc-runtime at version 3.3.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/cxf-xjc-runtime-3.3.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CVE-2021-30468-cxf-xjc-runtime",
+          "message": {
+            "text": "The path lib/cxf-xjc-runtime-3.3.1.jar reports cxf-xjc-runtime at version 3.3.1  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/cxf-xjc-runtime-3.3.1.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "GHSA-57j2-w4cx-62h2-jackson-databind",
+          "message": {
+            "text": "The path lib/jackson-databind-2.11.4.jar reports jackson-databind at version 2.11.4  which would result in a vulnerable (java-archive) package installed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "lib/jackson-databind-2.11.4.jar"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

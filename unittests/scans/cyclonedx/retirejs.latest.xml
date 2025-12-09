@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.0" version="1">
+  <components>
+    <component type="library">
+      <name>handlebars</name>
+      <version>3.0.0</version>
+      <hashes>
+        <hash alg="MD5">2d32aaf6a876f8ac17b77bc3c8a19409</hash>
+        <hash alg="SHA-1">2b4ea19f90558ba548492642b83534bd76c95955</hash>
+        <hash alg="SHA-256">b8c21f31aebba583306cfc53b1d175bf576f9052df67d0cf6698c641f8bee832</hash>
+        <hash alg="SHA-512">a06c79a8df095e6492224e8d337804cbfaf1e6507cba568e85d85f8b6ae3a78ef05f54e2f9fa6fed5ee60c46bebe7f40d97a25fa7bd8b6dd965941ed70c6fee8</hash>
+      </hashes>
+      <licenses><license></license></licenses>
+      <purl>pkg:npm/handlebars@3.0.0</purl>
+      <modified>false</modified>
+    </component>
+    <component type="library">
+      <name>jquery</name>
+      <version>1.11.2</version>
+      <hashes>
+        <hash alg="MD5">5790ead7ad3ba27397aedfa3d263b867</hash>
+        <hash alg="SHA-1">8130544c215fe5d1ec081d83461bf4a711e74882</hash>
+        <hash alg="SHA-256">2ecd295d295bec062cedebe177e54b9d6b19fc0a841dc5c178c654c9ccff09c0</hash>
+        <hash alg="SHA-512">781acedc99de4ce8d53d9b43a158c645eab1b23dfdfd6b57b3c442b11acc4a344e0d5b0067d4b78bb173abbded75fb91c410f2b5a58f71d438aa6266d048d98a</hash>
+      </hashes>
+      <licenses><license></license></licenses>
+      <purl>pkg:npm/jquery@1.11.2</purl>
+      <modified>false</modified>
+    </component>
+    <component type="library">
+      <name>bootstrap</name>
+      <version>3.0.3</version>
+      <hashes>
+        <hash alg="MD5">353240ad37d1b084a53b1575f8ce57da</hash>
+        <hash alg="SHA-1">b3182f99be238cc41164df8615005fad53282b4e</hash>
+        <hash alg="SHA-256">fc1d94f50dd3822e1e53cb96af4f040d2ad8b5c7b984bae5e84efc7641acfada</hash>
+        <hash alg="SHA-512">bcee8f1525cd733b971e176f19b3885e6ebb65095a4458e9e1687e0112dfa8f4f56d59663b59321ab075fbb736725939f179ec0ff0b27bd109b9b4f907c04281</hash>
+      </hashes>
+      <licenses><license></license></licenses>
+      <purl>pkg:npm/bootstrap@3.0.3</purl>
+      <modified>false</modified>
+    </component>
+    <component type="library">
+      <name>jquery</name>
+      <version>1.11.1</version>
+      <hashes>
+        <hash alg="MD5">3c9137d88a00b1ae0b41ff6a70571615</hash>
+        <hash alg="SHA-1">1797d73e9da4287351f6fbec1b183c19be217c2a</hash>
+        <hash alg="SHA-256">24262baafef17092927c3dafe764aaa52a2a371b83ed2249cca7e414df99fac1</hash>
+        <hash alg="SHA-512">31730738e73937ee0086849cb3d6506ea383ca2eac312b8d08e25c60563df5702fc2b92b3778c4b2b66e7fddd6965d74b5a4df5132df3f02faed01dcf3c7bcae</hash>
+      </hashes>
+      <licenses><license></license></licenses>
+      <purl>pkg:npm/jquery@1.11.1</purl>
+      <modified>false</modified>
+    </component>
+    <component type="library">
+      <name>handlebars</name>
+      <version>1.0.0</version>
+      <hashes>
+        <hash alg="MD5">6f95155fd6469590d96c9651ee156795</hash>
+        <hash alg="SHA-1">db2448c8bf24ef8ab033e6712da2784f9094c27f</hash>
+        <hash alg="SHA-256">0956895244959df828d613707d3469bcfce07c4cdf9234aa2869fd59eef070a9</hash>
+        <hash alg="SHA-512">2843705c1b89931d49371e0511e2c9fff61770b0192af024a3b43d6dd59d78a1e7ea68d9dba9b9e6ec65a3256d16c17a8a4bf2791659b79da6f9de4191028b16</hash>
+      </hashes>
+      <licenses><license></license></licenses>
+      <purl>pkg:npm/handlebars@1.0.0</purl>
+      <modified>false</modified>
+    </component>
+    <component type="library">
+      <name>jquery</name>
+      <version>1.8.0</version>
+      <hashes>
+        <hash alg="MD5">3a728460147fb9af7faf0e587b9fbf42</hash>
+        <hash alg="SHA-1">f3a55f44fb81cf8ee908a3872841f70d6548f8c1</hash>
+        <hash alg="SHA-256">8c574e0a06396dfa7064b8b460e0e4a8d5d0748c4aa66eb2e4efdfcb46da4b31</hash>
+        <hash alg="SHA-512">c6326be84aed0d20ae924246119b19ce4fd705f967d46c6c9dd89b1180984163f0708b9e0e8917f319304bf617f3c35d83657fcbfae1340bc34e689f0961c6a5</hash>
+      </hashes>
+      <licenses><license></license></licenses>
+      <purl>pkg:npm/jquery@1.8.0</purl>
+      <modified>false</modified>
+    </component>
+  </components>
+</bom>

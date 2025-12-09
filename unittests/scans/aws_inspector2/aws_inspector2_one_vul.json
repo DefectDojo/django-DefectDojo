@@ -1,0 +1,89 @@
+{
+    "findings": [
+        {
+            "awsAccountId": "012345678901",
+            "description": "A memory leak flaw was found in the Linux kernel in the ccp_run_aes_gcm_cmd() function in drivers/crypto/ccp/ccp-ops.c, which allows attackers to cause a denial of service (memory consumption). This vulnerability is similar with the older CVE-2019-18808.",
+            "epss": {
+                "score": 0.00075
+            },
+            "exploitAvailable": "NO",
+            "findingArn": "arn:aws:inspector2:us-east-1:012345678901:finding/00031f625ee77ac186869f906eb73366",
+            "firstObservedAt": "2024-02-02T16:30:33.045000+01:00",
+            "fixAvailable": "YES",
+            "inspectorScore": 5.5,
+            "inspectorScoreDetails": {
+                "adjustedCvss": {
+                    "adjustments": [],
+                    "cvssSource": "NVD",
+                    "score": 5.5,
+                    "scoreSource": "NVD",
+                    "scoringVector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+                    "version": "3.1"
+                }
+            },
+            "lastObservedAt": "2024-06-14T04:03:53.051000+02:00",
+            "packageVulnerabilityDetails": {
+                "cvss": [
+                    {
+                        "baseScore": 5.5,
+                        "scoringVector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H",
+                        "source": "NVD",
+                        "version": "3.1"
+                    }
+                ],
+                "referenceUrls": [],
+                "relatedVulnerabilities": [],
+                "source": "DEBIAN_CVE",
+                "sourceUrl": "https://security-tracker.debian.org/tracker/CVE-2021-3744",
+                "vendorSeverity": "unimportant",
+                "vulnerabilityId": "CVE-2021-3744",
+                "vulnerablePackages": [
+                    {
+                        "arch": "AMD64",
+                        "epoch": 0,
+                        "fixedInVersion": "0:4.19.232-1",
+                        "name": "linux",
+                        "packageManager": "OS",
+                        "release": "2",
+                        "remediation": "apt-get update && apt-get upgrade",
+                        "sourceLayerHash": "sha256:11a88e76431345b48525c4e4d58d497810019f4bafdb5e2bd56dc34a05e09cc3",
+                        "version": "4.19.118"
+                    }
+                ]
+            },
+            "remediation": {
+                "recommendation": {
+                    "text": "None Provided"
+                }
+            },
+            "resources": [
+                {
+                    "details": {
+                        "awsEcrContainerImage": {
+                            "architecture": "amd64",
+                            "author": "John D <johnd@demo.test>",
+                            "imageHash": "sha256:c667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                            "imageTags": [
+                                "2.3.0"
+                            ],
+                            "platform": "DEBIAN_10",
+                            "pushedAt": "2020-06-10T11:30:35+02:00",
+                            "registry": "012345678901",
+                            "repositoryName": "my-awesome-docker-image"
+                        }
+                    },
+                    "id": "arn:aws:ecr:us-east-1:012345678901:repository/my-awesome-docker-image/sha256:c667ad018b538adadb5bd1db75836c8561b23bc7d31d9cd8941fa74f5df93802",
+                    "partition": "aws",
+                    "region": "us-east-1",
+                    "tags": {},
+                    "type": "AWS_ECR_CONTAINER_IMAGE"
+                }
+            ],
+            "severity": "MEDIUM",
+            "status": "ACTIVE",
+            "title": "CVE-2021-3744 - linux",
+            "type": "PACKAGE_VULNERABILITY",
+            "updatedAt": "2024-06-14T04:03:53.051000+02:00"
+        }
+    ]
+}

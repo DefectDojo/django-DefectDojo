@@ -1,0 +1,600 @@
+[
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 1,
+    "fields": {
+      "type": 1,
+      "name": "V7: Cryptography Verification Requirements",
+      "objective": "Ensure that a verified application satisfies the following high level requirements:\r\n\r\n* That all cryptographic modules fail in a secure manner and that errors are handled correctly.\r\n* That a suitable random number generator is used when randomness is required.\r\n* That access to keys is managed in a secure way.",
+      "references": "* [OWASP Testing Guide 4.0: Testing for weak Cryptography](https://www.owasp.org/index.php/Testing_for_weak_Cryptography)\r\n* [OWASP Cheat Sheet: Cryptographic Storage](https://www.owasp.org/index.php/Cryptographic_Storage_Cheat_Sheet)",
+      "enabled": true,
+      "created": "2018-04-03T20:10:41.006Z",
+      "updated": "2018-04-03T20:10:41.006Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 2,
+    "fields": {
+      "type": 1,
+      "name": "V2: Authentication Verification Requirements",
+      "objective": "Authentication is the act of establishing, or confirming, something (or someone) as authentic, that is, that claims made by or about the thing are true. Ensure that a verified application satisfies the following high level requirements:\r\n\r\nVerifies the digital identity of the sender of a communication. Ensures that only those authorised are able to authenticate and credentials are transported in a secure manner.",
+      "references": "* https://www.owasp.org/index.php/Testing_for_authentication\r\n* https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet\r\n* https://www.owasp.org/index.php/Forgot_Password_Cheat_Sheet\r\n* https://www.owasp.org/index.php/Choosing_and_Using_Security_Questions_Cheat_Sheet",
+      "enabled": true,
+      "created": "2018-04-09T20:12:01.803Z",
+      "updated": "2018-04-09T20:12:01.803Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 3,
+    "fields": {
+      "type": 1,
+      "name": "V1: Architecture, Design and Threat Modeling Requirements",
+      "objective": "In a perfect world, security would be considered throughout all phases of development. In reality however, security is often only a consideration at a late stage in the SDLC. Besides the technical controls, the ASVS requires processes to be in place that ensure that the security has been explicitly addressed when planning the architecture of the application or API, and that the functional and security roles of all components are known. Since single page applications and act as clients to remote API or services, it must be ensured that appropriate security standards are also applied to those services - testing the app in isolation is not sufficient.\r\n\r\nThe category lists requirements pertaining to architecture and design of the app. As such, this is the only category that does not map to technical test cases in the OWASP Testing Guide. To cover topics such as threat modelling, secure SDLC, key management, users of the ASVS should consult the respective OWASP projects and/or other standards such as the ones linked below.",
+      "references": "* https://www.owasp.org/index.php/Application_Security_Architecture_Cheat_Sheet\r\n* https://www.owasp.org/index.php/Attack_Surface_Analysis_Cheat_Sheet\r\n* https://www.owasp.org/index.php/Application_Security_Architecture_Cheat_Sheet\r\n* https://www.owasp.org/index.php/Application_Threat_Modeling\r\n* https://www.owasp.org/index.php/Secure_SDLC_Cheat_Sheet\r\n* https://www.microsoft.com/en-us/sdl/\r\n* http://csrc.nist.gov/publications/nistpubs/800-57/sp800-57-Part1-revised2_Mar08-2007.pdf",
+      "enabled": true,
+      "created": "2018-04-10T17:20:51.811Z",
+      "updated": "2018-04-10T17:20:51.811Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 4,
+    "fields": {
+      "type": 1,
+      "name": "V3: Session Management Verification Requirements",
+      "objective": "One of the core components of any web-based application is the mechanism by which it controls and maintains the state for a user interacting with it. This is referred to this as Session Management and is defined as the set of all controls governing state-full interaction between a user and the web-based application.\r\n\r\nEnsure that a verified application satisfies the following high level session management requirements:\r\n\r\n* Sessions are unique to each individual and cannot be guessed or shared\r\n* Sessions are invalidated when no longer required and timed out during periods of inactivity.",
+      "references": "* https://www.owasp.org/index.php/Testing_for_Session_Management\r\n* https://www.owasp.org/index.php/Session_Management_Cheat_Sheet",
+      "enabled": true,
+      "created": "2018-04-10T17:24:33.975Z",
+      "updated": "2018-04-10T17:24:33.975Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 5,
+    "fields": {
+      "type": 1,
+      "name": "V4: Access Control Verification Requirements",
+      "objective": "Authorization is the concept of allowing access to resources only to those permitted to use them. Ensure that a verified application satisfies the following high level requirements:\r\n\r\n* Persons accessing resources holds valid credentials to do so.\r\n* Users are associated with a well-defined set of roles and privileges.\r\n* Role and permission metadata is protected from replay or tampering.",
+      "references": "* [OWASP Testing Guide 4.0: Authorization](https://www.owasp.org/index.php/Testing_for_Authorization)\r\n* [OWASP Cheat Sheet: Access Control](https://www.owasp.org/index.php/Access_Control_Cheat_Sheet)",
+      "enabled": true,
+      "created": "2018-04-10T18:46:47.356Z",
+      "updated": "2018-04-10T18:46:47.356Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 6,
+    "fields": {
+      "type": 1,
+      "name": "V5: Input Validation and Output Encoding Verification Requirements",
+      "objective": "The most common web application security weakness is the failure to properly validate input coming from the client or from the environment before using it. This weakness leads to almost all of the major vulnerabilities in web applications, such as cross site scripting, SQL injection, interpreter injection, locale/Unicode attacks, file system attacks, and buffer overflows.\r\n\r\nEnsure that a verified application satisfies the following high level requirements:\r\n\r\n* All input is validated to be correct and fit for the intended purpose.\r\n* Data from an external entity or client should never be trusted and should be handled accordingly.",
+      "references": "* [OWASP Testing Guide 4.0: Input Validation Testing](https://www.owasp.org/index.php/Testing_for_Input_Validation)\r\n* [OWASP Cheat Sheet: Input Validation](https://www.owasp.org/index.php/Input_Validation_Cheat_Sheet)\r\n* [OWASP Testing Guide 4.0: Testing for HTTP Parameter Pollution](https://www.owasp.org/index.php/Testing_for_HTTP_Parameter_pollution_%28OTG-INPVAL-004%29)\r\n* [OWASP LDAP Injection Cheat Sheet ](https://www.owasp.org/index.php/LDAP_Injection_Prevention_Cheat_Sheet)\r\n* [OWASP Testing Guide 4.0: Client Side Testing ](https://www.owasp.org/index.php/Client_Side_Testing)\r\n* [OWASP Cross Site Scripting Prevention Cheat Sheet ](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet)\r\n* [OWASP DOM Based Cross Site Scripting Prevention Cheat Sheet ](https://www.owasp.org/index.php/DOM_based_XSS_Prevention_Cheat_Sheet)\r\n* [OWASP Java Encoding Project](https://www.owasp.org/index.php/OWASP_Java_Encoder_Project)\r\n\r\nFor more information on auto-escaping, please see:\r\n\r\n* [Reducing XSS by way of Automatic Context-Aware Escaping in Template Systems](http://googleonlinesecurity.blogspot.com/2009/03/reducing-xss-by-way-of-automatic.html)\r\n* [AngularJS Strict Contextual Escaping](https://docs.angularjs.org/api/ng/service/$sce)\r\n* [ReactJS Escaping](https://reactjs.org/docs/introducing-jsx.html#jsx-prevents-injection-attacks)\r\n* [Improperly Controlled Modification of Dynamically-Determined Object Attributes](https://cwe.mitre.org/data/definitions/915.html)",
+      "enabled": true,
+      "created": "2018-04-10T18:56:42.504Z",
+      "updated": "2018-04-10T18:56:42.504Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 7,
+    "fields": {
+      "type": 1,
+      "name": "V8: Error Handling and Logging Verification Requirements",
+      "objective": "The primary objective of error handling and logging is to provide a useful reaction by the user, administrators, and incident response teams. The objective is not to create massive amounts of logs, but high quality logs, with more signal than discarded noise.\r\n\r\nHigh quality logs will often contain sensitive data, and must be protected as per local data privacy laws or directives. This should include:\r\n\r\n* Not collecting or logging sensitive information if not specifically required.\r\n* Ensuring all logged information is handled securely and protected as per its data classification.\r\n* Ensuring that logs are not forever, but have an absolute lifetime that is as short as possible.\r\n\r\nIf logs contain private or sensitive data, the definition of which varies from country to country, the logs become some of the most sensitive information held by the application and thus very attractive to attackers in their own right.",
+      "references": "* [OWASP Testing Guide 4.0 content: Testing for Error Handling](https://www.owasp.org/index.php/Testing_for_Error_Handling)",
+      "enabled": true,
+      "created": "2018-04-10T19:13:25.863Z",
+      "updated": "2018-04-10T19:13:25.863Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 8,
+    "fields": {
+      "type": 1,
+      "name": "V9: Data Protection Verification Requirements",
+      "objective": "There are three key elements to sound data protection: Confidentiality, Integrity and Availability (CIA). This standard assumes that data protection is enforced on a trusted system, such as a server, which has been hardened and has sufficient protections.\r\n\r\nApplications have to assume that all user devices are compromised in some way. Where an application transmits or stores sensitive information on insecure devices, such as shared computers, phones and tablets, the application is responsible for ensuring data stored on these devices is encrypted and cannot be easily illicitly obtained, altered or disclosed.\r\n\r\nEnsure that a verified application satisfies the following high level data protection requirements:\r\n\r\n*\tConfidentiality: Data should be protected from unauthorised observation or disclosure both in transit and when stored.\r\n*\tIntegrity: Data should be protected being maliciously created, altered or deleted by unauthorized attackers.\r\n*\tAvailability: Data should be available to authorized users as required",
+      "references": "* [Consider using Security Headers website to check security and anti-caching headers](https://securityheaders.io)\r\n* [OWASP Secure Headers project](https://www.owasp.org/index.php/OWASP_Secure_Headers_Project)\r\n* [User Privacy Protection Cheat Sheet](https://www.owasp.org/index.php/User_Privacy_Protection_Cheat_Sheet)",
+      "enabled": true,
+      "created": "2018-04-10T20:02:38.179Z",
+      "updated": "2018-04-10T20:02:38.179Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 9,
+    "fields": {
+      "type": 1,
+      "name": "V10: Communications Verification Requirements",
+      "objective": "Ensure that a verified application satisfies the following high level requirements:\r\n\r\n* That TLS is used where sensitive data is transmitted.\r\n* That strong algorithms and ciphers are used at all times.",
+      "references": "* [OWASP TLS Cheat Sheet. ](https://www.owasp.org/index.php/Transport_Layer_Protection_Cheat_Sheet)\r\n* [Notes on Approved modes of TLS. In the past, the ASVS referred to the US standard FIPS 140-2, but as a global standard, applying US standards this can be difficult, contradictory, or confusing to apply. A better method of achieving compliance with 10.8 would be to review guides such as (https://wiki.mozilla.org/Security/Server_Side_TLS), generate known good configurations (https://mozilla.github.io/server-side-tls/ssl-config-generator/), and use known TLS evaluation tools, such as sslyze, various vulnerability scanners or trusted TLS online assessment services to obtain a desired level of security. In general, we see non-compliance for this section being the use of outdated or insecure ciphers and algorithms, the lack of perfect forward secrecy, outdated or insecure SSL protocols, weak preferred ciphers, and so on.]\r\n* [Certificate pinning. For more information please review ](https://tools.ietf.org/html/rfc7469.)The rationale behind certificate pinning for production and backup keys is business continuity - see (https://noncombatant.org/2015/05/01/about-http-public-key-pinning/)\r\n* [OWASP Certificate Pinning Cheat Sheet](https://www.owasp.org/index.php/Pinning_Cheat_Sheet)\r\n* [OWASP Certificate and Public Key Pinning](https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning)\r\n* [Time of first use (TOFU) Pinning](https://developer.mozilla.org/en/docs/Web/Security/Public_Key_Pinning)\r\n* [Pre-loading HTTP Strict Transport Security](https://www.chromium.org/hsts)",
+      "enabled": true,
+      "created": "2018-04-11T01:34:58.018Z",
+      "updated": "2018-04-11T01:34:58.018Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 10,
+    "fields": {
+      "type": 1,
+      "name": "V13: Malicious Code Verification Requirements",
+      "objective": "Ensure that a verified application satisfies the following high level requirements:\r\n\r\n* Malicious activity is handled securely and properly as to not affect the rest of the application.\r\n* Do not have time bombs or other time based attacks built into them\r\n* Do not phone home to malicious or unauthorized destinations\r\n* Applications do not have back doors, Easter eggs, salami attacks, or logic flaws that can be controlled by an attacker\r\n\r\nMalicious code is extremely rare, and is difficult to detect. Manual line by line code review can assist looking for logic bombs, but even the most experienced code reviewer will struggle to find malicious code even if they know it exists. This section is not possible to complete without access to source code, including as many third party libraries as possible.",
+      "references": "",
+      "enabled": true,
+      "created": "2018-04-11T01:48:58.751Z",
+      "updated": "2018-04-11T01:48:58.751Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 11,
+    "fields": {
+      "type": 1,
+      "name": "V15: Business Logic Verification Requirements",
+      "objective": "Ensure that a verified application satisfies the following high level requirements:\r\n\r\n* The business logic flow is sequential and in order\r\n* Business logic includes limits to detect and prevent automated attacks, such as continuous small funds transfers, or adding a million friends one at a time, and so on.\r\n* High value business logic flows have considered abuse cases and malicious actors, and have protections against spoofing, tampering, repudiation, information disclosure, and elevation of privilege attacks.",
+      "references": "* [OWASP Testing Guide 4.0: Business Logic Testing ](https://www.owasp.org/index.php/Testing_for_business_logic)\r\n* [OWASP Cheat Sheet](https://www.owasp.org/index.php/Business_Logic_Security_Cheat_Sheet)",
+      "enabled": true,
+      "created": "2018-04-11T01:51:36.593Z",
+      "updated": "2018-04-11T01:51:36.593Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 12,
+    "fields": {
+      "type": 1,
+      "name": "V16: File and Resources Verification Requirements",
+      "objective": "Ensure that a verified application satisfies the following high level requirements:\r\n\r\n* Untrusted file data should be handled accordingly and in a secure manner\r\n* Obtained from untrusted sources are stored outside the webroot and limited permissions.",
+      "references": "",
+      "enabled": true,
+      "created": "2018-04-11T02:00:52.815Z",
+      "updated": "2018-04-11T02:00:52.815Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 13,
+    "fields": {
+      "type": 1,
+      "name": "V18: API and Web Service Verification Requirements",
+      "objective": "Ensure that a verified application that uses RESTful or SOAP based web services has:\r\n\r\n* Adequate authentication, session management and authorization of all web services\r\n* Input validation of all parameters that transit from a lower to higher trust level\r\n* Basic interoperability of SOAP web services layer to promote API use",
+      "references": "* [OWASP Testing Guide 4.0: Configuration and Deployment Management Testing](https://www.owasp.org/index.php/Testing_for_configuration_management)\r\n* [OWASP Cross-Site Request Forgery cheat sheet](https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet)\r\n* [JSON Web Tokens (and Signing)](https://jwt.io/)",
+      "enabled": true,
+      "created": "2018-04-11T02:13:07.053Z",
+      "updated": "2018-04-11T02:13:07.053Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 14,
+    "fields": {
+      "type": 1,
+      "name": "V19: Configuration Verification Requirements",
+      "objective": "* Up to date libraries and platform(s).\r\n* A secure by default configuration.\r\n* Sufficient hardening that user initiated changes to default configuration do not unnecessarily expose or create security weaknesses or flaws to underlying systems.",
+      "references": "* [OWASP Testing Guide 4.0: Configuration and Deployment Management Testing](https://www.owasp.org/index.php/Testing_for_configuration_management)",
+      "enabled": true,
+      "created": "2018-04-11T02:13:45.949Z",
+      "updated": "2018-04-11T02:13:45.949Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 15,
+    "fields": {
+      "type": 1,
+      "name": "V20: Internet of Things Verification Requirements",
+      "objective": "Embedded/IoT devices should:\r\n\r\n* Have the same level of security controls within the device as found in the server, by enforcing security controls in a trusted environment.\r\n* Sensitive data stored on the device should be done so in a secure manner.\r\n* All sensitive data transmitted from the device should utilize transport layer security.",
+      "references": "* [OWASP Internet of Things Top 10](https://www.owasp.org/images/7/71/Internet_of_Things_Top_Ten_2014-OWASP.pdf)\r\n* [OWASP Internet of Things Project](https://www.owasp.org/index.php/OWASP_Internet_of_Things_Project)\r\n* [Trudy TCP Proxy Tool](https://github.com/praetorian-inc/trudy)",
+      "enabled": true,
+      "created": "2018-04-11T02:14:27.877Z",
+      "updated": "2018-04-11T02:14:27.877Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 16,
+    "fields": {
+      "type": 2,
+      "name": "V13: API and Web Service Verification Requirements",
+      "objective": "Ensure that a verified application that uses trusted service layer APIs (commonly using JSON or XML or GraphQL) has:\n\n* Adequate authentication, session management and authorization of all web services.\n* Input validation of all parameters that transit from a lower to higher trust level.\n* Effective security controls for all API types, including cloud and Serverless API\n\nPlease read this chapter in combination with all other chapters at this same level; we no longer duplicate authentication or API session management concerns.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Serverless Top 10](https://www.owasp.org/images/5/5c/OWASP-Top-10-Serverless-Interpretation-en.pdf)\n* [OWASP Serverless Project](https://www.owasp.org/index.php/OWASP_Serverless_Top_10_Project)\n* [OWASP Testing Guide 4.0: Configuration and Deployment Management Testing](https://www.owasp.org/index.php/Testing_for_configuration_management)\n* [OWASP Cross-Site Request Forgery cheat sheet](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md#triple-submit-cookie)\n* [OWASP XML External Entity Prevention Cheat Sheet - General Guidance](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.md#general-guidance)* [JSON Web Tokens (and Signing)](https://jwt.io/)\n* [REST Security Cheat Sheet](https://www.owasp.org/index.php/REST_Security_Cheat_Sheet)\n* [JSON Schema](https://json-schema.org/specification.html)\n* [XML DTD Entity Attacks](https://www.vsecurity.com//download/publications/XMLDTDEntityAttacks.pdf)\n* [Orange Tsai - A new era of SSRF Exploiting URL Parser In Trending Programming Languages](https://www.blackhat.com/docs/us-17/thursday/us-17-Tsai-A-New-Era-Of-SSRF-Exploiting-URL-Parser-In-Trending-Programming-Languages.pdf)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.271Z",
+      "updated": "2019-03-27T15:18:24.271Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 17,
+    "fields": {
+      "type": 2,
+      "name": "V10: Malicious Code Verification Requirements",
+      "objective": "Ensure that code satisfies the following high level requirements:\n\n* Malicious activity is handled securely and properly  to not affect the rest of the application.\n* Does not have time bombs or other time-based attacks.\n* Does not \"phone home\" to malicious or unauthorized destinations.\n* Does not have back doors, Easter eggs, salami attacks, rootkits, or unauthorized code that can be controlled by an attacker.\n\nFinding malicious code is proof of the negative, which is impossible to completely validate. Best efforts should be undertaken to ensure that the code has no inherent malicious code or unwanted functionality.",
+      "references": "## References\n\n* [Hostile Sub-Domain Takeover, Detectify Labs](https://labs.detectify.com/2014/10/21/hostile-subdomain-takeover-using-herokugithubdesk-more/)\n* [Hijacking of abandoned subdomains part 2, Detectify Labs](https://labs.detectify.com/2014/12/08/hijacking-of-abandoned-subdomains-part-2/)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.271Z",
+      "updated": "2019-03-27T15:18:24.271Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 18,
+    "fields": {
+      "type": 2,
+      "name": "V14: Configuration Verification Requirements",
+      "objective": "Ensure that a verified application has:\n\n* A secure, repeatable, automatable build environment.\n* Hardened third party library, dependency and configuration management such that out of date or insecure components are not included by the application.\n* A secure-by-default configuration, such that administrators and users have to weaken the default security posture.\n\nConfiguration of the application out of the box should be safe to be on the Internet, which means a safe out of the box configuration.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Testing Guide 4.0: Testing for HTTP Verb Tampering]( https://www.owasp.org/index.php/Testing_for_HTTP_Verb_Tampering_%28OTG-INPVAL-003%29)\n* Adding Content-Disposition to API responses helps prevent many attacks based on misunderstanding on the MIME type between client and server, and the \"filename\" option specifically helps prevent [Reflected File Download attacks.](https://www.blackhat.com/docs/eu-14/materials/eu-14-Hafif-Reflected-File-Download-A-New-Web-Attack-Vector.pdf)\n* [Content Security Policy Cheat Sheet](https://www.owasp.org/index.php?title=Content_Security_Policy_Cheat_Sheet)\n* [Exploiting CORS misconfiguration for BitCoins and Bounties](https://portswigger.net/blog/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)\n* [OWASP Testing Guide 4.0: Configuration and Deployment Management Testing](https://www.owasp.org/index.php/Testing_for_configuration_management)\n* [Sandboxing third party components](https://www.owasp.org/index.php/3rd_Party_Javascript_Management_Cheat_Sheet#Sandboxing_Content)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.271Z",
+      "updated": "2019-03-27T15:18:24.271Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 19,
+    "fields": {
+      "type": 2,
+      "name": "V6: Stored Cryptography Verification Requirements",
+      "objective": "Ensure that a verified application satisfies the following high level requirements:\n\n* All cryptographic modules fail in a secure manner and that errors are handled correctly.\n* A suitable random number generator is used.\n* Access to keys is securely managed.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Testing Guide 4.0: Testing for weak Cryptography](https://www.owasp.org/index.php/Testing_for_weak_Cryptography)\n* [OWASP Cheat Sheet: Cryptographic Storage](https://www.owasp.org/index.php/Cryptographic_Storage_Cheat_Sheet)\n* [FIPS 140-2](https://csrc.nist.gov/publications/detail/fips/140/2/final)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.272Z",
+      "updated": "2019-03-27T15:18:24.272Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 20,
+    "fields": {
+      "type": 2,
+      "name": "V9: Communications Verification Requirements",
+      "objective": "Ensure that a verified application satisfies the following high level requirements:\n\n* TLS or strong encryption is always used, regardless of the sensitivity of the data being transmitted\n* The most recent, leading configuration advice is used to enable and order preferred algorithms and ciphers\n* Weak or soon to be deprecated algorithms and ciphers are ordered as a last resort\n* Deprecated or known insecure algorithms and ciphers are disabled.\n\nLeading industry advice on secure TLS configuration changes frequently, often due to catastrophic breaks in existing algorithms and ciphers. Always use the most recent versions of TLS configuration review tools (such as SSLyze or other TLS scanners) to configure the preferred order and algorithm selection. Configuration should be periodically checked to ensure that secure communications configuration is always present and effective.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP – TLS Cheat Sheet](https://www.owasp.org/index.php/Transport_Layer_Protection_Cheat_Sheet)\n* Notes on “Approved modes of TLS”. In the past, the ASVS referred to the US standard FIPS 140-2, but as a global standard, applying US standards can be difficult, contradictory, or confusing to apply. A better method of achieving compliance with 9.1.3 would be to review guides such as [Mozilla's Server Side TLS](https://wiki.mozilla.org/Security/Server_Side_TLS) or  [generate known good configurations](https://mozilla.github.io/server-side-tls/ssl-config-generator/), and use known TLS evaluation tools, such as sslyze, various vulnerability scanners or trusted TLS online assessment services to obtain a desired level of security. In general, we see non-compliance for this section being the use of outdated or insecure ciphers and algorithms, the lack of perfect forward secrecy, outdated or insecure SSL protocols, weak preferred ciphers, and so on.",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.272Z",
+      "updated": "2019-03-27T15:18:24.272Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 21,
+    "fields": {
+      "type": 2,
+      "name": "V4: Access Control Verification Requirements",
+      "objective": "Authorization is the concept of allowing access to resources only to those permitted to use them. Ensure that a verified application satisfies the following high level requirements:\n\n* Persons accessing resources hold valid credentials to do so.\n* Users are associated with a well-defined set of roles and privileges.\n* Role and permission metadata is protected from replay or tampering.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Testing Guide 4.0: Authorization](https://www.owasp.org/index.php/Testing_for_Authorization)\n* [OWASP Cheat Sheet: Access Control](https://www.owasp.org/index.php/Access_Control_Cheat_Sheet)\n* [OWASP CSRF Cheat Sheet](https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet)\n* [OWASP REST Cheat Sheet](https://www.owasp.org/index.php/REST_Security_Cheat_Sheet)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.272Z",
+      "updated": "2019-03-27T15:18:24.272Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 22,
+    "fields": {
+      "type": 2,
+      "name": "V3: Session Management Verification Requirements",
+      "objective": "One of the core components of any web-based application or stateful API is the mechanism by which it controls and maintains the state for a user or device interacting with it. Session management changes a stateless protocol to stateful, which is critical for differentiating different users or devices.\n\nEnsure that a verified application satisfies the following high-level session management requirements:\n\n* Sessions are unique to each individual and cannot be guessed or shared.\n* Sessions are invalidated when no longer required and timed out during periods of inactivity.\n\nAs previously noted, these requirements have been adapted to be a compliant subset of selected NIST 800-63b controls, focused around common threats and commonly exploited authentication weaknesses. Previous verification requirements have been retired, de-duped, or in most cases adapted to be strongly aligned with the intent of mandatory [NIST 800-63b](https://pages.nist.gov/800-63-3/sp800-63b.htmlx) requirements.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Testing Guide 4.0: Session Management Testing](https://www.owasp.org/index.php/Testing_for_Session_Management)\n* [OWASP Session Management Cheat Sheet](https://www.owasp.org/index.php/Session_Management_Cheat_Sheet)\n* [Set-Cookie __Host- prefix details](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Directives)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.272Z",
+      "updated": "2019-03-27T15:18:24.272Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 23,
+    "fields": {
+      "type": 2,
+      "name": "V7: Error Handling and Logging Verification Requirements",
+      "objective": "The primary objective of error handling and logging is to provide useful information for the user, administrators, and incident response teams. The objective is not to create massive amounts of logs, but high quality logs, with more signal than discarded noise.\n\nHigh quality logs will often contain sensitive data, and must be protected as per local data privacy laws or directives. This should include:\n\n* Not collecting or logging sensitive information unless specifically required.\n* Ensuring all logged information is handled securely and protected as per its data classification.\n* Ensuring that logs are not stored forever, but have an absolute lifetime that is as short as possible.\n\nIf logs contain private or sensitive data, the definition of which varies from country to country, the logs become some of the most sensitive information held by the application and thus very attractive to attackers in their own right.\n\nIt is also important to ensure that the application fails securely and that errors do not disclose unnecessary information.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Testing Guide 4.0 content: Testing for Error Handling](https://www.owasp.org/index.php/Testing_for_Error_Handling)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.273Z",
+      "updated": "2019-03-27T15:18:24.273Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 24,
+    "fields": {
+      "type": 2,
+      "name": "V8: Data Protection Verification Requirements",
+      "objective": "There are three key elements to sound data protection: Confidentiality, Integrity and Availability (CIA). This standard assumes that data protection is enforced on a trusted system, such as a server, which has been hardened and has sufficient protections.\n\nApplications have to assume that all user devices are compromised in some way. Where an application transmits or stores sensitive information on insecure devices, such as shared computers, phones and tablets, the application is responsible for ensuring data stored on these devices is encrypted and cannot be easily illicitly obtained, altered or disclosed.\n\nEnsure that a verified application satisfies the following high level data protection requirements:\n\n* Confidentiality: Data should be protected from unauthorized observation or disclosure both in transit and when stored.\n* Integrity: Data should be protected from being maliciously created, altered or deleted by unauthorized attackers.\n* Availability: Data should be available to authorized users as required.",
+      "references": "## References\n\nFor more information, see also:\n\n* [Consider using Security Headers website to check security and anti-caching headers](https://securityheaders.io)\n* [OWASP Secure Headers project](https://www.owasp.org/index.php/OWASP_Secure_Headers_Project)\n* [OWASP Privacy Risks Project](https://www.owasp.org/index.php/OWASP_Top_10_Privacy_Risks_Project)\n* [OWASP User Privacy Protection Cheat Sheet](https://www.owasp.org/index.php/User_Privacy_Protection_Cheat_Sheet)\n* [European Union General Data Protection Regulation (GDPR) overview](https://edps.europa.eu/data-protection_en)\n* [European Union Data Protection Supervisor - Internet Privacy Engineering Network](https://edps.europa.eu/data-protection/ipen-internet-privacy-engineering-network_en)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.273Z",
+      "updated": "2019-03-27T15:18:24.273Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 25,
+    "fields": {
+      "type": 2,
+      "name": "V2: Authentication Verification Requirements",
+      "objective": "Authentication is the act of establishing, or confirming, someone (or something) as authentic and that claims made by a person or about a device are correct, resistant to impersonation, and prevent recovery or interception of passwords.\n\nWhen the ASVS was first released, username + password was the most common form of authentication outside of high security systems. Multi-factor authentication (MFA) was commonly accepted in security circles but rarely required elsewhere. As the number of password breaches increased, the idea that usernames are somehow confidential and passwords unknown, rendered many security controls untenable. For example, NIST 800-63 considers usernames and knowledge based authentication (KBA) as public information, SMS and email notifications as [\"restricted\" authenticator types](https://pages.nist.gov/800-63-FAQ/#q-b1) , and passwords as pre-breached. This reality renders knowledge based authenticators, SMS and email recovery, password history, complexity, and rotation controls useless. These controls always have been less than helpful, often forcing users to come up with weak passwords every few months, but with the release of over 5 billion username and password breaches, it's time to move on.\n\nOf all the sections in the ASVS, the authentication and session management chapters have changed the most. Adoption of effective, evidence-based leading practice will be challenging for many, and that's perfectly okay. We have to start the transition to a post-password future now.",
+      "references": "## References\n\nFor more information, see also:\n\n* [NIST 800-63 - Digital Identity Guidelines](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63-3.pdf)\n* [NIST 800-63 A - Enrollment and Identity Proofing](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63a.pdf)\n* [NIST 800-63 B - Authentication and Lifecycle Management](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63b.pdf)\n* [NIST 800-63 C - Federation and Assertions](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63c.pdf)\n* [NIST 800-63 FAQ](https://pages.nist.gov/800-63-FAQ/)\n* [OWASP Testing Guide 4.0: Testing for Authentication](https://www.owasp.org/index.php/Testing_for_authentication)\n* [OWASP Cheat Sheet - Password storage](https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet)\n* [OWASP Cheat Sheet - Forgot password](https://www.owasp.org/index.php/Forgot_Password_Cheat_Sheet)\n* [OWASP Cheat Sheet - Choosing and using security questions](https://www.owasp.org/index.php/Choosing_and_Using_Security_Questions_Cheat_Sheet)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.274Z",
+      "updated": "2019-03-27T15:18:24.274Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 26,
+    "fields": {
+      "type": 2,
+      "name": "V12: File and Resources Verification Requirements",
+      "objective": "Ensure that a verified application satisfies the following high level requirements:\n\n* Untrusted file data should be handled accordingly and in a secure manner.\n* Untrusted file data obtained from untrusted sources are stored outside the web root and with limited permissions.",
+      "references": "## References\n\nFor more information, see also:\n\n* [File Extension Handling for Sensitive Information](https://www.owasp.org/index.php/Unrestricted_File_Upload)\n* [Reflective file download by Oren Hafif](https://www.trustwave.com/Resources/SpiderLabs-Blog/Reflected-File-Download---A-New-Web-Attack-Vector/)\n* [OWASP Third Party JavaScript Management Cheat Sheet](https://www.owasp.org/index.php/3rd_Party_Javascript_Management_Cheat_Sheet)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.274Z",
+      "updated": "2019-03-27T15:18:24.274Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 27,
+    "fields": {
+      "type": 2,
+      "name": "V1: Architecture, Design and Threat Modeling Requirements",
+      "objective": "Security architecture has almost become a lost art in many organizations. The days of the enterprise architect have passed in the age of DevSecOps. The application security field must catch up and adopt agile security principles while re-introducing leading security architecture principles to software practitioners. Architecture is not an implementation, but a way of thinking about a problem that has potentially many different answers, and no one single \"correct\" answer. All too often, security is seen as inflexible and demanding that developers fix code in a particular way, when the developers may know a much better way to solve the problem. There is no single, simple solution for architecture, and to pretend otherwise is a disservice to the software engineering field.\n\nA specific implementation of a web application is likely to be revised continuously throughout its lifetime, but the overall architecture will likely rarely change but evolve slowly. Security architecture is identical - we need authentication today, we will require authentication tomorrow, and we will need it five years from now. If we make sound decisions today, we can save a lot of effort, time, and money if we select and re-use architecturally compliant solutions. For example, a decade ago, multifactor authentication was rarely implemented.\n\nIf developers had invested in a single, secure identity provider model, such as SAML federated identity, the identity provider could be updated to incorporate new requirements such as NIST 800-63 compliance, while not changing the interfaces of the original application. If many applications shared the same security architecture and thus that same component, they all benefit from this upgrade at once. However, SAML will not always remain as the best or most suitable authentication solution - it might need to be swapped out for other solutions as requirements change. Changes like this are either complicated, so costly as to necessitate a complete re-write, or outright impossible without security architecture.\n\nIn this chapter, the ASVS covers off the primary aspects of any sound security architecture: availability, confidentiality, processing integrity, non-repudiation, and privacy. Each of these security principles must be built in and be innate to all applications. It is critical to \"shift left\", starting with developer enablement with secure coding checklists, mentoring and training, coding and testing, building, deployment, configuration, and operations, and finishing with follow up independent testing to assure that all of the security controls are present and functional. The last step used to be everything we did as an industry, but that is no longer sufficient when developers push code into production tens or hundreds of times a day. Application security professionals must keep up with agile techniques, which means adopting developer tools, learning to code, and working with developers rather than criticizing the project months after everyone else has moved on.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Threat Modeling Cheat Sheet](https://www.owasp.org/index.php/Threat_Modeling_Cheat_Sheet)\n* [OWASP Attack Surface Analysis Cheat Sheet](https://www.owasp.org/index.php/Attack_Surface_Analysis_Cheat_Sheet)\n* [OWASP Threat modeling](https://www.owasp.org/index.php/Application_Threat_Modeling)\n* [OWASP Secure SDLC Cheat Sheet](https://www.owasp.org/index.php/Secure_SDLC_Cheat_Sheet)\n* [Microsoft SDL](https://www.microsoft.com/en-us/sdl/)\n* [NIST SP 800-57](https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-4/final)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.275Z",
+      "updated": "2019-03-27T15:18:24.275Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 28,
+    "fields": {
+      "type": 2,
+      "name": "V5: Validation, Sanitization and Encoding Verification Requirements",
+      "objective": "The most common web application security weakness is the failure to properly validate input coming from the client or the environment before directly using it without any output encoding. This weakness leads to almost all of the significant vulnerabilities in web applications, such as Cross-Site Scripting (XSS), SQL injection, interpreter injection, locale/Unicode attacks, file system attacks, and buffer overflows.\n\nEnsure that a verified application satisfies the following high-level requirements:\n\n* Input validation and output encoding architecture have an agreed pipeline to prevent injection attacks.\n* Input data is strongly typed, validated, range or length checked, or at worst, sanitized or filtered.\n* Output data is encoded or escaped as per the context of the data as close to the interpreter as possible.\n\nWith modern web application architecture, output encoding is more important than ever. It is difficult to provide robust input validation in certain scenarios, so the use of safer API such as parameterized queries, auto-escaping templating frameworks, or carefully chosen output encoding is critical to the security of the application.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Testing Guide 4.0: Input Validation Testing](https://www.owasp.org/index.php/Testing_for_Input_Validation)\n* [OWASP Cheat Sheet: Input Validation](https://www.owasp.org/index.php/Input_Validation_Cheat_Sheet)\n* [OWASP Testing Guide 4.0: Testing for HTTP Parameter Pollution](https://www.owasp.org/index.php/Testing_for_HTTP_Parameter_pollution_%28OTG-INPVAL-004%29)\n* [OWASP LDAP Injection Cheat Sheet](https://www.owasp.org/index.php/LDAP_Injection_Prevention_Cheat_Sheet)\n* [OWASP Testing Guide 4.0: Client Side Testing](https://www.owasp.org/index.php/Client_Side_Testing)\n* [OWASP Cross Site Scripting Prevention Cheat Sheet](https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet)\n* [OWASP DOM Based Cross Site Scripting Prevention Cheat Sheet](https://www.owasp.org/index.php/DOM_based_XSS_Prevention_Cheat_Sheet)\n* [OWASP Java Encoding Project](https://www.owasp.org/index.php/OWASP_Java_Encoder_Project)\n* [OWASP Mass Assignment Prevention Cheat Sheet](https://www.owasp.org/index.php/Mass_Assignment_Cheat_Sheet)\n* [DOMPurify - Client-side HTML Sanitization Library](https://github.com/cure53/DOMPurify)\n* [XML External Entity (XXE) Prevention Cheat Sheet](https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Prevention_Cheat_Sheet))\n\nFor more information on auto-escaping, please see:\n\n* [Reducing XSS by way of Automatic Context-Aware Escaping in Template Systems](https://googleonlinesecurity.blogspot.com/2009/03/reducing-xss-by-way-of-automatic.html)\n* [AngularJS Strict Contextual Escaping](https://docs.angularjs.org/api/ng/service/$sce)\n* [AngularJS ngBind](https://docs.angularjs.org/api/ng/directive/ngBind)\n* [Angular Sanitization](https://angular.io/guide/security#sanitization-and-security-contexts)\n* [Angular Template Security](https://angular.io/guide/template-syntax#content-security)\n* [ReactJS Escaping](https://reactjs.org/docs/introducing-jsx.html#jsx-prevents-injection-attacks)\n* [Improperly Controlled Modification of Dynamically-Determined Object Attributes](https://cwe.mitre.org/data/definitions/915.html)\n\nFor more information on deserialization, please see:\n\n* [OWASP Deserialization Cheat Sheet](https://www.owasp.org/index.php/Deserialization_Cheat_Sheet)\n* [OWASP Deserialization of Untrusted Data Guide](https://www.owasp.org/index.php/Deserialization_of_untrusted_data)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.276Z",
+      "updated": "2019-03-27T15:18:24.276Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 29,
+    "fields": {
+      "type": 2,
+      "name": "V11: Business Logic Verification Requirements",
+      "objective": "Ensure that a verified application satisfies the following high level requirements:\n\n* The business logic flow is sequential, processed in order, and cannot be bypassed.\n* Business logic includes limits to detect and prevent automated attacks, such as continuous small funds transfers, or adding a million friends one at a time, and so on.\n* High value business logic flows have considered abuse cases and malicious actors, and have protections against spoofing, tampering, repudiation, information disclosure, and elevation of privilege attacks.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Testing Guide 4.0: Business Logic Testing](https://www.owasp.org/index.php/Testing_for_business_logic)\n* [OWASP Cheat Sheet](https://www.owasp.org/index.php/Business_Logic_Security_Cheat_Sheet)\n* Anti-automation can be achieved in many ways, including the use of [OWASP AppSensor](https://www.owasp.org/index.php/OWASP_AppSensor_Project) and [OWASP Automated Threats to Web Applications](https://www.owasp.org/index.php/OWASP_Automated_Threats_to_Web_Applications)\n* [OWASP AppSensor](https://www.owasp.org/index.php/OWASP_AppSensor_Project) can also help with Attack Detection and Response.\n* [OWASP Cornucopia](https://www.owasp.org/index.php/OWASP_Cornucopia)",
+      "enabled": true,
+      "created": "2019-03-27T15:18:24.276Z",
+      "updated": "2019-03-27T15:18:24.276Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 30,
+    "fields": {
+      "type": 3,
+      "name": "V1 Encoding and Sanitization",
+      "objective": "This chapter addresses the most common web application security weaknesses related to the unsafe processing of untrusted data. Such weaknesses can result in various technical vulnerabilities, where untrusted data is interpreted according to the syntax rules of the relevant interpreter.\n\nFor modern web applications, it is always best to use safer APIs, such as parameterized queries, auto-escaping, or templating frameworks. Otherwise, carefully performed output encoding, escaping, or sanitization becomes critical to the application's security.\n\nInput validation serves as a defense-in-depth mechanism to protect against unexpected or dangerous content. However, since its primary purpose is to ensure that incoming content matches functional and business expectations, requirements related to this can be found in the \"Validation and Business Logic\" chapter.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP LDAP Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LDAP_Injection_Prevention_Cheat_Sheet.html)\n* [OWASP Cross Site Scripting Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)\n* [OWASP DOM Based Cross Site Scripting Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html)\n* [OWASP XML External Entity Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html)\n* [OWASP Web Security Testing Guide: Client-Side Testing](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/11-Client-side_Testing)\n* [OWASP Java Encoding Project](https://owasp.org/owasp-java-encoder/)\n* [DOMPurify - Client-side HTML Sanitization Library](https://github.com/cure53/DOMPurify)\n* [RFC4180 - Common Format and MIME Type for Comma-Separated Values (CSV) Files](https://datatracker.ietf.org/doc/html/rfc4180#section-2)\n\nFor more information, specifically on deserialization or parsing issues, please see:\n\n* [OWASP Deserialization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html)\n* [An Exploration of JSON Interoperability Vulnerabilities](https://bishopfox.com/blog/json-interoperability-vulnerabilities)\n* [Orange Tsai - A New Era of SSRF Exploiting URL Parser In Trending Programming Languages](https://www.blackhat.com/docs/us-17/thursday/us-17-Tsai-A-New-Era-Of-SSRF-Exploiting-URL-Parser-In-Trending-Programming-Languages.pdf)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 31,
+    "fields": {
+      "type": 3,
+      "name": "V2 Validation and Business Logic",
+      "objective": "This chapter aims to ensure that a verified application meets the following high-level goals:\n\n* Input received by the application matches business or functional expectations.\n* The business logic flow is sequential, processed in order, and cannot be bypassed.\n* Business logic includes limits and controls to detect and prevent automated attacks, such as continuous small funds transfers or adding a million friends one at a time.\n* High-value business logic flows have considered abuse cases and malicious actors, and have protections against spoofing, tampering, information disclosure, and elevation of privilege attacks.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Web Security Testing Guide: Input Validation Testing](https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/README.html)\n* [OWASP Web Security Testing Guide: Business Logic Testing](https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/10-Business_Logic_Testing/README)\n* Anti-automation can be achieved in many ways, including the use of the [OWASP Automated Threats to Web Applications](https://owasp.org/www-project-automated-threats-to-web-applications/)\n* [OWASP Input Validation Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)\n* [JSON Schema](https://json-schema.org/specification.html)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 32,
+    "fields": {
+      "type": 3,
+      "name": "V3 Web Frontend Security",
+      "objective": "This category focuses on requirements designed to protect against attacks executed via a web frontend. These requirements do not apply to machine-to-machine solutions.",
+      "references": "## References\n\nFor more information, see also:\n\n* [Set-Cookie __Host- prefix details](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#cookie_prefixes)\n* [OWASP Content Security Policy Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html)\n* [OWASP Secure Headers Project](https://owasp.org/www-project-secure-headers/)\n* [OWASP Cross-Site Request Forgery Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)\n* [HSTS Browser Preload List submission form](https://hstspreload.org/)\n* [OWASP DOM Clobbering Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DOM_Clobbering_Prevention_Cheat_Sheet.html)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 33,
+    "fields": {
+      "type": 3,
+      "name": "V4 API and Web Service",
+      "objective": "Several considerations apply specifically to applications that expose APIs for use by web browsers or other consumers (commonly using JSON, XML, or GraphQL). This chapter covers the relevant security configurations and mechanisms that should be applied.\n\nNote that authentication, session management, and input validation concerns from other chapters also apply to APIs, so this chapter cannot be taken out of context or tested in isolation.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP REST Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html)\n* Resources on GraphQL Authorization from [graphql.org](https://graphql.org/learn/authorization/) and [Apollo](https://www.apollographql.com/docs/apollo-server/security/authentication/#authorization-methods).\n* [OWASP Web Security Testing Guide: GraphQL Testing](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/12-API_Testing/01-Testing_GraphQL)\n* [OWASP Web Security Testing Guide: Testing WebSockets](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/11-Client-side_Testing/10-Testing_WebSockets)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 34,
+    "fields": {
+      "type": 3,
+      "name": "V5 File Handling",
+      "objective": "The use of files can present a variety of risks to the application, including denial of service, unauthorized access, and storage exhaustion. This chapter includes requirements to address these risks.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP File Upload Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html)\n* [Example of using symlinks for arbitrary file read](https://hackerone.com/reports/1439593)\n* [Explanation of \"Magic Bytes\" from Wikipedia](https://en.wikipedia.org/wiki/List_of_file_signatures)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 35,
+    "fields": {
+      "type": 3,
+      "name": "V6 Authentication",
+      "objective": "Authentication is the process of establishing or confirming the authenticity of an individual or device. It involves verifying claims made by a person or about a device, ensuring resistance to impersonation, and preventing the recovery or interception of passwords.\n\n[NIST SP 800-63](https://pages.nist.gov/800-63-3/) is a modern, evidence-based standard that is valuable for organizations worldwide, but is particularly relevant to US agencies and those interacting with US agencies.\n\nWhile many of the requirements in this chapter are based on the second section of the standard (known as NIST SP 800-63B \"Digital Identity Guidelines - Authentication and Lifecycle Management\"), the chapter focuses on common threats and frequently exploited authentication weaknesses. It does not attempt to comprehensively cover every point in the standard. For cases where full NIST SP 800-63 compliance is necessary, please refer to NIST SP 800-63.\n\nAdditionally, NIST SP 800-63 terminology may sometimes differ, and this chapter often uses more commonly understood terminology to improve clarity.\n\nA common feature of more advanced applications is the ability to adapt authentication stages required based on various risk factors. This feature is covered in the \"Authorization\" chapter, since these mechanisms also need to be considered for authorization decisions.",
+      "references": "## References\n\nFor more information, see also:\n\n* [NIST SP 800-63 - Digital Identity Guidelines](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63-3.pdf)\n* [NIST SP 800-63B - Authentication and Lifecycle Management](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63b.pdf)\n* [NIST SP 800-63 FAQ](https://pages.nist.gov/800-63-FAQ/)\n* [OWASP Web Security Testing Guide: Testing for Authentication](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/04-Authentication_Testing)\n* [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)\n* [OWASP Forgot Password Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html)\n* [OWASP Choosing and Using Security Questions Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Choosing_and_Using_Security_Questions_Cheat_Sheet.html)\n* [CISA Guidance on \"Number Matching\"](https://www.cisa.gov/sites/default/files/publications/fact-sheet-implement-number-matching-in-mfa-applications-508c.pdf)\n* [Details on the FIDO Alliance](https://fidoalliance.org/)\n",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 36,
+    "fields": {
+      "type": 3,
+      "name": "V7 Session Management",
+      "objective": "Session management mechanisms allow applications to correlate user and device interactions over time, even when using stateless communication protocols (such as HTTP). Modern applications may use multiple session tokens with distinct characteristics and purposes. A secure session management system is one that prevents attackers from obtaining, utilizing, or otherwise abusing a victim's session. Applications maintaining sessions must ensure that the following high-level session management requirements are met:\n\n* Sessions are unique to each individual and cannot be guessed or shared.\n* Sessions are invalidated when no longer required and are timed out during periods of inactivity.\n\nMany of the requirements in this chapter relate to selected [NIST SP 800-63 Digital Identity Guidelines](https://pages.nist.gov/800-63-4/) controls, focusing on common threats and commonly exploited authentication weaknesses.\n\nNote that requirements for specific implementation details of certain session management mechanisms can be found elsewhere:\n\n* HTTP Cookies are a common mechanism for securing session tokens. Specific security requirements for cookies can be found in the \"Web Frontend Security\" chapter.\n* Self-contained tokens are frequently used as a way of maintaining sessions. Specific security requirements can be found in the \"Self-contained Tokens\" chapter.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Web Security Testing Guide: Session Management Testing](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/06-Session_Management_Testing)\n* [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 37,
+    "fields": {
+      "type": 3,
+      "name": "V8 Authorization",
+      "objective": "Authorization ensures that access is granted only to permitted consumers (users, servers, and other clients). To enforce the Principle of Least Privilege (POLP), verified applications must meet the following high-level requirements:\n\n* Document authorization rules, including decision-making factors and environmental contexts.\n* Consumers should have access only to resources permitted by their defined entitlements.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Web Security Testing Guide: Authorization](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/05-Authorization_Testing)\n* [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 38,
+    "fields": {
+      "type": 3,
+      "name": "V9 Self-contained Tokens",
+      "objective": "The concept of a self-contained token is mentioned in the original RFC 6749 OAuth 2.0 from 2012. It refers to a token containing data or claims on which a receiving service will rely to make security decisions. This should be differentiated from a simple token containing only an identifier, which a receiving service uses to look up data locally. The most common examples of self-contained tokens are JSON Web Tokens (JWTs) and SAML assertions.\n\nThe use of self-contained tokens has become very widespread, even outside of OAuth and OIDC. At the same time, the security of this mechanism relies on the ability to validate the integrity of the token and to ensure that the token is valid for a particular context. There are many pitfalls with this process, and this chapter provides specific details of the mechanisms that applications should have in place to prevent them.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP JSON Web Token Cheat Sheet for Java Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html) (but has useful general guidance)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 39,
+    "fields": {
+      "type": 3,
+      "name": "V10 OAuth and OIDC",
+      "objective": "OAuth2 (referred to as OAuth in this chapter) is an industry-standard framework for delegated authorization. For example, using OAuth, a client application can obtain access to APIs (server resources) on a user's behalf, provided the user has authorized the client application to do so.\n\nBy itself, OAuth is not designed for user authentication. The OpenID Connect (OIDC) framework extends OAuth by adding a user identity layer on top of OAuth. OIDC provides support for features including standardized user information, Single Sign-On (SSO), and session management. As OIDC is an extension of OAuth, the OAuth requirements in this chapter also apply to OIDC.\n\nThe following roles are defined in OAuth:\n\n* The OAuth client is the application that attempts to obtain access to server resources (e.g., by calling an API using the issued access token). The OAuth client is often a server-side application.\n    * A confidential client is a client capable of maintaining the confidentiality of the credentials it uses to authenticate itself with the authorization server.\n    * A public client is not capable of maintaining the confidentiality of credentials for authenticating with the authorization server. Therefore, instead of authenticating itself (e.g., using 'client_id' and 'client_secret' parameters), it only identifies itself (using a 'client_id' parameter).\n* The OAuth resource server (RS) is the server API exposing resources to OAuth clients.\n* The OAuth authorization server (AS) is a server application that issues access tokens to OAuth clients. These access tokens allow OAuth clients to access RS resources, either on behalf of an end-user or on the OAuth client's own behalf. The AS is often a separate application, but (if appropriate) it may be integrated into a suitable RS.\n* The resource owner (RO) is the end-user who authorizes OAuth clients to obtain limited access to resources hosted on the resource server on their behalf. The resource owner consents to this delegated authorization by interacting with the authorization server.\n\nThe following roles are defined in OIDC:\n\n* The relying party (RP) is the client application requesting end-user authentication through the OpenID Provider. It assumes the role of an OAuth client.\n* The OpenID Provider (OP) is an OAuth AS that is capable of authenticating the end-user and provides OIDC claims to an RP. The OP may be the identity provider (IdP), but in federated scenarios, the OP and the identity provider (where the end-user authenticates) may be different server applications.\n\nOAuth and OIDC were initially designed for third-party applications. Today, they are often used by first-party applications as well. However, when used in first-party scenarios, such as authentication and session management, the protocol adds some complexity, which may introduce new security challenges.\n\nOAuth and OIDC can be used for many types of applications, but the focus for ASVS and the requirements in this chapter is on web applications and APIs.\n\nSince OAuth and OIDC can be considered logic on top of web technologies, general requirements from other chapters always apply, and this chapter cannot be taken out of context.\n\nThis chapter addresses best current practices for OAuth2 and OIDC aligned with specifications found at <https://oauth.net/2/> and <https://openid.net/developers/specs/>. Even if RFCs are considered mature, they are updated frequently. Thus, it is important to align with the latest versions when applying the requirements in this chapter. See the references section for more details.\n\nGiven the complexity of the area, it is vitally important for a secure OAuth or OIDC solution to use well-known industry-standard authorization servers and apply the recommended security configuration.\n\nTerminology used in this chapter aligns with OAuth RFCs and OIDC specifications, but note that OIDC terminology is only used for OIDC-specific requirements; otherwise, OAuth terminology is used.\n\nIn the context of OAuth and OIDC, the term \"token\" in this chapter refers to:\n\n* Access tokens, which shall only be consumed by the RS and can either be reference tokens that are validated using introspection or self-contained tokens that are validated using some key material.\n* Refresh tokens, which shall only be consumed by the authorization server that issued the token.\n* OIDC ID Tokens, which shall only be consumed by the client that triggered the authorization flow.\n\nThe risk levels for some of the requirements in this chapter depend on whether the client is a confidential client or regarded as a public client. Since using strong client authentication mitigates many attack vectors, a few requirements might be relaxed when using a confidential client for L1 applications.",
+      "references": "## References\n\nFor more information on OAuth, please see:\n\n* [oauth.net](https://oauth.net/)\n* [OWASP OAuth 2.0 Protocol Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/OAuth2_Cheat_Sheet.html)\n\nFor OAuth-related requirements in ASVS following published and in draft status RFC-s are used:\n\n* [RFC6749 The OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)\n* [RFC6750 The OAuth 2.0 Authorization Framework: Bearer Token Usage](https://datatracker.ietf.org/doc/html/rfc6750)\n* [RFC6819 OAuth 2.0 Threat Model and Security Considerations](https://datatracker.ietf.org/doc/html/rfc6819)\n* [RFC7636 Proof Key for Code Exchange by OAuth Public Clients](https://datatracker.ietf.org/doc/html/rfc7636)\n* [RFC7591 OAuth 2.0 Dynamic Client Registration Protocol](https://datatracker.ietf.org/doc/html/rfc7591)\n* [RFC8628 OAuth 2.0 Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628)\n* [RFC8707 Resource Indicators for OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc8707)\n* [RFC9068 JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens](https://datatracker.ietf.org/doc/html/rfc9068)\n* [RFC9126 OAuth 2.0 Pushed Authorization Requests](https://datatracker.ietf.org/doc/html/rfc9126)\n* [RFC9207 OAuth 2.0 Authorization Server Issuer Identification](https://datatracker.ietf.org/doc/html/rfc9207)\n* [RFC9396 OAuth 2.0 Rich Authorization Requests](https://datatracker.ietf.org/doc/html/rfc9396)\n* [RFC9449 OAuth 2.0 Demonstrating Proof of Possession (DPoP)](https://datatracker.ietf.org/doc/html/rfc9449)\n* [RFC9700 Best Current Practice for OAuth 2.0 Security](https://datatracker.ietf.org/doc/html/rfc9700)\n* [draft OAuth 2.0 for Browser-Based Applications](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps)<!-- recheck on release -->\n* [draft The OAuth 2.1 Authorization Framework](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12)<!-- recheck on release -->\n\nFor more information on OpenID Connect, please see:\n\n* [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html)\n* [FAPI 2.0 Security Profile](https://openid.net/specs/fapi-security-profile-2_0-final.html)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 40,
+    "fields": {
+      "type": 3,
+      "name": "V11 Cryptography",
+      "objective": "The objective of this chapter is to define best practices for the general use of cryptography, as well as to instill a fundamental understanding of cryptographic principles and inspire a shift toward more resilient and modern approaches. It encourages the following:\n\n* Implementing robust cryptographic systems that fail securely, adapt to evolving threats, and are future-proof.\n* Utilizing cryptographic mechanisms that are both secure and aligned with industry best practices.\n* Maintaining a secure cryptographic key management system with appropriate access controls and auditing.\n* Regularly evaluating the cryptographic landscape to assess new risks and adapt algorithms accordingly.\n* Discovering and managing cryptographic use cases throughout the application's lifecycle to ensure that all cryptographic assets are accounted for and secured.\n\nIn addition to outlining general principles and best practices, this document also provides more in-depth technical information about the requirements in Appendix C - Cryptography Standards. This includes algorithms and modes that are considered \"approved\" for the purposes of the requirements in this chapter.\n\nRequirements that use cryptography to solve a separate problem, such as secrets management or communications security, will be in different parts of the standard.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Web Security Testing Guide: Testing for Weak Cryptography](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/09-Testing_for_Weak_Cryptography)\n* [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)\n* [FIPS 140-3](https://csrc.nist.gov/pubs/fips/140-3/final)\n* [NIST SP 800-57](https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-5/final)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 41,
+    "fields": {
+      "type": 3,
+      "name": "V12 Secure Communication",
+      "objective": "This chapter includes requirements related to the specific mechanisms that should be in place to protect data in transit, both between an end-user client and a backend service, as well as between internal and backend services.\n\nThe general concepts promoted by this chapter include:\n\n* Ensuring that communications are encrypted externally, and ideally internally as well.\n* Configuring encryption mechanisms using the latest guidance, including preferred algorithms and ciphers.\n* Using signed certificates to ensure that communications are not being intercepted by unauthorized parties.\n\nIn addition to outlining general principles and best practices, the ASVS also provides more in-depth technical information about cryptographic strength in Appendix C - Cryptography Standards.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP - Transport Layer Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html)\n* [Mozilla's Server Side TLS configuration guide](https://wiki.mozilla.org/Security/Server_Side_TLS)\n* [Mozilla's tool to generate known good TLS configurations](https://ssl-config.mozilla.org/).\n* [O-Saft - OWASP Project to validate TLS configuration](https://owasp.org/www-project-o-saft/)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 42,
+    "fields": {
+      "type": 3,
+      "name": "V13 Configuration",
+      "objective": "The application's default configuration must be secure for use on the Internet.\n\nThis chapter provides guidance on the various configurations necessary to achieve this, including those applied during development, build, and deployment.\n\nTopics covered include preventing data leakage, securely managing communication between components, and protecting secrets.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Web Security Testing Guide: Configuration and Deployment Management Testing](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 43,
+    "fields": {
+      "type": 3,
+      "name": "V14 Data Protection",
+      "objective": "Applications cannot account for all usage patterns and user behaviors, and should therefore implement controls to limit unauthorized access to sensitive data on client devices.\n\nThis chapter includes requirements related to defining what data needs to be protected, how it should be protected, and specific mechanisms to implement or pitfalls to avoid.\n\nAnother consideration for data protection is bulk extraction, modification, or excessive usage. Each system's requirements are likely to be very different, so determining what is \"abnormal\" must consider the threat model and business risk. From an ASVS perspective, detecting these issues is handled in the \"Security Logging and Error Handling\" chapter, and setting limits is handled in the \"Validation and Business Logic\" chapter.",
+      "references": "## References\n\nFor more information, see also:\n\n* [Consider using the Security Headers website to check security and anti-caching header fields](https://securityheaders.com/)\n* [Documentation about anti-caching headers by Mozilla](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching)\n* [OWASP Secure Headers project](https://owasp.org/www-project-secure-headers/)\n* [OWASP Privacy Risks Project](https://owasp.org/www-project-top-10-privacy-risks/)\n* [OWASP User Privacy Protection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/User_Privacy_Protection_Cheat_Sheet.html)\n* [Australian Privacy Principle 11 - Security of personal information](https://www.oaic.gov.au/privacy/australian-privacy-principles/australian-privacy-principles-guidelines/chapter-11-app-11-security-of-personal-information)\n* [European Union General Data Protection Regulation (GDPR) overview](https://www.edps.europa.eu/data-protection_en)\n* [European Union Data Protection Supervisor - Internet Privacy Engineering Network](https://www.edps.europa.eu/data-protection/ipen-internet-privacy-engineering-network_en)\n* [Information on the \"Clear-Site-Data\" header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Clear-Site-Data)\n* [White paper on Web Cache Deception](https://www.blackhat.com/docs/us-17/wednesday/us-17-Gil-Web-Cache-Deception-Attack-wp.pdf)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 44,
+    "fields": {
+      "type": 3,
+      "name": "V15 Secure Coding and Architecture",
+      "objective": "Many ASVS requirements either relate to a particular area of security, such as authentication or authorization, or pertain to a particular type of application functionality, such as logging or file handling.\n\nThis chapter provides general security requirements to consider when designing and developing applications. These requirements focus not only on clean architecture and code quality but also on specific architecture and coding practices necessary for application security.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Prototype Pollution Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Prototype_Pollution_Prevention_Cheat_Sheet.html)\n* [OWASP Mass Assignment Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html)\n* [OWASP CycloneDX Bill of Materials Specification](https://owasp.org/www-project-cyclonedx/)\n* [OWASP Web Security Testing Guide: Testing for HTTP Parameter Pollution](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/07-Input_Validation_Testing/04-Testing_for_HTTP_Parameter_Pollution)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 45,
+    "fields": {
+      "type": 3,
+      "name": "V16 Security Logging and Error Handling",
+      "objective": "Security logs are distinct from error or performance logs and are used to record security-relevant events such as authentication decisions, access control decisions, and attempts to bypass security controls, such as input validation or business logic validation. Their purpose is to support detection, response, and investigation by providing high-signal, structured data for analysis tools like SIEMs.\n\nLogs should not include sensitive personal data unless legally required, and any logged data must be protected as a high-value asset. Logging must not compromise privacy or system security. Applications must also fail securely, avoiding unnecessary disclosure or disruption.\n\nFor detailed implementation guidance, refer to the OWASP Cheat Sheets in the references section.",
+      "references": "## References\n\nFor more information, see also:\n\n* [OWASP Web Security Testing Guide: Testing for Error Handling](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/README)\n* [OWASP Authentication Cheat Sheet section about error messages](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html#authentication-and-error-messages)\n* [OWASP Logging Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html)\n* [OWASP Application Logging Vocabulary Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Vocabulary_Cheat_Sheet.html)",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  },
+  {
+    "model": "dojo.benchmark_category",
+    "pk": 46,
+    "fields": {
+      "type": 3,
+      "name": "V17 WebRTC",
+      "objective": "Web Real-Time Communication (WebRTC) enables real-time voice, video, and data exchange in modern applications. As adoption increases, securing WebRTC infrastructure becomes critical. This section provides security requirements for stakeholders who develop, host, or integrate WebRTC systems.\n\nThe WebRTC market can be broadly categorized into three segments:\n\n1. Product Developers: Proprietary and open-source vendors that create and supply WebRTC products and solutions. Their focus is on developing robust and secure WebRTC technologies that can be used by others.\n\n2. Communication Platforms as a Service (CPaaS): Providers that offer APIs, SDKs, and the necessary infrastructure or platforms to enable WebRTC functionalities. CPaaS providers may use products from the first category or develop their own WebRTC software to offer these services.\n\n3. Service Providers: Organizations that leverage products from product developers or CPaaS providers, or develop their own WebRTC solutions. They create and implement applications for online conferencing, healthcare, e-learning, and other domains where real-time communication is crucial.\n\nThe security requirements outlined here are primarily focused on Product Developers, CPaaS, and Service Providers who:\n\n* Utilize open-source solutions to build their WebRTC applications.\n* Use commercial WebRTC products as part of their infrastructure.\n* Use internally developed WebRTC solutions or integrate various components into a cohesive service offering.\n\nIt is important to note that these security requirements do not apply to developers who exclusively use SDKs and APIs provided by CPaaS vendors. For such developers, the CPaaS providers are typically responsible for most of the underlying security concerns within their platforms, and a generic security standard like ASVS may not fully address their needs.",
+      "references": "## References\n\nFor more information, see also:\n\n* The WebRTC DTLS ClientHello DoS is best documented at [Enable Security's blog post aimed at security professionals](https://www.enablesecurity.com/blog/novel-dos-vulnerability-affecting-webrtc-media-servers/) and the associated [white paper aimed at WebRTC developers](https://www.enablesecurity.com/blog/webrtc-hello-race-conditions-paper/)\n* [RFC 3550 - RTP: A Transport Protocol for Real-Time Applications](https://www.rfc-editor.org/rfc/rfc3550)\n* [RFC 3711 - The Secure Real-time Transport Protocol (SRTP)](https://datatracker.ietf.org/doc/html/rfc3711)\n* [RFC 5764 - Datagram Transport Layer Security (DTLS) Extension to Establish Keys for the Secure Real-time Transport Protocol (SRTP))](https://datatracker.ietf.org/doc/html/rfc5764)\n* [RFC 8825 - Overview: Real-Time Protocols for Browser-Based Applications](https://www.rfc-editor.org/info/rfc8825)\n* [RFC 8826 - Security Considerations for WebRTC](https://www.rfc-editor.org/info/rfc8826)\n* [RFC 8827 - WebRTC Security Architecture](https://www.rfc-editor.org/info/rfc8827)\n* [DTLS-SRTP Protection Profiles](https://www.iana.org/assignments/srtp-protection/srtp-protection.xhtml)\n",
+      "enabled": true,
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z"
+    }
+  }
+]

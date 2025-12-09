@@ -1,0 +1,3575 @@
+[
+  {
+    "model": "dojo.cwe",
+    "pk": 15,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/15.html",
+      "description": "External Control of System or Configuration Setting",
+      "number": 15
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 23,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/23.html",
+      "description": "Relative Path Traversal",
+      "number": 23
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 36,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/36.html",
+      "description": "Absolute Path Traversal",
+      "number": 36
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 41,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/41.html",
+      "description": "Improper Resolution of Path Equivalence",
+      "number": 41
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 59,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/59.html",
+      "description": "Improper Link Resolution Before File Access ('Link Following')",
+      "number": 59
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 66,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/66.html",
+      "description": "Improper Handling of File Names that Identify Virtual Resources",
+      "number": 66
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 76,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/76.html",
+      "description": "Improper Neutralization of Equivalent Special Elements",
+      "number": 76
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 78,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/78.html",
+      "description": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",
+      "number": 78
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 79,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/79.html",
+      "description": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+      "number": 79
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 88,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/88.html",
+      "description": "Argument Injection or Modification",
+      "number": 88
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 89,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/89.html",
+      "description": "Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+      "number": 89
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 90,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/90.html",
+      "description": "Improper Neutralization of Special Elements used in an LDAP Query ('LDAP Injection')",
+      "number": 90
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 91,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/91.html",
+      "description": "XML Injection (aka Blind XPath Injection)",
+      "number": 91
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 93,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/93.html",
+      "description": "Improper Neutralization of CRLF Sequences ('CRLF Injection')",
+      "number": 93
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 95,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/95.html",
+      "description": "Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')",
+      "number": 95
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 96,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/96.html",
+      "description": "Improper Neutralization of Directives in Statically Saved Code ('Static Code Injection')",
+      "number": 96
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 98,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/98.html",
+      "description": "Improper Control of Filename for Include/Require Statement in PHP Program ('PHP Remote File Inclusion')",
+      "number": 98
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 99,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/99.html",
+      "description": "Improper Control of Resource Identifiers ('Resource Injection')",
+      "number": 99
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 111,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/111.html",
+      "description": "Direct Use of Unsafe JNI",
+      "number": 111
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 112,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/112.html",
+      "description": "Missing XML Validation",
+      "number": 112
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 113,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/113.html",
+      "description": "Improper Neutralization of CRLF Sequences in HTTP Headers ('HTTP Response Splitting')",
+      "number": 113
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 114,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/114.html",
+      "description": "Process Control",
+      "number": 114
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 115,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/115.html",
+      "description": "Misinterpretation of Input",
+      "number": 115
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 117,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/117.html",
+      "description": "Improper Output Neutralization for Logs",
+      "number": 117
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 120,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/120.html",
+      "description": "Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')",
+      "number": 120
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 123,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/123.html",
+      "description": "Write-what-where Condition",
+      "number": 123
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 124,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/124.html",
+      "description": "Buffer Underwrite ('Buffer Underflow')",
+      "number": 124
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 125,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/125.html",
+      "description": "Out-of-bounds Read",
+      "number": 125
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 128,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/128.html",
+      "description": "Wrap-around Error",
+      "number": 128
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 129,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/129.html",
+      "description": "Improper Validation of Array Index",
+      "number": 129
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 130,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/130.html",
+      "description": "Improper Handling of Length Parameter Inconsistency ",
+      "number": 130
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 131,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/131.html",
+      "description": "Incorrect Calculation of Buffer Size",
+      "number": 131
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 134,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/134.html",
+      "description": "Use of Externally-Controlled Format String",
+      "number": 134
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 135,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/135.html",
+      "description": "Incorrect Calculation of Multi-Byte String Length",
+      "number": 135
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 140,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/140.html",
+      "description": "Improper Neutralization of Delimiters",
+      "number": 140
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 166,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/166.html",
+      "description": "Improper Handling of Missing Special Element",
+      "number": 166
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 167,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/167.html",
+      "description": "Improper Handling of Additional Special Element",
+      "number": 167
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 168,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/168.html",
+      "description": "Improper Handling of Inconsistent Special Elements",
+      "number": 168
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 170,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/170.html",
+      "description": "Improper Null Termination",
+      "number": 170
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 178,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/178.html",
+      "description": "Improper Handling of Case Sensitivity",
+      "number": 178
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 179,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/179.html",
+      "description": "Incorrect Behavior Order: Early Validation",
+      "number": 179
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 180,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/180.html",
+      "description": "Incorrect Behavior Order: Validate Before Canonicalize",
+      "number": 180
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 181,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/181.html",
+      "description": "Incorrect Behavior Order: Validate Before Filter",
+      "number": 181
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 182,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/182.html",
+      "description": "Collapse of Data into Unsafe Value",
+      "number": 182
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 183,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/183.html",
+      "description": "Permissive Whitelist",
+      "number": 183
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 184,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/184.html",
+      "description": "Incomplete Blacklist",
+      "number": 184
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 186,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/186.html",
+      "description": "Overly Restrictive Regular Expression",
+      "number": 186
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 188,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/188.html",
+      "description": "Reliance on Data/Memory Layout",
+      "number": 188
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 190,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/190.html",
+      "description": "Integer Overflow or Wraparound",
+      "number": 190
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 191,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/191.html",
+      "description": "Integer Underflow (Wrap or Wraparound)",
+      "number": 191
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 193,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/193.html",
+      "description": "Off-by-one Error",
+      "number": 193
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 194,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/194.html",
+      "description": "Unexpected Sign Extension",
+      "number": 194
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 197,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/197.html",
+      "description": "Numeric Truncation Error",
+      "number": 197
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 198,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/198.html",
+      "description": "Use of Incorrect Byte Ordering",
+      "number": 198
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 204,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/204.html",
+      "description": "Response Discrepancy Information Exposure",
+      "number": 204
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 205,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/205.html",
+      "description": "Information Exposure Through Behavioral Discrepancy",
+      "number": 205
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 208,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/208.html",
+      "description": "Information Exposure Through Timing Discrepancy",
+      "number": 208
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 209,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/209.html",
+      "description": "Information Exposure Through an Error Message",
+      "number": 209
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 210,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/210.html",
+      "description": "Information Exposure Through Self-generated Error Message",
+      "number": 210
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 211,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/211.html",
+      "description": "Information Exposure Through Externally-Generated Error Message",
+      "number": 211
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 212,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/212.html",
+      "description": "Improper Cross-boundary Removal of Sensitive Data",
+      "number": 212
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 213,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/213.html",
+      "description": "Intentional Information Exposure",
+      "number": 213
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 222,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/222.html",
+      "description": "Truncation of Security-relevant Information",
+      "number": 222
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 223,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/223.html",
+      "description": "Omission of Security-relevant Information",
+      "number": 223
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 224,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/224.html",
+      "description": "Obscured Security-relevant Information by Alternate Name",
+      "number": 224
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 226,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/226.html",
+      "description": "Sensitive Information Uncleared Before Release",
+      "number": 226
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 229,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/229.html",
+      "description": "Improper Handling of Values",
+      "number": 229
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 233,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/233.html",
+      "description": "Improper Handling of Parameters",
+      "number": 233
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 237,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/237.html",
+      "description": "Improper Handling of Structural Elements",
+      "number": 237
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 240,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/240.html",
+      "description": "Improper Handling of Inconsistent Structural Elements",
+      "number": 240
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 241,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/241.html",
+      "description": "Improper Handling of Unexpected Data Type",
+      "number": 241
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 242,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/242.html",
+      "description": "Use of Inherently Dangerous Function",
+      "number": 242
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 248,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/248.html",
+      "description": "Uncaught Exception",
+      "number": 248
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 252,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/252.html",
+      "description": "Unchecked Return Value",
+      "number": 252
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 253,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/253.html",
+      "description": "Incorrect Check of Function Return Value",
+      "number": 253
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 257,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/257.html",
+      "description": "Storing Passwords in a Recoverable Format",
+      "number": 257
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 259,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/259.html",
+      "description": "Use of Hard-coded Password",
+      "number": 259
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 263,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/263.html",
+      "description": "Password Aging with Long Expiration",
+      "number": 263
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 266,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/266.html",
+      "description": "Incorrect Privilege Assignment",
+      "number": 266
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 267,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/267.html",
+      "description": "Privilege Defined With Unsafe Actions",
+      "number": 267
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 268,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/268.html",
+      "description": "Privilege Chaining",
+      "number": 268
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 270,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/270.html",
+      "description": "Privilege Context Switching Error",
+      "number": 270
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 272,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/272.html",
+      "description": "Least Privilege Violation",
+      "number": 272
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 273,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/273.html",
+      "description": "Improper Check for Dropped Privileges",
+      "number": 273
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 274,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/274.html",
+      "description": "Improper Handling of Insufficient Privileges",
+      "number": 274
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 280,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/280.html",
+      "description": "Improper Handling of Insufficient Permissions or Privileges ",
+      "number": 280
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 281,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/281.html",
+      "description": "Improper Preservation of Permissions",
+      "number": 281
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 283,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/283.html",
+      "description": "Unverified Ownership",
+      "number": 283
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 288,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/288.html",
+      "description": "Authentication Bypass Using an Alternate Path or Channel",
+      "number": 288
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 290,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/290.html",
+      "description": "Authentication Bypass by Spoofing",
+      "number": 290
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 294,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/294.html",
+      "description": "Authentication Bypass by Capture-replay",
+      "number": 294
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 295,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/295.html",
+      "description": "Improper Certificate Validation",
+      "number": 295
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 296,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/296.html",
+      "description": "Improper Following of a Certificate's Chain of Trust",
+      "number": 296
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 299,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/299.html",
+      "description": "Improper Check for Certificate Revocation",
+      "number": 299
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 303,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/303.html",
+      "description": "Incorrect Implementation of Authentication Algorithm",
+      "number": 303
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 304,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/304.html",
+      "description": "Missing Critical Step in Authentication",
+      "number": 304
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 305,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/305.html",
+      "description": "Authentication Bypass by Primary Weakness",
+      "number": 305
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 307,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/307.html",
+      "description": "Improper Restriction of Excessive Authentication Attempts",
+      "number": 307
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 308,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/308.html",
+      "description": "Use of Single-factor Authentication",
+      "number": 308
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 309,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/309.html",
+      "description": "Use of Password System for Primary Authentication",
+      "number": 309
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 311,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/311.html",
+      "description": "Missing Encryption of Sensitive Data",
+      "number": 311
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 321,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/321.html",
+      "description": "Use of Hard-coded Cryptographic Key",
+      "number": 321
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 322,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/322.html",
+      "description": "Key Exchange without Entity Authentication",
+      "number": 322
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 323,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/323.html",
+      "description": "Reusing a Nonce, Key Pair in Encryption",
+      "number": 323
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 324,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/324.html",
+      "description": "Use of a Key Past its Expiration Date",
+      "number": 324
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 325,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/325.html",
+      "description": "Missing Required Cryptographic Step",
+      "number": 325
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 327,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/327.html",
+      "description": "Use of a Broken or Risky Cryptographic Algorithm",
+      "number": 327
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 328,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/328.html",
+      "description": "Reversible One-Way Hash",
+      "number": 328
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 331,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/331.html",
+      "description": "Insufficient Entropy",
+      "number": 331
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 334,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/334.html",
+      "description": "Small Space of Random Values",
+      "number": 334
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 335,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/335.html",
+      "description": "Incorrect Usage of Seeds in Pseudo-Random Number Generator (PRNG)",
+      "number": 335
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 336,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/336.html",
+      "description": "Same Seed in Pseudo-Random Number Generator (PRNG)",
+      "number": 336
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 337,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/337.html",
+      "description": "Predictable Seed in Pseudo-Random Number Generator (PRNG)",
+      "number": 337
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 338,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/338.html",
+      "description": "Use of Cryptographically Weak Pseudo-Random Number Generator (PRNG)",
+      "number": 338
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 339,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/339.html",
+      "description": "Small Seed Space in PRNG",
+      "number": 339
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 341,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/341.html",
+      "description": "Predictable from Observable State",
+      "number": 341
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 342,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/342.html",
+      "description": "Predictable Exact Value from Previous Values",
+      "number": 342
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 343,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/343.html",
+      "description": "Predictable Value Range from Previous Values",
+      "number": 343
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 344,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/344.html",
+      "description": "Use of Invariant Value in Dynamically Changing Context",
+      "number": 344
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 346,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/346.html",
+      "description": "Origin Validation Error",
+      "number": 346
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 347,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/347.html",
+      "description": "Improper Verification of Cryptographic Signature",
+      "number": 347
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 348,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/348.html",
+      "description": "Use of Less Trusted Source",
+      "number": 348
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 349,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/349.html",
+      "description": "Acceptance of Extraneous Untrusted Data With Trusted Data",
+      "number": 349
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 351,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/351.html",
+      "description": "Insufficient Type Distinction",
+      "number": 351
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 353,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/353.html",
+      "description": "Missing Support for Integrity Check",
+      "number": 353
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 354,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/354.html",
+      "description": "Improper Validation of Integrity Check Value",
+      "number": 354
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 356,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/356.html",
+      "description": "Product UI does not Warn User of Unsafe Actions",
+      "number": 356
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 357,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/357.html",
+      "description": "Insufficient UI Warning of Dangerous Operations",
+      "number": 357
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 358,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/358.html",
+      "description": "Improperly Implemented Security Check for Standard",
+      "number": 358
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 360,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/360.html",
+      "description": "Trust of System Event Data",
+      "number": 360
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 363,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/363.html",
+      "description": "Race Condition Enabling Link Following",
+      "number": 363
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 364,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/364.html",
+      "description": "Signal Handler Race Condition",
+      "number": 364
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 365,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/365.html",
+      "description": "Race Condition in Switch",
+      "number": 365
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 366,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/366.html",
+      "description": "Race Condition within a Thread",
+      "number": 366
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 367,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/367.html",
+      "description": "Time-of-check Time-of-use (TOCTOU) Race Condition",
+      "number": 367
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 368,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/368.html",
+      "description": "Context Switching Race Condition",
+      "number": 368
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 369,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/369.html",
+      "description": "Divide By Zero",
+      "number": 369
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 372,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/372.html",
+      "description": "Incomplete Internal State Distinction",
+      "number": 372
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 374,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/374.html",
+      "description": "Passing Mutable Objects to an Untrusted Method",
+      "number": 374
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 375,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/375.html",
+      "description": "Returning a Mutable Object to an Untrusted Caller",
+      "number": 375
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 377,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/377.html",
+      "description": "Insecure Temporary File",
+      "number": 377
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 378,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/378.html",
+      "description": "Creation of Temporary File With Insecure Permissions",
+      "number": 378
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 379,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/379.html",
+      "description": "Creation of Temporary File in Directory with Incorrect Permissions",
+      "number": 379
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 385,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/385.html",
+      "description": "Covert Timing Channel",
+      "number": 385
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 386,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/386.html",
+      "description": "Symbolic Name not Mapping to Correct Object",
+      "number": 386
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 391,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/391.html",
+      "description": "Unchecked Error Condition",
+      "number": 391
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 392,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/392.html",
+      "description": "Missing Report of Error Condition",
+      "number": 392
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 393,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/393.html",
+      "description": "Return of Wrong Status Code",
+      "number": 393
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 394,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/394.html",
+      "description": "Unexpected Status Code or Return Value",
+      "number": 394
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 395,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/395.html",
+      "description": "Use of NullPointerException Catch to Detect NULL Pointer Dereference",
+      "number": 395
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 396,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/396.html",
+      "description": "Declaration of Catch for Generic Exception",
+      "number": 396
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 397,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/397.html",
+      "description": "Declaration of Throws for Generic Exception",
+      "number": 397
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 403,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/403.html",
+      "description": "Exposure of File Descriptor to Unintended Control Sphere ('File Descriptor Leak')",
+      "number": 403
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 406,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/406.html",
+      "description": "Insufficient Control of Network Message Volume (Network Amplification)",
+      "number": 406
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 407,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/407.html",
+      "description": "Algorithmic Complexity",
+      "number": 407
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 408,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/408.html",
+      "description": "Incorrect Behavior Order: Early Amplification",
+      "number": 408
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 409,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/409.html",
+      "description": "Improper Handling of Highly Compressed Data (Data Amplification)",
+      "number": 409
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 410,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/410.html",
+      "description": "Insufficient Resource Pool",
+      "number": 410
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 412,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/412.html",
+      "description": "Unrestricted Externally Accessible Lock",
+      "number": 412
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 413,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/413.html",
+      "description": "Improper Resource Locking",
+      "number": 413
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 414,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/414.html",
+      "description": "Missing Lock Check",
+      "number": 414
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 416,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/416.html",
+      "description": "Use After Free",
+      "number": 416
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 419,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/419.html",
+      "description": "Unprotected Primary Channel",
+      "number": 419
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 420,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/420.html",
+      "description": "Unprotected Alternate Channel",
+      "number": 420
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 421,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/421.html",
+      "description": "Race Condition During Access to Alternate Channel",
+      "number": 421
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 425,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/425.html",
+      "description": "Direct Request ('Forced Browsing')",
+      "number": 425
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 426,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/426.html",
+      "description": "Untrusted Search Path",
+      "number": 426
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 427,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/427.html",
+      "description": "Uncontrolled Search Path Element",
+      "number": 427
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 428,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/428.html",
+      "description": "Unquoted Search Path or Element",
+      "number": 428
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 430,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/430.html",
+      "description": "Deployment of Wrong Handler",
+      "number": 430
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 431,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/431.html",
+      "description": "Missing Handler",
+      "number": 431
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 432,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/432.html",
+      "description": "Dangerous Signal Handler not Disabled During Sensitive Operations",
+      "number": 432
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 434,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/434.html",
+      "description": "Unrestricted Upload of File with Dangerous Type",
+      "number": 434
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 436,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/436.html",
+      "description": "Interpretation Conflict",
+      "number": 436
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 437,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/437.html",
+      "description": "Incomplete Model of Endpoint Features",
+      "number": 437
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 439,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/439.html",
+      "description": "Behavioral Change in New Version or Environment",
+      "number": 439
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 440,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/440.html",
+      "description": "Expected Behavior Violation",
+      "number": 440
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 444,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/444.html",
+      "description": "Inconsistent Interpretation of HTTP Requests ('HTTP Request Smuggling')",
+      "number": 444
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 446,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/446.html",
+      "description": "UI Discrepancy for Security Feature",
+      "number": 446
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 447,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/447.html",
+      "description": "Unimplemented or Unsupported Feature in UI",
+      "number": 447
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 448,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/448.html",
+      "description": "Obsolete Feature in UI",
+      "number": 448
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 449,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/449.html",
+      "description": "The UI Performs the Wrong Action",
+      "number": 449
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 450,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/450.html",
+      "description": "Multiple Interpretations of UI Input",
+      "number": 450
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 453,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/453.html",
+      "description": "Insecure Default Variable Initialization",
+      "number": 453
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 454,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/454.html",
+      "description": "External Initialization of Trusted Variables or Data Stores",
+      "number": 454
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 455,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/455.html",
+      "description": "Non-exit on Failed Initialization",
+      "number": 455
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 456,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/456.html",
+      "description": "Missing Initialization of a Variable",
+      "number": 456
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 459,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/459.html",
+      "description": "Incomplete Cleanup",
+      "number": 459
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 462,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/462.html",
+      "description": "Duplicate Key in Associative List (Alist)",
+      "number": 462
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 463,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/463.html",
+      "description": "Deletion of Data Structure Sentinel",
+      "number": 463
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 464,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/464.html",
+      "description": "Addition of Data Structure Sentinel",
+      "number": 464
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 466,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/466.html",
+      "description": "Return of Pointer Value Outside of Expected Range",
+      "number": 466
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 468,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/468.html",
+      "description": "Incorrect Pointer Scaling",
+      "number": 468
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 469,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/469.html",
+      "description": "Use of Pointer Subtraction to Determine Size",
+      "number": 469
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 470,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/470.html",
+      "description": "Use of Externally-Controlled Input to Select Classes or Code ('Unsafe Reflection')",
+      "number": 470
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 471,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/471.html",
+      "description": "Modification of Assumed-Immutable Data (MAID)",
+      "number": 471
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 472,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/472.html",
+      "description": "External Control of Assumed-Immutable Web Parameter",
+      "number": 472
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 474,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/474.html",
+      "description": "Use of Function with Inconsistent Implementations",
+      "number": 474
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 475,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/475.html",
+      "description": "Undefined Behavior for Input to API",
+      "number": 475
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 476,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/476.html",
+      "description": "NULL Pointer Dereference",
+      "number": 476
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 477,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/477.html",
+      "description": "Use of Obsolete Function",
+      "number": 477
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 480,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/480.html",
+      "description": "Use of Incorrect Operator",
+      "number": 480
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 484,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/484.html",
+      "description": "Omitted Break Statement in Switch",
+      "number": 484
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 489,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/489.html",
+      "description": "Leftover Debug Code",
+      "number": 489
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 494,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/494.html",
+      "description": "Download of Code Without Integrity Check",
+      "number": 494
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 501,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/501.html",
+      "description": "Trust Boundary Violation",
+      "number": 501
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 507,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/507.html",
+      "description": "Trojan Horse",
+      "number": 507
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 508,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/508.html",
+      "description": "Non-Replicating Malicious Code",
+      "number": 508
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 509,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/509.html",
+      "description": "Replicating Malicious Code (Virus or Worm)",
+      "number": 509
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 510,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/510.html",
+      "description": "Trapdoor",
+      "number": 510
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 511,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/511.html",
+      "description": "Logic/Time Bomb",
+      "number": 511
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 512,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/512.html",
+      "description": "Spyware",
+      "number": 512
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 515,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/515.html",
+      "description": "Covert Storage Channel",
+      "number": 515
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 521,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/521.html",
+      "description": "Weak Password Requirements",
+      "number": 521
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 522,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/522.html",
+      "description": "Insufficiently Protected Credentials",
+      "number": 522
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 538,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/538.html",
+      "description": "File and Directory Information Exposure",
+      "number": 538
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 544,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/544.html",
+      "description": "Missing Standardized Error Handling Mechanism",
+      "number": 544
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 551,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/551.html",
+      "description": "Incorrect Behavior Order: Authorization Before Parsing and Canonicalization",
+      "number": 551
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 552,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/552.html",
+      "description": "Files or Directories Accessible to External Parties",
+      "number": 552
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 562,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/562.html",
+      "description": "Return of Stack Variable Address",
+      "number": 562
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 565,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/565.html",
+      "description": "Reliance on Cookies without Validation and Integrity Checking",
+      "number": 565
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 567,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/567.html",
+      "description": "Unsynchronized Access to Shared Data in a Multithreaded Context",
+      "number": 567
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 581,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/581.html",
+      "description": "Object Model Violation: Just One of Equals and Hashcode Defined",
+      "number": 581
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 584,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/584.html",
+      "description": "Return Inside Finally Block",
+      "number": 584
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 587,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/587.html",
+      "description": "Assignment of a Fixed Address to a Pointer",
+      "number": 587
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 600,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/600.html",
+      "description": "Uncaught Exception in Servlet ",
+      "number": 600
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 602,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/602.html",
+      "description": "Client-Side Enforcement of Server-Side Security",
+      "number": 602
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 603,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/603.html",
+      "description": "Use of Client-Side Authentication",
+      "number": 603
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 605,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/605.html",
+      "description": "Multiple Binds to the Same Port",
+      "number": 605
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 606,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/606.html",
+      "description": "Unchecked Input for Loop Condition",
+      "number": 606
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 609,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/609.html",
+      "description": "Double-Checked Locking",
+      "number": 609
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 613,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/613.html",
+      "description": "Insufficient Session Expiration",
+      "number": 613
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 618,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/618.html",
+      "description": "Exposed Unsafe ActiveX Method",
+      "number": 618
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 619,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/619.html",
+      "description": "Dangling Database Cursor ('Cursor Injection')",
+      "number": 619
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 621,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/621.html",
+      "description": "Variable Extraction Error",
+      "number": 621
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 624,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/624.html",
+      "description": "Executable Regular Expression Error",
+      "number": 624
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 625,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/625.html",
+      "description": "Permissive Regular Expression",
+      "number": 625
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 627,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/627.html",
+      "description": "Dynamic Variable Evaluation",
+      "number": 627
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 628,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/628.html",
+      "description": "Function Call with Incorrectly Specified Arguments",
+      "number": 628
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 639,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/639.html",
+      "description": "Authorization Bypass Through User-Controlled Key",
+      "number": 639
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 640,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/640.html",
+      "description": "Weak Password Recovery Mechanism for Forgotten Password",
+      "number": 640
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 641,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/641.html",
+      "description": "Improper Restriction of Names for Files and Other Resources",
+      "number": 641
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 643,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/643.html",
+      "description": "Improper Neutralization of Data within XPath Expressions ('XPath Injection')",
+      "number": 643
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 645,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/645.html",
+      "description": "Overly Restrictive Account Lockout Mechanism",
+      "number": 645
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 648,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/648.html",
+      "description": "Incorrect Use of Privileged APIs",
+      "number": 648
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 649,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/649.html",
+      "description": "Reliance on Obfuscation or Encryption of Security-Relevant Inputs without Integrity Checking",
+      "number": 649
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 652,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/652.html",
+      "description": "Improper Neutralization of Data within XQuery Expressions ('XQuery Injection')",
+      "number": 652
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 653,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/653.html",
+      "description": "Insufficient Compartmentalization",
+      "number": 653
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 654,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/654.html",
+      "description": "Reliance on a Single Factor in a Security Decision",
+      "number": 654
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 655,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/655.html",
+      "description": "Insufficient Psychological Acceptability",
+      "number": 655
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 656,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/656.html",
+      "description": "Reliance on Security Through Obscurity",
+      "number": 656
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 662,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/662.html",
+      "description": "Improper Synchronization",
+      "number": 662
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 663,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/663.html",
+      "description": "Use of a Non-reentrant Function in a Concurrent Context",
+      "number": 663
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 666,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/666.html",
+      "description": "Operation on Resource in Wrong Phase of Lifetime",
+      "number": 666
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 667,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/667.html",
+      "description": "Improper Locking",
+      "number": 667
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 672,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/672.html",
+      "description": "Operation on a Resource after Expiration or Release",
+      "number": 672
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 674,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/674.html",
+      "description": "Uncontrolled Recursion",
+      "number": 674
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 676,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/676.html",
+      "description": "Use of Potentially Dangerous Function",
+      "number": 676
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 694,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/694.html",
+      "description": "Use of Multiple Resources with Duplicate Identifier",
+      "number": 694
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 695,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/695.html",
+      "description": "Use of Low-Level Functionality",
+      "number": 695
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 698,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/698.html",
+      "description": "Execution After Redirect (EAR)",
+      "number": 698
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 708,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/708.html",
+      "description": "Incorrect Ownership Assignment",
+      "number": 708
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 733,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/733.html",
+      "description": "Compiler Optimization Removal or Modification of Security-critical Code",
+      "number": 733
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 749,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/749.html",
+      "description": "Exposed Dangerous Method or Function",
+      "number": 749
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 759,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/759.html",
+      "description": "Use of a One-Way Hash without a Salt",
+      "number": 759
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 760,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/760.html",
+      "description": "Use of a One-Way Hash with a Predictable Salt",
+      "number": 760
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 763,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/763.html",
+      "description": "Release of Invalid Pointer or Reference",
+      "number": 763
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 770,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/770.html",
+      "description": "Allocation of Resources Without Limits or Throttling",
+      "number": 770
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 771,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/771.html",
+      "description": "Missing Reference to Active Allocated Resource",
+      "number": 771
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 772,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/772.html",
+      "description": "Missing Release of Resource after Effective Lifetime",
+      "number": 772
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 778,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/778.html",
+      "description": "Insufficient Logging",
+      "number": 778
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 779,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/779.html",
+      "description": "Logging of Excessive Data",
+      "number": 779
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 786,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/786.html",
+      "description": "Access of Memory Location Before Start of Buffer",
+      "number": 786
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 787,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/787.html",
+      "description": "Out-of-bounds Write",
+      "number": 787
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 788,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/788.html",
+      "description": "Access of Memory Location After End of Buffer",
+      "number": 788
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 791,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/791.html",
+      "description": "Incomplete Filtering of Special Elements",
+      "number": 791
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 795,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/795.html",
+      "description": "Only Filtering Special Elements at a Specified Location",
+      "number": 795
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 798,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/798.html",
+      "description": "Use of Hard-coded Credentials",
+      "number": 798
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 804,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/804.html",
+      "description": "Guessable CAPTCHA",
+      "number": 804
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 805,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/805.html",
+      "description": "Buffer Access with Incorrect Length Value",
+      "number": 805
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 807,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/807.html",
+      "description": "Reliance on Untrusted Inputs in a Security Decision",
+      "number": 807
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 820,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/820.html",
+      "description": "Missing Synchronization",
+      "number": 820
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 821,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/821.html",
+      "description": "Incorrect Synchronization",
+      "number": 821
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 822,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/822.html",
+      "description": "Untrusted Pointer Dereference",
+      "number": 822
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 823,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/823.html",
+      "description": "Use of Out-of-range Pointer Offset",
+      "number": 823
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 824,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/824.html",
+      "description": "Access of Uninitialized Pointer",
+      "number": 824
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 825,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/825.html",
+      "description": "Expired Pointer Dereference",
+      "number": 825
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 826,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/826.html",
+      "description": "Premature Release of Resource During Expected Lifetime",
+      "number": 826
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 827,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/827.html",
+      "description": "Improper Control of Document Type Definition",
+      "number": 827
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 828,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/828.html",
+      "description": "Signal Handler with Functionality that is not Asynchronous-Safe",
+      "number": 828
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 830,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/830.html",
+      "description": "Inclusion of Web Functionality from an Untrusted Source",
+      "number": 830
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 831,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/831.html",
+      "description": "Signal Handler Function Associated with Multiple Signals",
+      "number": 831
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 832,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/832.html",
+      "description": "Unlock of a Resource that is not Locked",
+      "number": 832
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 833,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/833.html",
+      "description": "Deadlock",
+      "number": 833
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 834,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/834.html",
+      "description": "Excessive Iteration",
+      "number": 834
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 835,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/835.html",
+      "description": "Loop with Unreachable Exit Condition ('Infinite Loop')",
+      "number": 835
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 836,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/836.html",
+      "description": "Use of Password Hash Instead of Password for Authentication",
+      "number": 836
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 837,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/837.html",
+      "description": "Improper Enforcement of a Single, Unique Action",
+      "number": 837
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 838,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/838.html",
+      "description": "Inappropriate Encoding for Output Context",
+      "number": 838
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 839,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/839.html",
+      "description": "Numeric Range Comparison Without Minimum Check",
+      "number": 839
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 841,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/841.html",
+      "description": "Improper Enforcement of Behavioral Workflow",
+      "number": 841
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 842,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/842.html",
+      "description": "Placement of User into Incorrect Group",
+      "number": 842
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 843,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/843.html",
+      "description": "Access of Resource Using Incompatible Type ('Type Confusion')",
+      "number": 843
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 908,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/908.html",
+      "description": "Use of Uninitialized Resource",
+      "number": 908
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 909,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/909.html",
+      "description": "Missing Initialization of Resource",
+      "number": 909
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 910,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/910.html",
+      "description": "Use of Expired File Descriptor",
+      "number": 910
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 911,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/911.html",
+      "description": "Improper Update of Reference Count",
+      "number": 911
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 914,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/914.html",
+      "description": "Improper Control of Dynamically-Identified Variables",
+      "number": 914
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 915,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/915.html",
+      "description": "Improperly Controlled Modification of Dynamically-Determined Object Attributes",
+      "number": 915
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 916,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/916.html",
+      "description": "Use of Password Hash With Insufficient Computational Effort",
+      "number": 916
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 917,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/917.html",
+      "description": "Improper Neutralization of Special Elements used in an Expression Language Statement ('Expression Language Injection')",
+      "number": 917
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 918,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/918.html",
+      "description": "Server-Side Request Forgery (SSRF)",
+      "number": 918
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 920,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/920.html",
+      "description": "Improper Restriction of Power Consumption",
+      "number": 920
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 921,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/921.html",
+      "description": "Storage of Sensitive Data in a Mechanism without Access Control",
+      "number": 921
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 939,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/939.html",
+      "description": "Improper Authorization in Handler for Custom URL Scheme",
+      "number": 939
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 940,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/940.html",
+      "description": "Improper Verification of Source of a Communication Channel",
+      "number": 940
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 941,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/941.html",
+      "description": "Incorrectly Specified Destination in a Communication Channel",
+      "number": 941
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1007,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1007.html",
+      "description": "Insufficient Visual Distinction of Homoglyphs Presented to User",
+      "number": 1007
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1021,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1021.html",
+      "description": "Improper Restriction of Rendered UI Layers or Frames",
+      "number": 1021
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1023,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1023.html",
+      "description": "Incomplete Comparison with Missing Factors",
+      "number": 1023
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1024,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1024.html",
+      "description": "Comparison of Incompatible Types",
+      "number": 1024
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1025,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1025.html",
+      "description": "Comparison Using Wrong Factors",
+      "number": 1025
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1037,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1037.html",
+      "description": "Processor Optimization Removal or Modification of Security-critical Code",
+      "number": 1037
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1041,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1041.html",
+      "description": "Use of Redundant Code",
+      "number": 1041
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1043,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1043.html",
+      "description": "Data Element Aggregating an Excessively Large Number of Non-Primitive Elements",
+      "number": 1043
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1044,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1044.html",
+      "description": "Architecture with Number of Horizontal Layers Outside of Expected Range",
+      "number": 1044
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1046,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1046.html",
+      "description": "Creation of Immutable Text Using String Concatenation",
+      "number": 1046
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1047,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1047.html",
+      "description": "Modules with Circular Dependencies",
+      "number": 1047
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1048,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1048.html",
+      "description": "Invokable Control Element with Large Number of Outward Calls",
+      "number": 1048
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1049,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1049.html",
+      "description": "Excessive Data Query Operations in a Large Data Table",
+      "number": 1049
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1050,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1050.html",
+      "description": "Excessive Platform Resource Consumption within a Loop",
+      "number": 1050
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1051,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1051.html",
+      "description": "Initialization with Hard-Coded Network Resource Configuration Data",
+      "number": 1051
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1052,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1052.html",
+      "description": "Excessive Use of Hard-Coded Literals in Initialization",
+      "number": 1052
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1053,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1053.html",
+      "description": "Missing Documentation for Design",
+      "number": 1053
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1054,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1054.html",
+      "description": "Invocation of a Control Element at an Unnecessarily Deep Horizontal Layer",
+      "number": 1054
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1055,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1055.html",
+      "description": "Multiple Inheritance from Concrete Classes",
+      "number": 1055
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1056,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1056.html",
+      "description": "Invokable Control Element with Variadic Parameters",
+      "number": 1056
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1057,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1057.html",
+      "description": "Data Access Operations Outside of Expected Data Manager Component",
+      "number": 1057
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1058,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1058.html",
+      "description": "Invokable Control Element in Multi-Thread Context with non-Final Static Storable or Member Element",
+      "number": 1058
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1060,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1060.html",
+      "description": "Excessive Number of Inefficient Server-Side Data Accesses",
+      "number": 1060
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1062,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1062.html",
+      "description": "Parent Class with References to Child Class",
+      "number": 1062
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1063,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1063.html",
+      "description": "Creation of Class Instance within a Static Code Block",
+      "number": 1063
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1064,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1064.html",
+      "description": "Invokable Control Element with Signature Containing an Excessive Number of Parameters",
+      "number": 1064
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1065,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1065.html",
+      "description": "Runtime Resource Management Control Element in a Component Built to Run on Application Servers",
+      "number": 1065
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1066,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1066.html",
+      "description": "Missing Serialization Control Element",
+      "number": 1066
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1067,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1067.html",
+      "description": "Excessive Execution of Sequential Searches of Data Resource",
+      "number": 1067
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1068,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1068.html",
+      "description": "Inconsistency Between Implementation and Documented Design",
+      "number": 1068
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1070,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1070.html",
+      "description": "Serializable Data Element Containing non-Serializable Item Elements",
+      "number": 1070
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1072,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1072.html",
+      "description": "Data Resource Access without Use of Connection Pooling",
+      "number": 1072
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1073,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1073.html",
+      "description": "Non-SQL Invokable Control Element with Excessive Number of Data Resource Accesses",
+      "number": 1073
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1074,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1074.html",
+      "description": "Class with Excessively Deep Inheritance",
+      "number": 1074
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1075,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1075.html",
+      "description": "Unconditional Control Flow Transfer outside of Switch Block",
+      "number": 1075
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1079,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1079.html",
+      "description": "Parent Class without Virtual Destructor Method",
+      "number": 1079
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1080,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1080.html",
+      "description": "Source Code File with Excessive Number of Lines of Code",
+      "number": 1080
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1082,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1082.html",
+      "description": "Class Instance Self Destruction Control Element",
+      "number": 1082
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1083,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1083.html",
+      "description": "Data Access from Outside Expected Data Manager Component",
+      "number": 1083
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1084,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1084.html",
+      "description": "Invokable Control Element with Excessive File or Data Access Operations",
+      "number": 1084
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1085,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1085.html",
+      "description": "Invokable Control Element with Excessive Volume of Commented-out Code",
+      "number": 1085
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1086,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1086.html",
+      "description": "Class with Excessive Number of Child Classes",
+      "number": 1086
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1087,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1087.html",
+      "description": "Class with Virtual Method without a Virtual Destructor",
+      "number": 1087
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1088,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1088.html",
+      "description": "Synchronous Access of Remote Resource without Timeout",
+      "number": 1088
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1089,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1089.html",
+      "description": "Large Data Table with Excessive Number of Indices",
+      "number": 1089
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1090,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1090.html",
+      "description": "Method Containing Access of a Member Element from Another Class",
+      "number": 1090
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1091,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1091.html",
+      "description": "Use of Object without Invoking Destructor Method",
+      "number": 1091
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1092,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1092.html",
+      "description": "Use of Same Invokable Control Element in Multiple Architectural Layers",
+      "number": 1092
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1094,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1094.html",
+      "description": "Excessive Index Range Scan for a Data Resource",
+      "number": 1094
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1095,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1095.html",
+      "description": "Loop Condition Value Update within the Loop",
+      "number": 1095
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1097,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1097.html",
+      "description": "Persistent Storable Data Element without Associated Comparison Control Element",
+      "number": 1097
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1099,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1099.html",
+      "description": "Inconsistent Naming Conventions for Identifiers",
+      "number": 1099
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1100,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1100.html",
+      "description": "Insufficient Isolation of System-Dependent Functions",
+      "number": 1100
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1101,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1101.html",
+      "description": "Reliance on Runtime Component in Generated Code",
+      "number": 1101
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1102,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1102.html",
+      "description": "Reliance on Machine-Dependent Data Representation",
+      "number": 1102
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1103,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1103.html",
+      "description": "Use of Platform-Dependent Third Party Components",
+      "number": 1103
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1104,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1104.html",
+      "description": "Use of Unmaintained Third Party Components",
+      "number": 1104
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1105,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1105.html",
+      "description": "Insufficient Encapsulation of Machine-Dependent Functionality",
+      "number": 1105
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1106,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1106.html",
+      "description": "Insufficient Use of Symbolic Constants",
+      "number": 1106
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1107,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1107.html",
+      "description": "Insufficient Isolation of Symbolic Constant Definitions",
+      "number": 1107
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1108,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1108.html",
+      "description": "Excessive Reliance on Global Variables",
+      "number": 1108
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1109,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1109.html",
+      "description": "Use of Same Variable for Multiple Purposes",
+      "number": 1109
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1110,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1110.html",
+      "description": "Incomplete Design Documentation",
+      "number": 1110
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1111,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1111.html",
+      "description": "Incomplete I/O Documentation",
+      "number": 1111
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1112,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1112.html",
+      "description": "Incomplete Documentation of Program Execution",
+      "number": 1112
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1113,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1113.html",
+      "description": "Inappropriate Comment Style",
+      "number": 1113
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1114,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1114.html",
+      "description": "Inappropriate Whitespace Style",
+      "number": 1114
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1115,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1115.html",
+      "description": "Source Code Element without Standard Prologue",
+      "number": 1115
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1116,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1116.html",
+      "description": "Inaccurate Comments",
+      "number": 1116
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1117,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1117.html",
+      "description": "Callable with Insufficient Behavioral Summary",
+      "number": 1117
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1118,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1118.html",
+      "description": "Insufficient Documentation of Error Handling Techniques",
+      "number": 1118
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1119,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1119.html",
+      "description": "Excessive Use of Unconditional Branching",
+      "number": 1119
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1121,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1121.html",
+      "description": "Excessive McCabe Cyclomatic Complexity",
+      "number": 1121
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1122,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1122.html",
+      "description": "Excessive Halstead Complexity",
+      "number": 1122
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1123,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1123.html",
+      "description": "Excessive Use of Self-Modifying Code",
+      "number": 1123
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1124,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1124.html",
+      "description": "Excessively Deep Nesting",
+      "number": 1124
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1125,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1125.html",
+      "description": "Excessive Attack Surface",
+      "number": 1125
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1126,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1126.html",
+      "description": "Declaration of Variable with Unnecessarily Wide Scope",
+      "number": 1126
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1127,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1127.html",
+      "description": "Compilation with Insufficient Warnings or Errors",
+      "number": 1127
+    }
+  },
+  {
+    "model": "dojo.cwe",
+    "pk": 1173,
+    "fields": {
+      "url": "https://cwe.mitre.org/data/definitions/1173.html",
+      "description": "Improper Use of Validation Framework",
+      "number": 1173
+    }
+  }
+]

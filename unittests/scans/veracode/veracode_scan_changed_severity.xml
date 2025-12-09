@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<detailedreport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://www.veracode.com/schema/reports/export/1.0" xsi:schemaLocation="https://www.veracode.com/schema/reports/export/1.0 https://analysiscenter.veracode.com/resource/detailedreport.xsd" report_format_version="1.5" account_id="48767" app_name="data-services" app_id="402332" analysis_id="2335367" static_analysis_unit_id="2351115" sandbox_id="537358" first_build_submitted_date="2018-02-17 00:39:35 UTC" version="2018-05-25-18:00:29" build_id="2348782" submitter="Bob Cratchet" platform="Not Specified" assurance_level="5" business_criticality="5" generation_date="2018-06-25 16:19:28 UTC" veracode_level="VL3" total_flaws="26" flaws_not_mitigated="19" teams="" life_cycle_stage="Not Specified" planned_deployment_date="" last_update_time="2018-05-26 00:06:22 UTC" is_latest_build="false" policy_name="Veracode Recommended Very High" policy_version="1" policy_compliance_status="Did Not Pass" policy_rules_status="Did Not Pass" grace_period_expired="true" scan_overdue="false" business_owner="" business_unit="Not Specified" tags="" legacy_scan_engine="false">
+	<static-analysis rating="B" score="94" submitted_date="2018-05-26 00:03:25 UTC" published_date="2018-05-26 00:06:16 UTC" version="2018-05-25-18:00:29" mitigated_rating="B" mitigated_score="94" next_scan_due="2018-08-26 00:06:16 UTC" analysis_size_bytes="8486358" engine_version="123190">
+		<modules>
+			<module name="bogus-services-1.1.15-SNAPSHOT.war" compiler="JAVAC_6" os="Java J2SE 6" architecture="JVM" loc="6517" score="94" numflawssev0="0" numflawssev1="0" numflawssev2="0" numflawssev3="14" numflawssev4="0" numflawssev5="0" />
+			<module name="bogus-services-client-web-1.1.15-SNAPSHOT.war" compiler="JAVAC_6" os="Java J2SE 6" architecture="JVM" loc="4817" score="96" numflawssev0="0" numflawssev1="0" numflawssev2="3" numflawssev3="9" numflawssev4="0" numflawssev5="0" />
+		</modules>
+	</static-analysis>
+	<severity level="5" />
+	<severity level="4" />
+	<severity level="3">
+		<category categoryid="21" categoryname="CRLF Injection" pcirelated="false">
+			<desc>
+				<para text="The acronym CRLF stands for &quot;Carriage Return, Line Feed&quot; and refers to the sequence of characters used to denote the end of a line of text.  CRLF injection vulnerabilities occur when data enters an application from an untrusted source and is not properly validated before being used.  For example, if an attacker is able to inject a CRLF into a log file, he could append falsified log entries, thereby misleading administrators or cover traces of the attack.  If an attacker is able to inject CRLFs into an HTTP response header, he can use this ability to carry out other attacks such as cache poisoning.  CRLF vulnerabilities primarily affect data integrity.  " />
+			</desc>
+			<recommendations>
+				<para text="Apply robust input filtering for all user-supplied data, using centralized data validation routines when possible.  Use output filters to sanitize all output derived from user-supplied input, replacing non-alphanumeric characters with their HTML entity equivalents." />
+			</recommendations>
+			<cwe cweid="113" cwename="Improper Neutralization of CRLF Sequences in HTTP Headers ('HTTP Response Splitting')" pcirelated="false" owasp="1027">
+				<description>
+					<text text="A function call contains an HTTP response splitting flaw.  Writing untrusted input into an HTTP header allows an attacker to manipulate the HTTP response rendered by the browser, leading to cache poisoning and cross-site scripting attacks." />
+				</description>
+				<staticflaws>
+					<flaw severity="2" categoryname="Information Exposure Through Sent Data" count="1" issueid="18" module="bogus-services-client-web-1.1.15-SNAPSHOT.war" type="javax.servlet.jsp.JspWriter.print" description="The application calls the javax.servlet.jsp.JspWriter.print() function, which will result in data being transferred out of the application (via the network or another medium). This data contains sensitive information. The first argument to print() contains potentially sensitive data from the variable filename. The potentially sensitive data originated from earlier calls to javax.servlet.ServletRequest.getParameter, java.lang.System.getProperty, and java.util.Properties.load. The potentially sensitive data is directed into an output stream returned by javax.servlet.jsp.JspWriter.&#xd;&#xa;&#xd;&#xa;Ensure that the transfer of the sensitive data is intended and that it does not violate application security policy. This flaw is categorized as low severity because it only impacts confidentiality, not integrity or availability. However, in the context of a mobile application, the significance of an information leak may be much greater, especially if misaligned with user expectations or data privacy policies.&#xd;&#xa;&#xd;&#xa;References: &#xd;&#xa;CWE (http://cwe.mitre.org/data/definitions/201.html) &#xd;&#xa;WASC (http://webappsec.pbworks.com/Information-Leakage)&#xd;&#xa;&#xd;&#xa;" note="" cweid="201" remediationeffort="2" exploitLevel="-1" categoryid="8" pcirelated="false" date_first_occurrence="2018-02-17 00:35:18 UTC" remediation_status="Open" cia_impact="pnn" grace_period_expires="" affects_policy_compliance="false" mitigation_status="none" mitigation_status_desc="Not Mitigated" sourcefile="utility.jsp" line="279" sourcefilepath="/devTools/" scope="com.veracode.compiledjsp.xsensitivedataservicesclientweb1115SNAPSHOTwar.devTools.utility_jsp" functionprototype="void _jspService(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)" functionrelativelocation="80" />
+					<flaw severity="2" categoryname="Information Exposure Through Sent Data" count="1" issueid="20" module="bogus-services-client-web-1.1.15-SNAPSHOT.war" type="javax.servlet.jsp.JspWriter.print" description="The application calls the javax.servlet.jsp.JspWriter.print() function, which will result in data being transferred out of the application (via the network or another medium). This data contains sensitive information. The first argument to print() contains potentially sensitive data from the variable filename. The potentially sensitive data originated from earlier calls to javax.servlet.ServletRequest.getParameter, java.lang.System.getProperty, and java.util.Properties.load. The potentially sensitive data is directed into an output stream returned by javax.servlet.jsp.JspWriter.&#xd;&#xa;&#xd;&#xa;Ensure that the transfer of the sensitive data is intended and that it does not violate application security policy. This flaw is categorized as low severity because it only impacts confidentiality, not integrity or availability. However, in the context of a mobile application, the significance of an information leak may be much greater, especially if misaligned with user expectations or data privacy policies.&#xd;&#xa;&#xd;&#xa;References: &#xd;&#xa;CWE (http://cwe.mitre.org/data/definitions/201.html) &#xd;&#xa;WASC (http://webappsec.pbworks.com/Information-Leakage)&#xd;&#xa;&#xd;&#xa;" note="" cweid="201" remediationeffort="2" exploitLevel="-1" categoryid="8" pcirelated="false" date_first_occurrence="2018-02-17 00:35:18 UTC" remediation_status="Open" cia_impact="pnn" grace_period_expires="" affects_policy_compliance="false" mitigation_status="none" mitigation_status_desc="Not Mitigated" sourcefile="utility.jsp" line="279" sourcefilepath="/devTools/" scope="com.veracode.compiledjsp.xsensitivedataservicesclientweb1115SNAPSHOTwar.devTools.utility_jsp" functionprototype="void _jspService(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)" functionrelativelocation="82" />
+				</staticflaws>
+			</cwe>
+				<cwe cweid="209" cwename="Information Exposure Through an Error Message" pcirelated="false" owasp="1032" owasp2013="933" certcpp="880" certjava="851">
+					<description>
+					<text text="The software generates an error message that includes sensitive information about its environment, users, or associated data.  The sensitive information may be valuable information on its own (such as a password), or it may be useful for launching other, more deadly attacks. If an attack fails, an attacker may use error information provided by the server to launch another more focused attack.  For example, file locations disclosed by an exception stack trace may be leveraged by an attacker to exploit a path traversal issue elsewhere in the application." />
+					</description>
+				<staticflaws>
+					<flaw severity="2" categoryname="Information Exposure Through an Error Message" count="1" issueid="26" module="bogus-services-client-web-1.1.15-SNAPSHOT.war" type="javax.servlet.jsp.JspWriter.print" description="The application calls the javax.servlet.jsp.JspWriter.print() function, which may expose information about the application logic or other details such as the names and versions of the application container and associated components. This information can be useful in executing other attacks and can also enable the attacker to target known vulnerabilities in application components. The first argument to print() contains data from an error message (possibly containing untrusted data) from the variable errorMessage. The data from an error message (possibly containing untrusted data) originated from an earlier call to java.lang.Throwable.printStackTrace. The data from an error message (possibly containing untrusted data) is directed into an output stream returned by javax.servlet.jsp.JspWriter.&#xd;&#xa;&#xd;&#xa;Ensure that error codes or other messages returned to end users are not overly verbose. Sanitize all messages of any sensitive information that is not absolutely necessary.&#xd;&#xa;&#xd;&#xa;References: &#xd;&#xa;CWE (http://cwe.mitre.org/data/definitions/209.html)&#xd;&#xa;&#xd;&#xa;" note="" cweid="209" remediationeffort="1" exploitLevel="0" categoryid="8" pcirelated="true" date_first_occurrence="2018-02-17 00:35:18 UTC" remediation_status="Open" cia_impact="pnn" grace_period_expires="" affects_policy_compliance="false" mitigation_status="none" mitigation_status_desc="Not Mitigated" sourcefile="utility.jsp" line="187" sourcefilepath="/devTools/" scope="com.veracode.compiledjsp.xsensitivedataservicesclientweb1115SNAPSHOTwar.devTools.utility_jsp" functionprototype="void _jspService(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)" functionrelativelocation="62" />
+					</staticflaws>
+				</cwe>
+			</category>
+		</severity>
+				<severity level="1" />
+					<severity level="0" />
+					<flaw-status new="0" reopen="0" open="19" cannot-reproduce="0" fixed="0" total="26" not_mitigated="19" sev-1-change="0" sev-2-change="0" sev-3-change="0" sev-4-change="0" sev-5-change="0" />
+					<customfields>
+					<customfield name="Jira Project" value="" />
+					<customfield name="Custom 2" value="" />
+					<customfield name="Custom 3" value="" />
+					<customfield name="Custom 4" value="" />
+					<customfield name="Custom 5" value="" />
+					<customfield name="Custom 6" value="" />
+					<customfield name="Custom 7" value="" />
+					<customfield name="Custom 8" value="" />
+					<customfield name="Custom 9" value="" />
+					<customfield name="Custom 10" value="" />
+				</customfields>
+				<software_composition_analysis third_party_components="29" violate_policy="false" components_violated_policy="0">
+					<vulnerable_components>
+					<component component_id="163cdbff-c93a-41cb-ba7b-0c0737edcff9" file_name="jettison-1.1.jar" sha1="1a01a2a1218fcf9faa2cc2a6ced025bdea687262" vulnerabilities="0" max_cvss_score="" version="1.1" library="jettison" vendor="org.codehaus.jettison" description="A StAX implementation for JSON." added_date="2018-02-17 00:36:00 UTC" component_affects_policy_compliance="false" new="false">
+					<file_paths>
+					<file_path value="bogus-services-1.1.15-SNAPSHOT.war#zip:WEB-INF/lib/jettison-1.1.jar" />
+					</file_paths>
+				<licenses>
+					<license name="Apache License 2.0" spdx_id="Apache-2.0" license_url="https://spdx.org/licenses/Apache-2.0.html" risk_rating="2" />
+					</licenses>
+				<vulnerabilities />
+					<violated_policy_rules />
+				</component>
+				<component component_id="1793362a-098a-47f2-95e8-0565117aa7fd" file_name="commons-httpclient-3.1.jar" sha1="964cd74171f427720480efdec40a7c7f6e58426a" vulnerabilities="4" max_cvss_score="5.8" version="3.1" library="commons-httpclient" vendor="commons-httpclient" description="The HttpClient  component supports the client-side of RFC 1945 (HTTP/1.0)  and RFC 2616 (HTTP/1.1) , several related specifications (RFC 2109 (Cookies) , RFC 2617 (HTTP Authentication) , etc.), and provides a framework by which new request types (methods) or HTTP extensions can be created easily." added_date="2018-02-17 00:35:59 UTC" component_affects_policy_compliance="false" new="false">
+					<file_paths>
+					<file_path value="bogus-services-1.1.15-SNAPSHOT.war#zip:WEB-INF/lib/commons-httpclient-3.1.jar" />
+					<file_path value="bogus-services-client-web-1.1.15-SNAPSHOT.war#zip:WEB-INF/lib/commons-httpclient-3.1.jar" />
+					</file_paths>
+				<licenses>
+					<license name="Apache License 2.0" spdx_id="Apache-2.0" license_url="https://spdx.org/licenses/Apache-2.0.html" risk_rating="2" />
+					</licenses>
+				<vulnerabilities>
+					<vulnerability cve_id="CVE-2012-5783" cvss_score="5.8" severity="3" cwe_id="CWE-20" cve_summary="Apache Commons HttpClient 3.x, as used in Amazon Flexible Payments Service (FPS) merchant Java SDK and other products, does not verify that the server hostname matches a domain name in the subject's Common Name (CN) or subjectAltName field of the X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via an arbitrary valid certificate." severity_desc="Medium" mitigation="false" vulnerability_affects_policy_compliance="false" />
+					<vulnerability cve_id="CVE-2015-5262" cvss_score="4.3" severity="2" cwe_id="CWE-399" cve_summary="http/conn/ssl/SSLConnectionSocketFactory.java in Apache HttpComponents HttpClient before 4.3.6 ignores the http.socket.timeout configuration setting during an SSL handshake, which allows remote attackers to cause a denial of service (HTTPS call hang) via unspecified vectors." severity_desc="Medium" mitigation="false" vulnerability_affects_policy_compliance="false" />
+					<vulnerability cve_id="CVE-2014-3577" cvss_score="5.8" severity="3" cwe_id="" cve_summary="org.apache.http.conn.ssl.AbstractVerifier in Apache HttpComponents HttpClient before 4.3.5 and HttpAsyncClient before 4.0.2 does not properly verify that the server hostname matches a domain name in the subject's Common Name (CN) or subjectAltName field of the X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via a &quot;CN=&quot; string in a field in the distinguished name (DN) of a certificate, as demonstrated by the &quot;foo,CN=www.apache.org&quot; string in the O field." severity_desc="Medium" mitigation="false" vulnerability_affects_policy_compliance="false" />
+					<vulnerability cve_id="CVE-2012-6153" cvss_score="4.3" severity="2" cwe_id="CWE-20" cve_summary="http/conn/ssl/AbstractVerifier.java in Apache Commons HttpClient before 4.2.3 does not properly verify that the server hostname matches a domain name in the subject's Common Name (CN) or subjectAltName field of the X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via a certificate with a subject that specifies a common name in a field that is not the CN field.  NOTE: this issue exists because of an incomplete fix for CVE-2012-5783." severity_desc="Medium" mitigation="false" vulnerability_affects_policy_compliance="false" />
+					</vulnerabilities>
+				<violated_policy_rules />
+				</component>
+				<component component_id="31baa9a8-661d-436c-ab0b-ef29f4234c0b" file_name="spring-aop-3.1.0.RELEASE.jar" sha1="5d998ce239b87cbf66fd18a01dad854de13e2f06" vulnerabilities="0" max_cvss_score="" version="3.1.0.RELEASE" library="spring-aop" vendor="org.springframework" description="" added_date="2018-02-17 00:36:00 UTC" component_affects_policy_compliance="false" new="false">
+					<file_paths>
+					<file_path value="bogus-services-1.1.15-SNAPSHOT.war#zip:WEB-INF/lib/spring-aop-3.1.0.RELEASE.jar" />
+					</file_paths>
+				<licenses>
+					<license name="Apache License 2.0" spdx_id="Apache-2.0" license_url="https://spdx.org/licenses/Apache-2.0.html" risk_rating="2" />
+					</licenses>
+				<vulnerabilities />
+					<violated_policy_rules />
+				</component>
+				<component component_id="fc90a7ad-5611-46f2-8d22-0a153cc22edb" file_name="commons-lang-2.4.jar" sha1="16313e02a793435009f1e458fa4af5d879f6fb11" vulnerabilities="0" max_cvss_score="" version="2.4" library="commons-lang" vendor="commons-lang" description="Commons Lang, a package of Java utility classes for the&#xa;        classes that are in java.lang's hierarchy, or are considered to be so&#xa;        standard as to justify existence in java.lang." added_date="2018-02-17 00:35:59 UTC"> component_affects_policy_compliance="false" new="false">
+					<file_paths>
+					<file_path value="bogus-services-1.1.15-SNAPSHOT.war#zip:WEB-INF/lib/commons-lang-2.4.jar" />
+					<file_path value="bogus-services-client-web-1.1.15-SNAPSHOT.war#zip:WEB-INF/lib/commons-lang-2.4.jar" />
+				</file_paths>
+				<licenses>
+					<license name="Apache License 2.0" spdx_id="Apache-2.0" license_url="https://spdx.org/licenses/Apache-2.0.html" risk_rating="2" />
+					</licenses>
+				<vulnerabilities />
+					<violated_policy_rules />
+					</component>
+				</vulnerable_components>
+			</software_composition_analysis>
+			</detailedreport>

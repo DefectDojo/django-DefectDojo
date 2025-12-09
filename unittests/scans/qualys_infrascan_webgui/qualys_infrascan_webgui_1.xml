@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE SCAN SYSTEM "https://qualysguard.qg2.apps.qualys.com/scan-1.dtd">
+<SCAN value="scan/1222134912.63524">
+
+<HEADER>
+  <KEY value="USERNAME">Username</KEY>
+  <KEY value="COMPANY"><![CDATA[Company Name]]></KEY>
+  <KEY value="DATE">2019-04-02T10:14:53Z</KEY>
+  <KEY value="TITLE"><![CDATA[Report Title]]></KEY>
+  <KEY value="TARGET"><![CDATA[10.1.10.1]]></KEY>
+  <KEY value="EXCLUDED_TARGET"><![CDATA[N/A]]></KEY>
+  <KEY value="DURATION">04:29:11</KEY>
+  <KEY value="SCAN_HOST">ScanHost</KEY>
+  <KEY value="NBHOST_ALIVE">1</KEY>
+  <KEY value="NBHOST_TOTAL">1</KEY>
+  <KEY value="REPORT_TYPE">On-demand</KEY>
+  <KEY value="OPTIONS"><![CDATA[Full TCP scan, Standard UDP port list, parallel ML scaling disabled for appliances, Load balancer detection OFF, Windows Authentication ON, Unix Authentication ON, Oracle Authentication ON, SNMP Authentication ON, Oracle Listener Authentication ON, VMware Authentication ON, DB2 Authentication ON, HTTP Authentication ON, MySQL Authentication ON, ICMP Host Discovery, Overall Performance: Custom, Hosts to Scan in Parallel - External Scanners: 5, Hosts to Scan in Parallel - Scanner Appliances: 3, Total Processes to Run in Parallel: 2, HTTP Processes to Run in Parallel: 2, Packet (Burst) Delay: Long, Intensity: Low]]></KEY>
+  <KEY value="STATUS">FINISHED</KEY>
+  <OPTION_PROFILE>
+    <OPTION_PROFILE_TITLE option_profile_default="0"><![CDATA[Option Profile]]></OPTION_PROFILE_TITLE>
+  </OPTION_PROFILE>
+</HEADER>
+
+<IP value="10.1.10.1" name="host1.example.com">
+  <OS><![CDATA[Ubuntu 11]]></OS>
+  <VULNS>
+    <CAT value="Local">
+      <VULN number="123168" severity="5" cveid="CVE-2014-6601,CVE-2015-0412,CVE-2014-6549,CVE-2015-0408,CVE-2015-0395,CVE-2015-0437,CVE-2015-0403,CVE-2015-0421,CVE-2015-0406,CVE-2015-0383,CVE-2015-0400,CVE-2015-0407,CVE-2015-0410,CVE-2014-6587,CVE-2014-3566,CVE-2014-6593,CVE-2014-6585,CVE-2014-6591,CVE-2015-0413">
+        <TITLE><![CDATA[Oracle Java SE Critical Patch Update - January 2015]]></TITLE>
+        <LAST_UPDATE><![CDATA[2018-09-11T03:31:46Z]]></LAST_UPDATE>
+        <CVSS_BASE>10</CVSS_BASE>
+        <CVSS_TEMPORAL>7.8</CVSS_TEMPORAL>
+        <CVSS3_BASE>3.4</CVSS3_BASE>
+        <CVSS3_TEMPORAL>3</CVSS3_TEMPORAL>
+        <PCI_FLAG>1</PCI_FLAG>
+        <VENDOR_REFERENCE_LIST>
+          <VENDOR_REFERENCE>
+            <ID><![CDATA[Oracle Java SE CPU January 2015]]></ID>
+            <URL><![CDATA[https://support.oracle.com/rs?type=doc&id=1948935.1]]></URL>
+          </VENDOR_REFERENCE>
+        </VENDOR_REFERENCE_LIST>
+        <CVE_ID_LIST>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2014-6601]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6601]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0412]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0412]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2014-6549]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6549]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0408]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0408]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0395]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0395]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0437]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0437]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0403]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0403]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0421]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0421]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0406]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0406]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0383]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0383]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0400]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0400]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0407]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0407]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0410]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0410]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2014-6587]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6587]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2014-3566]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-3566]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2014-6593]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6593]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2014-6585]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6585]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2014-6591]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6591]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2015-0413]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0413]]></URL>
+          </CVE_ID>
+        </CVE_ID_LIST>
+        <BUGTRAQ_ID_LIST>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72137]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72137]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72155]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72155]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[70574]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/70574]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72173]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72173]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72168]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72168]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72175]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72175]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72169]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72169]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72132]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72132]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72136]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72136]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72176]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72176]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72150]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72150]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72146]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72146]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72142]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72142]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72159]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72159]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72148]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72148]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72154]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72154]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72162]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72162]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72140]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72140]]></URL>
+          </BUGTRAQ_ID>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[72165]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/72165]]></URL>
+          </BUGTRAQ_ID>
+        </BUGTRAQ_ID_LIST>
+        <DIAGNOSIS><![CDATA[some diagnosis]]></DIAGNOSIS>
+        <CONSEQUENCE><![CDATA[Some impact]]></CONSEQUENCE>
+        <SOLUTION><![CDATA[some solution]]></SOLUTION>
+        <CORRELATION>
+          <EXPLOITABILITY>
+            <EXPLT_SRC>
+              <SRC_NAME><![CDATA[The Exploit-DB]]></SRC_NAME>
+              <EXPLT_LIST>
+                <EXPLT>
+                  <REF><![CDATA[CVE-2014-6593]]></REF>
+                  <DESC><![CDATA[JSSE - SKIP-TLS - The Exploit-DB Ref : 38641]]></DESC>
+                  <LINK><![CDATA[http://www.exploit-db.com/exploits/38641]]></LINK>
+                </EXPLT>
+              </EXPLT_LIST>
+            </EXPLT_SRC>
+            <EXPLT_SRC>
+              <SRC_NAME><![CDATA[Metasploit]]></SRC_NAME>
+              <EXPLT_LIST>
+                <EXPLT>
+                  <REF><![CDATA[CVE-2014-6593]]></REF>
+                  <DESC><![CDATA[Java Secure Socket Extension (JSSE) SKIP-TLS MITM Proxy - Metasploit Ref : /modules/auxiliary/server/jsse_skiptls_mitm_proxy]]></DESC>
+                  <LINK><![CDATA[https://github.com/rapid7/metasploit-framework/blob/master//modules/auxiliary/server/jsse_skiptls_mitm_proxy.rb]]></LINK>
+                </EXPLT>
+                <EXPLT>
+                  <REF><![CDATA[CVE-2014-3566]]></REF>
+                  <DESC><![CDATA[HTTP SSL/TLS Version Detection (POODLE scanner) - Metasploit Ref : /modules/auxiliary/scanner/http/ssl_version]]></DESC>
+                  <LINK><![CDATA[https://github.com/rapid7/metasploit-framework/blob/master//modules/auxiliary/scanner/http/ssl_version.rb]]></LINK>
+                </EXPLT>
+                <EXPLT>
+                  <REF><![CDATA[CVE-2014-3566]]></REF>
+                  <DESC><![CDATA[HTTP SSL/TLS Version Detection (POODLE scanner) - Metasploit Ref : /modules/auxiliary/spoof/cisco/dtp]]></DESC>
+                  <LINK><![CDATA[https://github.com/rapid7/metasploit-framework/blob/master//modules/auxiliary/scanner/http/ssl_version.rb]]></LINK>
+                </EXPLT>
+                <EXPLT>
+                  <REF><![CDATA[CVE-2014-6593]]></REF>
+                  <DESC><![CDATA[Java Secure Socket Extension (JSSE) SKIP-TLS MITM Proxy - Metasploit Ref : /modules/auxiliary/scanner/sap/sap_soap_rfc_susr_rfc_user_interface]]></DESC>
+                  <LINK><![CDATA[https://github.com/rapid7/metasploit-framework/blob/master//modules/auxiliary/server/jsse_skiptls_mitm_proxy.rb]]></LINK>
+                </EXPLT>
+              </EXPLT_LIST>
+            </EXPLT_SRC>
+          </EXPLOITABILITY>
+        </CORRELATION>
+        <RESULT><![CDATA[some output]]></RESULT>
+      </VULN>
+    </CAT>
+  </VULNS>
+</IP>
+</SCAN>
+<!-- CONFIDENTIAL AND PROPRIETARY INFORMATION. Qualys provides the QualysGuard Service "As Is," without any warranty of any kind. Qualys makes no warranty that the information contained in this report is complete or error-free. Copyright 2020, Qualys, Inc. //--> 

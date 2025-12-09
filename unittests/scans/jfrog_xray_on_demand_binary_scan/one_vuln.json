@@ -1,0 +1,44 @@
+[
+    {
+      "scan_id": "dd8f-4927-5db6-fb188ae8d984",
+      "vulnerabilities": [
+        {
+          "cves": [
+            {
+              "cve": "CVE-2014-0114",
+              "cvss_v2_score": "7.5",
+              "cvss_v2_vector": "CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P"
+            }
+          ],
+          "summary": "Summary test",
+          "severity": "High",
+          "components": {
+            "gav://test": {
+              "fixed_versions": [
+                "[1.9.4]"
+              ],
+              "impact_paths": [
+                [
+                  {
+                    "component_id": "gav://co.com.test.test:core:1.0.0-test"
+                  },
+                  {
+                    "component_id": "gav://test",
+                    "full_path": "lib/commons-beanutils-1.9.2.jar"
+                  }
+                ]
+              ]
+            }
+          },
+          "issue_id": "XRAY-55616",
+          "references": [
+            "https://test.com.co"
+          ]
+        }
+      ],
+      "component_id": "gav://co.com.test.test:core:1.0.0-test",
+      "package_type": "Maven",
+      "status": "completed"
+    }
+  ]
+

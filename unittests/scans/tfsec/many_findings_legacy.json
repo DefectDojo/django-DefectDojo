@@ -1,0 +1,68 @@
+{
+	"results": [
+		{
+			"rule_id": "GCP008",
+			"rule_description": "Legacy client authentication methods utilized.",
+			"rule_provider": "google",
+			"link": "See https://tfsec.dev/docs/google/GCP008/ for more information.",
+			"location": {
+				"filename": "tfsec-test/cluster.tf",
+				"start_line": 52,
+				"end_line": 92
+			},
+			"description": "Resource 'google_container_cluster.k8s_cluster' does not disable basic auth with static passwords for client authentication. Disable this with a master_auth block container empty strings for user and password.",
+			"impact": "Username and password authentication methods are less secure",
+			"resolution": "Use service account or OAuth for authentication",
+			"severity": "ERROR",
+			"passed": true
+		},
+		{
+			"rule_id": "GCP009",
+			"rule_description": "Pod security policy enforcement not defined.",
+			"rule_provider": "google",
+			"link": "See https://tfsec.dev/docs/google/GCP009/ for more information.",
+			"location": {
+				"filename": "tfsec-test/cluster.tf",
+				"start_line": 52,
+				"end_line": 92
+			},
+			"description": "Resource 'google_container_cluster.k8s_cluster' defines a cluster with no Pod Security Policy config defined. It is recommended to define a PSP for your pods and enable PSP enforcement.",
+			"impact": "Pods could be operating with more permissions than required to be effective",
+			"resolution": "Use security policies for pods to restrict permissions to those needed to be effective",
+			"severity": "ERROR",
+			"passed": false
+		},
+		{
+			"rule_id": "GCP010",
+			"rule_description": "Shielded GKE nodes not enabled.",
+			"rule_provider": "google",
+			"link": "See https://tfsec.dev/docs/google/GCP010/ for more information.",
+			"location": {
+				"filename": "tfsec-test/cluster.tf",
+				"start_line": 52,
+				"end_line": 92
+			},
+			"description": "Resource 'google_container_cluster.k8s_cluster' defines a cluster with shielded nodes disabled. Shielded GKE Nodes provide strong, verifiable node identity and integrity to increase the security of GKE nodes and should be enabled on all GKE clusters.",
+			"impact": "Node identity and integrity can't be verified without shielded GKE nodes",
+			"resolution": "Enable node shielding",
+			"severity": "ERROR",
+			"passed": false
+		},
+		{
+			"rule_id": "GEN003",
+			"rule_description": "Potentially sensitive data stored in block attribute.",
+			"rule_provider": "general",
+			"link": "See https://tfsec.dev/docs/general/GEN003/ for more information.",
+			"location": {
+				"filename": "tfsec-test/identity.tf",
+				"start_line": 226,
+				"end_line": 226
+			},
+			"description": "Block 'keycloak_oidc_identity_provider.google' includes a potentially sensitive attribute which is defined within the project.",
+			"impact": "Block attribute could be leaking secrets",
+			"resolution": "Don't include sensitive data in blocks",
+			"severity": "WARNING",
+			"passed": false
+		}
+	]
+}

@@ -1,0 +1,1832 @@
+{
+    "vulns": [
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136260",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.47.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "222",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136260::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/rfv",
+        "openedAt": "2023-07-15T12:51:53Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "DIRECT",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136029",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.51.3"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "80",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136029::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/px37",
+        "openedAt": "2023-07-15T12:31:29Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "135428",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.43.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "198",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "135428::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/lmr",
+        "openedAt": "2023-07-15T11:39:41Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "135318",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.46.3"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "164",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "135318::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/int",
+        "openedAt": "2023-07-15T11:30:05Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "DIRECT",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "134972",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.49.1"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "286",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "134972::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/eol",
+        "openedAt": "2023-07-15T11:03:23Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "DIRECT",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "134553",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "292",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "134553::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/bf",
+        "openedAt": "2023-07-15T10:28:12Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "DIRECT",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136875",
+        "subdirectory": "generators/generator-examplelearn/app/templates/examplelearn-serving",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.43.0"
+        },
+        "dependencyFileLocation": {
+          "path": "generators/generator-examplelearn/app/templates/examplelearn-serving/requirements3.txt",
+          "startLine": "231",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136875::generators/generator-examplelearn/app/templates/examplelearn-serving::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/yg",
+        "openedAt": "2023-07-14T13:44:38Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136869",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "130",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136869::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/wdof",
+        "openedAt": "2023-07-14T13:44:20Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136873",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "118",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136873::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/wrcf",
+        "openedAt": "2023-07-14T13:44:19Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136872",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "124",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136872::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/pxpf",
+        "openedAt": "2023-07-14T13:44:17Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136870",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "116",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136870::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/wdxp",
+        "openedAt": "2023-07-14T13:44:10Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136868",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "124",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136868::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/weng",
+        "openedAt": "2023-07-14T13:44:01Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136867",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "130",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136867::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/wcpf",
+        "openedAt": "2023-07-14T13:43:52Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136866",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "130",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136866::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/wbf",
+        "openedAt": "2023-07-14T13:43:49Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136863",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "151",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136863::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/wfm",
+        "openedAt": "2023-07-14T13:43:33Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136860",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "155",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136860::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/ws",
+        "openedAt": "2023-07-14T13:43:19Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "199274",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.43.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "229",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "199274::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/wbm",
+        "openedAt": "2023-07-14T13:43:16Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136857",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "138",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136857::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/wfnd",
+        "openedAt": "2023-07-14T13:42:59Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136856",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "109",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136856::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/wn",
+        "openedAt": "2023-07-14T13:42:55Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136850",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "127",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136850::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/api",
+        "openedAt": "2023-07-14T13:42:40Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Reachable Assertion in grpc",
+        "advisory": {
+          "ruleId": "ssc-82207871-bbda-49be-b1af-49fd927a2f93",
+          "title": "Reachable Assertion in grpc",
+          "description": "grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. ",
+          "ecosystem": "gem",
+          "severity": "HIGH",
+          "references": {
+            "cveIds": [
+              "CVE-2023-1428"
+            ],
+            "cweIds": [
+              "CWE-617: Reachable Assertion"
+            ],
+            "owaspIds": [
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-6628-q6j9-w8vg",
+              "https://nvd.nist.gov/vuln/detail/CVE-2023-1428"
+            ]
+          },
+          "announcedAt": "2023-07-06T21:15:08Z",
+          "ruleText": "{\n  \"id\": \"ssc-82207871-bbda-49be-b1af-49fd927a2f93\",\n  \"languages\": [\n    \"python\",\n    \"java\",\n    \"ruby\"\n  ],\n  \"message\": \"grpc versions before 1.53.0, before 3.2.0, grpcio versions before 1.53.0, io.grpc:grpc-protobuf versions before 1.53.0, Grpc.AspNetCore.Server versions before 2.52.0, and Grpc.Net.Client versions before 2.52.0 are vulnerable to Reachable Assertion causing an `abort()` to be call in gRPC. \",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-617: Reachable Assertion\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2023-07-06T21:15:08Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-6628-q6j9-w8vg\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2023-1428\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"grpc\": \"1.53.0\"\n      },\n      {\n        \"grpcio\": \"1.53.0\"\n      },\n      {\n        \"io.grpc:grpc-protobuf\": \"1.53.0\"\n      }\n    ],\n    \"sca-kind\": \"upgrade-only\",\n    \"sca-reachable-if\": \"you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"HIGH\",\n    \"sca-vuln-database-identifier\": \"CVE-2023-1428\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-82207871-bbda-49be-b1af-49fd927a2f93&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"python\",\n      \"java\",\n      \"ruby\"\n    ]\n  },\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"gem\",\n        \"package\": \"grpc\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"pypi\",\n        \"package\": \"grpcio\",\n        \"version\": \"< 1.53.0\"\n      },\n      {\n        \"namespace\": \"maven\",\n        \"package\": \"io.grpc:grpc-protobuf\",\n        \"version\": \"< 1.53.0\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "MANUAL_REVIEW_REACHABLE",
+          "vulnerableDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "< 1.53.0"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "grpc",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "grpcio",
+              "versionSpecifier": "1.53.0"
+            },
+            {
+              "name": "io.grpc:grpc-protobuf",
+              "versionSpecifier": "1.53.0"
+            }
+          ],
+          "reachableIf": "you use any of the following headers via http2 `te: x (x != trailers)`, `:scheme: x (x != http, https)`, or `grpclb_client_stats: x (x == anything)` and a later header is sent that gets the total header size past 8KB"
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "136848",
+        "matchedDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.39.0"
+        },
+        "dependencyFileLocation": {
+          "path": "requirements3.txt",
+          "startLine": "116",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "triage": {
+          "status": "NEW",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "136848::::ssc-82207871-bbda-49be-b1af-49fd927a2f93::reachable",
+        "closestSafeDependency": {
+          "name": "grpcio",
+          "versionSpecifier": "1.53.0"
+        },
+        "repositoryName": "example/wlist",
+        "openedAt": "2023-07-14T13:42:25Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "TRANSITIVE",
+        "subdirectory": "",
+        "usages": [],
+        "packageManager": "no_package_manager"
+      },
+      {
+        "title": "Authorization Bypass Through User-Controlled Key in url-parse",
+        "advisory": {
+          "ruleId": "ssc-a861a4fb-9d10-4655-97ed-67a37433ad36",
+          "title": "Authorization Bypass Through User-Controlled Key in url-parse",
+          "description": "url-parse prior to version 1.5.8 is vulnerable to Authorization Bypass Through User-Controlled Key. \nThis vulnerability occurs due to the `toString()` being unable to determine the correct hostname \nwhen no port number is provided in the Url. This issue stems from the `toString()` function which\nis called by the default export function `Url()`.\n",
+          "ecosystem": "npm",
+          "severity": "CRITICAL",
+          "references": {
+            "cveIds": [
+              "CVE-2022-0686"
+            ],
+            "cweIds": [
+              "CWE-639: Authorization Bypass Through User-Controlled Key"
+            ],
+            "owaspIds": [
+              "A01:2021 - Broken Access Control",
+              "A05:2017 - Broken Access Control",
+              "A06:2021 - Vulnerable and Outdated Components"
+            ],
+            "urls": [
+              "https://github.com/advisories/GHSA-hgjh-723h-mx2j",
+              "https://nvd.nist.gov/vuln/detail/CVE-2022-0686"
+            ]
+          },
+          "announcedAt": "2022-02-21T00:00:21Z",
+          "ruleText": "{\n  \"id\": \"ssc-a861a4fb-9d10-4655-97ed-67a37433ad36\",\n  \"languages\": [\n    \"js\",\n    \"ts\"\n  ],\n  \"message\": \"url-parse prior to version 1.5.8 is vulnerable to Authorization Bypass Through User-Controlled Key. \\nThis vulnerability occurs due to the `toString()` being unable to determine the correct hostname \\nwhen no port number is provided in the Url. This issue stems from the `toString()` function which\\nis called by the default export function `Url()`.\\n\",\n  \"metadata\": {\n    \"category\": \"security\",\n    \"confidence\": \"HIGH\",\n    \"cwe\": [\n      \"CWE-639: Authorization Bypass Through User-Controlled Key\"\n    ],\n    \"dev.semgrep.actions\": [],\n    \"owasp\": [\n      \"A01:2021 - Broken Access Control\",\n      \"A05:2017 - Broken Access Control\",\n      \"A06:2021 - Vulnerable and Outdated Components\"\n    ],\n    \"publish-date\": \"2022-02-21T00:00:21Z\",\n    \"references\": [\n      \"https://github.com/advisories/GHSA-hgjh-723h-mx2j\",\n      \"https://nvd.nist.gov/vuln/detail/CVE-2022-0686\"\n    ],\n    \"sca-fix-versions\": [\n      {\n        \"url-parse\": \"1.5.8\"\n      }\n    ],\n    \"sca-kind\": \"reachable\",\n    \"sca-schema\": 20230302,\n    \"sca-severity\": \"CRITICAL\",\n    \"sca-vuln-database-identifier\": \"CVE-2022-0686\",\n    \"source\": \"https://semgrep.dev/orgs/-/supply-chain/advisories?q=ssc-a861a4fb-9d10-4655-97ed-67a37433ad36&reachability+analysis=1-2-3-4\",\n    \"technology\": [\n      \"js\",\n      \"ts\"\n    ]\n  },\n  \"patterns\": [\n    {\n      \"metavariable-regex\": {\n        \"metavariable\": \"$PACKAGE\",\n        \"regex\": \"['\\\"]?(url-parse)['\\\"]?\"\n      }\n    },\n    {\n      \"pattern-either\": [\n        {\n          \"patterns\": [\n            {\n              \"pattern-either\": [\n                {\n                  \"pattern\": \"$IMPORT.Url(...)\"\n                },\n                {\n                  \"pattern\": \"$IMPORT(...)\"\n                },\n                {\n                  \"pattern\": \"new $IMPORT(...)\"\n                }\n              ]\n            },\n            {\n              \"pattern-either\": [\n                {\n                  \"pattern-inside\": \"$IMPORT = require(\\\"$PACKAGE\\\"). ....$FUNC;\\n...\\n\"\n                },\n                {\n                  \"pattern-inside\": \"({$IMPORT} = require(\\\"$PACKAGE\\\"))\\n...\\n\"\n                },\n                {\n                  \"pattern-inside\": \"$IMPORT = require(\\\"$PACKAGE\\\")\\n...\\n\"\n                },\n                {\n                  \"pattern-inside\": \"import(\\\"$PACKAGE\\\").then(...)\\n\"\n                },\n                {\n                  \"patterns\": [\n                    {\n                      \"pattern-inside\": \"$LD = require(\\\"$PACKAGE\\\");\\n...\\n\"\n                    },\n                    {\n                      \"pattern-inside\": \"global.$IMPORT = $LD\\n...\\n\"\n                    }\n                  ]\n                },\n                {\n                  \"pattern-inside\": \"import $IMPORT from \\\"$PACKAGE\\\";\\n...\\n\"\n                },\n                {\n                  \"pattern-inside\": \"$IMPORT = await import(\\\"$PACKAGE\\\")\\n...\\n\"\n                },\n                {\n                  \"pattern-inside\": \"$IMPORT = (await import(\\\"$PACKAGE\\\")).$Y\\n...\\n\"\n                },\n                {\n                  \"pattern-inside\": \"import * as $IMPORT from \\\"$PACKAGE\\\";\\n...\\n\"\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"patterns\": [\n            {\n              \"metavariable-regex\": {\n                \"metavariable\": \"$FUNC\",\n                \"regex\": \"(Url)\"\n              }\n            },\n            {\n              \"pattern-either\": [\n                {\n                  \"pattern\": \"$FUNC(...)\"\n                },\n                {\n                  \"pattern\": \"new $FUNC(...)\"\n                }\n              ]\n            },\n            {\n              \"pattern-either\": [\n                {\n                  \"pattern-inside\": \"import { $FUNC } from \\\"$PACKAGE\\\";\\n...\\n\"\n                },\n                {\n                  \"pattern-inside\": \"import $FUNC from \\\"$PACKAGE/$FUNC\\\";\\n...\\n\"\n                },\n                {\n                  \"pattern-inside\": \"import $FUNC from \\\"$PACKAGE.$FUNC\\\";\\n...\\n\"\n                },\n                {\n                  \"pattern-inside\": \"require({'packages':[...,{'name':'$PACKAGE',...}]},[...,'$PACKAGE/$FUNC'],function($FUNC){...}); ...\\n\"\n                },\n                {\n                  \"pattern-inside\": \"import { $FUNC as $X } from \\\"$PACKAGE\\\";\\n...\\n\"\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }\n  ],\n  \"r2c-internal-project-depends-on\": {\n    \"depends-on-either\": [\n      {\n        \"namespace\": \"npm\",\n        \"package\": \"url-parse\",\n        \"version\": \"< 1.5.8\"\n      }\n    ]\n  },\n  \"severity\": \"ERROR\"\n}",
+          "reachability": "REACHABILITY",
+          "vulnerableDependencies": [
+            {
+              "name": "url-parse",
+              "versionSpecifier": "< 1.5.8"
+            }
+          ],
+          "safeDependencies": [
+            {
+              "name": "url-parse",
+              "versionSpecifier": "1.5.8"
+            }
+          ],
+          "reachableIf": ""
+        },
+        "exposureType": "REACHABLE",
+        "repositoryId": "134031",
+        "matchedDependency": {
+          "name": "url-parse",
+          "versionSpecifier": "1.5.1"
+        },
+        "dependencyFileLocation": {
+          "path": "package-lock.json",
+          "startLine": "22067",
+          "url": "https://example.com",
+          "startCol": "0",
+          "endLine": "0",
+          "endCol": "0"
+        },
+        "usages": [
+          {
+            "findingId": "20128504",
+            "location": {
+              "path": "src/packages/authorize/isValidRedirectUri.ts",
+              "startLine": "24",
+              "startCol": "57",
+              "endLine": "24",
+              "endCol": "78",
+              "url": "https://example.com",
+              "committedAt": "1970-01-01T00:00:00Z"
+            }
+          },
+          {
+            "findingId": "20128505",
+            "location": {
+              "path": "src/packages/authorize/isValidRedirectUri.ts",
+              "startLine": "24",
+              "startCol": "37",
+              "endLine": "24",
+              "endCol": "54",
+              "url": "https://example.com",
+              "committedAt": "1970-01-01T00:00:00Z"
+            }
+          },
+          {
+            "findingId": "20128506",
+            "location": {
+              "path": "src/helpers/isValidexampleUrl.ts",
+              "startLine": "44",
+              "startCol": "54",
+              "endLine": "44",
+              "endCol": "75",
+              "url": "https://example.com",
+              "committedAt": "1970-01-01T00:00:00Z"
+            }
+          },
+          {
+            "findingId": "20128507",
+            "location": {
+              "path": "src/helpers/isValidexampleUrl.ts",
+              "startLine": "44",
+              "startCol": "34",
+              "endLine": "44",
+              "endCol": "51",
+              "url": "https://example.com",
+              "committedAt": "1970-01-01T00:00:00Z"
+            }
+          }
+        ],
+        "triage": {
+          "status": "CLOSED",
+          "dismissReason": "UNKNOWN_REASON",
+          "issueUrl": "",
+          "prUrl": ""
+        },
+        "groupKey": "134031::::ssc-a861a4fb-9d10-4655-97ed-67a37433ad36::reachable",
+        "packageManager": "npm",
+        "closestSafeDependency": {
+          "name": "url-parse",
+          "versionSpecifier": "1.5.8"
+        },
+        "repositoryName": "example/frontend",
+        "openedAt": "2023-05-17T02:03:04Z",
+        "firstTriagedAt": "1970-01-01T00:00:00Z",
+        "transitivity": "DIRECT",
+        "subdirectory": ""
+      }
+    ],
+    "hasMore": true,
+    "cursor": "19922841"
+  }
+  

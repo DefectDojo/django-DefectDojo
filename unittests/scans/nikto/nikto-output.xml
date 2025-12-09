@@ -1,0 +1,103 @@
+<?xml version="1.0" ?>
+<!DOCTYPE niktoscan SYSTEM "/usr/share/doc/nikto/nikto.dtd">
+<niktoscan hoststest="0" options="-h 127.0.0.1 -p 8070 -output nikto-output.xml" version="2.1.5" scanstart="Mon Nov 16 03:45:06 2020" scanend="Wed Dec 31 19:00:00 1969" scanelapsed=" seconds" nxmlversion="1.2">
+
+<scandetails targetip="127.0.0.1" targethostname="localhost" targetport="8070" targetbanner="" starttime="2020-11-16 03:45:07" sitename="http://localhost:8070" siteip="http://127.0.0.1:8070" hostheader="localhost" errors="0" checks="6544">
+
+
+<item id="999976" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[The anti-clickjacking X-Frame-Options header is not present.]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://localhost:8070/]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/]]></iplink>
+</item>
+
+<item id="999984" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[Server leaks inodes via ETags, header found with file /favicon.ico, fields: 0xW/21630 0x1602011686000 ]]></description>
+<uri><![CDATA[/favicon.ico]]></uri>
+<namelink><![CDATA[http://localhost:8070/favicon.ico]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/favicon.ico]]></iplink>
+</item>
+
+<item id="500008" osvdbid="39272" osvdblink="http://osvdb.org/39272" method="GET">
+<description><![CDATA[favicon.ico file identifies this server as: Apache Tomcat]]></description>
+<uri><![CDATA[/favicon.ico]]></uri>
+<namelink><![CDATA[]]></namelink>
+<iplink><![CDATA[http://:/favicon.ico]]></iplink>
+</item>
+
+<item id="999990" osvdbid="0" osvdblink="http://osvdb.org/0" method="OPTIONS">
+<description><![CDATA[Allowed HTTP Methods: GET, HEAD, POST, PUT, DELETE, OPTIONS ]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://localhost:8070/]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/]]></iplink>
+</item>
+
+<item id="999978" osvdbid="397" osvdblink="http://osvdb.org/397" method="GET">
+<description><![CDATA[HTTP method ('Allow' Header): 'PUT' method could allow clients to save files on the web server.]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://localhost:8070/]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/]]></iplink>
+</item>
+
+<item id="999976" osvdbid="5646" osvdblink="http://osvdb.org/5646" method="GET">
+<description><![CDATA[HTTP method ('Allow' Header): 'DELETE' may allow clients to remove files on the web server.]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://localhost:8070/]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/]]></iplink>
+</item>
+
+<item id="000366" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[/examples/servlets/index.html: Apache Tomcat default JSP pages present.]]></description>
+<uri><![CDATA[/examples/servlets/index.html]]></uri>
+<namelink><![CDATA[http://localhost:8070/examples/servlets/index.html]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/examples/servlets/index.html]]></iplink>
+</item>
+
+<item id="000834" osvdbid="3931" osvdblink="http://osvdb.org/3931" method="GET">
+<description><![CDATA[/myphpnuke/links.php?op=MostPopular&ratenum=[script]alert(document.cookie);[/script]&ratetype=percent: myphpnuke is vulnerable to Cross Site Scripting (XSS). CA-2000-02.]]></description>
+<uri><![CDATA[/myphpnuke/links.php?op=MostPopular&ratenum=[script]alert(document.cookie);[/script]&ratetype=percent]]></uri>
+<namelink><![CDATA[http://localhost:8070/myphpnuke/links.php?op=MostPopular&ratenum=[script]alert(document.cookie);[/script]&ratetype=percent]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/myphpnuke/links.php?op=MostPopular&ratenum=[script]alert(document.cookie);[/script]&ratetype=percent]]></iplink>
+</item>
+
+<item id="000863" osvdbid="4598" osvdblink="http://osvdb.org/4598" method="GET">
+<description><![CDATA[/members.asp?SF=%22;}alert(223344);function%20x(){v%20=%22: Web Wiz Forums ver. 7.01 and below is vulnerable to Cross Site Scripting (XSS). CA-2000-02.]]></description>
+<uri><![CDATA[/members.asp?SF=%22;}alert(223344);function%20x(){v%20=%22]]></uri>
+<namelink><![CDATA[http://localhost:8070/members.asp?SF=%22;}alert(223344);function%20x(){v%20=%22]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/members.asp?SF=%22;}alert(223344);function%20x(){v%20=%22]]></iplink>
+</item>
+
+<item id="000888" osvdbid="2946" osvdblink="http://osvdb.org/2946" method="GET">
+<description><![CDATA[/forum_members.asp?find=%22;}alert(9823);function%20x(){v%20=%22: Web Wiz Forums ver. 7.01 and below is vulnerable to Cross Site Scripting (XSS). CA-2000-02.]]></description>
+<uri><![CDATA[/forum_members.asp?find=%22;}alert(9823);function%20x(){v%20=%22]]></uri>
+<namelink><![CDATA[http://localhost:8070/forum_members.asp?find=%22;}alert(9823);function%20x(){v%20=%22]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/forum_members.asp?find=%22;}alert(9823);function%20x(){v%20=%22]]></iplink>
+</item>
+
+<item id="999960" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[Cookie JSESSIONID created without the httponly flag]]></description>
+<uri><![CDATA[/examples/jsp/snp/snoop.jsp]]></uri>
+<namelink><![CDATA[http://localhost:8070/examples/jsp/snp/snoop.jsp]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/examples/jsp/snp/snoop.jsp]]></iplink>
+</item>
+
+<item id="001355" osvdbid="3720" osvdblink="http://osvdb.org/3720" method="GET">
+<description><![CDATA[/examples/jsp/snp/snoop.jsp: Displays information about page retrievals, including other users.]]></description>
+<uri><![CDATA[/examples/jsp/snp/snoop.jsp]]></uri>
+<namelink><![CDATA[http://localhost:8070/examples/jsp/snp/snoop.jsp]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/examples/jsp/snp/snoop.jsp]]></iplink>
+</item>
+
+<item id="006525" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[/manager/html: Default Tomcat Manager interface found]]></description>
+<uri><![CDATA[/manager/html]]></uri>
+<namelink><![CDATA[http://localhost:8070/manager/html]]></namelink>
+<iplink><![CDATA[http://127.0.0.1:8070/manager/html]]></iplink>
+</item>
+
+<statistics elapsed="37" itemsfound="12" itemstested="6544" endtime="2020-11-16 03:45:44" />
+</scandetails>
+
+
+</niktoscan>

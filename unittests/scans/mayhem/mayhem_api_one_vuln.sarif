@@ -1,0 +1,62 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "semanticVersion": "2.31.2",
+          "name": "mAPI",
+          "fullName": "Mayhem for API",
+          "rules": [
+            {
+              "id": "default-credentials",
+              "shortDescription": {
+                "text": "Default Credentials Used"
+              },
+              "fullDescription": {
+                "text": "A protected API returned a successful response using well-known default credentials."
+              },
+              "help": {
+                "text": "Review the endpoint code to ensure that the required authentication code is\nrunning in all cases. If the endpoint does not require authentication, update\nthe specification to indicate as such.\n\nIf the authentication checks are performed on this endpoint, review the code\nchecking the provided credentials to ensure that default credentials are not\naccepted as valid. Ensure that the user-provided data is validated extensively\nbefore any authentication checks are performed. The sample response provided by\nMayhem for API as part of the bug report may point you in the right direction\nwhen trying to debug the issue. The issue may be in the underlying library, if\nany, you are using to perform validation checks.\n"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "Security",
+                  "CWE-287",
+                  "CWE-1390",
+                  "CWE-1391",
+                  "CWE-1392",
+                  "OWASP-API2"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "default-credentials",
+          "message": {
+            "text": "Default Credentials Used in 'GET /info'. [Details](https://app.mayhem.security/platform-demo/mayhem-demo/api/-/defects/2477915)",
+            "markdown": "Default Credentials Used in 'GET /info'.\n\n# Sample Request\n\n```http\nGET /info HTTP/1.1\ncontent-length: 0\nauthorization: Basic TFItSVNETjpMUi1JU0RO\nx-mapi-program-uuid: eb3b952d-2088-4711-a86b-7995c83b8579\n\n```\n\n# Sample Response\n\n```http\nHTTP/1.1 200 OK\ndate: Wed, 18 Jun 2025 02:24:15 GMT\nserver: uvicorn\ncontent-length: 35\ncontent-type: application/json\n\n[\n  \"version: 1.0.0\\n\",\n  \"config: fast\"\n]\n```\n\n[Details](https://app.mayhem.security/platform-demo/mayhem-demo/api/-/defects/2477915)\n"
+          },
+          "codeFlows": [],
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "unknown-file",
+                  "uriBaseId": "%SRCROOT%"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

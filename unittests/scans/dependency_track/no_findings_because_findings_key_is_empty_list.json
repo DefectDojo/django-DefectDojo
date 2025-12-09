@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "meta" : {
+    "application": "Dependency-Track",
+    "version": "3.4.0",
+    "timestamp": "2018-11-18T23:31:42Z",
+    "baseUrl": "http://dtrack.example.org"
+  },
+  "project" : {
+    "uuid": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+    "name": "Acme Example",
+    "version": "1.0",
+    "description": "A sample application"
+  },
+  "findings" : []
+}

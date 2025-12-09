@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<BugCollection version="4.4.0" sequence="0" timestamp="1631172733365" analysisTimestamp="1631172801721" release="">
+  <Project projectName="xonotic-parser">
+    <Jar>/home/damien/workspace/xonotic-parser/target/classes</Jar>
+    <AuxClasspathEntry>/home/damien/.m2/repository/org/antlr/antlr4-runtime/4.0/antlr4-runtime-4.0.jar</AuxClasspathEntry>
+    <AuxClasspathEntry>/home/damien/.m2/repository/org/abego/treelayout/org.abego.treelayout.core/1.0.1/org.abego.treelayout.core-1.0.1.jar</AuxClasspathEntry>
+    <AuxClasspathEntry>/home/damien/.m2/repository/org/freemarker/freemarker/2.3.23/freemarker-2.3.23.jar</AuxClasspathEntry>
+    <SrcDir>/home/damien/workspace/xonotic-parser/src/main/java</SrcDir>
+    <WrkDir>/home/damien/workspace/xonotic-parser/target</WrkDir>
+  </Project>
+  <BugInstance type="DMI_HARDCODED_ABSOLUTE_FILENAME" priority="1" rank="15" abbrev="DMI" category="STYLE">
+    <Class classname="Boot">
+      <SourceLine classname="Boot" start="15" end="254" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Class>
+    <Method classname="Boot" name="main" signature="([Ljava/lang/String;)V" isStatic="true">
+      <SourceLine classname="Boot" start="21" end="59" startBytecode="0" endBytecode="92" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Method>
+    <String value="/home/dcarol/workspace/xonotic-parser/log-2015-12-30-part1.txt" role="FILE_NAME"/>
+    <SourceLine classname="Boot" start="23" end="23" startBytecode="12" endBytecode="12" sourcefile="Boot.java" sourcepath="Boot.java"/>
+  </BugInstance>
+  <BugInstance type="DM_DEFAULT_ENCODING" priority="1" rank="19" abbrev="Dm" category="I18N">
+    <Class classname="Boot">
+      <SourceLine classname="Boot" start="15" end="254" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Class>
+    <Method classname="Boot" name="writeFrags" signature="(LLog;Ljava/lang/String;)V" isStatic="true">
+      <SourceLine classname="Boot" start="102" end="119" startBytecode="0" endBytecode="478" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Method>
+    <Method classname="java.io.FileWriter" name="&lt;init&gt;" signature="(Ljava/io/File;)V" isStatic="false" role="METHOD_CALLED">
+      <SourceLine classname="java.io.FileWriter" start="96" end="97" startBytecode="0" endBytecode="68" sourcefile="FileWriter.java" sourcepath="java/io/FileWriter.java"/>
+    </Method>
+    <SourceLine classname="Boot" start="104" end="104" startBytecode="18" endBytecode="18" sourcefile="Boot.java" sourcepath="Boot.java"/>
+  </BugInstance>
+  <BugInstance type="DM_DEFAULT_ENCODING" priority="1" rank="19" abbrev="Dm" category="I18N">
+    <Class classname="Boot">
+      <SourceLine classname="Boot" start="15" end="254" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Class>
+    <Method classname="Boot" name="writeSnipers" signature="(LLog;Ljava/lang/String;)V" isStatic="true">
+      <SourceLine classname="Boot" start="123" end="140" startBytecode="0" endBytecode="478" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Method>
+    <Method classname="java.io.FileWriter" name="&lt;init&gt;" signature="(Ljava/io/File;)V" isStatic="false" role="METHOD_CALLED">
+      <SourceLine classname="java.io.FileWriter" start="96" end="97" startBytecode="0" endBytecode="68" sourcefile="FileWriter.java" sourcepath="java/io/FileWriter.java"/>
+    </Method>
+    <SourceLine classname="Boot" start="125" end="125" startBytecode="18" endBytecode="18" sourcefile="Boot.java" sourcepath="Boot.java"/>
+  </BugInstance>
+  <BugInstance type="DM_DEFAULT_ENCODING" priority="1" rank="19" abbrev="Dm" category="I18N">
+    <Class classname="Boot">
+      <SourceLine classname="Boot" start="15" end="254" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Class>
+    <Method classname="Boot" name="writeSuicides" signature="(LLog;Ljava/lang/String;)V" isStatic="true">
+      <SourceLine classname="Boot" start="82" end="99" startBytecode="0" endBytecode="477" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Method>
+    <Method classname="java.io.FileWriter" name="&lt;init&gt;" signature="(Ljava/io/File;)V" isStatic="false" role="METHOD_CALLED">
+      <SourceLine classname="java.io.FileWriter" start="96" end="97" startBytecode="0" endBytecode="68" sourcefile="FileWriter.java" sourcepath="java/io/FileWriter.java"/>
+    </Method>
+    <SourceLine classname="Boot" start="84" end="84" startBytecode="18" endBytecode="18" sourcefile="Boot.java" sourcepath="Boot.java"/>
+  </BugInstance>
+  <BugInstance type="DM_DEFAULT_ENCODING" priority="1" rank="19" abbrev="Dm" category="I18N">
+    <Class classname="Boot">
+      <SourceLine classname="Boot" start="15" end="254" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Class>
+    <Method classname="Boot" name="writeTeamkills" signature="(LLog;Ljava/lang/String;)V" isStatic="true">
+      <SourceLine classname="Boot" start="62" end="79" startBytecode="0" endBytecode="477" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Method>
+    <Method classname="java.io.FileWriter" name="&lt;init&gt;" signature="(Ljava/io/File;)V" isStatic="false" role="METHOD_CALLED">
+      <SourceLine classname="java.io.FileWriter" start="96" end="97" startBytecode="0" endBytecode="68" sourcefile="FileWriter.java" sourcepath="java/io/FileWriter.java"/>
+    </Method>
+    <SourceLine classname="Boot" start="64" end="64" startBytecode="18" endBytecode="18" sourcefile="Boot.java" sourcepath="Boot.java"/>
+  </BugInstance>
+  <BugInstance type="WMI_WRONG_MAP_ITERATOR" priority="2" rank="18" abbrev="WMI" category="PERFORMANCE">
+    <Class classname="Boot">
+      <SourceLine classname="Boot" start="15" end="254" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Class>
+    <Method classname="Boot" name="getTopFrag" signature="(LLog;Z)Ljava/util/List;" isStatic="true">
+      <SourceLine classname="Boot" start="206" end="218" startBytecode="0" endBytecode="302" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Method>
+    <SourceLine classname="Boot" start="210" end="210" startBytecode="59" endBytecode="59" sourcefile="Boot.java" sourcepath="Boot.java"/>
+  </BugInstance>
+  <BugInstance type="WMI_WRONG_MAP_ITERATOR" priority="2" rank="18" abbrev="WMI" category="PERFORMANCE">
+    <Class classname="Boot">
+      <SourceLine classname="Boot" start="15" end="254" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Class>
+    <Method classname="Boot" name="getTopSuicide" signature="(LLog;)Ljava/util/List;" isStatic="true">
+      <SourceLine classname="Boot" start="162" end="174" startBytecode="0" endBytecode="285" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Method>
+    <SourceLine classname="Boot" start="166" end="166" startBytecode="55" endBytecode="55" sourcefile="Boot.java" sourcepath="Boot.java"/>
+  </BugInstance>
+  <BugInstance type="WMI_WRONG_MAP_ITERATOR" priority="2" rank="18" abbrev="WMI" category="PERFORMANCE">
+    <Class classname="Boot">
+      <SourceLine classname="Boot" start="15" end="254" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Class>
+    <Method classname="Boot" name="getTopTeamkill" signature="(LLog;)Ljava/util/List;" isStatic="true">
+      <SourceLine classname="Boot" start="242" end="254" startBytecode="0" endBytecode="285" sourcefile="Boot.java" sourcepath="Boot.java"/>
+    </Method>
+    <SourceLine classname="Boot" start="246" end="246" startBytecode="55" endBytecode="55" sourcefile="Boot.java" sourcepath="Boot.java"/>
+  </BugInstance>
+  <BugInstance type="EI_EXPOSE_REP" priority="2" rank="18" abbrev="EI" category="MALICIOUS_CODE">
+    <Class classname="Log">
+      <SourceLine classname="Log" start="5" end="22" sourcefile="Log.java" sourcepath="Log.java"/>
+    </Class>
+    <Method classname="Log" name="getMatchs" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="Log" start="9" end="9" startBytecode="0" endBytecode="46" sourcefile="Log.java" sourcepath="Log.java"/>
+    </Method>
+    <Field classname="Log" name="matchs" signature="Ljava/util/List;" isStatic="false">
+      <SourceLine classname="Log" sourcefile="Log.java" sourcepath="Log.java"/>
+    </Field>
+    <SourceLine classname="Log" start="9" end="9" startBytecode="4" endBytecode="4" sourcefile="Log.java" sourcepath="Log.java"/>
+  </BugInstance>
+  <BugInstance type="EI_EXPOSE_REP2" priority="2" rank="18" abbrev="EI2" category="MALICIOUS_CODE">
+    <Class classname="Log">
+      <SourceLine classname="Log" start="5" end="22" sourcefile="Log.java" sourcepath="Log.java"/>
+    </Class>
+    <Method classname="Log" name="setMatchs" signature="(Ljava/util/List;)V" isStatic="false">
+      <SourceLine classname="Log" start="13" end="14" startBytecode="0" endBytecode="79" sourcefile="Log.java" sourcepath="Log.java"/>
+    </Method>
+    <Field classname="Log" name="matchs" signature="Ljava/util/List;" isStatic="false">
+      <SourceLine classname="Log" sourcefile="Log.java" sourcepath="Log.java"/>
+    </Field>
+    <LocalVariable name="matchs" register="1" pc="2" role="LOCAL_VARIABLE_NAMED"/>
+    <SourceLine classname="Log" start="13" end="13" startBytecode="2" endBytecode="2" sourcefile="Log.java" sourcepath="Log.java"/>
+  </BugInstance>
+  <BugInstance type="EI_EXPOSE_REP" priority="2" rank="18" abbrev="EI" category="MALICIOUS_CODE">
+    <Class classname="Match">
+      <SourceLine classname="Match" start="4" end="40" sourcefile="Match.java" sourcepath="Match.java"/>
+    </Class>
+    <Method classname="Match" name="getMatchLines" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="Match" start="9" end="9" startBytecode="0" endBytecode="46" sourcefile="Match.java" sourcepath="Match.java"/>
+    </Method>
+    <Field classname="Match" name="matchLines" signature="Ljava/util/List;" isStatic="false">
+      <SourceLine classname="Match" sourcefile="Match.java" sourcepath="Match.java"/>
+    </Field>
+    <SourceLine classname="Match" start="9" end="9" startBytecode="4" endBytecode="4" sourcefile="Match.java" sourcepath="Match.java"/>
+  </BugInstance>
+  <BugInstance type="EI_EXPOSE_REP2" priority="2" rank="18" abbrev="EI2" category="MALICIOUS_CODE">
+    <Class classname="Match">
+      <SourceLine classname="Match" start="4" end="40" sourcefile="Match.java" sourcepath="Match.java"/>
+    </Class>
+    <Method classname="Match" name="setMatchLines" signature="(Ljava/util/List;)V" isStatic="false">
+      <SourceLine classname="Match" start="13" end="14" startBytecode="0" endBytecode="79" sourcefile="Match.java" sourcepath="Match.java"/>
+    </Method>
+    <Field classname="Match" name="matchLines" signature="Ljava/util/List;" isStatic="false">
+      <SourceLine classname="Match" sourcefile="Match.java" sourcepath="Match.java"/>
+    </Field>
+    <LocalVariable name="matchLines" register="1" pc="2" role="LOCAL_VARIABLE_NAMED"/>
+    <SourceLine classname="Match" start="13" end="13" startBytecode="2" endBytecode="2" sourcefile="Match.java" sourcepath="Match.java"/>
+  </BugInstance>
+  <BugInstance type="MS_FINAL_PKGPROTECT" priority="2" rank="18" abbrev="MS" category="MALICIOUS_CODE">
+    <Class classname="XonoticLexer">
+      <SourceLine classname="XonoticLexer" start="20" end="537" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Class>
+    <Field classname="XonoticLexer" name="modeNames" signature="[Ljava/lang/String;" isStatic="true">
+      <SourceLine classname="XonoticLexer" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Field>
+    <SourceLine classname="XonoticLexer" start="40" end="40" startBytecode="19" endBytecode="19" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+  </BugInstance>
+  <BugInstance type="MS_PKGPROTECT" priority="2" rank="18" abbrev="MS" category="MALICIOUS_CODE">
+    <Class classname="XonoticLexer">
+      <SourceLine classname="XonoticLexer" start="20" end="537" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Class>
+    <Field classname="XonoticLexer" name="_decisionToDFA" signature="[Lorg/antlr/v4/runtime/dfa/DFA;" isStatic="true">
+      <SourceLine classname="XonoticLexer" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Field>
+    <SourceLine classname="XonoticLexer" start="536" end="536" startBytecode="1572" endBytecode="1572" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+  </BugInstance>
+  <BugInstance type="MS_PKGPROTECT" priority="2" rank="18" abbrev="MS" category="MALICIOUS_CODE">
+    <Class classname="XonoticLexer">
+      <SourceLine classname="XonoticLexer" start="20" end="537" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Class>
+    <Field classname="XonoticLexer" name="ruleNames" signature="[Ljava/lang/String;" isStatic="true">
+      <SourceLine classname="XonoticLexer" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Field>
+    <SourceLine classname="XonoticLexer" start="68" end="68" startBytecode="1548" endBytecode="1548" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+  </BugInstance>
+  <BugInstance type="MS_PKGPROTECT" priority="2" rank="18" abbrev="MS" category="MALICIOUS_CODE">
+    <Class classname="XonoticLexer">
+      <SourceLine classname="XonoticLexer" start="20" end="537" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Class>
+    <Field classname="XonoticLexer" name="tokenNames" signature="[Ljava/lang/String;" isStatic="true">
+      <SourceLine classname="XonoticLexer" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Field>
+    <SourceLine classname="XonoticLexer" start="44" end="44" startBytecode="734" endBytecode="734" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+  </BugInstance>
+  <BugInstance type="SF_SWITCH_NO_DEFAULT" priority="2" rank="19" abbrev="SF" category="STYLE">
+    <Class classname="XonoticLexer">
+      <SourceLine classname="XonoticLexer" start="20" end="537" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Class>
+    <Method classname="XonoticLexer" name="WS_action" signature="(Lorg/antlr/v4/runtime/RuleContext;I)V" isStatic="false">
+      <SourceLine classname="XonoticLexer" start="114" end="117" startBytecode="0" endBytecode="104" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Method>
+    <SourceLine classname="XonoticLexer" start="114" end="115" startBytecode="1" endBytecode="23" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+  </BugInstance>
+  <BugInstance type="SF_SWITCH_NO_DEFAULT" priority="2" rank="19" abbrev="SF" category="STYLE">
+    <Class classname="XonoticLexer">
+      <SourceLine classname="XonoticLexer" start="20" end="537" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Class>
+    <Method classname="XonoticLexer" name="action" signature="(Lorg/antlr/v4/runtime/RuleContext;II)V" isStatic="false">
+      <SourceLine classname="XonoticLexer" start="109" end="112" startBytecode="0" endBytecode="116" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+    </Method>
+    <SourceLine classname="XonoticLexer" start="109" end="110" startBytecode="1" endBytecode="25" sourcefile="XonoticLexer.java" sourcepath="XonoticLexer.java"/>
+  </BugInstance>
+  <BugInstance type="MS_PKGPROTECT" priority="2" rank="18" abbrev="MS" category="MALICIOUS_CODE">
+    <Class classname="XonoticParser">
+      <SourceLine classname="XonoticParser" start="20" end="2089" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Field classname="XonoticParser" name="_decisionToDFA" signature="[Lorg/antlr/v4/runtime/dfa/DFA;" isStatic="true">
+      <SourceLine classname="XonoticParser" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Field>
+    <SourceLine classname="XonoticParser" start="2088" end="2088" startBytecode="1057" endBytecode="1057" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+  </BugInstance>
+  <BugInstance type="MS_PKGPROTECT" priority="2" rank="18" abbrev="MS" category="MALICIOUS_CODE">
+    <Class classname="XonoticParser">
+      <SourceLine classname="XonoticParser" start="20" end="2089" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Field classname="XonoticParser" name="ruleNames" signature="[Ljava/lang/String;" isStatic="true">
+      <SourceLine classname="XonoticParser" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Field>
+    <SourceLine classname="XonoticParser" start="74" end="74" startBytecode="1033" endBytecode="1033" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+  </BugInstance>
+  <BugInstance type="MS_PKGPROTECT" priority="2" rank="18" abbrev="MS" category="MALICIOUS_CODE">
+    <Class classname="XonoticParser">
+      <SourceLine classname="XonoticParser" start="20" end="2089" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Field classname="XonoticParser" name="tokenNames" signature="[Ljava/lang/String;" isStatic="true">
+      <SourceLine classname="XonoticParser" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Field>
+    <SourceLine classname="XonoticParser" start="40" end="40" startBytecode="821" endBytecode="821" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+  </BugInstance>
+  <BugInstance type="SF_SWITCH_NO_DEFAULT" priority="2" rank="19" abbrev="SF" category="STYLE">
+    <Class classname="XonoticParser">
+      <SourceLine classname="XonoticParser" start="20" end="2089" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser" name="frag_someone" signature="()LXonoticParser$Frag_someoneContext;" isStatic="false">
+      <SourceLine classname="XonoticParser" start="920" end="1063" startBytecode="0" endBytecode="1266" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+    <SourceLine classname="XonoticParser" start="928" end="1023" startBytecode="75" endBytecode="583" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+  </BugInstance>
+  <BugInstance type="SF_SWITCH_NO_DEFAULT" priority="2" rank="19" abbrev="SF" category="STYLE">
+    <Class classname="XonoticParser">
+      <SourceLine classname="XonoticParser" start="20" end="2089" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser" name="match_line" signature="()LXonoticParser$Match_lineContext;" isStatic="false">
+      <SourceLine classname="XonoticParser" start="327" end="483" startBytecode="0" endBytecode="918" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+    <SourceLine classname="XonoticParser" start="333" end="468" startBytecode="54" endBytecode="478" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_betrayedContext">
+      <SourceLine classname="XonoticParser$Frag_betrayedContext" start="1331" end="1349" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_betrayedContext" name="Word" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_betrayedContext" start="1331" end="1331" startBytecode="0" endBytecode="48" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_betrayedContext">
+      <SourceLine classname="XonoticParser$Frag_betrayedContext" start="1331" end="1349" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_betrayedContext" name="Word" signature="(I)Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_betrayedContext" start="1333" end="1333" startBytecode="0" endBytecode="59" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_ending_spreeContext">
+      <SourceLine classname="XonoticParser$Frag_ending_spreeContext" start="1386" end="1398" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_ending_spreeContext" name="Word" signature="()Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_ending_spreeContext" start="1386" end="1386" startBytecode="0" endBytecode="49" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_first_bloodContext">
+      <SourceLine classname="XonoticParser$Frag_first_bloodContext" start="1107" end="1119" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_first_bloodContext" name="Word" signature="()Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_first_bloodContext" start="1107" end="1107" startBytecode="0" endBytecode="49" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_sniped_someoneContext">
+      <SourceLine classname="XonoticParser$Frag_sniped_someoneContext" start="832" end="852" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_sniped_someoneContext" name="Word" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_sniped_someoneContext" start="834" end="834" startBytecode="0" endBytecode="48" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_sniped_someoneContext">
+      <SourceLine classname="XonoticParser$Frag_sniped_someoneContext" start="832" end="852" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_sniped_someoneContext" name="Word" signature="(I)Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_sniped_someoneContext" start="836" end="836" startBytecode="0" endBytecode="59" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_someoneContext">
+      <SourceLine classname="XonoticParser$Frag_someoneContext" start="896" end="916" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_someoneContext" name="Word" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_someoneContext" start="898" end="898" startBytecode="0" endBytecode="48" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_someoneContext">
+      <SourceLine classname="XonoticParser$Frag_someoneContext" start="896" end="916" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_someoneContext" name="Word" signature="(I)Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_someoneContext" start="900" end="900" startBytecode="0" endBytecode="59" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_specialContext">
+      <SourceLine classname="XonoticParser$Frag_specialContext" start="722" end="740" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_specialContext" name="Word" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_specialContext" start="722" end="722" startBytecode="0" endBytecode="48" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_specialContext">
+      <SourceLine classname="XonoticParser$Frag_specialContext" start="722" end="740" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_specialContext" name="Word" signature="(I)Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_specialContext" start="724" end="724" startBytecode="0" endBytecode="59" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_suicide2Context">
+      <SourceLine classname="XonoticParser$Frag_suicide2Context" start="1286" end="1298" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_suicide2Context" name="Word" signature="()Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_suicide2Context" start="1286" end="1286" startBytecode="0" endBytecode="49" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Frag_suicideContext">
+      <SourceLine classname="XonoticParser$Frag_suicideContext" start="1189" end="1206" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Frag_suicideContext" name="Word" signature="()Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Frag_suicideContext" start="1191" end="1191" startBytecode="0" endBytecode="49" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Line_triple_fragContext">
+      <SourceLine classname="XonoticParser$Line_triple_fragContext" start="1147" end="1159" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Line_triple_fragContext" name="Word" signature="()Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Line_triple_fragContext" start="1147" end="1147" startBytecode="0" endBytecode="49" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$MatchContext">
+      <SourceLine classname="XonoticParser$MatchContext" start="157" end="185" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$MatchContext" name="Word" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="XonoticParser$MatchContext" start="157" end="157" startBytecode="0" endBytecode="48" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$MatchContext">
+      <SourceLine classname="XonoticParser$MatchContext" start="157" end="185" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$MatchContext" name="Word" signature="(I)Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$MatchContext" start="159" end="159" startBytecode="0" endBytecode="59" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Match_line_changed_teamContext">
+      <SourceLine classname="XonoticParser$Match_line_changed_teamContext" start="1569" end="1584" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Match_line_changed_teamContext" name="Word" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="XonoticParser$Match_line_changed_teamContext" start="1569" end="1569" startBytecode="0" endBytecode="48" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Match_line_changed_teamContext">
+      <SourceLine classname="XonoticParser$Match_line_changed_teamContext" start="1569" end="1584" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Match_line_changed_teamContext" name="Word" signature="(I)Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Match_line_changed_teamContext" start="1571" end="1571" startBytecode="0" endBytecode="59" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Match_line_connectedContext">
+      <SourceLine classname="XonoticParser$Match_line_connectedContext" start="1617" end="1629" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Match_line_connectedContext" name="Word" signature="()Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Match_line_connectedContext" start="1617" end="1617" startBytecode="0" endBytecode="49" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Match_line_disconnectedContext">
+      <SourceLine classname="XonoticParser$Match_line_disconnectedContext" start="1655" end="1667" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Match_line_disconnectedContext" name="Word" signature="()Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Match_line_disconnectedContext" start="1655" end="1655" startBytecode="0" endBytecode="49" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Match_line_is_nowContext">
+      <SourceLine classname="XonoticParser$Match_line_is_nowContext" start="1694" end="1709" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Match_line_is_nowContext" name="Word" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="XonoticParser$Match_line_is_nowContext" start="1694" end="1694" startBytecode="0" endBytecode="48" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Match_line_is_nowContext">
+      <SourceLine classname="XonoticParser$Match_line_is_nowContext" start="1694" end="1709" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Match_line_is_nowContext" name="Word" signature="(I)Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Match_line_is_nowContext" start="1696" end="1696" startBytecode="0" endBytecode="59" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Match_winsContext">
+      <SourceLine classname="XonoticParser$Match_winsContext" start="1737" end="1749" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Match_winsContext" name="Word" signature="()Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Match_winsContext" start="1737" end="1737" startBytecode="0" endBytecode="49" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Not_fragContext">
+      <SourceLine classname="XonoticParser$Not_fragContext" start="779" end="796" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Not_fragContext" name="Word" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="XonoticParser$Not_fragContext" start="781" end="781" startBytecode="0" endBytecode="48" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Not_fragContext">
+      <SourceLine classname="XonoticParser$Not_fragContext" start="779" end="796" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Not_fragContext" name="Word" signature="(I)Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Not_fragContext" start="783" end="783" startBytecode="0" endBytecode="59" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Paused_gameContext">
+      <SourceLine classname="XonoticParser$Paused_gameContext" start="595" end="607" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Paused_gameContext" name="Word" signature="()Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Paused_gameContext" start="595" end="595" startBytecode="0" endBytecode="49" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Picked_upContext">
+      <SourceLine classname="XonoticParser$Picked_upContext" start="640" end="655" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Picked_upContext" name="Word" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="XonoticParser$Picked_upContext" start="640" end="640" startBytecode="0" endBytecode="48" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Picked_upContext">
+      <SourceLine classname="XonoticParser$Picked_upContext" start="640" end="655" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Picked_upContext" name="Word" signature="(I)Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Picked_upContext" start="642" end="642" startBytecode="0" endBytecode="59" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Player_stats_rec_failedContext">
+      <SourceLine classname="XonoticParser$Player_stats_rec_failedContext" start="541" end="556" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Player_stats_rec_failedContext" name="Word" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="XonoticParser$Player_stats_rec_failedContext" start="541" end="541" startBytecode="0" endBytecode="48" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Player_stats_rec_failedContext">
+      <SourceLine classname="XonoticParser$Player_stats_rec_failedContext" start="541" end="556" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Player_stats_rec_failedContext" name="Word" signature="(I)Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Player_stats_rec_failedContext" start="543" end="543" startBytecode="0" endBytecode="59" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Somebody_sayContext">
+      <SourceLine classname="XonoticParser$Somebody_sayContext" start="488" end="503" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Somebody_sayContext" name="Word" signature="()Ljava/util/List;" isStatic="false">
+      <SourceLine classname="XonoticParser$Somebody_sayContext" start="488" end="488" startBytecode="0" endBytecode="48" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Somebody_sayContext">
+      <SourceLine classname="XonoticParser$Somebody_sayContext" start="488" end="503" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Somebody_sayContext" name="Word" signature="(I)Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Somebody_sayContext" start="490" end="490" startBytecode="0" endBytecode="59" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$Unlocked_rageContext">
+      <SourceLine classname="XonoticParser$Unlocked_rageContext" start="1068" end="1080" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$Unlocked_rageContext" name="Word" signature="()Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$Unlocked_rageContext" start="1068" end="1068" startBytecode="0" endBytecode="49" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <BugInstance type="NM_METHOD_NAMING_CONVENTION" priority="2" rank="16" abbrev="Nm" category="BAD_PRACTICE">
+    <Class classname="XonoticParser$You_cannotContext">
+      <SourceLine classname="XonoticParser$You_cannotContext" start="1925" end="1937" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Class>
+    <Method classname="XonoticParser$You_cannotContext" name="Word" signature="()Lorg/antlr/v4/runtime/tree/TerminalNode;" isStatic="false">
+      <SourceLine classname="XonoticParser$You_cannotContext" start="1925" end="1925" startBytecode="0" endBytecode="49" sourcefile="XonoticParser.java" sourcepath="XonoticParser.java"/>
+    </Method>
+  </BugInstance>
+  <Errors errors="0" missingClasses="0"></Errors>
+  <FindBugsSummary timestamp="Thu, 9 Sep 2021 09:32:13 +0200" total_classes="51" referenced_classes="143" total_bugs="56" total_size="2080" num_packages="1" java_version="16.0.2" vm_version="16.0.2+7" cpu_seconds="21.67" clock_seconds="62.67" peak_mbytes="140.77" alloc_mbytes="512.00" gc_seconds="0.04" priority_2="51" priority_1="5">
+    <PackageStats package="" total_bugs="56" total_types="51" total_size="2080" priority_2="51" priority_1="5">
+      <ClassStats class="Boot" sourceFile="Boot.java" interface="false" size="162" bugs="8" priority_2="3" priority_1="5"/>
+      <ClassStats class="Log" sourceFile="Log.java" interface="false" size="16" bugs="2" priority_2="2"/>
+      <ClassStats class="Match" sourceFile="Match.java" interface="false" size="28" bugs="2" priority_2="2"/>
+      <ClassStats class="MatchLine" sourceFile="MatchLine.java" interface="false" size="29" bugs="0"/>
+      <ClassStats class="MatchLineChangedTeam" sourceFile="MatchLineChangedTeam.java" interface="false" size="3" bugs="0"/>
+      <ClassStats class="MatchLineConnected" sourceFile="MatchLineConnected.java" interface="false" size="3" bugs="0"/>
+      <ClassStats class="MatchLineDisconnected" sourceFile="MatchLineDisconnected.java" interface="false" size="3" bugs="0"/>
+      <ClassStats class="MatchLineFragBetrayed" sourceFile="MatchLineFragBetrayed.java" interface="false" size="22" bugs="0"/>
+      <ClassStats class="MatchLineFragFirstBlood" sourceFile="MatchLineFragFirstBlood.java" interface="false" size="5" bugs="0"/>
+      <ClassStats class="MatchLineFragSnipedSomeone" sourceFile="MatchLineFragSnipedSomeone.java" interface="false" size="22" bugs="0"/>
+      <ClassStats class="MatchLineFragSomeone" sourceFile="MatchLineFragSomeone.java" interface="false" size="20" bugs="0"/>
+      <ClassStats class="MatchLineFragSuicide" sourceFile="MatchLineFragSuicide.java" interface="false" size="14" bugs="0"/>
+      <ClassStats class="MatchLineIsNow" sourceFile="MatchLineIsNow.java" interface="false" size="3" bugs="0"/>
+      <ClassStats class="MatchLineServerNotBegin" sourceFile="MatchLineServerNotBegin.java" interface="false" size="3" bugs="0"/>
+      <ClassStats class="MatchLineServerNotOk" sourceFile="MatchLineServerNotOk.java" interface="false" size="3" bugs="0"/>
+      <ClassStats class="MatchLineServerSvqcBuild" sourceFile="MatchLineServerSvqcBuild.java" interface="false" size="3" bugs="0"/>
+      <ClassStats class="SuicideItem" sourceFile="SuicideItem.java" interface="false" size="8" bugs="0"/>
+      <ClassStats class="XonoticBaseListener" sourceFile="XonoticBaseListener.java" interface="false" size="131" bugs="0"/>
+      <ClassStats class="XonoticLexer" sourceFile="XonoticLexer.java" interface="false" size="154" bugs="6" priority_2="6"/>
+      <ClassStats class="XonoticListener" sourceFile="XonoticListener.java" interface="true" size="61" bugs="0"/>
+      <ClassStats class="XonoticParser" sourceFile="XonoticParser.java" interface="false" size="851" bugs="5" priority_2="5"/>
+      <ClassStats class="XonoticParser$Frag_betrayedContext" sourceFile="XonoticParser.java" interface="false" size="20" bugs="2" priority_2="2"/>
+      <ClassStats class="XonoticParser$Frag_ending_spreeContext" sourceFile="XonoticParser.java" interface="false" size="15" bugs="1" priority_2="1"/>
+      <ClassStats class="XonoticParser$Frag_first_bloodContext" sourceFile="XonoticParser.java" interface="false" size="15" bugs="1" priority_2="1"/>
+      <ClassStats class="XonoticParser$Frag_sniped_someoneContext" sourceFile="XonoticParser.java" interface="false" size="22" bugs="2" priority_2="2"/>
+      <ClassStats class="XonoticParser$Frag_someoneContext" sourceFile="XonoticParser.java" interface="false" size="22" bugs="2" priority_2="2"/>
+      <ClassStats class="XonoticParser$Frag_specialContext" sourceFile="XonoticParser.java" interface="false" size="20" bugs="2" priority_2="2"/>
+      <ClassStats class="XonoticParser$Frag_suicide2Context" sourceFile="XonoticParser.java" interface="false" size="15" bugs="1" priority_2="1"/>
+      <ClassStats class="XonoticParser$Frag_suicideContext" sourceFile="XonoticParser.java" interface="false" size="19" bugs="1" priority_2="1"/>
+      <ClassStats class="XonoticParser$Frag_weaponContext" sourceFile="XonoticParser.java" interface="false" size="12" bugs="0"/>
+      <ClassStats class="XonoticParser$Line_triple_fragContext" sourceFile="XonoticParser.java" interface="false" size="15" bugs="1" priority_2="1"/>
+      <ClassStats class="XonoticParser$LogContext" sourceFile="XonoticParser.java" interface="false" size="16" bugs="0"/>
+      <ClassStats class="XonoticParser$MatchContext" sourceFile="XonoticParser.java" interface="false" size="28" bugs="2" priority_2="2"/>
+      <ClassStats class="XonoticParser$Match_lineContext" sourceFile="XonoticParser.java" interface="false" size="60" bugs="0"/>
+      <ClassStats class="XonoticParser$Match_line_changed_teamContext" sourceFile="XonoticParser.java" interface="false" size="19" bugs="2" priority_2="2"/>
+      <ClassStats class="XonoticParser$Match_line_connectedContext" sourceFile="XonoticParser.java" interface="false" size="15" bugs="1" priority_2="1"/>
+      <ClassStats class="XonoticParser$Match_line_disconnectedContext" sourceFile="XonoticParser.java" interface="false" size="15" bugs="1" priority_2="1"/>
+      <ClassStats class="XonoticParser$Match_line_is_nowContext" sourceFile="XonoticParser.java" interface="false" size="18" bugs="2" priority_2="2"/>
+      <ClassStats class="XonoticParser$Match_winsContext" sourceFile="XonoticParser.java" interface="false" size="15" bugs="1" priority_2="1"/>
+      <ClassStats class="XonoticParser$Not_fragContext" sourceFile="XonoticParser.java" interface="false" size="20" bugs="2" priority_2="2"/>
+      <ClassStats class="XonoticParser$Paused_gameContext" sourceFile="XonoticParser.java" interface="false" size="15" bugs="1" priority_2="1"/>
+      <ClassStats class="XonoticParser$Picked_upContext" sourceFile="XonoticParser.java" interface="false" size="18" bugs="2" priority_2="2"/>
+      <ClassStats class="XonoticParser$Player_stats_rec_failedContext" sourceFile="XonoticParser.java" interface="false" size="16" bugs="2" priority_2="2"/>
+      <ClassStats class="XonoticParser$Server_horiz_lineContext" sourceFile="XonoticParser.java" interface="false" size="12" bugs="0"/>
+      <ClassStats class="XonoticParser$Server_keepaliveContext" sourceFile="XonoticParser.java" interface="false" size="12" bugs="0"/>
+      <ClassStats class="XonoticParser$Server_not_beginContext" sourceFile="XonoticParser.java" interface="false" size="12" bugs="0"/>
+      <ClassStats class="XonoticParser$Server_not_okContext" sourceFile="XonoticParser.java" interface="false" size="12" bugs="0"/>
+      <ClassStats class="XonoticParser$Server_svqc_buildContext" sourceFile="XonoticParser.java" interface="false" size="12" bugs="0"/>
+      <ClassStats class="XonoticParser$Somebody_sayContext" sourceFile="XonoticParser.java" interface="false" size="17" bugs="2" priority_2="2"/>
+      <ClassStats class="XonoticParser$Unlocked_rageContext" sourceFile="XonoticParser.java" interface="false" size="15" bugs="1" priority_2="1"/>
+      <ClassStats class="XonoticParser$You_cannotContext" sourceFile="XonoticParser.java" interface="false" size="14" bugs="1" priority_2="1"/>
+    </PackageStats>
+    <FindBugsProfile>
+      <ClassProfile name="edu.umd.cs.findbugs.SAXBugCollectionHandler" totalMilliseconds="132" invocations="1" avgMicrosecondsPerInvocation="132197" maxMicrosecondsPerInvocation="132197" standardDeviationMicrosecondsPerInvocation="0"/>
+    </FindBugsProfile>
+  </FindBugsSummary>
+  <ClassFeatures></ClassFeatures>
+  <History></History>
+</BugCollection>

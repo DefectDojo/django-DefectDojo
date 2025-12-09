@@ -1,0 +1,65 @@
+{
+  "referrer-policy": {
+    "expectation": "referrer-policy-private",
+    "name": "referrer-policy",
+    "output": {
+      "data": "origin-when-cross-origin, strict-origin-when-cross-origin",
+      "http": true,
+      "meta": false
+    },
+    "pass": true,
+    "result": "referrer-policy-private",
+    "score_description": "Referrer-Policy header set to \"no-referrer\", \"same-origin\", \"strict-origin\" or \"strict-origin-when-cross-origin\"",
+    "score_modifier": 5
+  },
+  "strict-transport-security": {
+    "expectation": "hsts-implemented-max-age-at-least-six-months",
+    "name": "strict-transport-security",
+    "output": {
+      "data": "max-age=31536000; includeSubdomains; preload",
+      "includeSubDomains": true,
+      "max-age": 31536000,
+      "preload": true,
+      "preloaded": true
+    },
+    "pass": true,
+    "result": "hsts-preloaded",
+    "score_description": "Preloaded via the HTTP Strict Transport Security (HSTS) preloading process",
+    "score_modifier": 5
+  },
+  "subresource-integrity": {
+    "expectation": "sri-implemented-and-external-scripts-loaded-securely",
+    "name": "subresource-integrity",
+    "output": {
+      "data": {
+        "https://github.githubassets.com/assets/compat-bootstrap-90c0ace0.js": {
+          "crossorigin": "anonymous",
+          "integrity": "sha512-BlCvumXWTvpASEdhCGiahDUDf7Bwb8QXA2XnnSnqJ9QafxcNcrNYUNYS2wXmd3nEpO//+zlZa9DSV9zmu5MqRg=="
+        },
+        "https://github.githubassets.com/assets/frameworks-91316555.js": {
+          "crossorigin": "anonymous",
+          "integrity": "sha512-E0kyAkQpX7xPQNWfQdhGhIwtiOr/ruPB3GeOjDy2UctSQ/n9a1l+ek/EnlgMSZucWIV3R0saqwvx1h4F4j0NVg=="
+        },
+        "https://github.githubassets.com/assets/github-bootstrap-528e24b3.js": {
+          "crossorigin": "anonymous",
+          "integrity": "sha512-TWKjtT83ffiMVpw3N5QD2Yco30TN4cekJy0Yziau/N/e2ckJowiHBoXiMpL3o5LjS+jA8kTIBhwCiK6g8zjGag=="
+        }
+      }
+    },
+    "pass": true,
+    "result": "sri-implemented-and-external-scripts-loaded-securely",
+    "score_description": "Subresource Integrity (SRI) is implemented and all scripts are loaded securely",
+    "score_modifier": 5
+  },
+  "x-frame-options": {
+    "expectation": "x-frame-options-sameorigin-or-deny",
+    "name": "x-frame-options",
+    "output": {
+      "data": "deny"
+    },
+    "pass": true,
+    "result": "x-frame-options-implemented-via-csp",
+    "score_description": "X-Frame-Options (XFO) implemented via the CSP frame-ancestors directive",
+    "score_modifier": 5
+  }
+}
