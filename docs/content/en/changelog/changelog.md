@@ -48,7 +48,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 ### Oct 27, 2025: v2.51.3
 
 * **(Tools)** Added Nuclei scan support for Smart Upload.
-* **(Priority)** Added Prioritization Engine to set up logic for calculating Priority and Risk for individual Findings.
+* **(Priority)** Added Prioritization Engine to allow for configurable Priority and Risk calculations for individual Findings under a given Product.
 * **(Metrics)** Updated Metrics table to include Products with zero Findings (as a result of filter parameters, or otherwise).
 * **(Pro UI)** Added Surveys to Pro UI.
 
