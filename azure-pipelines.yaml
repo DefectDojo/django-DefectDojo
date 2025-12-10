@@ -107,7 +107,7 @@ steps:
       rootFolderOrFile: "$(Build.ArtifactStagingDirectory)"
       includeRootFolder: false
       archiveFile: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
-    condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
+    # condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
 
   - task: PublishBuildArtifacts@1
     displayName: "Publish Artifact: $(DefinitionName)_artifact"
