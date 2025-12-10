@@ -666,7 +666,7 @@ def calculate_priority_epss_kev_finding(
     )
 
     severity_risk_map = severity_risk_map.get(
-        settings.PRIORIZATION_FIELD_WEIGHTS.get(tags_str.replace(",", ":"), "Standard"),
+        settings.PRIORIZATION_FIELD_WEIGHTS.get(tags_str.replace(",", ":").replace(" ", ""), "Standard"),
         severity_risk_map["Standard"],
     )
     if df_risk_score is not None and not df_risk_score.empty and finding.cve:
