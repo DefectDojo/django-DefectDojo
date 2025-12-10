@@ -86,8 +86,6 @@ class CreateFindingExclusionForm(forms.ModelForm):
                 self.add_error('product_type', "This field is required when 'Specific Engagements' is selected.")
             if not cleaned_data.get("product"):
                 self.add_error('product', "This field is required when 'Specific Engagements' is selected.")
-            if not cleaned_data.get("engagements"):
-                self.add_error('engagements', "This field is required when 'Specific Engagements' is selected.")
         
         return cleaned_data
 
