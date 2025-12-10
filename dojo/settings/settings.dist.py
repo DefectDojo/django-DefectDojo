@@ -200,6 +200,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ""),
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ""),
     DD_SAML2_ENABLED=(bool, False),
+    DD_CELERY_CRON_CLEAR_SESSIONS=(str, "0 0 0"),
     # Allows to override default SAML authentication backend. Check https://djangosaml2.readthedocs.io/contents/setup.html#custom-user-attributes-processing
     DD_SAML2_AUTHENTICATION_BACKENDS=(str, "djangosaml2.backends.Saml2Backend"),
     # Force Authentication to make SSO possible with SAML2
@@ -1632,6 +1633,7 @@ CELERY_EXPIRING_FINDINGEXCLUSION = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION")
 CELERY_NEW_FINDINGS_TO_EXCLUSION_LIST = env("DD_CHECK_NEW_FINDINGS_TO_EXCLUSION_LIST")
 CELERY_CRON_CHECK_PRIORIZATION = env("DD_CELERY_CRON_CHECK_PRIORIZATION")
 CELERY_CRON_STATUS_FINDINGS_PRIORIZATION = env("DD_CELERY_CRON_STATUS_FINDINGS_PRIORIZATION")
+CELERY_CRON_CLEAR_SESSIONS = env("DD_CELERY_CRON_CLEAR_SESSIONS")
 CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
@@ -1711,7 +1713,9 @@ CELERY_BEAT_SCHEDULE = {
     },
     "clear_sessions": {
         "task": "dojo.tasks.clear_sessions",
-        "schedule": crontab(hour=0, minute=0, day_of_week=0),
+        "schedule": crontab(hour=CELERY_CRON_CLEAR_SESSIONS.split()[0], 
+                            minute=CELERY_CRON_CLEAR_SESSIONS.split()[1], 
+                            day_of_week=CELERY_CRON_CLEAR_SESSIONS.split()[2]),
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
