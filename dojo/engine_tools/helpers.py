@@ -576,6 +576,12 @@ def identify_priority_vulnerabilities(findings) -> int:
 def get_severity_risk_map():
     priorization_weights = settings.PRIORIZATION_FIELD_WEIGHTS
     return {
+        "Strict": {
+            "Low": float(priorization_weights.get("P_Critical")),
+            "Medium": float(priorization_weights.get("P_Critical")),
+            "High": float(priorization_weights.get("P_Critical")),
+            "Critical": float(priorization_weights.get("P_Critical")),
+        },
         "Standard": {
             "Low": float(priorization_weights.get("P_Low")),
             "Medium": float(priorization_weights.get("P_Medium")),
@@ -593,7 +599,7 @@ def get_severity_risk_map():
             "Medium": float(priorization_weights.get("P_Low")),
             "High": float(priorization_weights.get("P_High")),
             "Critical": float(priorization_weights.get("P_Critical")),
-        },
+        }
     }
 
 
