@@ -31,11 +31,6 @@ class ProwlerParserCSV:
             # Set provider name to the correct capitalization format
             provider = provider.capitalize() if provider in {"kubernetes", "azure"} else provider.upper()
 
-            # if provider == "kubernetes" or provider == "azure":
-            #    provider = provider.capitalize()
-            # else:
-            #    provider = provider.upper()
-
             description = (
                 "**Cloud Type** : "
                 + provider

@@ -39,7 +39,6 @@ class ProwlerParserJSON:
 
             title = node.get("message", "")
             severity = self.convert_severity(node.get("severity"))
-            compliance = node.get("unmapped", {}).get("compliance", {})
             mitigation = (
                 "**Remediation Description** : "
                 + node.get("remediation", {}).get("desc", "N/A")
@@ -48,9 +47,8 @@ class ProwlerParserJSON:
                 + ", ".join(node.get("remediation", {}).get("references", []))
             )
             impact = node.get("risk_details", "")
-
+            compliance = node.get("unmapped", {}).get("compliance", {})
             references = "**Related URL** : " + node.get("unmapped", {}).get("related_url")
-
             # Add data presnet in scan to References
             for key, values in compliance.items():
                 joined = ", ".join(values)
