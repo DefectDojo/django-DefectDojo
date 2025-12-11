@@ -133,7 +133,7 @@ The Azure AD token need to be configured to include Group IDs. Without this step
 To update the format of the token, add a [Group Claim](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-fed-group-claims) that applies to whatever Group type you are using.
 If unsure of what type that is, select `All Groups`. Do not activate `Emit groups as role claims` within the Azure AD "Token configuration" page.
 
-Application API permissions need to be updated with the `Group.Read.All` permission so that groups can be read on behalf of the user that has successfully signed in.
+Application API permissions need to be updated with the `GroupMember.Read.All` or `Group.Read.All` permission so that groups can be read on behalf of the user that has successfully signed in.  `GroupMember.Read.All` is recommended as this grants the application fewer permissions.
 
 ##### Group Cleaning
 
@@ -169,7 +169,7 @@ The Azure AD token returned by Azure will also need to be configured to include 
 
 If unsure of what type that is, select `All Groups`. Do not activate `Emit groups as role claims` within the Azure AD "Token configuration" page.
 
-Application API permissions need to be updated with the `Group.Read.All` permission so that groups can be read on behalf of the user that has successfully signed in.
+Application API permissions need to be updated with the `GroupMember.Read.All` or `Group.Read.All` permission so that groups can be read on behalf of the user that has successfully signed in.  `GroupMember.Read.All` is recommended as this grants the application fewer permissions.
 
 To limit the amount of groups imported from Azure AD, a regular expression can be used as the following:
 
