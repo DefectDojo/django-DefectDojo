@@ -1,24 +1,133 @@
 {% extends "base.html" %}
 {% load authorization_tags %}
 {% block content %}
-    {{ block.super }}
-    <h3>Create New Exclusion</h3>
-    <form class="form-horizontal" method="post">{% csrf_token %}
-        {% include "dojo/form_fields.html" with form=form %}
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
+{{ block.super }}
+<h3>Create New Exclusion</h3>
+<form class="form-horizontal" method="post">{% csrf_token %}
+    {% include "dojo/form_fields.html" with form=form %}
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
 
-                {% if finding_exclusion %}
-                    <input class="btn btn-primary" type="submit" label="Update exclusion" name="Update exclusion" value="Update Exclusion"/>
-                    <input class="btn btn-primary" type="submit" label="add_exclusion" name="add_exclusion"
-                           value="Edit Questions"/>
-                {% else %}
-                    <input class="btn btn-primary" type="submit" label="creat_exclusion" name="create exclusion" value="Create Exclusion"/>
-                    <input class="btn btn-primary" type="submit" label="add_exclusion" name="add_exclusion"
-                           value="Close"/>
-                {% endif %}
-            </div>
+            {% if finding_exclusion %}
+            <input class="btn btn-primary" type="submit" label="Update exclusion" name="Update exclusion"
+                value="Update Exclusion" />
+            <input class="btn btn-primary" type="submit" label="add_exclusion" name="add_exclusion"
+                value="Edit Questions" />
+            {% else %}
+            <input class="btn btn-primary" type="submit" label="creat_exclusion" name="create exclusion"
+                value="Create Exclusion" />
+            <input class="btn btn-primary" type="submit" label="add_exclusion" name="add_exclusion" value="Close" />
+            {% endif %}
         </div>
-    </form>
+    </div>
+</form>
+<script type="application/javascript">
+    $(function () {
 
+        let engagementSearchTimeout = null;
+
+        function toggleHierarchicalFields() {
+            var scope = $('input[name="scope"]:checked').val();
+            if (scope === 'specific') {
+                $('#id_product_type').closest('.form-group').show();
+                $('#id_product').closest('.form-group').show();
+                $('#id_engagements').closest('.form-group').show();
+            } else {
+                $('#id_product_type').closest('.form-group').hide();
+                $('#id_product').closest('.form-group').hide();
+                $('#id_engagements').closest('.form-group').hide();
+            }
+        }
+
+        toggleHierarchicalFields();
+
+        $('input[name="scope"]').change(function () {
+            toggleHierarchicalFields();
+        });
+
+        $('#id_product_type').change(function () {
+            var url = "{% url 'product-list' %}" + "?prod_type=" + $(this).val();
+            $.get(url, function (data) {
+                $('#id_product').empty();
+                $('#id_product').append(
+                    $("<option></option>").attr("value", "").text("---------")
+                );
+
+                if (data.results) {
+                    $.each(data.results, function (index, value) {
+                        $('#id_product').append(
+                            $("<option></option>")
+                                .attr("value", value.id)
+                                .text(value.name)
+                        );
+                    });
+                }
+
+                $('#id_product').selectpicker('refresh');
+                $('#id_engagements').empty();
+                $('#id_engagements').selectpicker('refresh');
+            });
+        });
+
+        $('#id_product').change(function () {
+            var productId = $(this).val();
+
+            if (!productId) {
+                $('#id_engagements').empty();
+                $('#id_engagements').selectpicker('refresh');
+                return;
+            }
+
+            var url = "{% url 'engagement-list' %}" + "?product=" + productId;
+
+            $.get(url, function (data) {
+                $('#id_engagements').empty();
+
+                if (data.results) {
+                    $.each(data.results, function (index, value) {
+                        $('#id_engagements').append(
+                            $("<option></option>")
+                                .attr("value", value.id)
+                                .text(value.name)
+                        );
+                    });
+                }
+
+                $('#id_engagements').selectpicker('refresh');
+            });
+        });
+
+        $(document).on('input', '.bs-searchbox input', function () {
+            const searchText = $(this).val();
+            const productId = $('#id_product').val();
+
+            if (!productId || !searchText || searchText.length < 2) return;
+
+            clearTimeout(engagementSearchTimeout);
+
+            engagementSearchTimeout = setTimeout(function () {
+                const url = "{% url 'engagement-list' %}"
+                    + "?product=" + productId
+                    + "&name=" + encodeURIComponent(searchText);
+
+                $.get(url, function (data) {
+                    $('#id_engagements').empty();
+
+                    if (data.results) {
+                        $.each(data.results, function (index, value) {
+                            $('#id_engagements').append(
+                                $("<option></option>")
+                                    .attr("value", value.id)
+                                    .text(value.name)
+                            );
+                        });
+                    }
+
+                    $('#id_engagements').selectpicker('refresh');
+                });
+            }, 300);
+        });
+
+    });
+</script>
 {% endblock %}
