@@ -711,6 +711,7 @@ SEARCH_MAX_RESULTS = env("DD_SEARCH_MAX_RESULTS")
 SIMILAR_FINDINGS_MAX_RESULTS = env("DD_SIMILAR_FINDINGS_MAX_RESULTS")
 MAX_REQRESP_FROM_API = env("DD_MAX_REQRESP_FROM_API")
 MAX_AUTOCOMPLETE_WORDS = env("DD_MAX_AUTOCOMPLETE_WORDS")
+ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
 
 LOGIN_EXEMPT_URLS = (
     rf"^{URL_PREFIX}static/",
@@ -974,6 +975,15 @@ DJANGO_MIDDLEWARE_CLASSES = [
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
+
+if ENABLE_AUDITLOG:
+    middleware_list = list(MIDDLEWARE)
+    crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
+
+    # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
+    middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
+
+    MIDDLEWARE = middleware_list
 
 # WhiteNoise allows your web app to serve its own static files,
 # making it a self-contained unit that can be deployed anywhere without relying on nginx
@@ -1982,7 +1992,6 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # Auditlog
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
-ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
 AUDITLOG_FLUSH_BATCH_SIZE = env("DD_AUDITLOG_FLUSH_BATCH_SIZE")
 AUDITLOG_FLUSH_MAX_BATCHES = env("DD_AUDITLOG_FLUSH_MAX_BATCHES")
 
@@ -2073,15 +2082,6 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
 #########################################################################################################
 # Auditlog configuration                                                                                #
 #########################################################################################################
-
-if ENABLE_AUDITLOG:
-    middleware_list = list(MIDDLEWARE)
-    crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
-
-    # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
-    middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
-
-    MIDDLEWARE = middleware_list
 
 PGHISTORY_FOREIGN_KEY_FIELD = pghistory.ForeignKey(db_index=False)
 PGHISTORY_CONTEXT_FIELD = pghistory.ContextForeignKey(db_index=True)
