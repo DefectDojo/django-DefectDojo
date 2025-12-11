@@ -99,6 +99,10 @@ class EditFindingExclusionForm(forms.ModelForm):
         widget=forms.RadioSelect,
         label="Scope"
     )
+    
+    practice = forms.CharField(required=False,
+                               label="Practice Origin Exclusion",
+                               help_text="practice where exclusion originates",)
 
     class Meta:
         model = FindingExclusion
@@ -119,8 +123,6 @@ class EditFindingExclusionForm(forms.ModelForm):
 
         if not is_in_reviewer_group(self.user):
             self.fields.pop("scope")
-
-        if self.initial.get("practice"):
             self.fields.pop("practice")
 
         if 'product_type' in self.data:
