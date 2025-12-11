@@ -360,7 +360,7 @@ def delete_engagement(request, eid):
                     messages.SUCCESS,
                     message,
                     extra_tags="alert-success")
-                return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
+                return HttpResponseRedirect(reverse("view_product", args=(product.id, )))
 
     rels = ["Previewing the relationships has been disabled.", ""]
     display_preview = get_setting("DELETE_PREVIEW")
