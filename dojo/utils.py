@@ -2037,6 +2037,7 @@ class async_delete:
     @app.task
     def crawl(self, obj, model_list, **kwargs):
         logger.debug("ASYNC_DELETE: Crawling " + self.get_object_name(obj) + ": " + str(obj))
+        task_results = []
         for model_info in model_list:
             model = model_info[0]
             model_query = model_info[1]
@@ -2047,8 +2048,18 @@ class async_delete:
             chunks = self.chunk_list(model, objects_to_delete)
             for chunk in chunks:
                 logger.debug(f"deleting {len(chunk)} {self.get_object_name(model)}")
-                self.delete_chunk(chunk)
-        self.delete_chunk([obj])
+                result = self.delete_chunk(chunk)
+                # Collect async task results to wait for them all at once
+                if hasattr(result, "get"):
+                    task_results.append(result)
+            # Wait for all chunk deletions to complete (they run in parallel)
+            for task_result in task_results:
+                task_result.get(timeout=300)  # 5 minute timeout per chunk
+            # Now delete the main object after all chunks are done
+            result = self.delete_chunk([obj])
+            # Wait for final deletion to complete
+            if hasattr(result, "get"):
+                result.get(timeout=300)  # 5 minute timeout
         logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(obj) + ": " + str(obj))
 
     def chunk_list(self, model, full_list):
