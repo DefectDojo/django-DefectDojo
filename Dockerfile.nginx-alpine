@@ -5,7 +5,7 @@
 # Dockerfile.django-alpine to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.14.0-alpine3.22@sha256:8373231e1e906ddfb457748bfc032c4c06ada8c759b7b62d9c73ec2a3c56e710 AS base
+FROM python:3.14.1-alpine3.22@sha256:cc95388e96eeaa0a7dbf78d51d0d567cc0e9e2ae3ead2637877858de9b41a7bf AS base
 
 FROM base AS build
 WORKDIR /app
