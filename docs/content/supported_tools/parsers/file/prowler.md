@@ -2,7 +2,7 @@
 title: "Prowler Scan"
 toc_hide: true
 ---
-This parser imports the Prowler Scan files in JSON and CSV format. The AWS, GCP, Azure, and Kubernetes could types are supported by the parser.
+This parser imports Prowler Scan files in JSON and CSV format. The AWS, GCP, Azure, and Kubernetes could types are supported by this parser.
 
 ### Sample Scan Data
 Sample Prowler scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/prowler).
