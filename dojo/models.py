@@ -1583,7 +1583,7 @@ class Engagement(models.Model):
     @property
     def engagement_id(self):
         try:
-            return "ENG-{:03d}".format(self.id)
+            return f"ENG-{self.id:03d}"
         except Exception:
             return str(self.id)
 
