@@ -6,7 +6,9 @@ import logging
 import mimetypes
 import os
 import pathlib
+import random
 import re
+import time
 from calendar import monthrange
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
@@ -29,6 +31,7 @@ from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
+from django.db import OperationalError
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
@@ -2003,22 +2006,51 @@ class async_delete:
     @dojo_async_task
     @app.task
     def delete_chunk(self, objects, **kwargs):
+        # Now delete all objects with retry for deadlocks
+        max_retries = 3
         for obj in objects:
-            try:
-                obj.delete()
-            except AssertionError:
-                logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
-                # The id must be None
-                # The object has already been deleted elsewhere
-            except LogEntry.MultipleObjectsReturned:
-                # Delete the log entrys first, then delete
-                LogEntry.objects.filter(
-                    content_type=ContentType.objects.get_for_model(obj.__class__),
-                    object_pk=str(obj.pk),
-                    action=LogEntry.Action.DELETE,
-                ).delete()
-                # Now delete the object again
-                obj.delete()
+            retry_count = 0
+            while retry_count < max_retries:
+                try:
+                    obj.delete()
+                    break  # Success, exit retry loop
+                except OperationalError as e:
+                    error_msg = str(e)
+                    if "deadlock detected" in error_msg.lower():
+                        retry_count += 1
+                        if retry_count < max_retries:
+                            # Exponential backoff with jitter
+                            wait_time = (2 ** retry_count) + random.uniform(0, 1)
+                            logger.warning(
+                                f"ASYNC_DELETE: Deadlock detected deleting {self.get_object_name(obj)} {obj.pk}, "
+                                f"retrying ({retry_count}/{max_retries}) after {wait_time:.2f}s"
+                            )
+                            time.sleep(wait_time)
+                            # Refresh object from DB before retry
+                            obj.refresh_from_db()
+                        else:
+                            logger.error(
+                                f"ASYNC_DELETE: Deadlock persisted after {max_retries} retries for {self.get_object_name(obj)} {obj.pk}: {e}"
+                            )
+                            raise
+                    else:
+                        # Not a deadlock, re-raise
+                        raise
+                except AssertionError:
+                    logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
+                    # The id must be None
+                    # The object has already been deleted elsewhere
+                    break
+                except LogEntry.MultipleObjectsReturned:
+                    # Delete the log entrys first, then delete
+                    LogEntry.objects.filter(
+                        content_type=ContentType.objects.get_for_model(obj.__class__),
+                        object_pk=str(obj.pk),
+                        action=LogEntry.Action.DELETE,
+                    ).delete()
+                    # Now delete the object again (no retry needed for this case)
+                    obj.delete()
+                    break
 
     @dojo_async_task
     @app.task
