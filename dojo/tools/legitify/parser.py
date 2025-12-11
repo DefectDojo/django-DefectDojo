@@ -53,16 +53,21 @@ class LegitifyParser:
                         endpoints.add(Endpoint.from_uri(url))
 
             if is_finding:
+                remediation_steps = policy_info.get("remediationSteps", [])
+                fix_available = False
+                if remediation_steps:
+                    fix_available = True
                 finding = Finding(
                     description=policy_info.get("description", ""),
                     dynamic_finding=False,
                     impact="\n".join(policy_info.get("threat", [])),
-                    mitigation="\n".join(policy_info.get("remediationSteps", [])),
+                    mitigation="\n".join(remediation_steps),
                     references="\n".join(references),
                     severity=self.severity_mapper(policy_info.get("severity", "LOW")),
                     static_finding=True,
                     title=f'{policy_info.get("namespace", "").capitalize()} | {policy_info.get("title", "")}',
                     vuln_id_from_tool=policy_info.get("policyName", None),
+                    fix_available=fix_available,
                 )
                 finding.unsaved_endpoints = list(endpoints)
                 findings.append(finding)
