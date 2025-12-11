@@ -1,5 +1,5 @@
 # Dojo
-from dojo.templatetags.authorization_tags import is_in_group, has_permission_to_reclassify_orphans
+from dojo.templatetags.authorization_tags import is_in_group, has_permission_to_reclassify_orphans, is_in_reviewer_group
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification
 from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion, FindingExclusionLog
@@ -59,7 +59,8 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     
     duplicate_finding_exclusions = FindingExclusion.objects.filter(
             unique_id_from_tool__in=[default_unique_id],
-            engagements__isnull=True
+            engagements__isnull=True,
+            product__isnull=True
     ).exclude(status__in=["Rejected"]).first()
     
     if duplicate_finding_exclusions:
@@ -75,7 +76,8 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
                 args=(
                     duplicate_finding_exclusions.unique_id_from_tool,
                     relative_url,
-                    list(engagement_ids)
+                    list(engagement_ids),
+                    [duplicate_finding_exclusions.product.id] if duplicate_finding_exclusions.product else []
                 )
             )
             
@@ -336,7 +338,8 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                 args=(
                     finding_exclusion.unique_id_from_tool,
                     str(relative_url),
-                    list(engagement_ids)
+                    list(engagement_ids),
+                    [finding_exclusion.product.id] if finding_exclusion.product else []
                 )
             )
                     
@@ -456,7 +459,7 @@ def edit_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
     finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
 
     if request.method == 'POST':
-        form = EditFindingExclusionForm(request.POST, instance=finding_exclusion)
+        form = EditFindingExclusionForm(data=request.POST, instance=finding_exclusion, user=request.user)
         if form.is_valid():
             form.save()
             
@@ -469,7 +472,7 @@ def edit_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
             
             return redirect('finding_exclusion', fxid=fxid)
     else:
-        form = EditFindingExclusionForm(instance=finding_exclusion)
+        form = EditFindingExclusionForm(instance=finding_exclusion, user=request.user)
 
     return render(request, 'dojo/edit_finding_exclusion.html', {'form': form})
 
@@ -506,7 +509,7 @@ def delete_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
 
 
 def reopen_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
-    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value) or \
+    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value) and \
         not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
         raise PermissionDenied
     
@@ -534,7 +537,8 @@ def reopen_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
         args=(
             finding_exclusion.unique_id_from_tool,
             str(relative_url),
-            list(engagement_ids)
+            list(engagement_ids),
+            [finding_exclusion.product.id] if finding_exclusion.product else []
         )
     )
     

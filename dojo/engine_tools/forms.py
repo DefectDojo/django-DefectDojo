@@ -53,6 +53,9 @@ class CreateFindingExclusionForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
+        
+        if not is_in_reviewer_group(self.user):
+            self.fields.pop("scope")
 
         if self.initial.get("practice"):
             self.fields.pop("practice")
@@ -91,18 +94,71 @@ class CreateFindingExclusionForm(forms.ModelForm):
 
 
 class EditFindingExclusionForm(forms.ModelForm):
+    scope = forms.ChoiceField(
+        choices=[('all', 'All Engagements'), ('specific', 'Specific Engagements')],
+        widget=forms.RadioSelect,
+        label="Scope"
+    )
 
     class Meta:
         model = FindingExclusion
-        fields = ["type", "unique_id_from_tool", "reason", "expiration_date", "status"]
+        fields = [
+            "type", "unique_id_from_tool", "reason",
+            "expiration_date", "status", "practice",
+            "scope", "product_type", "product", "engagements"
+        ]
         widgets = {
             'expiration_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
         super().__init__(*args, **kwargs)
+
         self.fields["expiration_date"].required = False
-    
+
+        if not is_in_reviewer_group(self.user):
+            self.fields.pop("scope")
+
+        if self.initial.get("practice"):
+            self.fields.pop("practice")
+
+        if 'product_type' in self.data:
+            try:
+                product_type_id = int(self.data.get('product_type'))
+                self.fields['product'].queryset = (
+                    Product.objects
+                    .filter(prod_type_id=product_type_id)
+                    .order_by('name')
+                )
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk and self.instance.product_type:
+            self.fields['product'].queryset = (
+                Product.objects
+                .filter(prod_type=self.instance.product_type)
+                .order_by('name')
+            )
+        else:
+            self.fields['product'].queryset = Product.objects.none()
+
+        if 'product' in self.data:
+            try:
+                product_id = int(self.data.get('product'))
+                self.fields['engagements'].queryset = (
+                    Engagement.objects
+                    .filter(product_id=product_id)
+                    .order_by('name')
+                )
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk and self.instance.product:
+            self.fields['engagements'].queryset = (
+                self.instance.product.engagement_set.order_by('name')
+            )
+        else:
+            self.fields['engagements'].queryset = Engagement.objects.none()
+ 
     
 class FindingExclusionDiscussionForm(forms.ModelForm):
     class Meta:

@@ -1,5 +1,5 @@
 # Utils
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.db.models import Q
 from django.utils import timezone
 from django.urls import reverse
@@ -64,8 +64,16 @@ def get_approvers_members():
 
 
 def get_note(author, message):
-    note, _ = Notes.objects.get_or_create(author=author, entry=message)
-    return note
+    note = Notes.objects.filter(author=author, entry=message).first()
+    if note:
+        return note
+
+    try:
+        with transaction.atomic():
+            note = Notes.objects.create(author=author, entry=message)
+            return note
+    except IntegrityError:
+        return Notes.objects.filter(author=author, entry=message).first()
 
 
 def has_valid_comments(finding_exclusion, user) -> bool:

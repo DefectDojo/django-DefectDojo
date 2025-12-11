@@ -23,6 +23,9 @@
 </form>
 <script type="application/javascript">
     $(function () {
+
+        let engagementSearchTimeout = null;
+
         function toggleHierarchicalFields() {
             var scope = $('input[name="scope"]:checked').val();
             if (scope === 'specific') {
@@ -46,12 +49,20 @@
             var url = "{% url 'product-list' %}" + "?prod_type=" + $(this).val();
             $.get(url, function (data) {
                 $('#id_product').empty();
-                $('#id_product').append($("<option></option>").attr("value", "").text("---------"));
+                $('#id_product').append(
+                    $("<option></option>").attr("value", "").text("---------")
+                );
+
                 if (data.results) {
                     $.each(data.results, function (index, value) {
-                        $('#id_product').append($("<option></option>").attr("value", value.id).text(value.name));
+                        $('#id_product').append(
+                            $("<option></option>")
+                                .attr("value", value.id)
+                                .text(value.name)
+                        );
                     });
                 }
+
                 $('#id_product').selectpicker('refresh');
                 $('#id_engagements').empty();
                 $('#id_engagements').selectpicker('refresh');
@@ -59,17 +70,64 @@
         });
 
         $('#id_product').change(function () {
-            var url = "{% url 'engagement-list' %}" + "?product=" + $(this).val();
+            var productId = $(this).val();
+
+            if (!productId) {
+                $('#id_engagements').empty();
+                $('#id_engagements').selectpicker('refresh');
+                return;
+            }
+
+            var url = "{% url 'engagement-list' %}" + "?product=" + productId;
+
             $.get(url, function (data) {
                 $('#id_engagements').empty();
+
                 if (data.results) {
                     $.each(data.results, function (index, value) {
-                        $('#id_engagements').append($("<option></option>").attr("value", value.id).text(value.name));
+                        $('#id_engagements').append(
+                            $("<option></option>")
+                                .attr("value", value.id)
+                                .text(value.name)
+                        );
                     });
                 }
+
                 $('#id_engagements').selectpicker('refresh');
             });
         });
+
+        $(document).on('input', '.bs-searchbox input', function () {
+            const searchText = $(this).val();
+            const productId = $('#id_product').val();
+
+            if (!productId || !searchText || searchText.length < 2) return;
+
+            clearTimeout(engagementSearchTimeout);
+
+            engagementSearchTimeout = setTimeout(function () {
+                const url = "{% url 'engagement-list' %}"
+                    + "?product=" + productId
+                    + "&name=" + encodeURIComponent(searchText);
+
+                $.get(url, function (data) {
+                    $('#id_engagements').empty();
+
+                    if (data.results) {
+                        $.each(data.results, function (index, value) {
+                            $('#id_engagements').append(
+                                $("<option></option>")
+                                    .attr("value", value.id)
+                                    .text(value.name)
+                            );
+                        });
+                    }
+
+                    $('#id_engagements').selectpicker('refresh');
+                });
+            }, 300);
+        });
+
     });
 </script>
 {% endblock %}

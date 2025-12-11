@@ -254,8 +254,21 @@
                 <strong>This applies to the following engagements:</strong>
                 <ul>
                 {% for engagement in finding_exclusion.engagements.all %}
-                  <li><code>{{ engagement.name }}</code></li>
+                  <li>
+                    <strong>Product Type: </strong><code>{{ engagement.product.prod_type.name }}</code><br>
+                    <strong>Product: </strong><code>{{ engagement.product.name }}</code><br>
+                    <strong>Engagement: </strong><code>{{ engagement.name }}</code> 
+                  </li><br>
                 {% endfor %}
+                </ul>
+              {% endif %}
+              {% if finding_exclusion.product and not finding_exclusion.engagements.all %}
+                <strong>This applies to the following product:</strong>
+                <ul>
+                  <li>
+                    <strong>Product Type: </strong><code>{{ finding_exclusion.product.prod_type.name }}</code><br>
+                    <strong>Product: </strong><code>{{ finding_exclusion.product.name }}</code>
+                  </li>
                 </ul>
               {% endif %}
             </div>

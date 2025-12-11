@@ -1,0 +1,2547 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <title>
+            
+            
+        </title>
+        
+        
+
+        <!-- jQuery -->
+        <script src="/static/jquery/dist/jquery.min.js"></script>
+        <!--  jQuery UI -->
+        <script src="/static/jquery-ui/dist/jquery-ui.min.js"></script>
+        <!-- Bootstrap Core JavaScript -->
+        <script src="/static/bootstrap/dist/js/bootstrap.min.js"></script>
+        <!-- Bootstrap Select -->
+        <script src="/static/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+
+        <!-- Metis Menu Plugin JavaScript -->
+        <script src="/static/metismenu/dist/metisMenu.min.js"></script>
+
+        <script src="/static/chosen-js/chosen.jquery.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/static/startbootstrap-sb-admin-2/dist/js/sb-admin-2.js"></script>
+        <!-- Calendar JavaScript -->
+        <script src="/static/moment/min/moment.min.js"></script>
+        <script src="/static/fullcalendar/dist/fullcalendar.min.js"></script>
+        <!-- jquery cookie -->
+        <script src="/static/jquery.cookie/jquery.cookie.js"></script>
+        <!-- DataTables Javascript -->
+        <!-- DataTables core (required) -->
+        <script src="/static/datatables.net/js/dataTables.min.js"></script>
+        <!-- DataTables with Bootstrap styling (integration) -->
+        <script src="/static/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+        <!-- DataTables Buttons extension (core) -->
+        <script src="/static/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+        <!-- DataTables Buttons Bootstrap integration -->
+        <script src="/static/datatables.net-buttons-bs/js/buttons.bootstrap.min.js"></script>
+        <!-- Other Buttons extensions -->
+        <script src="/static/datatables.net-buttons/js/buttons.html5.min.js"></script>
+        <script src="/static/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+        <script src="/static/datatables.net-buttons/js/buttons.print.min.js"></script>
+        <!-- ColReorder extension -->
+        <script src="/static/datatables.net-colreorder/js/dataTables.colReorder.min.js"></script>
+
+        <script src="/static/pdfmake/build/pdfmake.min.js"></script>
+        <script src="/static/pdfmake/build/vfs_fonts.js"></script>
+
+        <script src="/static/jszip/dist/jszip.min.js"></script>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/static/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Bootstrap Select -->
+        <link href="/static/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet">
+
+        <!-- MetisMenu CSS -->
+        <link href="/static/metismenu/dist/metisMenu.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/static/startbootstrap-sb-admin-2/dist/css/sb-admin-2.css" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="/static/fontawesomefree/css/fontawesome.min.css" rel="stylesheet" type="text/css">
+        <link href="/static/fontawesomefree/css/brands.min.css" rel="stylesheet" type="text/css">
+        <link href="/static/fontawesomefree/css/solid.min.css" rel="stylesheet" type="text/css">
+
+        <!-- Flatpickr CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.css" rel="stylesheet">
+
+
+        
+        
+        <link rel="stylesheet" href="/static/jquery-ui/dist/themes/flick/jquery-ui.min.css">
+        <link rel="shortcut icon" type="image/png" href="/static/dojo/img/favicon.png"/>
+        <link rel="stylesheet" href="/static/chosen-bootstrap/chosen.bootstrap.min.css">
+        <link rel="stylesheet" href="/static/fullcalendar/dist/fullcalendar.min.css">
+        
+            <link rel="stylesheet" href="/static/dojo/css/dojo.css">
+        
+        <link rel="stylesheet" href="/static/datatables.net-bs/css/dataTables.bootstrap.min.css">
+        <link rel="stylesheet" href="/static/datatables.net-buttons-bs/css/buttons.bootstrap.min.css">
+
+        <style nonce="">
+            
+            
+        </style>
+    </head>
+    <body class="">
+        
+        
+        <div id="wrapper">
+            
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a rel="noopener noreferrer" class="navbar-brand" href="/">
+                        
+                            <div style="padding: 10px;">
+                                
+                                    <img src="/static/dojo/img/logo.png" alt="DefectDojo Logo" width="240"/>
+                                
+                            </div>
+                        
+                        </a>
+
+                    </div>
+                    <!-- /.navbar-header -->
+
+                    <ul class="nav navbar-top-links navbar-right">
+                        
+                        <li class="dropdown">
+                            <a rel="noopener noreferrer" class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="User Menu">
+                                <i class="fa-solid fa-user fa-fw"></i>
+                                <i class="fa-solid fa-caret-down"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-user">
+                                
+                                    
+                                    <li>
+                                        
+                                    </li>
+                                    <li>
+                                        
+                                    </li>
+                                
+                                
+                            </ul>
+                            <!-- /.dropdown-user -->
+                        </li>
+                        <!-- /.dropdown -->
+                    </ul>
+                    <!-- /.navbar-top-links -->
+
+                    
+                </nav>
+            
+            <!-- Page Content -->
+            <div id="page-wrapper">
+                
+                <div class="container-fluid">
+                    <!-- start of tabs -->
+                    
+                        
+                            <div class="row hidden-xs">
+                                <div class="col-lg-12">
+                                    
+                                </div>
+                            </div>
+                        
+                    
+                    <!-- end of tabs -->
+                    
+                    <!-- /.row -->
+                    <div class="row">
+                        <div id="base-content" class="col-lg-12">
+                            
+
+                            
+
+                            
+
+                            
+
+
+                            
+
+                            
+
+                            
+<h3>Create New Exclusion</h3>
+<form class="form-horizontal" method="post">
+    x
+
+    
+
+
+    
+
+
+
+
+
+    <div class="form-group">
+        
+            
+                <label class="col-sm-2 control-label
+                        "
+                       for="id_type">Type<sup>*</sup>
+                        
+                </label>
+            
+            <div class="col-sm-10  ">
+                <select name="type" class="form-control" id="id_type">
+  <option value="white_list">white_list</option>
+
+  <option value="black_list">black_list</option>
+
+</select>
+                <p style="width: 70%; font-style: italic; margin-bottom: 0px;"></p>
+                
+            </div>
+        
+    </div>
+
+    <div class="form-group">
+        
+            
+                <label class="col-sm-2 control-label
+                        "
+                       for="id_unique_id_from_tool">Unique id from tool<sup>*</sup>
+                        
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Vulnerability technical id from the source tool. Allows to track unique vulnerabilities." data-placement="right" data-container="body">
+                            </i>
+                        
+                </label>
+            
+            <div class="col-sm-10  ">
+                <input type="text" name="unique_id_from_tool" value="123" maxlength="500" class="form-control" required aria-describedby="id_unique_id_from_tool_helptext" id="id_unique_id_from_tool">
+                <p style="width: 70%; font-style: italic; margin-bottom: 0px;"></p>
+                
+            </div>
+        
+    </div>
+
+    <div class="form-group">
+        
+            
+                <label class="col-sm-2 control-label
+                        "
+                       for="id_reason">Reason<sup>*</sup>
+                        
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Please provide a reason for excluding this vulnerability id." data-placement="right" data-container="body">
+                            </i>
+                        
+                </label>
+            
+            <div class="col-sm-10  ">
+                <textarea name="reason" cols="40" rows="10" maxlength="200" class="form-control" required aria-describedby="id_reason_helptext" id="id_reason">
+</textarea>
+                <p style="width: 70%; font-style: italic; margin-bottom: 0px;"></p>
+                
+            </div>
+        
+    </div>
+
+    <div class="form-group">
+        
+            
+                <label class="col-sm-2 control-label
+                        ">Scope<sup>*</sup></label>
+            
+            <div class="col-sm-10 ">
+                
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="scope" value="all" id="id_scope_0" required checked>
+                            All Engagements
+                        </label>
+                    </div>
+                
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="scope" value="specific" id="id_scope_1" required>
+                            Specific Engagements
+                        </label>
+                    </div>
+                
+
+                
+
+                
+            </div>
+        
+    </div>
+
+    <div class="form-group">
+        
+            
+                <label class="col-sm-2 control-label
+                        "
+                       for="id_product_type">Product Type
+                        
+                </label>
+            
+            <div class="col-sm-10  ">
+                <select name="product_type" class="form-control" id="id_product_type">
+  <option value="" selected>---------</option>
+
+  <option value="3">EVC - DATOS ANALITICA E IA</option>
+
+  <option value="2">EVC - SIN DEFINIR</option>
+
+  <option value="1">EVC - defect-dojo</option>
+
+  <option value="4">EVC - defect-dojo54</option>
+
+  <option value="5">ProductType_0</option>
+
+  <option value="6">ProductType_1</option>
+
+  <option value="100">ProductType_100</option>
+
+  <option value="101">ProductType_101</option>
+
+  <option value="102">ProductType_102</option>
+
+  <option value="103">ProductType_103</option>
+
+  <option value="104">ProductType_104</option>
+
+  <option value="105">ProductType_105</option>
+
+  <option value="106">ProductType_106</option>
+
+  <option value="107">ProductType_107</option>
+
+  <option value="108">ProductType_108</option>
+
+  <option value="109">ProductType_109</option>
+
+  <option value="110">ProductType_110</option>
+
+  <option value="111">ProductType_111</option>
+
+  <option value="112">ProductType_112</option>
+
+  <option value="113">ProductType_113</option>
+
+  <option value="114">ProductType_114</option>
+
+  <option value="115">ProductType_115</option>
+
+  <option value="116">ProductType_116</option>
+
+  <option value="117">ProductType_117</option>
+
+  <option value="118">ProductType_118</option>
+
+  <option value="119">ProductType_119</option>
+
+  <option value="120">ProductType_120</option>
+
+  <option value="121">ProductType_121</option>
+
+  <option value="122">ProductType_122</option>
+
+  <option value="123">ProductType_123</option>
+
+  <option value="124">ProductType_124</option>
+
+  <option value="125">ProductType_125</option>
+
+  <option value="126">ProductType_126</option>
+
+  <option value="127">ProductType_127</option>
+
+  <option value="128">ProductType_128</option>
+
+  <option value="129">ProductType_129</option>
+
+  <option value="130">ProductType_130</option>
+
+  <option value="131">ProductType_131</option>
+
+  <option value="132">ProductType_132</option>
+
+  <option value="133">ProductType_133</option>
+
+  <option value="134">ProductType_134</option>
+
+  <option value="135">ProductType_135</option>
+
+  <option value="136">ProductType_136</option>
+
+  <option value="137">ProductType_137</option>
+
+  <option value="138">ProductType_138</option>
+
+  <option value="139">ProductType_139</option>
+
+  <option value="140">ProductType_140</option>
+
+  <option value="141">ProductType_141</option>
+
+  <option value="142">ProductType_142</option>
+
+  <option value="143">ProductType_143</option>
+
+  <option value="144">ProductType_144</option>
+
+  <option value="145">ProductType_145</option>
+
+  <option value="146">ProductType_146</option>
+
+  <option value="147">ProductType_147</option>
+
+  <option value="148">ProductType_148</option>
+
+  <option value="149">ProductType_149</option>
+
+  <option value="150">ProductType_150</option>
+
+  <option value="151">ProductType_151</option>
+
+  <option value="152">ProductType_152</option>
+
+  <option value="153">ProductType_153</option>
+
+  <option value="154">ProductType_154</option>
+
+  <option value="155">ProductType_155</option>
+
+  <option value="156">ProductType_156</option>
+
+  <option value="157">ProductType_157</option>
+
+  <option value="158">ProductType_158</option>
+
+  <option value="159">ProductType_159</option>
+
+  <option value="160">ProductType_160</option>
+
+  <option value="161">ProductType_161</option>
+
+  <option value="162">ProductType_162</option>
+
+  <option value="163">ProductType_163</option>
+
+  <option value="164">ProductType_164</option>
+
+  <option value="165">ProductType_165</option>
+
+  <option value="166">ProductType_166</option>
+
+  <option value="167">ProductType_167</option>
+
+  <option value="168">ProductType_168</option>
+
+  <option value="169">ProductType_169</option>
+
+  <option value="17">ProductType_17</option>
+
+  <option value="170">ProductType_170</option>
+
+  <option value="171">ProductType_171</option>
+
+  <option value="172">ProductType_172</option>
+
+  <option value="173">ProductType_173</option>
+
+  <option value="174">ProductType_174</option>
+
+  <option value="175">ProductType_175</option>
+
+  <option value="176">ProductType_176</option>
+
+  <option value="177">ProductType_177</option>
+
+  <option value="178">ProductType_178</option>
+
+  <option value="179">ProductType_179</option>
+
+  <option value="18">ProductType_18</option>
+
+  <option value="180">ProductType_180</option>
+
+  <option value="181">ProductType_181</option>
+
+  <option value="182">ProductType_182</option>
+
+  <option value="183">ProductType_183</option>
+
+  <option value="184">ProductType_184</option>
+
+  <option value="185">ProductType_185</option>
+
+  <option value="186">ProductType_186</option>
+
+  <option value="187">ProductType_187</option>
+
+  <option value="188">ProductType_188</option>
+
+  <option value="189">ProductType_189</option>
+
+  <option value="19">ProductType_19</option>
+
+  <option value="190">ProductType_190</option>
+
+  <option value="191">ProductType_191</option>
+
+  <option value="192">ProductType_192</option>
+
+  <option value="193">ProductType_193</option>
+
+  <option value="194">ProductType_194</option>
+
+  <option value="195">ProductType_195</option>
+
+  <option value="196">ProductType_196</option>
+
+  <option value="197">ProductType_197</option>
+
+  <option value="198">ProductType_198</option>
+
+  <option value="199">ProductType_199</option>
+
+  <option value="7">ProductType_2</option>
+
+  <option value="20">ProductType_20</option>
+
+  <option value="200">ProductType_200</option>
+
+  <option value="201">ProductType_201</option>
+
+  <option value="202">ProductType_202</option>
+
+  <option value="203">ProductType_203</option>
+
+  <option value="204">ProductType_204</option>
+
+  <option value="205">ProductType_205</option>
+
+  <option value="206">ProductType_206</option>
+
+  <option value="207">ProductType_207</option>
+
+  <option value="208">ProductType_208</option>
+
+  <option value="209">ProductType_209</option>
+
+  <option value="21">ProductType_21</option>
+
+  <option value="210">ProductType_210</option>
+
+  <option value="211">ProductType_211</option>
+
+  <option value="212">ProductType_212</option>
+
+  <option value="213">ProductType_213</option>
+
+  <option value="214">ProductType_214</option>
+
+  <option value="215">ProductType_215</option>
+
+  <option value="216">ProductType_216</option>
+
+  <option value="217">ProductType_217</option>
+
+  <option value="218">ProductType_218</option>
+
+  <option value="219">ProductType_219</option>
+
+  <option value="22">ProductType_22</option>
+
+  <option value="220">ProductType_220</option>
+
+  <option value="221">ProductType_221</option>
+
+  <option value="222">ProductType_222</option>
+
+  <option value="223">ProductType_223</option>
+
+  <option value="224">ProductType_224</option>
+
+  <option value="225">ProductType_225</option>
+
+  <option value="226">ProductType_226</option>
+
+  <option value="227">ProductType_227</option>
+
+  <option value="228">ProductType_228</option>
+
+  <option value="229">ProductType_229</option>
+
+  <option value="23">ProductType_23</option>
+
+  <option value="230">ProductType_230</option>
+
+  <option value="231">ProductType_231</option>
+
+  <option value="232">ProductType_232</option>
+
+  <option value="233">ProductType_233</option>
+
+  <option value="234">ProductType_234</option>
+
+  <option value="235">ProductType_235</option>
+
+  <option value="236">ProductType_236</option>
+
+  <option value="237">ProductType_237</option>
+
+  <option value="238">ProductType_238</option>
+
+  <option value="239">ProductType_239</option>
+
+  <option value="24">ProductType_24</option>
+
+  <option value="240">ProductType_240</option>
+
+  <option value="241">ProductType_241</option>
+
+  <option value="242">ProductType_242</option>
+
+  <option value="243">ProductType_243</option>
+
+  <option value="244">ProductType_244</option>
+
+  <option value="245">ProductType_245</option>
+
+  <option value="246">ProductType_246</option>
+
+  <option value="247">ProductType_247</option>
+
+  <option value="248">ProductType_248</option>
+
+  <option value="249">ProductType_249</option>
+
+  <option value="25">ProductType_25</option>
+
+  <option value="250">ProductType_250</option>
+
+  <option value="251">ProductType_251</option>
+
+  <option value="252">ProductType_252</option>
+
+  <option value="253">ProductType_253</option>
+
+  <option value="254">ProductType_254</option>
+
+  <option value="255">ProductType_255</option>
+
+  <option value="256">ProductType_256</option>
+
+  <option value="257">ProductType_257</option>
+
+  <option value="258">ProductType_258</option>
+
+  <option value="259">ProductType_259</option>
+
+  <option value="26">ProductType_26</option>
+
+  <option value="260">ProductType_260</option>
+
+  <option value="261">ProductType_261</option>
+
+  <option value="262">ProductType_262</option>
+
+  <option value="263">ProductType_263</option>
+
+  <option value="264">ProductType_264</option>
+
+  <option value="265">ProductType_265</option>
+
+  <option value="266">ProductType_266</option>
+
+  <option value="267">ProductType_267</option>
+
+  <option value="268">ProductType_268</option>
+
+  <option value="269">ProductType_269</option>
+
+  <option value="27">ProductType_27</option>
+
+  <option value="270">ProductType_270</option>
+
+  <option value="271">ProductType_271</option>
+
+  <option value="272">ProductType_272</option>
+
+  <option value="273">ProductType_273</option>
+
+  <option value="274">ProductType_274</option>
+
+  <option value="275">ProductType_275</option>
+
+  <option value="276">ProductType_276</option>
+
+  <option value="277">ProductType_277</option>
+
+  <option value="278">ProductType_278</option>
+
+  <option value="279">ProductType_279</option>
+
+  <option value="28">ProductType_28</option>
+
+  <option value="280">ProductType_280</option>
+
+  <option value="281">ProductType_281</option>
+
+  <option value="282">ProductType_282</option>
+
+  <option value="283">ProductType_283</option>
+
+  <option value="284">ProductType_284</option>
+
+  <option value="285">ProductType_285</option>
+
+  <option value="286">ProductType_286</option>
+
+  <option value="287">ProductType_287</option>
+
+  <option value="288">ProductType_288</option>
+
+  <option value="289">ProductType_289</option>
+
+  <option value="29">ProductType_29</option>
+
+  <option value="290">ProductType_290</option>
+
+  <option value="291">ProductType_291</option>
+
+  <option value="292">ProductType_292</option>
+
+  <option value="293">ProductType_293</option>
+
+  <option value="294">ProductType_294</option>
+
+  <option value="295">ProductType_295</option>
+
+  <option value="296">ProductType_296</option>
+
+  <option value="297">ProductType_297</option>
+
+  <option value="298">ProductType_298</option>
+
+  <option value="299">ProductType_299</option>
+
+  <option value="8">ProductType_3</option>
+
+  <option value="30">ProductType_30</option>
+
+  <option value="300">ProductType_300</option>
+
+  <option value="301">ProductType_301</option>
+
+  <option value="302">ProductType_302</option>
+
+  <option value="303">ProductType_303</option>
+
+  <option value="304">ProductType_304</option>
+
+  <option value="305">ProductType_305</option>
+
+  <option value="306">ProductType_306</option>
+
+  <option value="307">ProductType_307</option>
+
+  <option value="308">ProductType_308</option>
+
+  <option value="309">ProductType_309</option>
+
+  <option value="31">ProductType_31</option>
+
+  <option value="310">ProductType_310</option>
+
+  <option value="311">ProductType_311</option>
+
+  <option value="312">ProductType_312</option>
+
+  <option value="313">ProductType_313</option>
+
+  <option value="314">ProductType_314</option>
+
+  <option value="315">ProductType_315</option>
+
+  <option value="316">ProductType_316</option>
+
+  <option value="317">ProductType_317</option>
+
+  <option value="318">ProductType_318</option>
+
+  <option value="319">ProductType_319</option>
+
+  <option value="32">ProductType_32</option>
+
+  <option value="320">ProductType_320</option>
+
+  <option value="321">ProductType_321</option>
+
+  <option value="322">ProductType_322</option>
+
+  <option value="323">ProductType_323</option>
+
+  <option value="324">ProductType_324</option>
+
+  <option value="325">ProductType_325</option>
+
+  <option value="326">ProductType_326</option>
+
+  <option value="327">ProductType_327</option>
+
+  <option value="328">ProductType_328</option>
+
+  <option value="329">ProductType_329</option>
+
+  <option value="33">ProductType_33</option>
+
+  <option value="330">ProductType_330</option>
+
+  <option value="331">ProductType_331</option>
+
+  <option value="332">ProductType_332</option>
+
+  <option value="333">ProductType_333</option>
+
+  <option value="334">ProductType_334</option>
+
+  <option value="335">ProductType_335</option>
+
+  <option value="336">ProductType_336</option>
+
+  <option value="337">ProductType_337</option>
+
+  <option value="338">ProductType_338</option>
+
+  <option value="339">ProductType_339</option>
+
+  <option value="34">ProductType_34</option>
+
+  <option value="340">ProductType_340</option>
+
+  <option value="341">ProductType_341</option>
+
+  <option value="342">ProductType_342</option>
+
+  <option value="343">ProductType_343</option>
+
+  <option value="344">ProductType_344</option>
+
+  <option value="345">ProductType_345</option>
+
+  <option value="346">ProductType_346</option>
+
+  <option value="347">ProductType_347</option>
+
+  <option value="348">ProductType_348</option>
+
+  <option value="349">ProductType_349</option>
+
+  <option value="35">ProductType_35</option>
+
+  <option value="350">ProductType_350</option>
+
+  <option value="351">ProductType_351</option>
+
+  <option value="352">ProductType_352</option>
+
+  <option value="353">ProductType_353</option>
+
+  <option value="354">ProductType_354</option>
+
+  <option value="355">ProductType_355</option>
+
+  <option value="356">ProductType_356</option>
+
+  <option value="357">ProductType_357</option>
+
+  <option value="358">ProductType_358</option>
+
+  <option value="359">ProductType_359</option>
+
+  <option value="36">ProductType_36</option>
+
+  <option value="360">ProductType_360</option>
+
+  <option value="361">ProductType_361</option>
+
+  <option value="362">ProductType_362</option>
+
+  <option value="363">ProductType_363</option>
+
+  <option value="364">ProductType_364</option>
+
+  <option value="365">ProductType_365</option>
+
+  <option value="366">ProductType_366</option>
+
+  <option value="367">ProductType_367</option>
+
+  <option value="368">ProductType_368</option>
+
+  <option value="369">ProductType_369</option>
+
+  <option value="37">ProductType_37</option>
+
+  <option value="370">ProductType_370</option>
+
+  <option value="371">ProductType_371</option>
+
+  <option value="372">ProductType_372</option>
+
+  <option value="373">ProductType_373</option>
+
+  <option value="374">ProductType_374</option>
+
+  <option value="375">ProductType_375</option>
+
+  <option value="376">ProductType_376</option>
+
+  <option value="377">ProductType_377</option>
+
+  <option value="378">ProductType_378</option>
+
+  <option value="379">ProductType_379</option>
+
+  <option value="38">ProductType_38</option>
+
+  <option value="380">ProductType_380</option>
+
+  <option value="381">ProductType_381</option>
+
+  <option value="382">ProductType_382</option>
+
+  <option value="383">ProductType_383</option>
+
+  <option value="384">ProductType_384</option>
+
+  <option value="385">ProductType_385</option>
+
+  <option value="386">ProductType_386</option>
+
+  <option value="387">ProductType_387</option>
+
+  <option value="388">ProductType_388</option>
+
+  <option value="389">ProductType_389</option>
+
+  <option value="39">ProductType_39</option>
+
+  <option value="390">ProductType_390</option>
+
+  <option value="391">ProductType_391</option>
+
+  <option value="392">ProductType_392</option>
+
+  <option value="393">ProductType_393</option>
+
+  <option value="394">ProductType_394</option>
+
+  <option value="395">ProductType_395</option>
+
+  <option value="396">ProductType_396</option>
+
+  <option value="397">ProductType_397</option>
+
+  <option value="398">ProductType_398</option>
+
+  <option value="399">ProductType_399</option>
+
+  <option value="9">ProductType_4</option>
+
+  <option value="40">ProductType_40</option>
+
+  <option value="400">ProductType_400</option>
+
+  <option value="401">ProductType_401</option>
+
+  <option value="402">ProductType_402</option>
+
+  <option value="403">ProductType_403</option>
+
+  <option value="404">ProductType_404</option>
+
+  <option value="405">ProductType_405</option>
+
+  <option value="406">ProductType_406</option>
+
+  <option value="407">ProductType_407</option>
+
+  <option value="408">ProductType_408</option>
+
+  <option value="409">ProductType_409</option>
+
+  <option value="41">ProductType_41</option>
+
+  <option value="410">ProductType_410</option>
+
+  <option value="411">ProductType_411</option>
+
+  <option value="412">ProductType_412</option>
+
+  <option value="413">ProductType_413</option>
+
+  <option value="414">ProductType_414</option>
+
+  <option value="415">ProductType_415</option>
+
+  <option value="416">ProductType_416</option>
+
+  <option value="417">ProductType_417</option>
+
+  <option value="418">ProductType_418</option>
+
+  <option value="419">ProductType_419</option>
+
+  <option value="42">ProductType_42</option>
+
+  <option value="420">ProductType_420</option>
+
+  <option value="421">ProductType_421</option>
+
+  <option value="422">ProductType_422</option>
+
+  <option value="423">ProductType_423</option>
+
+  <option value="424">ProductType_424</option>
+
+  <option value="425">ProductType_425</option>
+
+  <option value="426">ProductType_426</option>
+
+  <option value="427">ProductType_427</option>
+
+  <option value="428">ProductType_428</option>
+
+  <option value="429">ProductType_429</option>
+
+  <option value="43">ProductType_43</option>
+
+  <option value="430">ProductType_430</option>
+
+  <option value="431">ProductType_431</option>
+
+  <option value="432">ProductType_432</option>
+
+  <option value="433">ProductType_433</option>
+
+  <option value="434">ProductType_434</option>
+
+  <option value="435">ProductType_435</option>
+
+  <option value="436">ProductType_436</option>
+
+  <option value="437">ProductType_437</option>
+
+  <option value="438">ProductType_438</option>
+
+  <option value="439">ProductType_439</option>
+
+  <option value="44">ProductType_44</option>
+
+  <option value="440">ProductType_440</option>
+
+  <option value="441">ProductType_441</option>
+
+  <option value="442">ProductType_442</option>
+
+  <option value="443">ProductType_443</option>
+
+  <option value="444">ProductType_444</option>
+
+  <option value="445">ProductType_445</option>
+
+  <option value="446">ProductType_446</option>
+
+  <option value="447">ProductType_447</option>
+
+  <option value="448">ProductType_448</option>
+
+  <option value="449">ProductType_449</option>
+
+  <option value="45">ProductType_45</option>
+
+  <option value="450">ProductType_450</option>
+
+  <option value="451">ProductType_451</option>
+
+  <option value="452">ProductType_452</option>
+
+  <option value="453">ProductType_453</option>
+
+  <option value="454">ProductType_454</option>
+
+  <option value="455">ProductType_455</option>
+
+  <option value="456">ProductType_456</option>
+
+  <option value="457">ProductType_457</option>
+
+  <option value="458">ProductType_458</option>
+
+  <option value="459">ProductType_459</option>
+
+  <option value="46">ProductType_46</option>
+
+  <option value="460">ProductType_460</option>
+
+  <option value="461">ProductType_461</option>
+
+  <option value="462">ProductType_462</option>
+
+  <option value="463">ProductType_463</option>
+
+  <option value="464">ProductType_464</option>
+
+  <option value="465">ProductType_465</option>
+
+  <option value="466">ProductType_466</option>
+
+  <option value="467">ProductType_467</option>
+
+  <option value="468">ProductType_468</option>
+
+  <option value="469">ProductType_469</option>
+
+  <option value="47">ProductType_47</option>
+
+  <option value="470">ProductType_470</option>
+
+  <option value="471">ProductType_471</option>
+
+  <option value="472">ProductType_472</option>
+
+  <option value="473">ProductType_473</option>
+
+  <option value="474">ProductType_474</option>
+
+  <option value="475">ProductType_475</option>
+
+  <option value="476">ProductType_476</option>
+
+  <option value="477">ProductType_477</option>
+
+  <option value="478">ProductType_478</option>
+
+  <option value="479">ProductType_479</option>
+
+  <option value="48">ProductType_48</option>
+
+  <option value="480">ProductType_480</option>
+
+  <option value="481">ProductType_481</option>
+
+  <option value="482">ProductType_482</option>
+
+  <option value="483">ProductType_483</option>
+
+  <option value="484">ProductType_484</option>
+
+  <option value="485">ProductType_485</option>
+
+  <option value="486">ProductType_486</option>
+
+  <option value="487">ProductType_487</option>
+
+  <option value="488">ProductType_488</option>
+
+  <option value="489">ProductType_489</option>
+
+  <option value="49">ProductType_49</option>
+
+  <option value="490">ProductType_490</option>
+
+  <option value="491">ProductType_491</option>
+
+  <option value="492">ProductType_492</option>
+
+  <option value="493">ProductType_493</option>
+
+  <option value="494">ProductType_494</option>
+
+  <option value="495">ProductType_495</option>
+
+  <option value="496">ProductType_496</option>
+
+  <option value="497">ProductType_497</option>
+
+  <option value="498">ProductType_498</option>
+
+  <option value="499">ProductType_499</option>
+
+  <option value="10">ProductType_5</option>
+
+  <option value="50">ProductType_50</option>
+
+  <option value="500">ProductType_500</option>
+
+  <option value="501">ProductType_501</option>
+
+  <option value="502">ProductType_502</option>
+
+  <option value="503">ProductType_503</option>
+
+  <option value="504">ProductType_504</option>
+
+  <option value="505">ProductType_505</option>
+
+  <option value="506">ProductType_506</option>
+
+  <option value="507">ProductType_507</option>
+
+  <option value="508">ProductType_508</option>
+
+  <option value="509">ProductType_509</option>
+
+  <option value="51">ProductType_51</option>
+
+  <option value="510">ProductType_510</option>
+
+  <option value="511">ProductType_511</option>
+
+  <option value="512">ProductType_512</option>
+
+  <option value="513">ProductType_513</option>
+
+  <option value="514">ProductType_514</option>
+
+  <option value="515">ProductType_515</option>
+
+  <option value="516">ProductType_516</option>
+
+  <option value="517">ProductType_517</option>
+
+  <option value="518">ProductType_518</option>
+
+  <option value="519">ProductType_519</option>
+
+  <option value="52">ProductType_52</option>
+
+  <option value="520">ProductType_520</option>
+
+  <option value="521">ProductType_521</option>
+
+  <option value="522">ProductType_522</option>
+
+  <option value="523">ProductType_523</option>
+
+  <option value="524">ProductType_524</option>
+
+  <option value="525">ProductType_525</option>
+
+  <option value="526">ProductType_526</option>
+
+  <option value="527">ProductType_527</option>
+
+  <option value="528">ProductType_528</option>
+
+  <option value="529">ProductType_529</option>
+
+  <option value="53">ProductType_53</option>
+
+  <option value="530">ProductType_530</option>
+
+  <option value="531">ProductType_531</option>
+
+  <option value="532">ProductType_532</option>
+
+  <option value="533">ProductType_533</option>
+
+  <option value="534">ProductType_534</option>
+
+  <option value="535">ProductType_535</option>
+
+  <option value="536">ProductType_536</option>
+
+  <option value="537">ProductType_537</option>
+
+  <option value="538">ProductType_538</option>
+
+  <option value="539">ProductType_539</option>
+
+  <option value="54">ProductType_54</option>
+
+  <option value="540">ProductType_540</option>
+
+  <option value="541">ProductType_541</option>
+
+  <option value="542">ProductType_542</option>
+
+  <option value="543">ProductType_543</option>
+
+  <option value="544">ProductType_544</option>
+
+  <option value="545">ProductType_545</option>
+
+  <option value="546">ProductType_546</option>
+
+  <option value="547">ProductType_547</option>
+
+  <option value="548">ProductType_548</option>
+
+  <option value="549">ProductType_549</option>
+
+  <option value="55">ProductType_55</option>
+
+  <option value="550">ProductType_550</option>
+
+  <option value="551">ProductType_551</option>
+
+  <option value="552">ProductType_552</option>
+
+  <option value="553">ProductType_553</option>
+
+  <option value="554">ProductType_554</option>
+
+  <option value="555">ProductType_555</option>
+
+  <option value="556">ProductType_556</option>
+
+  <option value="557">ProductType_557</option>
+
+  <option value="558">ProductType_558</option>
+
+  <option value="559">ProductType_559</option>
+
+  <option value="56">ProductType_56</option>
+
+  <option value="560">ProductType_560</option>
+
+  <option value="561">ProductType_561</option>
+
+  <option value="562">ProductType_562</option>
+
+  <option value="563">ProductType_563</option>
+
+  <option value="564">ProductType_564</option>
+
+  <option value="565">ProductType_565</option>
+
+  <option value="566">ProductType_566</option>
+
+  <option value="567">ProductType_567</option>
+
+  <option value="568">ProductType_568</option>
+
+  <option value="569">ProductType_569</option>
+
+  <option value="57">ProductType_57</option>
+
+  <option value="570">ProductType_570</option>
+
+  <option value="571">ProductType_571</option>
+
+  <option value="572">ProductType_572</option>
+
+  <option value="573">ProductType_573</option>
+
+  <option value="574">ProductType_574</option>
+
+  <option value="575">ProductType_575</option>
+
+  <option value="576">ProductType_576</option>
+
+  <option value="577">ProductType_577</option>
+
+  <option value="578">ProductType_578</option>
+
+  <option value="579">ProductType_579</option>
+
+  <option value="58">ProductType_58</option>
+
+  <option value="580">ProductType_580</option>
+
+  <option value="581">ProductType_581</option>
+
+  <option value="582">ProductType_582</option>
+
+  <option value="583">ProductType_583</option>
+
+  <option value="584">ProductType_584</option>
+
+  <option value="585">ProductType_585</option>
+
+  <option value="586">ProductType_586</option>
+
+  <option value="587">ProductType_587</option>
+
+  <option value="588">ProductType_588</option>
+
+  <option value="589">ProductType_589</option>
+
+  <option value="59">ProductType_59</option>
+
+  <option value="590">ProductType_590</option>
+
+  <option value="591">ProductType_591</option>
+
+  <option value="592">ProductType_592</option>
+
+  <option value="593">ProductType_593</option>
+
+  <option value="594">ProductType_594</option>
+
+  <option value="595">ProductType_595</option>
+
+  <option value="596">ProductType_596</option>
+
+  <option value="597">ProductType_597</option>
+
+  <option value="598">ProductType_598</option>
+
+  <option value="599">ProductType_599</option>
+
+  <option value="11">ProductType_6</option>
+
+  <option value="60">ProductType_60</option>
+
+  <option value="600">ProductType_600</option>
+
+  <option value="601">ProductType_601</option>
+
+  <option value="602">ProductType_602</option>
+
+  <option value="603">ProductType_603</option>
+
+  <option value="604">ProductType_604</option>
+
+  <option value="605">ProductType_605</option>
+
+  <option value="606">ProductType_606</option>
+
+  <option value="607">ProductType_607</option>
+
+  <option value="608">ProductType_608</option>
+
+  <option value="609">ProductType_609</option>
+
+  <option value="61">ProductType_61</option>
+
+  <option value="610">ProductType_610</option>
+
+  <option value="611">ProductType_611</option>
+
+  <option value="612">ProductType_612</option>
+
+  <option value="613">ProductType_613</option>
+
+  <option value="614">ProductType_614</option>
+
+  <option value="615">ProductType_615</option>
+
+  <option value="616">ProductType_616</option>
+
+  <option value="617">ProductType_617</option>
+
+  <option value="618">ProductType_618</option>
+
+  <option value="619">ProductType_619</option>
+
+  <option value="62">ProductType_62</option>
+
+  <option value="620">ProductType_620</option>
+
+  <option value="621">ProductType_621</option>
+
+  <option value="622">ProductType_622</option>
+
+  <option value="623">ProductType_623</option>
+
+  <option value="624">ProductType_624</option>
+
+  <option value="625">ProductType_625</option>
+
+  <option value="626">ProductType_626</option>
+
+  <option value="627">ProductType_627</option>
+
+  <option value="628">ProductType_628</option>
+
+  <option value="629">ProductType_629</option>
+
+  <option value="63">ProductType_63</option>
+
+  <option value="630">ProductType_630</option>
+
+  <option value="631">ProductType_631</option>
+
+  <option value="632">ProductType_632</option>
+
+  <option value="633">ProductType_633</option>
+
+  <option value="634">ProductType_634</option>
+
+  <option value="635">ProductType_635</option>
+
+  <option value="636">ProductType_636</option>
+
+  <option value="637">ProductType_637</option>
+
+  <option value="638">ProductType_638</option>
+
+  <option value="639">ProductType_639</option>
+
+  <option value="64">ProductType_64</option>
+
+  <option value="640">ProductType_640</option>
+
+  <option value="641">ProductType_641</option>
+
+  <option value="642">ProductType_642</option>
+
+  <option value="643">ProductType_643</option>
+
+  <option value="644">ProductType_644</option>
+
+  <option value="645">ProductType_645</option>
+
+  <option value="646">ProductType_646</option>
+
+  <option value="647">ProductType_647</option>
+
+  <option value="648">ProductType_648</option>
+
+  <option value="649">ProductType_649</option>
+
+  <option value="65">ProductType_65</option>
+
+  <option value="650">ProductType_650</option>
+
+  <option value="651">ProductType_651</option>
+
+  <option value="652">ProductType_652</option>
+
+  <option value="653">ProductType_653</option>
+
+  <option value="654">ProductType_654</option>
+
+  <option value="655">ProductType_655</option>
+
+  <option value="656">ProductType_656</option>
+
+  <option value="657">ProductType_657</option>
+
+  <option value="658">ProductType_658</option>
+
+  <option value="659">ProductType_659</option>
+
+  <option value="66">ProductType_66</option>
+
+  <option value="660">ProductType_660</option>
+
+  <option value="661">ProductType_661</option>
+
+  <option value="662">ProductType_662</option>
+
+  <option value="663">ProductType_663</option>
+
+  <option value="664">ProductType_664</option>
+
+  <option value="665">ProductType_665</option>
+
+  <option value="666">ProductType_666</option>
+
+  <option value="667">ProductType_667</option>
+
+  <option value="668">ProductType_668</option>
+
+  <option value="669">ProductType_669</option>
+
+  <option value="67">ProductType_67</option>
+
+  <option value="670">ProductType_670</option>
+
+  <option value="671">ProductType_671</option>
+
+  <option value="672">ProductType_672</option>
+
+  <option value="673">ProductType_673</option>
+
+  <option value="674">ProductType_674</option>
+
+  <option value="675">ProductType_675</option>
+
+  <option value="676">ProductType_676</option>
+
+  <option value="677">ProductType_677</option>
+
+  <option value="678">ProductType_678</option>
+
+  <option value="679">ProductType_679</option>
+
+  <option value="68">ProductType_68</option>
+
+  <option value="680">ProductType_680</option>
+
+  <option value="681">ProductType_681</option>
+
+  <option value="682">ProductType_682</option>
+
+  <option value="683">ProductType_683</option>
+
+  <option value="684">ProductType_684</option>
+
+  <option value="685">ProductType_685</option>
+
+  <option value="686">ProductType_686</option>
+
+  <option value="687">ProductType_687</option>
+
+  <option value="688">ProductType_688</option>
+
+  <option value="689">ProductType_689</option>
+
+  <option value="69">ProductType_69</option>
+
+  <option value="690">ProductType_690</option>
+
+  <option value="691">ProductType_691</option>
+
+  <option value="692">ProductType_692</option>
+
+  <option value="693">ProductType_693</option>
+
+  <option value="694">ProductType_694</option>
+
+  <option value="695">ProductType_695</option>
+
+  <option value="696">ProductType_696</option>
+
+  <option value="697">ProductType_697</option>
+
+  <option value="698">ProductType_698</option>
+
+  <option value="699">ProductType_699</option>
+
+  <option value="12">ProductType_7</option>
+
+  <option value="70">ProductType_70</option>
+
+  <option value="700">ProductType_700</option>
+
+  <option value="701">ProductType_701</option>
+
+  <option value="702">ProductType_702</option>
+
+  <option value="703">ProductType_703</option>
+
+  <option value="704">ProductType_704</option>
+
+  <option value="705">ProductType_705</option>
+
+  <option value="706">ProductType_706</option>
+
+  <option value="707">ProductType_707</option>
+
+  <option value="708">ProductType_708</option>
+
+  <option value="709">ProductType_709</option>
+
+  <option value="71">ProductType_71</option>
+
+  <option value="710">ProductType_710</option>
+
+  <option value="711">ProductType_711</option>
+
+  <option value="712">ProductType_712</option>
+
+  <option value="713">ProductType_713</option>
+
+  <option value="714">ProductType_714</option>
+
+  <option value="715">ProductType_715</option>
+
+  <option value="716">ProductType_716</option>
+
+  <option value="717">ProductType_717</option>
+
+  <option value="718">ProductType_718</option>
+
+  <option value="719">ProductType_719</option>
+
+  <option value="72">ProductType_72</option>
+
+  <option value="720">ProductType_720</option>
+
+  <option value="721">ProductType_721</option>
+
+  <option value="722">ProductType_722</option>
+
+  <option value="723">ProductType_723</option>
+
+  <option value="724">ProductType_724</option>
+
+  <option value="725">ProductType_725</option>
+
+  <option value="726">ProductType_726</option>
+
+  <option value="727">ProductType_727</option>
+
+  <option value="728">ProductType_728</option>
+
+  <option value="729">ProductType_729</option>
+
+  <option value="73">ProductType_73</option>
+
+  <option value="730">ProductType_730</option>
+
+  <option value="731">ProductType_731</option>
+
+  <option value="732">ProductType_732</option>
+
+  <option value="733">ProductType_733</option>
+
+  <option value="734">ProductType_734</option>
+
+  <option value="735">ProductType_735</option>
+
+  <option value="736">ProductType_736</option>
+
+  <option value="737">ProductType_737</option>
+
+  <option value="738">ProductType_738</option>
+
+  <option value="739">ProductType_739</option>
+
+  <option value="74">ProductType_74</option>
+
+  <option value="740">ProductType_740</option>
+
+  <option value="741">ProductType_741</option>
+
+  <option value="742">ProductType_742</option>
+
+  <option value="743">ProductType_743</option>
+
+  <option value="744">ProductType_744</option>
+
+  <option value="745">ProductType_745</option>
+
+  <option value="746">ProductType_746</option>
+
+  <option value="747">ProductType_747</option>
+
+  <option value="748">ProductType_748</option>
+
+  <option value="749">ProductType_749</option>
+
+  <option value="75">ProductType_75</option>
+
+  <option value="750">ProductType_750</option>
+
+  <option value="751">ProductType_751</option>
+
+  <option value="752">ProductType_752</option>
+
+  <option value="753">ProductType_753</option>
+
+  <option value="754">ProductType_754</option>
+
+  <option value="755">ProductType_755</option>
+
+  <option value="756">ProductType_756</option>
+
+  <option value="757">ProductType_757</option>
+
+  <option value="758">ProductType_758</option>
+
+  <option value="759">ProductType_759</option>
+
+  <option value="76">ProductType_76</option>
+
+  <option value="760">ProductType_760</option>
+
+  <option value="761">ProductType_761</option>
+
+  <option value="762">ProductType_762</option>
+
+  <option value="763">ProductType_763</option>
+
+  <option value="764">ProductType_764</option>
+
+  <option value="765">ProductType_765</option>
+
+  <option value="766">ProductType_766</option>
+
+  <option value="767">ProductType_767</option>
+
+  <option value="768">ProductType_768</option>
+
+  <option value="769">ProductType_769</option>
+
+  <option value="77">ProductType_77</option>
+
+  <option value="770">ProductType_770</option>
+
+  <option value="771">ProductType_771</option>
+
+  <option value="772">ProductType_772</option>
+
+  <option value="773">ProductType_773</option>
+
+  <option value="774">ProductType_774</option>
+
+  <option value="775">ProductType_775</option>
+
+  <option value="776">ProductType_776</option>
+
+  <option value="777">ProductType_777</option>
+
+  <option value="778">ProductType_778</option>
+
+  <option value="779">ProductType_779</option>
+
+  <option value="78">ProductType_78</option>
+
+  <option value="780">ProductType_780</option>
+
+  <option value="781">ProductType_781</option>
+
+  <option value="782">ProductType_782</option>
+
+  <option value="783">ProductType_783</option>
+
+  <option value="784">ProductType_784</option>
+
+  <option value="785">ProductType_785</option>
+
+  <option value="786">ProductType_786</option>
+
+  <option value="787">ProductType_787</option>
+
+  <option value="788">ProductType_788</option>
+
+  <option value="789">ProductType_789</option>
+
+  <option value="79">ProductType_79</option>
+
+  <option value="790">ProductType_790</option>
+
+  <option value="791">ProductType_791</option>
+
+  <option value="792">ProductType_792</option>
+
+  <option value="793">ProductType_793</option>
+
+  <option value="794">ProductType_794</option>
+
+  <option value="795">ProductType_795</option>
+
+  <option value="796">ProductType_796</option>
+
+  <option value="797">ProductType_797</option>
+
+  <option value="798">ProductType_798</option>
+
+  <option value="799">ProductType_799</option>
+
+  <option value="13">ProductType_8</option>
+
+  <option value="80">ProductType_80</option>
+
+  <option value="800">ProductType_800</option>
+
+  <option value="801">ProductType_801</option>
+
+  <option value="802">ProductType_802</option>
+
+  <option value="803">ProductType_803</option>
+
+  <option value="804">ProductType_804</option>
+
+  <option value="805">ProductType_805</option>
+
+  <option value="806">ProductType_806</option>
+
+  <option value="807">ProductType_807</option>
+
+  <option value="808">ProductType_808</option>
+
+  <option value="809">ProductType_809</option>
+
+  <option value="81">ProductType_81</option>
+
+  <option value="810">ProductType_810</option>
+
+  <option value="811">ProductType_811</option>
+
+  <option value="812">ProductType_812</option>
+
+  <option value="813">ProductType_813</option>
+
+  <option value="814">ProductType_814</option>
+
+  <option value="815">ProductType_815</option>
+
+  <option value="816">ProductType_816</option>
+
+  <option value="817">ProductType_817</option>
+
+  <option value="818">ProductType_818</option>
+
+  <option value="819">ProductType_819</option>
+
+  <option value="82">ProductType_82</option>
+
+  <option value="820">ProductType_820</option>
+
+  <option value="821">ProductType_821</option>
+
+  <option value="822">ProductType_822</option>
+
+  <option value="823">ProductType_823</option>
+
+  <option value="824">ProductType_824</option>
+
+  <option value="825">ProductType_825</option>
+
+  <option value="826">ProductType_826</option>
+
+  <option value="827">ProductType_827</option>
+
+  <option value="828">ProductType_828</option>
+
+  <option value="829">ProductType_829</option>
+
+  <option value="83">ProductType_83</option>
+
+  <option value="830">ProductType_830</option>
+
+  <option value="831">ProductType_831</option>
+
+  <option value="832">ProductType_832</option>
+
+  <option value="833">ProductType_833</option>
+
+  <option value="834">ProductType_834</option>
+
+  <option value="835">ProductType_835</option>
+
+  <option value="836">ProductType_836</option>
+
+  <option value="837">ProductType_837</option>
+
+  <option value="838">ProductType_838</option>
+
+  <option value="839">ProductType_839</option>
+
+  <option value="84">ProductType_84</option>
+
+  <option value="840">ProductType_840</option>
+
+  <option value="841">ProductType_841</option>
+
+  <option value="842">ProductType_842</option>
+
+  <option value="843">ProductType_843</option>
+
+  <option value="844">ProductType_844</option>
+
+  <option value="845">ProductType_845</option>
+
+  <option value="846">ProductType_846</option>
+
+  <option value="847">ProductType_847</option>
+
+  <option value="848">ProductType_848</option>
+
+  <option value="849">ProductType_849</option>
+
+  <option value="85">ProductType_85</option>
+
+  <option value="850">ProductType_850</option>
+
+  <option value="851">ProductType_851</option>
+
+  <option value="852">ProductType_852</option>
+
+  <option value="853">ProductType_853</option>
+
+  <option value="854">ProductType_854</option>
+
+  <option value="855">ProductType_855</option>
+
+  <option value="856">ProductType_856</option>
+
+  <option value="857">ProductType_857</option>
+
+  <option value="858">ProductType_858</option>
+
+  <option value="859">ProductType_859</option>
+
+  <option value="86">ProductType_86</option>
+
+  <option value="860">ProductType_860</option>
+
+  <option value="861">ProductType_861</option>
+
+  <option value="862">ProductType_862</option>
+
+  <option value="863">ProductType_863</option>
+
+  <option value="864">ProductType_864</option>
+
+  <option value="865">ProductType_865</option>
+
+  <option value="866">ProductType_866</option>
+
+  <option value="867">ProductType_867</option>
+
+  <option value="868">ProductType_868</option>
+
+  <option value="869">ProductType_869</option>
+
+  <option value="87">ProductType_87</option>
+
+  <option value="870">ProductType_870</option>
+
+  <option value="871">ProductType_871</option>
+
+  <option value="872">ProductType_872</option>
+
+  <option value="873">ProductType_873</option>
+
+  <option value="874">ProductType_874</option>
+
+  <option value="875">ProductType_875</option>
+
+  <option value="876">ProductType_876</option>
+
+  <option value="877">ProductType_877</option>
+
+  <option value="878">ProductType_878</option>
+
+  <option value="879">ProductType_879</option>
+
+  <option value="88">ProductType_88</option>
+
+  <option value="880">ProductType_880</option>
+
+  <option value="881">ProductType_881</option>
+
+  <option value="882">ProductType_882</option>
+
+  <option value="883">ProductType_883</option>
+
+  <option value="884">ProductType_884</option>
+
+  <option value="885">ProductType_885</option>
+
+  <option value="886">ProductType_886</option>
+
+  <option value="887">ProductType_887</option>
+
+  <option value="888">ProductType_888</option>
+
+  <option value="889">ProductType_889</option>
+
+  <option value="89">ProductType_89</option>
+
+  <option value="890">ProductType_890</option>
+
+  <option value="891">ProductType_891</option>
+
+  <option value="892">ProductType_892</option>
+
+  <option value="893">ProductType_893</option>
+
+  <option value="894">ProductType_894</option>
+
+  <option value="895">ProductType_895</option>
+
+  <option value="896">ProductType_896</option>
+
+  <option value="897">ProductType_897</option>
+
+  <option value="898">ProductType_898</option>
+
+  <option value="899">ProductType_899</option>
+
+  <option value="14">ProductType_9</option>
+
+  <option value="90">ProductType_90</option>
+
+  <option value="900">ProductType_900</option>
+
+  <option value="901">ProductType_901</option>
+
+  <option value="902">ProductType_902</option>
+
+  <option value="903">ProductType_903</option>
+
+  <option value="904">ProductType_904</option>
+
+  <option value="905">ProductType_905</option>
+
+  <option value="906">ProductType_906</option>
+
+  <option value="907">ProductType_907</option>
+
+  <option value="908">ProductType_908</option>
+
+  <option value="909">ProductType_909</option>
+
+  <option value="91">ProductType_91</option>
+
+  <option value="910">ProductType_910</option>
+
+  <option value="911">ProductType_911</option>
+
+  <option value="912">ProductType_912</option>
+
+  <option value="913">ProductType_913</option>
+
+  <option value="914">ProductType_914</option>
+
+  <option value="915">ProductType_915</option>
+
+  <option value="916">ProductType_916</option>
+
+  <option value="917">ProductType_917</option>
+
+  <option value="918">ProductType_918</option>
+
+  <option value="919">ProductType_919</option>
+
+  <option value="92">ProductType_92</option>
+
+  <option value="920">ProductType_920</option>
+
+  <option value="921">ProductType_921</option>
+
+  <option value="922">ProductType_922</option>
+
+  <option value="923">ProductType_923</option>
+
+  <option value="924">ProductType_924</option>
+
+  <option value="925">ProductType_925</option>
+
+  <option value="926">ProductType_926</option>
+
+  <option value="927">ProductType_927</option>
+
+  <option value="928">ProductType_928</option>
+
+  <option value="929">ProductType_929</option>
+
+  <option value="93">ProductType_93</option>
+
+  <option value="930">ProductType_930</option>
+
+  <option value="931">ProductType_931</option>
+
+  <option value="932">ProductType_932</option>
+
+  <option value="933">ProductType_933</option>
+
+  <option value="934">ProductType_934</option>
+
+  <option value="935">ProductType_935</option>
+
+  <option value="936">ProductType_936</option>
+
+  <option value="937">ProductType_937</option>
+
+  <option value="938">ProductType_938</option>
+
+  <option value="939">ProductType_939</option>
+
+  <option value="94">ProductType_94</option>
+
+  <option value="940">ProductType_940</option>
+
+  <option value="941">ProductType_941</option>
+
+  <option value="942">ProductType_942</option>
+
+  <option value="943">ProductType_943</option>
+
+  <option value="944">ProductType_944</option>
+
+  <option value="945">ProductType_945</option>
+
+  <option value="946">ProductType_946</option>
+
+  <option value="947">ProductType_947</option>
+
+  <option value="948">ProductType_948</option>
+
+  <option value="949">ProductType_949</option>
+
+  <option value="95">ProductType_95</option>
+
+  <option value="950">ProductType_950</option>
+
+  <option value="951">ProductType_951</option>
+
+  <option value="952">ProductType_952</option>
+
+  <option value="953">ProductType_953</option>
+
+  <option value="954">ProductType_954</option>
+
+  <option value="955">ProductType_955</option>
+
+  <option value="956">ProductType_956</option>
+
+  <option value="957">ProductType_957</option>
+
+  <option value="958">ProductType_958</option>
+
+  <option value="959">ProductType_959</option>
+
+  <option value="96">ProductType_96</option>
+
+  <option value="960">ProductType_960</option>
+
+  <option value="961">ProductType_961</option>
+
+  <option value="962">ProductType_962</option>
+
+  <option value="963">ProductType_963</option>
+
+  <option value="964">ProductType_964</option>
+
+  <option value="965">ProductType_965</option>
+
+  <option value="966">ProductType_966</option>
+
+  <option value="967">ProductType_967</option>
+
+  <option value="968">ProductType_968</option>
+
+  <option value="969">ProductType_969</option>
+
+  <option value="97">ProductType_97</option>
+
+  <option value="970">ProductType_970</option>
+
+  <option value="971">ProductType_971</option>
+
+  <option value="972">ProductType_972</option>
+
+  <option value="973">ProductType_973</option>
+
+  <option value="974">ProductType_974</option>
+
+  <option value="975">ProductType_975</option>
+
+  <option value="976">ProductType_976</option>
+
+  <option value="977">ProductType_977</option>
+
+  <option value="978">ProductType_978</option>
+
+  <option value="979">ProductType_979</option>
+
+  <option value="98">ProductType_98</option>
+
+  <option value="980">ProductType_980</option>
+
+  <option value="981">ProductType_981</option>
+
+  <option value="982">ProductType_982</option>
+
+  <option value="983">ProductType_983</option>
+
+  <option value="984">ProductType_984</option>
+
+  <option value="985">ProductType_985</option>
+
+  <option value="986">ProductType_986</option>
+
+  <option value="987">ProductType_987</option>
+
+  <option value="988">ProductType_988</option>
+
+  <option value="989">ProductType_989</option>
+
+  <option value="99">ProductType_99</option>
+
+  <option value="990">ProductType_990</option>
+
+  <option value="991">ProductType_991</option>
+
+  <option value="992">ProductType_992</option>
+
+  <option value="993">ProductType_993</option>
+
+  <option value="994">ProductType_994</option>
+
+  <option value="995">ProductType_995</option>
+
+  <option value="996">ProductType_996</option>
+
+  <option value="997">ProductType_997</option>
+
+  <option value="998">ProductType_998</option>
+
+  <option value="999">ProductType_999</option>
+
+</select>
+                <p style="width: 70%; font-style: italic; margin-bottom: 0px;"></p>
+                
+            </div>
+        
+    </div>
+
+    <div class="form-group">
+        
+            
+                <label class="col-sm-2 control-label
+                        "
+                       for="id_product">Product
+                        
+                </label>
+            
+            <div class="col-sm-10  ">
+                <select name="product" class="form-control" id="id_product">
+  <option value="" selected>---------</option>
+
+</select>
+                <p style="width: 70%; font-style: italic; margin-bottom: 0px;"></p>
+                
+            </div>
+        
+    </div>
+
+    <div class="form-group">
+        
+            
+                <label class="col-sm-2 control-label
+                        "
+                       for="id_engagements">Engagements
+                        
+                </label>
+            
+            <div class="col-sm-10  ">
+                <select name="engagements" class="form-control" id="id_engagements" multiple>
+</select>
+                <p style="width: 70%; font-style: italic; margin-bottom: 0px;"></p>
+                
+            </div>
+        
+    </div>
+
+
+
+
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+
+            
+            <input class="btn btn-primary" type="submit" label="creat_exclusion" name="create exclusion"
+                value="Create Exclusion" />
+            <input class="btn btn-primary" type="submit" label="add_exclusion" name="add_exclusion" value="Close" />
+            
+        </div>
+    </div>
+</form>
+<script type="application/javascript">
+    $(function () {
+        function toggleHierarchicalFields() {
+            var scope = $('input[name="scope"]:checked').val();
+            if (scope === 'specific') {
+                $('#id_product_type').closest('.form-group').show();
+                $('#id_product').closest('.form-group').show();
+                $('#id_engagements').closest('.form-group').show();
+            } else {
+                $('#id_product_type').closest('.form-group').hide();
+                $('#id_product').closest('.form-group').hide();
+                $('#id_engagements').closest('.form-group').hide();
+            }
+        }
+
+        toggleHierarchicalFields();
+
+        $('input[name="scope"]').change(function () {
+            toggleHierarchicalFields();
+        });
+
+        $('#id_product_type').change(function () {
+            var url = "/api/v2/products/" + "?prod_type=" + $(this).val();
+            $.get(url, function (data) {
+                $('#id_product').empty();
+                $('#id_product').append($("<option></option>").attr("value", "").text("---------"));
+                if (data.results) {
+                    $.each(data.results, function (index, value) {
+                        $('#id_product').append($("<option></option>").attr("value", value.id).text(value.name));
+                    });
+                }
+                $('#id_product').selectpicker('refresh');
+                $('#id_engagements').empty();
+                $('#id_engagements').selectpicker('refresh');
+            });
+        });
+
+        $('#id_product').change(function () {
+            var url = "/api/v2/engagements/" + "?product=" + $(this).val();
+            $.get(url, function (data) {
+                $('#id_engagements').empty();
+                if (data.results) {
+                    $.each(data.results, function (index, value) {
+                        $('#id_engagements').append($("<option></option>").attr("value", value.id).text(value.name));
+                    });
+                }
+                $('#id_engagements').selectpicker('refresh');
+            });
+        });
+    });
+</script>
+
+                        </div>
+                        <!-- /.col-lg-12 -->
+                    </div>
+                </div>
+                <!-- /.container-fluid -->
+            </div>
+            <!-- /#page-wrapper -->
+
+            <!-- .dojo-modals-wrapper -->
+            <div id="dojo-modals-wrapper" class="dojo-modals-wrapper">
+            
+            
+            </div>
+            <!-- /.dojo-modals-wrapper -->
+
+            <!-- Session Timeout Modal -->
+            <div class="modal fade" id="sessionTimeoutModal" tabindex="-1" role="dialog" aria-labelledby="sessionModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="sessionModalLabel">Session Expiring Soon</h4>
+                    </div>
+                    <div class="modal-body">
+                        Your session is about to expire due to inactivity.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- #footer-wrapper -->
+            <div id="footer-wrapper">
+            
+                <footer class="footer">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12 text-center text-">
+                                <p>
+                                    <a rel="noopener noreferrer" href="/">
+                                        <img class="logo" src="/static/dojo/img/chop.png" alt="DefectDojo Chop" height="45"/>
+                                    </a>
+                                    <br/>
+                                    <br/>
+                                    v. 2.50.1 ( 26116834 )
+                                </p>
+                                <p>
+                                    Detailed DefectDojo documentation can be found in our <a rel="noopener noreferrer"
+                                        href="https://documentation.defectdojo.com">GitHub Pages</a>.
+                                </p>
+                                <p>
+                                    DefectDojo is licensed under the <a rel="noopener noreferrer"
+                                        href="https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md">3-Clause BSD
+                            License</a>. | <a rel="noopener noreferrer" href="https://github.com/DefectDojo/django-DefectDojo/blob/master/NOTICE"> Dependencies Notice.</a>
+                                </p>
+                                <p>
+                                    &copy; 2015-2025 DefectDojo, Inc. All rights reserved. DefectDojo is trademark of DefectDojo, Inc.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            
+            </div>
+            <!-- /#footer-wrapper -->
+        </div>
+
+        <!-- /#wrapper -->
+
+        <!-- our JS -->
+        <script src="/static/dojo/js/index.js"></script>
+
+        <!-- our CVSS stuff -->
+        <script src="/static/dojo/js/cvsscalc31_helptext.js"></script>
+        <script src="/static/dojo/js/cvsscalc31.js"></script>
+        <script src="/static/dojo/js/cvss_calculator.js"></script>
+        <script type="application/javascript" nonce="">
+            $(document).ready(function() {
+                $('.has-popover').hover(
+                    function() { $(this).popover('show'); }, // hover
+                    function() { $(this).popover('hide'); } // unhover
+                );
+
+                
+
+                
+
+                function htmlEscape(str) {
+                    if (!str) {
+                        return '';
+                    }
+                    return str
+                        .replace(/\n/g, " ")
+                        .replace(/&/g, '&amp;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+                }
+
+                $("#id_jiraform-jira_issue").on('paste', function(e) {
+                    var clipboardData = e.clipboardData || e.originalEvent.clipboardData || window.clipboardData;
+                    var pastedData = clipboardData.getData('text');
+
+                    $this = $(this)
+                    // if someone entered/pasted a full URL, we strip evertyhing until last '/'
+                    setTimeout(function (elem) {
+                        $this.val($this.val().substring($this.val().lastIndexOf("/") + 1));
+                    }, 100);
+                });
+
+                <!-- TODO not working with django tagulous which uses select2, break styling -->
+                <!-- $('#id_tags').select2({ -->
+                    <!-- 'placeholder': 'Select or add some tags...', -->
+                    <!-- 'no_results_text': "Tag not found, press TAB key to add.", -->
+                <!-- }); -->
+
+                $('select').not('#notification-scope').addClass('selectpicker');
+                $('.selectpicker').attr('data-live-search', 'true');
+                $('.selectpicker').attr('data-container', 'body');
+                $('.selectpicker').css('width', '70%');
+                $('.selectpicker').selectpicker('render');
+
+            });
+        </script>
+        
+        
+        
+        
+    </body>
+</html>
