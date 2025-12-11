@@ -45,13 +45,9 @@
 {{- /*
   Determine the hostname to use for PostgreSQL/Redis.
 */}}
-{{- define "postgresql.hostname" -}}
-{{- if .Values.postgresql.enabled -}}
-{{-  if eq .Values.postgresql.architecture "replication" -}}
-{{-   printf "%s-%s-%s" .Release.Name "postgresql" .Values.postgresql.primary.name | trunc 63 | trimSuffix "-" -}}
-{{-  else -}}
-{{-   printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
-{{-  end -}}
+{{- define "postgres.hostname" -}}
+{{- if .Values.postgres.enabled -}}
+{{-  printf "%s-%s" .Release.Name "postgres" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- .Values.postgresServer | default "127.0.0.1" | quote -}}
 {{- end -}}
@@ -233,8 +229,8 @@ Inspired by Bitnami Common Chart v2.31.7
   - name: DD_DATABASE_PASSWORD
     valueFrom:
       secretKeyRef:
-        name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
-        key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
+        name: {{ .Values.postgres.auth.existingSecret | default "defectdojo-postgres-specific" }}
+        key: {{ .Values.postgres.auth.secretKeys.adminPasswordKey | default "postgresql-password" }}
   {{- with .Values.extraEnv }}
     {{- toYaml . | nindent 2 }}
   {{- end }}
@@ -274,7 +270,7 @@ Inspired by Bitnami Common Chart v2.31.7
   command: ["/cloud_sql_proxy"]
   args:
   - "-verbose={{ .Values.cloudsql.verbose }}"
-  - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
+  - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgres.primary.service.ports.postgresql }}"
   {{- if .Values.cloudsql.enable_iam_login }}
   - "-enable_iam_login"
   {{- end }}

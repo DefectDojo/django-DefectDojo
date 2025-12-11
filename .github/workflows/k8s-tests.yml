@@ -76,7 +76,7 @@ jobs:
                --set valkey.enabled=true \
                --set createValkeySecret=true \
                --set postgresql.enabled=true \
-               --set createPostgresqlSecret=true \
+               --set createPostgresSecret=true \
                --set createSecret=true
 
       - name: Check deployment status

@@ -12,7 +12,7 @@ createSecret: false
 # -- create valkey secret in defectdojo chart, outside of valkey chart
 createValkeySecret: false
 # -- create postgresql secret in defectdojo chart, outside of postgresql chart
-createPostgresqlSecret: false
+createPostgresSecret: false
 # -- Track configuration (trackConfig): will automatically respin application pods in case of config changes detection
 # can be:
 # 1. disabled (default)
@@ -550,45 +550,33 @@ initializer:
   # This might be handy for ArgoCD deployments
   staticName: false
 
-# -- For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/postgresql
-postgresql:
+# -- For more advance options check the bitnami chart documentation: https://artifacthub.io/packages/helm/cloudpirates-postgres/postgres
+postgres:
   # -- To use an external instance, switch enabled to `false` and set the address in `postgresServer` below
   enabled: true
   auth:
     username: defectdojo
     password: ""
     database: defectdojo
-    existingSecret: defectdojo-postgresql-specific
+    existingSecret: defectdojo-postgres-specific
     secretKeys:
-      adminPasswordKey: postgresql-postgres-password
-      userPasswordKey: postgresql-password
-      replicationPasswordKey: postgresql-replication-password
-  architecture: standalone
-  primary:
-    name: primary
-    persistence:
-      enabled: true
-    service:
-      ports:
-        postgresql: 5432
-    podSecurityContext:
-      # -- Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
-      enabled: true
-      # -- fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
-      fsGroup: 1001
-    containerSecurityContext:
-      # -- Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC
-      enabled: true
-      # -- runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
-      runAsUser: 1001
-    affinity: {}
-    nodeSelector: {}
-  volumePermissions:
+      adminPasswordKey: postgres-password
+  service:
+    port: 5432
+  podSecurityContext:
+    # -- fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+    fsGroup: 1001  # TODO: check this because in default, there is 999
+  containerSecurityContext:
+    # -- runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully.
+    runAsUser: 1001  # TODO: check this because in default, there is 999
+  affinity: {}
+  nodeSelector: {}
+  persistence:
     enabled: false
     # -- if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above
-    containerSecurityContext:
+    containerSecurityContext:  # TODO: check this because it is ont in cloudPirates
       runAsUser: 1001
-  shmVolume:
+  shmVolume:  # TODO: check this because it is ont in cloudPirates
     chmod:
       enabled: false
 
@@ -711,6 +699,6 @@ redisPort: 6379
 redisScheme: redis
 #
 # @schema type:[string, null]
-# -- To use an external PostgreSQL instance (like CloudSQL), set `postgresql.enabled` to false,
-# set items in `postgresql.auth` part for authentication, and set the address here:
+# -- To use an external PostgreSQL instance (like CloudSQL), set `postgres.enabled` to false,
+# set items in `postgres.auth` part for authentication, and set the address here:
 postgresServer: ~

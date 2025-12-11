@@ -31,7 +31,7 @@ spec:
             name: {{ $fullName }}
       env:
         - name: DD_DATABASE_USER
-          value: {{ .Values.postgresql.auth.username }}
+          value: {{ .Values.postgres.auth.username }}
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -41,8 +41,8 @@ spec:
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.postgresql.auth.existingSecret }}
-              key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
+              name: {{ .Values.postgres.auth.existingSecret }}
+              key: {{ .Values.postgres.auth.secretKeys.adminPasswordKey }}
         - name: DD_DEBUG
           value: 'True'
         - name: DD_SECRET_KEY

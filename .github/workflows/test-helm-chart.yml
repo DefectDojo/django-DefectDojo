@@ -103,7 +103,7 @@ jobs:
       #  if: steps.list_changed.outputs.changed == 'true'
 
       # - name: Run chart-testing (install)
-      #   run: ct install --config ct.yaml --target-branch ${{ env.ct-branch }} --helm-extra-args '--set createSecret=true --set createRabbitMqSecret=true --set createPostgresqlSecret=true --set timeout=900'
+      #   run: ct install --config ct.yaml --target-branch ${{ env.ct-branch }} --helm-extra-args '--set createSecret=true --set createRabbitMqSecret=true --set createPostgresSecret=true --set timeout=900'
       #  if: steps.list_changed.outputs.changed == 'true'
 
   docs_generation:
