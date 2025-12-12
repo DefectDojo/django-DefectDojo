@@ -12,7 +12,7 @@ django-environ==0.12.0
 django-filter==25.1
 django-imagekit==6.0.0
 django-multiselectfield==1.0.1
-django-polymorphic==4.2.0
+django-polymorphic==4.3.0
 django-crispy-forms==2.5
 django_extensions==4.1
 django-slack==5.19.0
@@ -34,8 +34,8 @@ cryptography==46.0.3
 python-dateutil==2.9.0.post0
 redis==7.1.0
 requests==2.32.5
-sqlalchemy==2.0.44  # Required by Celery broker transport
-urllib3==2.6.0
+sqlalchemy==2.0.45  # Required by Celery broker transport
+urllib3==2.6.2
 uWSGI==2.0.31
 vobject==0.9.9
 whitenoise==5.2.0
