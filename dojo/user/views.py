@@ -26,7 +26,10 @@ from django.utils.http import urlencode
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import PermissionDenied as RFPermissionDenied
+from rest_framework.exceptions import ValidationError as RFValidationError
 
+from dojo.authorization.authorization import user_is_superuser_or_global_owner
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.decorators import dojo_ratelimit
@@ -50,6 +53,7 @@ from dojo.labels import get_labels
 from dojo.models import Alerts, Dojo_Group_Member, Dojo_User, Product_Member, Product_Type_Member, UserContactInfo
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
+from dojo.user.authentication import reset_token_for_user
 from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting
 
 logger = logging.getLogger(__name__)
@@ -91,15 +95,17 @@ def api_v2_key(request):
         form = APIKeyForm(request.POST, instance=request.user)
         if form.is_valid() and form.cleaned_data["id"] == request.user.id:
             try:
-                api_key = Token.objects.get(user=request.user)
-                api_key.delete()
-                api_key = Token.objects.create(user=request.user)
-            except Token.DoesNotExist:
-                api_key = Token.objects.create(user=request.user)
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 _("API Key generated successfully."),
-                                 extra_tags="alert-success")
+                reset_token_for_user(acting_user=request.user, target_user=request.user, allow_self_reset=True)
+            except (RFPermissionDenied, RFValidationError) as e:
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    _("API Key generation failed: %s") % str(e),
+                                    extra_tags="alert-danger")
+            else:
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    _("API Key generated successfully."),
+                                    extra_tags="alert-success")
         else:
             raise PermissionDenied
     else:
@@ -439,10 +445,37 @@ def edit_user(request, uid):
                 global_role = global_role_form.save(commit=False)
                 global_role.user = user
                 global_role.save()
+
+                # Handle API token reset if checkbox is checked
+                # Only allow superusers or global owners to reset tokens
+                token_reset_success = False
+                if user_is_superuser_or_global_owner(request.user):
+                    reset_token = contact_form.cleaned_data.get("reset_api_token", False)
+                    if reset_token:
+                        try:
+                            reset_token_for_user(acting_user=request.user, target_user=user)
+                            token_reset_success = True
+                            messages.add_message(request,
+                                                messages.SUCCESS,
+                                                _("API token reset successfully."),
+                                                extra_tags="alert-success")
+                        except (RFPermissionDenied, RFValidationError) as e:
+                            # If permission denied or validation error, log but don't fail the user save
+                            messages.add_message(request,
+                                                messages.WARNING,
+                                                _("User saved successfully, but API token reset failed: %s") % str(e),
+                                                extra_tags="alert-warning")
+
                 messages.add_message(request,
                                     messages.SUCCESS,
                                     _("User saved successfully."),
                                     extra_tags="alert-success")
+
+                # Re-instantiate forms to uncheck the checkbox after successful save
+                if token_reset_success:
+                    # Reload contact from database to get updated token_last_reset timestamp
+                    contact.refresh_from_db()
+                    contact_form = UserContactInfoForm(instance=contact, user=user)
         else:
             messages.add_message(request,
                                 messages.ERROR,

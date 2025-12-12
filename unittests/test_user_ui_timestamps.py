@@ -8,20 +8,20 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 from dojo.models import Dojo_User, User, UserContactInfo
-from dojo.user.security import reset_token_for_user
+from dojo.user.authentication import reset_token_for_user
 
 
 class TestUserUITimestamps(TestCase):
     fixtures = ["dojo_testdata.json"]
 
-    @patch("dojo.user.security.create_notification")
+    @patch("dojo.user.authentication.create_notification")
     def test_view_user_contains_timestamps(self, mock_create_notification):
         fixed = datetime(2025, 12, 12, 12, 0, 0, tzinfo=UTC)
         admin = Dojo_User.objects.get(username="admin")
 
         # Create a target user and rotate their token at a fixed time.
         target = User.objects.create(username="ui-ts-target", email="ui-ts-target@dojo.com")
-        with patch("dojo.user.security.timezone.now", return_value=fixed):
+        with patch("dojo.user.authentication.timezone.now", return_value=fixed):
             reset_token_for_user(acting_user=admin, target_user=target)
 
         # Ensure the UI can render and the timestamps match what we wrote.
