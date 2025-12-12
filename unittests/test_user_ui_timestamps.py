@@ -14,7 +14,8 @@ from dojo.user.security import force_token_reset
 class TestUserUITimestamps(TestCase):
     fixtures = ["dojo_testdata.json"]
 
-    def test_view_user_contains_timestamps(self):
+    @patch("dojo.user.security.create_notification")
+    def test_view_user_contains_timestamps(self, mock_create_notification):
         fixed = datetime(2025, 12, 12, 12, 0, 0, tzinfo=UTC)
         admin = Dojo_User.objects.get(username="admin")
 

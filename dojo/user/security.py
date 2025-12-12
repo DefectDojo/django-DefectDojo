@@ -1,10 +1,12 @@
 from django.conf import settings
+from django.urls import reverse
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from dojo.authorization.authorization import user_is_superuser_or_global_owner
 from dojo.models import Dojo_User, UserContactInfo
+from dojo.notifications.helper import create_notification
 
 
 def force_token_reset(*, acting_user: Dojo_User, target_user: Dojo_User) -> None:
@@ -31,3 +33,15 @@ def force_token_reset(*, acting_user: Dojo_User, target_user: Dojo_User) -> None
     uci, _ = UserContactInfo.objects.get_or_create(user=target_user)
     uci.token_last_reset = timezone.now()
     uci.save(update_fields=["token_last_reset"])
+
+    # Send notification to the target user
+    create_notification(
+        event="other",
+        title="API Token Reset",
+        description=f"Your API token has been reset by {acting_user.get_full_name() or acting_user.username}. "
+                    f"Please retrieve the new API token via the UI to keep using the API.",
+        recipients=[target_user],
+        url=reverse("api_v2_key"),
+        requested_by=acting_user,
+        icon="key",
+    )
