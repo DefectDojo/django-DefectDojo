@@ -171,7 +171,7 @@ from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
-from dojo.user.security import force_token_reset
+from dojo.user.security import reset_token_for_user
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import (
     async_delete,
@@ -2421,7 +2421,7 @@ class UsersViewSet(
     )
     def reset_api_token(self, request, pk=None):
         target_user = self.get_object()
-        force_token_reset(acting_user=request.user, target_user=target_user)
+        reset_token_for_user(acting_user=request.user, target_user=target_user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

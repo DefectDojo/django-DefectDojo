@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
-from dojo.user.security import force_token_reset
+from dojo.user.security import reset_token_for_user
 
 
 class Command(BaseCommand):
@@ -39,7 +39,7 @@ class Command(BaseCommand):
             raise CommandError(msg) from exc
 
         try:
-            force_token_reset(acting_user=acting_user, target_user=target_user)
+            reset_token_for_user(acting_user=acting_user, target_user=target_user)
         except Exception as exc:
             raise CommandError(str(exc)) from exc
 

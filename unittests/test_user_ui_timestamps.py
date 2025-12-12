@@ -8,7 +8,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 from dojo.models import Dojo_User, User, UserContactInfo
-from dojo.user.security import force_token_reset
+from dojo.user.security import reset_token_for_user
 
 
 class TestUserUITimestamps(TestCase):
@@ -22,7 +22,7 @@ class TestUserUITimestamps(TestCase):
         # Create a target user and rotate their token at a fixed time.
         target = User.objects.create(username="ui-ts-target", email="ui-ts-target@dojo.com")
         with patch("dojo.user.security.timezone.now", return_value=fixed):
-            force_token_reset(acting_user=admin, target_user=target)
+            reset_token_for_user(acting_user=admin, target_user=target)
 
         # Ensure the UI can render and the timestamps match what we wrote.
         self.client.force_login(admin)

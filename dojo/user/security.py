@@ -9,7 +9,7 @@ from dojo.models import Dojo_User, UserContactInfo
 from dojo.notifications.helper import create_notification
 
 
-def force_token_reset(*, acting_user: Dojo_User, target_user: Dojo_User) -> None:
+def reset_token_for_user(*, acting_user: Dojo_User, target_user: Dojo_User) -> None:
     if not settings.API_TOKENS_ENABLED:
         msg = "API tokens are disabled."
         raise PermissionDenied(msg)
