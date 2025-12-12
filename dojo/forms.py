@@ -2439,7 +2439,9 @@ class UserContactInfoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
-        # Make timestamp fields readonly
+        # Make timestamp fields readonly.
+        # NOTE: `disabled=True` is enforced server-side by Django forms: posted values for disabled fields
+        # are ignored during binding/cleaning, so these timestamps cannot be modified via this form.
         if "password_last_reset" in self.fields:
             self.fields["password_last_reset"].disabled = True
         if "token_last_reset" in self.fields:
