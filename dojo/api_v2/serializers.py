@@ -523,10 +523,12 @@ class UserSerializer(serializers.ModelSerializer):
             "configuration_permissions",
         )
 
+    @extend_schema_field(serializers.DateTimeField(allow_null=True))
     def get_token_last_reset(self, instance):
         uci = getattr(instance, "usercontactinfo", None)
         return getattr(uci, "token_last_reset", None)
 
+    @extend_schema_field(serializers.DateTimeField(allow_null=True))
     def get_password_last_reset(self, instance):
         uci = getattr(instance, "usercontactinfo", None)
         return getattr(uci, "password_last_reset", None)
