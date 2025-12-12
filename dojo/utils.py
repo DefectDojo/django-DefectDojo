@@ -2020,17 +2020,17 @@ class async_delete:
                         retry_count += 1
                         if retry_count < max_retries:
                             # Exponential backoff with jitter
-                            wait_time = (2 ** retry_count) + random.uniform(0, 1)
+                            wait_time = (2 ** retry_count) + random.uniform(0, 1)  # noqa: S311
                             logger.warning(
                                 f"ASYNC_DELETE: Deadlock detected deleting {self.get_object_name(obj)} {obj.pk}, "
-                                f"retrying ({retry_count}/{max_retries}) after {wait_time:.2f}s"
+                                f"retrying ({retry_count}/{max_retries}) after {wait_time:.2f}s",
                             )
                             time.sleep(wait_time)
                             # Refresh object from DB before retry
                             obj.refresh_from_db()
                         else:
                             logger.error(
-                                f"ASYNC_DELETE: Deadlock persisted after {max_retries} retries for {self.get_object_name(obj)} {obj.pk}: {e}"
+                                f"ASYNC_DELETE: Deadlock persisted after {max_retries} retries for {self.get_object_name(obj)} {obj.pk}: {e}",
                             )
                             raise
                     else:
