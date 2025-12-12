@@ -10,7 +10,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
-from django.contrib.auth.views import LoginView, PasswordResetView
+from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetView
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -47,7 +47,7 @@ from dojo.forms import (
 )
 from dojo.group.queries import get_authorized_group_members_for_user
 from dojo.labels import get_labels
-from dojo.models import Alerts, Dojo_Group_Member, Dojo_User, Product_Member, Product_Type_Member
+from dojo.models import Alerts, Dojo_Group_Member, Dojo_User, Product_Member, Product_Type_Member, UserContactInfo
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting
@@ -289,6 +289,12 @@ def change_password(request):
             user.set_password(new_password)
             user.disable_force_password_reset()
             user.save()
+            # Case: user is logged in and changes their password via the profile UI.
+            # We stamp password_last_reset here so this flow is tracked independently from
+            # the "forgot password" reset flow (handled in DojoPasswordResetConfirmView).
+            uci, _created = UserContactInfo.objects.get_or_create(user=user)
+            uci.password_last_reset = now()
+            uci.save(update_fields=["password_last_reset"])
 
             messages.add_message(request,
                                     messages.SUCCESS,
@@ -669,3 +675,16 @@ class DojoPasswordResetView(PasswordResetView):
 
 class DojoForgotUsernameView(PasswordResetView):
     form_class = DojoForgotUsernameForm
+
+
+class DojoPasswordResetConfirmView(PasswordResetConfirmView):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Flow: user resets password via the emailed "forgot password" link.
+        # This uses PasswordResetConfirmView, so we stamp password_last_reset here
+        # because this flow does not pass through change_password().
+        user = form.user
+        uci, _created = UserContactInfo.objects.get_or_create(user=user)
+        uci.password_last_reset = now()
+        uci.save(update_fields=["password_last_reset"])
+        return response

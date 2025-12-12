@@ -1,0 +1,33 @@
+from django.conf import settings
+from django.utils import timezone
+from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import PermissionDenied, ValidationError
+
+from dojo.authorization.authorization import user_is_superuser_or_global_owner
+from dojo.models import Dojo_User, UserContactInfo
+
+
+def force_token_reset(*, acting_user: Dojo_User, target_user: Dojo_User) -> None:
+    if not settings.API_TOKENS_ENABLED:
+        msg = "API tokens are disabled."
+        raise PermissionDenied(msg)
+
+    if acting_user is None or getattr(acting_user, "is_anonymous", False):
+        msg = "Authentication required."
+        raise PermissionDenied(msg)
+
+    if acting_user == target_user:
+        msg = "Resetting your own API token via this endpoint is not allowed."
+        raise ValidationError(msg)
+
+    if not user_is_superuser_or_global_owner(acting_user):
+        msg = "Insufficient permissions to reset API tokens."
+        raise PermissionDenied(msg)
+
+    # Rotate token: delete existing token (if any), then create a new one.
+    Token.objects.filter(user=target_user).delete()
+    Token.objects.create(user=target_user)
+
+    uci, _ = UserContactInfo.objects.get_or_create(user=target_user)
+    uci.token_last_reset = timezone.now()
+    uci.save(update_fields=["token_last_reset"])
