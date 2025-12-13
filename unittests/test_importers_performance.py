@@ -121,72 +121,90 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
         )
 
         # First import
-        with (
+        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+        with (  # noqa: SIM117
             self.subTest("import1"), impersonate(Dojo_User.objects.get(username="admin")),
-            self.assertNumQueries(expected_num_queries1),
-            self._assertNumAsyncTask(expected_num_async_tasks1),
             scan_file1.open(encoding="utf-8") as scan,
         ):
-            import_options = {
-                "user": lead,
-                "lead": lead,
-                "scan_date": None,
-                "environment": environment,
-                "minimum_severity": "Info",
-                "active": True,
-                "verified": True,
-                "sync": True,
-                "scan_type": scan_type,
-                "engagement": engagement,
-                "tags": ["performance-test", "tag-in-param", "go-faster"],
-                "apply_tags_to_findings": True,
-            }
-            importer = DefaultImporter(**import_options)
-            test, _, _len_new_findings, _len_closed_findings, _, _, _ = importer.process_scan(scan)
+            with self.subTest(step="import1", metric="queries"):
+                with self.assertNumQueries(expected_num_queries1):
+                    with self.subTest(step="import1", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks1):
+                            import_options = {
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "environment": environment,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "sync": True,
+                                "scan_type": scan_type,
+                                "engagement": engagement,
+                                "tags": ["performance-test", "tag-in-param", "go-faster"],
+                                "apply_tags_to_findings": True,
+                            }
+                            importer = DefaultImporter(**import_options)
+                            test, _, _len_new_findings, _len_closed_findings, _, _, _ = importer.process_scan(scan)
 
         # Second import (reimport)
-        with (
+        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+        with (  # noqa: SIM117
             self.subTest("reimport1"), impersonate(Dojo_User.objects.get(username="admin")),
-            self.assertNumQueries(expected_num_queries2),
-            self._assertNumAsyncTask(expected_num_async_tasks2),
             scan_file2.open(encoding="utf-8") as scan,
         ):
-            reimport_options = {
-                "test": test,
-                "user": lead,
-                "lead": lead,
-                "scan_date": None,
-                "minimum_severity": "Info",
-                "active": True,
-                "verified": True,
-                "sync": True,
-                "scan_type": scan_type,
-                "tags": ["performance-test-reimport", "reimport-tag-in-param", "reimport-go-faster"],
-                "apply_tags_to_findings": True,
-            }
-            reimporter = DefaultReImporter(**reimport_options)
-            test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
+            with self.subTest(step="reimport1", metric="queries"):
+                with self.assertNumQueries(expected_num_queries2):
+                    with self.subTest(step="reimport1", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks2):
+                            reimport_options = {
+                                "test": test,
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "sync": True,
+                                "scan_type": scan_type,
+                                "tags": ["performance-test-reimport", "reimport-tag-in-param", "reimport-go-faster"],
+                                "apply_tags_to_findings": True,
+                            }
+                            reimporter = DefaultReImporter(**reimport_options)
+                            test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
         # Third import (reimport again)
-        with (
+        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+        with (  # noqa: SIM117
             self.subTest("reimport2"), impersonate(Dojo_User.objects.get(username="admin")),
-            self.assertNumQueries(expected_num_queries3),
-            self._assertNumAsyncTask(expected_num_async_tasks3),
             scan_file3.open(encoding="utf-8") as scan,
         ):
-            reimport_options = {
-                "test": test,
-                "user": lead,
-                "lead": lead,
-                "scan_date": None,
-                "minimum_severity": "Info",
-                "active": True,
-                "verified": True,
-                "sync": True,
-                "scan_type": scan_type,
-            }
-            reimporter = DefaultReImporter(**reimport_options)
-            test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
+            with self.subTest(step="reimport2", metric="queries"):
+                with self.assertNumQueries(expected_num_queries3):
+                    with self.subTest(step="reimport2", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks3):
+                            reimport_options = {
+                                "test": test,
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "sync": True,
+                                "scan_type": scan_type,
+                            }
+                            reimporter = DefaultReImporter(**reimport_options)
+                            test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
 
 class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
@@ -358,46 +376,58 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         )
 
         # First import - all findings should be new
-        with (
+        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+        with (  # noqa: SIM117
             self.subTest("first_import"), impersonate(Dojo_User.objects.get(username="admin")),
-            self.assertNumQueries(expected_num_queries1),
-            self._assertNumAsyncTask(expected_num_async_tasks1),
             STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
         ):
-            import_options = {
-                "user": lead,
-                "lead": lead,
-                "scan_date": None,
-                "environment": environment,
-                "minimum_severity": "Info",
-                "active": True,
-                "verified": True,
-                "scan_type": STACK_HAWK_SCAN_TYPE,
-                "engagement": engagement,
-            }
-            importer = DefaultImporter(**import_options)
-            _, _, len_new_findings1, len_closed_findings1, _, _, _ = importer.process_scan(scan)
+            with self.subTest(step="first_import", metric="queries"):
+                with self.assertNumQueries(expected_num_queries1):
+                    with self.subTest(step="first_import", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks1):
+                            import_options = {
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "environment": environment,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "scan_type": STACK_HAWK_SCAN_TYPE,
+                                "engagement": engagement,
+                            }
+                            importer = DefaultImporter(**import_options)
+                            _, _, len_new_findings1, len_closed_findings1, _, _, _ = importer.process_scan(scan)
 
         # Second import - all findings should be duplicates
-        with (
+        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+        with (  # noqa: SIM117
             self.subTest("second_import"), impersonate(Dojo_User.objects.get(username="admin")),
-            self.assertNumQueries(expected_num_queries2),
-            self._assertNumAsyncTask(expected_num_async_tasks2),
             STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
         ):
-            import_options = {
-                "user": lead,
-                "lead": lead,
-                "scan_date": None,
-                "environment": environment,
-                "minimum_severity": "Info",
-                "active": True,
-                "verified": True,
-                "scan_type": STACK_HAWK_SCAN_TYPE,
-                "engagement": engagement,
-            }
-            importer = DefaultImporter(**import_options)
-            _, _, len_new_findings2, len_closed_findings2, _, _, _ = importer.process_scan(scan)
+            with self.subTest(step="second_import", metric="queries"):
+                with self.assertNumQueries(expected_num_queries2):
+                    with self.subTest(step="second_import", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks2):
+                            import_options = {
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "environment": environment,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "scan_type": STACK_HAWK_SCAN_TYPE,
+                                "engagement": engagement,
+                            }
+                            importer = DefaultImporter(**import_options)
+                            _, _, len_new_findings2, len_closed_findings2, _, _, _ = importer.process_scan(scan)
 
         # Log the results for analysis
         logger.debug(f"First import: {len_new_findings1} new findings, {len_closed_findings1} closed findings")

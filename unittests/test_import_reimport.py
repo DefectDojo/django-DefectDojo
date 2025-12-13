@@ -2086,8 +2086,13 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         ).count()
 
         # Assert step 1 specific counts
-        self.assertEqual(step1_active, 213, "Step 1 active count")
-        self.assertEqual(step1_duplicate, 1, "Step 1 duplicate count")
+        # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        with self.subTest(step=1, metric="active"):
+            self.assertEqual(step1_active, 213, "Step 1 active count")
+        with self.subTest(step=1, metric="duplicate"):
+            self.assertEqual(step1_duplicate, 1, "Step 1 duplicate count")
 
         # Step 2: Reimport scan (same test)
         self.reimport_scan_with_params(
@@ -2108,8 +2113,13 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         ).count()
 
         # Assert step 2 specific counts
-        self.assertEqual(step2_active, 213, "Step 2 active count")
-        self.assertEqual(step2_duplicate, 1, "Step 2 duplicate count")
+        # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        with self.subTest(step=2, metric="active"):
+            self.assertEqual(step2_active, 213, "Step 2 active count")
+        with self.subTest(step=2, metric="duplicate"):
+            self.assertEqual(step2_duplicate, 1, "Step 2 duplicate count")
 
         # Step 3: Import scan in NEW engagement with batch_size=50
         with override_settings(
@@ -2151,16 +2161,21 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                 duplicate=True,
             ).count()
 
-            self.assertEqual(
-                step3_active,
-                step1_active,
-                "Step 3 active count should equal step 1 (baseline import)",
-            )
-            self.assertEqual(
-                step3_duplicate,
-                step1_duplicate,
-                "Step 3 duplicate count should equal step 1 (baseline import)",
-            )
+            # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+            # This allows us to see all count mismatches in a single test run, making it easier to fix
+            # all incorrect expected values at once rather than fixing them one at a time.
+            with self.subTest(step=3, metric="active"):
+                self.assertEqual(
+                    step3_active,
+                    step1_active,
+                    "Step 3 active count should equal step 1 (baseline import)",
+                )
+            with self.subTest(step=3, metric="duplicate"):
+                self.assertEqual(
+                    step3_duplicate,
+                    step1_duplicate,
+                    "Step 3 duplicate count should equal step 1 (baseline import)",
+                )
 
             # Step 4: Reimport scan in same new engagement (batch_size=50)
             self.reimport_scan_with_params(
@@ -2180,16 +2195,21 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                 duplicate=True,
             ).count()
 
-            self.assertEqual(
-                step4_active,
-                step2_active,
-                "Step 4 active count should equal step 2 (baseline reimport)",
-            )
-            self.assertEqual(
-                step4_duplicate,
-                step2_duplicate,
-                "Step 4 duplicate count should equal step 2 (baseline reimport)",
-            )
+            # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+            # This allows us to see all count mismatches in a single test run, making it easier to fix
+            # all incorrect expected values at once rather than fixing them one at a time.
+            with self.subTest(step=4, metric="active"):
+                self.assertEqual(
+                    step4_active,
+                    step2_active,
+                    "Step 4 active count should equal step 2 (baseline reimport)",
+                )
+            with self.subTest(step=4, metric="duplicate"):
+                self.assertEqual(
+                    step4_duplicate,
+                    step2_duplicate,
+                    "Step 4 duplicate count should equal step 2 (baseline reimport)",
+                )
 
     def test_batch_deduplication_large_bandit_file(self):
         """
@@ -2304,16 +2324,21 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                 duplicate=True,
             ).count()
 
-            self.assertEqual(
-                step3_active,
-                step1_active,
-                "Step 3 active count should equal step 1 (baseline import)",
-            )
-            self.assertEqual(
-                step3_duplicate,
-                step1_duplicate,
-                "Step 3 duplicate count should equal step 1 (baseline import)",
-            )
+            # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+            # This allows us to see all count mismatches in a single test run, making it easier to fix
+            # all incorrect expected values at once rather than fixing them one at a time.
+            with self.subTest(step=3, metric="active"):
+                self.assertEqual(
+                    step3_active,
+                    step1_active,
+                    "Step 3 active count should equal step 1 (baseline import)",
+                )
+            with self.subTest(step=3, metric="duplicate"):
+                self.assertEqual(
+                    step3_duplicate,
+                    step1_duplicate,
+                    "Step 3 duplicate count should equal step 1 (baseline import)",
+                )
 
             # Step 4: Import scan again in same new engagement (batch_size=50)
             self.import_scan_with_params(
@@ -2337,16 +2362,21 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                 duplicate=True,
             ).count()
 
-            self.assertEqual(
-                step4_active,
-                step2_active,
-                "Step 4 active count should equal step 2 (baseline second import)",
-            )
-            self.assertEqual(
-                step4_duplicate,
-                step2_duplicate,
-                "Step 4 duplicate count should equal step 2 (baseline second import)",
-            )
+            # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+            # This allows us to see all count mismatches in a single test run, making it easier to fix
+            # all incorrect expected values at once rather than fixing them one at a time.
+            with self.subTest(step=4, metric="active"):
+                self.assertEqual(
+                    step4_active,
+                    step2_active,
+                    "Step 4 active count should equal step 2 (baseline second import)",
+                )
+            with self.subTest(step=4, metric="duplicate"):
+                self.assertEqual(
+                    step4_duplicate,
+                    step2_duplicate,
+                    "Step 4 duplicate count should equal step 2 (baseline second import)",
+                )
 
 
 class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
