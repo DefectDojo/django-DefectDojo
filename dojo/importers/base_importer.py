@@ -793,9 +793,34 @@ class BaseImporter(ImporterOptions):
     ) -> Finding:
         """
         Parse the `unsaved_vulnerability_ids` field from findings after they are parsed
-        to create `Vulnerability_Id` objects with the finding associated correctly
+        to create `Vulnerability_Id` objects with the finding associated correctly.
+        Only updates if vulnerability_ids have changed to avoid unnecessary database operations.
+
+        Args:
+            finding: The finding to process vulnerability IDs for
+
+        Returns:
+            The finding object
+
         """
         if finding.unsaved_vulnerability_ids:
+            # Only check for changes if the finding has been saved and might have existing vulnerability_ids
+            # For new findings, we always need to save vulnerability_ids
+            if finding.pk and finding.vulnerability_id_set.exists():
+                # Check if vulnerability_ids have changed before updating
+                # Get existing vulnerability IDs from the database
+                existing_vuln_ids = set(finding.vulnerability_ids) if finding.vulnerability_ids else set()
+                # Normalize the new vulnerability IDs (remove duplicates for comparison)
+                new_vuln_ids = set(finding.unsaved_vulnerability_ids)
+
+                # Only update if vulnerability IDs have changed
+                if existing_vuln_ids == new_vuln_ids:
+                    logger.debug(
+                        f"Skipping vulnerability_ids update for finding {finding.id} - "
+                        f"vulnerability_ids unchanged: {sorted(existing_vuln_ids)}",
+                    )
+                    return finding
+
             # Remove old vulnerability ids - keeping this call only because of flake8
             Vulnerability_Id.objects.filter(finding=finding).delete()
 

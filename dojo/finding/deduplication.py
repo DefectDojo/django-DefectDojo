@@ -255,7 +255,7 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
     return (
         queryset
         .select_related("test", "test__engagement", "test__test_type")
-        .prefetch_related("endpoints")
+        .prefetch_related("endpoints", "vulnerability_id_set")
     )
 
 
