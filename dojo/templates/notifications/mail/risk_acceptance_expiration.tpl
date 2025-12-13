@@ -28,7 +28,7 @@
 			{% for finding in risk_acceptance.accepted_findings.all %}
 				{% if not finding.is_mitigated and finding.risk_status == "Risk Accepted" %}
 					{% url 'view_finding' finding.id as finding_url %}
-					<a href="{{ finding_url|full_url }}">{{ finding.title }}</a> {{ finding.severity }} {{ finding|finding_display_status:"email" }}
+					<a href="{{ finding_url|full_url }}">{{ finding.title }}</a> {{ finding|render_severity_and_priority }} {{ finding|finding_display_status:"email" }}
 				{% endif %}
 			{% endfor %}
 			<br/>

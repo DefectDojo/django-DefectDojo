@@ -590,14 +590,14 @@
                                                     {{ finding|priority_display_status }}
                                                 </span>
                                             </td>
-                                            {%endif%}
+                                            {% endif %}
                                             {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
                                             <td class="centered severity-sort" data-severity="{{ finding.severity_display }}">
                                                 <span class="label severity severity-{{ finding.severity }}">
                                                     {{ finding.severity_display }}
                                                 </span>
                                             </td>
-                                            {%endif%}
+                                            {% endif %}
                                             <td>
                                                 {% if finding.title %}
                                                     <a rel="noopener noreferrer" title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{finding.id}} - {{ finding.title|truncatechars_html:60 }}</a>
