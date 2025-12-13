@@ -7,7 +7,16 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.importers.default_importer import DefaultImporter
-from dojo.models import Development_Environment, Engagement, Finding, Product, Product_Type, Test, User
+from dojo.models import (
+    Development_Environment,
+    Engagement,
+    Finding,
+    Product,
+    Product_Type,
+    Test,
+    User,
+    Vulnerability_Id,
+)
 from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from dojo.tools.sarif.parser import SarifParser
 from dojo.utils import get_object_or_none
@@ -613,4 +622,78 @@ class TestImporterUtils(DojoAPITestCase):
         self.assertEqual(finding.cve, None)
         self.assertEqual(finding.unsaved_vulnerability_ids, None)
         self.assertEqual(finding.vulnerability_ids, [])
+        finding.delete()
+
+    def test_clear_vulnerability_ids_on_empty_list(self):
+        """Test that vulnerability IDs are cleared when an empty list is provided"""
+        # Create a finding with existing vulnerability IDs
+        finding = Finding()
+        finding.test = self.test
+        finding.reporter = self.testuser
+        finding.save()
+
+        # Add some vulnerability IDs
+        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
+        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-5678")
+        finding.cve = "CVE-2020-1234"
+        finding.save()
+
+        # Verify initial state
+        self.assertEqual(2, len(finding.vulnerability_ids))
+        self.assertEqual("CVE-2020-1234", finding.cve)
+
+        # Process with empty list - should clear all IDs
+        finding.unsaved_vulnerability_ids = []
+        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
+        # Save the finding to persist the cve=None change
+        finding.save()
+
+        # Get fresh finding from database to avoid cached property issues
+        finding = Finding.objects.get(pk=finding.pk)
+
+        # Verify IDs are cleared
+        self.assertEqual(0, len(finding.vulnerability_ids))
+        self.assertEqual(None, finding.cve)
+        # Verify no Vulnerability_Id objects exist for this finding
+        self.assertEqual(0, Vulnerability_Id.objects.filter(finding=finding).count())
+        finding.delete()
+
+    def test_change_vulnerability_ids_on_reimport(self):
+        """Test that vulnerability IDs are updated when different IDs are provided"""
+        # Create a finding with existing vulnerability IDs
+        finding = Finding()
+        finding.test = self.test
+        finding.reporter = self.testuser
+        finding.save()
+
+        # Add initial vulnerability IDs
+        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
+        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-5678")
+        finding.cve = "CVE-2020-1234"
+        finding.save()
+
+        # Verify initial state
+        self.assertEqual(2, len(finding.vulnerability_ids))
+        self.assertEqual("CVE-2020-1234", finding.vulnerability_ids[0])
+        self.assertEqual("CVE-2020-5678", finding.vulnerability_ids[1])
+        self.assertEqual("CVE-2020-1234", finding.cve)
+
+        # Process with different IDs - should replace old IDs
+        new_vulnerability_ids = ["CVE-2021-9999", "GHSA-xxxx-yyyy"]
+        finding.unsaved_vulnerability_ids = new_vulnerability_ids
+        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
+        # Save the finding to persist the cve change
+        finding.save()
+
+        # Get fresh finding from database to avoid cached property issues
+        finding = Finding.objects.get(pk=finding.pk)
+
+        # Verify old IDs are removed and new IDs are present
+        self.assertEqual(2, len(finding.vulnerability_ids))
+        self.assertEqual("CVE-2021-9999", finding.vulnerability_ids[0])
+        self.assertEqual("GHSA-xxxx-yyyy", finding.vulnerability_ids[1])
+        self.assertEqual("CVE-2021-9999", finding.cve)
+        # Verify only new Vulnerability_Id objects exist
+        vuln_ids = list(Vulnerability_Id.objects.filter(finding=finding).values_list("vulnerability_id", flat=True))
+        self.assertEqual(set(new_vulnerability_ids), set(vuln_ids))
         finding.delete()

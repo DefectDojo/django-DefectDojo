@@ -695,7 +695,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         finding: Finding,
         finding_from_report: Finding,
-    ) -> None:
+    ) -> Finding:
         """
         Save all associated objects to the finding after it has been saved
         for the purpose of foreign key restrictions
@@ -715,10 +715,19 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             finding.unsaved_files = finding_from_report.unsaved_files
         self.process_files(finding)
         # Process vulnerability IDs
-        if finding_from_report.unsaved_vulnerability_ids:
-            finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids
+        # Copy unsaved_vulnerability_ids from the report finding to the existing finding
+        # so process_vulnerability_ids can process them (see its docstring for details)
+        # Always set it (even if empty list) so we can clear existing IDs when report has none
+        finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids or []
+        # Store the current cve value to check if it changes
+        old_cve = finding.cve
         # legacy cve field has already been processed/set earlier
-        return self.process_vulnerability_ids(finding)
+        finding = self.process_vulnerability_ids(finding)
+        # Save the finding only if the cve field was changed by save_vulnerability_ids
+        # This is temporary as the cve field will be phased out
+        if finding.cve != old_cve:
+            finding.save()
+        return finding
 
     def process_groups_for_all_findings(
         self,
