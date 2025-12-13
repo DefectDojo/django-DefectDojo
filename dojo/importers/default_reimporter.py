@@ -189,8 +189,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.reactivated_items = []
         self.unchanged_items = []
         self.group_names_to_findings_dict = {}
-        # Progressive batching for chord execution
-        # No chord: we dispatch per 1000 findings or on the final finding
 
         logger.debug(f"starting reimport of {len(parsed_findings) if parsed_findings else 0} items.")
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
@@ -244,9 +242,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 deduplicationLogger.debug(f"unsaved finding's hash_code: {unsaved_finding.hash_code}")
 
             # Fetch all candidates for this batch at once (batch candidate finding)
-            candidates_by_hash = None
-            candidates_by_uid = None
-            candidates_by_key = None
+            candidates_by_hash = {}
+            candidates_by_uid = {}
+            candidates_by_key = {}
 
             if self.deduplication_algorithm == "hash_code":
                 candidates_by_hash = find_candidates_for_deduplication_hash(
@@ -266,6 +264,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # Process each finding in the batch using pre-fetched candidates
             for idx, unsaved_finding in enumerate(batch_findings):
                 is_final = is_final_batch and idx == len(batch_findings) - 1
+
                 # Match any findings to this new one coming in using pre-fetched candidates
                 matched_findings = self.match_finding_for_reimport(
                     unsaved_finding,
@@ -297,6 +296,26 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         )
                 else:
                     finding = self.process_finding_that_was_not_matched(unsaved_finding)
+
+                    # Add newly created finding to candidates for subsequent findings in this batch
+                    if finding:
+                        if finding.hash_code:
+                            candidates_by_hash.setdefault(finding.hash_code, []).append(finding)
+                            deduplicationLogger.debug(
+                                f"Added finding {finding.id} (hash_code: {finding.hash_code}) to candidates for next findings in this report",
+                            )
+                        if finding.unique_id_from_tool:
+                            candidates_by_uid.setdefault(finding.unique_id_from_tool, []).append(finding)
+                            deduplicationLogger.debug(
+                                f"Added finding {finding.id} (unique_id_from_tool: {finding.unique_id_from_tool}) to candidates for next findings in this report",
+                            )
+                        if finding.title:
+                            legacy_key = (finding.title.lower(), finding.severity)
+                            candidates_by_key.setdefault(legacy_key, []).append(finding)
+                            deduplicationLogger.debug(
+                                f"Added finding {finding.id} (title: {finding.title}, severity: {finding.severity}) to candidates for next findings in this report",
+                            )
+
                 # This condition __appears__ to always be true, but am afraid to remove it
                 if finding:
                     # Process the rest of the items on the finding
