@@ -1704,6 +1704,9 @@ def mktemplate(request, fid):
         )
         template.save()
         template.tags = finding.tags.all()
+        # Ensure template tags exist in Finding's tag model
+        # (They should already exist since they come from a finding, but ensure for consistency)
+        ensure_template_tags_in_finding_model(template)
 
         for vulnerability_id in finding.vulnerability_ids:
             Vulnerability_Id_Template(
@@ -1782,12 +1785,52 @@ def find_template_to_apply(request, fid):
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
-    data = finding.__dict__
-    # Not sure what's going on here, just leave same as with django-tagging
-    data["tags"] = [tag.name for tag in template.tags.all()]
+    data = finding.__dict__.copy()
+    # Remove tags and other non-serializable fields
+    data.pop("tags", None)
+    data.pop("_state", None)
+    data.pop("_tags_tagulous", None)
+    template_tag_names = [tag.name for tag in template.tags.all()]
+    # Add tags as comma-separated string for TagField
+    if template_tag_names:
+        data["tags"] = ", ".join(template_tag_names)
     data["vulnerability_ids"] = "\n".join(finding.vulnerability_ids)
 
     form = ApplyFindingTemplateForm(data=data, template=template)
+    # Combine tags from both Finding_Template and Finding tag models
+    # This ensures we don't lose tags that exist on templates but may have been removed from findings
+    if "tags" in form.fields:
+        finding_tag_model = Finding.tags.tag_model
+        template_tag_model = Finding_Template.tags.tag_model
+
+        # Get all tags from Finding_Template model
+        template_tags = set(template_tag_model.objects.values_list("name", flat=True))
+        # Get all tags from Finding model
+        finding_tags = set(finding_tag_model.objects.values_list("name", flat=True))
+        # Combine both sets to get all unique tag names
+        all_tag_names = template_tags | finding_tags
+
+        # Ensure all tags from both models exist in Finding's tag model (where they'll be applied)
+        # Strictly speaking, creating tags here isn't necessary since TagField can create them on save,
+        # but it's the safest option to avoid tags getting lost or not getting rendered properly.
+        # This prevents tagulous from removing tags that only exist on templates and ensures
+        # TagField can display them correctly during form rendering.
+        # Store tag objects in a dict for reuse
+        tag_objects = {}
+        for tag_name in all_tag_names:
+            tag, _ = finding_tag_model.objects.get_or_create(
+                name=tag_name,
+                defaults={"name": tag_name, "protected": False},
+            )
+            tag_objects[tag_name] = tag
+
+        # Update autocomplete_tags to include tags from both models
+        form.fields["tags"].autocomplete_tags = finding_tag_model.objects.all().order_by("name")
+
+        # Set initial value using template tags (already created above)
+        if template_tag_names:
+            template_finding_tags = [tag_objects[tag_name] for tag_name in template_tag_names]
+            form.fields["tags"].initial = template_finding_tags
     product_tab = Product_Tab(
         finding.test.engagement.product,
         title="Finding Template Options",
@@ -2109,6 +2152,28 @@ def export_templates_to_json(request):
     return HttpResponse(leads_as_json, content_type="json")
 
 
+def ensure_template_tags_in_finding_model(template):
+    """
+    Ensure all tags on a Finding_Template also exist in Finding's tag model.
+    This prevents tags from being lost when tagulous cleans up unused tags and ensures
+    tags can be properly applied when templates are used.
+    """
+    if not template or not template.pk:
+        return
+
+    finding_tag_model = Finding.tags.tag_model
+
+    # Get all tag names from the template
+    template_tag_names = [tag.name for tag in template.tags.all()]
+
+    # Ensure each tag exists in Finding's tag model
+    for tag_name in template_tag_names:
+        finding_tag_model.objects.get_or_create(
+            name=tag_name,
+            defaults={"name": tag_name, "protected": False},
+        )
+
+
 def apply_cwe_mitigation(apply_to_findings, template, *, update=True):
     count = 0
     if apply_to_findings and template.template_match and template.cwe is not None:
@@ -2191,6 +2256,8 @@ def add_template(request):
                 template, form.cleaned_data["vulnerability_ids"].split(),
             )
             form.save_m2m()
+            # Ensure template tags exist in Finding's tag model
+            ensure_template_tags_in_finding_model(template)
             count = apply_cwe_mitigation(
                 form.cleaned_data["apply_to_findings"], template,
             )
@@ -2238,6 +2305,8 @@ def edit_template(request, tid):
             )
             template.save()
             form.save_m2m()
+            # Ensure template tags exist in Finding's tag model
+            ensure_template_tags_in_finding_model(template)
 
             count = apply_cwe_mitigation(
                 form.cleaned_data["apply_to_findings"], template,
