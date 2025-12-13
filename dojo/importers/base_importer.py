@@ -31,7 +31,6 @@ from dojo.models import (
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
-    Vulnerability_Id,
 )
 from dojo.notifications.helper import create_notification
 from dojo.tag_utils import bulk_add_tags_to_instances
@@ -796,36 +795,41 @@ class BaseImporter(ImporterOptions):
         to create `Vulnerability_Id` objects with the finding associated correctly.
         Only updates if vulnerability_ids have changed to avoid unnecessary database operations.
 
+        Note: The finding parameter can be:
+        - A new finding (from import) with unsaved_vulnerability_ids set from the parsed report
+        - An existing finding (from reimport) with unsaved_vulnerability_ids copied from the
+          finding_from_report before calling this method
+
         Args:
-            finding: The finding to process vulnerability IDs for
+            finding: The finding to process vulnerability IDs for.
+                For reimports, this is the existing finding with unsaved_vulnerability_ids
+                set from the import/reimport report.
 
         Returns:
             The finding object
 
         """
-        if finding.unsaved_vulnerability_ids:
-            # Only check for changes if the finding has been saved and might have existing vulnerability_ids
-            # For new findings, we always need to save vulnerability_ids
-            if finding.pk and finding.vulnerability_id_set.exists():
-                # Check if vulnerability_ids have changed before updating
-                # Get existing vulnerability IDs from the database
-                existing_vuln_ids = set(finding.vulnerability_ids) if finding.vulnerability_ids else set()
-                # Normalize the new vulnerability IDs (remove duplicates for comparison)
-                new_vuln_ids = set(finding.unsaved_vulnerability_ids)
+        # Normalize to empty list if None - always process vulnerability IDs
+        vulnerability_ids_to_process = finding.unsaved_vulnerability_ids or []
 
-                # Only update if vulnerability IDs have changed
-                if existing_vuln_ids == new_vuln_ids:
-                    logger.debug(
-                        f"Skipping vulnerability_ids update for finding {finding.id} - "
-                        f"vulnerability_ids unchanged: {sorted(existing_vuln_ids)}",
-                    )
-                    return finding
+        # For existing findings, check if there are changes before updating
+        if finding.pk and len(finding.vulnerability_id_set.all()) > 0:
+            # Get existing vulnerability IDs from the database
+            existing_vuln_ids = set(finding.vulnerability_ids) if finding.vulnerability_ids else set()
+            # Normalize the new vulnerability IDs (remove duplicates for comparison)
+            new_vuln_ids = set(vulnerability_ids_to_process)
 
-            # Remove old vulnerability ids - keeping this call only because of flake8
-            Vulnerability_Id.objects.filter(finding=finding).delete()
+            # Only update if vulnerability IDs have changed
+            if existing_vuln_ids == new_vuln_ids:
+                logger.debug(
+                    f"Skipping vulnerability_ids update for finding {finding.id} - "
+                    f"vulnerability_ids unchanged: {sorted(existing_vuln_ids)}",
+                )
+                return finding
 
-            # user the helper function
-            finding_helper.save_vulnerability_ids(finding, finding.unsaved_vulnerability_ids)
+        # Use the helper function which handles deletion and creation
+        # Always use delete_existing=True - it's a no-op if there are no existing IDs
+        finding_helper.save_vulnerability_ids(finding, vulnerability_ids_to_process, delete_existing=True)
 
         return finding
 

@@ -102,6 +102,9 @@ class ImportReimportMixin:
         self.anchore_grype_file_name = get_unit_tests_scans_path("anchore_grype") / "check_all_fields.json"
         self.anchore_grype_file_name_fix_not_available = get_unit_tests_scans_path("anchore_grype") / "fix_not_available.json"
         self.anchore_grype_file_name_fix_available = get_unit_tests_scans_path("anchore_grype") / "fix_available.json"
+        self.anchore_grype_file_name_with_ids_fabricated = get_unit_tests_scans_path("anchore_grype") / "check_all_fields_with_ids_fabricated.json"
+        self.anchore_grype_file_name_no_ids_fabricated = get_unit_tests_scans_path("anchore_grype") / "check_all_fields_no_ids_fabricated.json"
+        self.anchore_grype_file_name_different_ids_fabricated = get_unit_tests_scans_path("anchore_grype") / "check_all_fields_different_ids_fabricated.json"
         self.anchore_grype_scan_type = "Anchore Grype"
 
         self.checkmarx_one_open_and_false_positive = get_unit_tests_scans_path("checkmarx_one") / "one-open-one-false-positive.json"
@@ -1695,6 +1698,78 @@ class ImportReimportMixin:
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual("GHSA-v6rh-hp5x-86rv", findings[3].vulnerability_ids[0])
         self.assertEqual("CVE-2021-44420", findings[3].vulnerability_ids[1])
+
+    def test_import_reimport_clear_vulnerability_ids(self):
+        """Test that vulnerability IDs are cleared when reimporting with no IDs"""
+        # Import scan with vulnerability IDs
+        import0 = self.import_scan_with_params(self.anchore_grype_file_name_with_ids_fabricated, scan_type=self.anchore_grype_scan_type)
+
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        findings = Finding.objects.filter(test=test)
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.cve)
+        self.assertEqual(2, len(finding.vulnerability_ids))
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.vulnerability_ids[0])
+        self.assertEqual("CVE-2021-44420", finding.vulnerability_ids[1])
+
+        # Reimport with no vulnerability IDs - should clear existing IDs
+        test_type = Test_Type.objects.get(name=self.anchore_grype_scan_type)
+        reimport_test = Test(
+            engagement=test.engagement,
+            test_type=test_type,
+            scan_type=self.anchore_grype_scan_type,
+            target_start=datetime.now(timezone.get_current_timezone()),
+            target_end=datetime.now(timezone.get_current_timezone()),
+        )
+        reimport_test.save()
+
+        self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name_no_ids_fabricated, scan_type=self.anchore_grype_scan_type)
+        findings = Finding.objects.filter(test=reimport_test)
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        # After clearing, only the primary vuln_id should remain (GHSA-v6rh-hp5x-86rv)
+        # because the parser always includes the primary vulnerability.id
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.cve)
+        self.assertEqual(1, len(finding.vulnerability_ids))
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.vulnerability_ids[0])
+
+    def test_import_reimport_change_vulnerability_ids(self):
+        """Test that vulnerability IDs are updated when reimporting with different IDs"""
+        # Import scan with initial vulnerability IDs
+        import0 = self.import_scan_with_params(self.anchore_grype_file_name_with_ids_fabricated, scan_type=self.anchore_grype_scan_type)
+
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        findings = Finding.objects.filter(test=test)
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.cve)
+        self.assertEqual(2, len(finding.vulnerability_ids))
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.vulnerability_ids[0])
+        self.assertEqual("CVE-2021-44420", finding.vulnerability_ids[1])
+
+        # Reimport with different vulnerability IDs - should update existing IDs
+        test_type = Test_Type.objects.get(name=self.anchore_grype_scan_type)
+        reimport_test = Test(
+            engagement=test.engagement,
+            test_type=test_type,
+            scan_type=self.anchore_grype_scan_type,
+            target_start=datetime.now(timezone.get_current_timezone()),
+            target_end=datetime.now(timezone.get_current_timezone()),
+        )
+        reimport_test.save()
+
+        self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name_different_ids_fabricated, scan_type=self.anchore_grype_scan_type)
+        findings = Finding.objects.filter(test=reimport_test)
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.cve)
+        self.assertEqual(3, len(finding.vulnerability_ids))
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.vulnerability_ids[0])
+        self.assertEqual("CVE-2021-1234", finding.vulnerability_ids[1])
+        self.assertEqual("CVE-2021-5678", finding.vulnerability_ids[2])
 
     def test_import_reimport_fix_available(self):
         import0 = self.import_scan_with_params(self.anchore_grype_file_name_fix_not_available, scan_type=self.anchore_grype_scan_type)
