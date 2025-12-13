@@ -35,6 +35,10 @@ class Command(BaseCommand):
             return
 
         # Calculate column widths
+        max_test_id_len = max(
+            (len(str(test.id)) for test in tests),
+            default=8,
+        )
         max_product_len = max(
             (len(str(test.engagement.product.name)) for test in tests),
             default=20,
@@ -57,6 +61,7 @@ class Command(BaseCommand):
         )
 
         # Ensure minimum widths for readability
+        max_test_id_len = max(max_test_id_len, 8)
         max_product_len = max(max_product_len, 20)
         max_engagement_len = max(max_engagement_len, 20)
         max_test_len = max(max_test_len, 20)
@@ -65,6 +70,7 @@ class Command(BaseCommand):
 
         # Header
         header = (
+            f"{'Test ID':<{max_test_id_len}} | "
             f"{'Product':<{max_product_len}} | "
             f"{'Engagement':<{max_engagement_len}} | "
             f"{'Test':<{max_test_len}} | "
@@ -81,6 +87,7 @@ class Command(BaseCommand):
 
         # Data rows
         for test in tests:
+            test_id = str(test.id)
             product_name = str(test.engagement.product.name)
             engagement_name = str(test.engagement.name)
             test_name = str(test.title or f"Test #{test.id}")
@@ -91,6 +98,7 @@ class Command(BaseCommand):
             duplicate = test.duplicate_findings
 
             row = (
+                f"{test_id:<{max_test_id_len}} | "
                 f"{product_name:<{max_product_len}} | "
                 f"{engagement_name:<{max_engagement_len}} | "
                 f"{test_name:<{max_test_len}} | "
