@@ -11,7 +11,7 @@ from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.models import Finding, Test, Test_Type, User
+from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, User
 
 from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
 from .test_utils import assertTestImportModelsCreated
@@ -107,6 +107,9 @@ class ImportReimportMixin:
         self.checkmarx_one_open_and_false_positive = get_unit_tests_scans_path("checkmarx_one") / "one-open-one-false-positive.json"
         self.checkmarx_one_two_false_positive = get_unit_tests_scans_path("checkmarx_one") / "two-false-positive.json"
         self.scan_type_checkmarx_one = "Checkmarx One Scan"
+
+        self.bandit_large_file = get_unit_tests_scans_path("bandit") / "many_vulns.json"
+        self.scan_type_bandit = "Bandit Scan"
 
     # import zap scan, testing:
     # - import
@@ -2032,6 +2035,318 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # Get the date
         date = findings["results"][0]["date"]
         self.assertEqual(date, "2006-12-26")
+
+    @override_settings(
+        IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=200,
+        IMPORT_REIMPORT_MATCH_BATCH_SIZE=200,
+    )
+    def test_batch_reimport_large_bandit_file(self):
+        """
+        Test that batch reimport produces identical results to non-batch mode (which we simulate via large max batch size setting).
+
+        Step 1: Import scan (baseline), assess active count, duplicate count
+        Step 2: Reimport scan (same test), assess active count, duplicate count
+        Step 3: Import scan in NEW engagement with batch_size=50, assess active and duplicate equal to step 1
+        Step 4: Reimport scan in same new engagement (batch_size=50), assess active and duplicate equal to step 2
+        """
+        # Step 1: Baseline import (default batch size)
+        # Create engagement first and set deduplication_on_engagement before import
+        product_type1, _ = Product_Type.objects.get_or_create(name="PT Bandit Baseline")
+        product1, _ = Product.objects.get_or_create(name="P Bandit Baseline", prod_type=product_type1)
+        engagement1 = Engagement.objects.create(
+            name="E Bandit Baseline",
+            product=product1,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        engagement1.deduplication_on_engagement = True
+        engagement1.save()
+        engagement1_id = engagement1.id
+
+        import1 = self.import_scan_with_params(
+            self.bandit_large_file,
+            scan_type=self.scan_type_bandit,
+            engagement=engagement1_id,
+            product_type_name=None,
+            product_name=None,
+            engagement_name=None,
+            auto_create_context=False,
+        )
+        test1_id = import1["test"]
+
+        # Assess step 1: active count, duplicate count
+        step1_active = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            active=True,
+            duplicate=False,
+        ).count()
+        step1_duplicate = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            duplicate=True,
+        ).count()
+
+        # Assert step 1 specific counts
+        self.assertEqual(step1_active, 213, "Step 1 active count")
+        self.assertEqual(step1_duplicate, 1, "Step 1 duplicate count")
+
+        # Step 2: Reimport scan (same test)
+        self.reimport_scan_with_params(
+            test1_id,
+            self.bandit_large_file,
+            scan_type=self.scan_type_bandit,
+        )
+
+        # Assess step 2: active count, duplicate count
+        step2_active = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            active=True,
+            duplicate=False,
+        ).count()
+        step2_duplicate = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            duplicate=True,
+        ).count()
+
+        # Assert step 2 specific counts
+        self.assertEqual(step2_active, 213, "Step 2 active count")
+        self.assertEqual(step2_duplicate, 1, "Step 2 duplicate count")
+
+        # Step 3: Import scan in NEW engagement with batch_size=50
+        with override_settings(
+            IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=50,
+            IMPORT_REIMPORT_MATCH_BATCH_SIZE=50,
+        ):
+            # Create engagement first and set deduplication_on_engagement before import
+            product_type2, _ = Product_Type.objects.get_or_create(name="PT Bandit Batch")
+            product2, _ = Product.objects.get_or_create(name="P Bandit Batch", prod_type=product_type2)
+            engagement2 = Engagement.objects.create(
+                name="E Bandit Batch",
+                product=product2,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            engagement2.deduplication_on_engagement = True
+            engagement2.save()
+            engagement2_id = engagement2.id
+
+            import2 = self.import_scan_with_params(
+                self.bandit_large_file,
+                scan_type=self.scan_type_bandit,
+                engagement=engagement2_id,
+                product_type_name=None,
+                product_name=None,
+                engagement_name=None,
+                auto_create_context=False,
+            )
+            test2_id = import2["test"]
+
+            # Assess step 3: active and duplicate should equal step 1
+            step3_active = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                active=True,
+                duplicate=False,
+            ).count()
+            step3_duplicate = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                duplicate=True,
+            ).count()
+
+            self.assertEqual(
+                step3_active,
+                step1_active,
+                "Step 3 active count should equal step 1 (baseline import)",
+            )
+            self.assertEqual(
+                step3_duplicate,
+                step1_duplicate,
+                "Step 3 duplicate count should equal step 1 (baseline import)",
+            )
+
+            # Step 4: Reimport scan in same new engagement (batch_size=50)
+            self.reimport_scan_with_params(
+                test2_id,
+                self.bandit_large_file,
+                scan_type=self.scan_type_bandit,
+            )
+
+            # Assess step 4: active and duplicate should equal step 2
+            step4_active = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                active=True,
+                duplicate=False,
+            ).count()
+            step4_duplicate = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                duplicate=True,
+            ).count()
+
+            self.assertEqual(
+                step4_active,
+                step2_active,
+                "Step 4 active count should equal step 2 (baseline reimport)",
+            )
+            self.assertEqual(
+                step4_duplicate,
+                step2_duplicate,
+                "Step 4 duplicate count should equal step 2 (baseline reimport)",
+            )
+
+    def test_batch_deduplication_large_bandit_file(self):
+        """
+        Test that batch deduplication produces identical results to non-batch mode (which we simulate via large max batch size setting).
+
+        Step 1: Import scan (baseline), assess active count, duplicate count
+        Step 2: Import scan again (same engagement), assess active count, duplicate count
+        Step 3: Import scan in NEW engagement with batch_size=50, assess active and duplicate equal to step 1
+        Step 4: Import scan again in same new engagement (batch_size=50), assess active and duplicate equal to step 2
+        """
+        # Step 1: Baseline import (default batch size)
+        # Create engagement first and set deduplication_on_engagement before import
+        product_type1, _ = Product_Type.objects.get_or_create(name="PT Bandit Baseline Dedupe")
+        product1, _ = Product.objects.get_or_create(name="P Bandit Baseline Dedupe", prod_type=product_type1)
+        engagement1 = Engagement.objects.create(
+            name="E Bandit Baseline Dedupe",
+            product=product1,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        engagement1.deduplication_on_engagement = True
+        engagement1.save()
+        engagement1_id = engagement1.id
+
+        self.import_scan_with_params(
+            self.bandit_large_file,
+            scan_type=self.scan_type_bandit,
+            engagement=engagement1_id,
+            product_type_name=None,
+            product_name=None,
+            engagement_name=None,
+            auto_create_context=False,
+        )
+
+        # Assess step 1: active count, duplicate count
+        step1_active = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            active=True,
+            duplicate=False,
+        ).count()
+        step1_duplicate = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            duplicate=True,
+        ).count()
+
+        # Assert step 1 specific counts
+        self.assertEqual(step1_active, 213, "Step 1 active count")
+        self.assertEqual(step1_duplicate, 1, "Step 1 duplicate count")
+
+        # Step 2: Import scan again (same engagement)
+        self.import_scan_with_params(
+            self.bandit_large_file,
+            scan_type=self.scan_type_bandit,
+            engagement=engagement1_id,
+            product_type_name=None,
+            product_name=None,
+            engagement_name=None,
+            auto_create_context=False,
+        )
+
+        # Assess step 2: active count, duplicate count
+        step2_active = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            active=True,
+            duplicate=False,
+        ).count()
+        step2_duplicate = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            duplicate=True,
+        ).count()
+
+        # Assert step 2 specific counts
+        self.assertEqual(step2_active, 213, "Step 2 active count")
+        self.assertEqual(step2_duplicate, 215, "Step 2 duplicate count")
+
+        # Step 3: Import scan in NEW engagement with batch_size=50
+        with override_settings(
+            IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=50,
+            IMPORT_REIMPORT_MATCH_BATCH_SIZE=50,
+        ):
+            # Create engagement first and set deduplication_on_engagement before import
+            product_type2, _ = Product_Type.objects.get_or_create(name="PT Bandit Batch Dedupe")
+            product2, _ = Product.objects.get_or_create(name="P Bandit Batch Dedupe", prod_type=product_type2)
+            engagement2 = Engagement.objects.create(
+                name="E Bandit Batch Dedupe",
+                product=product2,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            engagement2.deduplication_on_engagement = True
+            engagement2.save()
+            engagement2_id = engagement2.id
+
+            self.import_scan_with_params(
+                self.bandit_large_file,
+                scan_type=self.scan_type_bandit,
+                engagement=engagement2_id,
+                product_type_name=None,
+                product_name=None,
+                engagement_name=None,
+                auto_create_context=False,
+            )
+
+            # Assess step 3: active and duplicate should equal step 1
+            step3_active = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                active=True,
+                duplicate=False,
+            ).count()
+            step3_duplicate = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                duplicate=True,
+            ).count()
+
+            self.assertEqual(
+                step3_active,
+                step1_active,
+                "Step 3 active count should equal step 1 (baseline import)",
+            )
+            self.assertEqual(
+                step3_duplicate,
+                step1_duplicate,
+                "Step 3 duplicate count should equal step 1 (baseline import)",
+            )
+
+            # Step 4: Import scan again in same new engagement (batch_size=50)
+            self.import_scan_with_params(
+                self.bandit_large_file,
+                scan_type=self.scan_type_bandit,
+                engagement=engagement2_id,
+                product_type_name=None,
+                product_name=None,
+                engagement_name=None,
+                auto_create_context=False,
+            )
+
+            # Assess step 4: active and duplicate should equal step 2
+            step4_active = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                active=True,
+                duplicate=False,
+            ).count()
+            step4_duplicate = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                duplicate=True,
+            ).count()
+
+            self.assertEqual(
+                step4_active,
+                step2_active,
+                "Step 4 active count should equal step 2 (baseline second import)",
+            )
+            self.assertEqual(
+                step4_duplicate,
+                step2_duplicate,
+                "Step 4 duplicate count should equal step 2 (baseline second import)",
+            )
 
 
 class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):

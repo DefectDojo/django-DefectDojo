@@ -33,7 +33,9 @@ STACK_HAWK_SUBSET_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk
 STACK_HAWK_SCAN_TYPE = "StackHawk HawkScan"
 
 
-class TestDojoImporterPerformance(DojoTestCase):
+class TestDojoImporterPerformanceBase(DojoTestCase):
+
+    """Base class for performance tests with shared setup and helper methods."""
 
     def setUp(self):
         super().setUp()
@@ -77,35 +79,53 @@ class TestDojoImporterPerformance(DojoTestCase):
         )
         logger.debug(msg)
 
-    def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
-        """
-        Log output can be quite large as when the assertNumQueries fails, all queries are printed.
-        It could be usefule to capture the output in `less`:
-            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformance 2>&1 | less
-        Then search for `expected` to find the lines where the expected number of queries is printed.
-        Or you can use `grep` to filter the output:
-            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformance 2>&1 | grep expected -B 10
-        """
+    def _create_test_objects(self, product_name, engagement_name):
+        """Helper method to create test product, engagement, lead user, and environment."""
         product_type, _created = Product_Type.objects.get_or_create(name="test")
         product, _created = Product.objects.get_or_create(
-            name="TestDojoDefaultImporter",
+            name=product_name,
             prod_type=product_type,
         )
         engagement, _created = Engagement.objects.get_or_create(
-            name="Test Create Engagement",
+            name=engagement_name,
             product=product,
             target_start=timezone.now(),
             target_end=timezone.now(),
         )
         lead, _ = User.objects.get_or_create(username="admin")
         environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        return product, engagement, lead, environment
 
-        # first import the subset which missed one finding and a couple of endpoints on some of the findings
+    def _import_reimport_performance(
+        self,
+        expected_num_queries1,
+        expected_num_async_tasks1,
+        expected_num_queries2,
+        expected_num_async_tasks2,
+        expected_num_queries3,
+        expected_num_async_tasks3,
+        scan_file1,
+        scan_file2,
+        scan_file3,
+        scan_type,
+        product_name,
+        engagement_name,
+    ):
+        """
+        Test import/reimport/reimport performance with specified scan files and scan type.
+        Log output can be quite large as when the assertNumQueries fails, all queries are printed.
+        """
+        _, engagement, lead, environment = self._create_test_objects(
+            product_name,
+            engagement_name,
+        )
+
+        # First import
         with (
             self.subTest("import1"), impersonate(Dojo_User.objects.get(username="admin")),
             self.assertNumQueries(expected_num_queries1),
             self._assertNumAsyncTask(expected_num_async_tasks1),
-            STACK_HAWK_SUBSET_FILENAME.open(encoding="utf-8") as scan,
+            scan_file1.open(encoding="utf-8") as scan,
         ):
             import_options = {
                 "user": lead,
@@ -116,7 +136,7 @@ class TestDojoImporterPerformance(DojoTestCase):
                 "active": True,
                 "verified": True,
                 "sync": True,
-                "scan_type": STACK_HAWK_SCAN_TYPE,
+                "scan_type": scan_type,
                 "engagement": engagement,
                 "tags": ["performance-test", "tag-in-param", "go-faster"],
                 "apply_tags_to_findings": True,
@@ -124,12 +144,12 @@ class TestDojoImporterPerformance(DojoTestCase):
             importer = DefaultImporter(**import_options)
             test, _, _len_new_findings, _len_closed_findings, _, _, _ = importer.process_scan(scan)
 
-        # use reimport with the full report so it add a finding and some endpoints
+        # Second import (reimport)
         with (
             self.subTest("reimport1"), impersonate(Dojo_User.objects.get(username="admin")),
             self.assertNumQueries(expected_num_queries2),
             self._assertNumAsyncTask(expected_num_async_tasks2),
-            STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
+            scan_file2.open(encoding="utf-8") as scan,
         ):
             reimport_options = {
                 "test": test,
@@ -140,19 +160,19 @@ class TestDojoImporterPerformance(DojoTestCase):
                 "active": True,
                 "verified": True,
                 "sync": True,
-                "scan_type": STACK_HAWK_SCAN_TYPE,
+                "scan_type": scan_type,
                 "tags": ["performance-test-reimport", "reimport-tag-in-param", "reimport-go-faster"],
                 "apply_tags_to_findings": True,
             }
             reimporter = DefaultReImporter(**reimport_options)
             test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
-        # use reimport with the subset again to close a finding and mitigate some endpoints
+        # Third import (reimport again)
         with (
             self.subTest("reimport2"), impersonate(Dojo_User.objects.get(username="admin")),
             self.assertNumQueries(expected_num_queries3),
             self._assertNumAsyncTask(expected_num_async_tasks3),
-            STACK_HAWK_SUBSET_FILENAME.open(encoding="utf-8") as scan,
+            scan_file3.open(encoding="utf-8") as scan,
         ):
             reimport_options = {
                 "test": test,
@@ -163,10 +183,39 @@ class TestDojoImporterPerformance(DojoTestCase):
                 "active": True,
                 "verified": True,
                 "sync": True,
-                "scan_type": STACK_HAWK_SCAN_TYPE,
+                "scan_type": scan_type,
             }
             reimporter = DefaultReImporter(**reimport_options)
             test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
+
+
+class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
+
+    """Performance tests using small sample files (StackHawk, ~6 findings)."""
+
+    def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
+        """
+        Log output can be quite large as when the assertNumQueries fails, all queries are printed.
+        It could be usefule to capture the output in `less`:
+            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformanceSmall 2>&1 | less
+        Then search for `expected` to find the lines where the expected number of queries is printed.
+        Or you can use `grep` to filter the output:
+            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformanceSmall 2>&1 | grep expected -B 10
+        """
+        return super()._import_reimport_performance(
+            expected_num_queries1,
+            expected_num_async_tasks1,
+            expected_num_queries2,
+            expected_num_async_tasks2,
+            expected_num_queries3,
+            expected_num_async_tasks3,
+            scan_file1=STACK_HAWK_SUBSET_FILENAME,
+            scan_file2=STACK_HAWK_FILENAME,
+            scan_file3=STACK_HAWK_SUBSET_FILENAME,
+            scan_type=STACK_HAWK_SCAN_TYPE,
+            product_name="TestDojoDefaultImporter",
+            engagement_name="Test Create Engagement",
+        )
 
     @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
     def test_import_reimport_reimport_performance_async(self):
@@ -177,9 +226,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=340,
             expected_num_async_tasks1=7,
-            expected_num_queries2=288,
+            expected_num_queries2=274,
             expected_num_async_tasks2=18,
-            expected_num_queries3=175,
+            expected_num_queries3=162,
             expected_num_async_tasks3=17,
         )
 
@@ -195,9 +244,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=306,
             expected_num_async_tasks1=7,
-            expected_num_queries2=281,
+            expected_num_queries2=267,
             expected_num_async_tasks2=18,
-            expected_num_queries3=170,
+            expected_num_queries3=157,
             expected_num_async_tasks3=17,
         )
 
@@ -219,9 +268,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=345,
             expected_num_async_tasks1=6,
-            expected_num_queries2=293,
+            expected_num_queries2=279,
             expected_num_async_tasks2=17,
-            expected_num_queries3=180,
+            expected_num_queries3=167,
             expected_num_async_tasks3=16,
         )
 
@@ -241,9 +290,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=311,
             expected_num_async_tasks1=6,
-            expected_num_queries2=286,
+            expected_num_queries2=272,
             expected_num_async_tasks2=17,
-            expected_num_queries3=175,
+            expected_num_queries3=162,
             expected_num_async_tasks3=16,
         )
 
@@ -267,9 +316,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=347,
             expected_num_async_tasks1=8,
-            expected_num_queries2=295,
+            expected_num_queries2=281,
             expected_num_async_tasks2=19,
-            expected_num_queries3=182,
+            expected_num_queries3=169,
             expected_num_async_tasks3=18,
         )
 
@@ -290,9 +339,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=313,
             expected_num_async_tasks1=8,
-            expected_num_queries2=288,
+            expected_num_queries2=274,
             expected_num_async_tasks2=19,
-            expected_num_queries3=177,
+            expected_num_queries3=164,
             expected_num_async_tasks3=18,
         )
 
@@ -303,19 +352,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         The second import should result in all findings being marked as duplicates.
         This is different from reimport as we create a new test each time.
         """
-        product_type, _created = Product_Type.objects.get_or_create(name="test")
-        product, _created = Product.objects.get_or_create(
-            name="TestDojoDeduplicationPerformance",
-            prod_type=product_type,
+        _, engagement, lead, environment = self._create_test_objects(
+            "TestDojoDeduplicationPerformance",
+            "Test Deduplication Performance Engagement",
         )
-        engagement, _created = Engagement.objects.get_or_create(
-            name="Test Deduplication Performance Engagement",
-            product=product,
-            target_start=timezone.now(),
-            target_end=timezone.now(),
-        )
-        lead, _ = User.objects.get_or_create(username="admin")
-        environment, _ = Development_Environment.objects.get_or_create(name="Development")
 
         # First import - all findings should be new
         with (

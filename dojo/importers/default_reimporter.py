@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import serialize
 from django.db.models.query_utils import Q
@@ -7,6 +8,12 @@ from django.db.models.query_utils import Q
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 from dojo.decorators import we_want_async
+from dojo.finding.deduplication import (
+    find_candidates_for_deduplication_hash,
+    find_candidates_for_deduplication_uid_or_hash,
+    find_candidates_for_deduplication_unique_id,
+    find_candidates_for_reimport_legacy,
+)
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -204,86 +211,141 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             cleaned_findings.append(sanitized)
 
         batch_finding_ids: list[int] = []
-        batch_max_size = 1000
+        # Batch size for deduplication/post-processing (only new findings)
+        dedupe_batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
+        # Batch size for candidate matching (all findings, before matching)
+        match_batch_max_size = getattr(settings, "IMPORT_REIMPORT_MATCH_BATCH_SIZE", 1000)
 
-        for idx, unsaved_finding in enumerate(cleaned_findings):
-            is_final = idx == len(cleaned_findings) - 1
-            # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
-            # Finding.mitigated is DateTimeField and it requires timezone
-            if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
-                unsaved_finding.mitigated = unsaved_finding.mitigated.replace(tzinfo=self.now.tzinfo)
-            # Override the test if needed
-            if not hasattr(unsaved_finding, "test"):
-                unsaved_finding.test = self.test
-            # Set the service supplied at import time
-            if self.service is not None:
-                unsaved_finding.service = self.service
-            # Clean any endpoints that are on the finding
-            self.endpoint_manager.clean_unsaved_endpoints(unsaved_finding.unsaved_endpoints)
-            # Calculate the hash code to be used to identify duplicates
-            unsaved_finding.hash_code = self.calculate_unsaved_finding_hash_code(unsaved_finding)
-            deduplicationLogger.debug(f"unsaved finding's hash_code: {unsaved_finding.hash_code}")
-            # Match any findings to this new one coming in
-            matched_findings = self.match_new_finding_to_existing_finding(unsaved_finding)
-            deduplicationLogger.debug(f"found {len(matched_findings)} findings matching with current new finding")
-            # Determine how to proceed based on whether matches were found or not
-            if matched_findings:
-                existing_finding = matched_findings[0]
-                finding, force_continue = self.process_matched_finding(
-                    unsaved_finding,
-                    existing_finding,
+        # Process findings in batches to enable batch candidate fetching
+        # This avoids the 1+N query problem by fetching all candidates for a batch at once
+        for batch_start in range(0, len(cleaned_findings), match_batch_max_size):
+            batch_end = min(batch_start + match_batch_max_size, len(cleaned_findings))
+            batch_findings = cleaned_findings[batch_start:batch_end]
+            is_final_batch = batch_end == len(cleaned_findings)
+
+            logger.debug(f"Processing reimport batch {batch_start}-{batch_end} of {len(cleaned_findings)} findings")
+
+            # Prepare findings in batch: set test, service, calculate hash codes
+            for unsaved_finding in batch_findings:
+                # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
+                # Finding.mitigated is DateTimeField and it requires timezone
+                if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
+                    unsaved_finding.mitigated = unsaved_finding.mitigated.replace(tzinfo=self.now.tzinfo)
+                # Override the test if needed
+                if not hasattr(unsaved_finding, "test"):
+                    unsaved_finding.test = self.test
+                # Set the service supplied at import time
+                if self.service is not None:
+                    unsaved_finding.service = self.service
+                # Clean any endpoints that are on the finding
+                self.endpoint_manager.clean_unsaved_endpoints(unsaved_finding.unsaved_endpoints)
+                # Calculate the hash code to be used to identify duplicates
+                unsaved_finding.hash_code = self.calculate_unsaved_finding_hash_code(unsaved_finding)
+                deduplicationLogger.debug(f"unsaved finding's hash_code: {unsaved_finding.hash_code}")
+
+            # Fetch all candidates for this batch at once (batch candidate finding)
+            candidates_by_hash = None
+            candidates_by_uid = None
+            candidates_by_key = None
+
+            if self.deduplication_algorithm == "hash_code":
+                candidates_by_hash = find_candidates_for_deduplication_hash(
+                    self.test, batch_findings, mode="reimport",
                 )
-                # Determine if we should skip the rest of the loop
-                if force_continue:
-                    continue
-                # Update endpoints on the existing finding with those on the new finding
-                if finding.dynamic_finding:
-                    logger.debug(
-                        "Re-import found an existing dynamic finding for this new "
-                        "finding. Checking the status of endpoints",
-                    )
-                    self.endpoint_manager.update_endpoint_status(
-                        existing_finding,
+            elif self.deduplication_algorithm == "unique_id_from_tool":
+                candidates_by_uid = find_candidates_for_deduplication_unique_id(
+                    self.test, batch_findings, mode="reimport",
+                )
+            elif self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+                candidates_by_uid, candidates_by_hash = find_candidates_for_deduplication_uid_or_hash(
+                    self.test, batch_findings, mode="reimport",
+                )
+            elif self.deduplication_algorithm == "legacy":
+                candidates_by_key = find_candidates_for_reimport_legacy(self.test, batch_findings)
+
+            # Process each finding in the batch using pre-fetched candidates
+            for idx, unsaved_finding in enumerate(batch_findings):
+                is_final = is_final_batch and idx == len(batch_findings) - 1
+                # Match any findings to this new one coming in using pre-fetched candidates
+                matched_findings = self.match_finding_for_reimport(
+                    unsaved_finding,
+                    candidates_by_hash=candidates_by_hash,
+                    candidates_by_uid=candidates_by_uid,
+                    candidates_by_key=candidates_by_key,
+                )
+                deduplicationLogger.debug(f"found {len(matched_findings)} findings matching with current new finding")
+                # Determine how to proceed based on whether matches were found or not
+                if matched_findings:
+                    existing_finding = matched_findings[0]
+                    finding, force_continue = self.process_matched_finding(
                         unsaved_finding,
-                        self.user,
+                        existing_finding,
                     )
-            else:
-                finding = self.process_finding_that_was_not_matched(unsaved_finding)
-            # This condition __appears__ to always be true, but am afraid to remove it
-            if finding:
-                # Process the rest of the items on the finding
-                finding = self.finding_post_processing(
-                    finding,
-                    unsaved_finding,
-                )
-                # all data is already saved on the finding, we only need to trigger post processing in batches
-                push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
-                batch_finding_ids.append(finding.id)
-
-                # If batch is full or we're at the end, dispatch one batched task
-                if len(batch_finding_ids) >= batch_max_size or is_final:
-                    finding_ids_batch = list(batch_finding_ids)
-                    batch_finding_ids.clear()
-                    if we_want_async(async_user=self.user):
-                        finding_helper.post_process_findings_batch_signature(
-                            finding_ids_batch,
-                            dedupe_option=True,
-                            rules_option=True,
-                            product_grading_option=True,
-                            issue_updater_option=True,
-                            push_to_jira=push_to_jira,
-                        )()
-                    else:
-                        finding_helper.post_process_findings_batch(
-                            finding_ids_batch,
-                            dedupe_option=True,
-                            rules_option=True,
-                            product_grading_option=True,
-                            issue_updater_option=True,
-                            push_to_jira=push_to_jira,
+                    # Determine if we should skip the rest of the loop
+                    if force_continue:
+                        continue
+                    # Update endpoints on the existing finding with those on the new finding
+                    if finding.dynamic_finding:
+                        logger.debug(
+                            "Re-import found an existing dynamic finding for this new "
+                            "finding. Checking the status of endpoints",
                         )
+                        self.endpoint_manager.update_endpoint_status(
+                            existing_finding,
+                            unsaved_finding,
+                            self.user,
+                        )
+                else:
+                    finding = self.process_finding_that_was_not_matched(unsaved_finding)
+                # This condition __appears__ to always be true, but am afraid to remove it
+                if finding:
+                    # Process the rest of the items on the finding
+                    finding = self.finding_post_processing(
+                        finding,
+                        unsaved_finding,
+                    )
+                    # all data is already saved on the finding, we only need to trigger post processing in batches
+                    push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+                    batch_finding_ids.append(finding.id)
 
-            # No chord: tasks are dispatched immediately above per batch
+                    # Post-processing batches (deduplication, rules, etc.) are separate from matching batches.
+                    # These batches only contain "new" findings that were saved (not matched to existing findings).
+                    # In reimport scenarios, typically most findings match existing ones, so only a small fraction
+                    # of findings in each matching batch become new findings that need deduplication.
+                    #
+                    # We accumulate finding IDs across matching batches rather than dispatching at the end of each
+                    # matching batch. This ensures deduplication batches stay close to the intended batch size
+                    # (e.g., 1000 findings) for optimal bulk operation efficiency, even when only ~10% of findings
+                    # in matching batches are new. If we dispatched at the end of each matching batch, we would
+                    # end up with many small deduplication batches (e.g., ~100 findings each), reducing efficiency.
+                    #
+                    # The two batch types serve different purposes:
+                    # - Matching batches: optimize candidate fetching (solve 1+N query problem)
+                    # - Deduplication batches: optimize bulk operations (larger batches = fewer queries)
+                    # They don't need to be aligned since they optimize different operations.
+                    if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
+                        finding_ids_batch = list(batch_finding_ids)
+                        batch_finding_ids.clear()
+                        if we_want_async(async_user=self.user):
+                            finding_helper.post_process_findings_batch_signature(
+                                finding_ids_batch,
+                                dedupe_option=True,
+                                rules_option=True,
+                                product_grading_option=True,
+                                issue_updater_option=True,
+                                push_to_jira=push_to_jira,
+                            )()
+                        else:
+                            finding_helper.post_process_findings_batch(
+                                finding_ids_batch,
+                                dedupe_option=True,
+                                rules_option=True,
+                                product_grading_option=True,
+                                issue_updater_option=True,
+                                push_to_jira=push_to_jira,
+                            )
+
+        # No chord: tasks are dispatched immediately above per batch
 
         self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
         # due to #3958 we can have duplicates inside the same report
@@ -417,6 +479,81 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     numerical_severity=Finding.get_numerical_severity(unsaved_finding.severity)).order_by("id")
         logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
         return None
+
+    def match_finding_for_reimport(
+        self,
+        unsaved_finding: Finding,
+        candidates_by_hash: dict | None = None,
+        candidates_by_uid: dict | None = None,
+        candidates_by_key: dict | None = None,
+    ) -> list[Finding]:
+        """
+        Matches a single new finding to existing findings using pre-fetched candidate dictionaries.
+        This avoids individual database queries by using batch-fetched candidates.
+
+        Args:
+            unsaved_finding: The finding to match
+            candidates_by_hash: Dictionary mapping hash_code to list of findings (for hash_code algorithm)
+            candidates_by_uid: Dictionary mapping unique_id_from_tool to list of findings (for unique_id algorithms)
+            candidates_by_key: Dictionary mapping (title_lower, severity) to list of findings (for legacy algorithm)
+
+        Returns:
+            List of matching findings, ordered by id
+
+        """
+        deduplicationLogger.debug("matching finding for reimport using algorithm: %s", self.deduplication_algorithm)
+
+        if self.deduplication_algorithm == "hash_code":
+            if candidates_by_hash is None:
+                # Fallback to individual query if candidates not provided
+                return self.match_new_finding_to_existing_finding(unsaved_finding)
+            if unsaved_finding.hash_code is None:
+                return []
+            matches = candidates_by_hash.get(unsaved_finding.hash_code, [])
+            return sorted(matches, key=lambda f: f.id)
+
+        if self.deduplication_algorithm == "unique_id_from_tool":
+            if candidates_by_uid is None:
+                # Fallback to individual query if candidates not provided
+                return self.match_new_finding_to_existing_finding(unsaved_finding)
+            if unsaved_finding.unique_id_from_tool is None:
+                return []
+            matches = candidates_by_uid.get(unsaved_finding.unique_id_from_tool, [])
+            return sorted(matches, key=lambda f: f.id)
+
+        if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+            if candidates_by_hash is None or candidates_by_uid is None:
+                # Fallback to individual query if candidates not provided
+                return self.match_new_finding_to_existing_finding(unsaved_finding)
+
+            # Collect matches from both hash_code and unique_id_from_tool
+            matches_by_id = {}
+
+            if unsaved_finding.hash_code is not None:
+                hash_matches = candidates_by_hash.get(unsaved_finding.hash_code, [])
+                for match in hash_matches:
+                    matches_by_id[match.id] = match
+
+            if unsaved_finding.unique_id_from_tool is not None:
+                uid_matches = candidates_by_uid.get(unsaved_finding.unique_id_from_tool, [])
+                for match in uid_matches:
+                    matches_by_id[match.id] = match
+
+            matches = list(matches_by_id.values())
+            return sorted(matches, key=lambda f: f.id)
+
+        if self.deduplication_algorithm == "legacy":
+            if candidates_by_key is None:
+                # Fallback to individual query if candidates not provided
+                return self.match_new_finding_to_existing_finding(unsaved_finding)
+            if not unsaved_finding.title:
+                return []
+            key = (unsaved_finding.title.lower(), unsaved_finding.severity)
+            matches = candidates_by_key.get(key, [])
+            return sorted(matches, key=lambda f: f.id)
+
+        logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
+        return []
 
     def process_matched_finding(
         self,
