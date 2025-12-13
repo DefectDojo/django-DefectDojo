@@ -239,7 +239,7 @@ def build_dedupe_scope_queryset(test):
     return (
         Finding.objects.filter(scope_q)
         .select_related("test", "test__engagement", "test__test_type")
-        .prefetch_related("endpoints")
+        .prefetch_related("endpoints", "vulnerability_id_set")
     )
 
 
