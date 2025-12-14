@@ -221,6 +221,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         can override candidate addition logic without copying the full `process_findings()`
         implementation.
 
+        Is overriden in Pro
+
         Args:
             finding: The newly created finding to add to candidates
             candidates_by_hash: Dictionary mapping hash_code to list of findings (modified in-place)
