@@ -159,6 +159,48 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             test_import_history,
         )
 
+    def get_reimport_match_candidates_for_batch(
+        self,
+        batch_findings: list[Finding],
+    ) -> tuple[dict, dict, dict]:
+        """
+        Fetch candidate matches for a batch of *unsaved* findings during reimport.
+
+        This is intentionally a separate method so downstream editions (e.g. Dojo Pro)
+        can override candidate retrieval without copying the full `process_findings()`
+        implementation.
+
+        Returns:
+            (candidates_by_hash, candidates_by_uid, candidates_by_key)
+
+        """
+        candidates_by_hash: dict = {}
+        candidates_by_uid: dict = {}
+        candidates_by_key: dict = {}
+
+        if self.deduplication_algorithm == "hash_code":
+            candidates_by_hash = find_candidates_for_deduplication_hash(
+                self.test,
+                batch_findings,
+                mode="reimport",
+            )
+        elif self.deduplication_algorithm == "unique_id_from_tool":
+            candidates_by_uid = find_candidates_for_deduplication_unique_id(
+                self.test,
+                batch_findings,
+                mode="reimport",
+            )
+        elif self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+            candidates_by_uid, candidates_by_hash = find_candidates_for_deduplication_uid_or_hash(
+                self.test,
+                batch_findings,
+                mode="reimport",
+            )
+        elif self.deduplication_algorithm == "legacy":
+            candidates_by_key = find_candidates_for_reimport_legacy(self.test, batch_findings)
+
+        return candidates_by_hash, candidates_by_uid, candidates_by_key
+
     def process_findings(
         self,
         parsed_findings: list[Finding],
@@ -242,24 +284,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 deduplicationLogger.debug(f"unsaved finding's hash_code: {unsaved_finding.hash_code}")
 
             # Fetch all candidates for this batch at once (batch candidate finding)
-            candidates_by_hash = {}
-            candidates_by_uid = {}
-            candidates_by_key = {}
-
-            if self.deduplication_algorithm == "hash_code":
-                candidates_by_hash = find_candidates_for_deduplication_hash(
-                    self.test, batch_findings, mode="reimport",
-                )
-            elif self.deduplication_algorithm == "unique_id_from_tool":
-                candidates_by_uid = find_candidates_for_deduplication_unique_id(
-                    self.test, batch_findings, mode="reimport",
-                )
-            elif self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
-                candidates_by_uid, candidates_by_hash = find_candidates_for_deduplication_uid_or_hash(
-                    self.test, batch_findings, mode="reimport",
-                )
-            elif self.deduplication_algorithm == "legacy":
-                candidates_by_key = find_candidates_for_reimport_legacy(self.test, batch_findings)
+            candidates_by_hash, candidates_by_uid, candidates_by_key = self.get_reimport_match_candidates_for_batch(
+                batch_findings,
+            )
 
             # Process each finding in the batch using pre-fetched candidates
             for idx, unsaved_finding in enumerate(batch_findings):
