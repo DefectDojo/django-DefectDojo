@@ -269,15 +269,6 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
     )
 
 
-# TODO: remove this if that doesn't affect Pro
-def build_dedupe_scope_queryset(test):
-    """
-    Legacy function name for backward compatibility.
-    Use build_candidate_scope_queryset() instead.
-    """
-    return build_candidate_scope_queryset(test, mode="deduplication")
-
-
 def find_candidates_for_deduplication_hash(test, findings, mode="deduplication", service=None):
     """
     Find candidates by hash_code. Works for both deduplication and reimport.
