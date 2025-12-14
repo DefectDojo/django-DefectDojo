@@ -125,6 +125,7 @@ preview = true
     "S606",  # subprocess.run without shell=True is safe for this script
     "S607",  # subprocess.run without shell=True is safe for this script
     "T201",  # print statements are fine for console output scripts
+    "EXE001", # git won't commit the executable flag I don't know why
 ]
 
 [lint.flake8-boolean-trap]
