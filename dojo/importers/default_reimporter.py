@@ -170,6 +170,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         can override candidate retrieval without copying the full `process_findings()`
         implementation.
 
+        Is overridden in Pro.
+
         Returns:
             (candidates_by_hash, candidates_by_uid, candidates_by_key)
 
@@ -200,6 +202,51 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             candidates_by_key = find_candidates_for_reimport_legacy(self.test, batch_findings)
 
         return candidates_by_hash, candidates_by_uid, candidates_by_key
+
+    def add_new_finding_to_candidates(
+        self,
+        finding: Finding,
+        candidates_by_hash: dict,
+        candidates_by_uid: dict,
+        candidates_by_key: dict,
+    ) -> None:
+        """
+        Add a newly created finding to candidate dictionaries for subsequent findings in the same batch.
+
+        This allows duplicates within the same scan report to be detected even when they're processed
+        in the same batch. When a new finding is created (no match found), it is added to the candidate
+        dictionaries so that subsequent findings in the same batch can match against it.
+
+        This is intentionally a separate method so downstream editions (e.g. Dojo Pro)
+        can override candidate addition logic without copying the full `process_findings()`
+        implementation.
+
+        Args:
+            finding: The newly created finding to add to candidates
+            candidates_by_hash: Dictionary mapping hash_code to list of findings (modified in-place)
+            candidates_by_uid: Dictionary mapping unique_id_from_tool to list of findings (modified in-place)
+            candidates_by_key: Dictionary mapping (title_lower, severity) to list of findings (modified in-place)
+
+        """
+        if not finding:
+            return
+
+        if finding.hash_code:
+            candidates_by_hash.setdefault(finding.hash_code, []).append(finding)
+            deduplicationLogger.debug(
+                f"Added finding {finding.id} (hash_code: {finding.hash_code}) to candidates for next findings in this report",
+            )
+        if finding.unique_id_from_tool:
+            candidates_by_uid.setdefault(finding.unique_id_from_tool, []).append(finding)
+            deduplicationLogger.debug(
+                f"Added finding {finding.id} (unique_id_from_tool: {finding.unique_id_from_tool}) to candidates for next findings in this report",
+            )
+        if finding.title:
+            legacy_key = (finding.title.lower(), finding.severity)
+            candidates_by_key.setdefault(legacy_key, []).append(finding)
+            deduplicationLogger.debug(
+                f"Added finding {finding.id} (title: {finding.title}, severity: {finding.severity}) to candidates for next findings in this report",
+            )
 
     def process_findings(
         self,
@@ -293,7 +340,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 is_final = is_final_batch and idx == len(batch_findings) - 1
 
                 # Match any findings to this new one coming in using pre-fetched candidates
-                matched_findings = self.match_finding_for_reimport(
+                matched_findings = self.match_finding_to_candidate_reimport(
                     unsaved_finding,
                     candidates_by_hash=candidates_by_hash,
                     candidates_by_uid=candidates_by_uid,
@@ -325,23 +372,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding = self.process_finding_that_was_not_matched(unsaved_finding)
 
                     # Add newly created finding to candidates for subsequent findings in this batch
-                    if finding:
-                        if finding.hash_code:
-                            candidates_by_hash.setdefault(finding.hash_code, []).append(finding)
-                            deduplicationLogger.debug(
-                                f"Added finding {finding.id} (hash_code: {finding.hash_code}) to candidates for next findings in this report",
-                            )
-                        if finding.unique_id_from_tool:
-                            candidates_by_uid.setdefault(finding.unique_id_from_tool, []).append(finding)
-                            deduplicationLogger.debug(
-                                f"Added finding {finding.id} (unique_id_from_tool: {finding.unique_id_from_tool}) to candidates for next findings in this report",
-                            )
-                        if finding.title:
-                            legacy_key = (finding.title.lower(), finding.severity)
-                            candidates_by_key.setdefault(legacy_key, []).append(finding)
-                            deduplicationLogger.debug(
-                                f"Added finding {finding.id} (title: {finding.title}, severity: {finding.severity}) to candidates for next findings in this report",
-                            )
+                    self.add_new_finding_to_candidates(
+                        finding,
+                        candidates_by_hash,
+                        candidates_by_uid,
+                        candidates_by_key,
+                    )
 
                 # This condition __appears__ to always be true, but am afraid to remove it
                 if finding:
@@ -483,50 +519,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         logger.debug("REIMPORT_SCAN parser v2: Create parse findings")
         return super().parse_findings_dynamic_test_type(scan, parser)
 
-    def match_new_finding_to_existing_finding(
-        self,
-        unsaved_finding: Finding,
-    ) -> list[Finding]:
-        """Matches a single new finding to N existing findings and then returns those matches"""
-        # This code should match the logic used for deduplication out of the re-import feature.
-        # See utils.py deduplicate_* functions
-        deduplicationLogger.debug("return findings bases on algorithm: %s", self.deduplication_algorithm)
-        if self.deduplication_algorithm == "hash_code":
-            return Finding.objects.filter(
-                test=self.test,
-                hash_code=unsaved_finding.hash_code,
-            ).exclude(hash_code=None).order_by("id")
-        if self.deduplication_algorithm == "unique_id_from_tool":
-            deduplicationLogger.debug(f"unique_id_from_tool: {unsaved_finding.unique_id_from_tool}")
-            return Finding.objects.filter(
-                test=self.test,
-                unique_id_from_tool=unsaved_finding.unique_id_from_tool,
-            ).exclude(unique_id_from_tool=None).order_by("id")
-        if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
-            deduplicationLogger.debug(f"unique_id_from_tool: {unsaved_finding.unique_id_from_tool}")
-            deduplicationLogger.debug(f"hash_code: {unsaved_finding.hash_code}")
-            query = Finding.objects.filter(
-                Q(test=self.test),
-                (Q(hash_code__isnull=False) & Q(hash_code=unsaved_finding.hash_code))
-                | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=unsaved_finding.unique_id_from_tool)),
-            ).order_by("id")
-            deduplicationLogger.debug(query.query)
-            return query
-        if self.deduplication_algorithm == "legacy":
-            # This is the legacy reimport behavior. Although it's pretty flawed and doesn't match the legacy algorithm for deduplication,
-            # this is left as is for simplicity.
-            # Re-writing the legacy deduplication here would be complicated and counter-productive.
-            # If you have use cases going through this section, you're advised to create a deduplication configuration for your parser
-            logger.warning("Legacy reimport. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
-            return Finding.objects.filter(
-                    title__iexact=unsaved_finding.title,
-                    test=self.test,
-                    severity=unsaved_finding.severity,
-                    numerical_severity=Finding.get_numerical_severity(unsaved_finding.severity)).order_by("id")
-        logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
-        return None
-
-    def match_finding_for_reimport(
+    def match_finding_to_candidate_reimport(
         self,
         unsaved_finding: Finding,
         candidates_by_hash: dict | None = None,

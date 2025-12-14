@@ -271,6 +271,7 @@ class BaseImporter(ImporterOptions):
     def determine_deduplication_algorithm(self) -> str:
         """
         Determines what dedupe algorithm to use for the Test being processed.
+        Overridden in Pro.
         :return: A string representing the dedupe algorithm to use.
         """
         return self.test.deduplication_algorithm
