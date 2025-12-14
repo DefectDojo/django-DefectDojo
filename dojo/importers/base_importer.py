@@ -786,51 +786,23 @@ class BaseImporter(ImporterOptions):
 
         return finding
 
-    def process_vulnerability_ids(
+    def store_vulnerability_ids(
         self,
         finding: Finding,
     ) -> Finding:
         """
-        Parse the `unsaved_vulnerability_ids` field from findings after they are parsed
-        to create `Vulnerability_Id` objects with the finding associated correctly.
-        Only updates if vulnerability_ids have changed to avoid unnecessary database operations.
-
-        Note: The finding parameter can be:
-        - A new finding (from import) with unsaved_vulnerability_ids set from the parsed report
-        - An existing finding (from reimport) with unsaved_vulnerability_ids copied from the
-          finding_from_report before calling this method
+        Store vulnerability IDs for a finding.
+        Reads from finding.unsaved_vulnerability_ids and saves them overwriting existing ones.
 
         Args:
-            finding: The finding to process vulnerability IDs for.
-                For reimports, this is the existing finding with unsaved_vulnerability_ids
-                set from the import/reimport report.
+            finding: The finding to store vulnerability IDs for
 
         Returns:
             The finding object
 
         """
-        # Normalize to empty list if None - always process vulnerability IDs
         vulnerability_ids_to_process = finding.unsaved_vulnerability_ids or []
-
-        # For existing findings, check if there are changes before updating
-        if finding.pk and len(finding.vulnerability_id_set.all()) > 0:
-            # Get existing vulnerability IDs from the database
-            existing_vuln_ids = set(finding.vulnerability_ids) if finding.vulnerability_ids else set()
-            # Normalize the new vulnerability IDs (remove duplicates for comparison)
-            new_vuln_ids = set(vulnerability_ids_to_process)
-
-            # Only update if vulnerability IDs have changed
-            if existing_vuln_ids == new_vuln_ids:
-                logger.debug(
-                    f"Skipping vulnerability_ids update for finding {finding.id} - "
-                    f"vulnerability_ids unchanged: {sorted(existing_vuln_ids)}",
-                )
-                return finding
-
-        # Use the helper function which handles deletion and creation
-        # Always use delete_existing=True - it's a no-op if there are no existing IDs
-        finding_helper.save_vulnerability_ids(finding, vulnerability_ids_to_process, delete_existing=True)
-
+        finding_helper.save_vulnerability_ids(finding, vulnerability_ids_to_process, delete_existing=False)
         return finding
 
     def process_files(

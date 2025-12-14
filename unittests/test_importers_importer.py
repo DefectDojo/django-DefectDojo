@@ -7,6 +7,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.importers.default_importer import DefaultImporter
+from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
     Development_Environment,
     Engagement,
@@ -562,8 +563,7 @@ class TestImporterUtils(DojoAPITestCase):
             "scan_type": NPM_AUDIT_SCAN_TYPE,
         }
 
-    @patch("dojo.importers.base_importer.Vulnerability_Id", autospec=True)
-    def test_handle_vulnerability_ids_references_and_cve(self, mock):
+    def test_handle_vulnerability_ids_references_and_cve(self):
         # Why doesn't this test use the test db and query for one?
         vulnerability_ids = ["CVE", "REF-1", "REF-2"]
         finding = Finding()
@@ -571,7 +571,7 @@ class TestImporterUtils(DojoAPITestCase):
         finding.test = self.test
         finding.reporter = self.testuser
         finding.save()
-        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
+        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
 
         self.assertEqual("CVE", finding.vulnerability_ids[0])
         self.assertEqual("CVE", finding.cve)
@@ -580,8 +580,7 @@ class TestImporterUtils(DojoAPITestCase):
         self.assertEqual("REF-2", finding.vulnerability_ids[2])
         finding.delete()
 
-    @patch("dojo.importers.base_importer.Vulnerability_Id", autospec=True)
-    def test_handle_no_vulnerability_ids_references_and_cve(self, mock):
+    def test_handle_no_vulnerability_ids_references_and_cve(self):
         vulnerability_ids = ["CVE"]
         finding = Finding()
         finding.test = self.test
@@ -589,22 +588,21 @@ class TestImporterUtils(DojoAPITestCase):
         finding.save()
         finding.unsaved_vulnerability_ids = vulnerability_ids
 
-        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
+        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
 
         self.assertEqual("CVE", finding.vulnerability_ids[0])
         self.assertEqual("CVE", finding.cve)
         self.assertEqual(vulnerability_ids, finding.unsaved_vulnerability_ids)
         finding.delete()
 
-    @patch("dojo.importers.base_importer.Vulnerability_Id", autospec=True)
-    def test_handle_vulnerability_ids_references_and_no_cve(self, mock):
+    def test_handle_vulnerability_ids_references_and_no_cve(self):
         vulnerability_ids = ["REF-1", "REF-2"]
         finding = Finding()
         finding.test = self.test
         finding.reporter = self.testuser
         finding.save()
         finding.unsaved_vulnerability_ids = vulnerability_ids
-        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
+        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
 
         self.assertEqual("REF-1", finding.vulnerability_ids[0])
         self.assertEqual("REF-1", finding.cve)
@@ -612,13 +610,12 @@ class TestImporterUtils(DojoAPITestCase):
         self.assertEqual("REF-2", finding.vulnerability_ids[1])
         finding.delete()
 
-    @patch("dojo.importers.base_importer.Vulnerability_Id", autospec=True)
-    def test_no_handle_vulnerability_ids_references_and_no_cve(self, mock):
+    def test_no_handle_vulnerability_ids_references_and_no_cve(self):
         finding = Finding()
         finding.test = self.test
         finding.reporter = self.testuser
         finding.save()
-        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
+        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
         self.assertEqual(finding.cve, None)
         self.assertEqual(finding.unsaved_vulnerability_ids, None)
         self.assertEqual(finding.vulnerability_ids, [])
@@ -644,7 +641,7 @@ class TestImporterUtils(DojoAPITestCase):
 
         # Process with empty list - should clear all IDs
         finding.unsaved_vulnerability_ids = []
-        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
+        DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"]).reconcile_vulnerability_ids(finding)
         # Save the finding to persist the cve=None change
         finding.save()
 
@@ -681,7 +678,7 @@ class TestImporterUtils(DojoAPITestCase):
         # Process with different IDs - should replace old IDs
         new_vulnerability_ids = ["CVE-2021-9999", "GHSA-xxxx-yyyy"]
         finding.unsaved_vulnerability_ids = new_vulnerability_ids
-        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
+        DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"]).reconcile_vulnerability_ids(finding)
         # Save the finding to persist the cve change
         finding.save()
 
