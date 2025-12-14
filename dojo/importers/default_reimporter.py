@@ -217,10 +217,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         in the same batch. When a new finding is created (no match found), it is added to the candidate
         dictionaries so that subsequent findings in the same batch can match against it.
 
-        This is intentionally a separate method so downstream editions (e.g. Dojo Pro)
-        can override candidate addition logic without copying the full `process_findings()`
-        implementation.
-
         Is overriden in Pro
 
         Args:
