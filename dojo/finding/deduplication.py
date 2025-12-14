@@ -252,10 +252,20 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
             )
         queryset = Finding.objects.filter(scope_q)
 
+    # Base prefetches for both modes
+    prefetch_list = ["endpoints", "vulnerability_id_set"]
+
+    # Additional prefetches for reimport mode
+    if mode == "reimport":
+        prefetch_list.extend([
+            "status_finding",
+            "status_finding__endpoint",
+        ])
+
     return (
         queryset
         .select_related("test", "test__engagement", "test__test_type")
-        .prefetch_related("endpoints", "vulnerability_id_set")
+        .prefetch_related(*prefetch_list)
     )
 
 
