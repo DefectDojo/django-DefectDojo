@@ -1,3 +1,23 @@
+"""
+Performance tests for importers.
+
+These tests verify that import and reimport operations maintain acceptable query counts
+and async task counts to prevent performance regressions.
+
+Counts can be updated via the Python script at scripts/update_performance_test_counts.py.
+However, counts must be verified to ensure no implicit performance regressions are introduced.
+When counts change, review the differences carefully to determine if they represent:
+- Legitimate optimizations (counts decreasing)
+- Acceptable changes due to feature additions (counts increasing with justification)
+- Unintended performance regressions (counts increasing without clear reason)
+
+Always verify updated counts by:
+1. Running the update script to see the differences
+2. Reviewing the changes to understand why counts changed
+3. Running the verification step to ensure all tests pass
+4. Investigating any unexpected increases in query or task counts
+"""
+
 import logging
 from contextlib import contextmanager
 
