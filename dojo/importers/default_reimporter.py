@@ -550,27 +550,23 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         deduplicationLogger.debug("matching finding for reimport using algorithm: %s", self.deduplication_algorithm)
 
         if self.deduplication_algorithm == "hash_code":
-            if candidates_by_hash is None:
-                # Fallback to individual query if candidates not provided
-                return self.match_new_finding_to_existing_finding(unsaved_finding)
-            if unsaved_finding.hash_code is None:
+            if candidates_by_hash is None or unsaved_finding.hash_code is None:
                 return []
             matches = candidates_by_hash.get(unsaved_finding.hash_code, [])
             return sorted(matches, key=lambda f: f.id)
 
         if self.deduplication_algorithm == "unique_id_from_tool":
-            if candidates_by_uid is None:
-                # Fallback to individual query if candidates not provided
-                return self.match_new_finding_to_existing_finding(unsaved_finding)
-            if unsaved_finding.unique_id_from_tool is None:
+            if candidates_by_uid is None or unsaved_finding.unique_id_from_tool is None:
                 return []
             matches = candidates_by_uid.get(unsaved_finding.unique_id_from_tool, [])
             return sorted(matches, key=lambda f: f.id)
 
         if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
-            if candidates_by_hash is None or candidates_by_uid is None:
-                # Fallback to individual query if candidates not provided
-                return self.match_new_finding_to_existing_finding(unsaved_finding)
+            if candidates_by_hash is None and candidates_by_uid is None:
+                return []
+
+            if unsaved_finding.hash_code is None and unsaved_finding.unique_id_from_tool is None:
+                return []
 
             # Collect matches from both hash_code and unique_id_from_tool
             matches_by_id = {}
@@ -589,10 +585,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             return sorted(matches, key=lambda f: f.id)
 
         if self.deduplication_algorithm == "legacy":
-            if candidates_by_key is None:
-                # Fallback to individual query if candidates not provided
-                return self.match_new_finding_to_existing_finding(unsaved_finding)
-            if not unsaved_finding.title:
+            if candidates_by_key is None or not unsaved_finding.title:
                 return []
             key = (unsaved_finding.title.lower(), unsaved_finding.severity)
             matches = candidates_by_key.get(key, [])
