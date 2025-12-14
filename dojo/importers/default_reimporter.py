@@ -175,6 +175,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         else:
             original_findings = self.test.finding_set.all().filter(Q(service__isnull=True) | Q(service__exact=""))
 
+        # Prefetch vulnerability_id_set for reconcile_vulnerability_ids
+        original_findings = original_findings.prefetch_related("vulnerability_id_set")
+
         logger.debug(f"original_findings_qyer: {original_findings.query}")
         self.original_items = list(original_findings)
         logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
@@ -691,6 +694,41 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.process_request_response_pairs(unsaved_finding)
         return unsaved_finding
 
+    def reconcile_vulnerability_ids(
+        self,
+        finding: Finding,
+    ) -> Finding:
+        """
+        Reconcile vulnerability IDs for an existing finding.
+        Checks if IDs have changed before updating to avoid unnecessary database operations.
+        Uses prefetched data if available, otherwise fetches efficiently.
+
+        Args:
+            finding: The existing finding to reconcile vulnerability IDs for.
+                Must have unsaved_vulnerability_ids set.
+
+        Returns:
+            The finding object
+
+        """
+        vulnerability_ids_to_process = finding.unsaved_vulnerability_ids or []
+
+        # Use prefetched data directly without triggering queries
+        existing_vuln_ids = {v.vulnerability_id for v in finding.vulnerability_id_set.all()}
+        new_vuln_ids = set(vulnerability_ids_to_process)
+
+        # Early exit if unchanged
+        if existing_vuln_ids == new_vuln_ids:
+            logger.debug(
+                f"Skipping vulnerability_ids update for finding {finding.id} - "
+                f"vulnerability_ids unchanged: {sorted(existing_vuln_ids)}",
+            )
+            return finding
+
+        # Update if changed
+        finding_helper.save_vulnerability_ids(finding, vulnerability_ids_to_process, delete_existing=True)
+        return finding
+
     def finding_post_processing(
         self,
         finding: Finding,
@@ -716,13 +754,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.process_files(finding)
         # Process vulnerability IDs
         # Copy unsaved_vulnerability_ids from the report finding to the existing finding
-        # so process_vulnerability_ids can process them (see its docstring for details)
+        # so reconcile_vulnerability_ids can process them
         # Always set it (even if empty list) so we can clear existing IDs when report has none
         finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids or []
         # Store the current cve value to check if it changes
         old_cve = finding.cve
         # legacy cve field has already been processed/set earlier
-        finding = self.process_vulnerability_ids(finding)
+        finding = self.reconcile_vulnerability_ids(finding)
         # Save the finding only if the cve field was changed by save_vulnerability_ids
         # This is temporary as the cve field will be phased out
         if finding.cve != old_cve:
