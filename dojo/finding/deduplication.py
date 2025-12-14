@@ -376,7 +376,7 @@ def find_candidates_for_deduplication_uid_or_hash(test, findings, mode="deduplic
 
 
 def find_candidates_for_deduplication_legacy(test, findings):
-    base_queryset = build_dedupe_scope_queryset(test)
+    base_queryset = build_candidate_scope_queryset(test, mode="deduplication")
     titles = {f.title for f in findings if getattr(f, "title", None)}
     cwes = {f.cwe for f in findings if getattr(f, "cwe", 0)}
     cwes.discard(0)
