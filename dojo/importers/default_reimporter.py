@@ -250,14 +250,19 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         unsaved_finding,
                         self.user,
                     )
+                # Existing finding - use reconcile_vulnerability_ids
+                is_new_finding = False
             else:
                 finding = self.process_finding_that_was_not_matched(unsaved_finding)
+                # New finding - use store_vulnerability_ids
+                is_new_finding = True
             # This condition __appears__ to always be true, but am afraid to remove it
             if finding:
                 # Process the rest of the items on the finding
                 finding = self.finding_post_processing(
                     finding,
                     unsaved_finding,
+                    is_new_finding=is_new_finding,
                 )
                 # all data is already saved on the finding, we only need to trigger post processing in batches
                 push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
@@ -733,10 +738,18 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         finding: Finding,
         finding_from_report: Finding,
+        *,
+        is_new_finding: bool = False,
     ) -> Finding:
         """
         Save all associated objects to the finding after it has been saved
         for the purpose of foreign key restrictions
+
+        Args:
+            finding: The finding to process (can be new or existing)
+            finding_from_report: The finding parsed from the report
+            is_new_finding: True if this is a newly created finding, False if it's an existing finding
+
         """
         self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding_from_report.unsaved_endpoints)
         if len(self.endpoints_to_add) > 0:
@@ -753,14 +766,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             finding.unsaved_files = finding_from_report.unsaved_files
         self.process_files(finding)
         # Process vulnerability IDs
-        # Copy unsaved_vulnerability_ids from the report finding to the existing finding
-        # so reconcile_vulnerability_ids can process them
+        # Copy unsaved_vulnerability_ids from the report finding to the finding
         # Always set it (even if empty list) so we can clear existing IDs when report has none
         finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids or []
         # Store the current cve value to check if it changes
         old_cve = finding.cve
         # legacy cve field has already been processed/set earlier
-        finding = self.reconcile_vulnerability_ids(finding)
+        # Use store_vulnerability_ids for new findings, reconcile_vulnerability_ids for existing findings
+        finding = self.store_vulnerability_ids(finding) if is_new_finding else self.reconcile_vulnerability_ids(finding)
         # Save the finding only if the cve field was changed by save_vulnerability_ids
         # This is temporary as the cve field will be phased out
         if finding.cve != old_cve:

@@ -177,7 +177,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=340,
             expected_num_async_tasks1=7,
-            expected_num_queries2=294,
+            expected_num_queries2=293,
             expected_num_async_tasks2=18,
             expected_num_queries3=180,
             expected_num_async_tasks3=17,
@@ -195,7 +195,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=306,
             expected_num_async_tasks1=7,
-            expected_num_queries2=287,
+            expected_num_queries2=286,
             expected_num_async_tasks2=18,
             expected_num_queries3=175,
             expected_num_async_tasks3=17,
@@ -219,7 +219,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=346,
             expected_num_async_tasks1=6,
-            expected_num_queries2=300,
+            expected_num_queries2=299,
             expected_num_async_tasks2=17,
             expected_num_queries3=186,
             expected_num_async_tasks3=16,
@@ -241,7 +241,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=312,
             expected_num_async_tasks1=6,
-            expected_num_queries2=293,
+            expected_num_queries2=292,
             expected_num_async_tasks2=17,
             expected_num_queries3=181,
             expected_num_async_tasks3=16,
@@ -267,7 +267,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=348,
             expected_num_async_tasks1=8,
-            expected_num_queries2=302,
+            expected_num_queries2=301,
             expected_num_async_tasks2=19,
             expected_num_queries3=188,
             expected_num_async_tasks3=18,
@@ -290,7 +290,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=314,
             expected_num_async_tasks1=8,
-            expected_num_queries2=295,
+            expected_num_queries2=294,
             expected_num_async_tasks2=19,
             expected_num_queries3=183,
             expected_num_async_tasks3=18,
