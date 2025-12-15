@@ -825,7 +825,9 @@
                     { "data": "checkbox" },
                 {% endif %}
                     { "data": "action" },
+                    {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
                     { "data": "severity" },
+                    {% endif %}
                     { "data": "finding" , render: function (data, type, row) {
                             return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
                     }},
@@ -833,7 +835,9 @@
                     { "data": "cve" },
                     { "data": "epss_score", "type": "num", "render": percentSort },
                     { "data": "epss_percentile", "type": "num", "render": percentSort },
+                    {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"True" %}
                     { "data": "priority", "type": "num"},
+                    {% endif %}
                     { "data": "known_exploited", },
                     { "data": "used_ransomware", },
                     { "data": "kev_date", render: function(data, type, row, meta) {

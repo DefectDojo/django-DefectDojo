@@ -9,7 +9,7 @@
             <input type="checkbox" name="accepted_findings" value="{{ finding.id }}">
         </td>
         <td>{{finding.id}}</td>
-         {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"True" %}
+         {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
         <td>
             <span class="label severity severity-{{ finding|priority_display_status }}">
                 <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
