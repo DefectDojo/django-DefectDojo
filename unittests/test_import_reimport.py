@@ -11,7 +11,7 @@ from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.models import Finding, Test, Test_Type, User
+from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, User
 
 from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
 from .test_utils import assertTestImportModelsCreated
@@ -2032,6 +2032,118 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # Get the date
         date = findings["results"][0]["date"]
         self.assertEqual(date, "2006-12-26")
+
+    @override_settings(
+        IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=50,
+        IMPORT_REIMPORT_MATCH_BATCH_SIZE=50,
+    )
+    def test_reimport_with_internal_duplicates_same_batch(self):
+        """
+        Test that duplicates within the same scan report are detected during reimport
+        even when they're processed in the same batch.
+
+        This test mimics the integration test test_import_path_tests in tests/dedupe_test.py,
+        which tests the same scenario but uses Selenium UI testing.
+
+        BACKGROUND:
+        When reimporting a scan report, the system uses batch processing to optimize
+        database queries. Findings are processed in batches (default: 1000), and for
+        each batch, candidate matches are fetched from the database once. However, this
+        creates a bug: if multiple duplicate findings exist within the same scan report
+        and they're processed in the same batch, they cannot match each other because
+        the candidate dictionary is built before any findings in the batch are saved.
+
+        THE BUG:
+        - Finding #1 in batch: No matches found → Creates new finding
+        - Finding #2 in batch: No matches found (Finding #1 not in DB yet) → Creates duplicate
+        - Finding #3 in batch: No matches found (Findings #1 and #2 not in DB yet) → Creates duplicate
+        Result: 3 findings created instead of 1 unique finding
+
+        THIS TEST:
+        This test reproduces the bug by:
+        1. Creating an empty test (no existing findings to match against)
+        2. Reimporting dedupe_path_1.json which contains 3 duplicate findings:
+           - All have same file_path: "/opt/appsecpipeline/source/dojo/cred/views.py"
+           - All have same line_number: 524
+           - All have same test_id: "B110"
+           - All should have the same hash_code and match each other
+        3. Using small batch size (50) to ensure all 3 duplicates are in the same batch
+        4. Verifying that only 1 finding is created (not 3)
+
+        EXPECTED BEHAVIOR:
+        - Total findings: 1 (the 3 duplicates should match to 1 unique finding)
+        - Active findings: 1
+        - Duplicate findings: 0 (duplicates within report should match, not be marked as duplicates)
+
+        CURRENT BUGGY BEHAVIOR:
+        - Total findings: 3 (all duplicates are created because they can't match each other)
+        - Active findings: 1 (first one)
+        - Duplicate findings: 2 (second and third are marked as duplicates of first)
+
+        This test should fail with the current buggy implementation and pass after
+        implementing intra-batch duplicate tracking.
+        """
+        # Use the dedupe_path_1.json file from integration tests (has 3 duplicate findings)
+        # Note: This file is in tests/dedupe_scans, not unittests/scans
+        dedupe_path_file = Path(__file__).parent.parent / "tests" / "dedupe_scans" / "dedupe_path_1.json"
+
+        # Create engagement and test
+        product_type, _ = Product_Type.objects.get_or_create(name="PT Bandit Internal Dupes")
+        product, _ = Product.objects.get_or_create(name="P Bandit Internal Dupes", prod_type=product_type)
+        engagement = Engagement.objects.create(
+            name="E Bandit Internal Dupes",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        engagement.deduplication_on_engagement = True
+        engagement.save()
+
+        # Create an empty test first
+        # Get or create the test type
+        test_type, _ = Test_Type.objects.get_or_create(name="Bandit Scan")
+        test = Test.objects.create(
+            engagement=engagement,
+            test_type=test_type,
+            title="Path Test 1",
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        test_id = test.id
+
+        # Now reimport the file with duplicates to the empty test
+        # This tests reimport batch matching where duplicates within the same report need to match each other
+        reimport_result = self.reimport_scan_with_params(
+            test_id,
+            dedupe_path_file,
+            scan_type="Bandit Scan",
+        )
+
+        test_id = reimport_result["test"]
+
+        # Verify findings count
+        # dedupe_path_1.json has 3 findings that are duplicates (same file_path, line_number, test_id)
+        # They should all match each other, resulting in 1 unique finding
+        # However, if intra-batch matching fails, we'll get 3 findings created instead of 1
+        total_findings = Finding.objects.filter(test_id=test_id).count()
+        active_findings = Finding.objects.filter(test_id=test_id, active=True, duplicate=False).count()
+        duplicate_findings = Finding.objects.filter(test_id=test_id, duplicate=True).count()
+
+        # Expected: 1 active finding (the 3 duplicates should match each other)
+        # If intra-batch matching fails, we'll get 3 findings instead
+        with self.subTest(metric="total_findings"):
+            self.assertEqual(total_findings, 1,
+                f"Expected 1 total finding (3 duplicates should match to 1), got {total_findings}. "
+                f"If this is 3, intra-batch duplicates weren't detected.")
+
+        with self.subTest(metric="active_findings"):
+            self.assertEqual(active_findings, 1,
+                f"Expected 1 active finding, got {active_findings}. "
+                f"If this fails, intra-batch duplicates weren't detected.")
+
+        with self.subTest(metric="duplicate_findings"):
+            self.assertEqual(duplicate_findings, 0,
+                f"Expected 0 duplicate findings (duplicates within report should match), got {duplicate_findings}")
 
 
 class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):

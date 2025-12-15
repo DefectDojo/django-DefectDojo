@@ -369,10 +369,10 @@ def get_jira_project_key(obj):
 def get_jira_issue_template(obj):
     jira_project = get_jira_project(obj)
 
-    template_dir = jira_project.issue_template_dir
+    template_dir = jira_project.issue_template_dir if jira_project else None
     if not template_dir:
         jira_instance = get_jira_instance(obj)
-        template_dir = jira_instance.issue_template_dir
+        template_dir = jira_instance.issue_template_dir if jira_instance else None
 
     # fallback to default as before
     if not template_dir:
@@ -902,6 +902,10 @@ def add_jira_issue(obj, *args, **kwargs):
     jira_project = get_jira_project(obj)
     jira_instance = get_jira_instance(obj)
 
+    if not jira_instance:
+        message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
+        return failure_to_add_message(message, None, obj)
+
     obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
         # not sure why this check is not part of can_be_pushed_to_jira, but afraid to change it
@@ -1046,10 +1050,17 @@ def update_jira_issue(obj, *args, **kwargs):
         message = f"Object {obj.id} cannot be pushed to JIRA as there is no JIRA configuration for {to_str_typed(obj)}."
         return failure_to_update_message(message, None, obj)
 
+    if not jira_instance:
+        message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
+        return failure_to_update_message(message, None, obj)
+
     j_issue = obj.jira_issue
     try:
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
+        if not jira:
+            message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA connection could not be established."
+            return failure_to_update_message(message, None, obj)
         issue = jira.issue(j_issue.jira_id)
     except Exception as e:
         message = f"The following jira instance could not be connected: {jira_instance} - {e}"
@@ -1168,7 +1179,8 @@ def get_jira_issue_from_jira(find):
         return jira.issue(j_issue.jira_id)
 
     except JIRAError as e:
-        logger.exception("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
+        jira_url = jira_project.jira_instance.url if (jira_project and jira_project.jira_instance) else "N/A"
+        logger.exception("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key if jira_project else "N/A", jira_url, json.dumps(meta, indent=4))
         log_jira_alert(e.text, find)
         return None
 
@@ -1199,6 +1211,10 @@ def issue_from_jira_is_active(issue_from_jira):
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
+    if not jira_instance:
+        logger.warning("Cannot push status to JIRA for %d:%s - jira_instance is None", obj.id, to_str_typed(obj))
+        return False
+
     status_list = _safely_get_obj_status_for_jira(obj)
     issue_closed = False
     updated = False
@@ -1224,6 +1240,7 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
     if updated and save:
         obj.jira_issue.jira_change = timezone.now()
         obj.jira_issue.save()
+    return updated
 
 
 # gets the metadata for the provided issue type in the provided jira project
@@ -1300,6 +1317,8 @@ def get_issuetype_fields(
 
 
 def is_jira_project_valid(jira_project):
+    if not jira_project or not jira_project.jira_instance:
+        return False
     try:
         jira = get_jira_connection(jira_project)
         get_issuetype_fields(jira, jira_project.project_key, jira_project.jira_instance.default_issue_type)
@@ -1361,7 +1380,11 @@ def close_epic(eng, push_to_jira, **kwargs):
 
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
-    if jira_project.enable_engagement_epic_mapping:
+    if not jira_instance:
+        logger.warning("JIRA close epic failed: jira_instance is None")
+        return False
+
+    if jira_project and jira_project.enable_engagement_epic_mapping:
         if push_to_jira:
             try:
                 jissue = get_jira_issue(eng)
@@ -1449,7 +1472,11 @@ def add_epic(engagement, **kwargs):
 
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
-    if jira_project.enable_engagement_epic_mapping:
+    if not jira_instance:
+        logger.warning("JIRA add epic failed: jira_instance is None")
+        return False
+
+    if jira_project and jira_project.enable_engagement_epic_mapping:
         epic_name = kwargs.get("epic_name")
         epic_issue_type_name = getattr(jira_project, "epic_issue_type_name", "Epic")
         if not epic_name:
