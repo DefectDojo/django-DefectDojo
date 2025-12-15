@@ -119,12 +119,12 @@ jobs:
       - name: Update values in HELM chart
         if: startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')
         run: |
-          title=${{ github.event.pull_request.title }}
+          title='${{ github.event.pull_request.title }}'
           chars='{}:[],&*#?|-<>=!%@'
           for c in $(echo "$chars" | grep -o .); do
             title="${title//"$c"/_}"
           done
-          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: $title\n"' helm/defectdojo/Chart.yaml
+          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: '$title'\n"' helm/defectdojo/Chart.yaml
           git add helm/defectdojo/Chart.yaml
           git commit -m "ci: update Chart annotations from PR #${{ github.event.pull_request.number }}" || echo "No changes to commit"
 
