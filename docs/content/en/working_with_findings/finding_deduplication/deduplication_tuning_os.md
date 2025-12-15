@@ -112,7 +112,7 @@ docker compose exec uwsgi /bin/bash -c "python manage.py dedupe --hash_code_only
 ```
 
 Help/usage:
-
+```bash
 options:
   --parser PARSER       List of parsers for which hash_code needs recomputing
                         (defaults to all parsers)
@@ -135,9 +135,9 @@ To help troubleshooting deduplication use the following tools:
 - Observe log out in the `dojo.specific-loggers.deduplication` category. This is a class independant logger that outputs details about the deduplication process and settings when processing findings.
 - Observe the `unique_id_from_tool` and `hash_code` values by hovering over the `ID` field or `Status` column:
 
-![Unique ID from Tool and Hash Code on the View Finding page](images/hash_code_id_field.png)
+  ![Unique ID from Tool and Hash Code on the View Finding page](/docs/assets/images//hash_code_id_field.png)
 
-![Unique ID from Tool and Hash Code on the Finding List Status Column](images/hash_code_status_column.png)
+  ![Unique ID from Tool and Hash Code on the Finding List Status Column](/docs/assets/images/hash_code_status_column.png)
 
 ## Related documentation
 
