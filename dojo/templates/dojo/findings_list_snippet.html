@@ -319,7 +319,7 @@
                                         </th>
                                     {% endif %}
                                     <th></th>
-                                    {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"True" %}
+                                    {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
                                     <th class="nowrap centered severity-sort" scope="col">
                                         {% trans "Priority" %}
                                     </th>
@@ -688,11 +688,12 @@
                                             {% if filter_name == 'Closed' %}
                                             <td class="nowrap" data-order="{{ finding.mitigated|date:"U" }}">
                                                 {{ finding.mitigated|date }}
+                                            </td>
                                             {% else %}
                                             <td class="nowrap" data-order="{{ finding.date|date:"U" }}">
                                                 {{ finding.date }}
-                                            {% endif %}
                                             </td>
+                                            {% endif %}
                                             <td>
                                                 {{ finding.age }}
                                             </td>
@@ -787,6 +788,7 @@
                                                         {% if not forloop.last %}<br>{% endif %}
                                                     {% endfor %}
                                                 {% endif %}
+                                                "Rene"
                                             </td>
                                         {% endif %}
                                         {% endblock body %}
