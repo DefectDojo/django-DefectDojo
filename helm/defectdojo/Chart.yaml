@@ -10,11 +10,11 @@ maintainers:
     url: https://github.com/DefectDojo/django-DefectDojo
 dependencies:
   - name: postgresql
-    version: ~16.7.0
+    version: 16.7.27
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: postgresql.enabled
   - name: valkey
-    version: ~0.10.0
+    version: 0.10.2
     repository: "oci://registry-1.docker.io/cloudpirates"
     condition: valkey.enabled
 # For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/
@@ -34,4 +34,6 @@ dependencies:
 #     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "true"
-  artifacthub.io/changes: ""
+  artifacthub.io/changes: |
+    - kind: fixed
+      description: Use non-tilde notation of versions in subcharts
