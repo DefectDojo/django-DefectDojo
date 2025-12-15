@@ -3505,11 +3505,12 @@ class Finding(models.Model):
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
         # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
         elif dedupe_option:
+            finding_id = self.id if self.id is not None else "unsaved"
             if self.hash_code is not None:
-                deduplicationLogger.debug("Hash_code already computed for finding %i", self.id)
+                deduplicationLogger.debug("Hash_code already computed for finding: %s", finding_id)
             else:
                 self.hash_code = self.compute_hash_code()
-                deduplicationLogger.debug("Hash_code computed for finding %i: %s", self.id, self.hash_code)
+                deduplicationLogger.debug("Hash_code computed for finding: %s: %s", finding_id, self.hash_code)
 
 
 class FindingAdmin(admin.ModelAdmin):
