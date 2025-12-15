@@ -28,7 +28,7 @@ def reopen_external_issue_github(find, note, prod, eng):
         logger.error("Unable to get project key")
         return
     # Check if we have github info related to the finding
-    if not GITHUB_PKey.objects.filter(finding=find).exists():
+    if not GITHUB_Issue.objects.filter(finding=find).exists():
         return
     # Get the GitHub issue related to the finding
     g_issue = GITHUB_Issue.objects.get(finding=find)
@@ -63,7 +63,7 @@ def close_external_issue_github(find, note, prod, eng):
         logger.error("Unable to get project key")
         return
     # Check if we have github info related to the finding
-    if not GITHUB_PKey.objects.filter(finding=find).exists():
+    if not GITHUB_Issue.objects.filter(finding=find).exists():
         return
     # Get the GitHub issue related to the finding
     g_issue = GITHUB_Issue.objects.get(finding=find)
@@ -98,7 +98,7 @@ def update_external_issue_github(find, prod, eng):
         logger.error("Unable to get project key")
         return
     # Check if we have github info related to the finding
-    if not GITHUB_PKey.objects.filter(finding=find).exists():
+    if not GITHUB_Issue.objects.filter(finding=find).exists():
         return
     # Get the GitHub issue related to the finding
     g_issue = GITHUB_Issue.objects.get(finding=find)
