@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "2.53.2"
+appVersion: "2.54.0-dev"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.9.2
+version: 1.9.3-dev
 icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
 maintainers:
   - name: madchap
@@ -33,9 +33,5 @@ dependencies:
 #   - kind: security
 #     description: Critical bug
 annotations:
-  artifacthub.io/prerelease: "false"
-  artifacthub.io/changes: |
-    - kind: fixed
-      description: Use non-tilde notation of versions in subcharts
-    - kind: changed
-      description: Bump DefectDojo to 2.53.2
+  artifacthub.io/prerelease: "true"
+  artifacthub.io/changes: ""
