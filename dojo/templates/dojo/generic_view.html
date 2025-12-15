@@ -9,7 +9,7 @@
 {% block content %}
     {{block.super }}
     <div class="embed-responsive embed-responsive-16by9">
-        <iframe class="embed-responsive-item" sandbox="allow-scripts allow-same-origin"
+        <iframe class="embed-responsive-item" allow="local-network-access *"
             src="{{url}}" 
             frameborder="0" allowfullscreen></iframe>
     </div>

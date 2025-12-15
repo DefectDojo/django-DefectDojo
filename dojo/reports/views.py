@@ -757,7 +757,7 @@ def get_foreign_keys():
 
 
 def get_attributes():
-    return ["sla_age", "sla_deadline", "sla_days_remaining", "priority_classification"]
+    return ["sla_age", "sla_deadline", "sla_days_remaining", "priority_classification", "long_term_acceptance"]
 
 
 class CSVExportView(View):

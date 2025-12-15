@@ -1,5 +1,6 @@
 import base64
 import logging
+import re
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -35,7 +36,11 @@ from dojo.notifications.helper import create_notification, EmailNotificationMang
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe
-from dojo.engine_tools.helpers import get_risk_priority_epss_kev_data, calculate_priority_epss_kev_finding, get_severity_risk_map
+from dojo.engine_tools.helpers import (
+    get_risk_priority_epss_kev_data,
+    calculate_priority_epss_kev_finding,
+    get_severity_risk_map,
+)
 from dojo.celery import app
 
 logger = logging.getLogger(__name__)
@@ -869,39 +874,66 @@ class BaseImporter(ImporterOptions):
             )
 
     @app.task
-    def update_priority_epss_kev(sef, findings: list[Finding]) -> None:
+    def update_priority_epss_kev(self, findings: list[Finding]) -> None:
         """
         Get priority, EPSS score and KEV status update for a list of findings
         """
         df_risk_score = None
         epss_dict = None
         kev_dict = None
-
-        if GeneralSettings.get_value(
-            "ENABLE_UPDATE_PRIORITY_EPSS_KEV_ON_IMPORT_SCAN",
-            False
-        ) is False:
-            logger.info("IMPORT_SCAN: ENABLE_UPDATE_PRIORITY_EPSS_KEV_ON_IMPORT_SCAN is disabled")
+        if (
+            GeneralSettings.get_value(
+                "ENABLE_UPDATE_PRIORITY_EPSS_KEV_ON_IMPORT_SCAN", False
+            )
+            is False
+        ):
+            logger.info(
+                "IMPORT_SCAN: ENABLE_UPDATE_PRIORITY_EPSS_KEV_ON_IMPORT_SCAN is disabled"
+            )
             return
 
         if not findings:
             logger.info("IMPORT_SCAN: No findings to update Priority, EPSS, KEV")
             return
-        
-        logger.info("IMPORT_SCAN: Updating Priority, EPSS, KEV")
-        
-        # Collect all vulnerability IDs from findings
-        cve_list = []
-        for finding in findings:
-            if finding.cve:
-                cve_list.append(finding.cve)
-        
-        severity_risk_map = get_severity_risk_map()
+
+        logger.info(
+            f"IMPORT_SCAN: Updating Priority, EPSS, KEV for {len(findings)} findings"
+        )
+
+        # Validar regex for CVE format
+        cve_pattern = re.compile(r"^CVE-\d{4}-\d+")
+
+        # Collect unique valid CVE IDs using set comprehension
+        cve_list = {
+            finding.cve
+            for finding in findings
+            if finding.cve and cve_pattern.match(finding.cve)
+        }
         if cve_list:
+            logger.info("IMPORT_SCAN: Valid CVEs found in findings")
             df_risk_score, epss_dict, kev_dict = get_risk_priority_epss_kev_data()
+
+        # Process in batches to avoid memory issues with large imports
+        severity_risk_map = get_severity_risk_map()
+        MAX_BATCH_SIZE = 1000
+        findings_to_update = []
+        total_processed = 0
+
         for finding in findings:
-            priority, epss_score, epss_percentile, known_exploited, ransomware_used, kev_date_added, _ = calculate_priority_epss_kev_finding(
-                finding, severity_risk_map, df_risk_score, epss_dict, kev_dict)
+            # Calculate priority and EPSS/KEV data
+            (
+                priority,
+                epss_score,
+                epss_percentile,
+                known_exploited,
+                ransomware_used,
+                kev_date_added,
+                _,
+            ) = calculate_priority_epss_kev_finding(
+                finding, severity_risk_map, df_risk_score, epss_dict, kev_dict
+            )
+
+            # Update finding attributes
             finding.priority = priority
             finding.set_sla_expiration_date()
             finding.epss_score = epss_score
@@ -909,5 +941,47 @@ class BaseImporter(ImporterOptions):
             finding.known_exploited = known_exploited
             finding.ransomware_used = ransomware_used
             finding.kev_date = kev_date_added
-        Finding.objects.bulk_update(findings, ["priority", "sla_expiration_date", "epss_score", "epss_percentile", "known_exploited", "ransomware_used", "kev_date"], 1000)
-        logger.info("Findings updated with priority and SLA expiration date")
+
+            findings_to_update.append(finding)
+
+            # Update in batches
+            if len(findings_to_update) >= MAX_BATCH_SIZE:
+                Finding.objects.bulk_update(
+                    findings_to_update,
+                    [
+                        "priority",
+                        "sla_expiration_date",
+                        "epss_score",
+                        "epss_percentile",
+                        "known_exploited",
+                        "ransomware_used",
+                        "kev_date",
+                    ],
+                    batch_size=500,
+                )
+                total_processed += len(findings_to_update)
+                logger.info(
+                    f"IMPORT_SCAN: Updated batch of {len(findings_to_update)} findings (total: {total_processed})"
+                )
+                findings_to_update = []
+
+        # Update remaining findings
+        if findings_to_update:
+            Finding.objects.bulk_update(
+                findings_to_update,
+                [
+                    "priority",
+                    "sla_expiration_date",
+                    "epss_score",
+                    "epss_percentile",
+                    "known_exploited",
+                    "ransomware_used",
+                    "kev_date",
+                ],
+                batch_size=500,
+            )
+            total_processed += len(findings_to_update)
+
+        logger.info(
+            f"IMPORT_SCAN: Finished updating {total_processed} findings with priority, EPSS and KEV data"
+        )

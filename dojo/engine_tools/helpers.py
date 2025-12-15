@@ -1,9 +1,10 @@
 # Utils
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.db.models import Q
 from django.utils import timezone
 from django.urls import reverse
 from django.conf import settings
+from django.core.cache import cache
 from datetime import timedelta
 from celery.utils.log import get_task_logger
 from enum import Enum
@@ -19,7 +20,7 @@ import requests
 # Dojo
 from dojo.models import Finding, Dojo_Group, Notes, Vulnerability_Id
 from dojo.group.queries import get_group_members_for_group
-from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
+from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion, FindingExclusionLog
 from dojo.engine_tools.queries import tag_filter, priority_tag_filter
 from dojo.celery import app
 from dojo.user.queries import get_user
@@ -64,8 +65,16 @@ def get_approvers_members():
 
 
 def get_note(author, message):
-    note, _ = Notes.objects.get_or_create(author=author, entry=message)
-    return note
+    note = Notes.objects.filter(author=author, entry=message).first()
+    if note:
+        return note
+
+    try:
+        with transaction.atomic():
+            note = Notes.objects.create(author=author, entry=message)
+            return note
+    except IntegrityError:
+        return Notes.objects.filter(author=author, entry=message).first()
 
 
 def has_valid_comments(finding_exclusion, user) -> bool:
@@ -79,7 +88,7 @@ def has_valid_comments(finding_exclusion, user) -> bool:
 
 
 @app.task
-def add_findings_to_whitelist(unique_id_from_tool, relative_url):
+def add_findings_to_whitelist(unique_id_from_tool, relative_url, engagement_ids=[], product_ids=[]):
     findings_to_update = (
         Finding.objects.filter(
             Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
@@ -88,6 +97,12 @@ def add_findings_to_whitelist(unique_id_from_tool, relative_url):
         .exclude(risk_status=Constants.ON_WHITELIST.value)
         .filter(tag_filter)
     )
+
+    if product_ids and not engagement_ids:
+        findings_to_update = findings_to_update.filter(test__engagement__product__in=product_ids)
+
+    if engagement_ids:
+        findings_to_update = findings_to_update.filter(test__engagement__in=engagement_ids)
 
     if findings_to_update.exists():
         finding_exclusion_url = get_full_url(relative_url)
@@ -119,11 +134,23 @@ def accept_finding_exclusion_inmediately(finding_exclusion: FindingExclusion) ->
     finding_exclusion.save()
 
     relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
+    engagement_ids = finding_exclusion.engagements.values_list('id', flat=True)
     add_findings_to_whitelist.apply_async(
         args=(
             finding_exclusion.unique_id_from_tool,
             str(relative_url),
+            list(engagement_ids),
+            [finding_exclusion.product.id] if finding_exclusion.product else [],
         )
+    )
+
+    system_user = get_user(settings.SYSTEM_USER)
+
+    FindingExclusionLog.objects.create(
+        finding_exclusion=finding_exclusion,
+        changed_by=system_user,
+        previous_status=finding_exclusion.status,
+        current_status="Accepted"
     )
 
     # Send notification to the developer owner
@@ -255,6 +282,16 @@ def expire_finding_exclusion(expired_fex_id: str) -> None:
                 risk_status=risk_status,
             ).prefetch_related("tags", "notes")
 
+            engagement_ids = expired_fex.engagements.values_list("id", flat=True)
+
+            if expired_fex.product and not engagement_ids:
+                findings = findings.filter(test__engagement__product=expired_fex.product)
+
+            if engagement_ids:
+                findings = findings.filter(
+                    test__engagement__in=list(engagement_ids)
+                )
+
             findings_to_update = []
 
             for finding in findings:
@@ -264,6 +301,13 @@ def expire_finding_exclusion(expired_fex_id: str) -> None:
 
             Finding.objects.bulk_update(
                 findings_to_update, ["active", "risk_status"], 1000
+            )
+
+            FindingExclusionLog.objects.create(
+                finding_exclusion=expired_fex,
+                changed_by=system_user,
+                previous_status=expired_fex.status,
+                current_status="Expired"
             )
 
             maintainers = get_reviewers_members()
@@ -305,10 +349,13 @@ def check_new_findings_to_exclusion_list():
     for finding_exclusion in finding_exclusions:
         relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
         if finding_exclusion.type == "white_list":
+            engagement_ids = finding_exclusion.engagements.values_list('id', flat=True)
             add_findings_to_whitelist.apply_async(
                 args=(
                     finding_exclusion.unique_id_from_tool,
                     relative_url,
+                    list(engagement_ids),
+                    [finding_exclusion.product.id] if finding_exclusion.product else [],
                 )
             )
         else:
@@ -392,6 +439,9 @@ def update_finding_prioritization_per_cve(
     vulnerability_id = finding.cve
     severity = finding.severity
     scan_type = finding.test.scan_type
+    logger.info(
+        f"Init update_finding_prioritization_per_cve with CVE {vulnerability_id}, severity {severity}, cve_greater {cve_greater}, scan_type {scan_type}"
+    )
     if vulnerability_id:
         if (
             Constants.TAG_TENABLE.value in finding.tags
@@ -424,7 +474,7 @@ def update_finding_prioritization_per_cve(
     findings = (
         Finding.objects.filter(priority_cve_severity_filter, test__scan_type=scan_type)
         .filter(priority_tag_filter)
-        .filter(active=True)
+        .filter(active=settings.CELERY_CRON_STATUS_FINDINGS_PRIORIZATION)
     )
 
     # If we need to filter by vulnerability_id count, apply it after the initial query
@@ -432,7 +482,14 @@ def update_finding_prioritization_per_cve(
         findings = findings.annotate(
             vulnerability_id_count=Count("vulnerability_id")
         ).filter(vulnerability_id_count=1)
-    for finding_update in findings:
+
+    # Process in chunks to avoid memory issues
+    MAX_BATCH_SIZE = 5000
+    findings_iterator = findings.iterator(chunk_size=1000)
+    findings_to_update = []
+    total_processed = 0
+
+    for finding_update in findings_iterator:
         finding_update.priority = priorization
         finding_update.set_sla_expiration_date()
         finding_update.epss_score = epss_score
@@ -440,23 +497,50 @@ def update_finding_prioritization_per_cve(
         finding_update.known_exploited = known_exploited
         finding_update.ransomware_used = ransomware_used
         finding_update.kev_date = kev_date_added
+        findings_to_update.append(finding_update)
 
-    Finding.objects.bulk_update(
-        findings,
-        [
-            "priority",
-            "sla_expiration_date",
-            "epss_score",
-            "epss_percentile",
-            "known_exploited",
-            "ransomware_used",
-            "kev_date",
-        ],
-        1000,
-    )
-    message = f"{vulnerability_id} with severity {severity} and cve_greater {cve_greater} of {scan_type} with {findings.count()} findings updated with prioritization {priorization} and EPSS score {epss_score} and percentile {epss_percentile}"
+        # Update in batches to avoid memory overflow
+        if len(findings_to_update) >= MAX_BATCH_SIZE:
+            Finding.objects.bulk_update(
+                findings_to_update,
+                [
+                    "priority",
+                    "sla_expiration_date",
+                    "epss_score",
+                    "epss_percentile",
+                    "known_exploited",
+                    "ransomware_used",
+                    "kev_date",
+                ],
+                1000,
+            )
+            total_processed += len(findings_to_update)
+            logger.info(
+                f"Updated batch of {len(findings_to_update)} findings (total: {total_processed}) for CVE {vulnerability_id}"
+            )
+            findings_to_update = []
+
+    # Update remaining findings
+    if findings_to_update:
+        Finding.objects.bulk_update(
+            findings_to_update,
+            [
+                "priority",
+                "sla_expiration_date",
+                "epss_score",
+                "epss_percentile",
+                "known_exploited",
+                "ransomware_used",
+                "kev_date",
+            ],
+            1000,
+        )
+        total_processed += len(findings_to_update)
+
+    message = f"{vulnerability_id} with severity {severity} and cve_greater {cve_greater} of {scan_type} with {total_processed} findings updated with prioritization {priorization} and EPSS score {epss_score} and percentile {epss_percentile}"
     if known_exploited:
         message += f" (Known Exploited Vulnerability) - Ransomware_used {ransomware_used} - KEV Date Added {kev_date_added}"
+    logger.info("Finished update_finding_prioritization_per_cve: " + message)
     return message
 
 
@@ -538,6 +622,12 @@ def identify_priority_vulnerabilities(findings) -> int:
 def get_severity_risk_map():
     priorization_weights = settings.PRIORIZATION_FIELD_WEIGHTS
     return {
+        "Strict": {
+            "Low": float(priorization_weights.get("P_Critical")),
+            "Medium": float(priorization_weights.get("P_Critical")),
+            "High": float(priorization_weights.get("P_Critical")),
+            "Critical": float(priorization_weights.get("P_Critical")),
+        },
         "Standard": {
             "Low": float(priorization_weights.get("P_Low")),
             "Medium": float(priorization_weights.get("P_Medium")),
@@ -555,11 +645,24 @@ def get_severity_risk_map():
             "Medium": float(priorization_weights.get("P_Low")),
             "High": float(priorization_weights.get("P_High")),
             "Critical": float(priorization_weights.get("P_Critical")),
-        },
+        }
     }
 
 
 def get_risk_priority_epss_kev_data():
+    """
+    Get risk score, EPSS and KEV data with caching for performance
+    Cache TTL: 24 hours (86400 seconds)
+    """
+    cache_key = "risk_priority_epss_kev_data"
+    cached_data = cache.get(cache_key)
+
+    if cached_data:
+        logger.info("Using cached risk score, EPSS and KEV data")
+        return cached_data
+
+    logger.info("Fetching fresh risk score, EPSS and KEV data")
+
     try:
         risk_score_dataframes = list_and_read_parquet_files_from_s3(
             bucket_name=settings.BUCKET_NAME_RISK_SCORE,
@@ -581,7 +684,14 @@ def get_risk_priority_epss_kev_data():
     # Get epss data and kev data
     epss_dict = download_epss_data(backward_day=0, cve_cutoff=settings.CVE_CUTOFF)
     kev_dict = generate_cve_kev_dict()
-    return df_risk_score, epss_dict, kev_dict
+
+    result = (df_risk_score, epss_dict, kev_dict)
+
+    # Cache for 24 hours
+    cache.set(cache_key, result, 86400)
+    logger.info("Cached risk score, EPSS and KEV data for 24 hours")
+
+    return result
 
 
 def calculate_priority_epss_kev_finding(
@@ -602,7 +712,7 @@ def calculate_priority_epss_kev_finding(
     )
 
     severity_risk_map = severity_risk_map.get(
-        settings.PRIORIZATION_FIELD_WEIGHTS.get(tags_str.replace(",", ":"), "Standard"),
+        settings.PRIORIZATION_FIELD_WEIGHTS.get(tags_str.replace(",", ":").replace(" ", ""), "Standard"),
         severity_risk_map["Standard"],
     )
     if df_risk_score is not None and not df_risk_score.empty and finding.cve:
@@ -792,10 +902,10 @@ def generate_cve_kev_dict():
 def check_priorization():
     # Get all vulnerabilities with priority tag filter
     all_vulnerabilities = (
-        Finding.objects.filter(active=True)
+        Finding.objects.filter(active=settings.CELERY_CRON_STATUS_FINDINGS_PRIORIZATION)
         .filter(priority_tag_filter)
-        .order_by("priority", "test__scan_type", "severity")
-        .distinct("priority", "test__scan_type", "severity")
+        .order_by("cve", "test__scan_type", "severity")
+        .distinct("cve", "test__scan_type", "severity")
     )
 
     logger.info(
@@ -808,7 +918,7 @@ def check_priorization():
 
 @app.task
 def remove_findings_from_deleted_finding_exclusions(
-    unique_id_from_tool: str, fx_type: str
+    unique_id_from_tool: str, fx_type: str, engagement_ids: list = [], product_ids: list = []
 ) -> None:
     try:
         with transaction.atomic():
@@ -830,6 +940,12 @@ def remove_findings_from_deleted_finding_exclusions(
                 active=is_active,
                 risk_status=risk_status,
             ).prefetch_related("tags", "notes")
+
+            if product_ids and not engagement_ids:
+                findings = findings.filter(test__engagement__product__in=product_ids)
+
+            if engagement_ids:
+                findings = findings.filter(test__engagement__in=engagement_ids)
 
             findings_to_update = []
 

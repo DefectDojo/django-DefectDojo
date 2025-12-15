@@ -55,6 +55,16 @@ class FindingExclusion(models.Model):
                                    on_delete=models.CASCADE,
                                    related_name="dojo_user_rejected")
     practice = models.CharField(max_length=50, null=True, blank=True)
+    product_type = models.ForeignKey("Product_Type",
+                                     null=True,
+                                     blank=True,
+                                     on_delete=models.CASCADE)
+    product = models.ForeignKey("Product",
+                                null=True,
+                                blank=True,
+                                on_delete=models.CASCADE)
+    engagements = models.ManyToManyField("Engagement",
+                                   blank=True)
     
     class Meta:
         db_table = "dojo_finding_exlusion"
@@ -72,7 +82,22 @@ class FindingExclusionDiscussion(models.Model):
     
     class Meta:
         db_table = "dojo_finding_exclusion_discussion"
-        
 
+
+class FindingExclusionLog(models.Model):
+    finding_exclusion = models.ForeignKey("FindingExclusion", on_delete=models.CASCADE, related_name='logs')
+    changed_by = models.ForeignKey("Dojo_User", on_delete=models.CASCADE)
+    previous_status = models.CharField(max_length=8, choices=FindingExclusion.STATUS_CHOICES, blank=True, default="Pending")
+    current_status = models.CharField(max_length=8, choices=FindingExclusion.STATUS_CHOICES, blank=True, default="Pending")
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Log for {self.finding_exclusion.uuid} by {self.changed_by.username} on {self.changed_at}"
+    
+    class Meta:
+        db_table = "dojo_finding_exclusion_log"
+        
+        
+admin.site.register(FindingExclusionLog)
 admin.site.register(FindingExclusion)
 admin.site.register(FindingExclusionDiscussion)
