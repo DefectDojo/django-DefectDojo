@@ -35,11 +35,10 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if not settings.ENABLE_AUDITLOG or settings.AUDITLOG_TYPE != "django-pghistory":
+        if not settings.ENABLE_AUDITLOG:
             self.stdout.write(
                 self.style.WARNING(
-                    "pghistory is not enabled. Set DD_ENABLE_AUDITLOG=True and "
-                    "DD_AUDITLOG_TYPE=django-pghistory",
+                    "pghistory is not enabled. Set DD_ENABLE_AUDITLOG=True",
                 ),
             )
             return

@@ -34,4 +34,6 @@ dependencies:
 #     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "true"
-  artifacthub.io/changes: ""
+  artifacthub.io/changes: |
+    - kind: changed
+      description: chore(deps)_ update gcr.io/cloudsql_docker/gce_proxy docker tag from 1.37.10 to v1.37.11 (helm/defectdojo/values.yaml)
