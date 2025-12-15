@@ -1987,20 +1987,20 @@ class async_delete:
     def __init__(self, *args, **kwargs):
         self.mapping = {
             "Product_Type": [
-                (Endpoint, "product__prod_type"),
-                (Finding, "test__engagement__product__prod_type"),
-                (Test, "engagement__product__prod_type"),
-                (Engagement, "product__prod_type"),
-                (Product, "prod_type")],
+                (Endpoint, "product__prod_type__id"),
+                (Finding, "test__engagement__product__prod_type__id"),
+                (Test, "engagement__product__prod_type__id"),
+                (Engagement, "product__prod_type__id"),
+                (Product, "prod_type__id")],
             "Product": [
-                (Endpoint, "product"),
-                (Finding, "test__engagement__product"),
-                (Test, "engagement__product"),
-                (Engagement, "product")],
+                (Endpoint, "product__id"),
+                (Finding, "test__engagement__product__id"),
+                (Test, "engagement__product__id"),
+                (Engagement, "product__id")],
             "Engagement": [
-                (Finding, "test__engagement"),
-                (Test, "engagement")],
-            "Test": [(Finding, "test")],
+                (Finding, "test__engagement__id"),
+                (Test, "engagement__id")],
+            "Test": [(Finding, "test__id")],
         }
 
     @dojo_async_task
@@ -2069,11 +2069,11 @@ class async_delete:
     @app.task
     def crawl(self, obj, model_list, **kwargs):
         logger.debug("ASYNC_DELETE: Crawling " + self.get_object_name(obj) + ": " + str(obj))
-        task_results = []
         for model_info in model_list:
+            task_results = []
             model = model_info[0]
             model_query = model_info[1]
-            filter_dict = {model_query: obj}
+            filter_dict = {model_query: obj.id}
             # Only fetch the IDs since we will make a list of IDs in the following function call
             objects_to_delete = model.objects.only("id").filter(**filter_dict).distinct().order_by("id")
             logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + self.get_object_name(model) + "s in chunks")
@@ -2087,11 +2087,11 @@ class async_delete:
             # Wait for all chunk deletions to complete (they run in parallel)
             for task_result in task_results:
                 task_result.get(timeout=300)  # 5 minute timeout per chunk
-            # Now delete the main object after all chunks are done
-            result = self.delete_chunk([obj])
-            # Wait for final deletion to complete
-            if hasattr(result, "get"):
-                result.get(timeout=300)  # 5 minute timeout
+        # Now delete the main object after all chunks are done
+        result = self.delete_chunk([obj])
+        # Wait for final deletion to complete
+        if hasattr(result, "get"):
+            result.get(timeout=300)  # 5 minute timeout
         logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(obj) + ": " + str(obj))
 
     def chunk_list(self, model, full_list):
