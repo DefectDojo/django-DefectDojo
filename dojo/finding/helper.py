@@ -236,7 +236,8 @@ def add_to_finding_group(finding_group, finds):
     finding_group.findings.add(*available_findings)
 
     # Now update the JIRA to add the finding to the finding group
-    if finding_group.has_jira_issue and jira_helper.get_jira_instance(finding_group).finding_jira_sync:
+    jira_instance = jira_helper.get_jira_instance(finding_group)
+    if finding_group.has_jira_issue and jira_instance and jira_instance.finding_jira_sync:
         logger.debug("pushing to jira from finding.finding_bulk_update_all()")
         jira_helper.push_to_jira(finding_group)
 
@@ -263,7 +264,8 @@ def remove_from_finding_group(finds):
 
     # Now update the JIRA to remove the finding from the finding group
     for group in affected_groups:
-        if group.has_jira_issue and jira_helper.get_jira_instance(group).finding_jira_sync:
+        jira_instance = jira_helper.get_jira_instance(group)
+        if group.has_jira_issue and jira_instance and jira_instance.finding_jira_sync:
             logger.debug("pushing to jira from finding.finding_bulk_update_all()")
             jira_helper.push_to_jira(group)
 
@@ -340,7 +342,8 @@ def group_findings_by(finds, finding_group_by_option):
 
     # Now update the JIRA to add the finding to the finding group
     for group in affected_groups:
-        if group.has_jira_issue and jira_helper.get_jira_instance(group).finding_jira_sync:
+        jira_instance = jira_helper.get_jira_instance(group)
+        if group.has_jira_issue and jira_instance and jira_instance.finding_jira_sync:
             logger.debug("pushing to jira from finding.finding_bulk_update_all()")
             jira_helper.push_to_jira(group)
 

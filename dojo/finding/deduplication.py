@@ -147,7 +147,14 @@ def set_duplicate(new_finding, existing_finding):
     for find in new_finding.original_finding.all():
         new_finding.original_finding.remove(find)
         set_duplicate(find, existing_finding)
-    existing_finding.found_by.add(new_finding.test.test_type)
+    # Only add test type to found_by if it is not already present.
+    # This is efficient because `found_by` is prefetched for candidates via `build_dedupe_scope_queryset()`.
+    test_type = getattr(getattr(new_finding, "test", None), "test_type", None)
+    if test_type is not None and test_type not in existing_finding.found_by.all():
+        existing_finding.found_by.add(test_type)
+
+    # existing_finding.found_by.add(new_finding.test.test_type)
+
     logger.debug("saving new finding: %d", new_finding.id)
     super(Finding, new_finding).save()
     logger.debug("saving existing finding: %d", existing_finding.id)
@@ -253,7 +260,7 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
         queryset = Finding.objects.filter(scope_q)
 
     # Base prefetches for both modes
-    prefetch_list = ["endpoints", "vulnerability_id_set"]
+    prefetch_list = ["endpoints", "vulnerability_id_set", "found_by"]
 
     # Additional prefetches for reimport mode
     if mode == "reimport":

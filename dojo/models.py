@@ -2766,6 +2766,8 @@ class Finding(models.Model):
         logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
 
+        is_new_finding = self.pk is None
+
         # if not isinstance(self.date, (datetime, date)):
         #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
 
@@ -2809,7 +2811,7 @@ class Finding(models.Model):
 
         self.set_hash_code(dedupe_option)
 
-        if self.pk is None:
+        if is_new_finding:
             # We enter here during the first call from serializers.py
             from dojo.utils import apply_cwe_to_template  # noqa: PLC0415 circular import
             # No need to use the returned variable since `self` Is updated in memory
@@ -2838,7 +2840,9 @@ class Finding(models.Model):
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         super().save(*args, **kwargs)
 
-        self.found_by.add(self.test.test_type)
+        # Only add to found_by for newly-created findings (avoid doing this on every update)
+        if is_new_finding:
+            self.found_by.add(self.test.test_type)
 
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
         system_settings = System_Settings.objects.get()

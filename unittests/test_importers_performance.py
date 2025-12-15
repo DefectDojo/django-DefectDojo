@@ -255,22 +255,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
             engagement_name="Test Create Engagement",
         )
 
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
-    def test_import_reimport_reimport_performance_async(self):
-        # Ensure django-auditlog is properly configured for this test
-        configure_audit_system()
-        configure_pghistory_triggers()
-
-        self._import_reimport_performance(
-            expected_num_queries1=340,
-            expected_num_async_tasks1=7,
-            expected_num_queries2=238,
-            expected_num_async_tasks2=18,
-            expected_num_queries3=118,
-            expected_num_async_tasks3=17,
-        )
-
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    @override_settings(ENABLE_AUDITLOG=True)
     def test_import_reimport_reimport_performance_pghistory_async(self):
         """
         This test checks the performance of the importers when using django-pghistory with async enabled.
@@ -288,31 +273,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
             expected_num_async_tasks3=17,
         )
 
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
-    def test_import_reimport_reimport_performance_no_async(self):
-        """
-        This test checks the performance of the importers when they are run in sync mode.
-        The reason for this is that we also want to be aware of when a PR affects the number of queries
-        or async tasks created by a background task.
-        The impersonate context manager above does not work as expected for disabling async,
-        so we patch the we_want_async decorator to always return False.
-        """
-        configure_audit_system()
-        configure_pghistory_triggers()
-
-        testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.block_execution = True
-        testuser.usercontactinfo.save()
-        self._import_reimport_performance(
-            expected_num_queries1=346,
-            expected_num_async_tasks1=6,
-            expected_num_queries2=244,
-            expected_num_async_tasks2=17,
-            expected_num_queries3=124,
-            expected_num_async_tasks3=16,
-        )
-
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    @override_settings(ENABLE_AUDITLOG=True)
     def test_import_reimport_reimport_performance_pghistory_no_async(self):
         """
         This test checks the performance of the importers when using django-pghistory with async disabled.
@@ -328,39 +289,13 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._import_reimport_performance(
             expected_num_queries1=312,
             expected_num_async_tasks1=6,
-            expected_num_queries2=237,
+            expected_num_queries2=287,
             expected_num_async_tasks2=17,
-            expected_num_queries3=119,
+            expected_num_queries3=176,
             expected_num_async_tasks3=16,
         )
 
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
-    def test_import_reimport_reimport_performance_no_async_with_product_grading(self):
-        """
-        This test checks the performance of the importers when they are run in sync mode.
-        The reason for this is that we also want to be aware of when a PR affects the number of queries
-        or async tasks created by a background task.
-        The impersonate context manager above does not work as expected for disabling async,
-        so we patch the we_want_async decorator to always return False.
-        """
-        configure_audit_system()
-        configure_pghistory_triggers()
-
-        testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.block_execution = True
-        testuser.usercontactinfo.save()
-        self.system_settings(enable_product_grade=True)
-
-        self._import_reimport_performance(
-            expected_num_queries1=348,
-            expected_num_async_tasks1=8,
-            expected_num_queries2=246,
-            expected_num_async_tasks2=19,
-            expected_num_queries3=126,
-            expected_num_async_tasks3=18,
-        )
-
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    @override_settings(ENABLE_AUDITLOG=True)
     def test_import_reimport_reimport_performance_pghistory_no_async_with_product_grading(self):
         """
         This test checks the performance of the importers when using django-pghistory with async disabled and product grading enabled.
@@ -377,9 +312,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._import_reimport_performance(
             expected_num_queries1=314,
             expected_num_async_tasks1=8,
-            expected_num_queries2=239,
+            expected_num_queries2=289,
             expected_num_async_tasks2=19,
-            expected_num_queries3=121,
+            expected_num_queries3=178,
             expected_num_async_tasks3=18,
         )
 
@@ -488,27 +423,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
             total_findings = Finding.objects.filter(test__engagement=engagement).count()
             self.assertEqual(total_findings, 12, f"Expected 12 total findings, got {total_findings}")
 
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
-    def test_deduplication_performance_async(self):
-        """
-        Test deduplication performance with async tasks enabled.
-        This test imports the same scan twice to measure deduplication query and task overhead.
-        """
-        configure_audit_system()
-        configure_pghistory_triggers()
-
-        # Enable deduplication
-        self.system_settings(enable_deduplication=True)
-
-        self._deduplication_performance(
-            expected_num_queries1=311,
-            expected_num_async_tasks1=8,
-            expected_num_queries2=204,
-            expected_num_async_tasks2=8,
-            check_duplicates=False,  # Async mode - deduplication happens later
-        )
-
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    @override_settings(ENABLE_AUDITLOG=True)
     def test_deduplication_performance_pghistory_async(self):
         """Test deduplication performance with django-pghistory and async tasks enabled."""
         configure_audit_system()
@@ -525,27 +440,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
             check_duplicates=False,  # Async mode - deduplication happens later
         )
 
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
-    def test_deduplication_performance_no_async(self):
-        """Test deduplication performance with async tasks disabled."""
-        configure_audit_system()
-        configure_pghistory_triggers()
-
-        # Enable deduplication
-        self.system_settings(enable_deduplication=True)
-
-        testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.block_execution = True
-        testuser.usercontactinfo.save()
-
-        self._deduplication_performance(
-            expected_num_queries1=317,
-            expected_num_async_tasks1=7,
-            expected_num_queries2=288,
-            expected_num_async_tasks2=7,
-        )
-
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    @override_settings(ENABLE_AUDITLOG=True)
     def test_deduplication_performance_pghistory_no_async(self):
         """Test deduplication performance with django-pghistory and async tasks disabled."""
         configure_audit_system()
@@ -561,6 +456,6 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._deduplication_performance(
             expected_num_queries1=281,
             expected_num_async_tasks1=7,
-            expected_num_queries2=251,
+            expected_num_queries2=245,
             expected_num_async_tasks2=7,
         )

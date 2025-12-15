@@ -3607,7 +3607,7 @@ class PgHistoryFilter(DojoFilter):
             ("insert", "Insert"),
             ("update", "Update"),
             ("delete", "Delete"),
-            ("initial_import", "Initial Import"),
+            ("initial_backfill", "Initial Backfill"),
         ],
     )
 

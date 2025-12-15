@@ -1,11 +1,16 @@
-import logging
-from datetime import UTC, date, datetime
+"""
+Unit tests for flush_auditlog functionality.
 
-from auditlog.models import LogEntry
+Tests the flush_auditlog management command and task that removes old audit log entries.
+"""
+import logging
+from datetime import UTC, datetime
+
 from dateutil.relativedelta import relativedelta
+from django.apps import apps
 from django.test import override_settings
 
-from dojo.models import Finding
+from dojo.models import Product_Type
 from dojo.tasks import flush_auditlog
 
 from .dojo_test_case import DojoTestCase
@@ -18,32 +23,71 @@ class TestFlushAuditlog(DojoTestCase):
 
     @override_settings(AUDITLOG_FLUSH_RETENTION_PERIOD=-1)
     def test_flush_auditlog_disabled(self):
-        entries_before = LogEntry.objects.all().count()
+        """Test that flush_auditlog does nothing when retention period is -1 (disabled)."""
+        # Get pghistory event model
+        ProductTypeEvent = apps.get_model("dojo", "Product_TypeEvent")
+        entries_before = ProductTypeEvent.objects.count()
+
         flush_auditlog()
-        entries_after = LogEntry.objects.all().count()
+
+        entries_after = ProductTypeEvent.objects.count()
         self.assertEqual(entries_before, entries_after)
 
     @override_settings(AUDITLOG_FLUSH_RETENTION_PERIOD=0)
     def test_delete_all_entries(self):
-        entries_before = LogEntry.objects.filter(timestamp__date__lt=date.today()).count()
+        """Test that flush_auditlog deletes all entries when retention period is 0."""
+        # Get pghistory event model
+        ProductTypeEvent = apps.get_model("dojo", "Product_TypeEvent")
+
+        # Create a test product type to generate events
+        product_type = Product_Type.objects.create(
+            name="Test Product Type for Flush",
+            description="Test description",
+        )
+
+        # Flush with retention period 0 (delete all)
         flush_auditlog()
-        entries_after = LogEntry.objects.filter(timestamp__date__lt=date.today()).count()
-        # we have three old log entries in our testdata
-        self.assertEqual(entries_before - 3, entries_after)
+
+        # All entries should be deleted
+        entries_after = ProductTypeEvent.objects.count()
+        self.assertEqual(entries_after, 0, "All entries should be deleted when retention period is 0")
+
+        # Clean up
+        product_type.delete()
 
     @override_settings(AUDITLOG_FLUSH_RETENTION_PERIOD=1)
     def test_delete_entries_with_retention_period(self):
-        entries_before = LogEntry.objects.filter(timestamp__date__lt=datetime.now(UTC)).count()
-        two_weeks_ago = datetime.now(UTC) - relativedelta(weeks=2)
-        log_entry = LogEntry.objects.log_create(
-            instance=Finding.objects.all()[0],
-            timestamp=two_weeks_ago,
-            changes="foo",
-            action=LogEntry.Action.UPDATE,
+        """Test that flush_auditlog deletes entries older than retention period."""
+        # Get pghistory event model
+        ProductTypeEvent = apps.get_model("dojo", "Product_TypeEvent")
+
+        # Create a test product type
+        product_type = Product_Type.objects.create(
+            name="Test Product Type for Retention",
+            description="Test description",
         )
-        log_entry.timestamp = two_weeks_ago
-        log_entry.save()
+
+        # Get the event created by the creation
+        recent_event = ProductTypeEvent.objects.filter(pgh_obj_id=product_type.id).first()
+
+        # Manually create an old event by updating the timestamp
+        # Set it to 2 months ago so it will be deleted with retention period of 1 month
+        if recent_event:
+            two_months_ago = datetime.now(UTC) - relativedelta(months=2)
+            # Update the created_at timestamp to make it old
+            ProductTypeEvent.objects.filter(pk=recent_event.pk).update(pgh_created_at=two_months_ago)
+
+        # Count events before flush
+        entries_before = ProductTypeEvent.objects.count()
+
+        # Flush with retention period of 1 month
         flush_auditlog()
-        entries_after = LogEntry.objects.filter(timestamp__date__lt=datetime.now(UTC)).count()
-        # we have three old log entries in our testdata and added a new one
-        self.assertEqual(entries_before - 3 + 1, entries_after)
+
+        # Count events after flush
+        entries_after = ProductTypeEvent.objects.count()
+
+        # The old event should be deleted (2 months old > 1 month retention)
+        self.assertLess(entries_after, entries_before, "Old entries should be deleted")
+
+        # Clean up
+        product_type.delete()
