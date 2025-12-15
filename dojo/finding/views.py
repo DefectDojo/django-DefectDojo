@@ -983,10 +983,11 @@ class EditFinding(View):
                     jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
                     jira_message = "Linked a JIRA issue successfully."
             # any existing finding should be updated
+            jira_instance = jira_helper.get_jira_instance(finding)
             push_to_jira = (
                 push_to_jira
                 and not (push_to_jira and finding.finding_group)
-                and (finding.has_jira_issue or jira_helper.get_jira_instance(finding).finding_jira_sync)
+                and (finding.has_jira_issue or (jira_instance and jira_instance.finding_jira_sync))
             )
             # Determine if a message should be added
             if jira_message:
@@ -1251,8 +1252,9 @@ def defect_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
+                jira_instance = jira_helper.get_jira_instance(finding)
                 push_to_jira = jira_helper.is_push_all_issues(finding) \
-                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+                    or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
                 if defect_choice == "Close Finding":
@@ -1543,8 +1545,9 @@ def request_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
+                jira_instance = jira_helper.get_jira_instance(finding)
                 push_to_jira = jira_helper.is_push_all_issues(finding) \
-                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+                    or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
                 jira_helper.add_comment(finding, new_note, force_push=True)
@@ -1637,8 +1640,9 @@ def clear_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
+                jira_instance = jira_helper.get_jira_instance(finding)
                 push_to_jira = jira_helper.is_push_all_issues(finding) \
-                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+                    or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
                 jira_helper.add_comment(finding, new_note, force_push=True)
