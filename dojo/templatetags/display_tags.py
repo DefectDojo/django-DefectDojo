@@ -1318,3 +1318,10 @@ def validate_type_file(filename, type=None):
     if type_file in dict_image_types.get(type, []):
         return True
     return False
+
+@register.filter()
+def render_severity_and_priority(finding):
+    severity = finding.severity
+    if GeneralSettings.get_value("PRIORITIZATION_MODEL_SEVERITY", "False"):
+        severity = priority_display_status(finding)
+    return severity

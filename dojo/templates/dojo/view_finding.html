@@ -261,7 +261,12 @@
                 <tr>
                     {% block header_head %}
                         <th>ID</th>
+                        {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
+                        <th>Priorization</th>
+                        {% endif %}
+                        {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
                         <th>Severity</th>
+                        {% endif %}
                         {% if system_settings.enable_finding_sla %}
                         <th>SLA</th>
                         {% endif %}
@@ -311,7 +316,6 @@
                                 <th>EPSS Percentile</th>
                             {% endif %}
                         {% endif %}
-                        <th>Priorization</th>
                         <th>Found by</th>
                         {% if finding.vuln_id_from_tool %}
                             <th>Vuln ID from tool</th>
@@ -324,6 +328,16 @@
                 <tr>
                     {% block header_body %}
                         <td title="hash_code: {{ finding.hash_code }}">{{ finding.id }}</td>
+                        {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
+                        <td>
+                             <span class="label severity severity-{{ finding|priority_display_status }}">
+                                <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+                                        data-content="{{ finding.priority }}">
+                                {{ finding|priority_display_status }}
+                            </span>
+                        </td>
+                        {% endif %}
+                         {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
                         <td>
                             <span class="label severity severity-{{ finding.severity }}">
                                 {% if finding.severity %}
@@ -338,6 +352,7 @@
                                 {% endif %}
                             </span>
                         </td>
+                        {% endif %}
                         {% if system_settings.enable_finding_sla %}
                         <td>
                         {{ finding|finding_sla }}
@@ -481,13 +496,6 @@
                                     <td class="text-right">{{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
                                 {% endif %}
                         {% endif %}
-                        <td>
-                             <span class="label severity severity-{{ finding|priority_display_status }}">
-                                <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
-                                        data-content="{{ finding.priority }}">
-                                {{ finding|priority_display_status }}
-                            </span>
-                        </td>
                         <td>
                             {% if found_by %}
                                 {% for scanner in found_by %}

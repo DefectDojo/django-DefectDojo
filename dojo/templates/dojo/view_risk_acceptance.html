@@ -413,9 +413,13 @@
                 <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Severity</th>
-                    <th>EPSS Score / Percentile</th>
+                    {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
                     <th>Priority</th>
+                    {% endif %}
+                    {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
+                    <th>Severity</th>
+                    {% endif %}
+                    <th>EPSS Score / Percentile</th>
                     <th>Vulnerability Id</th>
                     <th>Name</th>
                     <th>Date</th>
@@ -432,22 +436,26 @@
                         <td>
                             {{finding.id}}
                         </td>
-                        <td>
-                          <span class="label severity severity-{{ finding.severity }}">
-                              {{ finding.severity_display }}
-                          </span>
-                        </td>
-                        <td>
-                            {{ finding.epss_score|format_epss }}
-                            /
-                            {{ finding.epss_percentile|format_epss }}
-                        </td>
+                        {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
                         <td>
                             <span class="label severity severity-{{ finding|priority_display_status }}">
                                 <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
                     data-content="{{ finding.priority }}">
                                 {{ finding|priority_display_status }}
                             </span>
+                        </td>
+                        {% endif %}
+                        {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
+                        <td>
+                          <span class="label severity severity-{{ finding.severity }}">
+                              {{ finding.severity_display }}
+                          </span>
+                        </td>
+                        {% endif %}
+                        <td>
+                            {{ finding.epss_score|format_epss }}
+                            /
+                            {{ finding.epss_percentile|format_epss }}
                         </td>
                         <td>
                             {% for vulnerability_id in finding.vulnerability_ids %}
@@ -767,13 +775,17 @@
                     columns: [
                         { title: '' },
                         { title: 'ID' },
+                        {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
                         { title: 'Severity' },
+                        {% endif %}
+                        {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
+                        { title: 'Priority' },
+                        {% endif %}
                         { title: 'Name' },
                         { title: 'CWE' },
                         { title: 'Vulnerability Id' },
                         { title: 'EPSS Score' },
                         { title: 'EPSS Precentile' },
-                        { title: 'Priority' },
                         { 
                             title: 'Date', 
                             render: function(data) {

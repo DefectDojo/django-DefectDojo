@@ -942,9 +942,16 @@
                                     </th>
                                 {% endif %}
                                 <th></th>
+                                 {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
+                                <th class="nowrap centered severity-sort" scope="col">
+                                    {% trans "Priority" %}
+                                </th>
+                                {% endif %}
+                                {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
                                 <th class="centered severity-sort">
                                     {% trans "Severity" %}
                                 </th>
+                                {% endif %}
                                 <th>
                                     {% trans "Name" %}
                                 </th>
@@ -959,9 +966,6 @@
                                 </th>
                                 <th>
                                     {% trans "EPSS Percentile" %}
-                                </th>
-                                <th class="nowrap centered severity-sort" scope="col">
-                                    {% trans "Priority" %}
                                 </th>
                                 <th>
                                     {% trans "Date" %}
@@ -1178,11 +1182,22 @@
                                             </div>
                                         </div>
                                     </td>
+                                    {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
+                                    <td class="centered severity-sort" data-severity="{{ finding|priority_display_status }}">
+                                        <span class="label severity severity-{{ finding|priority_display_status }}">
+                                            <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+                                data-content="{{ finding.priority }}">
+                                            {{ finding|priority_display_status }}
+                                        </span>
+                                    </td>
+                                    {% endif%}
+                                    {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
                                     <td class="centered severity-sort" data-severity="{{ finding.severity_display }}">
                                         <span class="label severity severity-{{ finding.severity }}">
                                             {{ finding.severity_display }}
                                         </span>
                                     </td>
+                                    {% endif %}
                                     <td>
                                         {% if finding.title %}
                                             <a rel="noopener noreferrer" title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
@@ -1264,13 +1279,6 @@
                                     </td>
                                     <td class="nowrap">
                                         {{ finding.epss_percentile|format_epss }}
-                                    </td>
-                                    <td class="centered severity-sort" data-severity="{{ finding|priority_display_status }}">
-                                        <span class="label severity severity-{{ finding|priority_display_status }}">
-                                            <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
-                                data-content="{{ finding.priority }}">
-                                            {{ finding|priority_display_status }}
-                                        </span>
                                     </td>
                                     <td class="nowrap" data-order="{{ finding.date|date:"U" }}">
                                         {{ finding.date }}
@@ -1677,7 +1685,9 @@
                     { "data": "checkbox" },
                 {% endif %}
                 { "data": "action" },
+                {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
                 { "data": "severity" },
+                {% endif %}
                 { "data": "finding" , render: function (data, type, row) {
                     return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
                 }},
@@ -1685,7 +1695,9 @@
                 { "data": "cve" },
                 { "data": "epss_score", "type": "num", "render": percentSort },
                 { "data": "epss_percentile", "type": "num", "render": percentSort },
+                {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
                 { "data": "priority", "type": "num"},
+                {% endif %}
                 { "data": "date", render: function (data, type, row, meta) {
                     if(type === 'sort') {
                         var api = new $.fn.dataTable.Api(meta.settings);
