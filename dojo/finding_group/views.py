@@ -82,7 +82,16 @@ def view_finding_group(request, fgid):
 
             if jira_issue:
                 # See if the submitted issue was a issue key or the full URL
-                jira_instance = jira_helper.get_jira_project(finding_group).jira_instance
+                jira_project = jira_helper.get_jira_project(finding_group)
+                if not jira_project or not jira_project.jira_instance:
+                    messages.add_message(
+                        request,
+                        messages.ERROR,
+                        "Cannot process JIRA issue: JIRA instance is not configured or has been deleted.",
+                        extra_tags="alert-danger",
+                    )
+                    return render(request, "dojo/edit_finding_group.html", {"form": edit_finding_group_form, "finding_group": finding_group})
+                jira_instance = jira_project.jira_instance
                 jira_issue = jira_issue.removeprefix(jira_instance.url + "/browse/")
 
                 if finding_group.has_jira_issue and jira_issue != jira_helper.get_jira_key(finding_group):
