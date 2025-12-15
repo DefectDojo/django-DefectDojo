@@ -396,8 +396,8 @@ class BaseImporter(ImporterOptions):
         # In longer running imports it can happen that the async_dupe_delete task removes a finding before the history record is created
         # We filter out these findings here to avoid FK violations (IntegrityError)
         all_findings = []
-        for _list, _ in finding_action_mappings:
-            all_findings.extend(_list)
+        for list_, _ in finding_action_mappings:
+            all_findings.extend(list_)
         existing_findings = finding_helper.filter_findings_by_existence(all_findings) if all_findings else []
         existing_ids = {f.id for f in existing_findings}
 
