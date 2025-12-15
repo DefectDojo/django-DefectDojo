@@ -589,13 +589,13 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.startupProbe | object | `{}` | Enable startup probe for Celery worker container. |
 | celery.worker.terminationGracePeriodSeconds | int | `300` |  |
 | celery.worker.tolerations | list | `[]` |  |
-| cloudsql | object | `{"containerSecurityContext":{},"enable_iam_login":false,"enabled":false,"extraEnv":[],"extraVolumeMounts":[],"image":{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.10"},"instance":"","resources":{},"use_private_ip":false,"verbose":true}` | Google CloudSQL support in GKE via gce-proxy |
+| cloudsql | object | `{"containerSecurityContext":{},"enable_iam_login":false,"enabled":false,"extraEnv":[],"extraVolumeMounts":[],"image":{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.11"},"instance":"","resources":{},"use_private_ip":false,"verbose":true}` | Google CloudSQL support in GKE via gce-proxy |
 | cloudsql.containerSecurityContext | object | `{}` | Optional: security context for the CloudSQL proxy container. |
 | cloudsql.enable_iam_login | bool | `false` | use IAM database authentication |
 | cloudsql.enabled | bool | `false` | To use CloudSQL in GKE set 'enable: true' |
 | cloudsql.extraEnv | list | `[]` | Additional environment variables for the CloudSQL proxy container. |
 | cloudsql.extraVolumeMounts | list | `[]` | Array of additional volume mount points for the CloudSQL proxy container |
-| cloudsql.image | object | `{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.10"}` | set repo and image tag of gce-proxy |
+| cloudsql.image | object | `{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.11"}` | set repo and image tag of gce-proxy |
 | cloudsql.instance | string | `""` | set CloudSQL instance: 'project:zone:instancename' |
 | cloudsql.resources | object | `{}` | Optional: add resource requests/limits for the CloudSQL proxy container. |
 | cloudsql.use_private_ip | bool | `false` | whether to use a private IP to connect to the database |
