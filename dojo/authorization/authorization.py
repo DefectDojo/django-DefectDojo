@@ -41,6 +41,35 @@ def user_has_configuration_permission(user, permission):
     return user.has_perm(permission)
 
 
+def user_is_superuser_or_global_owner(user):
+    """
+    Returns True if the user is a superuser or has a global role (directly or
+    via group membership) whose Role.is_owner is True.
+    """
+    if not user or getattr(user, "is_anonymous", False):
+        return False
+
+    if user.is_superuser:
+        return True
+
+    if (
+        hasattr(user, "global_role")
+        and user.global_role.role is not None
+        and user.global_role.role.is_owner
+    ):
+        return True
+
+    for group in get_groups(user):
+        if (
+            hasattr(group, "global_role")
+            and group.global_role.role is not None
+            and group.global_role.role.is_owner
+        ):
+            return True
+
+    return False
+
+
 def user_has_permission(user, obj, permission):
     if user.is_anonymous:
         return False
@@ -101,7 +130,9 @@ def user_has_permission(user, obj, permission):
         isinstance(obj, Risk_Acceptance)
         and permission == Permissions.Risk_Acceptance
     ):
-        return user_has_permission(user, obj.engagement.product, permission)
+        if obj.engagement is not None:
+            return user_has_permission(user, obj.engagement.product, permission)
+        return user_has_global_permission(user, permission)
     if ((
         isinstance(obj, Finding | Stub_Finding)
     ) and permission in Permissions.get_finding_permissions()) or (

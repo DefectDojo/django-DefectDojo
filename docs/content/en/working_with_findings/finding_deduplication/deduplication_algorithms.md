@@ -13,7 +13,7 @@ DefectDojo supports four deduplication algorithms that can be selected per parse
 - **Unique ID From Tool or Hash Code**: Prefer the tool’s unique ID; fall back to hash when no matching unique ID is found.
 - **Legacy**: Historical algorithm with multiple conditions; only available in the Open Source version.
 
-Algorithm selection per parser is controlled by `DEDUPLICATION_ALGORITHM_PER_PARSER` (see the [OS tuning page](deduplication_tuning_os) for configuration details).
+Algorithm selection per parser is controlled by `DEDUPLICATION_ALGORITHM_PER_PARSER` (see the [Open-Source tuning page](/en/working_with_findings/finding_deduplication/deduplication_tuning_os/) for configuration details).
 
 ## How endpoints are assessed per algorithm
 
@@ -60,6 +60,4 @@ The endpoints also have to match for the findings to be considered duplicates, s
   - During import/reimport, the `Service` field entered in the UI can override the parser-provided service. Changing it can change the hash and therefore affect deduplication outcomes.
   - If you want service to have no impact on deduplication, configure `HASH_CODE_FIELDS_ALWAYS` accordingly (see the OS tuning page). Removing `service` from the always-included list will stop it from affecting hashes.
 
-See also: the [Open Source tuning guide](deduplication_tuning_os) for configuration details and examples.
-
-
+See also: the [Open Source tuning guide](/en/working_with_findings/finding_deduplication/deduplication_tuning_os/) for configuration details and examples.

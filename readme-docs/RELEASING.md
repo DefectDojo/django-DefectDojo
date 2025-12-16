@@ -4,8 +4,10 @@
 
 We have two types of releases:
 
-1. **Feature releases** - These are created from the `dev` branch, via a new release branch, i.e. `release/x.y.z`. 
-2. **Bugfix releases** - These are created from the `bugfix` branch, via a new release branch, i.e. `release/x.y.z`. 
+1. **Feature releases** - These are monthly releases created from the `dev` branch, via a new release branch, i.e. `release/x.y.z`. 
+2. **Bugfix releases** - These are weekly created from the `bugfix` branch, via a new release branch, i.e. `release/x.y.z`. 
+
+Dependency updates and security patches go into the monthly releases. Urgent crirtical security patches will go into the bugfix releases.
 
 The release process will then:
 

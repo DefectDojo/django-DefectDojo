@@ -6,10 +6,13 @@ import logging
 import mimetypes
 import os
 import pathlib
+import random
 import re
+import time
 from calendar import monthrange
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
+from functools import cached_property
 from math import pi, sqrt
 from pathlib import Path
 
@@ -29,6 +32,7 @@ from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
+from django.db import OperationalError
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
@@ -70,6 +74,7 @@ from dojo.models import (
     Product,
     System_Settings,
     Test,
+    Test_Type,
     User,
 )
 from dojo.notifications.helper import create_notification
@@ -83,6 +88,11 @@ labels = get_labels()
 """
 Helper functions for DefectDojo
 """
+
+
+def get_visible_scan_types():
+    """Returns a QuerySet of active Test_Type objects."""
+    return Test_Type.objects.filter(active=True)
 
 
 def do_false_positive_history(finding, *args, **kwargs):
@@ -1299,60 +1309,86 @@ def get_celery_worker_status():
 
 
 # Used to display the counts and enabled tabs in the product view
+# Uses @cached_property for lazy loading to avoid expensive queries on every page load
+# See: https://github.com/DefectDojo/django-DefectDojo/issues/10313
 class Product_Tab:
     def __init__(self, product, title=None, tab=None):
-        self.product = product
-        self.title = title
-        self.tab = tab
-        self.engagement_count = Engagement.objects.filter(
-            product=self.product, active=True).count()
-        self.open_findings_count = Finding.objects.filter(test__engagement__product=self.product,
-                                                          false_p=False,
-                                                          duplicate=False,
-                                                          out_of_scope=False,
-                                                          active=True,
-                                                          mitigated__isnull=True).count()
+        self._product = product
+        self._title = title
+        self._tab = tab
+        self._engagement = None
+
+    @cached_property
+    def engagement_count(self):
+        return Engagement.objects.filter(
+            product=self._product, active=True).count()
+
+    @cached_property
+    def open_findings_count(self):
+        return Finding.objects.filter(
+            test__engagement__product=self._product,
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            active=True,
+            mitigated__isnull=True).count()
+
+    @cached_property
+    def _active_endpoints(self):
         if settings.V3_FEATURE_LOCATIONS:
-            active_endpoints = Location.objects.filter(
+            return Location.objects.filter(
                 products__product=self.product,
                 products__status=ProductLocationStatus.Active,
             )
-            self.endpoints_count = active_endpoints.distinct().count()
-            self.endpoint_hosts_count = active_endpoints.values("url__host").distinct().count()
         else:
-            active_endpoints = Endpoint.objects.filter(
+            return Endpoint.objects.filter(
                 product=self.product,
                 status_endpoint__mitigated=False,
                 status_endpoint__false_positive=False,
                 status_endpoint__out_of_scope=False,
                 status_endpoint__risk_accepted=False,
             )
-            self.endpoints_count = active_endpoints.distinct().count()
-            self.endpoint_hosts_count = active_endpoints.values("host").distinct().count()
-        self.benchmark_type = Benchmark_Type.objects.filter(
+
+    @cached_property
+    def endpoints_count(self):
+        return self._active_endpoints.distinct().count()
+
+    @cached_property
+    def endpoint_hosts_count(self):
+        if settings.V3_FEATURE_LOCATIONS:
+            return  self._active_endpoints.values("url__host").distinct().count()
+        else:
+            return self._active_endpoints.values("host").distinct().count()
+
+    @cached_property
+    def benchmark_type(self):
+        return Benchmark_Type.objects.filter(
             enabled=True).order_by("name")
-        self.engagement = None
 
     def setTab(self, tab):
-        self.tab = tab
+        self._tab = tab
 
     def setEngagement(self, engagement):
-        self.engagement = engagement
+        self._engagement = engagement
 
+    @property
     def engagement(self):
-        return self.engagement
+        return self._engagement
 
+    @property
     def tab(self):
-        return self.tab
+        return self._tab
 
     def setTitle(self, title):
-        self.title = title
+        self._title = title
 
+    @property
     def title(self):
-        return self.title
+        return self._title
 
+    @property
     def product(self):
-        return self.product
+        return self._product
 
     def engagements(self):
         return self.engagement_count
@@ -1365,9 +1401,6 @@ class Product_Tab:
 
     def endpoint_hosts(self):
         return self.endpoint_hosts_count
-
-    def benchmark_type(self):
-        return self.benchmark_type
 
 
 # Used to display the counts and enabled tabs in the product view
@@ -1994,41 +2027,70 @@ class async_delete:
     def __init__(self, *args, **kwargs):
         self.mapping = {
             "Product_Type": [
-                (Endpoint, "product__prod_type"),
-                (Finding, "test__engagement__product__prod_type"),
-                (Test, "engagement__product__prod_type"),
-                (Engagement, "product__prod_type"),
-                (Product, "prod_type")],
+                (Endpoint, "product__prod_type__id"),
+                (Finding, "test__engagement__product__prod_type__id"),
+                (Test, "engagement__product__prod_type__id"),
+                (Engagement, "product__prod_type__id"),
+                (Product, "prod_type__id")],
             "Product": [
-                (Endpoint, "product"),
-                (Finding, "test__engagement__product"),
-                (Test, "engagement__product"),
-                (Engagement, "product")],
+                (Endpoint, "product__id"),
+                (Finding, "test__engagement__product__id"),
+                (Test, "engagement__product__id"),
+                (Engagement, "product__id")],
             "Engagement": [
-                (Finding, "test__engagement"),
-                (Test, "engagement")],
-            "Test": [(Finding, "test")],
+                (Finding, "test__engagement__id"),
+                (Test, "engagement__id")],
+            "Test": [(Finding, "test__id")],
         }
 
     @dojo_async_task
     @app.task
     def delete_chunk(self, objects, **kwargs):
+        # Now delete all objects with retry for deadlocks
+        max_retries = 3
         for obj in objects:
-            try:
-                obj.delete()
-            except AssertionError:
-                logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
-                # The id must be None
-                # The object has already been deleted elsewhere
-            except LogEntry.MultipleObjectsReturned:
-                # Delete the log entrys first, then delete
-                LogEntry.objects.filter(
-                    content_type=ContentType.objects.get_for_model(obj.__class__),
-                    object_pk=str(obj.pk),
-                    action=LogEntry.Action.DELETE,
-                ).delete()
-                # Now delete the object again
-                obj.delete()
+            retry_count = 0
+            while retry_count < max_retries:
+                try:
+                    obj.delete()
+                    break  # Success, exit retry loop
+                except OperationalError as e:
+                    error_msg = str(e)
+                    if "deadlock detected" in error_msg.lower():
+                        retry_count += 1
+                        if retry_count < max_retries:
+                            # Exponential backoff with jitter
+                            wait_time = (2 ** retry_count) + random.uniform(0, 1)  # noqa: S311
+                            logger.warning(
+                                f"ASYNC_DELETE: Deadlock detected deleting {self.get_object_name(obj)} {obj.pk}, "
+                                f"retrying ({retry_count}/{max_retries}) after {wait_time:.2f}s",
+                            )
+                            time.sleep(wait_time)
+                            # Refresh object from DB before retry
+                            obj.refresh_from_db()
+                        else:
+                            logger.error(
+                                f"ASYNC_DELETE: Deadlock persisted after {max_retries} retries for {self.get_object_name(obj)} {obj.pk}: {e}",
+                            )
+                            raise
+                    else:
+                        # Not a deadlock, re-raise
+                        raise
+                except AssertionError:
+                    logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
+                    # The id must be None
+                    # The object has already been deleted elsewhere
+                    break
+                except LogEntry.MultipleObjectsReturned:
+                    # Delete the log entrys first, then delete
+                    LogEntry.objects.filter(
+                        content_type=ContentType.objects.get_for_model(obj.__class__),
+                        object_pk=str(obj.pk),
+                        action=LogEntry.Action.DELETE,
+                    ).delete()
+                    # Now delete the object again (no retry needed for this case)
+                    obj.delete()
+                    break
 
     @dojo_async_task
     @app.task
@@ -2048,17 +2110,28 @@ class async_delete:
     def crawl(self, obj, model_list, **kwargs):
         logger.debug("ASYNC_DELETE: Crawling " + self.get_object_name(obj) + ": " + str(obj))
         for model_info in model_list:
+            task_results = []
             model = model_info[0]
             model_query = model_info[1]
-            filter_dict = {model_query: obj}
+            filter_dict = {model_query: obj.id}
             # Only fetch the IDs since we will make a list of IDs in the following function call
-            objects_to_delete = model.objects.only("id").filter(**filter_dict)
+            objects_to_delete = model.objects.only("id").filter(**filter_dict).distinct().order_by("id")
             logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + self.get_object_name(model) + "s in chunks")
             chunks = self.chunk_list(model, objects_to_delete)
             for chunk in chunks:
                 logger.debug(f"deleting {len(chunk)} {self.get_object_name(model)}")
-                self.delete_chunk(chunk)
-        self.delete_chunk([obj])
+                result = self.delete_chunk(chunk)
+                # Collect async task results to wait for them all at once
+                if hasattr(result, "get"):
+                    task_results.append(result)
+            # Wait for all chunk deletions to complete (they run in parallel)
+            for task_result in task_results:
+                task_result.get(timeout=300)  # 5 minute timeout per chunk
+        # Now delete the main object after all chunks are done
+        result = self.delete_chunk([obj])
+        # Wait for final deletion to complete
+        if hasattr(result, "get"):
+            result.get(timeout=300)  # 5 minute timeout
         logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(obj) + ": " + str(obj))
 
     def chunk_list(self, model, full_list):

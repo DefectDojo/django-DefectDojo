@@ -119,7 +119,7 @@ class Command(BaseCommand):
                     SELECT COUNT(*) FROM {table_name} t
                     WHERE NOT EXISTS (
                         SELECT 1 FROM {event_table_name} e
-                        WHERE e.pgh_obj_id = t.id AND e.pgh_label = 'initial_import'
+                        WHERE e.pgh_obj_id = t.id AND e.pgh_label = 'initial_backfill'
                     )
                 """)
                 backfill_count = cursor.fetchone()[0]
@@ -165,7 +165,7 @@ class Command(BaseCommand):
                 if col == "pgh_created_at":
                     select_columns.append("NOW() as pgh_created_at")
                 elif col == "pgh_label":
-                    select_columns.append("'initial_import' as pgh_label")
+                    select_columns.append("'initial_backfill' as pgh_label")
                 elif col == "pgh_obj_id":
                     select_columns.append("t.id as pgh_obj_id")
                 elif col == "pgh_context_id":
@@ -181,7 +181,7 @@ class Command(BaseCommand):
                     SELECT t.id FROM {table_name} t
                     WHERE NOT EXISTS (
                         SELECT 1 FROM {event_table_name} e
-                        WHERE e.pgh_obj_id = t.id AND e.pgh_label = 'initial_import'
+                        WHERE e.pgh_obj_id = t.id AND e.pgh_label = 'initial_backfill'
                     )
                     ORDER BY t.id
                 """)

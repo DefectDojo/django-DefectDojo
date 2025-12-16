@@ -118,6 +118,7 @@ from dojo.utils import (
     get_page_items_and_count,
     get_return_url,
     get_system_setting,
+    get_visible_scan_types,
     get_words_for_field,
     match_finding_to_existing_findings,
     process_tag_notifications,
@@ -302,6 +303,7 @@ class ListFindings(View, BaseListFindings):
             "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "title_words": get_words_for_field(Finding, "title"),
             "component_words": get_words_for_field(Finding, "component_name"),
+            "visible_test_types": get_visible_scan_types(),
         }
         # Look to see if the product was used
         if product_id := self.get_product_id():
@@ -983,10 +985,11 @@ class EditFinding(View):
                     jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
                     jira_message = "Linked a JIRA issue successfully."
             # any existing finding should be updated
+            jira_instance = jira_helper.get_jira_instance(finding)
             push_to_jira = (
                 push_to_jira
                 and not (push_to_jira and finding.finding_group)
-                and (finding.has_jira_issue or jira_helper.get_jira_instance(finding).finding_jira_sync)
+                and (finding.has_jira_issue or (jira_instance and jira_instance.finding_jira_sync))
             )
             # Determine if a message should be added
             if jira_message:
@@ -1251,8 +1254,9 @@ def defect_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
+                jira_instance = jira_helper.get_jira_instance(finding)
                 push_to_jira = jira_helper.is_push_all_issues(finding) \
-                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+                    or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
                 if defect_choice == "Close Finding":
@@ -1543,8 +1547,9 @@ def request_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
+                jira_instance = jira_helper.get_jira_instance(finding)
                 push_to_jira = jira_helper.is_push_all_issues(finding) \
-                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+                    or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
                 jira_helper.add_comment(finding, new_note, force_push=True)
@@ -1637,8 +1642,9 @@ def clear_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
+                jira_instance = jira_helper.get_jira_instance(finding)
                 push_to_jira = jira_helper.is_push_all_issues(finding) \
-                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+                    or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
                 jira_helper.add_comment(finding, new_note, force_push=True)

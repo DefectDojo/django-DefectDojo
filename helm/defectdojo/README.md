@@ -511,7 +511,7 @@ The HELM schema will be generated for you.
 
 # General information about chart values
 
-![Version: 1.9.1-dev](https://img.shields.io/badge/Version-1.9.1--dev-informational?style=flat-square) ![AppVersion: 2.54.0-dev](https://img.shields.io/badge/AppVersion-2.54.0--dev-informational?style=flat-square)
+![Version: 1.9.4-dev](https://img.shields.io/badge/Version-1.9.4--dev-informational?style=flat-square) ![AppVersion: 2.54.0-dev](https://img.shields.io/badge/AppVersion-2.54.0--dev-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -525,8 +525,8 @@ A Helm chart for Kubernetes to install DefectDojo
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://registry-1.docker.io/cloudpirates | valkey | ~0.10.0 |
-| oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | postgresql | ~16.7.0 |
+| oci://registry-1.docker.io/cloudpirates | valkey | 0.10.2 |
+| oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | postgresql | 16.7.27 |
 
 ## Values
 
@@ -589,13 +589,13 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.startupProbe | object | `{}` | Enable startup probe for Celery worker container. |
 | celery.worker.terminationGracePeriodSeconds | int | `300` |  |
 | celery.worker.tolerations | list | `[]` |  |
-| cloudsql | object | `{"containerSecurityContext":{},"enable_iam_login":false,"enabled":false,"extraEnv":[],"extraVolumeMounts":[],"image":{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.10"},"instance":"","resources":{},"use_private_ip":false,"verbose":true}` | Google CloudSQL support in GKE via gce-proxy |
+| cloudsql | object | `{"containerSecurityContext":{},"enable_iam_login":false,"enabled":false,"extraEnv":[],"extraVolumeMounts":[],"image":{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.11"},"instance":"","resources":{},"use_private_ip":false,"verbose":true}` | Google CloudSQL support in GKE via gce-proxy |
 | cloudsql.containerSecurityContext | object | `{}` | Optional: security context for the CloudSQL proxy container. |
 | cloudsql.enable_iam_login | bool | `false` | use IAM database authentication |
 | cloudsql.enabled | bool | `false` | To use CloudSQL in GKE set 'enable: true' |
 | cloudsql.extraEnv | list | `[]` | Additional environment variables for the CloudSQL proxy container. |
 | cloudsql.extraVolumeMounts | list | `[]` | Array of additional volume mount points for the CloudSQL proxy container |
-| cloudsql.image | object | `{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.10"}` | set repo and image tag of gce-proxy |
+| cloudsql.image | object | `{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.11"}` | set repo and image tag of gce-proxy |
 | cloudsql.instance | string | `""` | set CloudSQL instance: 'project:zone:instancename' |
 | cloudsql.resources | object | `{}` | Optional: add resource requests/limits for the CloudSQL proxy container. |
 | cloudsql.use_private_ip | bool | `false` | whether to use a private IP to connect to the database |
@@ -623,7 +623,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.ingress.enabled | bool | `true` |  |
 | django.ingress.ingressClassName | string | `""` |  |
 | django.ingress.secretName | string | `"defectdojo-tls"` |  |
-| django.mediaPersistentVolume | object | `{"enabled":true,"fsGroup":1001,"name":"media","persistentVolumeClaim":{"accessModes":["ReadWriteMany"],"create":false,"name":"","size":"5Gi","storageClassName":""},"type":"emptyDir"}` | This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume |
+| django.mediaPersistentVolume | object | `{"enabled":true,"name":"media","persistentVolumeClaim":{"accessModes":["ReadWriteMany"],"create":false,"name":"","size":"5Gi","storageClassName":""},"type":"emptyDir"}` | This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume |
 | django.mediaPersistentVolume.name | string | `"media"` | any name |
 | django.mediaPersistentVolume.persistentVolumeClaim | object | `{"accessModes":["ReadWriteMany"],"create":false,"name":"","size":"5Gi","storageClassName":""}` | in case if pvc specified, should point to the already existing pvc |
 | django.mediaPersistentVolume.persistentVolumeClaim.accessModes | list | `["ReadWriteMany"]` | check KUBERNETES.md doc first for option to choose |

@@ -12,6 +12,7 @@ from dojo.authorization.authorization import (
     user_has_configuration_permission,
     user_has_global_permission,
     user_has_permission,
+    user_is_superuser_or_global_owner,
 )
 from dojo.authorization.roles_permissions import Permissions
 from dojo.importers.auto_create_context import AutoCreateContextManager
@@ -870,6 +871,11 @@ class UserHasJiraIssuePermission(permissions.BasePermission):
 class IsSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_superuser
+
+
+class IsSuperUserOrGlobalOwner(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return user_is_superuser_or_global_owner(request.user)
 
 
 class UserHasEngagementPresetPermission(permissions.BasePermission):
