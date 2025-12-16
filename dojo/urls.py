@@ -79,6 +79,7 @@ from dojo.api_v2.views import (
     FindingExclusionViewSet,
     
 )
+from dojo.api_v2.ia_recommendation.views import IArecommendationApiView
 from dojo.api_v2.general_settings.views import GeneralSettingsViewSet
 from dojo.api_v2.manager_cache.views import ManagerCacheApiView
 from dojo.api_v2.alerts.views import AlertViewSet
@@ -125,6 +126,7 @@ from dojo.api_v2.security_posture.urls import urlpatterns as security_posture_ur
 from dojo.security_posture.urls import urlpatterns as security_posture_urls_view
 from dojo.api_v2.notifications.urls import urlpatterns as notifications_email_urls
 from dojo.api_v2.alerts.urls import urlpatterns as alert_urls
+from dojo.api_v2.ia_recommendation.urls import urlpatterns as ia_recommendation_urls
 
 from dojo.utils import get_system_setting
 
@@ -293,6 +295,7 @@ urlpatterns += notifications_email_urls
 urlpatterns += api_v2_urls
 urlpatterns += survey_urls
 urlpatterns += alert_urls 
+urlpatterns += ia_recommendation_urls 
 
 if hasattr(settings, "DJANGO_METRICS_ENABLED"):
     if settings.DJANGO_METRICS_ENABLED:
