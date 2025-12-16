@@ -279,6 +279,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     jira_helper.push_to_jira(findings[0].finding_group)
                 else:
                     jira_helper.push_to_jira(findings[0])
+            else:
+                logger.debug("push_to_jira is False, not pushing to JIRA")
 
         # Note: All chord batching is now handled within the loop above
 
