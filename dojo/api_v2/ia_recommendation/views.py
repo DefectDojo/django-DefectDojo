@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.core.cache import cache
 from dojo.api_v2.ia_recommendation.serializers import IaRecommendationSerializer
+from dojo.api_v2.ia_recommendation.helper import get_ia_recommendation
 from dojo.api_v2.api_error import ApiError
 from drf_spectacular.utils import (
     extend_schema,
@@ -26,11 +27,7 @@ class IArecommendationApiView(APIView):
     @extend_schema(
         responses={status.HTTP_200_OK: IaRecommendationSerializer},
     )
-    def get(self, request, fid):
-        finding = get_object_or_404(id=fid)
-        ia_recommendation = get_ia_recommendation(finding)
-        serializer = IaRecommendationSerializer(data=ia_recommendation)
-        if serializer.is_valid()
-            return http_response.ok(message="Ia recommendation", data=serializer.data)
-        return ApiError.internal_server_error("Error Serializer data: {serializer.erros}")
-
+    def get(self, request, id):
+        finding = get_object_or_404(Finding, pk=id)
+        ia_recommendation = get_ia_recommendation(str(finding.id), request.user)
+        return ia_recommendation
