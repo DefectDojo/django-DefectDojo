@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0248_alter_general_survey_expiration"),
+        ("dojo", "0250_pghistory_backfill"),
     ]
 
     operations = [
