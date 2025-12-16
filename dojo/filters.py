@@ -94,7 +94,7 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests
 from dojo.user.queries import get_authorized_users
-from dojo.utils import get_system_setting, is_finding_groups_enabled, truncate_timezone_aware
+from dojo.utils import get_system_setting, get_visible_scan_types, is_finding_groups_enabled, truncate_timezone_aware
 
 logger = logging.getLogger(__name__)
 
@@ -561,23 +561,68 @@ class FindingTagFilter(DojoFilter):
         field_name="tags__name",
         to_field_name="name",
         queryset=Finding.tags.tag_model.objects.all().order_by("name"),
-        help_text="Filter Findings by the selected tags")
+        help_text="Filter Findings by the selected tags (OR logic)",
+    )
+
+    tags_and = ModelMultipleChoiceFilter(
+        field_name="tags__name",
+        to_field_name="name",
+        queryset=Finding.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Findings by the selected tags (AND logic)",
+        label="Tags (AND)",
+        conjoined=True,
+    )
+
     test__tags = ModelMultipleChoiceFilter(
         field_name="test__tags__name",
         to_field_name="name",
         queryset=Test.tags.tag_model.objects.all().order_by("name"),
-        help_text="Filter Tests by the selected tags")
+        help_text="Filter Findings by the selected Test tags (OR logic)",
+        label="Test Tags",
+    )
+
+    test__tags_and = ModelMultipleChoiceFilter(
+        field_name="test__tags__name",
+        to_field_name="name",
+        queryset=Test.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Findings by the selected Test tags (AND logic)",
+        label="Test Tags (AND)",
+        conjoined=True,
+    )
+
     test__engagement__tags = ModelMultipleChoiceFilter(
         field_name="test__engagement__tags__name",
         to_field_name="name",
         queryset=Engagement.tags.tag_model.objects.all().order_by("name"),
-        help_text="Filter Engagements by the selected tags")
+        help_text="Filter Findings by the selected Engagement tags (OR logic)",
+        label="Engagement Tags",
+    )
+
+    test__engagement__tags_and = ModelMultipleChoiceFilter(
+        field_name="test__engagement__tags__name",
+        to_field_name="name",
+        queryset=Engagement.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Findings by the selected Engagement tags (AND logic)",
+        label="Engagement Tags (AND)",
+        conjoined=True,
+    )
+
     test__engagement__product__tags = ModelMultipleChoiceFilter(
         field_name="test__engagement__product__tags__name",
         to_field_name="name",
         queryset=Product.tags.tag_model.objects.all().order_by("name"),
-        label=labels.ASSET_FILTERS_TAGS_FILTER_LABEL,
-        help_text=labels.ASSET_FILTERS_TAGS_FILTER_HELP)
+        help_text="Filter Findings by the selected Product tags (OR logic)",
+        label="Product Tags",
+    )
+
+    test__engagement__product__tags_and = ModelMultipleChoiceFilter(
+        field_name="test__engagement__product__tags__name",
+        to_field_name="name",
+        queryset=Product.tags.tag_model.objects.all().order_by("name"),
+        help_text="Filter Findings by the selected Product tags (AND logic)",
+        label="Product Tags (AND)",
+        conjoined=True,
+    )
 
     not_tags = ModelMultipleChoiceFilter(
         field_name="tags__name",
@@ -2118,6 +2163,9 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         # Don't show the product filter on the product finding view
         self.set_related_object_fields(*args, **kwargs)
 
+        if "test__test_type" in self.form.fields:
+            self.form.fields["test__test_type"].queryset = get_visible_scan_types()
+
     def set_related_object_fields(self, *args: list, **kwargs: dict):
         finding_group_query = Finding_Group.objects.all()
         if self.pid is not None:
@@ -3647,7 +3695,7 @@ class PgHistoryFilter(DojoFilter):
             ("insert", "Insert"),
             ("update", "Update"),
             ("delete", "Delete"),
-            ("initial_import", "Initial Import"),
+            ("initial_backfill", "Initial Backfill"),
         ],
     )
 

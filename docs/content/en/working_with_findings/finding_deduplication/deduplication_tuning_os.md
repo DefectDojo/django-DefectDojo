@@ -6,7 +6,7 @@ weight: 5
 
 This page explains how to tune deduplication in the Open Source (OS) edition of DefectDojo. For a visual, feature-rich tuning UI, see the Pro documentation. The OS edition uses settings files and environment variables.
 
-See also: [Configuration](../../open_source/installation/configuration) for details on environment variables and `local_settings.py` overrides.
+See also: [Configuration](/en/open_source/installation/configuration) for details on environment variables and `local_settings.py` overrides.
 
 ## What you can configure
 

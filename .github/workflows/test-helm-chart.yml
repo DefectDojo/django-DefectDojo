@@ -26,14 +26,17 @@ jobs:
         with:
           python-version: 3.14 # Renovate helper is not needed here
 
-      - name: Configure Helm repos
-        run: |-
-             helm dependency list ./helm/defectdojo
-             helm dependency update ./helm/defectdojo
+      # Running update is not needed for listing - it just triggers errors as soon as one of the subcharts is not in the latest version (`helm dep. update` change content of the chart)
+      # As soon as we would like to run more extensive tests, this can be reenabled, but this will need to be placed after "ct list-changed" command
+      # - name: Configure Helm repos
+      #   run: |-
+      #        helm dependency list ./helm/defectdojo
+      #        helm dependency update ./helm/defectdojo
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # v2.8.0
         with:
+          version: 3.14.0 # renovate: datasource=github-releases depName=helm/chart-testing
           yamale_version: 6.1.0 # renovate: datasource=pypi depName=yamale versioning=semver
           yamllint_version: 1.37.1 # renovate: datasource=pypi depName=yamllint versioning=semver
 
@@ -47,26 +50,28 @@ jobs:
           fi
 
       - name: Run chart-testing (list-changed)
-        id: list-changed
+        id: list_changed
         run: |
           changed=$(ct list-changed --config ct.yaml --target-branch ${{ env.ct-branch}})
           if [[ -n "$changed" ]]; then
-            echo "changed=true" >> $GITHUB_ENV
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Content changed:"
+            echo "$changed" | sed 's/^/  /'
           fi
 
       # run version check only if not dev as in dev we have a `x.y.z-dev` version
       # x.y.z gets bumped automatically when doing a release
       - name: Run chart-testing (lint)
         run: ct lint --config ct.yaml --target-branch ${{ env.ct-branch }} --check-version-increment=true
-        if: ${{ env.changed == 'true' && env.ct-branch != 'dev' && env.ct-branch != 'bugfix' }}
+        if: ${{ steps.list_changed.outputs.changed == 'true' && env.ct-branch != 'dev' && env.ct-branch != 'bugfix' }}
 
       # run all checks but version increment always when something changed
       - name: Run chart-testing (lint)
         run: ct lint --config ct.yaml --target-branch ${{ env.ct-branch }} --check-version-increment=false
-        if: env.changed == 'true'
+        if: steps.list_changed.outputs.changed == 'true'
 
       - name: Check update of "artifacthub.io/changes" HELM annotation
-        if: ${{ env.changed == 'true' && !(startsWith(github.head_ref, 'master-into-dev/') || startsWith(github.head_ref, 'master-into-bugfix/')) }}
+        if: ${{ steps.list_changed.outputs.changed == 'true' && !(startsWith(github.head_ref, 'master-into-dev/') || startsWith(github.head_ref, 'master-into-bugfix/')) }}
         run: |
           # fast fail if `git show` fails
           set -e
@@ -95,11 +100,11 @@ jobs:
 
       # - name: Create kind cluster
       #  uses: helm/kind-action@v1.1.0
-      #  if: env.changed == 'true'
+      #  if: steps.list_changed.outputs.changed == 'true'
 
       # - name: Run chart-testing (install)
       #   run: ct install --config ct.yaml --target-branch ${{ env.ct-branch }} --helm-extra-args '--set createSecret=true --set createRabbitMqSecret=true --set createPostgresqlSecret=true --set timeout=900'
-      #  if: env.changed == 'true'
+      #  if: steps.list_changed.outputs.changed == 'true'
 
   docs_generation:
     name: Update documentation
@@ -114,12 +119,12 @@ jobs:
       - name: Update values in HELM chart
         if: startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')
         run: |
-          title=${{ github.event.pull_request.title }}
+          title='${{ github.event.pull_request.title }}'
           chars='{}:[],&*#?|-<>=!%@'
           for c in $(echo "$chars" | grep -o .); do
             title="${title//"$c"/_}"
           done
-          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: $title\n"' helm/defectdojo/Chart.yaml
+          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: '$title'\n"' helm/defectdojo/Chart.yaml
           git add helm/defectdojo/Chart.yaml
           git commit -m "ci: update Chart annotations from PR #${{ github.event.pull_request.number }}" || echo "No changes to commit"
 
@@ -150,7 +155,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Generate values schema json
-        uses: losisin/helm-values-schema-json-action@660c441a4a507436a294fc55227e1df54aca5407 # v2.3.1
+        uses: losisin/helm-values-schema-json-action@f3517c55537e26953c8a11be7549ea908990130d # v2.3.2
         with:
           fail-on-diff: true
           working-directory: "helm/defectdojo"
