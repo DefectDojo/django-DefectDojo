@@ -12,7 +12,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0248_alter_general_survey_expiration'),
+        ('dojo', '0251_usercontactinfo_reset_timestamps'),
     ]
 
     operations = [
