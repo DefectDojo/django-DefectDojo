@@ -3363,13 +3363,19 @@ class Finding(models.Model):
     def get_severity_related_to_priority(self):
         """Get severity related to priority the finding"""
 
+        severity = self.severity.lower()
         severity_mapping = {
             "Very Critical": "critical",
             "Critical": "high",
             "High": "medium",
             "Medium Low": "low",
         }
-        severity = self.severity.lower()
+        if (
+            GeneralSettings.get_value("PRIORITIZATION_MODEL_SEVERITY") is True or
+            GeneralSettings.get_value("PRIORITIZATION_MODEL_PRIORITY") is False
+        ):
+            return severity
+        
         return severity_mapping.get(self.priority_classification, severity)
 
 

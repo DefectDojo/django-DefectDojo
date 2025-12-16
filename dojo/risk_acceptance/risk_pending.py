@@ -75,13 +75,13 @@ def update_expiration_risk_accepted(finding: Finding,
 
         logger.debug(f"Update RiskAcceptanceExpiration: {expiration_delta_days}")
         expiration_date = timezone.now().date() + relativedelta(
-            days=expiration_delta_days.get(finding.severity.lower())
+            days=expiration_delta_days.get(finding.get_severity_related_to_priority())
             )
         created_date = timezone.now().date()
         risk_acceptance.expiration_date = expiration_date
         risk_acceptance.created = created_date
         risk_acceptance.save()
-    return (expiration_delta_days.get(finding.severity.lower()),
+    return (expiration_delta_days.get(finding.get_severity_related_to_priority()),
             risk_acceptance.expiration_date,
             risk_acceptance.created)
 
@@ -165,7 +165,7 @@ def rules_for_direct_acceptance(
         status_permission (dict): Dictionary of status permission of user on risk_acceptance
     """
     number_of_acceptors_required = (
-        settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity)
+        settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.get_severity_related_to_priority())
         .get("type_contacts")
         .get(get_product_type_prefix_key(product_type.name)).get("number_acceptors")
     )
@@ -308,7 +308,7 @@ def is_permissions_risk_acceptance(
     ):
         result = True
     
-    contacts = get_contacts_product_type_and_product_by_serverity(engagement, finding.severity, user)
+    contacts = get_contacts_product_type_and_product_by_serverity(engagement, finding.get_severity_related_to_priority(), user)
     if contacts:
         contacts_ids = [contact.id for contact in contacts]
         if user.id in contacts_ids and finding.risk_accepted is False:
@@ -323,7 +323,7 @@ def is_rol_permissions_risk_acceptance(user, finding: Finding, product: Product,
         user.is_superuser is True
         or role_has_exclusive_permissions(user)
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
-        or settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity).get("type_contacts")
+        or settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.get_severity_related_to_priority()).get("type_contacts")
         .get(get_product_type_prefix_key(product_type.name)).get("number_acceptors")
         == 0
     ):
@@ -615,13 +615,13 @@ def add_finding_correlated(entry_findings, queryset):
         risk_acceptance_query = None
         risk_acceptance_query = queryset.filter(
             accepted_findings__cve__in=finding.vulnerability_ids,
-            accepted_findings__severity=finding.severity,
+            accepted_findings__severity=finding.get_severity_related_to_priority(),
             accepted_findings__tags__name__in=tags_enable
             ).order_by("-created")
         if not risk_acceptance_query.exists():
             risk_acceptance_query = queryset.filter(
                 accepted_findings__vuln_id_from_tool=finding.vuln_id_from_tool,
-                accepted_findings__severity=finding.severity,
+                accepted_findings__severity=finding.get_severity_related_to_priority(),
                 accepted_findings__tags__name__in=tags_enable
                 ).order_by("-created")
         # add finding a risk-acceptance

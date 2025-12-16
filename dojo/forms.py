@@ -1156,7 +1156,7 @@ class RiskPendingForm(forms.ModelForm):
         )
         logger.debug(f"RiskAcceptanceExpiration: {expiration_delta_days}")
         expiration_date = timezone.now().date() + relativedelta(
-            days=expiration_delta_days.get(self.severity.lower())
+            days=expiration_delta_days.get(self.severity)
         )
         self.fields["expiration_date"].initial = expiration_date
         self.fields['owner'].queryset = get_owner_user()
@@ -1189,7 +1189,7 @@ class RiskPendingForm(forms.ModelForm):
             raise forms.ValidationError(msg)
         else:
             sla = sla_expiration_risk_acceptance("RiskAcceptanceExpiration")
-            date_sla = timezone.now().date() + relativedelta(days=sla.get(self.severity.lower()))
+            date_sla = timezone.now().date() + relativedelta(days=sla.get(self.severity))
             data["expiration_date"] = date_sla  # secure assignment of the expiration date
 
         if "accepted_by" in data.keys():
