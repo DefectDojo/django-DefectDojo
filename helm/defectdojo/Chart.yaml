@@ -2,7 +2,7 @@ apiVersion: v2
 appVersion: "2.54.0-dev"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.9.2-dev
+version: 1.9.4-dev
 icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
 maintainers:
   - name: madchap
@@ -10,11 +10,11 @@ maintainers:
     url: https://github.com/DefectDojo/django-DefectDojo
 dependencies:
   - name: postgresql
-    version: ~16.7.0
+    version: 16.7.27
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: postgresql.enabled
   - name: valkey
-    version: ~0.10.0
+    version: 0.10.2
     repository: "oci://registry-1.docker.io/cloudpirates"
     condition: valkey.enabled
 # For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/

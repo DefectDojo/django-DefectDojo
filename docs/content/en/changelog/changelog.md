@@ -8,7 +8,56 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
+## Dec 2025: v2.53
+
+### Dec 8, 2025: v2.53.1
+
+* **(Assets/Organizations)** Introduced overhaul to Products/Product Types, added the ability to create and diagram relationships between Assets.  See [Assets/Organizations documentation](/en/working_with_findings/organizing_engagements_tests/pro_assets_organizations/) for details, and information on opting in to the Beta.
+* **(Findings)** Added new KEV fields for ransomware, exploits, and date handling.
+
+### Dec 1, 2025: v2.53.0
+
+* **(Pro UI)** Added Asset Hierarchy.
+* **(Priority)** Priority and Risk can now be overridden manually, or through Rules Engine.
+
+## Nov 2025: v2.52
+
+### Nov 24, 2025: v2.52.3
+
+* **(Pro UI)** Improved error messaging for failed Imports.
+* **(Pro UI)** Added Engagement Tags column to Finding lists
+
+
+### Nov 17, 2025: v2.52.2
+
+* No significant feature changes.
+
+### Nov 10, 2025: v2.52.1
+
+* **(Pro UI)** Finding view now shows all associated Endpoints, not just Active Endpoints
+
+
+### Nov 3, 2025: v2.52.0
+
+* **(Pro UI)** In-app Contact Support form now requires a valid email address in your user profile.
+* **(Pro UI)** You can now Add Files to Findings through the Pro UI directly from Finding Lists.
+* **(Pro UI)** Unicode letters are now allowed in Tags.
+
 ## Oct 2025: v2.51
+
+### Oct 27, 2025: v2.51.3
+
+* **(Tools)** Added Nuclei scan support for Smart Upload.
+* **(Priority)** Added Prioritization Engine to allow for configurable Priority and Risk calculations for individual Findings under a given Product.
+* **(Metrics)** Updated Metrics table to include Products with zero Findings (as a result of filter parameters, or otherwise).
+* **(Pro UI)** Added Surveys to Pro UI.
+
+
+
+### Oct 20, 2025: v2.51.2
+
+* **(Connectors)** Added Anchore Enterprise Connector.
+
 
 ### Oct 14, 2025: v2.51.1
 

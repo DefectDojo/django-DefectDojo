@@ -31,7 +31,7 @@ env = environ.FileAwareEnv(
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
     DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
-    # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
+    # django-jsonfield-backport raises a warning that can be ignored,
     # see https://github.com/laymonage/django-jsonfield-backport
     # debug_toolbar.E001 is raised when running tests in dev mode via run-unittests.sh
     DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001"]),
@@ -340,12 +340,9 @@ env = environ.FileAwareEnv(
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ""),
     # Dictates whether cloud banner is created or not
     DD_CREATE_CLOUD_BANNER=(bool, True),
-    # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Procuts, ...)
-    # If you run big import you may want to disable this because the way django-auditlog currently works, there's
-    # a big performance hit. Especially during (re-)imports.
+    # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Products, ...)
+    # If you run big import you may want to disable this because there's a performance hit during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
-    # Audit logging system: "django-auditlog" (default) or "django-pghistory"
-    DD_AUDITLOG_TYPE=(str, "django-auditlog"),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
@@ -714,6 +711,7 @@ SEARCH_MAX_RESULTS = env("DD_SEARCH_MAX_RESULTS")
 SIMILAR_FINDINGS_MAX_RESULTS = env("DD_SIMILAR_FINDINGS_MAX_RESULTS")
 MAX_REQRESP_FROM_API = env("DD_MAX_REQRESP_FROM_API")
 MAX_AUTOCOMPLETE_WORDS = env("DD_MAX_AUTOCOMPLETE_WORDS")
+ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
 
 LOGIN_EXEMPT_URLS = (
     rf"^{URL_PREFIX}static/",
@@ -971,13 +969,21 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.AdditionalHeaderMiddleware",
     "dojo.middleware.CustomSocialAuthExceptionMiddleware",
     "crum.CurrentRequestUserMiddleware",
-    "dojo.middleware.AuditlogMiddleware",
     "dojo.middleware.AsyncSearchContextMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
     "dojo.middleware.LongRunningRequestAlertMiddleware",
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
+
+if ENABLE_AUDITLOG:
+    middleware_list = list(MIDDLEWARE)
+    crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
+
+    # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
+    middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
+
+    MIDDLEWARE = middleware_list
 
 # WhiteNoise allows your web app to serve its own static files,
 # making it a self-contained unit that can be deployed anywhere without relying on nginx
@@ -1907,10 +1913,10 @@ VULNERABILITY_URLS = {
     "BAM-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BAM-25498
     "BSERV-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BSERV-19020
     "C-": "https://hub.armosec.io/docs/",  # e.g. https://hub.armosec.io/docs/c-0085
-    "CISCO-SA-": "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/",  # e.g. https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-umbrella-tunnel-gJw5thgE
     "CAPEC": "https://capec.mitre.org/data/definitions/&&.html",  # e.g. https://capec.mitre.org/data/definitions/157.html
     "CERTFR-": "https://www.cert.ssi.gouv.fr/alerte/",  # e.g. https://www.cert.ssi.gouv.fr/alerte/CERTFR-2025-ALE-012"
     "CGA-": "https://images.chainguard.dev/security/",  # e.g. https://images.chainguard.dev/security/CGA-24pq-h5fw-43v3
+    "CISCO-SA-": "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/",  # e.g. https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-umbrella-tunnel-gJw5thgE
     "CONFSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/CONFSERVER-93361
     "CVE-": "https://nvd.nist.gov/vuln/detail/",  # e.g. https://nvd.nist.gov/vuln/detail/cve-2022-22965
     "CWE": "https://cwe.mitre.org/data/definitions/&&.html",  # e.g. https://cwe.mitre.org/data/definitions/79.html
@@ -1927,6 +1933,7 @@ VULNERABILITY_URLS = {
     "GLSA": "https://security.gentoo.org/",  # e.g. https://security.gentoo.org/glsa/202409-32
     "GO-": "https://pkg.go.dev/vuln/",  # e.g. https://pkg.go.dev/vuln/GO-2025-3703
     "GSD-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/gsd-2021-34715
+    "ICSA-": "https://cvepremium.circl.lu/recent/",  # e.g. https://cvepremium.circl.lu/vuln/ICSA-25-317-01
     "JSDSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/JSDSERVER-14872
     "JVNDB-": "https://jvndb.jvn.jp/en/contents/",  # e.g. https://jvndb.jvn.jp/en/contents/2025/JVNDB-2025-004079.html
     "KB": "https://support.hcl-software.com/csm?id=kb_article&sysparm_article=",  # e.g. https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0108401
@@ -1986,10 +1993,6 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # Auditlog
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
-ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
-AUDITLOG_TYPE = env("DD_AUDITLOG_TYPE")
-AUDITLOG_TWO_STEP_MIGRATION = False
-AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
 AUDITLOG_FLUSH_BATCH_SIZE = env("DD_AUDITLOG_FLUSH_BATCH_SIZE")
 AUDITLOG_FLUSH_MAX_BATCHES = env("DD_AUDITLOG_FLUSH_MAX_BATCHES")
 
@@ -2080,19 +2083,6 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
 #########################################################################################################
 # Auditlog configuration                                                                                #
 #########################################################################################################
-
-if ENABLE_AUDITLOG:
-    middleware_list = list(MIDDLEWARE)
-    crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
-
-    if AUDITLOG_TYPE == "django-auditlog":
-        # Insert AuditlogMiddleware before CurrentRequestUserMiddleware
-        middleware_list.insert(crum_index, "dojo.middleware.AuditlogMiddleware")
-    elif AUDITLOG_TYPE == "django-pghistory":
-        # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
-        middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
-
-    MIDDLEWARE = middleware_list
 
 PGHISTORY_FOREIGN_KEY_FIELD = pghistory.ForeignKey(db_index=False)
 PGHISTORY_CONTEXT_FIELD = pghistory.ContextForeignKey(db_index=True)
