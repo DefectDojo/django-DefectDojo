@@ -31,7 +31,7 @@ from polymorphic.base import ManagerInheritanceWarning
 from tagulous.forms import TagField
 
 import dojo.jira_link.helper as jira_helper
-from dojo.authorization.authorization import user_has_configuration_permission
+from dojo.authorization.authorization import user_has_configuration_permission, user_is_superuser_or_global_owner
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
@@ -2420,13 +2420,32 @@ class DeleteUserForm(forms.ModelForm):
 
 
 class UserContactInfoForm(forms.ModelForm):
+    reset_api_token = forms.BooleanField(
+        required=False,
+        label=_("Reset API token"),
+        help_text=_("Upon saving, a new token will be generated and a notification of category 'Other' is triggered."),
+    )
+
     class Meta:
         model = UserContactInfo
         exclude = ["user", "slack_user_id"]
+        # Swap order: password_last_reset before token_last_reset
+        field_order = [
+            "title", "phone_number", "cell_number", "twitter_username", "github_username",
+            "slack_username", "block_execution", "force_password_reset", "reset_api_token",
+            "password_last_reset", "token_last_reset",
+        ]
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+        # Make timestamp fields readonly.
+        # NOTE: `disabled=True` is enforced server-side by Django forms: posted values for disabled fields
+        # are ignored during binding/cleaning, so these timestamps cannot be modified via this form.
+        if "password_last_reset" in self.fields:
+            self.fields["password_last_reset"].disabled = True
+        if "token_last_reset" in self.fields:
+            self.fields["token_last_reset"].disabled = True
         # Do not expose force password reset if the current user does not have a password to reset
         if user is not None:
             if not user.has_usable_password():
@@ -2437,10 +2456,14 @@ class UserContactInfoForm(forms.ModelForm):
         if not current_user.is_superuser:
             if not user_has_configuration_permission(current_user, "auth.change_user") and \
                not user_has_configuration_permission(current_user, "auth.add_user"):
-                del self.fields["force_password_reset"]
+                self.fields.pop("force_password_reset", None)
             if not get_system_setting("enable_user_profile_editable"):
                 for field in self.fields:
                     self.fields[field].disabled = True
+
+        # Only show reset_api_token to superusers or global owners, and only if API tokens are enabled
+        if not settings.API_TOKENS_ENABLED or not user_is_superuser_or_global_owner(current_user):
+            self.fields.pop("reset_api_token", None)
 
 
 class GlobalRoleForm(forms.ModelForm):
