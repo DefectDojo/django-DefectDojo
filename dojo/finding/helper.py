@@ -493,6 +493,7 @@ def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_op
     # use list() to force a complete query execution and related objects to be loaded once
     logger.debug(f"getting finding models for batch deduplication with: {len(finding_ids)} findings")
     findings = get_finding_models_for_deduplication(finding_ids)
+    logger.debug(f"found {len(findings)} findings for batch deduplication")
 
     if not findings:
         logger.debug(f"no findings found for batch deduplication with IDs: {finding_ids}")
