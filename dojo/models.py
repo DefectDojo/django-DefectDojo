@@ -268,6 +268,8 @@ class UserContactInfo(models.Model):
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
     block_execution = models.BooleanField(default=False, help_text=_("Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion."))
     force_password_reset = models.BooleanField(default=False, help_text=_("Forces this user to reset their password on next login."))
+    token_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent API token reset for this user."))
+    password_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent password reset for this user."))
 
 
 class Dojo_Group(models.Model):
@@ -2768,6 +2770,8 @@ class Finding(models.Model):
         logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
 
+        is_new_finding = self.pk is None
+
         # if not isinstance(self.date, (datetime, date)):
         #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
 
@@ -2811,7 +2815,7 @@ class Finding(models.Model):
 
         self.set_hash_code(dedupe_option)
 
-        if self.pk is None:
+        if is_new_finding:
             # We enter here during the first call from serializers.py
             from dojo.utils import apply_cwe_to_template  # noqa: PLC0415 circular import
             # No need to use the returned variable since `self` Is updated in memory
@@ -2840,7 +2844,9 @@ class Finding(models.Model):
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         super().save(*args, **kwargs)
 
-        self.found_by.add(self.test.test_type)
+        # Only add to found_by for newly-created findings (avoid doing this on every update)
+        if is_new_finding:
+            self.found_by.add(self.test.test_type)
 
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
         system_settings = System_Settings.objects.get()
@@ -3507,11 +3513,12 @@ class Finding(models.Model):
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
         # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
         elif dedupe_option:
+            finding_id = self.id if self.id is not None else "unsaved"
             if self.hash_code is not None:
-                deduplicationLogger.debug("Hash_code already computed for finding %i", self.id)
+                deduplicationLogger.debug("Hash_code already computed for finding: %s", finding_id)
             else:
                 self.hash_code = self.compute_hash_code()
-                deduplicationLogger.debug("Hash_code computed for finding %i: %s", self.id, self.hash_code)
+                deduplicationLogger.debug("Hash_code computed for finding: %s: %s", finding_id, self.hash_code)
 
 
 class FindingAdmin(admin.ModelAdmin):

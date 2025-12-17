@@ -26,14 +26,17 @@ jobs:
         with:
           python-version: 3.14 # Renovate helper is not needed here
 
-      - name: Configure Helm repos
-        run: |-
-             helm dependency list ./helm/defectdojo
-             helm dependency update ./helm/defectdojo
+      # Running update is not needed for listing - it just triggers errors as soon as one of the subcharts is not in the latest version (`helm dep. update` change content of the chart)
+      # As soon as we would like to run more extensive tests, this can be reenabled, but this will need to be placed after "ct list-changed" command
+      # - name: Configure Helm repos
+      #   run: |-
+      #        helm dependency list ./helm/defectdojo
+      #        helm dependency update ./helm/defectdojo
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # v2.8.0
         with:
+          version: 3.14.0 # renovate: datasource=github-releases depName=helm/chart-testing
           yamale_version: 6.1.0 # renovate: datasource=pypi depName=yamale versioning=semver
           yamllint_version: 1.37.1 # renovate: datasource=pypi depName=yamllint versioning=semver
 
@@ -52,6 +55,8 @@ jobs:
           changed=$(ct list-changed --config ct.yaml --target-branch ${{ env.ct-branch}})
           if [[ -n "$changed" ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Content changed:"
+            echo "$changed" | sed 's/^/  /'
           fi
 
       # run version check only if not dev as in dev we have a `x.y.z-dev` version
@@ -114,12 +119,12 @@ jobs:
       - name: Update values in HELM chart
         if: startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')
         run: |
-          title=${{ github.event.pull_request.title }}
+          title='${{ github.event.pull_request.title }}'
           chars='{}:[],&*#?|-<>=!%@'
           for c in $(echo "$chars" | grep -o .); do
             title="${title//"$c"/_}"
           done
-          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: $title\n"' helm/defectdojo/Chart.yaml
+          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: '$title'\n"' helm/defectdojo/Chart.yaml
           git add helm/defectdojo/Chart.yaml
           git commit -m "ci: update Chart annotations from PR #${{ github.event.pull_request.number }}" || echo "No changes to commit"
 
