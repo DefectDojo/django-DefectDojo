@@ -7,6 +7,7 @@ import textwrap
 from datetime import datetime
 
 import dateutil.parser
+from django.utils import timezone
 
 from dojo.models import Finding
 
@@ -240,7 +241,7 @@ def get_item(vulnerability, test, image_metadata=""):
     try:
         date = str(dateutil.parser.parse(vulnerability.get("discoveredDate")).date())
     except (ValueError, TypeError, dateutil.parser.ParserError):
-        date = datetime.now()
+        date = timezone.now()
 
     # Build impact field combining severity and image metadata which can change between scans, so we add it to the impact field as the description field is sometimes used for hash code calculation
     impact_parts = [severity]
