@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 import dateutil.parser
 
@@ -25,7 +26,10 @@ class SonarQubeRESTAPIJSON:
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
                     codeVariants = str(issue.get("codeVariants"))
-                    date = str(dateutil.parser.parse(issue.get("creationDate")).date())
+                    try:
+                        date = str(dateutil.parser.parse(issue.get("creationDate")).date())
+                    except (ValueError, TypeError, dateutil.parser.ParserError):
+                        date = datetime.now()
                     description = ""
                     description += "**key:** " + key + "\n"
                     description += "**rule:** " + rule + "\n"
@@ -65,7 +69,10 @@ class SonarQubeRESTAPIJSON:
                     message = issue.get("message")
                     line = issue.get("line")
                     cwe = None
-                    date = str(dateutil.parser.parse(issue.get("creationDate")).date())
+                    try:
+                        date = str(dateutil.parser.parse(issue.get("creationDate")).date())
+                    except (ValueError, TypeError, dateutil.parser.ParserError):
+                        date = datetime.now()
                     if "Category: CWE-" in message:
                         cwe_pattern = r"Category: CWE-\d{1,5}"
                         cwes = re.findall(cwe_pattern, message)
@@ -160,7 +167,10 @@ class SonarQubeRESTAPIJSON:
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
                     codeVariants = issue.get("codeVariants", [])
-                    date = str(dateutil.parser.parse(issue.get("creationDate")).date())
+                    try:
+                        date = str(dateutil.parser.parse(issue.get("creationDate")).date())
+                    except (ValueError, TypeError, dateutil.parser.ParserError):
+                        date = datetime.now()
                     description = ""
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
@@ -208,7 +218,10 @@ class SonarQubeRESTAPIJSON:
                 flows = hotspot.get("flows", [])
                 ruleKey = hotspot.get("ruleKey")
                 messageFormattings = hotspot.get("messageFormattings", [])
-                date = str(dateutil.parser.parse(hotspot.get("creationDate")).date())
+                try:
+                    date = str(dateutil.parser.parse(hotspot.get("creationDate")).date())
+                except (ValueError, TypeError, dateutil.parser.ParserError):
+                    date = datetime.now()
                 description = ""
                 description += "**key:** " + key + "\n"
                 description += "**component:** " + component + "\n"
