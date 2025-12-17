@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
-from django.db.models import F, QuerySet
+from django.db.models import F, QuerySet, Value
 from django.db.models.functions import Coalesce, ExtractDay, Length, TruncDate
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
@@ -276,17 +276,30 @@ class BaseListFindings:
     def get_filtered_findings(self):
         findings = get_authorized_findings(Permissions.Finding_View)
         # Annotate computed SLA age in days: sla_expiration_date - (sla_start_date or date)
+        # Handle NULL sla_expiration_date by using Coalesce to provide a large default value
+        # so NULLs sort last when sorting ascending (most urgent first)
         findings = findings.annotate(
-            sla_age_days=ExtractDay(
-                F("sla_expiration_date") - Coalesce(F("sla_start_date"), TruncDate("created")),
+            sla_age_days=Coalesce(
+                ExtractDay(
+                    F("sla_expiration_date") - Coalesce(F("sla_start_date"), TruncDate("created")),
+                ),
+                Value(999999),  # Large value to push NULLs to the end when sorting ascending
+                output_field=models.IntegerField(),
             ),
-        ).order_by(self.get_order_by())
+        )
+        # Don't apply initial order_by here - let OrderingFilter handle it via request.GET['o']
+        # This prevents conflicts between initial ordering and user-requested sorting
         findings = self.filter_findings_by_object(findings)
         return self.filter_findings_by_filter_name(findings)
 
     def get_fully_filtered_findings(self, request: HttpRequest):
         findings = self.get_filtered_findings()
-        return self.filter_findings_by_form(request, findings)
+        filtered = self.filter_findings_by_form(request, findings)
+        # Apply default ordering if no ordering parameter is provided
+        # This maintains backward compatibility with the previous behavior
+        if not request.GET.get("o"):
+            filtered.qs = filtered.qs.order_by(self.get_order_by())
+        return filtered
 
 
 class ListFindings(View, BaseListFindings):
