@@ -11,19 +11,20 @@ This script:
 
 How to run:
 
-    # Step 1: Run tests and generate report (uses TestDojoImporterPerformanceSmall by default)
-    python3 scripts/update_performance_test_counts.py --report-only
+    # Default: Update the test file (uses TestDojoImporterPerformanceSmall by default)
+    python3 scripts/update_performance_test_counts.py
 
     # Or specify a different test class:
-    python3 scripts/update_performance_test_counts.py --test-class TestDojoImporterPerformanceSmall --report-only
+    python3 scripts/update_performance_test_counts.py --test-class TestDojoImporterPerformanceSmall
 
-    # Step 2: Review the report, then update the file
-    python3 scripts/update_performance_test_counts.py --update
+    # Step 1: Run tests and generate report only (without updating)
+    python3 scripts/update_performance_test_counts.py --report-only
 
-    # Step 3: Verify all tests pass
+    # Step 2: Verify all tests pass
     python3 scripts/update_performance_test_counts.py --verify
 
 The script defaults to TestDojoImporterPerformanceSmall if --test-class is not provided.
+The script defaults to --update behavior if no action flag is provided.
 """
 
 import argparse
@@ -55,18 +56,80 @@ class TestCount:
         )
 
 
-def run_tests(test_class: str) -> str:
-    """Run the performance tests and return the output."""
+def run_tests(test_class: str) -> tuple[str, int]:
+    """Run the performance tests and return the output and return code."""
     print(f"Running tests for {test_class}...")
     cmd = [
         "./run-unittest.sh",
         "--test-case",
         f"unittests.test_importers_performance.{test_class}",
     ]
-    result = subprocess.run(
-        cmd, check=False, capture_output=True, text=True, cwd=Path(__file__).parent.parent,
+
+    # Run with real-time output streaming
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+        cwd=Path(__file__).parent.parent,
     )
-    return result.stdout + result.stderr
+
+    output_lines = []
+    for line in process.stdout:
+        print(line, end="")  # Print in real-time
+        output_lines.append(line)
+
+    process.wait()
+    output = "".join(output_lines)
+
+    return output, process.returncode
+
+
+def check_test_execution_success(output: str, return_code: int) -> tuple[bool, str]:
+    """Check if tests executed successfully or failed due to other reasons."""
+    # Check for migration errors
+    migration_error_patterns = [
+        r"django\.db\.migrations\.exceptions\.",
+        r"Migration.*failed",
+        r"django\.core\.management\.base\.CommandError",
+        r"OperationalError",
+        r"ProgrammingError",
+        r"relation.*does not exist",
+        r"no such table",
+    ]
+
+    for pattern in migration_error_patterns:
+        if re.search(pattern, output, re.IGNORECASE):
+            return False, f"Migration or database error detected: {pattern}"
+
+    # Check if any tests actually ran
+    test_run_patterns = [
+        r"Ran \d+ test",
+        r"OK",
+        r"FAILED",
+        r"FAIL:",
+        r"test_\w+",
+    ]
+
+    tests_ran = any(re.search(pattern, output) for pattern in test_run_patterns)
+
+    if not tests_ran and return_code != 0:
+        return False, "Tests did not run successfully. Check the output above for errors."
+
+    # Check for other critical errors
+    critical_error_patterns = [
+        r"ImportError",
+        r"ModuleNotFoundError",
+        r"SyntaxError",
+        r"IndentationError",
+    ]
+
+    for pattern in critical_error_patterns:
+        if re.search(pattern, output):
+            return False, f"Critical error detected: {pattern}"
+
+    return True, ""
 
 
 def parse_test_output(output: str) -> list[TestCount]:
@@ -249,17 +312,23 @@ def update_test_file(counts: list[TestCount]):
 def verify_tests(test_class: str) -> bool:
     """Run tests to verify they all pass."""
     print(f"Verifying tests for {test_class}...")
-    output = run_tests(test_class)
+    output, return_code = run_tests(test_class)
+
+    success, error_msg = check_test_execution_success(output, return_code)
+    if not success:
+        print(f"\n❌ Test execution failed: {error_msg}")
+        return False
+
     counts = parse_test_output(output)
 
     if counts:
-        print("❌ Some tests still have count mismatches:")
+        print("\n❌ Some tests still have count mismatches:")
         for count in counts:
             print(f"  {count.test_name} - {count.step} {count.metric}: "
                   f"expected {count.expected}, got {count.actual}")
         return False
     else:  # noqa: RET505
-        print("✅ All tests pass!")
+        print("\n✅ All tests pass!")
         return True
 
 
@@ -283,7 +352,7 @@ def main():
     parser.add_argument(
         "--update",
         action="store_true",
-        help="Update the test file with new counts",
+        help="Update the test file with new counts (default behavior if no action flag is provided)",
     )
     parser.add_argument(
         "--verify",
@@ -295,20 +364,14 @@ def main():
 
     if args.report_only:
         # Step 1: Run tests and generate report
-        output = run_tests(args.test_class)
+        output, return_code = run_tests(args.test_class)
+        success, error_msg = check_test_execution_success(output, return_code)
+        if not success:
+            print(f"\n❌ Test execution failed: {error_msg}")
+            sys.exit(1)
         counts = parse_test_output(output)
         expected_counts = extract_expected_counts_from_file(args.test_class)
         generate_report(counts, expected_counts)
-
-    elif args.update:
-        # Step 2: Update the file
-        output = run_tests(args.test_class)
-        counts = parse_test_output(output)
-        if counts:
-            update_test_file(counts)
-            print("\nNext step: Run --verify to ensure all tests pass")
-        else:
-            print("No differences found. All tests are already up to date.")
 
     elif args.verify:
         # Step 3: Verify
@@ -316,8 +379,19 @@ def main():
         sys.exit(0 if success else 1)
 
     else:
-        parser.print_help()
-        sys.exit(1)
+        # Default: Update the file (--update is the default behavior)
+        output, return_code = run_tests(args.test_class)
+        success, error_msg = check_test_execution_success(output, return_code)
+        if not success:
+            print(f"\n❌ Test execution failed: {error_msg}")
+            print("Cannot update counts because tests did not run successfully.")
+            sys.exit(1)
+        counts = parse_test_output(output)
+        if counts:
+            update_test_file(counts)
+            print("\nNext step: Run --verify to ensure all tests pass")
+        else:
+            print("\nNo differences found. All tests are already up to date.")
 
 
 if __name__ == "__main__":
