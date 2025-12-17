@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 
 import dateutil.parser
+from django.utils import timezone
 
 from dojo.models import Finding
 
@@ -29,7 +30,7 @@ class SonarQubeRESTAPIJSON:
                     try:
                         date = str(dateutil.parser.parse(issue.get("creationDate")).date())
                     except (ValueError, TypeError, dateutil.parser.ParserError):
-                        date = datetime.now()
+                        date = timezone.now()
                     description = ""
                     description += "**key:** " + key + "\n"
                     description += "**rule:** " + rule + "\n"
@@ -72,7 +73,7 @@ class SonarQubeRESTAPIJSON:
                     try:
                         date = str(dateutil.parser.parse(issue.get("creationDate")).date())
                     except (ValueError, TypeError, dateutil.parser.ParserError):
-                        date = datetime.now()
+                        date = timezone.now()
                     if "Category: CWE-" in message:
                         cwe_pattern = r"Category: CWE-\d{1,5}"
                         cwes = re.findall(cwe_pattern, message)
@@ -170,7 +171,7 @@ class SonarQubeRESTAPIJSON:
                     try:
                         date = str(dateutil.parser.parse(issue.get("creationDate")).date())
                     except (ValueError, TypeError, dateutil.parser.ParserError):
-                        date = datetime.now()
+                        date = timezone.now()
                     description = ""
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
@@ -221,7 +222,7 @@ class SonarQubeRESTAPIJSON:
                 try:
                     date = str(dateutil.parser.parse(hotspot.get("creationDate")).date())
                 except (ValueError, TypeError, dateutil.parser.ParserError):
-                    date = datetime.now()
+                    date = timezone.now()
                 description = ""
                 description += "**key:** " + key + "\n"
                 description += "**component:** " + component + "\n"
