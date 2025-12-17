@@ -256,6 +256,11 @@ class BaseListFindings:
         return findings
 
     def filter_findings_by_form(self, request: HttpRequest, findings: QuerySet[Finding]):
+        # Apply default ordering if no ordering parameter is provided
+        # This maintains backward compatibility with the previous behavior
+        if not request.GET.get("o"):
+            findings = findings.order_by(self.get_order_by())
+
         # Set up the args for the form
         args = [request.GET, findings]
         # Set the initial form args
@@ -294,12 +299,7 @@ class BaseListFindings:
 
     def get_fully_filtered_findings(self, request: HttpRequest):
         findings = self.get_filtered_findings()
-        filtered = self.filter_findings_by_form(request, findings)
-        # Apply default ordering if no ordering parameter is provided
-        # This maintains backward compatibility with the previous behavior
-        if not request.GET.get("o"):
-            filtered.qs = filtered.qs.order_by(self.get_order_by())
-        return filtered
+        return self.filter_findings_by_form(request, findings)
 
 
 class ListFindings(View, BaseListFindings):
