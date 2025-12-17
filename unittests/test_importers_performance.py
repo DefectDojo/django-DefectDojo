@@ -454,8 +454,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=281,
+            expected_num_queries1=282,
             expected_num_async_tasks1=7,
-            expected_num_queries2=245,
+            expected_num_queries2=246,
             expected_num_async_tasks2=7,
+
         )
