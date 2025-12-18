@@ -87,7 +87,9 @@
                                 {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
                                 <th scope="col">{% dojo_sort request 'Product' 'product' 'asc' %}</th>
                             {% endif %}
-							<th class="text-center" nowrap="nowrap" scope="col">Active (Verified) Findings</th>
+              {% if not host_view %}
+							  <th class="text-center" nowrap="nowrap" scope="col">Active (Verified) Findings</th>
+              {% endif %}
 							<th scope="col">Status</th>
                         </tr>
 
@@ -115,14 +117,12 @@
                                     {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
                                   </td>
                                 {% endif %}
-                                <td class="text-center">
-                                  {% if host_view %}
-                                       {{ e.host_active_findings_count }} ({{ e.host_active_verified_findings_count }})
-                                  {% else %}
+                                {% if not host_view %}
+                                  <td class="text-center">
                                       <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.active_findings_count }}</a>
                                       <a rel="noopener noreferrer" href="{% url 'verified_findings' %}?endpoints={{ e.id }}">({{ e.active_verified_findings_count }})</a>
-                                  {% endif %}
-                                </td>
+                                  </td>
+                                {% endif %}
                                 <td>
                                   {% if host_view %}
                                     {{ e.host_mitigated_endpoints_count }} / {{ e.host_endpoints_count }} mitigated endpoints

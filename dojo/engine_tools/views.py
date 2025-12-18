@@ -522,6 +522,7 @@ def reopen_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
     finding_exclusion.status_updated_by = request.user
     finding_exclusion.reviewed_at = datetime.now()
     finding_exclusion.reviewed_by = request.user
+    finding_exclusion.expiration_date = timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS))
     finding_exclusion.save()
     
     FindingExclusionLog.objects.create(

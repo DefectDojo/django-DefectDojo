@@ -34,7 +34,6 @@
                         <th>Engagement Name</th>
                         <th>Product Name</th>
                         <th>Product Type Name</th>
-                        <th>Total Findings</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,24 +44,13 @@
                             </td>
                             <td>{{ item.version }}</td>
                             <td>
-                                 {{ item.engagement_name }}
-                            </td>
-                            <td>
-                                <a href="{% url 'view_product' item.engagement.product.id %}" data-toggle="tooltip" data-placement="bottom"> 
-                                 {{ item.product_name }}
+                                <a rel="noopener noreferrer" href="{% url 'view_product_components' item.engagement.product.id  %}?engagement={{ item.engagement_name }}">
+                                    <b></b>{{ item.engagement_name }}</b>
                                 </a>
                             </td>
+                            <td>{{ item.product_name }}</td>
                             <td>
                                 {{ item.product_type_name }}
-                            </td>
-                            <td class="text-right">
-                                {% if item.total_findings %}
-                                     <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_id={{ item.id }}&test__engagement__product={{ item.engagement.product.id }}">
-                                        <b>{{ item.total_findings }}</b>
-                                    </a>
-                                {% else %}
-                                    0
-                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -128,7 +116,6 @@
                         { "data": "Engagement_name"},
                         { "data": "Product_name" },
                         { "data": "Product_type_name" },
-                        { "data": "Total" },
                 ],
                 order: [],
                 columnDefs: [

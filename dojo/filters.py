@@ -101,7 +101,6 @@ from dojo.models import (
     TextQuestion,
     User,
     Vulnerability_Id,
-    GeneralSettings
 )
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
@@ -1092,21 +1091,14 @@ class ProductComponentFilter(DojoFilter):
         },
     )
 
-    engagement = ModelMultipleChoiceFilter(
-        queryset=Engagement.objects.none(),
-        label="Engagement")
+    engagement = CharFilter(
+        field_name="engagement__name",
+        lookup_expr="icontains",
+        label="Engagement name contains",)
+
 
     def __init__(self, *args, **kwargs):
-        parent_product = kwargs.pop("parent_product", None)
         super().__init__(*args, **kwargs)
-        if parent_product:
-            self.form.fields[
-                "engagement"
-            ].queryset = get_authorized_engagements(Permissions.Engagement_View).filter(product=parent_product)
-        else:
-            self.form.fields[
-                "engagement"
-            ].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
 
 class ComponentFilterWithoutObjectLookups(ProductComponentFilter):
@@ -1141,21 +1133,12 @@ class ComponentFilter(ProductComponentFilter):
         label="Product")
 
     def __init__(self, *args, **kwargs):
-        parent_product = kwargs.pop("parent_product", None)
         super().__init__(*args, **kwargs)
 
         self.form.fields[
             "engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
         self.form.fields[
             "engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
-        if parent_product:
-            self.form.fields[
-                "engagement"
-            ].queryset = get_authorized_engagements(Permissions.Engagement_View).filter(product=parent_product)
-        else:
-            self.form.fields[
-                "engagement"
-            ].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
 
 class EngagementDirectFilterHelper(FilterSet):

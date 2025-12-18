@@ -8,6 +8,7 @@
 FROM python:3.15.0a2-slim-bookworm@sha256:6ba8455246a58fd6522ddd9bef7e7b9c93d3a56d55bffe173ace0a9c748a6632 AS base
 FROM base AS build
 WORKDIR /app
+ENV DEBIAN_FRONTEND=noninteractive
 RUN \
   apt-get -y update && \
   apt-get -y install --no-install-recommends \
@@ -30,9 +31,9 @@ COPY requirements.txt ./
 # https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
 RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
-
 FROM build AS collectstatic
 
+ENV DEBIAN_FRONTEND=noninteractive
 ENV \
   # This will point yarn to whatever version of node you decide to use
   # due to the use of nodejs instead of node name in some distros
