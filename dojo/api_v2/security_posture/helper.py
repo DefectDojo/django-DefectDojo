@@ -93,7 +93,7 @@ def get_security_posture(engagement: Engagement, engagement_name: str):
         "unknown": 0,
     }
     for finding in active_finding.iterator():
-        priority = finding.priority_classification
+        priority = finding.priority_classification[0]
         logger.debug(f"Finding {finding.id} has priority {priority}")
         data["counter_findings_by_priority"][str(priority).lower().replace(" ", "_")] += 1
         data["counter_findings_by_severity"][str(finding.severity).lower()] += 1 

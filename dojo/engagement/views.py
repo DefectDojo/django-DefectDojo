@@ -1448,7 +1448,6 @@ def add_risk_acceptance_pending(request, eid, fid):
                     test__engagement=eng,
                     active=True,
                     risk_status__in=["Risk Active", "Risk Expired", "Transfer Rejected"],
-                    severity=finding.priority_classification,
                 ).filter(
                     NOT_ACCEPTED_FINDINGS_QUERY
                     & ~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-"))
@@ -1457,7 +1456,9 @@ def add_risk_acceptance_pending(request, eid, fid):
             query = query.filter(severity=finding.severity)
         else:
             if GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True:
-                query = query.filter(severity=finding.priority_classification)
+                min_rp = finding.priority_classification[1]
+                max_rp = finding.priority_classification[2]
+                query = query.filter(priority__range=(min_rp, max_rp))
             else:
                 raise ValueError("No prioritization model is enabled. PRIORITIZATION_MODEL_PRIORITY")
 

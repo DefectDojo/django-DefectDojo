@@ -311,7 +311,7 @@ def finding_sla(finding):
         return ""
 
     title = ""
-    severity = finding.priority_classification
+    severity = finding.priority_classification[0]
     if severity == "Unknown":
         severity = finding.severity
     days_remaining = finding.sla_days_remaining()
@@ -839,7 +839,7 @@ def finding_display_status(finding, event="view"):
 
 @register.filter
 def priority_display_status(finding):
-    return finding.priority_classification.replace(" ", "-")
+    return finding.priority_classification[0].replace(" ", "-")
 
 @register.filter
 def cwe_url(cwe):
