@@ -1652,14 +1652,22 @@ def add_transfer_finding(request, eid, fid=None):
                 product=product,
                 user=request.user)
 
-        form.fields["findings"].queryset = form.fields["findings"].queryset.filter(
+        query = form.fields["findings"].queryset.filter(
             duplicate=False,
             test__engagement=origin_engagement,
-            active=True,
-            severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+            active=True).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+
+        if (
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True and
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False
+        ):
+            min_rp = finding.priority_classification[1]
+            max_rp = finding.priority_classification[2]
+            form.fields["findings"].queryset = query.filter(priority__range=(min_rp, max_rp))
+        else:
+            form.fields["findings"].queryset = query.filter(severity=finding.severity)
+            
         
-
-
     return render(request, 'dojo/add_transfer_finding.html', {
                   'eng': origin_engagement,
                   'product_tab': "product_tab test",
