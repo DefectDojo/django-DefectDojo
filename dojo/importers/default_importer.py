@@ -368,8 +368,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             self.mitigate_finding(
                 old_finding,
                 (
-                    "This finding has been automatically closed "
-                    "as it is not present anymore in recent scans."
+                    'This Finding has been automatically closed by the Test: \n "' + str(self.test) +
+                    '" \n \n This is because the Finding is not present anymore in recent scans.'
                 ),
                 finding_groups_enabled=self.findings_groups_enabled,
                 product_grading_option=False,
