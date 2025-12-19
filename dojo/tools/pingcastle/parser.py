@@ -21,29 +21,21 @@ class PingCastleParser:
     def get_description_for_scan_types(self, scan_type):
         return "PingCastle XML export"
 
-    # --- public API ---
-
     def get_findings(self, file, test):
         tree = parse(file)
         root = tree.getroot()
         dupes = {}
         report_date = self._parse_datetime(root.findtext("GenerationDate"))
         domain_fqdn = root.findtext("DomainFQDN") or ""
-        # Collect DC info & endpoints for enrichment
         dc_infos, dc_endpoints = self._collect_domain_controllers(root)
-        # Store (not in dupes; summary is standalone)
         findings = []
-
-        # 1) Risk rules -> findings
         for rr in root.findall("RiskRules/HealthcheckRiskRule"):
             points = self._safe_int(rr.findtext("Points"))
             category = rr.findtext("Category") or ""
             model = rr.findtext("Model") or ""
             risk_id = rr.findtext("RiskId") or ""
             rationale = rr.findtext("Rationale") or ""
-
             severity = self._map_points_to_severity(points)
-
             title = f"[PingCastle] {risk_id} ({category}/{model})"
             description = self._compose_risk_rule_description(
                 domain_fqdn=domain_fqdn,
@@ -55,7 +47,6 @@ class PingCastleParser:
                 dc_infos=dc_infos,
                 root=root,
             )
-
             finding = Finding(
                 title=title,
                 test=test,
@@ -67,32 +58,20 @@ class PingCastleParser:
             )
             if report_date:
                 finding.date = report_date
-
-            # CVE detection inside rationale (rare but helpful)
             cves = list(self.CVE_REGEX.findall(rationale or ""))
             if cves:
                 finding.unsaved_vulnerability_ids = cves
-
-            # Attach endpoints: DC-specific risks get DC endpoints; others get domain endpoint
             finding.unsaved_endpoints = []
             if self._is_dc_specific_risk(risk_id):
                 finding.unsaved_endpoints.extend(dc_endpoints)
             elif domain_fqdn:
                 finding.unsaved_endpoints.append(Endpoint(host=domain_fqdn))
-
-            # Special enrichment for A-DC-Coerce: include RPC interfaces details if present
             if risk_id == "A-DC-Coerce":
                 self._enrich_coerce_with_rpc_interfaces(finding, dc_infos)
-
-            # Special enrichment for A-DC-Spooler: reflect RemoteSpoolerDetected
             if risk_id == "A-DC-Spooler":
                 self._enrich_spooler_status(finding, dc_infos)
-
-            # Special enrichment for password length (A-MinPwdLen): add current GPO settings if present
             if risk_id == "A-MinPwdLen":
                 self._enrich_password_policy(finding, root)
-
-            # De-duplicate by risk_id
             dupe_key = risk_id
             if dupe_key in dupes:
                 existing = dupes[dupe_key]
@@ -100,7 +79,6 @@ class PingCastleParser:
                 existing.unsaved_endpoints.extend(finding.unsaved_endpoints)
             else:
                 dupes[dupe_key] = finding
-
         findings.extend(list(dupes.values()))
         return findings
 
@@ -125,10 +103,7 @@ class PingCastleParser:
         lines.append(f"**Points**: `{points}`")
         if rationale:
             lines.append(f"**Rationale**: {rationale}")
-
-        # Context snippets, depending on category/model/risk_id
         if risk_id.startswith("A-DC-") or "DomainControllers" in root.tag:
-            # Attach short DC summary table
             if dc_infos:
                 lines.append("\n#### Domain Controllers")
                 for dc in dc_infos:
@@ -149,7 +124,6 @@ class PingCastleParser:
             remote_spooler = dc.findtext("RemoteSpoolerDetected") or "false"
             ip_elems = dc.findall("IP/string")
             ips = [ip_elem.text for ip_elem in ip_elems if ip_elem is not None and ip_elem.text]
-
             dc_info = {
                 "name": name,
                 "os": os,
@@ -157,7 +131,6 @@ class PingCastleParser:
                 "ips": ips,
                 "rpc_interfaces": [],
             }
-
             # RPC interfaces
             for rpc in dc.findall("RPCInterfacesOpen/HealthcheckDCRPCInterface"):
                 dc_info["rpc_interfaces"].append({
@@ -166,9 +139,7 @@ class PingCastleParser:
                     "opnum": rpc.attrib.get("OpNum", ""),
                     "function": rpc.attrib.get("Function", ""),
                 })
-
             dc_infos.append(dc_info)
-
             # Endpoints: DC name + IPs
             if name:
                 endpoints.append(Endpoint(host=name))
@@ -264,12 +235,10 @@ class PingCastleParser:
         rid = (risk_id or "").strip()
         mod = (model or "").strip()
         rat = (rationale or "").strip().lower()
-
         # 1) Explicit prefixes commonly used by PingCastle for DC-specific checks
         dc_prefixes = ("A-DC-", "S-DC-")
         if rid.startswith(dc_prefixes):
             return True
-
         # 2) Known DC-specific RiskIds (extend as needed)
         dc_specific_ids = {
             "A-DC-Spooler",
@@ -279,11 +248,9 @@ class PingCastleParser:
         }
         if rid in dc_specific_ids:
             return True
-
         # 3) Model hints: "Audit" with a DC-focused RiskId, or PassTheCredential but DC scoped
         if mod == "Audit" and rid.endswith("DC"):
             return True
-
         # 4) Rationale heuristic: mentions DC presence/quantity
         # examples: "remotely accessible from 1 DC", "on domain controllers", "DCs"
         dc_markers = (
