@@ -8,6 +8,7 @@ from contextlib import suppress
 from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -46,6 +47,9 @@ from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
 from dojo.validators import cvss3_validator, cvss4_validator
+
+if TYPE_CHECKING:
+    from dojo.location.models import AbstractLocation
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -2760,7 +2764,11 @@ class Finding(BaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.unsaved_endpoints = []
+        if settings.V3_FEATURE_LOCATIONS:
+            self.unsaved_locations: list[AbstractLocation] = []
+        else:
+            # TODO: Delete this after the move to Locations
+            self.unsaved_endpoints = []
         self.unsaved_request = None
         self.unsaved_response = None
         self.unsaved_tags = None
@@ -2825,7 +2833,14 @@ class Finding(BaseModel):
             from dojo.utils import apply_cwe_to_template  # noqa: PLC0415 circular import
             # No need to use the returned variable since `self` Is updated in memory
             apply_cwe_to_template(self)
-            if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
+            if settings.V3_FEATURE_LOCATIONS:
+                if (self.file_path is not None) and (len(self.unsaved_locations) == 0):
+                    self.static_finding = True
+                    self.dynamic_finding = False
+                elif (self.file_path is not None):
+                    self.static_finding = True
+            # TODO: Delete this after the move to Locations
+            elif (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
                 self.static_finding = True
                 self.dynamic_finding = False
             elif (self.file_path is not None):
@@ -2836,12 +2851,20 @@ class Finding(BaseModel):
             finding_helper.update_finding_status(self, user, changed_fields={"id": (None, None)})
 
         # logger.debug('setting static / dynamic in save')
-        # need to have an id/pk before we can access endpoints
-        elif (self.file_path is not None) and (not self.endpoints.exists()):
-            self.static_finding = True
-            self.dynamic_finding = False
-        elif (self.file_path is not None):
-            self.static_finding = True
+        # need to have an id/pk before we can access locations/endpoints
+        elif self.file_path is not None:
+            if settings.V3_FEATURE_LOCATIONS:
+                if not self.locations.exists():
+                    self.static_finding = True
+                    self.dynamic_finding = False
+                else:
+                    self.static_finding = True
+            # TODO: Delete this after the move to Locations
+            elif not self.endpoints.exists():
+                self.static_finding = True
+                self.dynamic_finding = False
+            else:
+                self.static_finding = True
 
         # update the SLA expiration date last, after all other finding fields have been updated
         self.set_sla_expiration_date()
@@ -2965,11 +2988,19 @@ class Finding(BaseModel):
 
         fields_to_hash = ""
         for hashcodeField in hash_code_fields:
+            # Note: preserve this field label ("endpoints") for settings purposes through the Locations migration
             if hashcodeField == "endpoints":
-                # For endpoints, need to compute the field
-                myEndpoints = self.get_endpoints()
-                fields_to_hash += myEndpoints
-                deduplicationLogger.debug(hashcodeField + " : " + myEndpoints)
+                if settings.V3_FEATURE_LOCATIONS:
+                    # For locations, need to compute the field
+                    locations = self.get_locations()
+                    fields_to_hash += locations
+                    deduplicationLogger.debug(hashcodeField + " : " + locations)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    # For endpoints, need to compute the field
+                    myEndpoints = self.get_endpoints()
+                    fields_to_hash += myEndpoints
+                    deduplicationLogger.debug(hashcodeField + " : " + myEndpoints)
             elif hashcodeField == "vulnerability_ids":
                 # For vulnerability_ids, need to compute the field
                 my_vulnerability_ids = self.get_vulnerability_ids()
@@ -3019,33 +3050,64 @@ class Finding(BaseModel):
 
         return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnerability_ids(self)
 
-    # Get endpoints to use for hash_code computation
-    # (This sometimes reports "None")
-    def get_endpoints(self):
+    if settings.V3_FEATURE_LOCATIONS:
+        # Get endpoints to use for hash_code computation
+        def get_locations(self):
 
-        def _get_unsaved_endpoints(finding) -> str:
-            if len(finding.unsaved_endpoints) > 0:
-                deduplicationLogger.debug("get_endpoints before the finding was saved")
-                # convert list of unsaved endpoints to the list of their canonical representation
-                endpoint_str_list = [str(endpoint) for endpoint in finding.unsaved_endpoints]
-                # deduplicate (usually done upon saving finding) and sort endpoints
-                return "".join(dict.fromkeys(endpoint_str_list))
-            # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
-            # In this case, before saving the finding, both static_finding and dynamic_finding are True
-            # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
-            deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
-            return ""
+            def _get_unsaved_locations(finding) -> str:
+                if len(finding.unsaved_locations) > 0:
+                    deduplicationLogger.debug("get_locations before the finding was saved")
+                    # convert list of unsaved endpoints to the list of their canonical representation
+                    # deduplicate (usually done upon saving finding) and sort locations
+                    locations = sorted({location.get_location_value() for location in finding.unsaved_locations})
+                    return "".join(locations)
+                # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
+                # In this case, before saving the finding, both static_finding and dynamic_finding are True
+                # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
+                deduplicationLogger.debug(
+                    "trying to get locations on a finding before it was saved but no locations found (static parser wrongly identified as dynamic?")
+                return ""
 
-        def _get_saved_endpoints(finding) -> str:
-            if finding.id is not None:
-                deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(finding.endpoints.count()))
-                # convert list of endpoints to the list of their canonical representation
-                endpoint_str_list = [str(endpoint) for endpoint in finding.endpoints.all()]
-                # sort endpoints strings
-                return "".join(sorted(endpoint_str_list))
-            return ""
+            def _get_saved_locations(finding) -> str:
+                if finding.id is not None:
+                    deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(
+                        finding.locations.count()))
+                    # convert list of locations to the list of their canonical representation
+                    locations = sorted({location.location_value for location in finding.locations.all()})
+                    # sort endpoints strings
+                    return "".join(sorted(locations))
+                return ""
 
-        return _get_saved_endpoints(self) or _get_unsaved_endpoints(self)
+            return _get_saved_locations(self) or _get_unsaved_locations(self)
+    else:
+        # TODO: Delete this after the move to Locations
+        # Get endpoints to use for hash_code computation
+        # (This sometimes reports "None")
+        def get_endpoints(self):
+
+            def _get_unsaved_endpoints(finding) -> str:
+                if len(finding.unsaved_endpoints) > 0:
+                    deduplicationLogger.debug("get_endpoints before the finding was saved")
+                    # convert list of unsaved endpoints to the list of their canonical representation
+                    endpoint_str_list = [str(endpoint) for endpoint in finding.unsaved_endpoints]
+                    # deduplicate (usually done upon saving finding) and sort endpoints
+                    return "".join(dict.fromkeys(endpoint_str_list))
+                # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
+                # In this case, before saving the finding, both static_finding and dynamic_finding are True
+                # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
+                deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
+                return ""
+
+            def _get_saved_endpoints(finding) -> str:
+                if finding.id is not None:
+                    deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(finding.endpoints.count()))
+                    # convert list of endpoints to the list of their canonical representation
+                    endpoint_str_list = [str(endpoint) for endpoint in finding.endpoints.all()]
+                    # sort endpoints strings
+                    return "".join(sorted(endpoint_str_list))
+                return ""
+
+            return _get_saved_endpoints(self) or _get_unsaved_endpoints(self)
 
     # Compute the hash_code from the fields to hash
     def hash_fields(self, fields_to_hash):
