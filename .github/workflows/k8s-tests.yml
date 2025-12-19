@@ -18,7 +18,7 @@ jobs:
           # are tested (https://kubernetes.io/releases/)
           - k8s: 'v1.34.3' # renovate: datasource=github-releases depName=kubernetes/kubernetes versioning=loose
             os: debian
-          - k8s: '1.32.10' # renovate: datasource=custom.endoflife-oldest-maintained depName=kubernetes
+          - k8s: '1.32.11' # renovate: datasource=custom.endoflife-oldest-maintained depName=kubernetes
             os: debian
     steps:
       - name: Checkout
