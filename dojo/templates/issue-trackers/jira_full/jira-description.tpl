@@ -8,12 +8,8 @@
 *Title*: [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]
 
 *Defect Dojo link:* {{ finding_url|full_url }} ({{ finding.id }})
-{% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
+
 *Severity:* {{ finding.severity }}
-{% endif %}
-{% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"True" %}
-*Severity:*  {{ finding|priority_display_status }}
-{% endif %}
 
 {% if finding.sla_deadline %}
 *Due Date:* {{ finding.sla_deadline }}

@@ -24,18 +24,10 @@
                         "name": "{% trans "Finding" %}:",
                         "value": "{{ finding.title }}"
                     },
-                    {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
                     {
                         "name": "{% trans "Severity" %}:",
                         "value": "{{ finding.severity }}"
                     },
-                    {% endif %}
-                    {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"True" %}
-                    {
-                        "name": "{% trans "Severity" %}:",
-                        "value": "{{ finding.severity }}"
-                    },
-                    {% endif %}
                     {
                         "name": "{% trans "SLA age" %}:",
                         "value": "{{ sla_age }}"
