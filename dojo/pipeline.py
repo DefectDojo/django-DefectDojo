@@ -284,6 +284,8 @@ def assign_with_user_manager(
             name_product_type = get_user_manager(
                 graph_user_request_json["userPrincipalName"], graph_user_request_json["id"], token_graph
             )
+    
+    logger.debug("detected product type " + str(name_product_type))
 
     if name_product_type:
         products_types = Product_Type.objects.filter(description__contains=name_product_type).values_list('name', flat=True)
@@ -307,9 +309,13 @@ def get_user_manager(name, id, token_graph):
         "Authorization": f"Bearer {token_graph}",
         "ConsistencyLevel": "eventual",
     }
-    response = requests.get(url, headers=headers).json()
+    requests_get_user_manager = requests.get(url, headers=headers)
+    logger.debug("User manager response status code: " + str(requests_get_user_manager.status_code) + " with message " + str(requests_get_user_manager.text))
+    requests_get_user_manager.raise_for_status()
+    response = requests_get_user_manager.json()
+    logger.debug("User manager response: " + str(response))
     if "officeLocation" not in response:
-        print(f"User {name} does not have an office location")
+        logger.debug(f"User {name} does not have an office location")
         return None
     matches_cmdb = (
         re.search(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[1], response["officeLocation"], re.IGNORECASE)

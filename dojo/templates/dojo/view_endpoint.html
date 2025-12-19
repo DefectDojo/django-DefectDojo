@@ -22,7 +22,7 @@
                     {% if host_view %}
                         <span title="{{ endpoint.host }}">
                             Host: {{ endpoint.host|url_shortener }} -
-                            {{ endpoint.host_mitigated_endpoints_count }} / {{ endpoint.host_endpoints_count }} mitigated endpoints
+                            {{ endpoint.host_endpoints_count }} endpoints
                         </span>
                     {% else %}
                         <span title="{{ endpoint }}">
