@@ -9,8 +9,9 @@ from dojo.models import Endpoint, Finding
 
 
 class PingCastleParser:
-
     CVE_REGEX = re.compile(r"(CVE-\d{4}-\d{4,7})", re.IGNORECASE)
+    # keep severity order for minimal contextual bumping
+    _SEVERITY_ORDER = ["Info", "Low", "Medium", "High", "Critical"]
 
     def get_scan_types(self):
         return ["PingCastle"]
@@ -35,7 +36,16 @@ class PingCastleParser:
             model = rr.findtext("Model") or ""
             risk_id = rr.findtext("RiskId") or ""
             rationale = rr.findtext("Rationale") or ""
+            # base severity from points
             severity = self._map_points_to_severity(points)
+            # minimal contextual bumping (CVE mention, missing mitigation, DC scope, Exposure category)
+            severity = self._apply_contextual_bump(
+                severity=severity,
+                category=category,
+                model=model,
+                risk_id=risk_id,
+                rationale=rationale,
+            )
             title = f"[PingCastle] {risk_id} ({category}/{model})"
             description = self._compose_risk_rule_description(
                 domain_fqdn=domain_fqdn,
@@ -62,7 +72,7 @@ class PingCastleParser:
             if cves:
                 finding.unsaved_vulnerability_ids = cves
             finding.unsaved_endpoints = []
-            if self._is_dc_specific_risk(risk_id):
+            if self._is_dc_specific_risk(risk_id, model, rationale):
                 finding.unsaved_endpoints.extend(dc_endpoints)
             elif domain_fqdn:
                 finding.unsaved_endpoints.append(Endpoint(host=domain_fqdn))
@@ -112,7 +122,6 @@ class PingCastleParser:
                         f"- **{dc['name']}** (OS: {dc.get('os', '?')}, IPs: {ips}, "
                         f"SpoolerRemote: {dc.get('remote_spooler', 'false')})",
                     )
-
         return "\n".join(lines)
 
     def _collect_domain_controllers(self, root):
@@ -252,7 +261,6 @@ class PingCastleParser:
         if mod == "Audit" and rid.endswith("DC"):
             return True
         # 4) Rationale heuristic: mentions DC presence/quantity
-        # examples: "remotely accessible from 1 DC", "on domain controllers", "DCs"
         dc_markers = (
             " from ",
             " dc",
@@ -261,3 +269,33 @@ class PingCastleParser:
             " domain controllers",
         )
         return bool(any(marker in rat for marker in dc_markers))
+
+    # --- minimal contextual bumping ---
+    def _apply_contextual_bump(self, severity: str, category: str = "", model: str = "",
+                               risk_id: str = "", rationale: str = "") -> str:
+        """
+        Minimal additive logic on top of points-based severity:
+        - If a CVE is mentioned -> bump by 1 level (at least Low).
+          If rationale indicates missing/not enabled mitigation -> ensure at least Medium.
+        - If DC-specific -> bump by 1 level.
+        - If category is 'Exposure' -> bump by 1 level.
+        """
+        current = severity
+        idx = self._SEVERITY_ORDER.index(current)
+        rat = (rationale or "").lower()
+        cat = (category or "").strip().lower()
+
+        # CVE present
+        if self.CVE_REGEX.search(rationale or ""):
+            idx = min(idx + 1, len(self._SEVERITY_ORDER) - 1)
+            mitigation_markers = ("mitigation", "not set", "disabled", "missing", "not enabled", "enable")
+            if any(m in rat for m in mitigation_markers):
+                idx = max(idx, self._SEVERITY_ORDER.index("Medium"))
+
+        # DC-specific
+        if self._is_dc_specific_risk(risk_id, model, rationale):
+            idx = min(idx + 1, len(self._SEVERITY_ORDER) - 1)
+
+        # Exposure category
+        if cat == "exposure":
+            idx = min(idx + 1, len(self._SEVERITY_ORDER) - 1)
