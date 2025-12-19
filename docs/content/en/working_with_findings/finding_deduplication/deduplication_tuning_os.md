@@ -112,7 +112,7 @@ docker compose exec uwsgi /bin/bash -c "python manage.py dedupe --hash_code_only
 ```
 
 Help/usage:
-
+```
 options:
   --parser PARSER       List of parsers for which hash_code needs recomputing
                         (defaults to all parsers)
