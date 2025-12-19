@@ -165,6 +165,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
     ):
         soc = user.social_auth.get()
         token = soc.extra_data["access_token"]
+        resource = str(soc.extra_data["resource"])
         group_names = search_azure_groups(kwargs, token, soc)
         logger.debug("detected groups " + str(group_names))
         groups_validate = settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP.split(',')
@@ -179,7 +180,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             user_login = kwargs["details"]["email"]
             request_headers = {"Authorization": "Bearer " + token}
             graph_user_request = requests.get(
-                (str(soc.extra_data["resource"]) + "/v1.0/users/" + user_login), headers=request_headers
+                (resource + "/v1.0/users/" + user_login), headers=request_headers
             )
             graph_user_request.raise_for_status()
             graph_user_request_json = graph_user_request.json()
@@ -215,7 +216,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             if assign_mode == "AZURE_DEVOPS_PERMISSIONS":
                 assign_with_azuredevops_permission(user_login, user, user_product_types_names, role_assigned, is_cybersecurity, is_leader)
             elif assign_mode == "USER_MANAGER":
-                assign_with_user_manager(graph_user_request_json, user, token, user_product_types_names, role_assigned, is_cybersecurity)
+                assign_with_user_manager(graph_user_request_json, resource, user, token, user_product_types_names, role_assigned, is_cybersecurity)
         else:
             message = f"The user is not a member of any of the app's security groups. {groups_validate}"
             messages.error(
@@ -269,7 +270,7 @@ def assign_with_azuredevops_permission(user_login, user, user_product_types_name
 
 
 def assign_with_user_manager(
-    graph_user_request_json, user, token_graph, user_product_types_names, role_assigned, is_cybersecurity
+    graph_user_request_json, resource, user, token_graph, user_product_types_names, role_assigned, is_cybersecurity
 ):
     name_product_type = None
     if graph_user_request_json:
@@ -282,7 +283,7 @@ def assign_with_user_manager(
             name_product_type = graph_user_request_json["officeLocation"].replace("-", " ")
         else:
             name_product_type = get_user_manager(
-                graph_user_request_json["userPrincipalName"], graph_user_request_json["id"], token_graph
+                resource, graph_user_request_json["userPrincipalName"], graph_user_request_json["id"], token_graph
             )
     
     logger.debug("detected product type " + str(name_product_type))
@@ -296,14 +297,13 @@ def assign_with_user_manager(
         else:
             update_member_product_type(name_product_type, user_product_types_names, user, role_assigned)
             user_product_types_names[:] = [name for name in user_product_types_names if name != name_product_type]
-
-        clean_project_type_user(user_product_types_names, user, graph_user_request_json["userPrincipalName"], False, is_cybersecurity)
     else:
         update_member_office_location_role(role_assigned, graph_user_request_json, user)
+    clean_project_type_user(user_product_types_names, user, graph_user_request_json["userPrincipalName"], False, is_cybersecurity)
 
 
-def get_user_manager(name, id, token_graph):
-    url = f"https://graph.microsoft.com/v1.0/users/{id}/manager"
+def get_user_manager(resource, name, id, token_graph):
+    url = f"{resource}/v1.0/users//{id}/manager"
     headers = {
         "content-type": "application/json",
         "Authorization": f"Bearer {token_graph}",
@@ -313,7 +313,6 @@ def get_user_manager(name, id, token_graph):
     logger.debug("User manager response status code: " + str(requests_get_user_manager.status_code) + " with message " + str(requests_get_user_manager.text))
     requests_get_user_manager.raise_for_status()
     response = requests_get_user_manager.json()
-    logger.debug("User manager response: " + str(response))
     if "officeLocation" not in response:
         logger.debug(f"User {name} does not have an office location")
         return None
@@ -329,12 +328,14 @@ def get_user_manager(name, id, token_graph):
         return response["officeLocation"].replace("-", " ")
     else:
         return get_user_manager(
-            name, response["id"], token_graph
+            resource, name, response["id"], token_graph
         )
 
 def update_member_office_location_role(role_assigned, graph_user_request_json, user):
     if role_assigned["role"].id == Roles.Developer:
+        logger.debug("Assigning to user %s product membership based on office location %s", graph_user_request_json["mail"], graph_user_request_json["officeLocation"])
         products = Product.objects.filter(description__contains=graph_user_request_json["officeLocation"])
+        logger.debug("detected products " + str(len(products)))
         # Get user's product names
         user_product_names = [prod.name for prod in get_authorized_products(Permissions.Product_View, user)]
         for product in products:
@@ -348,11 +349,12 @@ def update_member_office_location_role(role_assigned, graph_user_request_json, u
                 )
 
         # For each product: if user is not project member any more, remove him from product's list of product members
-        for product_name in user_product_names:
-            if product_name not in products.values_list('name', flat=True):
-                product = Product.objects.get(name=product_name)
-                Product_Member.objects.filter(product=product, user=user).delete()
-                logger.debug("Deleting membership of user %s from product %s", user, product_name)
+        if (graph_user_request_json["mail"].split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM):
+            for product_name in user_product_names:
+                if product_name not in products.values_list('name', flat=True):
+                    product = Product.objects.get(name=product_name)
+                    Product_Member.objects.filter(product=product, user=user).delete()
+                    logger.debug("Deleting membership of user %s from product %s", user, product_name)
 
 def update_member_product_type(product_type, user_product_types_names, user, role_assigned):
     if product_type not in user_product_types_names:

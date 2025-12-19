@@ -125,7 +125,7 @@
                                 {% endif %}
                                 <td>
                                   {% if host_view %}
-                                     {{ e.host_endpoints_count }} endpoints
+                                    {{ e.host_mitigated_endpoints_count }} / {{ e.host_endpoints_count }} mitigated endpoints
                                   {% else %}
                                     {% if e.mitigated %}
                                       Mitigated
