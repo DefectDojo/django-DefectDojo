@@ -1,18 +1,16 @@
 
 import logging
 import operator
-from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from enum import Enum
 from functools import partial
-from typing import Any, NamedTuple, TypeVar
+from typing import TYPE_CHECKING, Any, NamedTuple, TypeVar
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.functions import Coalesce, ExtractDay, Now, TruncMonth, TruncWeek
 from django.db.models.query import QuerySet
-from django.http import HttpRequest
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -31,6 +29,11 @@ from dojo.utils import (
     get_system_setting,
     queryset_check,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from django.http import HttpRequest
 
 logger = logging.getLogger(__name__)
 

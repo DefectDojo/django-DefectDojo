@@ -1,12 +1,12 @@
 import base64
 import logging
 import time
+from typing import TYPE_CHECKING
 
 from celery import chord, group
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db import IntegrityError
 from django.urls import reverse
 from django.utils.timezone import make_aware
@@ -37,8 +37,12 @@ from dojo.models import (
 from dojo.notifications.helper import create_notification
 from dojo.tag_utils import bulk_add_tags_to_instances
 from dojo.tools.factory import get_parser
-from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe
+
+if TYPE_CHECKING:
+    from django.core.files.uploadedfile import TemporaryUploadedFile
+
+    from dojo.tools.parser_test import ParserTest
 
 logger = logging.getLogger(__name__)
 

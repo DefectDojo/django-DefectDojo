@@ -1,7 +1,9 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from dojo.models import Endpoint
 from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser
+
+if TYPE_CHECKING:
+    from dojo.models import Endpoint
 
 
 class NmapScanningEngineParser(BaseEngineParser):

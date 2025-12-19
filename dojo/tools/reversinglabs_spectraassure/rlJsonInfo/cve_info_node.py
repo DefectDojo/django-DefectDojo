@@ -1,5 +1,8 @@
-import datetime
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import datetime
 
 logger = logging.getLogger(__name__)
 

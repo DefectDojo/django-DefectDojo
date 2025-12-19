@@ -1,11 +1,11 @@
 import logging
+from typing import TYPE_CHECKING
 
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.paginator import Page, Paginator
 from django.db.models import Count, Min, Q, QuerySet, Subquery
 from django.db.utils import DEFAULT_DB_ALIAS
-from django.http import HttpRequest
 from django.http.response import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
@@ -26,6 +26,9 @@ from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulk
 from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Global_Role, Product
 from dojo.product.queries import get_authorized_products
 from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_setting, get_system_setting, get_words_for_field
+
+if TYPE_CHECKING:
+    from django.http import HttpRequest
 
 logger = logging.getLogger(__name__)
 

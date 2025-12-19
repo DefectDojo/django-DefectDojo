@@ -5,6 +5,7 @@ import operator
 import time
 from datetime import datetime, timedelta
 from functools import reduce
+from typing import TYPE_CHECKING
 
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
@@ -41,7 +42,6 @@ from dojo.forms import (
     TestForm,
     TypedNoteForm,
 )
-from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
     BurpRawRequestResponse,
@@ -82,6 +82,9 @@ from dojo.utils import (
     process_tag_notifications,
     redirect_to_return_url_or_else,
 )
+
+if TYPE_CHECKING:
+    from dojo.importers.base_importer import BaseImporter
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger("dojo")

@@ -1,6 +1,6 @@
 import logging
+from typing import TYPE_CHECKING
 
-from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 
@@ -18,6 +18,9 @@ from dojo.models import (
 )
 from dojo.utils import perform_product_grading
 from dojo.validators import clean_tags
+
+if TYPE_CHECKING:
+    from django.core.files.uploadedfile import TemporaryUploadedFile
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
