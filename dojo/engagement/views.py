@@ -1452,15 +1452,15 @@ def add_risk_acceptance_pending(request, eid, fid):
                     NOT_ACCEPTED_FINDINGS_QUERY
                     & ~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-"))
                 ).order_by("title") 
-        if GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is True:
-            query = query.filter(severity=finding.severity)
+        if (
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False and
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True
+        ):
+            min_rp = finding.priority_classification[1]
+            max_rp = finding.priority_classification[2]
+            query = query.filter(priority__range=(min_rp, max_rp))
         else:
-            if GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True:
-                min_rp = finding.priority_classification[1]
-                max_rp = finding.priority_classification[2]
-                query = query.filter(priority__range=(min_rp, max_rp))
-            else:
-                raise ValueError("No prioritization model is enabled. PRIORITIZATION_MODEL_PRIORITY")
+            query = query.filter(severity=finding.severity)
 
         finding_choices = (
             query
@@ -1658,8 +1658,8 @@ def add_transfer_finding(request, eid, fid=None):
             active=True).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
         if (
-            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True and
-            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False and
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True
         ):
             min_rp = finding.priority_classification[1]
             max_rp = finding.priority_classification[2]
