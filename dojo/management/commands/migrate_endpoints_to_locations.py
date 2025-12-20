@@ -64,7 +64,7 @@ class Command(BaseCommand):
         of having a single status possible rather than a combo of many
         """
         if endpoint_status.risk_accepted:
-            return FindingLocationStatus.RiskExcepted
+            return FindingLocationStatus.RiskAccepted
         if endpoint_status.false_positive:
             return FindingLocationStatus.FalsePositive
         if endpoint_status.out_of_scope:

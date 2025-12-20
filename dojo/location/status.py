@@ -13,7 +13,7 @@ class FindingLocationStatus(TextChoices):
     Active = "Active", _("Active")
     Mitigated = "Mitigated", _("Mitigated")
     FalsePositive = "FalsePositive", _("False Positive")
-    RiskExcepted = "RiskExcepted", _("Risk Excepted")
+    RiskAccepted = "RiskAccepted", _("Risk Accepted")
     OutOfScope = "OutOfScope", _("Out Of Scope")
 
 

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from contextlib import suppress
-from typing import Self
 from urllib.parse import ParseResult, urlparse
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -150,16 +149,23 @@ class URL(AbstractLocation):
         URL._parse_string_value(str(self))
 
     @staticmethod
-    def create_location_from_value(value: str) -> Self:
-        """Parse a string URL and return the resulting URL Model."""
+    def create_location_from_value(value: str) -> URL:
+        """Parse a string URL and return the resulting *persisted* URL Model."""
+        url = URL.from_value(value)
+        url.save()
+        return url
+
+    @staticmethod
+    def from_value(value: str) -> URL:
+        """Parse a string URL and return the resulting *unsaved* URL Model."""
         # Parse the supplied input
         parsed_url = URL._parse_string_value(value)
         # Create the initial object, assuming no exceptions are thrown
-        return URL.objects.create(
-            protocol=parsed_url.protocol,
+        return URL(
+            protocol=parsed_url.scheme,
             host=parsed_url.hostname,
-            port=parsed_url.port,
-            path=parsed_url.path or None,
-            query=parsed_url.query or None,
-            fragment=parsed_url.fragment or None,
+            port=parsed_url.port or DEFAULT_PORTS.get(parsed_url.scheme, None),
+            path=parsed_url.path.lstrip("/"),
+            query=parsed_url.query,
+            fragment=parsed_url.fragment,
         )
