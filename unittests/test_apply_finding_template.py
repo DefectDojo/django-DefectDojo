@@ -1,5 +1,4 @@
 import datetime
-from unittest import skip
 
 from django.contrib.auth.models import User
 from django.contrib.messages.storage.fallback import FallbackStorage
@@ -21,8 +20,8 @@ class FindingMother:
         settings.save()
 
         p = Product()
-        p.Name = "Test Product"
-        p.Description = "Product for Testing Apply Template functionality"
+        p.name = "Test Product"
+        p.description = "Product for Testing Apply Template functionality"
         p.prod_type = Product_Type.objects.get(id=1)
         p.save()
 
@@ -53,7 +52,9 @@ class FindingMother:
         f.reporter = user
         f.last_reviewed = timezone.now()
         f.last_reviewed_by = user
+        f.cve = None  # Set explicitly as it's required (blank=False)
         f.save()
+        return f
 
 
 class FindingTemplateMother:
@@ -67,6 +68,7 @@ class FindingTemplateMother:
         tmp.mitigation = "Finding Template Mitigation"
         tmp.impact = "Finding Template Impact"
         tmp.save()
+        return tmp
 
 
 class FindingTemplateTestUtil:
@@ -79,6 +81,7 @@ class FindingTemplateTestUtil:
         user_count = User.objects.count()
         user = User()
         user.is_staff = is_staff
+        user.is_superuser = is_staff  # Superuser has all permissions
         user.username = "TestUser" + str(user_count)
         user.save()
         return user
@@ -104,15 +107,13 @@ class FindingTemplateTestUtil:
         return post_request
 
 
-@skip("outdated so doesn't work with current fixture")
 class TestApplyFindingTemplate(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
-    apply_template_url = "finding/2/2/apply_template_to_finding"
-
     def setUp(self):
-        FindingMother.create()
-        FindingTemplateMother.create()
+        self.finding = FindingMother.create()
+        self.template = FindingTemplateMother.create()
+        self.apply_template_url = f"finding/{self.finding.id}/{self.template.id}/apply_template_to_finding"
 
     def make_request(self, user_is_staff, finding_id, template_id, data=None):
         user = FindingTemplateTestUtil.create_user(user_is_staff)
@@ -122,20 +123,21 @@ class TestApplyFindingTemplate(DojoTestCase):
         else:
             request = FindingTemplateTestUtil.create_get_request(user, self.apply_template_url)
 
-        return views.apply_template_to_finding(request, finding_id, template_id)
+        return views.apply_template_to_finding(request, fid=finding_id, tid=template_id)
 
     def test_apply_template_to_finding_with_data_does_not_display_error_success(self):
-        result = self.make_request(user_is_staff=True, finding_id=1, template_id=1,
+        result = self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=self.template.id,
                                    data={"title": "Finding for Testing Apply Template functionality",
                                     "cwe": "89",
                                     "severity": "High",
                                     "description": "Finding for Testing Apply Template Functionality",
                                     "mitigation": "template mitigation",
                                     "impact": "template impact"})
-        self.assertNotContains(result, "There appears to be errors on the form", 302)
+        self.assertEqual(result.status_code, 302)
+        self.assertNotIn("There appears to be errors on the form", str(result))
 
     def test_apply_template_to_finding_with_data_returns_to_view_success(self):
-        result = self.make_request(user_is_staff=True, finding_id=1, template_id=1,
+        result = self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=self.template.id,
                                    data={"title": "Finding for Testing Apply Template functionality",
                                     "cwe": "89",
                                     "severity": "High",
@@ -144,7 +146,7 @@ class TestApplyFindingTemplate(DojoTestCase):
                                     "impact": "template impact"})
         self.assertIsNotNone(result)
         self.assertEqual(302, result.status_code)
-        self.assertEqual("/finding/1", result.url)
+        self.assertEqual(f"/finding/{self.finding.id}", result.url)
 
     def test_apply_template_to_finding_with_data_saves_success(self):
         test_title = "Finding for Testing Apply Template functionality"
@@ -154,7 +156,7 @@ class TestApplyFindingTemplate(DojoTestCase):
         test_mitigation = "template mitigation"
         test_impact = "template impact"
 
-        self.make_request(user_is_staff=True, finding_id=1, template_id=1,
+        self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=self.template.id,
                                    data={"title": test_title,
                                     "cwe": test_cwe,
                                     "severity": test_severity,
@@ -162,8 +164,9 @@ class TestApplyFindingTemplate(DojoTestCase):
                                     "mitigation": test_mitigation,
                                     "impact": test_impact})
 
-        f = Finding.objects.get(id=1)
-        self.assertEqual(test_title, f.title)
+        f = Finding.objects.get(id=self.finding.id)
+        # Title is automatically title-cased by Finding.save()
+        self.assertEqual("Finding for Testing Apply Template Functionality", f.title)
         self.assertEqual(test_cwe, f.cwe)
         self.assertEqual(test_severity, f.severity)
         self.assertEqual(test_description, f.description)
@@ -171,7 +174,7 @@ class TestApplyFindingTemplate(DojoTestCase):
         self.assertEqual(test_impact, f.impact)
 
     def test_unauthorized_apply_template_to_finding_fails(self):
-        result = self.make_request(user_is_staff=False, finding_id=1, template_id=1,
+        result = self.make_request(user_is_staff=False, finding_id=self.finding.id, template_id=self.template.id,
                                    data={"title": "Finding for Testing Apply Template functionality",
                                     "cwe": "89",
                                     "severity": "High",
@@ -183,19 +186,21 @@ class TestApplyFindingTemplate(DojoTestCase):
         self.assertIn("login", result.url)
 
     def test_apply_template_to_finding_with_illegal_finding_fails(self):
-        self.make_request(user_is_staff=True, finding_id=None, template_id=1)
+        with self.assertRaises(Http404):
+            self.make_request(user_is_staff=True, finding_id=99999, template_id=self.template.id)
 
     def test_apply_template_to_finding_with_illegal_template_fails(self):
-        self.make_request(user_is_staff=True, finding_id=1, template_id=None)
+        with self.assertRaises(Http404):
+            self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=99999)
 
     def test_apply_template_to_finding_with_no_data_returns_view_success(self):
-        result = self.make_request(user_is_staff=True, finding_id=1, template_id=1, data=None)
+        result = self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=self.template.id, data=None)
         self.assertIsNotNone(result)
         self.assertEqual(302, result.status_code)
-        self.assertEqual("/finding/1", result.url)
+        self.assertEqual(f"/finding/{self.finding.id}", result.url)
 
     def test_apply_template_to_finding_without_required_field_displays_field_title_success(self):
-        result = self.make_request(user_is_staff=True, finding_id=1, template_id=1,
+        result = self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=self.template.id,
                                    data={"title": "",
                                     "cwe": "89",
                                     "severity": "High",
@@ -205,7 +210,7 @@ class TestApplyFindingTemplate(DojoTestCase):
         self.assertContains(result, "The title is required.")
 
     def test_apply_template_to_finding_without_required_field_displays_error_success(self):
-        result = self.make_request(user_is_staff=True, finding_id=1, template_id=1,
+        result = self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=self.template.id,
                                    data={"title": "",
                                     "cwe": "89",
                                     "severity": "High",
@@ -215,14 +220,13 @@ class TestApplyFindingTemplate(DojoTestCase):
         self.assertContains(result, "There appears to be errors on the form")
 
 
-@skip("outdated so doesn't work with current fixture")
 class TestFindTemplateToApply(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
-    choose_template_url = "finding/2/find_template_to_apply"
 
     def setUp(self):
-        FindingMother.create()
-        FindingTemplateMother.create()
+        self.finding = FindingMother.create()
+        self.template = FindingTemplateMother.create()
+        self.choose_template_url = f"finding/{self.finding.id}/find_template_to_apply"
 
     def make_request(self, user_is_staff, finding_id, data=None):
         user = FindingTemplateTestUtil.create_user(user_is_staff)
@@ -232,34 +236,33 @@ class TestFindTemplateToApply(DojoTestCase):
         else:
             request = FindingTemplateTestUtil.create_get_request(user, self.choose_template_url)
 
-        return views.find_template_to_apply(request, finding_id)
+        return views.find_template_to_apply(request, fid=finding_id)
 
     def test_unauthorized_find_template_to_apply_fails(self):
-        result = self.make_request(user_is_staff=False, finding_id=1)
+        result = self.make_request(user_is_staff=False, finding_id=self.finding.id)
         self.assertEqual(302, result.status_code)
         self.assertIn("login", result.url)
 
     def test_authorized_find_template_to_apply_success(self):
-        result = self.make_request(user_is_staff=True, finding_id=1)
+        result = self.make_request(user_is_staff=True, finding_id=self.finding.id)
         self.assertEqual(200, result.status_code)
 
     def test_find_template_to_apply_displays_templates_success(self):
-        result = self.make_request(user_is_staff=True, finding_id=1)
+        result = self.make_request(user_is_staff=True, finding_id=self.finding.id)
         self.assertContains(result, "Finding Template for Testing Apply Template functionality")
 
     def test_find_template_to_apply_displays_breadcrumb(self):
-        result = self.make_request(user_is_staff=True, finding_id=1)
+        result = self.make_request(user_is_staff=True, finding_id=self.finding.id)
         self.assertContains(result, "Apply Template to Finding")
 
 
-@skip("outdated so doesn't work with current fixture")
 class TestChooseFindingTemplateOptions(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
-    finding_template_options_url = "finding/2/2/choose_finding_template_options"
 
     def setUp(self):
-        FindingMother.create()
-        FindingTemplateMother.create()
+        self.finding = FindingMother.create()
+        self.template = FindingTemplateMother.create()
+        self.finding_template_options_url = f"finding/{self.template.id}/{self.finding.id}/choose_finding_template_options"
 
     def make_request(self, user_is_staff, finding_id, template_id, data=None):
         user = FindingTemplateTestUtil.create_user(user_is_staff)
@@ -269,27 +272,25 @@ class TestChooseFindingTemplateOptions(DojoTestCase):
         else:
             request = FindingTemplateTestUtil.create_get_request(user, self.finding_template_options_url)
 
-        return views.choose_finding_template_options(request, finding_id, template_id)
+        return views.choose_finding_template_options(request, tid=template_id, fid=finding_id)
 
     def test_unauthorized_choose_finding_template_options_fails(self):
-        result = self.make_request(user_is_staff=False, finding_id=1, template_id=1)
+        result = self.make_request(user_is_staff=False, finding_id=self.finding.id, template_id=self.template.id)
         self.assertEqual(302, result.status_code)
         self.assertIn("login", result.url)
 
     def test_authorized_choose_finding_template_options_success(self):
-        result = self.make_request(user_is_staff=True, finding_id=1, template_id=1)
+        result = self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=self.template.id)
         self.assertEqual(200, result.status_code)
 
     def test_choose_finding_template_options_with_invalid_finding_fails(self):
         with self.assertRaises(Http404):
-            result = self.make_request(user_is_staff=True, finding_id=0, template_id=1)
-            self.assertEqual(404, result.status_code)
+            self.make_request(user_is_staff=True, finding_id=0, template_id=self.template.id)
 
     def test_choose_finding_template_options_with_invalid_template_fails(self):
         with self.assertRaises(Http404):
-            result = self.make_request(user_is_staff=True, finding_id=1, template_id=0)
-            self.assertEqual(404, result.status_code)
+            self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=0)
 
     def test_choose_finding_template_options_with_valid_finding_and_template_renders_apply_finding_template_view(self):
-        result = self.make_request(user_is_staff=True, finding_id=1, template_id=1)
+        result = self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=self.template.id)
         self.assertContains(result, "<h3> Apply template to a Finding</h3>")
