@@ -475,12 +475,6 @@ class System_Settings(models.Model):
         help_text=_("Enables Benchmarks such as the OWASP ASVS "
                   "(Application Security Verification Standard)"))
 
-    enable_template_match = models.BooleanField(
-        default=False,
-        blank=False,
-        verbose_name=_("Enable Remediation Advice"),
-        help_text=_("Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner."))
-
     enable_similar_findings = models.BooleanField(
         default=True,
         blank=False,
@@ -2814,10 +2808,6 @@ class Finding(models.Model):
         self.set_hash_code(dedupe_option)
 
         if is_new_finding:
-            # We enter here during the first call from serializers.py
-            from dojo.utils import apply_cwe_to_template  # noqa: PLC0415 circular import
-            # No need to use the returned variable since `self` Is updated in memory
-            apply_cwe_to_template(self)
             if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
                 self.static_finding = True
                 self.dynamic_finding = False
@@ -3661,8 +3651,6 @@ class Finding_Template(models.Model):
     references = models.TextField(null=True, blank=True, db_column="refs")
     last_used = models.DateTimeField(null=True, editable=False)
     numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
-    template_match = models.BooleanField(default=False, verbose_name=_("Template Match Enabled"), help_text=_("Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE."))
-    template_match_title = models.BooleanField(default=False, verbose_name=_("Match Template by Title and CWE"), help_text=_("Matches by title text (contains search) and CWE."))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add."))
 

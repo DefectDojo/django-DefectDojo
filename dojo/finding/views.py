@@ -19,7 +19,6 @@ from django.db.models.functions import Coalesce, ExtractDay, Length, TruncDate
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
-from django.template.defaultfilters import pluralize
 from django.urls import reverse
 from django.utils import formats, timezone
 from django.utils.safestring import mark_safe
@@ -62,7 +61,6 @@ from dojo.forms import (
     EditPlannedRemediationDateFindingForm,
     FindingBulkUpdateForm,
     FindingForm,
-    FindingFormID,
     FindingTemplateForm,
     GITHUBFindingForm,
     JIRAFindingForm,
@@ -111,7 +109,6 @@ from dojo.utils import (
     add_external_issue,
     add_field_errors_to_response,
     add_success_message_to_response,
-    apply_cwe_to_template,
     calculate_grade,
     do_false_positive_history,
     get_page_items,
@@ -476,15 +473,6 @@ class ViewFinding(View):
             "cred_engagement": cred_engagement,
         }
 
-    def get_cwe_template(self, finding: Finding):
-        cwe_template = None
-        with contextlib.suppress(Finding_Template.DoesNotExist):
-            cwe_template = Finding_Template.objects.filter(cwe=finding.cwe).first()
-
-        return {
-            "cwe_template": cwe_template,
-        }
-
     def get_request_response(self, finding: Finding):
         request_response = None
         burp_request = None
@@ -695,7 +683,6 @@ class ViewFinding(View):
         # Add in the other extras
         context |= self.get_previous_and_next_findings(finding)
         context |= self.get_credential_objects(finding)
-        context |= self.get_cwe_template(finding)
         # Add in more of the other extras
         context |= self.get_request_response(finding)
         context |= self.get_similar_findings(request, finding)
@@ -1341,31 +1328,6 @@ def reopen_finding(request, fid):
         url=reverse("view_finding", args=(finding.id,)),
     )
     return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
-
-
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
-def apply_template_cwe(request, fid):
-    finding = get_object_or_404(Finding, id=fid)
-    if request.method == "POST":
-        form = FindingFormID(request.POST, instance=finding)
-        if form.is_valid():
-            finding = apply_cwe_to_template(finding)
-            finding.save()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Finding CWE template applied successfully.",
-                extra_tags="alert-success",
-            )
-            return HttpResponseRedirect(reverse("view_finding", args=(fid,)))
-        messages.add_message(
-            request,
-            messages.ERROR,
-            "Unable to apply CWE template finding, please try again.",
-            extra_tags="alert-danger",
-        )
-        return None
-    raise PermissionDenied
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
@@ -2246,7 +2208,6 @@ def add_template(request):
     if request.method == "POST":
         form = FindingTemplateForm(request.POST)
         if form.is_valid():
-            apply_message = ""
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(
                 template.severity,
@@ -2258,18 +2219,11 @@ def add_template(request):
             form.save_m2m()
             # Ensure template tags exist in Finding's tag model
             ensure_template_tags_in_finding_model(template)
-            count = apply_cwe_mitigation(
-                form.cleaned_data["apply_to_findings"], template,
-            )
-            if count > 0:
-                apply_message = (
-                    " and " + str(count) + pluralize(count, "finding,findings") + " "
-                )
 
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Template created successfully. " + apply_message,
+                "Template created successfully.",
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("templates"))
@@ -2308,15 +2262,10 @@ def edit_template(request, tid):
             # Ensure template tags exist in Finding's tag model
             ensure_template_tags_in_finding_model(template)
 
-            count = apply_cwe_mitigation(
-                form.cleaned_data["apply_to_findings"], template,
-            )
-            apply_message = " and " + str(count) + " " + pluralize(count, "finding,findings") + " " if count > 0 else ""
-
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Template " + apply_message + "updated successfully.",
+                "Template updated successfully.",
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect(reverse("templates"))
@@ -2327,14 +2276,12 @@ def edit_template(request, tid):
             extra_tags="alert-danger",
         )
 
-    count = apply_cwe_mitigation(apply_to_findings=True, template=template, update=False)
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(
         request,
         "dojo/add_template.html",
         {
             "form": form,
-            "count": count,
             "name": "Edit Template",
             "template": template,
         },

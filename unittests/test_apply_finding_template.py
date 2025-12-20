@@ -1,7 +1,9 @@
 import datetime
 
+from crum import impersonate
 from django.contrib.auth.models import User
 from django.contrib.messages.storage.fallback import FallbackStorage
+from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.test.client import RequestFactory
 from django.utils import timezone
@@ -123,7 +125,8 @@ class TestApplyFindingTemplate(DojoTestCase):
         else:
             request = FindingTemplateTestUtil.create_get_request(user, self.apply_template_url)
 
-        return views.apply_template_to_finding(request, fid=finding_id, tid=template_id)
+        with impersonate(user):
+            return views.apply_template_to_finding(request, fid=finding_id, tid=template_id)
 
     def test_apply_template_to_finding_with_data_does_not_display_error_success(self):
         result = self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=self.template.id,
@@ -174,7 +177,8 @@ class TestApplyFindingTemplate(DojoTestCase):
         self.assertEqual(test_impact, f.impact)
 
     def test_unauthorized_apply_template_to_finding_fails(self):
-        result = self.make_request(user_is_staff=False, finding_id=self.finding.id, template_id=self.template.id,
+        with self.assertRaises(PermissionDenied):
+            self.make_request(user_is_staff=False, finding_id=self.finding.id, template_id=self.template.id,
                                    data={"title": "Finding for Testing Apply Template functionality",
                                     "cwe": "89",
                                     "severity": "High",
@@ -182,8 +186,6 @@ class TestApplyFindingTemplate(DojoTestCase):
                                     "mitigation": "template mitigation",
                                     "impact": "template impact"},
                                    )
-        self.assertEqual(302, result.status_code)
-        self.assertIn("login", result.url)
 
     def test_apply_template_to_finding_with_illegal_finding_fails(self):
         with self.assertRaises(Http404):
@@ -225,7 +227,7 @@ class TestFindTemplateToApply(DojoTestCase):
 
     def setUp(self):
         self.finding = FindingMother.create()
-        self.template = FindingTemplateMother.create()
+        FindingTemplateMother.create()
         self.choose_template_url = f"finding/{self.finding.id}/find_template_to_apply"
 
     def make_request(self, user_is_staff, finding_id, data=None):
@@ -236,12 +238,12 @@ class TestFindTemplateToApply(DojoTestCase):
         else:
             request = FindingTemplateTestUtil.create_get_request(user, self.choose_template_url)
 
-        return views.find_template_to_apply(request, fid=finding_id)
+        with impersonate(user):
+            return views.find_template_to_apply(request, fid=finding_id)
 
     def test_unauthorized_find_template_to_apply_fails(self):
-        result = self.make_request(user_is_staff=False, finding_id=self.finding.id)
-        self.assertEqual(302, result.status_code)
-        self.assertIn("login", result.url)
+        with self.assertRaises(PermissionDenied):
+            self.make_request(user_is_staff=False, finding_id=self.finding.id)
 
     def test_authorized_find_template_to_apply_success(self):
         result = self.make_request(user_is_staff=True, finding_id=self.finding.id)
@@ -272,12 +274,12 @@ class TestChooseFindingTemplateOptions(DojoTestCase):
         else:
             request = FindingTemplateTestUtil.create_get_request(user, self.finding_template_options_url)
 
-        return views.choose_finding_template_options(request, tid=template_id, fid=finding_id)
+        with impersonate(user):
+            return views.choose_finding_template_options(request, tid=template_id, fid=finding_id)
 
     def test_unauthorized_choose_finding_template_options_fails(self):
-        result = self.make_request(user_is_staff=False, finding_id=self.finding.id, template_id=self.template.id)
-        self.assertEqual(302, result.status_code)
-        self.assertIn("login", result.url)
+        with self.assertRaises(PermissionDenied):
+            self.make_request(user_is_staff=False, finding_id=self.finding.id, template_id=self.template.id)
 
     def test_authorized_choose_finding_template_options_success(self):
         result = self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=self.template.id)
@@ -285,12 +287,88 @@ class TestChooseFindingTemplateOptions(DojoTestCase):
 
     def test_choose_finding_template_options_with_invalid_finding_fails(self):
         with self.assertRaises(Http404):
-            self.make_request(user_is_staff=True, finding_id=0, template_id=self.template.id)
+            self.make_request(user_is_staff=True, finding_id=99999, template_id=self.template.id)
 
     def test_choose_finding_template_options_with_invalid_template_fails(self):
         with self.assertRaises(Http404):
-            self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=0)
+            self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=99999)
 
     def test_choose_finding_template_options_with_valid_finding_and_template_renders_apply_finding_template_view(self):
         result = self.make_request(user_is_staff=True, finding_id=self.finding.id, template_id=self.template.id)
         self.assertContains(result, "<h3> Apply template to a Finding</h3>")
+
+
+class TestMkTemplate(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.finding = FindingMother.create()
+        self.user = FindingTemplateTestUtil.create_user(is_staff=True)
+        self.user.is_superuser = True
+        self.user.save()
+
+    def make_request(self, user, finding_id):
+        rf = RequestFactory()
+        request = rf.get(f"/finding/{finding_id}/mktemplate")
+        request.user = user
+        request.session = {}
+        messages = FallbackStorage(request)
+        request._messages = messages
+        return views.mktemplate(request, finding_id)
+
+    def test_mktemplate_creates_template_from_finding(self):
+        """Test that mktemplate creates a template from an existing finding"""
+        # Verify no template exists with this title
+        initial_count = Finding_Template.objects.filter(title=self.finding.title).count()
+        self.assertEqual(initial_count, 0)
+
+        # Create template from finding
+        result = self.make_request(self.user, self.finding.id)
+
+        # Verify redirect to finding view
+        self.assertEqual(result.status_code, 302)
+        self.assertEqual(result.url, f"/finding/{self.finding.id}")
+
+        # Verify template was created
+        templates = Finding_Template.objects.filter(title=self.finding.title)
+        self.assertEqual(templates.count(), 1)
+
+        template = templates.first()
+        self.assertEqual(template.title, self.finding.title)
+        self.assertEqual(template.cwe, self.finding.cwe)
+        self.assertEqual(template.severity, self.finding.severity)
+        self.assertEqual(template.description, self.finding.description)
+        self.assertEqual(template.mitigation, self.finding.mitigation)
+        self.assertEqual(template.impact, self.finding.impact)
+        self.assertEqual(template.references, self.finding.references)
+
+    def test_mktemplate_fails_when_template_exists(self):
+        """Test that mktemplate fails when a template with the same title already exists"""
+        # Create a template with the same title first
+        existing_template = Finding_Template()
+        existing_template.title = self.finding.title
+        existing_template.cwe = 0
+        existing_template.severity = "Low"
+        existing_template.save()
+
+        # Try to create template from finding
+        result = self.make_request(self.user, self.finding.id)
+
+        # Verify redirect (still redirects but with error message)
+        self.assertEqual(result.status_code, 302)
+        self.assertEqual(result.url, f"/finding/{self.finding.id}")
+
+        # Verify only one template exists (the original one)
+        templates = Finding_Template.objects.filter(title=self.finding.title)
+        self.assertEqual(templates.count(), 1)
+        self.assertEqual(templates.first().id, existing_template.id)
+
+    def test_mktemplate_requires_permission(self):
+        """Test that mktemplate requires Finding_Add permission"""
+        user = FindingTemplateTestUtil.create_user(is_staff=False)
+        user.is_superuser = False
+        user.save()
+
+        # Should raise PermissionDenied
+        with self.assertRaises(PermissionDenied):
+            self.make_request(user, self.finding.id)
