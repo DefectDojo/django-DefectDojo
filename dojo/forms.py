@@ -114,7 +114,7 @@ from dojo.utils import (
     is_finding_groups_enabled,
     is_scan_file_too_large,
 )
-from dojo.validators import ImporterFileExtensionValidator, tag_validator
+from dojo.validators import ImporterFileExtensionValidator, cvss3_validator, cvss4_validator, tag_validator
 from dojo.widgets import TableCheckboxWidget
 
 logger = logging.getLogger(__name__)
@@ -1661,6 +1661,7 @@ class FindingTemplateForm(forms.ModelForm):
     cwe = forms.IntegerField(label="CWE", required=False)
     vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
     severity = forms.ChoiceField(
         required=False,
         choices=SEVERITY_CHOICES,
@@ -1668,7 +1669,7 @@ class FindingTemplateForm(forms.ModelForm):
             "required": "Select valid choice: In Progress, On Hold, Completed",
             "invalid_choice": "Select valid choice: Critical,High,Medium,Low"})
 
-    field_order = ["title", "cwe", "vulnerability_ids", "severity", "cvssv3", "description", "mitigation", "impact", "references", "tags"]
+    field_order = ["title", "cwe", "vulnerability_ids", "severity", "cvssv3", "cvssv4", "description", "mitigation", "impact", "references", "tags"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1679,8 +1680,26 @@ class FindingTemplateForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Template
-        order = ("title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "impact")
+        order = ("title", "cwe", "vulnerability_ids", "cvssv3", "cvssv4", "severity", "description", "impact")
         exclude = ("numerical_severity", "is_mitigated", "last_used", "endpoint_status", "cve")
+
+    def clean_cvssv3(self):
+        value = self.cleaned_data.get("cvssv3")
+        if value:
+            try:
+                cvss3_validator(value)
+            except ValidationError as e:
+                raise forms.ValidationError(e.messages)
+        return value
+
+    def clean_cvssv4(self):
+        value = self.cleaned_data.get("cvssv4")
+        if value:
+            try:
+                cvss4_validator(value)
+            except ValidationError as e:
+                raise forms.ValidationError(e.messages)
+        return value
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))

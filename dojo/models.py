@@ -3643,6 +3643,7 @@ class Finding_Template(models.Model):
                            verbose_name="Vulnerability Id",
                            help_text="An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources.")
     cvssv3 = models.TextField(help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."), validators=[cvss3_validator], max_length=117, null=True, verbose_name=_("CVSS v3 vector"))
+    cvssv4 = models.TextField(help_text=_("Common Vulnerability Scoring System version 4 (CVSS4) score associated with this finding."), validators=[cvss4_validator], max_length=255, null=True, verbose_name=_("CVSS4 vector"))
 
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
