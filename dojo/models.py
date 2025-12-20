@@ -2990,17 +2990,10 @@ class Finding(BaseModel):
         for hashcodeField in hash_code_fields:
             # Note: preserve this field label ("endpoints") for settings purposes through the Locations migration
             if hashcodeField == "endpoints":
-                if settings.V3_FEATURE_LOCATIONS:
-                    # For locations, need to compute the field
-                    locations = self.get_locations()
-                    fields_to_hash += locations
-                    deduplicationLogger.debug(hashcodeField + " : " + locations)
-                else:
-                    # TODO: Delete this after the move to Locations
-                    # For endpoints, need to compute the field
-                    myEndpoints = self.get_endpoints()
-                    fields_to_hash += myEndpoints
-                    deduplicationLogger.debug(hashcodeField + " : " + myEndpoints)
+                # For locations/endpoints, need to compute the field
+                locations = self.get_locations()
+                fields_to_hash += locations
+                deduplicationLogger.debug(hashcodeField + " : " + locations)
             elif hashcodeField == "vulnerability_ids":
                 # For vulnerability_ids, need to compute the field
                 my_vulnerability_ids = self.get_vulnerability_ids()
@@ -3050,41 +3043,12 @@ class Finding(BaseModel):
 
         return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnerability_ids(self)
 
-    if settings.V3_FEATURE_LOCATIONS:
-        # Get endpoints to use for hash_code computation
-        def get_locations(self):
-
-            def _get_unsaved_locations(finding) -> str:
-                if len(finding.unsaved_locations) > 0:
-                    deduplicationLogger.debug("get_locations before the finding was saved")
-                    # convert list of unsaved endpoints to the list of their canonical representation
-                    # deduplicate (usually done upon saving finding) and sort locations
-                    locations = sorted({location.get_location_value() for location in finding.unsaved_locations})
-                    return "".join(locations)
-                # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
-                # In this case, before saving the finding, both static_finding and dynamic_finding are True
-                # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
-                deduplicationLogger.debug(
-                    "trying to get locations on a finding before it was saved but no locations found (static parser wrongly identified as dynamic?")
-                return ""
-
-            def _get_saved_locations(finding) -> str:
-                if finding.id is not None:
-                    deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(
-                        finding.locations.count()))
-                    # convert list of locations to the list of their canonical representation
-                    locations = sorted({location.location_value for location in finding.locations.all()})
-                    # sort endpoints strings
-                    return "".join(sorted(locations))
-                return ""
-
-            return _get_saved_locations(self) or _get_unsaved_locations(self)
-    else:
+    # Get locations/endpoints to use for hash_code computation
+    def get_locations(self):
         # TODO: Delete this after the move to Locations
-        # Get endpoints to use for hash_code computation
-        # (This sometimes reports "None")
-        def get_endpoints(self):
-
+        if not settings.V3_FEATURE_LOCATIONS:
+            # Get endpoints to use for hash_code computation
+            # (This sometimes reports "None")
             def _get_unsaved_endpoints(finding) -> str:
                 if len(finding.unsaved_endpoints) > 0:
                     deduplicationLogger.debug("get_endpoints before the finding was saved")
@@ -3108,6 +3072,30 @@ class Finding(BaseModel):
                 return ""
 
             return _get_saved_endpoints(self) or _get_unsaved_endpoints(self)
+
+        def _get_unsaved_locations(finding) -> str:
+            if len(finding.unsaved_locations) > 0:
+                deduplicationLogger.debug("get_locations before the finding was saved")
+                # convert list of unsaved locations to the list of their canonical representation
+                # deduplicate (usually done upon saving finding) and sort locations
+                locations = sorted({location.get_location_value() for location in finding.unsaved_locations})
+                return "".join(locations)
+            # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
+            # In this case, before saving the finding, both static_finding and dynamic_finding are True
+            # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
+            deduplicationLogger.debug("trying to get locations on a finding before it was saved but no locations found (static parser wrongly identified as dynamic?")
+            return ""
+
+        def _get_saved_locations(finding) -> str:
+            if finding.id is not None:
+                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(finding.locations.count()))
+                # convert list of locations to the list of their canonical representation
+                locations = sorted({location_ref.location.get_location_value() for location_ref in finding.locations.all()})
+                # sort locations strings
+                return "".join(sorted(locations))
+            return ""
+
+        return _get_saved_locations(self) or _get_unsaved_locations(self)
 
     # Compute the hash_code from the fields to hash
     def hash_fields(self, fields_to_hash):
