@@ -9,7 +9,18 @@ from django.test.client import RequestFactory
 from django.utils import timezone
 
 from dojo.finding import views
-from dojo.models import Engagement, Finding, Finding_Template, Product, Product_Type, System_Settings, Test, Test_Type
+from dojo.models import (
+    Engagement,
+    Finding,
+    Finding_Template,
+    Product,
+    Product_Member,
+    Product_Type,
+    Role,
+    System_Settings,
+    Test,
+    Test_Type,
+)
 
 from .dojo_test_case import DojoTestCase
 
@@ -86,6 +97,19 @@ class FindingTemplateTestUtil:
         user.is_superuser = is_staff  # Superuser has all permissions
         user.username = "TestUser" + str(user_count)
         user.save()
+        return user
+
+    @staticmethod
+    def create_user_with_role(product, role_name, *, is_staff=False):
+        """Create a user with a specific role on a product"""
+        user_count = User.objects.count()
+        user = User()
+        user.is_staff = is_staff
+        user.is_superuser = False
+        user.username = f"TestUser{role_name}{user_count}"
+        user.save()
+        role = Role.objects.get(name=role_name)
+        Product_Member(user=user, product=product, role=role).save()
         return user
 
     @staticmethod
@@ -177,6 +201,7 @@ class TestApplyFindingTemplate(DojoTestCase):
         self.assertEqual(test_impact, f.impact)
 
     def test_unauthorized_apply_template_to_finding_fails(self):
+        """Test that a non-superuser without permissions cannot apply template"""
         with self.assertRaises(PermissionDenied):
             self.make_request(user_is_staff=False, finding_id=self.finding.id, template_id=self.template.id,
                                    data={"title": "Finding for Testing Apply Template functionality",
@@ -186,6 +211,42 @@ class TestApplyFindingTemplate(DojoTestCase):
                                     "mitigation": "template mitigation",
                                     "impact": "template impact"},
                                    )
+
+    def test_reader_role_cannot_apply_template(self):
+        """Test that a Reader role user (read-only) cannot apply template"""
+        reader_user = FindingTemplateTestUtil.create_user_with_role(
+            self.finding.test.engagement.product, "Reader", is_staff=False,
+        )
+        request = FindingTemplateTestUtil.create_post_request(
+            reader_user, self.apply_template_url,
+            data={"title": "Finding for Testing Apply Template functionality",
+                  "cwe": "89",
+                  "severity": "High",
+                  "description": "Finding for Testing Apply Template Functionality",
+                  "mitigation": "template mitigation",
+                  "impact": "template impact"},
+        )
+        with impersonate(reader_user), self.assertRaises(PermissionDenied):
+            views.apply_template_to_finding(request, fid=self.finding.id, tid=self.template.id)
+
+    def test_writer_role_can_apply_template(self):
+        """Test that a Writer role user (non-staff) can apply template"""
+        writer_user = FindingTemplateTestUtil.create_user_with_role(
+            self.finding.test.engagement.product, "Writer", is_staff=False,
+        )
+        request = FindingTemplateTestUtil.create_post_request(
+            writer_user, self.apply_template_url,
+            data={"title": "Finding for Testing Apply Template functionality",
+                  "cwe": "89",
+                  "severity": "High",
+                  "description": "Finding for Testing Apply Template Functionality",
+                  "mitigation": "template mitigation",
+                  "impact": "template impact"},
+        )
+        with impersonate(writer_user):
+            result = views.apply_template_to_finding(request, fid=self.finding.id, tid=self.template.id)
+            self.assertEqual(302, result.status_code)
+            self.assertEqual(f"/finding/{self.finding.id}", result.url)
 
     def test_apply_template_to_finding_with_illegal_finding_fails(self):
         with self.assertRaises(Http404):
