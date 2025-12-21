@@ -9,10 +9,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0254_add_cvssv4_to_finding_template'),
+        ('dojo', '0251_usercontactinfo_reset_timestamps'),
     ]
 
     operations = [
+        migrations.RemoveField(
+            model_name='system_settings',
+            name='enable_template_match',
+        ),
+        migrations.RemoveField(
+            model_name='finding_template',
+            name='template_match',
+        ),
+        migrations.RemoveField(
+            model_name='finding_template',
+            name='template_match_title',
+        ),
         pgtrigger.migrations.RemoveTrigger(
             model_name='finding_template',
             name='insert_insert',
@@ -24,6 +36,19 @@ class Migration(migrations.Migration):
         pgtrigger.migrations.RemoveTrigger(
             model_name='finding_template',
             name='delete_delete',
+        ),
+        migrations.RemoveField(
+            model_name='finding_templateevent',
+            name='template_match',
+        ),
+        migrations.RemoveField(
+            model_name='finding_templateevent',
+            name='template_match_title',
+        ),
+        migrations.AddField(
+            model_name='finding_template',
+            name='cvssv4',
+            field=models.TextField(help_text='Common Vulnerability Scoring System version 4 (CVSS4) score associated with this finding.', max_length=255, null=True, validators=[dojo.validators.cvss4_validator], verbose_name='CVSS4 vector'),
         ),
         migrations.AddField(
             model_name='finding_template',
@@ -82,8 +107,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='finding_template',
-            name='vulnerability_ids_field',
+            name='vulnerability_ids_text',
             field=models.TextField(blank=True, help_text='Vulnerability IDs (one per line)', null=True),
+        ),
+        migrations.AddField(
+            model_name='finding_template',
+            name='endpoints_text',
+            field=models.TextField(blank=True, help_text='Endpoint URLs (one per line)', null=True),
         ),
         migrations.AddField(
             model_name='finding_templateevent',
@@ -147,19 +177,24 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='finding_templateevent',
-            name='vulnerability_ids_field',
+            name='vulnerability_ids_text',
             field=models.TextField(blank=True, help_text='Vulnerability IDs (one per line)', null=True),
         ),
-        pgtrigger.migrations.AddTrigger(
-            model_name='finding_template',
-            trigger=pgtrigger.compiler.Trigger(name='insert_insert', sql=pgtrigger.compiler.UpsertTriggerSql(func='INSERT INTO "dojo_finding_templateevent" ("component_name", "component_version", "cve", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "cwe", "description", "effort_for_fixing", "fix_available", "fix_version", "id", "impact", "last_used", "mitigation", "notes", "numerical_severity", "pgh_context_id", "pgh_created_at", "pgh_label", "pgh_obj_id", "planned_remediation_version", "refs", "severity", "severity_justification", "steps_to_reproduce", "title", "vulnerability_ids_field") VALUES (NEW."component_name", NEW."component_version", NEW."cve", NEW."cvssv3", NEW."cvssv3_score", NEW."cvssv4", NEW."cvssv4_score", NEW."cwe", NEW."description", NEW."effort_for_fixing", NEW."fix_available", NEW."fix_version", NEW."id", NEW."impact", NEW."last_used", NEW."mitigation", NEW."notes", NEW."numerical_severity", _pgh_attach_context(), NOW(), \'insert\', NEW."id", NEW."planned_remediation_version", NEW."refs", NEW."severity", NEW."severity_justification", NEW."steps_to_reproduce", NEW."title", NEW."vulnerability_ids_field"); RETURN NULL;', hash='911a9b7b9a9e2d29ceec9f932e957822029ded91', operation='INSERT', pgid='pgtrigger_insert_insert_59092', table='dojo_finding_template', when='AFTER')),
+        migrations.AddField(
+            model_name='finding_templateevent',
+            name='endpoints_text',
+            field=models.TextField(blank=True, help_text='Endpoint URLs (one per line)', null=True),
         ),
         pgtrigger.migrations.AddTrigger(
             model_name='finding_template',
-            trigger=pgtrigger.compiler.Trigger(name='update_update', sql=pgtrigger.compiler.UpsertTriggerSql(condition='WHEN (OLD.* IS DISTINCT FROM NEW.*)', func='INSERT INTO "dojo_finding_templateevent" ("component_name", "component_version", "cve", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "cwe", "description", "effort_for_fixing", "fix_available", "fix_version", "id", "impact", "last_used", "mitigation", "notes", "numerical_severity", "pgh_context_id", "pgh_created_at", "pgh_label", "pgh_obj_id", "planned_remediation_version", "refs", "severity", "severity_justification", "steps_to_reproduce", "title", "vulnerability_ids_field") VALUES (NEW."component_name", NEW."component_version", NEW."cve", NEW."cvssv3", NEW."cvssv3_score", NEW."cvssv4", NEW."cvssv4_score", NEW."cwe", NEW."description", NEW."effort_for_fixing", NEW."fix_available", NEW."fix_version", NEW."id", NEW."impact", NEW."last_used", NEW."mitigation", NEW."notes", NEW."numerical_severity", _pgh_attach_context(), NOW(), \'update\', NEW."id", NEW."planned_remediation_version", NEW."refs", NEW."severity", NEW."severity_justification", NEW."steps_to_reproduce", NEW."title", NEW."vulnerability_ids_field"); RETURN NULL;', hash='b34e1e22297587c21cc5f3433502a771d0e87183', operation='UPDATE', pgid='pgtrigger_update_update_43036', table='dojo_finding_template', when='AFTER')),
+            trigger=pgtrigger.compiler.Trigger(name='insert_insert', sql=pgtrigger.compiler.UpsertTriggerSql(func='INSERT INTO "dojo_finding_templateevent" ("component_name", "component_version", "cve", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "cwe", "description", "effort_for_fixing", "endpoints_text", "fix_available", "fix_version", "id", "impact", "last_used", "mitigation", "notes", "numerical_severity", "pgh_context_id", "pgh_created_at", "pgh_label", "pgh_obj_id", "planned_remediation_version", "refs", "severity", "severity_justification", "steps_to_reproduce", "title", "vulnerability_ids_text") VALUES (NEW."component_name", NEW."component_version", NEW."cve", NEW."cvssv3", NEW."cvssv3_score", NEW."cvssv4", NEW."cvssv4_score", NEW."cwe", NEW."description", NEW."effort_for_fixing", NEW."endpoints_text", NEW."fix_available", NEW."fix_version", NEW."id", NEW."impact", NEW."last_used", NEW."mitigation", NEW."notes", NEW."numerical_severity", _pgh_attach_context(), NOW(), \'insert\', NEW."id", NEW."planned_remediation_version", NEW."refs", NEW."severity", NEW."severity_justification", NEW."steps_to_reproduce", NEW."title", NEW."vulnerability_ids_text"); RETURN NULL;', hash='602d9e872906719a1c95d671a0c9e4ffe5b1b7ec', operation='INSERT', pgid='pgtrigger_insert_insert_59092', table='dojo_finding_template', when='AFTER')),
         ),
         pgtrigger.migrations.AddTrigger(
             model_name='finding_template',
-            trigger=pgtrigger.compiler.Trigger(name='delete_delete', sql=pgtrigger.compiler.UpsertTriggerSql(func='INSERT INTO "dojo_finding_templateevent" ("component_name", "component_version", "cve", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "cwe", "description", "effort_for_fixing", "fix_available", "fix_version", "id", "impact", "last_used", "mitigation", "notes", "numerical_severity", "pgh_context_id", "pgh_created_at", "pgh_label", "pgh_obj_id", "planned_remediation_version", "refs", "severity", "severity_justification", "steps_to_reproduce", "title", "vulnerability_ids_field") VALUES (OLD."component_name", OLD."component_version", OLD."cve", OLD."cvssv3", OLD."cvssv3_score", OLD."cvssv4", OLD."cvssv4_score", OLD."cwe", OLD."description", OLD."effort_for_fixing", OLD."fix_available", OLD."fix_version", OLD."id", OLD."impact", OLD."last_used", OLD."mitigation", OLD."notes", OLD."numerical_severity", _pgh_attach_context(), NOW(), \'delete\', OLD."id", OLD."planned_remediation_version", OLD."refs", OLD."severity", OLD."severity_justification", OLD."steps_to_reproduce", OLD."title", OLD."vulnerability_ids_field"); RETURN NULL;', hash='ad10ba8807613033b3a86b8f2ce2d9d0742829d6', operation='DELETE', pgid='pgtrigger_delete_delete_3f3a6', table='dojo_finding_template', when='AFTER')),
+            trigger=pgtrigger.compiler.Trigger(name='update_update', sql=pgtrigger.compiler.UpsertTriggerSql(condition='WHEN (OLD.* IS DISTINCT FROM NEW.*)', func='INSERT INTO "dojo_finding_templateevent" ("component_name", "component_version", "cve", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "cwe", "description", "effort_for_fixing", "endpoints_text", "fix_available", "fix_version", "id", "impact", "last_used", "mitigation", "notes", "numerical_severity", "pgh_context_id", "pgh_created_at", "pgh_label", "pgh_obj_id", "planned_remediation_version", "refs", "severity", "severity_justification", "steps_to_reproduce", "title", "vulnerability_ids_text") VALUES (NEW."component_name", NEW."component_version", NEW."cve", NEW."cvssv3", NEW."cvssv3_score", NEW."cvssv4", NEW."cvssv4_score", NEW."cwe", NEW."description", NEW."effort_for_fixing", NEW."endpoints_text", NEW."fix_available", NEW."fix_version", NEW."id", NEW."impact", NEW."last_used", NEW."mitigation", NEW."notes", NEW."numerical_severity", _pgh_attach_context(), NOW(), \'update\', NEW."id", NEW."planned_remediation_version", NEW."refs", NEW."severity", NEW."severity_justification", NEW."steps_to_reproduce", NEW."title", NEW."vulnerability_ids_text"); RETURN NULL;', hash='644c1afec5497d6e86c4c1c861801819b7363d61', operation='UPDATE', pgid='pgtrigger_update_update_43036', table='dojo_finding_template', when='AFTER')),
+        ),
+        pgtrigger.migrations.AddTrigger(
+            model_name='finding_template',
+            trigger=pgtrigger.compiler.Trigger(name='delete_delete', sql=pgtrigger.compiler.UpsertTriggerSql(func='INSERT INTO "dojo_finding_templateevent" ("component_name", "component_version", "cve", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "cwe", "description", "effort_for_fixing", "endpoints_text", "fix_available", "fix_version", "id", "impact", "last_used", "mitigation", "notes", "numerical_severity", "pgh_context_id", "pgh_created_at", "pgh_label", "pgh_obj_id", "planned_remediation_version", "refs", "severity", "severity_justification", "steps_to_reproduce", "title", "vulnerability_ids_text") VALUES (OLD."component_name", OLD."component_version", OLD."cve", OLD."cvssv3", OLD."cvssv3_score", OLD."cvssv4", OLD."cvssv4_score", OLD."cwe", OLD."description", OLD."effort_for_fixing", OLD."endpoints_text", OLD."fix_available", OLD."fix_version", OLD."id", OLD."impact", OLD."last_used", OLD."mitigation", OLD."notes", OLD."numerical_severity", _pgh_attach_context(), NOW(), \'delete\', OLD."id", OLD."planned_remediation_version", OLD."refs", OLD."severity", OLD."severity_justification", OLD."steps_to_reproduce", OLD."title", OLD."vulnerability_ids_text"); RETURN NULL;', hash='925844fc74c390b9d4fc446e0d3f44f556817fd4', operation='DELETE', pgid='pgtrigger_delete_delete_3f3a6', table='dojo_finding_template', when='AFTER')),
         ),
     ]
