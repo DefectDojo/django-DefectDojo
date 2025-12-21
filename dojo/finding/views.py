@@ -37,7 +37,6 @@ from dojo.authorization.authorization_decorators import (
     user_is_authorized,
 )
 from dojo.authorization.roles_permissions import Permissions
-from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -1867,74 +1866,15 @@ def apply_template_to_finding(request, fid, tid):
             finding.references = form.cleaned_data["references"]
             finding.tags = form.cleaned_data["tags"]
 
-            # Apply CVSS fields (currently missing!)
-            if form.cleaned_data.get("cvssv3"):
-                finding.cvssv3 = form.cleaned_data["cvssv3"]
-            if form.cleaned_data.get("cvssv3_score") is not None:
-                finding.cvssv3_score = form.cleaned_data["cvssv3_score"]
-            if form.cleaned_data.get("cvssv4"):
-                finding.cvssv4 = form.cleaned_data["cvssv4"]
-            if form.cleaned_data.get("cvssv4_score") is not None:
-                finding.cvssv4_score = form.cleaned_data["cvssv4_score"]
-
-            # Apply remediation planning fields
-            if form.cleaned_data.get("fix_available") is not None:
-                finding.fix_available = form.cleaned_data["fix_available"]
-            if form.cleaned_data.get("fix_version"):
-                finding.fix_version = form.cleaned_data["fix_version"]
-            if form.cleaned_data.get("planned_remediation_version"):
-                finding.planned_remediation_version = form.cleaned_data["planned_remediation_version"]
-            if form.cleaned_data.get("effort_for_fixing"):
-                finding.effort_for_fixing = form.cleaned_data["effort_for_fixing"]
-
-            # Apply technical details
-            if form.cleaned_data.get("steps_to_reproduce"):
-                finding.steps_to_reproduce = form.cleaned_data["steps_to_reproduce"]
-            if form.cleaned_data.get("severity_justification"):
-                finding.severity_justification = form.cleaned_data["severity_justification"]
-            if form.cleaned_data.get("component_name"):
-                finding.component_name = form.cleaned_data["component_name"]
-            if form.cleaned_data.get("component_version"):
-                finding.component_version = form.cleaned_data["component_version"]
-
-            # Apply notes (create Note object)
-            if form.cleaned_data.get("notes"):
-                note = Notes(
-                    entry=form.cleaned_data["notes"],
-                    date=timezone.now(),
-                    author=request.user,
-                    private=False,
-                )
-                note.save()
-                finding.notes.add(note)
-
-            # Apply endpoints (parse URLs and resolve to Endpoint objects)
-            if form.cleaned_data.get("endpoints"):
-                endpoint_urls = [url.strip() for url in form.cleaned_data["endpoints"].split("\n") if url.strip()]
-                for endpoint_url in endpoint_urls:
-                    try:
-                        endpoint = Endpoint.from_uri(endpoint_url)
-                        ep, _ = endpoint_get_or_create(
-                            protocol=endpoint.protocol,
-                            host=endpoint.host,
-                            port=endpoint.port,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=finding.test.engagement.product,
-                        )
-                        Endpoint_Status.objects.get_or_create(
-                            finding=finding,
-                            endpoint=ep,
-                            defaults={"date": finding.date},
-                        )
-                    except Exception as e:
-                        logger.warning(f"Failed to parse endpoint URL '{endpoint_url}': {e}")
-
-            # Apply vulnerability IDs (existing)
-            finding.cve = None
-            finding_helper.save_vulnerability_ids(
-                finding, form.cleaned_data["vulnerability_ids"].split(),
+            # Copy template fields (using centralized helper)
+            finding_helper.copy_template_fields_to_finding(
+                finding=finding,
+                template=template,
+                form_data=form.cleaned_data,
+                user=request.user,
+                copy_vulnerability_ids=True,
+                copy_endpoints=True,
+                copy_notes=True,
             )
 
             # Update review fields

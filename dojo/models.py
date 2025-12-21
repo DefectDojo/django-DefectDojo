@@ -3671,8 +3671,8 @@ class Finding_Template(models.Model):
     notes = models.TextField(null=True, blank=True, help_text=_("Note content to add when applying this template"))
 
     # String-based list fields (newline-separated)
-    vulnerability_ids_field = models.TextField(null=True, blank=True, help_text=_("Vulnerability IDs (one per line)"))
-    endpoints_field = models.TextField(null=True, blank=True, help_text=_("Endpoint URLs (one per line)"))
+    vulnerability_ids_text = models.TextField(null=True, blank=True, help_text=_("Vulnerability IDs (one per line)"))
+    endpoints_text = models.TextField(null=True, blank=True, help_text=_("Endpoint URLs (one per line)"))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add."))
 
@@ -3698,9 +3698,9 @@ class Finding_Template(models.Model):
         vulnerability_ids = []
 
         # Get from the TextField
-        if self.vulnerability_ids_field:
+        if self.vulnerability_ids_text:
             # Parse newline-separated string, remove empty lines
-            vulnerability_ids = [line.strip() for line in self.vulnerability_ids_field.split("\n") if line.strip()]
+            vulnerability_ids = [line.strip() for line in self.vulnerability_ids_text.split("\n") if line.strip()]
 
         # Synchronize the cve field with the vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
@@ -3718,10 +3718,10 @@ class Finding_Template(models.Model):
     @property
     def endpoints(self):
         """Parse endpoint URLs from TextField string (newline-separated)."""
-        if not self.endpoints_field:
+        if not self.endpoints_text:
             return []
         # Parse newline-separated string, remove empty lines
-        return [line.strip() for line in self.endpoints_field.split("\n") if line.strip()]
+        return [line.strip() for line in self.endpoints_text.split("\n") if line.strip()]
 
 
 class Check_List(models.Model):

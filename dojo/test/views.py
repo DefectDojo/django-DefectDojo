@@ -25,7 +25,6 @@ import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter, TestImportFilter
 from dojo.finding.queries import prefetch_for_findings
@@ -48,12 +47,10 @@ from dojo.models import (
     BurpRawRequestResponse,
     Cred_Mapping,
     Endpoint,
-    Endpoint_Status,
     Finding,
     Finding_Group,
     Finding_Template,
     Note_Type,
-    Notes,
     Product_API_Scan_Configuration,
     Stub_Finding,
     Test,
@@ -704,55 +701,22 @@ def add_finding_from_template(request, tid, fid):
             new_finding.tags = form.cleaned_data["tags"]
             new_finding.date = form.cleaned_data["date"] or datetime.today()
 
-            # Copy all fields from template
-            new_finding.cvssv3 = template.cvssv3
-            new_finding.cvssv3_score = template.cvssv3_score
-            new_finding.cvssv4 = template.cvssv4
-            new_finding.cvssv4_score = template.cvssv4_score
-            new_finding.fix_available = template.fix_available
-            new_finding.fix_version = template.fix_version
-            new_finding.planned_remediation_version = template.planned_remediation_version
-            new_finding.effort_for_fixing = template.effort_for_fixing
-            new_finding.steps_to_reproduce = template.steps_to_reproduce
-            new_finding.severity_justification = template.severity_justification
-            new_finding.component_name = template.component_name
-            new_finding.component_version = template.component_version
-
             finding_helper.update_finding_status(new_finding, request.user)
 
             new_finding.save(dedupe_option=False)
 
-            # Save vulnerability IDs from template
-            if template.vulnerability_ids:
-                finding_helper.save_vulnerability_ids(new_finding, template.vulnerability_ids, delete_existing=False)
+            # Copy all fields from template
+            finding_helper.copy_template_fields_to_finding(
+                finding=new_finding,
+                template=template,
+                user=request.user,
+                copy_vulnerability_ids=True,
+                copy_endpoints=True,
+                copy_notes=True,
+            )
 
-            # Save and add new endpoints from form
+            # Save and add new endpoints from form (user may have added more)
             finding_helper.add_endpoints(new_finding, form)
-
-            # Add endpoints from template if they exist
-            if template.endpoints:
-                # Parse endpoints from template and add them
-                endpoint_urls = template.endpoints if isinstance(template.endpoints, list) else [url.strip() for url in template.endpoints.split("\n") if url.strip()]
-                if endpoint_urls:
-                    added_endpoints = save_endpoints_to_add(endpoint_urls, test.engagement.product)
-                    endpoint_ids = [endpoint.id for endpoint in added_endpoints]
-                    new_finding.endpoints.set(new_finding.endpoints.all() | Endpoint.objects.filter(id__in=endpoint_ids))
-                    for endpoint in added_endpoints:
-                        Endpoint_Status.objects.get_or_create(
-                            finding=new_finding,
-                            endpoint=endpoint,
-                            defaults={"date": new_finding.date or timezone.now()},
-                        )
-
-            # Add note from template if it exists
-            if template.notes:
-                note = Notes(
-                    entry=template.notes,
-                    author=request.user,
-                    date=timezone.now(),
-                )
-                note.save()
-                new_finding.notes.add(note)
 
             new_finding.save()
             if "jiraform-push_to_jira" in request.POST:

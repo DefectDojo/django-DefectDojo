@@ -1768,7 +1768,7 @@ class FindingTemplateForm(forms.ModelForm):
                  "steps_to_reproduce", "severity_justification", "mitigation", "fix_available", "fix_version",
                  "planned_remediation_version", "effort_for_fixing", "component_name", "component_version",
                  "references", "notes", "endpoints", "tags")
-        exclude = ("numerical_severity", "is_mitigated", "last_used", "endpoint_status", "cve", "vulnerability_ids_field")
+        exclude = ("numerical_severity", "is_mitigated", "last_used", "endpoint_status", "cve", "vulnerability_ids_text")
 
     def clean_cvssv3(self):
         value = self.cleaned_data.get("cvssv3")
