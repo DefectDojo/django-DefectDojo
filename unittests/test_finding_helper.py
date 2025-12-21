@@ -233,7 +233,7 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         self.assertEqual(save_mock.call_count, 2)
         self.assertEqual("REF-1", finding.cve)
 
-    @patch("dojo.finding.helper.Finding_Template.save")
+    @patch("dojo.models.Finding_Template.save")
     def test_save_vulnerability_id_templates(self, save_mock):
         finding_template = Finding_Template()
         new_vulnerability_ids = ["REF-1", "REF-2", "REF-2"]
