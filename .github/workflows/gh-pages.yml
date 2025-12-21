@@ -46,11 +46,13 @@ jobs:
 
       - name: Install dependencies
         run: cd docs && npm ci
-      
+
       - name: Build production website
         env:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
+          HUGO_MEMORYLIMIT: 4GiB  # Set Hugo memory limit to 4GB
+          GOMEMLIMIT: 4GiB  # Set Go runtime memory limit to 4GB
         run: cd docs && hugo --minify --gc --config config/production/hugo.toml
 
       - name: Deploy
