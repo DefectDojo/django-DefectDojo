@@ -2036,12 +2036,14 @@ class FindingTemplateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Finding_Template
-        exclude = ("cve", "vulnerability_ids_field")
+        exclude = ("cve", "vulnerability_ids_text")
 
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
     def get_vulnerability_ids(self, obj):
         """Return vulnerability IDs as a list of strings."""
         return obj.vulnerability_ids
 
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
     def get_endpoints(self, obj):
         """Return endpoints as a list of URL strings."""
         return obj.endpoints if hasattr(obj, "endpoints") else []
