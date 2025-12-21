@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
-from django.db.models import F, QuerySet
+from django.db.models import Case, F, QuerySet, When
 from django.db.models.functions import Coalesce, ExtractDay, Length, TruncDate
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
@@ -1728,9 +1728,20 @@ def find_template_to_apply(request, fid):
                 cve_len=Length("cve"), order=models.Value(2, models.IntegerField()),
             )
         )
-        templates = templates_by_last_used.union(templates_by_cve).order_by(
+        union_queryset = templates_by_last_used.union(templates_by_cve).order_by(
             "order", "-last_used",
         )
+        # Convert union queryset to regular queryset to avoid issues with distinct() in filters
+        # Get IDs from union queryset and create a new queryset filtered by those IDs
+        template_ids = list(union_queryset.values_list("id", flat=True))
+        templates = Finding_Template.objects.filter(id__in=template_ids).annotate(
+            cve_len=Length("cve"),
+            order=Case(
+                *[When(id=template_id, then=models.Value(i + 1)) for i, template_id in enumerate(template_ids)],
+                default=models.Value(len(template_ids) + 1),
+                output_field=models.IntegerField(),
+            ),
+        ).order_by("order", "-last_used")
 
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
