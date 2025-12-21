@@ -9,10 +9,12 @@ from django.test.client import RequestFactory
 from django.utils import timezone
 
 from dojo.finding import views
+from dojo.finding.helper import save_endpoints_template, save_vulnerability_ids_template
 from dojo.models import (
     Engagement,
     Finding,
     Finding_Template,
+    Notes,
     Product,
     Product_Member,
     Product_Type,
@@ -20,7 +22,9 @@ from dojo.models import (
     System_Settings,
     Test,
     Test_Type,
+    Vulnerability_Id,
 )
+from dojo.test import views as test_views
 
 from .dojo_test_case import DojoTestCase
 
@@ -433,3 +437,154 @@ class TestMkTemplate(DojoTestCase):
         # Should raise PermissionDenied
         with self.assertRaises(PermissionDenied):
             self.make_request(user, self.finding.id)
+
+
+class TestAddFindingFromTemplate(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.test = FindingMother.create().test
+        self.template = FindingTemplateMother.create()
+        self.user = FindingTemplateTestUtil.create_user(is_staff=True)
+        self.user.is_superuser = True
+        self.user.save()
+
+    def make_get_request(self, user, test_id, template_id):
+        rf = RequestFactory()
+        request = rf.get(f"/test/{test_id}/add_findings/{template_id}")
+        request.user = user
+        request.session = {}
+        messages = FallbackStorage(request)
+        request._messages = messages
+        return test_views.add_finding_from_template(request, tid=test_id, fid=template_id)
+
+    def make_post_request(self, user, test_id, template_id, data=None):
+        rf = RequestFactory()
+        if data is None:
+            data = {
+                "title": self.template.title,
+                "date": timezone.now().date(),
+                "severity": self.template.severity,
+                "description": self.template.description,
+                "mitigation": self.template.mitigation or "",
+                "impact": self.template.impact or "",
+                "references": self.template.references or "",
+                "active": True,
+                "verified": True,
+                "false_p": False,
+                "duplicate": False,
+                "out_of_scope": False,
+            }
+        request = rf.post(f"/test/{test_id}/add_findings/{template_id}", data)
+        request.user = user
+        request.session = {}
+        messages = FallbackStorage(request)
+        request._messages = messages
+        return test_views.add_finding_from_template(request, tid=test_id, fid=template_id)
+
+    def test_add_finding_from_template_renders_form(self):
+        """Test that GET request renders the form with template data"""
+        result = self.make_get_request(self.user, self.test.id, self.template.id)
+        self.assertEqual(result.status_code, 200)
+        self.assertContains(result, self.template.title)
+
+    def test_add_finding_from_template_creates_finding(self):
+        """Test that POST request creates a new finding from template"""
+        initial_count = Finding.objects.filter(test=self.test).count()
+
+        result = self.make_post_request(self.user, self.test.id, self.template.id)
+
+        # Should redirect to test view
+        self.assertEqual(result.status_code, 302)
+        self.assertEqual(result.url, f"/test/{self.test.id}")
+
+        # Verify finding was created
+        final_count = Finding.objects.filter(test=self.test).count()
+        self.assertEqual(final_count, initial_count + 1)
+
+        # Verify finding has template data
+        finding = Finding.objects.filter(test=self.test).order_by("-id").first()
+        self.assertEqual(finding.title, self.template.title.title())  # Title is title-cased
+        self.assertEqual(finding.cwe, self.template.cwe)
+        self.assertEqual(finding.severity, self.template.severity)
+        self.assertEqual(finding.description, self.template.description)
+        self.assertEqual(finding.mitigation, self.template.mitigation)
+        self.assertEqual(finding.impact, self.template.impact)
+        self.assertEqual(finding.references, self.template.references)
+
+    def test_add_finding_from_template_copies_all_fields(self):
+        """Test that all template fields are copied to the finding"""
+        # Update template with all new fields
+        self.template.cvssv3_score = 7.5
+        self.template.cvssv4_score = 8.0
+        self.template.fix_available = True
+        self.template.fix_version = "1.2.3"
+        self.template.planned_remediation_version = "1.3.0"
+        self.template.effort_for_fixing = "Low"
+        self.template.steps_to_reproduce = "Step 1: Do this\nStep 2: Do that"
+        self.template.severity_justification = "This is critical because..."
+        self.template.component_name = "test-component"
+        self.template.component_version = "1.0.0"
+        self.template.notes = "Template note content"
+        self.template.save()
+
+        # Set vulnerability IDs
+        save_vulnerability_ids_template(self.template, ["CVE-2023-1234", "CVE-2023-5678"])
+
+        # Set endpoints
+        save_endpoints_template(self.template, ["https://example.com/api", "https://example.com/admin"])
+
+        result = self.make_post_request(self.user, self.test.id, self.template.id)
+        self.assertEqual(result.status_code, 302)
+
+        finding = Finding.objects.filter(test=self.test).order_by("-id").first()
+
+        # Verify all fields were copied
+        self.assertEqual(finding.cvssv3_score, 7.5)
+        self.assertEqual(finding.cvssv4_score, 8.0)
+        self.assertEqual(finding.fix_available, True)
+        self.assertEqual(finding.fix_version, "1.2.3")
+        self.assertEqual(finding.planned_remediation_version, "1.3.0")
+        self.assertEqual(finding.effort_for_fixing, "Low")
+        self.assertEqual(finding.steps_to_reproduce, "Step 1: Do this\nStep 2: Do that")
+        self.assertEqual(finding.severity_justification, "This is critical because...")
+        self.assertEqual(finding.component_name, "test-component")
+        self.assertEqual(finding.component_version, "1.0.0")
+
+        # Verify vulnerability IDs were copied
+        vulnerability_ids = [vid.vulnerability_id for vid in Vulnerability_Id.objects.filter(finding=finding)]
+        self.assertIn("CVE-2023-1234", vulnerability_ids)
+        self.assertIn("CVE-2023-5678", vulnerability_ids)
+
+        # Verify endpoints were copied
+        self.assertTrue(any("example.com/api" in str(ep) for ep in finding.endpoints.all()))
+        self.assertTrue(any("example.com/admin" in str(ep) for ep in finding.endpoints.all()))
+
+        # Verify note was created
+        notes = Notes.objects.filter(finding=finding)
+        self.assertTrue(notes.exists())
+        note = notes.first()
+        self.assertEqual(note.entry, "Template note content")
+
+    def test_add_finding_from_template_requires_permission(self):
+        """Test that add_finding_from_template requires Finding_Add permission"""
+        unauthorized_user = FindingTemplateTestUtil.create_user(is_staff=False)
+        unauthorized_user.is_superuser = False
+        unauthorized_user.save()
+
+        result = self.make_get_request(unauthorized_user, self.test.id, self.template.id)
+        # Should raise permission denied or return 403
+        self.assertIn(result.status_code, [403, 404])
+
+    def test_add_finding_from_template_updates_template_last_used(self):
+        """Test that template.last_used is updated when creating finding"""
+        original_last_used = self.template.last_used
+
+        result = self.make_post_request(self.user, self.test.id, self.template.id)
+        self.assertEqual(result.status_code, 302)
+
+        # Refresh template from database
+        self.template.refresh_from_db()
+        self.assertIsNotNone(self.template.last_used)
+        if original_last_used:
+            self.assertGreaterEqual(self.template.last_used, original_last_used)

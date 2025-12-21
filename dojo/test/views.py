@@ -25,6 +25,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter, TestImportFilter
 from dojo.finding.queries import prefetch_for_findings
@@ -47,10 +48,12 @@ from dojo.models import (
     BurpRawRequestResponse,
     Cred_Mapping,
     Endpoint,
+    Endpoint_Status,
     Finding,
     Finding_Group,
     Finding_Template,
     Note_Type,
+    Notes,
     Product_API_Scan_Configuration,
     Stub_Finding,
     Test,
@@ -658,12 +661,12 @@ class AddFindingView(View):
 
 
 @user_is_authorized(Test, Permissions.Finding_Add, "tid")
-def add_temp_finding(request, tid, fid):
+def add_finding_from_template(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)
-    finding = get_object_or_404(Finding_Template, id=fid)
+    template = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
-    push_all_jira_issues = jira_helper.is_push_all_issues(finding)
+    push_all_jira_issues = jira_helper.is_push_all_issues(template)
 
     if request.method == "POST":
 
@@ -690,8 +693,8 @@ def add_temp_finding(request, tid, fid):
                                      _("Can not set a finding as inactive or false positive without adding all mandatory notes"),
                                      extra_tags="alert-danger")
         if form.is_valid():
-            finding.last_used = timezone.now()
-            finding.save()
+            template.last_used = timezone.now()
+            template.save()
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
@@ -699,15 +702,57 @@ def add_temp_finding(request, tid, fid):
                 new_finding.severity)
 
             new_finding.tags = form.cleaned_data["tags"]
-            new_finding.cvssv3 = finding.cvssv3
             new_finding.date = form.cleaned_data["date"] or datetime.today()
+
+            # Copy all fields from template
+            new_finding.cvssv3 = template.cvssv3
+            new_finding.cvssv3_score = template.cvssv3_score
+            new_finding.cvssv4 = template.cvssv4
+            new_finding.cvssv4_score = template.cvssv4_score
+            new_finding.fix_available = template.fix_available
+            new_finding.fix_version = template.fix_version
+            new_finding.planned_remediation_version = template.planned_remediation_version
+            new_finding.effort_for_fixing = template.effort_for_fixing
+            new_finding.steps_to_reproduce = template.steps_to_reproduce
+            new_finding.severity_justification = template.severity_justification
+            new_finding.component_name = template.component_name
+            new_finding.component_version = template.component_version
 
             finding_helper.update_finding_status(new_finding, request.user)
 
             new_finding.save(dedupe_option=False)
 
-            # Save and add new endpoints
+            # Save vulnerability IDs from template
+            if template.vulnerability_ids:
+                finding_helper.save_vulnerability_ids(new_finding, template.vulnerability_ids, delete_existing=False)
+
+            # Save and add new endpoints from form
             finding_helper.add_endpoints(new_finding, form)
+
+            # Add endpoints from template if they exist
+            if template.endpoints:
+                # Parse endpoints from template and add them
+                endpoint_urls = template.endpoints if isinstance(template.endpoints, list) else [url.strip() for url in template.endpoints.split("\n") if url.strip()]
+                if endpoint_urls:
+                    added_endpoints = save_endpoints_to_add(endpoint_urls, test.engagement.product)
+                    endpoint_ids = [endpoint.id for endpoint in added_endpoints]
+                    new_finding.endpoints.set(new_finding.endpoints.all() | Endpoint.objects.filter(id__in=endpoint_ids))
+                    for endpoint in added_endpoints:
+                        Endpoint_Status.objects.get_or_create(
+                            finding=new_finding,
+                            endpoint=endpoint,
+                            defaults={"date": new_finding.date or timezone.now()},
+                        )
+
+            # Add note from template if it exists
+            if template.notes:
+                note = Notes(
+                    entry=template.notes,
+                    author=request.user,
+                    date=timezone.now(),
+                )
+                note.save()
+                new_finding.notes.add(note)
 
             new_finding.save()
             if "jiraform-push_to_jira" in request.POST:
@@ -737,20 +782,64 @@ def add_temp_finding(request, tid, fid):
                              extra_tags="alert-danger")
 
     else:
-        form = AddFindingForm(req_resp=None, product=test.engagement.product, initial={"active": False,
-                                    "date": timezone.now().date(),
-                                    "verified": False,
-                                    "false_p": False,
-                                    "duplicate": False,
-                                    "out_of_scope": False,
-                                    "title": finding.title,
-                                    "description": finding.description,
-                                    "cwe": finding.cwe,
-                                    "severity": finding.severity,
-                                    "mitigation": finding.mitigation,
-                                    "impact": finding.impact,
-                                    "references": finding.references,
-                                    "numerical_severity": finding.numerical_severity})
+        # Build initial data with all template fields
+        initial_data = {
+            "active": False,
+            "date": timezone.now().date(),
+            "verified": False,
+            "false_p": False,
+            "duplicate": False,
+            "out_of_scope": False,
+            "title": template.title,
+            "description": template.description,
+            "cwe": template.cwe,
+            "severity": template.severity,
+            "mitigation": template.mitigation,
+            "impact": template.impact,
+            "references": template.references,
+            "numerical_severity": template.numerical_severity,
+        }
+
+        # Add CVSS fields
+        if template.cvssv3:
+            initial_data["cvssv3"] = template.cvssv3
+        if template.cvssv3_score is not None:
+            initial_data["cvssv3_score"] = template.cvssv3_score
+        if template.cvssv4:
+            initial_data["cvssv4"] = template.cvssv4
+        if template.cvssv4_score is not None:
+            initial_data["cvssv4_score"] = template.cvssv4_score
+
+        # Add remediation fields
+        if template.fix_available is not None:
+            initial_data["fix_available"] = template.fix_available
+        if template.fix_version:
+            initial_data["fix_version"] = template.fix_version
+        if template.planned_remediation_version:
+            initial_data["planned_remediation_version"] = template.planned_remediation_version
+        if template.effort_for_fixing:
+            initial_data["effort_for_fixing"] = template.effort_for_fixing
+
+        # Add technical details fields
+        if template.steps_to_reproduce:
+            initial_data["steps_to_reproduce"] = template.steps_to_reproduce
+        if template.severity_justification:
+            initial_data["severity_justification"] = template.severity_justification
+        if template.component_name:
+            initial_data["component_name"] = template.component_name
+        if template.component_version:
+            initial_data["component_version"] = template.component_version
+
+        # Add vulnerability IDs
+        if template.vulnerability_ids:
+            initial_data["vulnerability_ids"] = " ".join(template.vulnerability_ids)
+
+        # Add endpoints to endpoints_to_add field
+        if template.endpoints:
+            endpoint_urls = template.endpoints if isinstance(template.endpoints, list) else template.endpoints.split("\n")
+            initial_data["endpoints_to_add"] = "\n".join([url.strip() for url in endpoint_urls if url.strip()])
+
+        form = AddFindingForm(req_resp=None, product=test.engagement.product, initial=initial_data)
 
         if jira_helper.get_jira_project(test):
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix="jiraform", jira_project=jira_helper.get_jira_project(test), finding_form=form)
@@ -763,7 +852,7 @@ def add_temp_finding(request, tid, fid):
                    "jform": jform,
                    "findings": findings,
                    "temp": True,
-                   "fid": finding.id,
+                   "fid": template.id,
                    "tid": test.id,
                    "test": test,
                    })

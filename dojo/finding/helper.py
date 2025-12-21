@@ -34,7 +34,6 @@ from dojo.models import (
     System_Settings,
     Test,
     Vulnerability_Id,
-    Vulnerability_Id_Template,
 )
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
@@ -788,21 +787,29 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
 
 
 def save_vulnerability_ids_template(finding_template, vulnerability_ids):
-    # Remove duplicates
-    vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
+    """Save vulnerability IDs as newline-separated string in TextField."""
+    # Remove duplicates and empty strings
+    vulnerability_ids = list(dict.fromkeys([vid.strip() for vid in vulnerability_ids if vid.strip()]))
 
-    # Remove old vulnerability ids
-    Vulnerability_Id_Template.objects.filter(finding_template=finding_template).delete()
+    # Save as newline-separated string
+    finding_template.vulnerability_ids_field = "\n".join(vulnerability_ids) if vulnerability_ids else None
 
-    # Save new vulnerability ids
-    for vulnerability_id in vulnerability_ids:
-        Vulnerability_Id_Template(finding_template=finding_template, vulnerability_id=vulnerability_id).save()
-
-    # Set CVE
+    # Set CVE for backward compatibility
     if vulnerability_ids:
         finding_template.cve = vulnerability_ids[0]
     else:
         finding_template.cve = None
+
+    finding_template.save()
+
+
+def save_endpoints_template(finding_template, endpoint_urls):
+    """Save endpoint URLs as newline-separated string in TextField."""
+    # Remove duplicates and empty strings
+    endpoint_urls = list(dict.fromkeys([url.strip() for url in endpoint_urls if url.strip()]))
+    # Save as newline-separated string
+    finding_template.endpoints_field = "\n".join(endpoint_urls) if endpoint_urls else None
+    finding_template.save()
 
 
 def normalize_datetime(value):

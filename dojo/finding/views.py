@@ -37,6 +37,7 @@ from dojo.authorization.authorization_decorators import (
     user_is_authorized,
 )
 from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -95,7 +96,6 @@ from dojo.models import (
     Test_Import,
     Test_Import_Finding_Action,
     User,
-    Vulnerability_Id_Template,
 )
 from dojo.notifications.helper import create_notification
 from dojo.tag_utils import bulk_add_tags_to_instances
@@ -1656,12 +1656,23 @@ def mktemplate(request, fid):
             title=finding.title,
             cwe=finding.cwe,
             cvssv3=finding.cvssv3,
+            cvssv3_score=finding.cvssv3_score,
+            cvssv4=finding.cvssv4,
+            cvssv4_score=finding.cvssv4_score,
             severity=finding.severity,
             description=finding.description,
             mitigation=finding.mitigation,
             impact=finding.impact,
             references=finding.references,
             numerical_severity=finding.numerical_severity,
+            fix_available=finding.fix_available,
+            fix_version=finding.fix_version,
+            planned_remediation_version=finding.planned_remediation_version,
+            effort_for_fixing=finding.effort_for_fixing,
+            steps_to_reproduce=finding.steps_to_reproduce,
+            severity_justification=finding.severity_justification,
+            component_name=finding.component_name,
+            component_version=finding.component_version,
             tags=finding.tags.all(),
         )
         template.save()
@@ -1670,10 +1681,13 @@ def mktemplate(request, fid):
         # (They should already exist since they come from a finding, but ensure for consistency)
         ensure_template_tags_in_finding_model(template)
 
-        for vulnerability_id in finding.vulnerability_ids:
-            Vulnerability_Id_Template(
-                finding_template=template, vulnerability_id=vulnerability_id,
-            ).save()
+        # Save vulnerability IDs using helper (handles both old and new format)
+        finding_helper.save_vulnerability_ids_template(template, finding.vulnerability_ids)
+
+        # Copy endpoints if they exist
+        if finding.endpoints.exists():
+            endpoint_urls = [str(ep) for ep in finding.endpoints.all()]
+            finding_helper.save_endpoints_template(template, endpoint_urls)
 
         messages.add_message(
             request,
@@ -1752,11 +1766,31 @@ def choose_finding_template_options(request, tid, fid):
     data.pop("tags", None)
     data.pop("_state", None)
     data.pop("_tags_tagulous", None)
+
+    # Populate from template for fields that exist on template
+    template_fields = ["cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score",
+                      "fix_available", "fix_version", "planned_remediation_version",
+                      "effort_for_fixing", "steps_to_reproduce", "severity_justification",
+                      "component_name", "component_version", "notes"]
+    for field in template_fields:
+        if hasattr(template, field):
+            value = getattr(template, field)
+            if value is not None:
+                data[field] = value
+
+    # Handle vulnerability_ids and endpoints (convert lists to strings)
+    data["vulnerability_ids"] = "\n".join(finding.vulnerability_ids)
+    if hasattr(template, "endpoints") and template.endpoints:
+        endpoints_value = template.endpoints
+        if isinstance(endpoints_value, list):
+            data["endpoints"] = "\n".join(endpoints_value)
+        else:
+            data["endpoints"] = endpoints_value
+
     template_tag_names = [tag.name for tag in template.tags.all()]
     # Add tags as comma-separated string for TagField
     if template_tag_names:
         data["tags"] = ", ".join(template_tag_names)
-    data["vulnerability_ids"] = "\n".join(finding.vulnerability_ids)
 
     form = ApplyFindingTemplateForm(data=data, template=template)
     # Combine tags from both Finding_Template and Finding tag models
@@ -1822,6 +1856,8 @@ def apply_template_to_finding(request, fid, tid):
         if form.is_valid():
             template.last_used = timezone.now()
             template.save()
+
+            # Apply basic fields (existing)
             finding.title = form.cleaned_data["title"]
             finding.cwe = form.cleaned_data["cwe"]
             finding.severity = form.cleaned_data["severity"]
@@ -1829,15 +1865,83 @@ def apply_template_to_finding(request, fid, tid):
             finding.mitigation = form.cleaned_data["mitigation"]
             finding.impact = form.cleaned_data["impact"]
             finding.references = form.cleaned_data["references"]
-            finding.last_reviewed = timezone.now()
-            finding.last_reviewed_by = request.user
             finding.tags = form.cleaned_data["tags"]
 
+            # Apply CVSS fields (currently missing!)
+            if form.cleaned_data.get("cvssv3"):
+                finding.cvssv3 = form.cleaned_data["cvssv3"]
+            if form.cleaned_data.get("cvssv3_score") is not None:
+                finding.cvssv3_score = form.cleaned_data["cvssv3_score"]
+            if form.cleaned_data.get("cvssv4"):
+                finding.cvssv4 = form.cleaned_data["cvssv4"]
+            if form.cleaned_data.get("cvssv4_score") is not None:
+                finding.cvssv4_score = form.cleaned_data["cvssv4_score"]
+
+            # Apply remediation planning fields
+            if form.cleaned_data.get("fix_available") is not None:
+                finding.fix_available = form.cleaned_data["fix_available"]
+            if form.cleaned_data.get("fix_version"):
+                finding.fix_version = form.cleaned_data["fix_version"]
+            if form.cleaned_data.get("planned_remediation_version"):
+                finding.planned_remediation_version = form.cleaned_data["planned_remediation_version"]
+            if form.cleaned_data.get("effort_for_fixing"):
+                finding.effort_for_fixing = form.cleaned_data["effort_for_fixing"]
+
+            # Apply technical details
+            if form.cleaned_data.get("steps_to_reproduce"):
+                finding.steps_to_reproduce = form.cleaned_data["steps_to_reproduce"]
+            if form.cleaned_data.get("severity_justification"):
+                finding.severity_justification = form.cleaned_data["severity_justification"]
+            if form.cleaned_data.get("component_name"):
+                finding.component_name = form.cleaned_data["component_name"]
+            if form.cleaned_data.get("component_version"):
+                finding.component_version = form.cleaned_data["component_version"]
+
+            # Apply notes (create Note object)
+            if form.cleaned_data.get("notes"):
+                note = Notes(
+                    entry=form.cleaned_data["notes"],
+                    date=timezone.now(),
+                    author=request.user,
+                    private=False,
+                )
+                note.save()
+                finding.notes.add(note)
+
+            # Apply endpoints (parse URLs and resolve to Endpoint objects)
+            if form.cleaned_data.get("endpoints"):
+                endpoint_urls = [url.strip() for url in form.cleaned_data["endpoints"].split("\n") if url.strip()]
+                for endpoint_url in endpoint_urls:
+                    try:
+                        endpoint = Endpoint.from_uri(endpoint_url)
+                        ep, _ = endpoint_get_or_create(
+                            protocol=endpoint.protocol,
+                            host=endpoint.host,
+                            port=endpoint.port,
+                            path=endpoint.path,
+                            query=endpoint.query,
+                            fragment=endpoint.fragment,
+                            product=finding.test.engagement.product,
+                        )
+                        Endpoint_Status.objects.get_or_create(
+                            finding=finding,
+                            endpoint=ep,
+                            defaults={"date": finding.date},
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to parse endpoint URL '{endpoint_url}': {e}")
+
+            # Apply vulnerability IDs (existing)
             finding.cve = None
             finding_helper.save_vulnerability_ids(
                 finding, form.cleaned_data["vulnerability_ids"].split(),
             )
 
+            # Update review fields
+            finding.last_reviewed = timezone.now()
+            finding.last_reviewed_by = request.user
+
+            # Save finding (this will trigger CVSS score computation if vectors are set)
             finding.save()
         else:
             messages.add_message(
@@ -2212,10 +2316,15 @@ def add_template(request):
             template.numerical_severity = Finding.get_numerical_severity(
                 template.severity,
             )
-            template.save()
+            # Save vulnerability IDs using helper
             finding_helper.save_vulnerability_ids_template(
                 template, form.cleaned_data["vulnerability_ids"].split(),
             )
+            # Save endpoints using helper
+            if form.cleaned_data.get("endpoints"):
+                endpoint_urls = [url.strip() for url in form.cleaned_data["endpoints"].split("\n") if url.strip()]
+                finding_helper.save_endpoints_template(template, endpoint_urls)
+            template.save()
             form.save_m2m()
             # Ensure template tags exist in Finding's tag model
             ensure_template_tags_in_finding_model(template)
@@ -2242,9 +2351,17 @@ def add_template(request):
 @user_has_global_permission(Permissions.Finding_Edit)
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
+    initial_data = {"vulnerability_ids": "\n".join(template.vulnerability_ids)}
+    # Add endpoints to initial data if they exist
+    if hasattr(template, "endpoints") and template.endpoints:
+        endpoints_value = template.endpoints
+        if isinstance(endpoints_value, list):
+            initial_data["endpoints"] = "\n".join(endpoints_value)
+        else:
+            initial_data["endpoints"] = endpoints_value
     form = FindingTemplateForm(
         instance=template,
-        initial={"vulnerability_ids": "\n".join(template.vulnerability_ids)},
+        initial=initial_data,
     )
 
     if request.method == "POST":
@@ -2254,9 +2371,14 @@ def edit_template(request, tid):
             template.numerical_severity = Finding.get_numerical_severity(
                 template.severity,
             )
+            # Save vulnerability IDs using helper
             finding_helper.save_vulnerability_ids_template(
                 template, form.cleaned_data["vulnerability_ids"].split(),
             )
+            # Save endpoints using helper
+            if form.cleaned_data.get("endpoints"):
+                endpoint_urls = [url.strip() for url in form.cleaned_data["endpoints"].split("\n") if url.strip()]
+                finding_helper.save_endpoints_template(template, endpoint_urls)
             template.save()
             form.save_m2m()
             # Ensure template tags exist in Finding's tag model

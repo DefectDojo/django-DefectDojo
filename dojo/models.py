@@ -3643,7 +3643,9 @@ class Finding_Template(models.Model):
                            verbose_name="Vulnerability Id",
                            help_text="An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources.")
     cvssv3 = models.TextField(help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."), validators=[cvss3_validator], max_length=117, null=True, verbose_name=_("CVSS v3 vector"))
+    cvssv3_score = models.FloatField(null=True, blank=True, help_text=_("CVSSv3 score"))
     cvssv4 = models.TextField(help_text=_("Common Vulnerability Scoring System version 4 (CVSS4) score associated with this finding."), validators=[cvss4_validator], max_length=255, null=True, verbose_name=_("CVSS4 vector"))
+    cvssv4_score = models.FloatField(null=True, blank=True, help_text=_("CVSSv4 score"))
 
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -3652,6 +3654,25 @@ class Finding_Template(models.Model):
     references = models.TextField(null=True, blank=True, db_column="refs")
     last_used = models.DateTimeField(null=True, editable=False)
     numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
+
+    # Remediation planning fields
+    fix_available = models.BooleanField(null=True, blank=True, help_text=_("Indicates if a fix is available for this vulnerability type"))
+    fix_version = models.CharField(max_length=100, null=True, blank=True, help_text=_("Version where fix is available"))
+    planned_remediation_version = models.CharField(max_length=99, null=True, blank=True, help_text=_("Target version for remediation"))
+    effort_for_fixing = models.CharField(max_length=99, null=True, blank=True, help_text=_("Effort estimate for fixing (e.g., Low/Medium/High)"))
+
+    # Technical details fields
+    steps_to_reproduce = models.TextField(null=True, blank=True, help_text=_("Standard reproduction steps for this vulnerability type"))
+    severity_justification = models.TextField(null=True, blank=True, help_text=_("Explanation of why this severity level is appropriate"))
+    component_name = models.CharField(max_length=500, null=True, blank=True, help_text=_("Affected component name (e.g., library name)"))
+    component_version = models.CharField(max_length=100, null=True, blank=True, help_text=_("Affected component version"))
+
+    # Notes field (single note content, not a list)
+    notes = models.TextField(null=True, blank=True, help_text=_("Note content to add when applying this template"))
+
+    # String-based list fields (newline-separated)
+    vulnerability_ids_field = models.TextField(null=True, blank=True, help_text=_("Vulnerability IDs (one per line)"))
+    endpoints_field = models.TextField(null=True, blank=True, help_text=_("Endpoint URLs (one per line)"))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add."))
 
@@ -3671,16 +3692,20 @@ class Finding_Template(models.Model):
         return [{"title": str(self),
                "url": reverse("view_template", args=(self.id,))}]
 
-    @cached_property
+    @property
     def vulnerability_ids(self):
-        # Get vulnerability ids from database and convert to list of strings
-        vulnerability_ids_model = self.vulnerability_id_template_set.all()
-        vulnerability_ids = [vulnerability_id.vulnerability_id for vulnerability_id in vulnerability_ids_model]
+        """Parse vulnerability IDs from TextField string (newline-separated)."""
+        vulnerability_ids = []
 
-        # Synchronize the cve field with the unsaved_vulnerability_ids
+        # Get from the TextField
+        if self.vulnerability_ids_field:
+            # Parse newline-separated string, remove empty lines
+            vulnerability_ids = [line.strip() for line in self.vulnerability_ids_field.split("\n") if line.strip()]
+
+        # Synchronize the cve field with the vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
         # the cve field is not needed anymore and can be removed.
-        if vulnerability_ids and self.cve:
+        if vulnerability_ids and self.cve and self.cve not in vulnerability_ids:
             # Make sure the first entry of the list is the value of the cve field
             vulnerability_ids.insert(0, self.cve)
         elif not vulnerability_ids and self.cve:
@@ -3690,10 +3715,13 @@ class Finding_Template(models.Model):
         # Remove duplicates
         return list(dict.fromkeys(vulnerability_ids))
 
-
-class Vulnerability_Id_Template(models.Model):
-    finding_template = models.ForeignKey(Finding_Template, editable=False, on_delete=models.CASCADE)
-    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    @property
+    def endpoints(self):
+        """Parse endpoint URLs from TextField string (newline-separated)."""
+        if not self.endpoints_field:
+            return []
+        # Parse newline-separated string, remove empty lines
+        return [line.strip() for line in self.endpoints_field.split("\n") if line.strip()]
 
 
 class Check_List(models.Model):
@@ -4848,7 +4876,6 @@ admin.site.register(Product_API_Scan_Configuration)
 admin.site.register(Development_Environment)
 admin.site.register(Finding_Template)
 admin.site.register(Vulnerability_Id)
-admin.site.register(Vulnerability_Id_Template)
 admin.site.register(BurpRawRequestResponse)
 admin.site.register(Announcement)
 admin.site.register(UserAnnouncement)
