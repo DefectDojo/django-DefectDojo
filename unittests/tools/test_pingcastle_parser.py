@@ -6,27 +6,24 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 class TestPingCastleParser(DojoTestCase):
 
     def test_no_findings(self):
-        my_file_handle = (get_unit_tests_scans_path("pingcastle") / "zero.xml").open(encoding="utf-8")
-        parser = PingCastleParser()
-        findings = parser.get_findings(my_file_handle, None)
-        my_file_handle.close()
+        with (get_unit_tests_scans_path("pingcastle") / "zero.xml").open(encoding="utf-8") as my_file_handle:
+            parser = PingCastleParser()
+            findings = parser.get_findings(my_file_handle, None)
         self.assertEqual(0, len(findings))
 
     def test_one_finding(self):
-        my_file_handle = (get_unit_tests_scans_path("pingcastle") / "one.xml").open(encoding="utf-8")
-        parser = PingCastleParser()
-        findings = parser.get_findings(my_file_handle, None)
-        my_file_handle.close()
+        with (get_unit_tests_scans_path("pingcastle") / "one.xml").open(encoding="utf-8") as my_file_handle:
+            parser = PingCastleParser()
+            findings = parser.get_findings(my_file_handle, None)
         self.assertEqual(1, len(findings))
         self.assertEqual(findings[0].title, "[PingCastle] A-MinPwdLen (Anomalies/WeakPassword)")
         self.assertEqual(findings[0].severity, "Medium")
         self.assertTrue(hasattr(findings[0], "unsaved_endpoints"))
 
     def test_many_findings(self):
-        my_file_handle = (get_unit_tests_scans_path("pingcastle") / "many.xml").open(encoding="utf-8")
-        parser = PingCastleParser()
-        findings = parser.get_findings(my_file_handle, None)
-        my_file_handle.close()
+        with (get_unit_tests_scans_path("pingcastle") / "many.xml").open(encoding="utf-8") as my_file_handle:
+            parser = PingCastleParser()
+            findings = parser.get_findings(my_file_handle, None)
         self.assertEqual(28, len(findings))
         admin_login = next((f for f in findings if f.vuln_id_from_tool == "P-AdminLogin"), None)
         self.assertIsNotNone(admin_login)
@@ -38,7 +35,7 @@ class TestPingCastleParser(DojoTestCase):
         self.assertEqual(spooler.severity, "High")
         self.assertTrue(len(getattr(spooler, "unsaved_endpoints", [])) > 0)
         for endpoint in spooler.unsaved_endpoints:
-             endpoint.clean()
+            endpoint.clean()
         ds_heuristics = next((f for f in findings if f.vuln_id_from_tool == "A-DsHeuristicsLDAPSecurity"), None)
         self.assertIsNotNone(ds_heuristics)
         self.assertEqual(ds_heuristics.title, "[PingCastle] A-DsHeuristicsLDAPSecurity (Anomalies/Reconnaissance)")

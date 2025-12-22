@@ -24,11 +24,12 @@ class PingCastleParser:
         return "PingCastle XML export"
 
     def get_findings(self, file, test):
-     try:
-         tree = parse(file)
-         root = tree.getroot()
-     except Exception as e:
-         raise ValueError(f"Invalid PingCastle XML format: {e}")
+        try:
+            tree = parse(file)
+            root = tree.getroot()
+        except Exception as e:
+            exception = f"Invalid PingCastle XML format: {e}"
+            raise ValueError(exception)
         dupes = {}
         report_date = self._parse_datetime(root.findtext("GenerationDate"))
         domain_fqdn = root.findtext("DomainFQDN") or ""
@@ -40,7 +41,6 @@ class PingCastleParser:
             model = rr.findtext("Model") or ""
             risk_id = rr.findtext("RiskId") or ""
             rationale = rr.findtext("Rationale") or ""
-
             severity = self._map_points_to_severity(points)
             severity = self._apply_contextual_bump(
                 severity=severity,
@@ -51,7 +51,6 @@ class PingCastleParser:
             )
             if not severity or severity not in self._SEVERITY_ORDER:
                 severity = "Info"
-
             title = f"[PingCastle] {risk_id} ({category}/{model})"
             description = self._compose_risk_rule_description(
                 domain_fqdn=domain_fqdn,
