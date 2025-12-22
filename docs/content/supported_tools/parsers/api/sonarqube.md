@@ -22,11 +22,8 @@ separate the items in the "Extras" field by a vertical bar (e.g.
 In `Add API Scan Configuration`
 -   `Service key 1` must
     be the SonarQube project key, which can be found by navigating to a specific project and
-    selecting the value from the url
-    `https://<sonarqube_host>/dashboard?id=key`.
-    When you do not provide a SonarQube project key, DefectDojo will
-    use the name of the Product as the project key in SonarQube. If you would like to
-    import findings from multiple projects, you can specify multiple keys as
+    selecting the value from the url `https://<sonarqube_host>/dashboard?id=key`.
+    If you would like to import findings from multiple projects, you can specify multiple keys as
     separated `API Scan Configuration` in the `Product` settings.
 -   If using SonarCloud, the organization ID can be used from step 1, but it
     can be overridden by supplying a different organization ID in the `Service key 2` input field.
