@@ -236,7 +236,8 @@ def add_to_finding_group(finding_group, finds):
     finding_group.findings.add(*available_findings)
 
     # Now update the JIRA to add the finding to the finding group
-    if finding_group.has_jira_issue and jira_helper.get_jira_instance(finding_group).finding_jira_sync:
+    jira_instance = jira_helper.get_jira_instance(finding_group)
+    if finding_group.has_jira_issue and jira_instance and jira_instance.finding_jira_sync:
         logger.debug("pushing to jira from finding.finding_bulk_update_all()")
         jira_helper.push_to_jira(finding_group)
 
@@ -263,7 +264,8 @@ def remove_from_finding_group(finds):
 
     # Now update the JIRA to remove the finding from the finding group
     for group in affected_groups:
-        if group.has_jira_issue and jira_helper.get_jira_instance(group).finding_jira_sync:
+        jira_instance = jira_helper.get_jira_instance(group)
+        if group.has_jira_issue and jira_instance and jira_instance.finding_jira_sync:
             logger.debug("pushing to jira from finding.finding_bulk_update_all()")
             jira_helper.push_to_jira(group)
 
@@ -340,7 +342,8 @@ def group_findings_by(finds, finding_group_by_option):
 
     # Now update the JIRA to add the finding to the finding group
     for group in affected_groups:
-        if group.has_jira_issue and jira_helper.get_jira_instance(group).finding_jira_sync:
+        jira_instance = jira_helper.get_jira_instance(group)
+        if group.has_jira_issue and jira_instance and jira_instance.finding_jira_sync:
             logger.debug("pushing to jira from finding.finding_bulk_update_all()")
             jira_helper.push_to_jira(group)
 
@@ -467,8 +470,8 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
 @app.task
 def post_process_findings_batch_signature(finding_ids, *args, dedupe_option=True, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, **kwargs):
-    return post_process_findings_batch(finding_ids, dedupe_option, rules_option, product_grading_option,
-                                       issue_updater_option, push_to_jira, user, **kwargs)
+    return post_process_findings_batch(finding_ids, *args, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option, issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, **kwargs)
+    # Pass arguments as keyword arguments to ensure Celery properly serializes them
 
 
 @dojo_async_task
@@ -476,13 +479,21 @@ def post_process_findings_batch_signature(finding_ids, *args, dedupe_option=True
 def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, **kwargs):
 
+    logger.debug(
+        f"post_process_findings_batch called: finding_ids_count={len(finding_ids) if finding_ids else 0}, "
+        f"args={args}, dedupe_option={dedupe_option}, rules_option={rules_option}, "
+        f"product_grading_option={product_grading_option}, issue_updater_option={issue_updater_option}, "
+        f"push_to_jira={push_to_jira}, user={user.id if user else None}, kwargs={kwargs}",
+    )
     if not finding_ids:
         return
 
     system_settings = System_Settings.objects.get()
 
     # use list() to force a complete query execution and related objects to be loaded once
+    logger.debug(f"getting finding models for batch deduplication with: {len(finding_ids)} findings")
     findings = get_finding_models_for_deduplication(finding_ids)
+    logger.debug(f"found {len(findings)} findings for batch deduplication")
 
     if not findings:
         logger.debug(f"no findings found for batch deduplication with IDs: {finding_ids}")
@@ -514,6 +525,8 @@ def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_op
                 jira_helper.push_to_jira(finding)
             else:
                 jira_helper.push_to_jira(finding.finding_group)
+    else:
+        logger.debug("push_to_jira is False, not ushing to JIRA")
 
 
 @receiver(pre_delete, sender=Finding)

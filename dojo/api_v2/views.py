@@ -2515,7 +2515,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             jira_driver = engagement or (product or None)
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
-        # logger.debug(f"push_to_jira: {push_to_jira}")
+
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):

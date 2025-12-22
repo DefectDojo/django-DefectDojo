@@ -238,22 +238,30 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # Categorize this finding as a new one
             new_findings.append(finding)
             # all data is already saved on the finding, we only need to trigger post processing in batches
+            logger.debug("process_findings: self.push_to_jira=%s, self.findings_groups_enabled=%s, self.group_by=%s",
+                         self.push_to_jira, self.findings_groups_enabled, self.group_by)
             push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+            logger.debug("process_findings: computed push_to_jira=%s", push_to_jira)
             batch_finding_ids.append(finding.id)
 
             # If batch is full or we're at the end, dispatch one batched task
             if len(batch_finding_ids) >= batch_max_size or is_final_finding:
                 finding_ids_batch = list(batch_finding_ids)
                 batch_finding_ids.clear()
+                logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
+                             push_to_jira, len(finding_ids_batch), is_final_finding)
                 if we_want_async(async_user=self.user):
-                    finding_helper.post_process_findings_batch_signature(
+                    signature = finding_helper.post_process_findings_batch_signature(
                         finding_ids_batch,
                         dedupe_option=True,
                         rules_option=True,
                         product_grading_option=True,
                         issue_updater_option=True,
                         push_to_jira=push_to_jira,
-                    )()
+                    )
+                    logger.debug("process_findings: signature created with push_to_jira=%s, signature.kwargs=%s",
+                                 push_to_jira, signature.kwargs)
+                    signature()
                 else:
                     finding_helper.post_process_findings_batch(
                         finding_ids_batch,
@@ -279,6 +287,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     jira_helper.push_to_jira(findings[0].finding_group)
                 else:
                     jira_helper.push_to_jira(findings[0])
+            else:
+                logger.debug("push_to_jira is False, not pushing to JIRA")
 
         # Note: All chord batching is now handled within the loop above
 

@@ -1,5 +1,6 @@
 import base64
 import logging
+import time
 
 from celery import chord, group
 from django.conf import settings
@@ -244,9 +245,14 @@ class BaseImporter(ImporterOptions):
         """
         # Attempt any preprocessing before generating findings
         scan = self.process_scan_file(scan)
+        start_time = time.perf_counter()
         if hasattr(parser, "get_tests"):
-            return self.parse_findings_dynamic_test_type(scan, parser)
-        return self.parse_findings_static_test_type(scan, parser)
+            parsed_findings = self.parse_findings_dynamic_test_type(scan, parser)
+        else:
+            parsed_findings = self.parse_findings_static_test_type(scan, parser)
+        elapsed_time = time.perf_counter() - start_time
+        logger.info(f"Parsing findings took {elapsed_time:.2f} seconds ({len(parsed_findings) if parsed_findings else 0} findings parsed)")
+        return parsed_findings
 
     def sync_process_findings(
         self,
