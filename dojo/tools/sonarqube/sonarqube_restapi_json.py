@@ -1,5 +1,8 @@
 import re
 
+import dateutil.parser
+from django.utils import timezone
+
 from dojo.models import Finding
 
 
@@ -23,6 +26,10 @@ class SonarQubeRESTAPIJSON:
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
                     codeVariants = str(issue.get("codeVariants"))
+                    try:
+                        date = str(dateutil.parser.parse(issue.get("creationDate")).date())
+                    except (ValueError, TypeError, dateutil.parser.ParserError):
+                        date = timezone.now()
                     description = ""
                     description += "**key:** " + key + "\n"
                     description += "**rule:** " + rule + "\n"
@@ -50,6 +57,7 @@ class SonarQubeRESTAPIJSON:
                         dynamic_finding=False,
                         tags=["bug"],
                         line=line,
+                        date=date,
                     )
                 elif issue.get("type") == "VULNERABILITY":
                     key = issue.get("key")
@@ -61,6 +69,10 @@ class SonarQubeRESTAPIJSON:
                     message = issue.get("message")
                     line = issue.get("line")
                     cwe = None
+                    try:
+                        date = str(dateutil.parser.parse(issue.get("creationDate")).date())
+                    except (ValueError, TypeError, dateutil.parser.ParserError):
+                        date = timezone.now()
                     if "Category: CWE-" in message:
                         cwe_pattern = r"Category: CWE-\d{1,5}"
                         cwes = re.findall(cwe_pattern, message)
@@ -119,6 +131,7 @@ class SonarQubeRESTAPIJSON:
                         file_path=component,
                         tags=["vulnerability"],
                         line=line,
+                        date=date,
                     )
                     vulnids = []
                     if "Reference: CVE" in message:
@@ -154,6 +167,10 @@ class SonarQubeRESTAPIJSON:
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
                     codeVariants = issue.get("codeVariants", [])
+                    try:
+                        date = str(dateutil.parser.parse(issue.get("creationDate")).date())
+                    except (ValueError, TypeError, dateutil.parser.ParserError):
+                        date = timezone.now()
                     description = ""
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
@@ -185,6 +202,7 @@ class SonarQubeRESTAPIJSON:
                         file_path=component,
                         tags=["code_smell"],
                         line=line,
+                        date=date,
                     )
                 items.append(item)
         if json_content.get("hotspots"):
@@ -200,6 +218,10 @@ class SonarQubeRESTAPIJSON:
                 flows = hotspot.get("flows", [])
                 ruleKey = hotspot.get("ruleKey")
                 messageFormattings = hotspot.get("messageFormattings", [])
+                try:
+                    date = str(dateutil.parser.parse(hotspot.get("creationDate")).date())
+                except (ValueError, TypeError, dateutil.parser.ParserError):
+                    date = timezone.now()
                 description = ""
                 description += "**key:** " + key + "\n"
                 description += "**component:** " + component + "\n"
@@ -229,6 +251,7 @@ class SonarQubeRESTAPIJSON:
                     file_path=component,
                     tags=["hotspot"],
                     line=line,
+                    date=date,
                 )
                 items.append(item)
         return items

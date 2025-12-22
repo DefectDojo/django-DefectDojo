@@ -241,6 +241,7 @@
             {% if enable_table_filtering %}
                 var dojoTable = $('#engagements').DataTable({
                     colReorder: true,
+					autoWidth: false,
                     columnDefs: [
                         {
                             "orderable": false,
