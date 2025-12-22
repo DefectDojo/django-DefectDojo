@@ -92,6 +92,8 @@ env = environ.FileAwareEnv(
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
+    # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
+    DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
     # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
     DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 10),
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
@@ -1874,6 +1876,11 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {"placeholder": "Enter some tags (comma separated, use enter to select / create a new tag)", "width": "70%"}
+
+# Configure tagulous slug truncate unique setting if provided
+# If not set (value is -1), tagulous will use its internal default value of 5
+if (truncate_unique := env("DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE")) != -1:
+    TAGULOUS_SLUG_TRUNCATE_UNIQUE = truncate_unique
 
 EDITABLE_MITIGATED_DATA = env("DD_EDITABLE_MITIGATED_DATA")
 
