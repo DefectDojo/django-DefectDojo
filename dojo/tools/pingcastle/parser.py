@@ -24,8 +24,11 @@ class PingCastleParser:
         return "PingCastle XML export"
 
     def get_findings(self, file, test):
-        tree = parse(file)
-        root = tree.getroot()
+     try:
+         tree = parse(file)
+         root = tree.getroot()
+     except Exception as e:
+         raise ValueError(f"Invalid PingCastle XML format: {e}")
         dupes = {}
         report_date = self._parse_datetime(root.findtext("GenerationDate"))
         domain_fqdn = root.findtext("DomainFQDN") or ""
