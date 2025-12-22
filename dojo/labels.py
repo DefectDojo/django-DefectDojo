@@ -63,11 +63,11 @@ class LabelsProxy(
         As a side benefit, this will explode if any label defined on this class is not present in the given dict: a
         runtime check that a labels dict must be complete.
         """
-        for _l, _v in self._get_label_entries().items():
+        for l_, v_ in self._get_label_entries().items():
             try:
-                setattr(self, _l, label_set[_v])
+                setattr(self, l_, label_set[v_])
             except KeyError:
-                error_message = f"Supplied copy dictionary does not provide entry for {_l}"
+                error_message = f"Supplied copy dictionary does not provide entry for {l_}"
                 logger.error(error_message)
                 raise ValueError(error_message)
 

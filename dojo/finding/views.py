@@ -118,6 +118,7 @@ from dojo.utils import (
     get_page_items_and_count,
     get_return_url,
     get_system_setting,
+    get_visible_scan_types,
     get_words_for_field,
     match_finding_to_existing_findings,
     process_tag_notifications,
@@ -315,6 +316,7 @@ class ListFindings(View, BaseListFindings):
             "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "title_words": get_words_for_field(Finding, "title"),
             "component_words": get_words_for_field(Finding, "component_name"),
+            "visible_test_types": get_visible_scan_types(),
         }
         # Look to see if the product was used
         if product_id := self.get_product_id():

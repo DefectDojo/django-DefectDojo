@@ -775,12 +775,15 @@ def add_endpoints(new_finding, form):
             endpoint=endpoint, defaults={"date": form.cleaned_data["date"] or timezone.now()})
 
 
-def save_vulnerability_ids(finding, vulnerability_ids):
+def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool = True):
     # Remove duplicates
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
-    # Remove old vulnerability ids
-    Vulnerability_Id.objects.filter(finding=finding).delete()
+    # Remove old vulnerability ids if requested
+    # Callers can set delete_existing=False when they know there are no existing IDs
+    # to avoid an unnecessary delete query (e.g., for new findings)
+    if delete_existing:
+        Vulnerability_Id.objects.filter(finding=finding).delete()
 
     # Save new vulnerability ids
     # Using bulk create throws Django 50 warnings about unsaved models...
