@@ -220,18 +220,6 @@ class PingCastleParser:
         return "Critical"
 
     @staticmethod
-    def _map_global_score_to_severity(score):
-        if score < 20:
-            return "Info"
-        if score < 40:
-            return "Low"
-        if score < 60:
-            return "Medium"
-        if score < 80:
-            return "High"
-        return "Critical"
-
-    @staticmethod
     def _is_dc_specific_risk(risk_id: str, model: str = "", rationale: str = "") -> bool:
         """
         Best effort classification: return True if the risk targets Domain Controllers specifically.
