@@ -936,6 +936,30 @@ class ImportScanResultsView(View):
     ) -> str | None:
         """Attempt to import with all the supplied information"""
         try:
+            # Log only user-entered form values, excluding internal objects
+            user_values = {
+                "scan_type": context.get("scan_type"),
+                "scan_date": context.get("scan_date"),
+                "minimum_severity": context.get("minimum_severity"),
+                "active": context.get("active"),
+                "verified": context.get("verified"),
+                "test_title": context.get("test_title"),
+                "tags": context.get("tags"),
+                "version": context.get("version"),
+                "branch_tag": context.get("branch_tag"),
+                "build_id": context.get("build_id"),
+                "commit_hash": context.get("commit_hash"),
+                "service": context.get("service"),
+                "close_old_findings": context.get("close_old_findings"),
+                "apply_tags_to_findings": context.get("apply_tags_to_findings"),
+                "apply_tags_to_endpoints": context.get("apply_tags_to_endpoints"),
+                "close_old_findings_product_scope": context.get("close_old_findings_product_scope"),
+                "group_by": context.get("group_by"),
+                "create_finding_groups_for_all_findings": context.get("create_finding_groups_for_all_findings"),
+                "push_to_jira": context.get("push_to_jira"),
+                "push_all_jira_issues": context.get("push_all_jira_issues"),
+            }
+            logger.debug(f"import_findings called with user values: {user_values}")
             importer_client = self.get_importer(context)
             context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
                 context.pop("scan", None),
