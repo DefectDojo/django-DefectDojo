@@ -557,6 +557,7 @@ You can also optionally set the following variables:
     {{< highlight python >}}
     DD_SOCIAL_AUTH_OIDC_ID_KEY=(str, ''),                           #the key associated with the OIDC user IDs
     DD_SOCIAL_AUTH_OIDC_USERNAME_KEY=(str, ''),                     #the key associated with the OIDC usernames
+    DD_SOCIAL_AUTH_CREATE_USER_MAPPING=(str, "username"),           #could also be email or fullname
     DD_SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS=(list, ['']),           #list of domains allowed for login
     DD_SOCIAL_AUTH_OIDC_JWT_ALGORITHMS=(list, ["RS256","HS256"]),
     DD_SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER=(str, ''),
