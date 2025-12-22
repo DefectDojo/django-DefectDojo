@@ -233,59 +233,123 @@ def are_endpoints_duplicates(new_finding, to_duplicate_finding):
     return False
 
 
-def build_dedupe_scope_queryset(test):
-    scope_on_engagement = test.engagement.deduplication_on_engagement
-    if scope_on_engagement:
-        scope_q = Q(test__engagement=test.engagement)
-    else:
-        # Product scope limited to current product, but exclude engagements that opted into engagement-scoped dedupe
-        scope_q = Q(test__engagement__product=test.engagement.product) & (
-            Q(test__engagement=test.engagement)
-            | Q(test__engagement__deduplication_on_engagement=False)
-        )
+def build_candidate_scope_queryset(test, mode="deduplication", service=None):
+    """
+    Build a queryset for candidate finding.
+
+    Args:
+        test: The test to scope from
+        mode: "deduplication" (can match across tests) or "reimport" (same test only)
+        service: Optional service filter (for deduplication mode, not used for reimport since service is in hash)
+
+    """
+    if mode == "reimport":
+        # For reimport, only filter by test. Service filtering is not needed because
+        # service is included in hash_code calculation (HASH_CODE_FIELDS_ALWAYS = ["service"]),
+        # so matching by hash_code automatically ensures correct service match.
+        queryset = Finding.objects.filter(test=test)
+    else:  # deduplication mode
+        scope_on_engagement = test.engagement.deduplication_on_engagement
+        if scope_on_engagement:
+            scope_q = Q(test__engagement=test.engagement)
+        else:
+            # Product scope limited to current product, but exclude engagements that opted into engagement-scoped dedupe
+            scope_q = Q(test__engagement__product=test.engagement.product) & (
+                Q(test__engagement=test.engagement)
+                | Q(test__engagement__deduplication_on_engagement=False)
+            )
+        queryset = Finding.objects.filter(scope_q)
+
+    # Base prefetches for both modes
+    prefetch_list = ["endpoints", "vulnerability_id_set", "found_by"]
+
+    # Additional prefetches for reimport mode
+    if mode == "reimport":
+        prefetch_list.extend([
+            "status_finding",
+            "status_finding__endpoint",
+        ])
 
     return (
-        Finding.objects.filter(scope_q)
+        queryset
         .select_related("test", "test__engagement", "test__test_type")
-        .prefetch_related("endpoints", "found_by")
+        .prefetch_related(*prefetch_list)
     )
 
 
-def find_candidates_for_deduplication_hash(test, findings):
-    base_queryset = build_dedupe_scope_queryset(test)
+def find_candidates_for_deduplication_hash(test, findings, mode="deduplication", service=None):
+    """
+    Find candidates by hash_code. Works for both deduplication and reimport.
+
+    Args:
+        test: The test to scope from
+        findings: List of findings to find candidates for
+        mode: "deduplication" or "reimport"
+        service: Optional service filter (for deduplication mode, not used for reimport since service is in hash)
+
+    """
+    base_queryset = build_candidate_scope_queryset(test, mode=mode, service=service)
     hash_codes = {f.hash_code for f in findings if getattr(f, "hash_code", None) is not None}
     if not hash_codes:
         return {}
-    existing_qs = (
-        base_queryset.filter(hash_code__in=hash_codes)
-        .exclude(hash_code=None)
-        .exclude(duplicate=True)
-        .order_by("id")
-    )
+
+    existing_qs = base_queryset.filter(hash_code__in=hash_codes).exclude(hash_code=None)
+    if mode == "deduplication":
+        existing_qs = existing_qs.exclude(duplicate=True)
+    existing_qs = existing_qs.order_by("id")
+
     existing_by_hash = {}
     for ef in existing_qs:
         existing_by_hash.setdefault(ef.hash_code, []).append(ef)
-    deduplicationLogger.debug(f"Found {len(existing_by_hash)} existing findings by hash codes")
+
+    log_msg = "for reimport" if mode == "reimport" else ""
+    deduplicationLogger.debug(f"Found {len(existing_by_hash)} existing findings by hash codes {log_msg}")
     return existing_by_hash
 
 
-def find_candidates_for_deduplication_unique_id(test, findings):
-    base_queryset = build_dedupe_scope_queryset(test)
+def find_candidates_for_deduplication_unique_id(test, findings, mode="deduplication", service=None):
+    """
+    Find candidates by unique_id_from_tool. Works for both deduplication and reimport.
+
+    Args:
+        test: The test to scope from
+        findings: List of findings to find candidates for
+        mode: "deduplication" or "reimport"
+        service: Optional service filter (for deduplication mode, not used for reimport since service is in hash)
+
+    """
+    base_queryset = build_candidate_scope_queryset(test, mode=mode, service=service)
     unique_ids = {f.unique_id_from_tool for f in findings if getattr(f, "unique_id_from_tool", None) is not None}
     if not unique_ids:
         return {}
-    existing_qs = base_queryset.filter(unique_id_from_tool__in=unique_ids).exclude(unique_id_from_tool=None).exclude(duplicate=True).order_by("id")
+
+    existing_qs = base_queryset.filter(unique_id_from_tool__in=unique_ids).exclude(unique_id_from_tool=None)
+    if mode == "deduplication":
+        existing_qs = existing_qs.exclude(duplicate=True)
     # unique_id_from_tool can only apply to the same test_type because it is parser dependent
-    existing_qs = existing_qs.filter(test__test_type=test.test_type)
+    existing_qs = existing_qs.filter(test__test_type=test.test_type).order_by("id")
+
     existing_by_uid = {}
     for ef in existing_qs:
         existing_by_uid.setdefault(ef.unique_id_from_tool, []).append(ef)
-    deduplicationLogger.debug(f"Found {len(existing_by_uid)} existing findings by unique IDs")
+
+    log_msg = "for reimport" if mode == "reimport" else ""
+    deduplicationLogger.debug(f"Found {len(existing_by_uid)} existing findings by unique IDs {log_msg}")
     return existing_by_uid
 
 
-def find_candidates_for_deduplication_uid_or_hash(test, findings):
-    base_queryset = build_dedupe_scope_queryset(test)
+def find_candidates_for_deduplication_uid_or_hash(test, findings, mode="deduplication", service=None):
+    """
+    Find candidates by unique_id_from_tool or hash_code. Works for both deduplication and reimport.
+
+    Args:
+        test: The test to scope from
+        findings: List of findings to find candidates for
+        mode: "deduplication" or "reimport"
+        service: Optional service filter (for deduplication mode, not used for reimport since service is in hash)
+
+    """
+    base_queryset = build_candidate_scope_queryset(test, mode=mode, service=service)
     hash_codes = {f.hash_code for f in findings if getattr(f, "hash_code", None) is not None}
     unique_ids = {f.unique_id_from_tool for f in findings if getattr(f, "unique_id_from_tool", None) is not None}
     if not hash_codes and not unique_ids:
@@ -299,7 +363,11 @@ def find_candidates_for_deduplication_uid_or_hash(test, findings):
         uid_q = Q(unique_id_from_tool__isnull=False, unique_id_from_tool__in=unique_ids) & Q(test__test_type=test.test_type)
         cond |= uid_q
 
-    existing_qs = base_queryset.filter(cond).exclude(duplicate=True).order_by("id")
+    existing_qs = base_queryset.filter(cond)
+    if mode == "deduplication":
+        # reimport matching will match against duplicates, import/deduplication doesn't.
+        existing_qs = existing_qs.exclude(duplicate=True)
+    existing_qs = existing_qs.order_by("id")
 
     existing_by_hash = {}
     existing_by_uid = {}
@@ -308,13 +376,15 @@ def find_candidates_for_deduplication_uid_or_hash(test, findings):
             existing_by_hash.setdefault(ef.hash_code, []).append(ef)
         if ef.unique_id_from_tool is not None:
             existing_by_uid.setdefault(ef.unique_id_from_tool, []).append(ef)
-    deduplicationLogger.debug(f"Found {len(existing_by_uid)} existing findings by unique IDs")
-    deduplicationLogger.debug(f"Found {len(existing_by_hash)} existing findings by hash codes")
+
+    log_msg = "for reimport" if mode == "reimport" else ""
+    deduplicationLogger.debug(f"Found {len(existing_by_uid)} existing findings by unique IDs {log_msg}")
+    deduplicationLogger.debug(f"Found {len(existing_by_hash)} existing findings by hash codes {log_msg}")
     return existing_by_uid, existing_by_hash
 
 
 def find_candidates_for_deduplication_legacy(test, findings):
-    base_queryset = build_dedupe_scope_queryset(test)
+    base_queryset = build_candidate_scope_queryset(test, mode="deduplication")
     titles = {f.title for f in findings if getattr(f, "title", None)}
     cwes = {f.cwe for f in findings if getattr(f, "cwe", 0)}
     cwes.discard(0)
@@ -334,6 +404,52 @@ def find_candidates_for_deduplication_legacy(test, findings):
     deduplicationLogger.debug(f"Found {len(by_cwe)} existing findings by CWE")
     deduplicationLogger.debug(f"Found {len(existing_qs)} existing findings by title or CWE")
     return by_title, by_cwe
+
+
+# TODO: should we align this with deduplication?
+def find_candidates_for_reimport_legacy(test, findings, service=None):
+    """
+    Find all existing findings in the test that match any of the given findings by title and severity.
+    Used for batch reimport to avoid 1+N query problem.
+    Legacy reimport matches by title (case-insensitive), severity, and numerical_severity.
+    Note: This function is kept separate because legacy reimport has fundamentally different matching logic
+    than legacy deduplication (title+severity vs title+CWE).
+    Note: service parameter is kept for backward compatibility but not used since service is in hash_code.
+    """
+    base_queryset = build_candidate_scope_queryset(test, mode="reimport", service=None)
+
+    # Collect all unique title/severity combinations
+    title_severity_pairs = set()
+    for finding in findings:
+        if finding.title:
+            title_severity_pairs.add((
+                finding.title.lower(),  # Case-insensitive matching
+                finding.severity,
+                Finding.get_numerical_severity(finding.severity),
+            ))
+
+    if not title_severity_pairs:
+        return {}
+
+    # Build query to find all matching findings
+    conditions = Q()
+    for title_lower, severity, numerical_severity in title_severity_pairs:
+        conditions |= (
+            Q(title__iexact=title_lower) &
+            Q(severity=severity) &
+            Q(numerical_severity=numerical_severity)
+        )
+
+    existing_qs = base_queryset.filter(conditions).order_by("id")
+
+    # Build dictionary keyed by (title_lower, severity) for quick lookup
+    existing_by_key = {}
+    for ef in existing_qs:
+        key = (ef.title.lower(), ef.severity)
+        existing_by_key.setdefault(key, []).append(ef)
+
+    deduplicationLogger.debug(f"Found {sum(len(v) for v in existing_by_key.values())} existing findings by legacy matching for reimport")
+    return existing_by_key
 
 
 def _is_candidate_older(new_finding, candidate):

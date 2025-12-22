@@ -234,7 +234,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # Process any files
             self.process_files(finding)
             # Process vulnerability IDs
-            finding = self.process_vulnerability_ids(finding)
+            finding = self.store_vulnerability_ids(finding)
             # Categorize this finding as a new one
             new_findings.append(finding)
             # all data is already saved on the finding, we only need to trigger post processing in batches

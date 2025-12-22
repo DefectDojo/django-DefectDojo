@@ -84,7 +84,7 @@ select = [
    "PGH",
    "PLC",
    "PLE",
-   "PLR01", "PLR02", "PLR04", "PLR0915", "PLR1711", "PLR1704", "PLR1714", "PLR1716", "PLR172", "PLR173", "PLR2044", "PLR5", "PLR6104", "PLR6201", 
+   "PLR01", "PLR02", "PLR04", "PLR0915", "PLR1711", "PLR1704", "PLR1714", "PLR1716", "PLR172", "PLR173", "PLR2044", "PLR5", "PLR6104", "PLR6201",
    "PLW",
    "UP",
    "FURB",
@@ -117,6 +117,15 @@ preview = true
 ]
 "dojo/filters.py" = [
     "A003",  # ruff upgrade to 0.13.3
+]
+"scripts/update_performance_test_counts.py" = [
+    "S603",  # subprocess.run without shell=True is safe for this script
+    "S604",  # subprocess.run without shell=True is safe for this script
+    "S605",  # subprocess.run without shell=True is safe for this script
+    "S606",  # subprocess.run without shell=True is safe for this script
+    "S607",  # subprocess.run without shell=True is safe for this script
+    "T201",  # print statements are fine for console output scripts
+    "EXE001", # git won't commit the executable flag I don't know why
 ]
 
 [lint.flake8-boolean-trap]

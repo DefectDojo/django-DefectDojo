@@ -6,16 +6,11 @@ on:
         platform:
           type: string
           default: "linux/amd64"
-        auditlog_type:
-          type: string
-          default: "django-auditlog"
 
 jobs:
   unit_tests:
     name: Rest Framework Unit Tests
     runs-on: ${{ inputs.platform ==  'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
-    env:
-      AUDITLOG_TYPE: ${{ inputs.auditlog_type }}
 
     strategy:
       matrix:
@@ -30,13 +25,13 @@ jobs:
           echo $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
       # load docker images from build jobs
       - name: Load images from artifacts
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           path: built-docker-image
           pattern: built-docker-image-*

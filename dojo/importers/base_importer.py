@@ -32,7 +32,6 @@ from dojo.models import (
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
-    Vulnerability_Id,
 )
 from dojo.notifications.helper import create_notification
 from dojo.tag_utils import bulk_add_tags_to_instances
@@ -278,6 +277,7 @@ class BaseImporter(ImporterOptions):
     def determine_deduplication_algorithm(self) -> str:
         """
         Determines what dedupe algorithm to use for the Test being processed.
+        Overridden in Pro.
         :return: A string representing the dedupe algorithm to use.
         """
         return self.test.deduplication_algorithm
@@ -396,8 +396,8 @@ class BaseImporter(ImporterOptions):
         # In longer running imports it can happen that the async_dupe_delete task removes a finding before the history record is created
         # We filter out these findings here to avoid FK violations (IntegrityError)
         all_findings = []
-        for _list, _ in finding_action_mappings:
-            all_findings.extend(_list)
+        for list_, _ in finding_action_mappings:
+            all_findings.extend(list_)
         existing_findings = finding_helper.filter_findings_by_existence(all_findings) if all_findings else []
         existing_ids = {f.id for f in existing_findings}
 
@@ -793,21 +793,23 @@ class BaseImporter(ImporterOptions):
 
         return finding
 
-    def process_vulnerability_ids(
+    def store_vulnerability_ids(
         self,
         finding: Finding,
     ) -> Finding:
         """
-        Parse the `unsaved_vulnerability_ids` field from findings after they are parsed
-        to create `Vulnerability_Id` objects with the finding associated correctly
+        Store vulnerability IDs for a finding.
+        Reads from finding.unsaved_vulnerability_ids and saves them overwriting existing ones.
+
+        Args:
+            finding: The finding to store vulnerability IDs for
+
+        Returns:
+            The finding object
+
         """
-        if finding.unsaved_vulnerability_ids:
-            # Remove old vulnerability ids - keeping this call only because of flake8
-            Vulnerability_Id.objects.filter(finding=finding).delete()
-
-            # user the helper function
-            finding_helper.save_vulnerability_ids(finding, finding.unsaved_vulnerability_ids)
-
+        vulnerability_ids_to_process = finding.unsaved_vulnerability_ids or []
+        finding_helper.save_vulnerability_ids(finding, vulnerability_ids_to_process, delete_existing=False)
         return finding
 
     def process_files(

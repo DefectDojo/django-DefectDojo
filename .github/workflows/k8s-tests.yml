@@ -16,13 +16,13 @@ jobs:
           # databases, broker and k8s are independent, so we don't need to test each combination
           # lastest k8s version (https://kubernetes.io/releases/) and the oldest officially supported version
           # are tested (https://kubernetes.io/releases/)
-          - k8s: 'v1.34.2' # renovate: datasource=github-releases depName=kubernetes/kubernetes versioning=loose
+          - k8s: 'v1.34.3' # renovate: datasource=github-releases depName=kubernetes/kubernetes versioning=loose
             os: debian
-          - k8s: '1.32.10' # renovate: datasource=custom.endoflife-oldest-maintained depName=kubernetes
+          - k8s: '1.32.11' # renovate: datasource=custom.endoflife-oldest-maintained depName=kubernetes
             os: debian
     steps:
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@b589f2d61bf96695c546929c72b38563e856059d # v2.14.0
@@ -38,7 +38,7 @@ jobs:
           minikube status
 
       - name: Load images from artifacts
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           path: built-docker-image
           pattern: built-docker-image-*
