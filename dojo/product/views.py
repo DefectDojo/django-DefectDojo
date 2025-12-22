@@ -363,7 +363,7 @@ def view_product_components(request, pid):
     component_query = component_query.order_by("-total_findings")
 
     filter_class = ProductComponentFilter
-    comp_filter = filter_class(request.GET, queryset=component_query, parent_product=prod)
+    comp_filter = filter_class(request.GET, queryset=component_query)
     result = get_page_items(request, comp_filter.qs, 25)
 
 

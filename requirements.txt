@@ -49,7 +49,7 @@ uWSGI==2.0.31
 vobject==0.9.9
 whitenoise==5.2.0
 titlecase==2.4.1
-social-auth-app-django==5.4.3
+social-auth-app-django==5.6.0
 social-auth-core==4.8.3
 gitPython==3.1.45
 python-gitlab==7.0.0

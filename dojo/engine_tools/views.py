@@ -433,15 +433,7 @@ def expire_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
         raise PermissionDenied
     finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
     
-    previous_status = finding_exclusion.status
     expire_finding_exclusion_immediately.apply_async(args=(str(finding_exclusion.uuid),))
-    
-    FindingExclusionLog.objects.create(
-        finding_exclusion=finding_exclusion,
-        changed_by=request.user,
-        previous_status=previous_status,
-        current_status="Expired"
-    )
 
     messages.add_message(   
             request,
@@ -522,6 +514,7 @@ def reopen_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
     finding_exclusion.status_updated_by = request.user
     finding_exclusion.reviewed_at = datetime.now()
     finding_exclusion.reviewed_by = request.user
+    finding_exclusion.expiration_date = timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS))
     finding_exclusion.save()
     
     FindingExclusionLog.objects.create(
