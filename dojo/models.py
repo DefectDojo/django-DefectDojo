@@ -2948,7 +2948,7 @@ class Finding(models.Model):
 
         # Make sure that we have a cwe if we need one
         if self.cwe == 0 and not self.test.hash_code_allows_null_cwe:
-            deduplicationLogger.warning(
+            deduplicationLogger.debug(
                 "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path)
                 + "'. Fallback to legacy mode for this finding.")
             return self.compute_hash_code_legacy()
