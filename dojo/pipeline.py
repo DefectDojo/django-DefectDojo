@@ -167,7 +167,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
         token = soc.extra_data["access_token"]
         resource = str(soc.extra_data["resource"])
         group_names = search_azure_groups(kwargs, token, soc)
-        logger.debug("detected groups " + str(group_names))
+        logger.debug(f"detected groups {group_names} for user {user}")
         groups_validate = settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP.split(',')
         if (
             group_names is not None
@@ -186,7 +186,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             graph_user_request_json = graph_user_request.json()
             job_title = graph_user_request_json["jobTitle"]
             office_location = graph_user_request_json["officeLocation"]
-            logger.debug("detected jobTitle " + job_title + " and officeLocation " + office_location)
+            logger.debug(f"detected jobTitle {job_title} and officeLocation {office_location} for user {user_login}")
 
             # Assign global role
             if office_location in settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[1]:
@@ -213,6 +213,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                 role_assigned = {"role": Role.objects.get(id=Roles.Cibersecurity)}
 
             assign_mode = settings.SOCIAL_AUTH_AZURE_DEVOPS_ASSIGN_MODE
+            logger.debug(f"Assign mode {assign_mode}")
             if assign_mode == "AZURE_DEVOPS_PERMISSIONS":
                 assign_with_azuredevops_permission(user_login, user, user_product_types_names, role_assigned, is_cybersecurity, is_leader)
             elif assign_mode == "USER_MANAGER":
@@ -235,6 +236,7 @@ def assign_with_azuredevops_permission(user_login, user, user_product_types_name
     result_query_subjects = graph_client.query_subjects({"query": user_login, "subjectKind": ["User"]})
 
     if result_query_subjects is not None and len(result_query_subjects) > 0:
+        logger.debug(f"detected {len(result_query_subjects)} result_query_subjects for user {user_login}")
         # Get user's product type for become member
         result_memberships = graph_client.get_membership(result_query_subjects[0].descriptor, None)
 
@@ -243,11 +245,13 @@ def assign_with_azuredevops_permission(user_login, user, user_product_types_name
             graph_client,
             settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[0],
         )
+
+        logger.debug(f"detected {len(groups_team_leve1)} groups_team_leve1 for user {user_login}")
         
         if len(groups_team_leve1) > 0:
             groups_team_leve2 = []
             for group_team_leve1 in groups_team_leve1:
-                logger.debug("User %s is member of group %s", user, group_team_leve1.display_name)
+                logger.debug(f"User {user} is member of group {group_team_leve1.display_name}")
                 groups_team_leve2 += custom_filter_group(
                     graph_client.get_membership(group_team_leve1.descriptor, None).additional_properties["value"],
                     graph_client,
@@ -256,6 +260,7 @@ def assign_with_azuredevops_permission(user_login, user, user_product_types_name
 
             # create a new product type or update product's type authorized_users
             if len(groups_team_leve2) > 0 and user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM:
+                logger.debug(f"detected {len(groups_team_leve2)} groups_team_leve2 for user {user_login}")
                 for group_team_leve2 in groups_team_leve2:
                     update_member_product_type(group_team_leve2.display_name, user_product_types_names, user, role_assigned)
 
@@ -286,7 +291,7 @@ def assign_with_user_manager(
                 resource, graph_user_request_json["userPrincipalName"], graph_user_request_json["id"], token_graph
             )
     
-    logger.debug("detected product type " + str(name_product_type))
+    logger.debug(f"detected product type {name_product_type}")
 
     if name_product_type:
         products_types = Product_Type.objects.filter(description__contains=name_product_type).values_list('name', flat=True)
@@ -310,7 +315,7 @@ def get_user_manager(resource, name, id, token_graph):
         "ConsistencyLevel": "eventual",
     }
     requests_get_user_manager = requests.get(url, headers=headers)
-    logger.debug("User manager response status code: " + str(requests_get_user_manager.status_code) + " with message " + str(requests_get_user_manager.text))
+    logger.debug(f"User manager response status code: {requests_get_user_manager.status_code} with message {requests_get_user_manager.text}")
     requests_get_user_manager.raise_for_status()
     response = requests_get_user_manager.json()
     if "officeLocation" not in response:
@@ -333,9 +338,9 @@ def get_user_manager(resource, name, id, token_graph):
 
 def update_member_office_location_role(role_assigned, graph_user_request_json, user):
     if role_assigned["role"].id == Roles.Developer:
-        logger.debug("Assigning to user %s product membership based on office location %s", graph_user_request_json["mail"], graph_user_request_json["officeLocation"])
+        logger.debug(f"Assigning to user {graph_user_request_json['mail']} product membership based on office location {graph_user_request_json['officeLocation']}")
         products = Product.objects.filter(description__contains=graph_user_request_json["officeLocation"])
-        logger.debug("detected products " + str(len(products)))
+        logger.debug(f"detected products {len(products)}")
         # Get user's product names
         user_product_names = [prod.name for prod in get_authorized_products(Permissions.Product_View, user)]
         for product in products:
