@@ -438,7 +438,8 @@ def finding_queries(request, prod):
     filters["new_verified"] = findings_qs.filter(finding_helper.VERIFIED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters["open"] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters["inactive"] = findings_qs.filter(finding_helper.INACTIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
-    filters["closed"] = findings_qs.filter(finding_helper.CLOSED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
+    # Filter closed findings by mitigated date (not discovery date) to show findings closed within the date range
+    filters["closed"] = findings_qs.filter(finding_helper.CLOSED_FINDINGS_QUERY).filter(mitigated__range=[start_date, end_date], mitigated__isnull=False).order_by("mitigated")
     filters["false_positive"] = findings_qs.filter(finding_helper.FALSE_POSITIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters["out_of_scope"] = findings_qs.filter(finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters["all"] = findings_qs.order_by("date")
@@ -610,7 +611,8 @@ def view_product_metrics(request, pid):
 
     all_findings = list(filters.get("all", []).values("id", "date", "severity"))
     open_findings = list(filters.get("open", []).values("id", "date", "mitigated", "severity"))
-    closed_findings = list(filters.get("closed", []).values("id", "date", "severity"))
+    # Include mitigated date for closed findings to group by when they were closed, not discovered
+    closed_findings = list(filters.get("closed", []).values("id", "date", "mitigated", "severity"))
     accepted_findings = list(filters.get("accepted", []).values("id", "date", "severity"))
 
     """
@@ -681,11 +683,29 @@ def view_product_metrics(request, pid):
             if open_objs_by_severity.get(finding.get("severity")) is not None:
                 open_objs_by_severity[finding.get("severity")] += 1
 
-        # Close findings
+        # Close findings - group by mitigated date, not discovery date
         elif closed_findings_dict.get(finding.get("id", None)):
-            if unix_timestamp in open_close_weekly:
+            # Find the closed finding to get its mitigated date
+            closed_finding = next((f for f in closed_findings if f.get("id") == finding.get("id")), None)
+            if closed_finding and closed_finding.get("mitigated"):
+                # Use mitigated date for grouping closed findings
+                mitigated_date = closed_finding.get("mitigated")
+                mitigated_date_only = mitigated_date.date() if isinstance(mitigated_date, datetime) else mitigated_date
+                iso_cal = mitigated_date_only.isocalendar()
+                mitigated_week_start = iso_to_gregorian(iso_cal[0], iso_cal[1], 1)
+                mitigated_html_date = mitigated_week_start.strftime("<span class='small'>%m/%d<br/>%Y</span>")
+                mitigated_unix_timestamp = (tcalendar.timegm(mitigated_week_start.timetuple()) * 1000)
+
+                if mitigated_unix_timestamp in open_close_weekly:
+                    open_close_weekly[mitigated_unix_timestamp]["closed"] += 1
+                else:
+                    open_close_weekly[mitigated_unix_timestamp] = {"closed": 1, "open": 0, "accepted": 0}
+                    open_close_weekly[mitigated_unix_timestamp]["week"] = mitigated_html_date
+            elif unix_timestamp in open_close_weekly:
+                # Fallback to discovery date if mitigated date is not available
                 open_close_weekly[unix_timestamp]["closed"] += 1
             else:
+                # Fallback to discovery date if mitigated date is not available
                 open_close_weekly[unix_timestamp] = {"closed": 1, "open": 0, "accepted": 0}
                 open_close_weekly[unix_timestamp]["week"] = html_date
             # Optimization: count severity level on server side
