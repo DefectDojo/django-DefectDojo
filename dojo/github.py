@@ -15,25 +15,29 @@ logger = logging.getLogger(__name__)
 
 
 def reopen_external_issue_github(find, note, prod, eng):
-
+    # Ensure the system setting for GitHub integration is enabled
     from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
     if not get_system_setting("enable_github"):
         return
-
     # Check if we have github info related to the product
-    if GITHUB_PKey.objects.filter(product=prod).count() == 0:
+    if not GITHUB_PKey.objects.filter(product=prod).exists():
         return
-
+    # Get the GitHub product configuration
     github_product = GITHUB_PKey.objects.get(product=prod)
     if github_product is None:
         logger.error("Unable to get project key")
         return
-
-    github_conf = github_product.git_conf
+    # Check if we have github info related to the finding
+    if not GITHUB_Issue.objects.filter(finding=find).exists():
+        return
+    # Get the GitHub issue related to the finding
     g_issue = GITHUB_Issue.objects.get(finding=find)
+    if not g_issue:
+        logger.error("Unable to get github issue")
+        return
 
     try:
-        g_ctx = Github(auth=Auth.Token(github_conf.api_key))
+        g_ctx = Github(auth=Auth.Token(github_product.git_conf.api_key))
         repo = g_ctx.get_repo(github_product.git_project)
         issue = repo.get_issue(int(g_issue.issue_id))
     except:
@@ -46,25 +50,29 @@ def reopen_external_issue_github(find, note, prod, eng):
 
 
 def close_external_issue_github(find, note, prod, eng):
-
+    # Ensure the system setting for GitHub integration is enabled
     from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
     if not get_system_setting("enable_github"):
         return
-
     # Check if we have github info related to the product
-    if GITHUB_PKey.objects.filter(product=prod).count() == 0:
+    if not GITHUB_PKey.objects.filter(product=prod).exists():
         return
-
+    # Get the GitHub product configuration
     github_product = GITHUB_PKey.objects.get(product=prod)
     if github_product is None:
         logger.error("Unable to get project key")
         return
-
-    github_conf = github_product.git_conf
+    # Check if we have github info related to the finding
+    if not GITHUB_Issue.objects.filter(finding=find).exists():
+        return
+    # Get the GitHub issue related to the finding
     g_issue = GITHUB_Issue.objects.get(finding=find)
+    if not g_issue:
+        logger.error("Unable to get github issue")
+        return
 
     try:
-        g_ctx = Github(auth=Auth.Token(github_conf.api_key))
+        g_ctx = Github(auth=Auth.Token(github_product.git_conf.api_key))
         repo = g_ctx.get_repo(github_product.git_project)
         issue = repo.get_issue(int(g_issue.issue_id))
     except:
@@ -77,25 +85,29 @@ def close_external_issue_github(find, note, prod, eng):
 
 
 def update_external_issue_github(find, prod, eng):
-
+    # Ensure the system setting for GitHub integration is enabled
     from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
     if not get_system_setting("enable_github"):
         return
-
     # Check if we have github info related to the product
-    if GITHUB_PKey.objects.filter(product=prod).count() == 0:
+    if not GITHUB_PKey.objects.filter(product=prod).exists():
         return
-
+    # Get the GitHub product configuration
     github_product = GITHUB_PKey.objects.get(product=prod)
     if github_product is None:
         logger.error("Unable to get project key")
         return
-
-    github_conf = github_product.git_conf
+    # Check if we have github info related to the finding
+    if not GITHUB_Issue.objects.filter(finding=find).exists():
+        return
+    # Get the GitHub issue related to the finding
     g_issue = GITHUB_Issue.objects.get(finding=find)
+    if not g_issue:
+        logger.error("Unable to get github issue")
+        return
 
     try:
-        g_ctx = Github(auth=Auth.Token(github_conf.api_key))
+        g_ctx = Github(auth=Auth.Token(github_product.git_conf.api_key))
         repo = g_ctx.get_repo(github_product.git_project)
         issue = repo.get_issue(int(g_issue.issue_id))
         issue.edit(title=find.title, body=github_body(find), labels=["defectdojo", "security / " + find.severity])
@@ -105,32 +117,27 @@ def update_external_issue_github(find, prod, eng):
 
 
 def add_external_issue_github(find, prod, eng):
-
+    # Ensure the system setting for GitHub integration is enabled
     from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
     if not get_system_setting("enable_github"):
         return
-
     # Check if we have github info related to the product
-    if GITHUB_PKey.objects.filter(product=prod).count() == 0:
-        logger.debug("cannot find github conf for this product")
+    if not GITHUB_PKey.objects.filter(product=prod).exists():
         return
-
-    github_pkey = GITHUB_PKey.objects.get(product=prod)
-    if github_pkey is None:
-        logger.error("Unable to get product conf")
+    # Get the GitHub product configuration
+    github_product = GITHUB_PKey.objects.get(product=prod)
+    if github_product is None:
+        logger.error("Unable to get project key")
         return
-
-    github_conf = github_pkey.git_conf
-
     # We push only active and verified issues
     if "Active" in find.status() and ("Verified" in find.status() and get_system_setting("enforce_verified_status", True)):
         eng = Engagement.objects.get(test=find.test)
         prod = Product.objects.get(engagement=eng)
         github_product_key = GITHUB_PKey.objects.get(product=prod)
-        logger.info("Create issue with github profile: " + str(github_conf) + " on product: " + str(github_product_key))
+        logger.info("Create issue with github profile: " + str(github_product_key.git_conf) + " on product: " + str(github_product_key))
 
         try:
-            g = Github(auth=Auth.Token(github_conf.api_key))
+            g = Github(auth=Auth.Token(github_product_key.git_conf.api_key))
             user = g.get_user()
             logger.debug("logged in with github user: " + user.login)
             logger.debug("Look for project: " + github_product_key.git_project)
