@@ -33,7 +33,7 @@ jobs:
              docker images
 
       - name: Start Dojo
-        run: docker compose up --no-deps -d postgres nginx uwsgi
+        run: docker compose up --no-deps -d valkey postgres uwsgi nginx
         env:
           DJANGO_VERSION: ${{ env.release_version }}-alpine
           NGINX_VERSION: ${{ env.release_version }}-alpine
