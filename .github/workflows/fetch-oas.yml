@@ -38,6 +38,10 @@ jobs:
           DJANGO_VERSION: ${{ env.release_version }}-alpine
           NGINX_VERSION: ${{ env.release_version }}-alpine
 
+      - name: Wait for Dojo to be ready
+        run: |
+          timeout 120 bash -c 'until curl -f http://localhost:8080/api/v2/oa3/schema/; do sleep 10; done'
+
       - name: Download OpenAPI Specifications
         run: |-
              wget 'http://localhost:8080/api/v2/oa3/schema/?format=${{ matrix.file-type }}' -O oas.${{ matrix.file-type }} --tries=10 --retry-on-http-error=502
