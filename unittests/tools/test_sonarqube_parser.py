@@ -579,20 +579,25 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("6.4", item.cvssv3_score)
         self.assertEqual("package", item.component_name)
         self.assertEqual("1.1.2", item.component_version)
+        self.assertEqual("2023-10-16", item.date)
         item = findings[1]
         self.assertEqual("Web:TableWithoutCaptionCheck_asdfwfewfwefewf", item.title)
         self.assertEqual("Low", item.severity)
         self.assertEqual(0, item.cwe)
         self.assertIsNone(item.cvssv3_score)
+        self.assertEqual("2023-07-25", item.date)
         item = findings[2]
         self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
         self.assertEqual("Low", item.severity)
+        self.assertEqual("2024-01-29", item.date)
         item = findings[3]
         self.assertEqual("GHSA-frr2-c345-p7c2", item.unsaved_vulnerability_ids[0])
+        self.assertEqual("2023-10-16", item.date)
         item = findings[4]
         self.assertEqual("CVE-2023-52428", item.unsaved_vulnerability_ids[0])
         self.assertEqual("nimbus-jose-jwt-9.24.4.jar", item.component_name)
         self.assertIsNone(item.component_version)
+        self.assertEqual("2023-10-16", item.date)
         my_file_handle.close()
 
     def test_parse_json_file_from_api_with_multiple_findings_hotspots_json(self):
@@ -606,12 +611,15 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(str, type(item.description))
         self.assertEqual("typescript:7777_fwafewef", item.title)
         self.assertEqual("High", item.severity)
+        self.assertEqual("2024-02-13", item.date)
         item = findings[1]
         self.assertEqual("Web:1222_cyxcvyxcvyxv", item.title)
         self.assertEqual("Low", item.severity)
+        self.assertEqual("2023-07-27", item.date)
         item = findings[2]
         self.assertEqual("Web:9876_werrwerwerwer", item.title)
         self.assertEqual("Low", item.severity)
+        self.assertEqual("2023-07-27", item.date)
         my_file_handle.close()
 
     def test_parse_json_file_from_api_with_empty_json(self):
