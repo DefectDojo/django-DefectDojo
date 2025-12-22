@@ -525,7 +525,7 @@ A Helm chart for Kubernetes to install DefectDojo
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://registry-1.docker.io/cloudpirates | valkey | 0.10.2 |
+| oci://registry-1.docker.io/cloudpirates | valkey | 0.13.0 |
 | oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | postgresql | 16.7.27 |
 
 ## Values
