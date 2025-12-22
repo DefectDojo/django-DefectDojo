@@ -37,6 +37,8 @@ class TestPingCastleParser(DojoTestCase):
         self.assertEqual(spooler.title, "[PingCastle] A-DC-Spooler (Anomalies/PassTheCredential)")
         self.assertEqual(spooler.severity, "High")
         self.assertTrue(len(getattr(spooler, "unsaved_endpoints", [])) > 0)
+        for endpoint in spooler.unsaved_endpoints:
+             endpoint.clean()
         ds_heuristics = next((f for f in findings if f.vuln_id_from_tool == "A-DsHeuristicsLDAPSecurity"), None)
         self.assertIsNotNone(ds_heuristics)
         self.assertEqual(ds_heuristics.title, "[PingCastle] A-DsHeuristicsLDAPSecurity (Anomalies/Reconnaissance)")
