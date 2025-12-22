@@ -22,7 +22,7 @@ Django==5.2.9
 django-single-session==0.2.0
 djangorestframework==3.16.1
 html2text==2025.4.15
-humanize==4.14.0
+humanize==4.15.0
 jira==3.10.5
 PyGithub==2.8.1
 lxml==6.0.2
