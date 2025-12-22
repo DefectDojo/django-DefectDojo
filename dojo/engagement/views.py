@@ -53,6 +53,7 @@ from dojo.filters import (
     EngagementTestFilterWithoutObjectLookups,
     ProductEngagementsFilter,
     ProductEngagementsFilterWithoutObjectLookups,
+    FindingPriorityFilter
 )
 from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
 from dojo.finding.views import find_available_notetypes
@@ -1456,9 +1457,19 @@ def add_risk_acceptance_pending(request, eid, fid):
             GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False and
             GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True
         ):
-            min_rp = finding.priority_classification[1]
-            max_rp = finding.priority_classification[2]
-            query = query.filter(priority__range=(min_rp, max_rp))
+            priority_level = finding.priority_classification
+
+            priority_filter = FindingPriorityFilter()
+            priority_map = {
+                "Very Critical": 4,
+                "Critical": 3,
+                "High": 2,
+                "Medium Low": 1,
+                "Unknown": 0,
+            }
+            priority_value = priority_map.get(priority_level, 0)
+
+            query = priority_filter.filter(query, [str(priority_value)])
         else:
             query = query.filter(severity=finding.severity)
 
@@ -1661,9 +1672,19 @@ def add_transfer_finding(request, eid, fid=None):
             GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False and
             GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True
         ):
-            min_rp = finding.priority_classification[1]
-            max_rp = finding.priority_classification[2]
-            form.fields["findings"].queryset = query.filter(priority__range=(min_rp, max_rp))
+            priority_level = finding.priority_classification
+
+            priority_filter = FindingPriorityFilter()
+            priority_map = {
+                "Very Critical": 4,
+                "Critical": 3,
+                "High": 2,
+                "Medium Low": 1,
+                "Unknown": 0,
+            }
+            priority_value = priority_map.get(priority_level, 0)
+            query = priority_filter.filter(form.fields["findings"].queryset, [str(priority_value)])
+            form.fields["findings"].queryset = query
         else:
             form.fields["findings"].queryset = query.filter(severity=finding.severity)
             
@@ -1899,8 +1920,27 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                                                      risk_status__in=["Risk Active", "Risk Expired", "Transfer Rejected"],
                                                      active=True,
                                                      risk_accepted=False,
-                                                     severity=risk_acceptance.severity,
                                                      duplicate=False).filter(~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")))
+        if (
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False and
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True
+        ):
+            priority_level = accepted_findings[0].priority_classification
+
+            priority_filter = FindingPriorityFilter()
+            priority_map = {
+                "Very Critical": 4,
+                "Critical": 3,
+                "High": 2,
+                "Medium Low": 1,
+                "Unknown": 0,
+            }
+            priority_value = priority_map.get(priority_level, 0)
+
+            unaccepted_findings = priority_filter.filter(unaccepted_findings, [str(priority_value)])
+        else:
+            unaccepted_findings = unaccepted_findings.filter(severity=risk_acceptance.severity)
+
         if len(accepted_findings) > 0 and accepted_findings[0].impact and accepted_findings[0].impact in settings.COMPLIANCE_FILTER_RISK:
             unaccepted_findings = unaccepted_findings.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
 

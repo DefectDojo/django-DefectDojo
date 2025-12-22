@@ -3334,9 +3334,9 @@ class Finding(models.Model):
                     min_rp, max_rp = map(float, rp.split("-"))
 
                     if min_rp <= priority <= max_rp:
-                        return label, min_rp, max_rp
+                        return label
 
-        return "Unknown", 0.0, 0.0
+        return "Unknown" 
 
 
     @property
@@ -3353,7 +3353,7 @@ class Finding(models.Model):
             "Medium Low": "low",
         }
         severity = self.severity.lower()
-        return severity_mapping.get(self.priority_classification[0], severity)
+        return severity_mapping.get(self.priority_classification, severity)
 
 
     def get_sla_period(self):
@@ -4179,6 +4179,12 @@ class Risk_Acceptance(models.Model):
     @property
     def is_expired(self):
         return self.expiration_date_handled is not None
+    
+    @property
+    def priority(self):
+        if self.accepted_findings.exists():
+            return self.accepted_findings[0].priority_classification
+        raise ValueError("No accepted findings associated with this risk acceptance.")
 
     # relationship is many to many, but we use it as one-to-many
     @property
