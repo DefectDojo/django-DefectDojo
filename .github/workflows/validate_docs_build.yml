@@ -38,4 +38,5 @@ jobs:
         env:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
+          HUGO_MEMORYLIMIT: 6
         run: cd docs && npm ci && hugo --minify --gc --config config/production/hugo.toml
