@@ -27,6 +27,7 @@ def get_finding_models_for_deduplication(finding_ids):
 
     """
     if not finding_ids:
+        logger.debug("get_finding_models_for_deduplication called with no finding_ids")
         return []
 
     return list(
@@ -659,6 +660,7 @@ def dedupe_batch_of_findings(findings, *args, **kwargs):
         return batch_dedupe_method(findings, *args, **kwargs)
 
     if not findings:
+        logger.debug("dedupe_batch_of_findings called with no findings")
         return None
 
     enabled = System_Settings.objects.get().enable_deduplication
