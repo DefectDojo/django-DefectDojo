@@ -40,10 +40,10 @@ data:
   DD_CELERY_WORKER_CONCURRENCY: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.concurrency | default "8" }}{{ end }}'
   DD_CELERY_WORKER_PREFETCH_MULTIPLIER: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.prefetchMultiplier | default "128" }}{{ end }}'
   DD_DATABASE_ENGINE: django.db.backends.postgresql
-  DD_DATABASE_HOST: {{ template "postgresql.hostname" . }}
-  DD_DATABASE_PORT: '{{ .Values.postgresql.primary.service.ports.postgresql }}'
-  DD_DATABASE_USER: {{ .Values.postgresql.auth.username }}
-  DD_DATABASE_NAME: {{ .Values.postgresql.auth.database }}
+  DD_DATABASE_HOST: {{ template "postgres.hostname" . }}
+  DD_DATABASE_PORT: '{{ .Values.postgres.service.port }}'
+  DD_DATABASE_USER: {{ .Values.postgres.auth.username }}
+  DD_DATABASE_NAME: {{ .Values.postgres.auth.database }}
   DD_INITIALIZE: '{{ .Values.initializer.run }}'
   DD_UWSGI_ENDPOINT: /run/defectdojo/uwsgi.sock
   DD_UWSGI_HOST: localhost

@@ -144,8 +144,8 @@ spec:
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
-              key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
+              name: {{ .Values.postgres.auth.existingSecret | default "defectdojo-postgres-specific" }}
+              key: {{ .Values.postgres.auth.secretKeys.adminPasswordKey | default "postgresql-password" }}
         - name: DD_SECRET_KEY
           valueFrom:
             secretKeyRef:

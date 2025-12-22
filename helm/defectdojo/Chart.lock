@@ -1,9 +1,9 @@
 dependencies:
-- name: postgresql
-  repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
-  version: 16.7.27
+- name: postgres
+  repository: oci://registry-1.docker.io/cloudpirates
+  version: 0.13.3
 - name: valkey
   repository: oci://registry-1.docker.io/cloudpirates
   version: 0.13.0
-digest: sha256:2ea1c1bef68a7e7fd2dee4262506c880e48c9703cb7ba9908d91b891fc630048
-generated: "2025-12-15T17:19:18.528341139Z"
+digest: sha256:0e62815b84927241859692d2e9d0b0460106474f5efd23d6d63e8fd2789c2d4c
+generated: "2025-12-20T00:00:22.276183+01:00"

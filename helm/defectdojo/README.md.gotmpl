@@ -95,7 +95,7 @@ helm install \
   --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
   --set createSecret=true \
   --set createValkeySecret=true \
-  --set createPostgresqlSecret=true
+  --set createPostgresSecret=true
 ```
 
 It usually takes up to a minute for the services to startup and the
@@ -281,7 +281,7 @@ helm install \
   --set django.ingress.secretName="minikube-tls" \
   --set createSecret=true \
   --set createValkeySecret=true \
-  --set createPostgresqlSecret=true
+  --set createPostgresSecret=true
 
 # For high availability deploy multiple instances of Django, Celery and Valkey
 helm install \
@@ -296,7 +296,7 @@ helm install \
   --set valkey.replicaCount=3 \
   --set createSecret=true \
   --set createValkeySecret=true \
-  --set createPostgresqlSecret=true
+  --set createPostgresSecret=true
 
 # Run highly available PostgreSQL cluster
 # for production environment.
@@ -310,12 +310,12 @@ helm install \
   --set valkey.architecture=replication \
   --set valkey.replicaCount=3 \
   --set django.ingress.secretName="minikube-tls" \
-  --set postgresql.enabled=true \
-  --set postgresql.replication.enabled=true \
-  --set postgresql.replication.slaveReplicas=3 \
+  --set postgres.enabled=true \
+  --set postgres.replication.enabled=true \
+  --set postgres.replication.slaveReplicas=3 \
   --set createSecret=true \
   --set createValkeySecret=true \
-  --set createPostgresqlSecret=true
+  --set createPostgresSecret=true
 
 # Note: If you run `helm install defectdojo before, you will get an error
 # message like `Error: release defectdojo failed: secrets "defectdojo" already
@@ -393,7 +393,7 @@ Sample secret template (replace the placeholders with your PostgreSQL credential
 apiversion: v1
 kind: Secret
 metadata:  
-  name: defectdojo-postgresql-specific  
+  name: defectdojo-postgres-specific  
 type: Opaque
 stringData:  # I chose stringData for better visualization of the credentials for debugging
   password: <user-password>
@@ -435,9 +435,7 @@ postgresql:
     database: defectdojo # your database name
     secretKeys: 
       adminPasswordKey: password # the name of the field containing the password value
-      userPasswordKey: password # the name of the field containing the password value
-      replicationPasswordKey: password # the name of the field containing the password value
-    existingSecret: defectdojo-postgresql-specific # the secret containing your database password
+    existingSecret: defectdojo-postgres-specific # the secret containing your database password
 
 extraEnv:
 # Overwrite the database endpoint
@@ -489,7 +487,7 @@ helm uninstall defectdojo
 To remove persistent objects not removed by uninstall (this will remove any database):
 
 ```
-kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-postgresql-specific
+kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-postgres-specific
 kubectl delete serviceAccount defectdojo
 kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 ```

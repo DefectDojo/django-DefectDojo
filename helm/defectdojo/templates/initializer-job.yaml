@@ -153,8 +153,8 @@ spec:
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.postgresql.auth.existingSecret }}
-              key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
+              name: {{ .Values.postgres.auth.existingSecret }}
+              key: {{ .Values.postgres.auth.secretKeys.adminPasswordKey }}
         {{- with .Values.initializer.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

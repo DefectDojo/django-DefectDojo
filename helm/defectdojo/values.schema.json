@@ -376,7 +376,7 @@
                 }
             }
         },
-        "createPostgresqlSecret": {
+        "createPostgresSecret": {
             "description": "create postgresql secret in defectdojo chart, outside of postgresql chart",
             "type": "boolean"
         },
@@ -1175,19 +1175,12 @@
             "description": "Additional labels to add to the pods: ``` podLabels: key: value ```",
             "type": "object"
         },
-        "postgresServer": {
-            "description": "To use an external PostgreSQL instance (like CloudSQL), set `postgresql.enabled` to false, set items in `postgresql.auth` part for authentication, and set the address here:",
-            "type": [
-                "string",
-                "null"
-            ]
-        },
-        "postgresql": {
-            "description": "For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/postgresql",
+        "postgres": {
+            "description": "For more advance options check the bitnami chart documentation: https://artifacthub.io/packages/helm/cloudpirates-postgres/postgres",
             "type": "object",
             "properties": {
-                "architecture": {
-                    "type": "string"
+                "affinity": {
+                    "type": "object"
                 },
                 "auth": {
                     "type": "object",
@@ -1206,12 +1199,6 @@
                             "properties": {
                                 "adminPasswordKey": {
                                     "type": "string"
-                                },
-                                "replicationPasswordKey": {
-                                    "type": "string"
-                                },
-                                "userPasswordKey": {
-                                    "type": "string"
                                 }
                             }
                         },
@@ -1220,85 +1207,23 @@
                         }
                     }
                 },
+                "containerSecurityContext": {
+                    "type": "object",
+                    "properties": {
+                        "runAsUser": {
+                            "description": "runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift \"restricted SCC\" to work successfully.",
+                            "type": "integer"
+                        }
+                    }
+                },
                 "enabled": {
                     "description": "To use an external instance, switch enabled to `false` and set the address in `postgresServer` below",
                     "type": "boolean"
                 },
-                "primary": {
-                    "type": "object",
-                    "properties": {
-                        "affinity": {
-                            "type": "object"
-                        },
-                        "containerSecurityContext": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "description": "Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC",
-                                    "type": "boolean"
-                                },
-                                "runAsUser": {
-                                    "description": "runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift \"restricted SCC\" to work successfully.",
-                                    "type": "integer"
-                                }
-                            }
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "nodeSelector": {
-                            "type": "object"
-                        },
-                        "persistence": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean"
-                                }
-                            }
-                        },
-                        "podSecurityContext": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "description": "Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC",
-                                    "type": "boolean"
-                                },
-                                "fsGroup": {
-                                    "description": "fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift \"restricted SCC\" to work successfully.",
-                                    "type": "integer"
-                                }
-                            }
-                        },
-                        "service": {
-                            "type": "object",
-                            "properties": {
-                                "ports": {
-                                    "type": "object",
-                                    "properties": {
-                                        "postgresql": {
-                                            "type": "integer"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                "nodeSelector": {
+                    "type": "object"
                 },
-                "shmVolume": {
-                    "type": "object",
-                    "properties": {
-                        "chmod": {
-                            "type": "object",
-                            "properties": {
-                                "enabled": {
-                                    "type": "boolean"
-                                }
-                            }
-                        }
-                    }
-                },
-                "volumePermissions": {
+                "persistence": {
                     "type": "object",
                     "properties": {
                         "containerSecurityContext": {
@@ -1314,8 +1239,45 @@
                             "type": "boolean"
                         }
                     }
+                },
+                "podSecurityContext": {
+                    "type": "object",
+                    "properties": {
+                        "fsGroup": {
+                            "description": "fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift \"restricted SCC\" to work successfully.",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "service": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "shmVolume": {
+                    "type": "object",
+                    "properties": {
+                        "chmod": {
+                            "type": "object",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
                 }
             }
+        },
+        "postgresServer": {
+            "description": "To use an external PostgreSQL instance (like CloudSQL), set `postgres.enabled` to false, set items in `postgres.auth` part for authentication, and set the address here:",
+            "type": [
+                "string",
+                "null"
+            ]
         },
         "redisParams": {
             "description": "Parameters attached to the redis connection string, defaults to \"ssl_cert_reqs=optional\" if `redisScheme` is `rediss`",

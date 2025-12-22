@@ -95,7 +95,7 @@ helm install \
   --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
   --set createSecret=true \
   --set createValkeySecret=true \
-  --set createPostgresqlSecret=true
+  --set createPostgresSecret=true
 ```
 
 It usually takes up to a minute for the services to startup and the
@@ -281,7 +281,7 @@ helm install \
   --set django.ingress.secretName="minikube-tls" \
   --set createSecret=true \
   --set createValkeySecret=true \
-  --set createPostgresqlSecret=true
+  --set createPostgresSecret=true
 
 # For high availability deploy multiple instances of Django, Celery and Valkey
 helm install \
@@ -296,7 +296,7 @@ helm install \
   --set valkey.replicaCount=3 \
   --set createSecret=true \
   --set createValkeySecret=true \
-  --set createPostgresqlSecret=true
+  --set createPostgresSecret=true
 
 # Run highly available PostgreSQL cluster
 # for production environment.
@@ -310,12 +310,12 @@ helm install \
   --set valkey.architecture=replication \
   --set valkey.replicaCount=3 \
   --set django.ingress.secretName="minikube-tls" \
-  --set postgresql.enabled=true \
-  --set postgresql.replication.enabled=true \
-  --set postgresql.replication.slaveReplicas=3 \
+  --set postgres.enabled=true \
+  --set postgres.replication.enabled=true \
+  --set postgres.replication.slaveReplicas=3 \
   --set createSecret=true \
   --set createValkeySecret=true \
-  --set createPostgresqlSecret=true
+  --set createPostgresSecret=true
 
 # Note: If you run `helm install defectdojo before, you will get an error
 # message like `Error: release defectdojo failed: secrets "defectdojo" already
@@ -393,7 +393,7 @@ Sample secret template (replace the placeholders with your PostgreSQL credential
 apiversion: v1
 kind: Secret
 metadata: 
-  name: defectdojo-postgresql-specific 
+  name: defectdojo-postgres-specific 
 type: Opaque
 stringData:  # I chose stringData for better visualization of the credentials for debugging
   password: <user-password>
@@ -435,9 +435,7 @@ postgresql:
     database: defectdojo # your database name
     secretKeys:
       adminPasswordKey: password # the name of the field containing the password value
-      userPasswordKey: password # the name of the field containing the password value
-      replicationPasswordKey: password # the name of the field containing the password value
-    existingSecret: defectdojo-postgresql-specific # the secret containing your database password
+    existingSecret: defectdojo-postgres-specific # the secret containing your database password
 
 extraEnv:
 # Overwrite the database endpoint
@@ -487,7 +485,7 @@ helm uninstall defectdojo
 To remove persistent objects not removed by uninstall (this will remove any database):
 
 ```
-kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-postgresql-specific
+kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-postgres-specific
 kubectl delete serviceAccount defectdojo
 kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 ```
@@ -525,8 +523,8 @@ A Helm chart for Kubernetes to install DefectDojo
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://registry-1.docker.io/cloudpirates | valkey | 0.10.2 |
-| oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | postgresql | 16.7.27 |
+| oci://registry-1.docker.io/cloudpirates | postgres | 0.13.3 |
+| oci://registry-1.docker.io/cloudpirates | valkey | 0.10.3 |
 
 ## Values
 
@@ -600,7 +598,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | cloudsql.resources | object | `{}` | Optional: add resource requests/limits for the CloudSQL proxy container. |
 | cloudsql.use_private_ip | bool | `false` | whether to use a private IP to connect to the database |
 | cloudsql.verbose | bool | `true` | By default, the proxy has verbose logging. Set this to false to make it less verbose |
-| createPostgresqlSecret | bool | `false` | create postgresql secret in defectdojo chart, outside of postgresql chart |
+| createPostgresSecret | bool | `false` | create postgresql secret in defectdojo chart, outside of postgresql chart |
 | createSecret | bool | `false` | create defectdojo specific secret |
 | createValkeySecret | bool | `false` | create valkey secret in defectdojo chart, outside of valkey chart |
 | dbMigrationChecker.containerSecurityContext | object | `{}` | Container security context for the DB migration checker. |
@@ -740,14 +738,12 @@ A Helm chart for Kubernetes to install DefectDojo
 | networkPolicy.ingress | list | `[]` | For more detailed configuration with ports and peers. It will ignore ingressExtend ``` ingress:  - from:     - podSelector:         matchLabels:           app.kubernetes.io/instance: defectdojo     - podSelector:         matchLabels:           app.kubernetes.io/instance: defectdojo-prometheus    ports:    - protocol: TCP      port: 8443 ``` |
 | networkPolicy.ingressExtend | list | `[]` | if additional labels need to be allowed (e.g. prometheus scraper) ``` ingressExtend:  - podSelector:      matchLabels:      app.kubernetes.io/instance: defectdojo-prometheus ``` |
 | podLabels | object | `{}` | Additional labels to add to the pods: ``` podLabels:   key: value ``` |
-| postgresServer | string | `nil` | To use an external PostgreSQL instance (like CloudSQL), set `postgresql.enabled` to false, set items in `postgresql.auth` part for authentication, and set the address here: |
-| postgresql | object | `{"architecture":"standalone","auth":{"database":"defectdojo","existingSecret":"defectdojo-postgresql-specific","password":"","secretKeys":{"adminPasswordKey":"postgresql-postgres-password","replicationPasswordKey":"postgresql-replication-password","userPasswordKey":"postgresql-password"},"username":"defectdojo"},"enabled":true,"primary":{"affinity":{},"containerSecurityContext":{"enabled":true,"runAsUser":1001},"name":"primary","nodeSelector":{},"persistence":{"enabled":true},"podSecurityContext":{"enabled":true,"fsGroup":1001},"service":{"ports":{"postgresql":5432}}},"shmVolume":{"chmod":{"enabled":false}},"volumePermissions":{"containerSecurityContext":{"runAsUser":1001},"enabled":false}}` | For more advance options check the bitnami chart documentation: https://github.com/bitnami/charts/tree/main/bitnami/postgresql |
-| postgresql.enabled | bool | `true` | To use an external instance, switch enabled to `false` and set the address in `postgresServer` below |
-| postgresql.primary.containerSecurityContext.enabled | bool | `true` | Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC |
-| postgresql.primary.containerSecurityContext.runAsUser | int | `1001` | runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully. |
-| postgresql.primary.podSecurityContext.enabled | bool | `true` | Default is true for K8s. Enabled needs to false for OpenShift restricted SCC and true for anyuid SCC |
-| postgresql.primary.podSecurityContext.fsGroup | int | `1001` | fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully. |
-| postgresql.volumePermissions.containerSecurityContext | object | `{"runAsUser":1001}` | if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above |
+| postgres | object | `{"affinity":{},"auth":{"database":"defectdojo","existingSecret":"defectdojo-postgres-specific","password":"","secretKeys":{"adminPasswordKey":"postgres-password"},"username":"defectdojo"},"containerSecurityContext":{"runAsUser":1001},"enabled":true,"nodeSelector":{},"persistence":{"containerSecurityContext":{"runAsUser":1001},"enabled":false},"podSecurityContext":{"fsGroup":1001},"service":{"port":5432},"shmVolume":{"chmod":{"enabled":false}}}` | For more advance options check the bitnami chart documentation: https://artifacthub.io/packages/helm/cloudpirates-postgres/postgres |
+| postgres.containerSecurityContext.runAsUser | int | `1001` | runAsUser specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully. |
+| postgres.enabled | bool | `true` | To use an external instance, switch enabled to `false` and set the address in `postgresServer` below |
+| postgres.persistence.containerSecurityContext | object | `{"runAsUser":1001}` | if using restricted SCC set runAsUser: "auto" and if running under anyuid SCC - runAsUser needs to match the line above |
+| postgres.podSecurityContext.fsGroup | int | `1001` | fsGroup specification below is not applied if enabled=false. enabled=false is the required setting for OpenShift "restricted SCC" to work successfully. |
+| postgresServer | string | `nil` | To use an external PostgreSQL instance (like CloudSQL), set `postgres.enabled` to false, set items in `postgres.auth` part for authentication, and set the address here: |
 | redisParams | string | `""` | Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `redisScheme` is `rediss` |
 | redisPort | int | `6379` | Define the protocol to use with the external Redis instance |
 | redisScheme | string | `"redis"` | Define the protocol to use with the external Redis instance |
