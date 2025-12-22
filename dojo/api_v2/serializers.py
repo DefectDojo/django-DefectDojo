@@ -2281,6 +2281,7 @@ class CommonImportScanSerializer(serializers.Serializer):
         Raises exceptions in the event of an error
         """
         try:
+            logger.debug(f"process_scan called with context: {context}")
             start_time = time.perf_counter()
             importer = self.get_importer(**context)
             context["test"], _, _, _, _, _, _ = importer.process_scan(
@@ -2558,6 +2559,7 @@ class ReImportScanSerializer(CommonImportScanSerializer):
         """
         statistics_before, statistics_delta = None, None
         try:
+            logger.debug(f"process_scan called with context: {context}")
             start_time = time.perf_counter()
             if test := context.get("test"):
                 statistics_before = test.statistics
