@@ -2599,6 +2599,9 @@ def finding_bulk_update_all(request, pid=None):
 
             finds = prefetch_for_findings(finds)
             note = None
+            skipped_duplicate_count = 0
+            skipped_active_risk_accept_count = 0
+            actually_updated_count = 0
             if form.cleaned_data["severity"] or form.cleaned_data["status"]:
                 for find in finds:
                     old_find = copy.deepcopy(find)
@@ -2613,18 +2616,30 @@ def finding_bulk_update_all(request, pid=None):
 
                     if form.cleaned_data["status"]:
                         # logger.debug('setting status from bulk edit form: %s', form)
-                        find.active = form.cleaned_data["active"]
-                        find.verified = form.cleaned_data["verified"]
-                        find.false_p = form.cleaned_data["false_p"]
-                        find.out_of_scope = form.cleaned_data["out_of_scope"]
-                        find.is_mitigated = form.cleaned_data["is_mitigated"]
-                        find.under_review = form.cleaned_data["under_review"]
+                        # Check if finding is duplicate and user wants to set active/verified
+                        if find.duplicate and (form.cleaned_data["active"] or form.cleaned_data["verified"]):
+                            # Skip active/verified but allow other status changes
+                            skipped_duplicate_count += 1
+                            # Set other fields but not active/verified
+                            find.false_p = form.cleaned_data["false_p"]
+                            find.out_of_scope = form.cleaned_data["out_of_scope"]
+                            find.is_mitigated = form.cleaned_data["is_mitigated"]
+                            find.under_review = form.cleaned_data["under_review"]
+                        else:
+                            # Apply all status changes normally
+                            find.active = form.cleaned_data["active"]
+                            find.verified = form.cleaned_data["verified"]
+                            find.false_p = form.cleaned_data["false_p"]
+                            find.out_of_scope = form.cleaned_data["out_of_scope"]
+                            find.is_mitigated = form.cleaned_data["is_mitigated"]
+                            find.under_review = form.cleaned_data["under_review"]
                         find.last_reviewed = timezone.now()
                         find.last_reviewed_by = request.user
 
                     # use super to avoid all custom logic in our overriden save method
                     # it will trigger the pre_save signal
                     find.save_no_options()
+                    actually_updated_count += 1
 
                     if system_settings.false_positive_history:
                         # If finding is being marked as false positive
@@ -2652,6 +2667,14 @@ def finding_bulk_update_all(request, pid=None):
                 for prod in prods:
                     calculate_grade(prod)
 
+            if skipped_duplicate_count > 0:
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    f"Skipped status update of {skipped_duplicate_count} duplicate findings. Duplicate findings cannot be active or verified.",
+                    extra_tags="alert-warning",
+                )
+
             if form.cleaned_data["date"]:
                 for finding in finds:
                     finding.date = form.cleaned_data["date"]
@@ -2672,9 +2695,12 @@ def finding_bulk_update_all(request, pid=None):
                     finding.save_no_options()
 
             skipped_risk_accept_count = 0
+            skipped_active_risk_accept_count = 0
             if form.cleaned_data["risk_acceptance"]:
                 for finding in finds:
-                    if not finding.duplicate:
+                    if finding.active:
+                        skipped_active_risk_accept_count += 1
+                    elif not finding.duplicate:
                         if form.cleaned_data["risk_accept"]:
                             if (
                                 not finding.test.engagement.product.enable_simple_risk_acceptance
@@ -2694,6 +2720,14 @@ def finding_bulk_update_all(request, pid=None):
                     messages.WARNING,
                     (f"Skipped simple risk acceptance of {skipped_risk_accept_count} findings, "
                      "simple risk acceptance is disabled on the related products"),
+                    extra_tags="alert-warning",
+                )
+
+            if skipped_active_risk_accept_count > 0:
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    f"Skipped risk acceptance of {skipped_active_risk_accept_count} active findings. Active findings cannot be risk accepted.",
                     extra_tags="alert-warning",
                 )
 
@@ -2927,7 +2961,23 @@ def finding_bulk_update_all(request, pid=None):
             if success_count > 0:
                 add_success_message_to_response(f"{success_count} findings pushed to JIRA successfully")
 
-            if updated_find_count > 0:
+            # Show success message if status/severity updates were made (using actually_updated_count)
+            # or if other updates were made (using updated_find_count)
+            if (form.cleaned_data["severity"] or form.cleaned_data["status"]) and actually_updated_count > 0:
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    f"Bulk update of {actually_updated_count} findings was successful.",
+                    extra_tags="alert-success",
+                )
+            elif updated_find_count > 0 and (
+                form.cleaned_data["date"] or form.cleaned_data["planned_remediation_date"]
+                or form.cleaned_data["planned_remediation_version"] or form.cleaned_data["tags"]
+                or form.cleaned_data["notes"] or form.cleaned_data["risk_acceptance"]
+                or form.cleaned_data["finding_group_create"] or form.cleaned_data["finding_group_add"]
+                or form.cleaned_data["finding_group_remove"] or form.cleaned_data["finding_group_by"]
+                or form.cleaned_data["push_to_jira"] or form.cleaned_data["push_to_github"]
+            ):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
