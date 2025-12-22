@@ -2700,16 +2700,16 @@ def finding_bulk_update_all(request, pid=None):
                 for finding in finds:
                     if finding.active:
                         skipped_active_risk_accept_count += 1
-                    elif not finding.duplicate:
-                        if form.cleaned_data["risk_accept"]:
-                            if (
-                                not finding.test.engagement.product.enable_simple_risk_acceptance
-                            ):
-                                skipped_risk_accept_count += 1
-                            else:
-                                ra_helper.simple_risk_accept(request.user, finding)
-                        elif form.cleaned_data["risk_unaccept"]:
-                            ra_helper.risk_unaccept(request.user, finding)
+                    # Allow risk acceptance for inactive findings (whether duplicate or not)
+                    elif form.cleaned_data["risk_accept"]:
+                        if (
+                            not finding.test.engagement.product.enable_simple_risk_acceptance
+                        ):
+                            skipped_risk_accept_count += 1
+                        else:
+                            ra_helper.simple_risk_accept(request.user, finding)
+                    elif form.cleaned_data["risk_unaccept"]:
+                        ra_helper.risk_unaccept(request.user, finding)
 
                 for prod in prods:
                     calculate_grade(prod)
