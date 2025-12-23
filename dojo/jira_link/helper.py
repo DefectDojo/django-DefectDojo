@@ -893,13 +893,30 @@ def add_jira_issue(obj, *args, **kwargs):
     jira_project = get_jira_project(obj)
     jira_instance = get_jira_instance(obj)
 
-    obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
+    obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
+        # Expected validation failures (not verified, not active, below threshold)
+        # should not create alerts when auto-pushing via "push all issues"
+        # These are expected conditions that don't indicate a problem
+        expected_validation_errors = [
+            "error_not_active_or_verified",
+            "error_below_minimum_threshold",
+            "error_empty",
+            "error_inactive",
+        ]
+
         # not sure why this check is not part of can_be_pushed_to_jira, but afraid to change it
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
             logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
-            log_jira_cannot_be_pushed_reason(error_message + " and findis a duplicate", obj)
+            # Duplicates are expected, don't create alerts
+            logger.info("%s cannot be pushed to JIRA: %s (expected - duplicate finding)",
+                       to_str_typed(obj), error_message)
+        elif error_code in expected_validation_errors:
+            # These are expected when auto-pushing, only log, don't alert
+            logger.info("%s cannot be pushed to JIRA: %s (expected - finding not ready yet)",
+                       to_str_typed(obj), error_message)
         else:
+            # Unexpected errors (configuration issues, etc.) should still alert
             log_jira_cannot_be_pushed_reason(error_message, obj)
             logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
             logger.warning("The JIRA issue will NOT be created.")
