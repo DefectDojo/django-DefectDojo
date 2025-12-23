@@ -28,9 +28,6 @@ from dojo.group.queries import users_with_permissions_to_approve_long_term_findi
 from dojo.risk_acceptance.notification import Notification
 from dojo.user.queries import get_role_members, get_user
 from dojo.group.queries import get_users_for_group_by_role
-from dojo.risk_acceptance.queries import (
-    abuse_control_min_vulnerability_closed,
-    abuse_control_max_vulnerability_accepted)
 from dojo.transfer_findings import helper as hp_transfer_finding
 import dojo.risk_acceptance.helper as ra_helper
 
