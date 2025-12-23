@@ -56,32 +56,6 @@ def get_authorized_risk_acceptances(permission):
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
 
 
-def abuse_control_max_vulnerability_accepted(product_id: int, max_percentage: int):
-    message = ""
-    queryset = Finding.objects.select_related('test__engagement')\
-        .filter(test__engagement__product=product_id)
-    total_finding_active = queryset.filter(Q(Q(risk_status="Risk Accepted") | Q(active=True)) & Q(mitigated__isnull=True))
-    ideal_finding_accepted = round((len(total_finding_active) * max_percentage), 1)
-    total_finding_accepted = queryset.filter(risk_accepted=True, active=False, risk_status="Risk Accepted", mitigated=None)
-    persentage_finding_accepted = ((100 * len(total_finding_accepted)) / len(total_finding_active)) / 100
-    if status := persentage_finding_accepted <= max_percentage:
-        message = (f"The product meets abuse control:"
-                   f"The current percentage of findings accepted is {round((persentage_finding_accepted * 100), 1)}% and is less than or equal to {max_percentage * 100}%")
-        logger.debug(message)
-    else:
-        message = (f"The product does not meets abuse control:"
-                   f"The current percentage of findings accepted is {round((persentage_finding_accepted * 100), 1)}% and must be less than or equal to {max_percentage * 100}%"
-                   f" At least {int(len(total_finding_accepted) - ideal_finding_accepted)} findings need to be closed.")
-        logger.debug(message)
-
-    result = {
-        "status": status,
-        "total_finding_active": len(total_finding_active),
-        "total_finding_accepted": len(total_finding_accepted),
-        "persentage_finding_accepted": persentage_finding_accepted,
-        "message": message}
-    return result
-        
 
     
 
