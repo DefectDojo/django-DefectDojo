@@ -16,8 +16,9 @@ class ProwlerParser:
         return "Prowler report file can be imported in JSON format or in CSV format."
 
     def get_findings(self, filename, test):
-        if str(filename).lower().endswith(".csv"):
+        name = getattr(filename, "name", str(filename)).lower()
+        if name.endswith(".csv"):
             return ProwlerParserCSV().get_findings(filename, test)
-        if str(filename).lower().endswith(".json"):
+        if name.endswith(".json"):
             return ProwlerParserJSON().get_findings(filename, test)
-        return None
+        return []

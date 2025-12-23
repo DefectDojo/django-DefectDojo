@@ -120,12 +120,12 @@ class ProwlerParserJSON:
 
     def add_cloud_type_metadata(self, node: dict, cloudtype: str, description: str) -> str:
         # Add metadata for GCP, AWS, and Azure
-        if cloudtype in {"GCP", "AWS", "Azure"}:
+        if cloudtype in {"GCP", "AWS", "AZURE"}:
             description += "\n\n" + "**" + cloudtype + " Region** : " + node.get("cloud", {}).get("region", "N/A")
             return description
 
         # Add metadata for Kubernetes
-        if cloudtype == "Kubernetes":
+        if cloudtype == "KUBERNETES":
             for resource in node.get("resources", []):
                 pod = resource.get("data", {}).get("metadata", {}).get("name")
                 namespace = resource.get("data", {}).get("metadata", {}).get("namespace")

@@ -6,13 +6,6 @@ from unittests.dojo_test_case import get_unit_tests_scans_path
 
 
 class TestProwlerParser(TestCase):
-    # TODO: Write test for:
-    # AWS JSON
-    # Azure JSON
-    # GCP CSV
-    # GCP JSON
-    # Kubernetes CSV
-    # Kubernetes JSON
 
     def test_prowler_parser_json_with_no_vuln_has_no_findings(self):
         with (get_unit_tests_scans_path("prowler") / "prowler_zero_vul.json").open(encoding="utf-8") as testfile:
@@ -192,7 +185,7 @@ class TestProwlerParser(TestCase):
             self.assertEqual(4, len(findings))
             with self.subTest(i=0):
                 description = (
-                    "**Cloud Type** : Azure\n\n"
+                    "**Cloud Type** : AZURE\n\n"
                     "**Description** : Azure Kubernetes Service (AKS) can be configured to use Azure Active Directory (AD) for user authentication. In this configuration, you sign in to an AKS cluster using an Azure AD authentication token. You can also configure Kubernetes role-based access control (Kubernetes RBAC) to limit access to cluster resources based a user's identity or group membership.\n\n"
                     "**Service Name** : aks\n\n"
                     "**Status Detail** : RBAC is enabled for cluster '<resource_name>' in subscription '<account_name>'.\n\n"
@@ -225,7 +218,7 @@ class TestProwlerParser(TestCase):
                 self.assertEqual(findings[i].references, references)
             with self.subTest(i=1):
                 description = (
-                    "**Cloud Type** : Azure\n\n"
+                    "**Cloud Type** : AZURE\n\n"
                     "**Description** : Disable public IP addresses for cluster nodes, so that they only have private IP addresses. Private Nodes are nodes with no public IP addresses.\n\n"
                     "**Service Name** : aks\n\n"
                     "**Status Detail** : Cluster '<resource_name>' was created with private nodes in subscription '<account_name>'\n\n"
@@ -257,7 +250,7 @@ class TestProwlerParser(TestCase):
                 self.assertEqual(findings[i].references, references)
             with self.subTest(i=2):
                 description = (
-                    "**Cloud Type** : Azure\n\n"
+                    "**Cloud Type** : AZURE\n\n"
                     "**Description** : Disable access to the Kubernetes API from outside the node network if it is not required.\n\n"
                     "**Service Name** : aks\n\n"
                     "**Status Detail** : Public access to nodes is enabled for cluster '<resource_name>' in subscription '<account_name>'\n\n"
@@ -291,7 +284,7 @@ class TestProwlerParser(TestCase):
                 self.assertEqual(findings[i].references, references)
             with self.subTest(i=3):
                 description = (
-                    "**Cloud Type** : Azure\n\n"
+                    "**Cloud Type** : AZURE\n\n"
                     "**Description** : When you run modern, microservices-based applications in Kubernetes, you often want to control which components can communicate with each other. The principle of least privilege should be applied to how traffic can flow between pods in an Azure Kubernetes Service (AKS) cluster. Let's say you likely want to block traffic directly to back-end applications. The Network Policy feature in Kubernetes lets you define rules for ingress and egress traffic between pods in a cluster.\n\n"
                     "**Service Name** : aks\n\n"
                     "**Status Detail** : Network policy is enabled for cluster '<resource_name>' in subscription '<account_name>'.\n\n"
@@ -407,7 +400,7 @@ class TestProwlerParser(TestCase):
             self.assertEqual(4, len(findings))
             with self.subTest(i=0):
                 description = (
-                    "**Cloud Type** : Kubernetes\n\n"
+                    "**Cloud Type** : KUBERNETES\n\n"
                     "**Description** : This check verifies that the AlwaysPullImages admission control plugin is enabled in the Kubernetes API server. This plugin ensures that every new pod always pulls the required images, enforcing image access control and preventing the use of possibly outdated or altered images.\n\n"
                     "**Service Name** : apiserver\n\n"
                     "**Status Detail** : AlwaysPullImages admission control plugin is not set in pod <resource_uid>\n\n"
@@ -441,7 +434,7 @@ class TestProwlerParser(TestCase):
                 self.assertEqual(findings[i].references, references)
             with self.subTest(i=1):
                 description = (
-                    "**Cloud Type** : Kubernetes\n\n"
+                    "**Cloud Type** : KUBERNETES\n\n"
                     "**Description** : Disable anonymous requests to the API server. When enabled, requests that are not rejected by other configured authentication methods are treated as anonymous requests, which are then served by the API server. Disallowing anonymous requests strengthens security by ensuring all access is authenticated.\n\n"
                     "**Service Name** : apiserver\n\n"
                     "**Status Detail** : API Server does not have anonymous-auth enabled in pod <resource_uid>\n\n"
@@ -475,7 +468,7 @@ class TestProwlerParser(TestCase):
                 self.assertEqual(findings[i].references, references)
             with self.subTest(i=2):
                 description = (
-                    "**Cloud Type** : Kubernetes\n\n"
+                    "**Cloud Type** : KUBERNETES\n\n"
                     "**Description** : This check ensures that the Kubernetes API server is configured with an appropriate audit log retention period. Setting --audit-log-maxage to 30 or as per business requirements helps in maintaining logs for sufficient time to investigate past events.\n\n"
                     "**Service Name** : apiserver\n\n"
                     "**Status Detail** : Audit log max age is not set to 30 or as appropriate in pod <resource_uid>\n\n"
@@ -509,7 +502,7 @@ class TestProwlerParser(TestCase):
                 self.assertEqual(findings[i].references, references)
             with self.subTest(i=3):
                 description = (
-                    "**Cloud Type** : Kubernetes\n\n"
+                    "**Cloud Type** : KUBERNETES\n\n"
                     "**Description** : This check ensures that the Kubernetes API server is configured with an appropriate number of audit log backups. Setting --audit-log-maxbackup to 10 or as per business requirements helps maintain a sufficient log backup for investigations or analysis.\n\n"
                     "**Service Name** : apiserver\n\n"
                     "**Status Detail** : Audit log max backup is not set to 10 or as appropriate in pod <resource_uid>\n\n"
@@ -653,12 +646,12 @@ class TestProwlerParser(TestCase):
             self.assertEqual(3, len(findings))
             with self.subTest(i=0):
                 description = (
-                    "**Cloud Type** : Azure\n\n"
+                    "**Cloud Type** : AZURE\n\n"
                     "**Finding Description** : Application Insights within Azure act as an Application Performance Monitoring solution providing valuable data into how well an application performs and additional information when performing incident response. The types of log data collected include application metrics, telemetry data, and application trace logging data providing organizations with detailed information about application activity and application transactions. Both data sets help organizations adopt a proactive and retroactive means to handle security and performance related metrics within their modern applications.\n\n"
                     "**Product Name** : Prowler\n\n"
                     "**Status Detail** : There are no AppInsight configured in subscription <subscription_name>.\n\n"
                     "**Finding Created Time** : 2025-02-14T14:27:30.710664\n\n"
-                    "**Azure Region** : global"
+                    "**AZURE Region** : global"
                 )
 
                 mitigation = (
@@ -683,12 +676,12 @@ class TestProwlerParser(TestCase):
                 self.assertEqual(findings[i].references, references)
             with self.subTest(i=1):
                 description = (
-                    "**Cloud Type** : Azure\n\n"
+                    "**Cloud Type** : AZURE\n\n"
                     "**Finding Description** : Microsoft Defender for Cloud emails the subscription owners whenever a high-severity alert is triggered for their subscription. You should provide a security contact email address as an additional email address.\n\n"
                     "**Product Name** : Prowler\n\n"
                     "**Status Detail** : There is not another correct email configured for subscription <subscription_name>.\n\n"
                     "**Finding Created Time** : 2025-02-14T14:27:30.710664\n\n"
-                    "**Azure Region** : global"
+                    "**AZURE Region** : global"
                 )
 
                 mitigation = (
@@ -713,12 +706,12 @@ class TestProwlerParser(TestCase):
                 self.assertEqual(findings[i].references, references)
             with self.subTest(i=2):
                 description = (
-                    "**Cloud Type** : Azure\n\n"
+                    "**Cloud Type** : AZURE\n\n"
                     "**Finding Description** : Ensure That Microsoft Defender for App Services Is Set To 'On' \n\n"
                     "**Product Name** : Prowler\n\n"
                     "**Status Detail** : Defender plan Defender for App Services from subscription <subscription_name> is set to OFF (pricing tier not standard).\n\n"
                     "**Finding Created Time** : 2025-02-14T14:27:30.710664\n\n"
-                    "**Azure Region** : global"
+                    "**AZURE Region** : global"
                 )
 
                 mitigation = (
@@ -845,7 +838,7 @@ class TestProwlerParser(TestCase):
             self.assertEqual(3, len(findings))
             with self.subTest(i=0):
                 description = (
-                    "**Cloud Type** : Kubernetes\n\n"
+                    "**Cloud Type** : KUBERNETES\n\n"
                     "**Finding Description** : This check verifies that the AlwaysPullImages admission control plugin is enabled in the Kubernetes API server. This plugin ensures that every new pod always pulls the required images, enforcing image access control and preventing the use of possibly outdated or altered images.\n\n"
                     "**Product Name** : Prowler\n\n"
                     "**Status Detail** : AlwaysPullImages admission control plugin is not set in pod <pod>.\n\n"
@@ -874,7 +867,7 @@ class TestProwlerParser(TestCase):
                 self.assertEqual(findings[i].references, references)
             with self.subTest(i=1):
                 description = (
-                    "**Cloud Type** : Kubernetes\n\n"
+                    "**Cloud Type** : KUBERNETES\n\n"
                     "**Finding Description** : This check ensures that the Kubernetes API server is configured with an appropriate audit log retention period. Setting --audit-log-maxage to 30 or as per business requirements helps in maintaining logs for sufficient time to investigate past events.\n\n"
                     "**Product Name** : Prowler\n\n"
                     "**Status Detail** : Audit log max age is not set to 30 or as appropriate in pod <pod>.\n\n"
@@ -903,14 +896,14 @@ class TestProwlerParser(TestCase):
                 self.assertEqual(findings[i].references, references)
             with self.subTest(i=2):
                 description = (
-                    "**Cloud Type** : Kubernetes\n\n"
+                    "**Cloud Type** : KUBERNETES\n\n"
                     "**Finding Description** : This check ensures that the Kubernetes API server is configured with an appropriate number of audit log backups. Setting --audit-log-maxbackup to 10 or as per business requirements helps maintain a sufficient log backup for investigations or analysis.\n\n"
                     "**Product Name** : Prowler\n\n"
                     "**Status Detail** : Audit log max backup is not set to 10 or as appropriate in pod <pod>.\n\n"
                     "**Finding Created Time** : 2025-02-14T14:27:38.533897\n\n"
                     "**Pod Name** : <pod>\n\n"
                     "**Namespace** : <namespace>\n"
-                    "**Cloud Type** : Kubernetes\n\n"
+                    "**Cloud Type** : KUBERNETES\n\n"
                     "**Finding Description** : This check ensures that the Kubernetes API server is configured with an appropriate number of audit log backups. Setting --audit-log-maxbackup to 10 or as per business requirements helps maintain a sufficient log backup for investigations or analysis.\n\n"
                     "**Product Name** : Prowler\n\n"
                     "**Status Detail** : Audit log max backup is not set to 10 or as appropriate in pod <pod>.\n\n"
