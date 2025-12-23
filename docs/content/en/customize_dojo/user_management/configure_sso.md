@@ -133,7 +133,7 @@ The Azure AD token need to be configured to include Group IDs. Without this step
 To update the format of the token, add a [Group Claim](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-fed-group-claims) that applies to whatever Group type you are using.
 If unsure of what type that is, select `All Groups`. Do not activate `Emit groups as role claims` within the Azure AD "Token configuration" page.
 
-Application API permissions need to be updated with the `Group.Read.All` permission so that groups can be read on behalf of the user that has successfully signed in.
+Application API permissions need to be updated with the `GroupMember.Read.All` or `Group.Read.All` permission so that groups can be read on behalf of the user that has successfully signed in.  `GroupMember.Read.All` is recommended as this grants the application fewer permissions.
 
 ##### Group Cleaning
 
@@ -169,7 +169,7 @@ The Azure AD token returned by Azure will also need to be configured to include 
 
 If unsure of what type that is, select `All Groups`. Do not activate `Emit groups as role claims` within the Azure AD "Token configuration" page.
 
-Application API permissions need to be updated with the `Group.Read.All` permission so that groups can be read on behalf of the user that has successfully signed in.
+Application API permissions need to be updated with the `GroupMember.Read.All` or `Group.Read.All` permission so that groups can be read on behalf of the user that has successfully signed in.  `GroupMember.Read.All` is recommended as this grants the application fewer permissions.
 
 To limit the amount of groups imported from Azure AD, a regular expression can be used as the following:
 
@@ -511,7 +511,7 @@ If during the login process you get the following error: *The
 in the client app settings.* and the `redirect_uri` HTTP
 GET parameter starts with `http://` instead of
 `https://` you need to add
-`SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` to Docker environment variables, or to your `local_settings.py` file.
+`DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` to Docker Compose environment variables, or `SOCIAL_AUTH_REDIRECT_IS_HTTPS` to your `local_settings.py` file.
 
 2. Restart DefectDojo, and 'Login With Okta' should appear on the login screen.
 
@@ -557,6 +557,7 @@ You can also optionally set the following variables:
     {{< highlight python >}}
     DD_SOCIAL_AUTH_OIDC_ID_KEY=(str, ''),                           #the key associated with the OIDC user IDs
     DD_SOCIAL_AUTH_OIDC_USERNAME_KEY=(str, ''),                     #the key associated with the OIDC usernames
+    DD_SOCIAL_AUTH_CREATE_USER_MAPPING=(str, "username"),           #could also be email or fullname
     DD_SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS=(list, ['']),           #list of domains allowed for login
     DD_SOCIAL_AUTH_OIDC_JWT_ALGORITHMS=(list, ["RS256","HS256"]),
     DD_SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER=(str, ''),

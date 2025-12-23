@@ -6,7 +6,9 @@ import logging
 import mimetypes
 import os
 import pathlib
+import random
 import re
+import time
 from calendar import monthrange
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
@@ -16,7 +18,6 @@ from pathlib import Path
 import bleach
 import crum
 import cvss
-import hyperlink
 import vobject
 from asteval import Interpreter
 from auditlog.models import LogEntry
@@ -30,6 +31,7 @@ from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
+from django.db import OperationalError
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
@@ -235,353 +237,6 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
 
     logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
     return None
-
-
-# true if both findings are on an engagement that have a different "deduplication on engagement" configuration
-def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
-    return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
-
-
-def get_endpoints_as_url(finding):
-    return [hyperlink.parse(str(e)) for e in finding.endpoints.all()]
-
-
-def are_urls_equal(url1, url2, fields):
-    # Possible values are: scheme, host, port, path, query, fragment, userinfo, and user.
-    # For a details description see https://hyperlink.readthedocs.io/en/latest/api.html#attributes
-    deduplicationLogger.debug("Check if url %s and url %s are equal in terms of %s.", url1, url2, fields)
-    for field in fields:
-        if field == "scheme":
-            if url1.scheme != url2.scheme:
-                return False
-        elif field == "host":
-            if url1.host != url2.host:
-                return False
-        elif field == "port":
-            if url1.port != url2.port:
-                return False
-        elif field == "path":
-            if url1.path != url2.path:
-                return False
-        elif field == "query":
-            if url1.query != url2.query:
-                return False
-        elif field == "fragment":
-            if url1.fragment != url2.fragment:
-                return False
-        elif field == "userinfo":
-            if url1.userinfo != url2.userinfo:
-                return False
-        elif field == "user":
-            if url1.user != url2.user:
-                return False
-        else:
-            logger.warning("Field " + field + " is not supported by the endpoint dedupe algorithm, ignoring it.")
-    return True
-
-
-def are_endpoints_duplicates(new_finding, to_duplicate_finding):
-    fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
-    # shortcut if fields list is empty/feature is disabled
-    if len(fields) == 0:
-        deduplicationLogger.debug("deduplication by endpoint fields is disabled")
-        return True
-
-    list1 = get_endpoints_as_url(new_finding)
-    list2 = get_endpoints_as_url(to_duplicate_finding)
-
-    deduplicationLogger.debug(f"Starting deduplication by endpoint fields for finding {new_finding.id} with urls {list1} and finding {to_duplicate_finding.id} with urls {list2}")
-    if list1 == [] and list2 == []:
-        return True
-
-    for l1 in list1:
-        for l2 in list2:
-            if are_urls_equal(l1, l2, fields):
-                return True
-    return False
-
-
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
-def do_dedupe_finding_task(new_finding, *args, **kwargs):
-    return do_dedupe_finding(new_finding, *args, **kwargs)
-
-
-def do_dedupe_finding(new_finding, *args, **kwargs):
-    if dedupe_method := get_custom_method("FINDING_DEDUPE_METHOD"):
-        return dedupe_method(new_finding, *args, **kwargs)
-
-    try:
-        enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
-    except System_Settings.DoesNotExist:
-        logger.warning("system settings not found")
-        enabled = False
-    if enabled:
-        deduplicationLogger.debug("dedupe for: " + str(new_finding.id)
-                    + ":" + str(new_finding.title))
-        deduplicationAlgorithm = new_finding.test.deduplication_algorithm
-        deduplicationLogger.debug("deduplication algorithm: " + deduplicationAlgorithm)
-        if deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
-            deduplicate_unique_id_from_tool(new_finding)
-        elif deduplicationAlgorithm == settings.DEDUPE_ALGO_HASH_CODE:
-            deduplicate_hash_code(new_finding)
-        elif deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
-            deduplicate_uid_or_hash_code(new_finding)
-        else:
-            deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
-            deduplicate_legacy(new_finding)
-    else:
-        deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
-    return None
-
-
-def deduplicate_legacy(new_finding):
-    # ---------------------------------------------------------
-    # 1) Collects all the findings that have the same:
-    #      (title  and static_finding and dynamic_finding)
-    #      or (CWE and static_finding and dynamic_finding)
-    #    as the new one
-    #    (this is "cond1")
-    # ---------------------------------------------------------
-    if new_finding.test.engagement.deduplication_on_engagement:
-        eng_findings_cwe = Finding.objects.filter(
-            test__engagement=new_finding.test.engagement,
-            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True).values("id")
-        eng_findings_title = Finding.objects.filter(
-            test__engagement=new_finding.test.engagement,
-            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True).values("id")
-    else:
-        eng_findings_cwe = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True).values("id")
-        eng_findings_title = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True).values("id")
-
-    total_findings = Finding.objects.filter(Q(id__in=eng_findings_cwe) | Q(id__in=eng_findings_title)).prefetch_related("endpoints", "test", "test__engagement", "found_by", "original_finding", "test__test_type")
-    deduplicationLogger.debug("Found "
-        + str(len(eng_findings_cwe)) + " findings with same cwe, "
-        + str(len(eng_findings_title)) + " findings with same title: "
-        + str(len(total_findings)) + " findings with either same title or same cwe")
-
-    # total_findings = total_findings.order_by('date')
-    for find in total_findings.order_by("id"):
-        flag_endpoints = False
-        flag_line_path = False
-        flag_hash = False
-        if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug(
-                "deduplication_on_engagement_mismatch, skipping dedupe.")
-            continue
-
-        # ---------------------------------------------------------
-        # 2) If existing and new findings have endpoints: compare them all
-        #    Else look at line+file_path
-        #    (if new finding is not static, do not deduplicate)
-        # ---------------------------------------------------------
-
-        if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
-            list1 = [str(e) for e in new_finding.endpoints.all()]
-            list2 = [str(e) for e in find.endpoints.all()]
-
-            if all(x in list1 for x in list2):
-                deduplicationLogger.debug("%s: existing endpoints are present in new finding", find.id)
-                flag_endpoints = True
-        elif new_finding.static_finding and new_finding.file_path and len(new_finding.file_path) > 0:
-            if str(find.line) == str(new_finding.line) and find.file_path == new_finding.file_path:
-                deduplicationLogger.debug("%s: file_path and line match", find.id)
-                flag_line_path = True
-            else:
-                deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
-        else:
-            deduplicationLogger.debug("find.static/dynamic: %s/%s", find.static_finding, find.dynamic_finding)
-            deduplicationLogger.debug("new_finding.static/dynamic: %s/%s", new_finding.static_finding, new_finding.dynamic_finding)
-            deduplicationLogger.debug("find.file_path: %s", find.file_path)
-            deduplicationLogger.debug("new_finding.file_path: %s", new_finding.file_path)
-
-            deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
-
-        if find.hash_code == new_finding.hash_code:
-            flag_hash = True
-
-        deduplicationLogger.debug(
-            "deduplication flags for new finding (" + ("dynamic" if new_finding.dynamic_finding else "static") + ") " + str(new_finding.id) + " and existing finding " + str(find.id)
-            + " flag_endpoints: " + str(flag_endpoints) + " flag_line_path:" + str(flag_line_path) + " flag_hash:" + str(flag_hash))
-
-        # ---------------------------------------------------------
-        # 3) Findings are duplicate if (cond1 is true) and they have the same:
-        #    hash
-        #    and (endpoints or (line and file_path)
-        # ---------------------------------------------------------
-        if ((flag_endpoints or flag_line_path) and flag_hash):
-            try:
-                set_duplicate(new_finding, find)
-            except Exception as e:
-                deduplicationLogger.debug(str(e))
-                continue
-
-            break
-
-
-def deduplicate_unique_id_from_tool(new_finding):
-    if new_finding.test.engagement.deduplication_on_engagement:
-        existing_findings = Finding.objects.filter(
-            test__engagement=new_finding.test.engagement,
-            # the unique_id_from_tool is unique for a given tool: do not compare with other tools
-            test__test_type=new_finding.test.test_type,
-            unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
-                id=new_finding.id).exclude(
-                    unique_id_from_tool=None).exclude(
-                        duplicate=True).order_by("id")
-    else:
-        existing_findings = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            # the unique_id_from_tool is unique for a given tool: do not compare with other tools
-            test__test_type=new_finding.test.test_type,
-            unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
-                id=new_finding.id).exclude(
-                    unique_id_from_tool=None).exclude(
-                        duplicate=True).order_by("id")
-
-    deduplicationLogger.debug("Found "
-        + str(len(existing_findings)) + " findings with same unique_id_from_tool")
-    for find in existing_findings:
-        if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug(
-                "deduplication_on_engagement_mismatch, skipping dedupe.")
-            continue
-        try:
-            set_duplicate(new_finding, find)
-            break
-        except Exception as e:
-            deduplicationLogger.debug(str(e))
-            continue
-
-
-def deduplicate_hash_code(new_finding):
-    if new_finding.test.engagement.deduplication_on_engagement:
-        existing_findings = Finding.objects.filter(
-            test__engagement=new_finding.test.engagement,
-            hash_code=new_finding.hash_code).exclude(
-                id=new_finding.id).exclude(
-                    hash_code=None).exclude(
-                        duplicate=True).order_by("id")
-    else:
-        existing_findings = Finding.objects.filter(
-            test__engagement__product=new_finding.test.engagement.product,
-            hash_code=new_finding.hash_code).exclude(
-                id=new_finding.id).exclude(
-                    hash_code=None).exclude(
-                        duplicate=True).order_by("id")
-
-    deduplicationLogger.debug("Found "
-        + str(len(existing_findings)) + " findings with same hash_code")
-    for find in existing_findings:
-        if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug(
-                "deduplication_on_engagement_mismatch, skipping dedupe.")
-            continue
-        try:
-            if are_endpoints_duplicates(new_finding, find):
-                set_duplicate(new_finding, find)
-                break
-        except Exception as e:
-            deduplicationLogger.debug(str(e))
-            continue
-
-
-def deduplicate_uid_or_hash_code(new_finding):
-    if new_finding.test.engagement.deduplication_on_engagement:
-        existing_findings = Finding.objects.filter(
-            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code))
-            # unique_id_from_tool can only apply to the same test_type because it is parser dependent
-            | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
-            test__engagement=new_finding.test.engagement).exclude(
-                id=new_finding.id).exclude(
-                        duplicate=True).order_by("id")
-    else:
-        # same without "test__engagement=new_finding.test.engagement" condition
-        existing_findings = Finding.objects.filter(
-            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code))
-            | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
-            test__engagement__product=new_finding.test.engagement.product).exclude(
-                id=new_finding.id).exclude(
-                        duplicate=True).order_by("id")
-    deduplicationLogger.debug("Found "
-        + str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
-    for find in existing_findings:
-        if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug(
-                "deduplication_on_engagement_mismatch, skipping dedupe.")
-            continue
-        try:
-            if are_endpoints_duplicates(new_finding, find):
-                set_duplicate(new_finding, find)
-        except Exception as e:
-            deduplicationLogger.debug(str(e))
-            continue
-        break
-
-
-def set_duplicate(new_finding, existing_finding):
-    deduplicationLogger.debug(f"new_finding.status(): {new_finding.id} {new_finding.status()}")
-    deduplicationLogger.debug(f"existing_finding.status(): {existing_finding.id} {existing_finding.status()}")
-    if existing_finding.duplicate:
-        deduplicationLogger.debug("existing finding: %s:%s:duplicate=%s;duplicate_finding=%s", existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else "None")
-        msg = "Existing finding is a duplicate"
-        raise Exception(msg)
-    if existing_finding.id == new_finding.id:
-        msg = "Can not add duplicate to itself"
-        raise Exception(msg)
-    if is_duplicate_reopen(new_finding, existing_finding):
-        msg = "Found a regression. Ignore this so that a new duplicate chain can be made"
-        raise Exception(msg)
-    if new_finding.duplicate and finding_mitigated(existing_finding):
-        msg = "Skip this finding as we do not want to attach a new duplicate to a mitigated finding"
-        raise Exception(msg)
-
-    deduplicationLogger.debug("Setting new finding " + str(new_finding.id) + " as a duplicate of existing finding " + str(existing_finding.id))
-    new_finding.duplicate = True
-    new_finding.active = False
-    new_finding.verified = False
-    new_finding.duplicate_finding = existing_finding
-
-    # Make sure transitive duplication is flattened
-    # if A -> B and B is made a duplicate of C here, aferwards:
-    # A -> C and B -> C should be true
-    for find in new_finding.original_finding.all().order_by("-id"):
-        new_finding.original_finding.remove(find)
-        set_duplicate(find, existing_finding)
-    existing_finding.found_by.add(new_finding.test.test_type)
-    logger.debug("saving new finding: %d", new_finding.id)
-    super(Finding, new_finding).save()
-    logger.debug("saving existing finding: %d", existing_finding.id)
-    super(Finding, existing_finding).save()
-
-
-def is_duplicate_reopen(new_finding, existing_finding) -> bool:
-    return finding_mitigated(existing_finding) and finding_not_human_set_status(existing_finding) and not finding_mitigated(new_finding)
-
-
-def finding_mitigated(finding: Finding) -> bool:
-    return finding.active is False and (finding.is_mitigated is True or finding.mitigated is not None)
-
-
-def finding_not_human_set_status(finding: Finding) -> bool:
-    return finding.out_of_scope is False and finding.false_p is False
-
-
-def set_duplicate_reopen(new_finding, existing_finding):
-    logger.debug("duplicate reopen existing finding")
-    existing_finding.mitigated = new_finding.mitigated
-    existing_finding.is_mitigated = new_finding.is_mitigated
-    existing_finding.active = new_finding.active
-    existing_finding.verified = new_finding.verified
-    existing_finding.notes.create(author=existing_finding.reporter,
-                                    entry="This finding has been automatically re-opened as it was found in recent scans.")
-    existing_finding.save()
 
 
 def count_findings(findings: QuerySet) -> tuple[dict["Product", list[int]], dict[str, int]]:
@@ -1463,7 +1118,8 @@ def process_tag_notifications(request, note, parent_url, parent_title):
         title=f"{request.user} jotted a note",
         url=parent_url,
         icon="commenting",
-        recipients=users_to_notify)
+        recipients=users_to_notify,
+        requested_by=get_current_user())
 
 
 def encrypt(key, iv, plaintext):
@@ -2331,41 +1987,70 @@ class async_delete:
     def __init__(self, *args, **kwargs):
         self.mapping = {
             "Product_Type": [
-                (Endpoint, "product__prod_type"),
-                (Finding, "test__engagement__product__prod_type"),
-                (Test, "engagement__product__prod_type"),
-                (Engagement, "product__prod_type"),
-                (Product, "prod_type")],
+                (Endpoint, "product__prod_type__id"),
+                (Finding, "test__engagement__product__prod_type__id"),
+                (Test, "engagement__product__prod_type__id"),
+                (Engagement, "product__prod_type__id"),
+                (Product, "prod_type__id")],
             "Product": [
-                (Endpoint, "product"),
-                (Finding, "test__engagement__product"),
-                (Test, "engagement__product"),
-                (Engagement, "product")],
+                (Endpoint, "product__id"),
+                (Finding, "test__engagement__product__id"),
+                (Test, "engagement__product__id"),
+                (Engagement, "product__id")],
             "Engagement": [
-                (Finding, "test__engagement"),
-                (Test, "engagement")],
-            "Test": [(Finding, "test")],
+                (Finding, "test__engagement__id"),
+                (Test, "engagement__id")],
+            "Test": [(Finding, "test__id")],
         }
 
     @dojo_async_task
     @app.task
     def delete_chunk(self, objects, **kwargs):
+        # Now delete all objects with retry for deadlocks
+        max_retries = 3
         for obj in objects:
-            try:
-                obj.delete()
-            except AssertionError:
-                logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
-                # The id must be None
-                # The object has already been deleted elsewhere
-            except LogEntry.MultipleObjectsReturned:
-                # Delete the log entrys first, then delete
-                LogEntry.objects.filter(
-                    content_type=ContentType.objects.get_for_model(obj.__class__),
-                    object_pk=str(obj.pk),
-                    action=LogEntry.Action.DELETE,
-                ).delete()
-                # Now delete the object again
-                obj.delete()
+            retry_count = 0
+            while retry_count < max_retries:
+                try:
+                    obj.delete()
+                    break  # Success, exit retry loop
+                except OperationalError as e:
+                    error_msg = str(e)
+                    if "deadlock detected" in error_msg.lower():
+                        retry_count += 1
+                        if retry_count < max_retries:
+                            # Exponential backoff with jitter
+                            wait_time = (2 ** retry_count) + random.uniform(0, 1)  # noqa: S311
+                            logger.warning(
+                                f"ASYNC_DELETE: Deadlock detected deleting {self.get_object_name(obj)} {obj.pk}, "
+                                f"retrying ({retry_count}/{max_retries}) after {wait_time:.2f}s",
+                            )
+                            time.sleep(wait_time)
+                            # Refresh object from DB before retry
+                            obj.refresh_from_db()
+                        else:
+                            logger.error(
+                                f"ASYNC_DELETE: Deadlock persisted after {max_retries} retries for {self.get_object_name(obj)} {obj.pk}: {e}",
+                            )
+                            raise
+                    else:
+                        # Not a deadlock, re-raise
+                        raise
+                except AssertionError:
+                    logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
+                    # The id must be None
+                    # The object has already been deleted elsewhere
+                    break
+                except LogEntry.MultipleObjectsReturned:
+                    # Delete the log entrys first, then delete
+                    LogEntry.objects.filter(
+                        content_type=ContentType.objects.get_for_model(obj.__class__),
+                        object_pk=str(obj.pk),
+                        action=LogEntry.Action.DELETE,
+                    ).delete()
+                    # Now delete the object again (no retry needed for this case)
+                    obj.delete()
+                    break
 
     @dojo_async_task
     @app.task
@@ -2385,17 +2070,28 @@ class async_delete:
     def crawl(self, obj, model_list, **kwargs):
         logger.debug("ASYNC_DELETE: Crawling " + self.get_object_name(obj) + ": " + str(obj))
         for model_info in model_list:
+            task_results = []
             model = model_info[0]
             model_query = model_info[1]
-            filter_dict = {model_query: obj}
+            filter_dict = {model_query: obj.id}
             # Only fetch the IDs since we will make a list of IDs in the following function call
-            objects_to_delete = model.objects.only("id").filter(**filter_dict)
+            objects_to_delete = model.objects.only("id").filter(**filter_dict).distinct().order_by("id")
             logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + self.get_object_name(model) + "s in chunks")
             chunks = self.chunk_list(model, objects_to_delete)
             for chunk in chunks:
                 logger.debug(f"deleting {len(chunk)} {self.get_object_name(model)}")
-                self.delete_chunk(chunk)
-        self.delete_chunk([obj])
+                result = self.delete_chunk(chunk)
+                # Collect async task results to wait for them all at once
+                if hasattr(result, "get"):
+                    task_results.append(result)
+            # Wait for all chunk deletions to complete (they run in parallel)
+            for task_result in task_results:
+                task_result.get(timeout=300)  # 5 minute timeout per chunk
+        # Now delete the main object after all chunks are done
+        result = self.delete_chunk([obj])
+        # Wait for final deletion to complete
+        if hasattr(result, "get"):
+            result.get(timeout=300)  # 5 minute timeout
         logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(obj) + ": " + str(obj))
 
     def chunk_list(self, model, full_list):

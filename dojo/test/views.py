@@ -3,7 +3,7 @@ import base64
 import logging
 import operator
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import reduce
 
 from django.contrib import messages
@@ -393,6 +393,9 @@ def test_calendar(request):
     tests = tests.prefetch_related("test_type", "lead", "engagement__product")
 
     add_breadcrumb(title=_("Test Calendar"), top_level=True, request=request)
+    for t in tests:
+        if t.target_end:
+            t.target_end += timedelta(days=1)
     return render(request, "dojo/calendar.html", {
         "caltype": "tests",
         "leads": request.GET.getlist("lead", ""),
@@ -604,7 +607,6 @@ class AddFindingView(View):
 
             # Note: this notification has not be moved to "@receiver(post_save, sender=Finding)" method as many other notifications
             # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
-            # TODO: but same should be implemented for API endpoint
 
             # Create a notification
             create_notification(
@@ -905,17 +907,17 @@ class ReImportScanResultsView(View):
             "minimum_severity": form.cleaned_data.get("minimum_severity"),
             "do_not_reactivate": form.cleaned_data.get("do_not_reactivate"),
             "tags": form.cleaned_data.get("tags"),
-            "version": form.cleaned_data.get("version"),
-            "branch_tag": form.cleaned_data.get("branch_tag", None),
-            "build_id": form.cleaned_data.get("build_id", None),
-            "commit_hash": form.cleaned_data.get("commit_hash", None),
-            "api_scan_configuration": form.cleaned_data.get("api_scan_configuration", None),
-            "service": form.cleaned_data.get("service", None),
+            "version": form.cleaned_data.get("version") or None,
+            "branch_tag": form.cleaned_data.get("branch_tag") or None,
+            "build_id": form.cleaned_data.get("build_id") or None,
+            "commit_hash": form.cleaned_data.get("commit_hash") or None,
+            "api_scan_configuration": form.cleaned_data.get("api_scan_configuration") or None,
+            "service": form.cleaned_data.get("service") or None,
             "apply_tags_to_findings": form.cleaned_data.get("apply_tags_to_findings", False),
             "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
-            "group_by": form.cleaned_data.get("group_by", None),
+            "group_by": form.cleaned_data.get("group_by") or None,
             "close_old_findings": form.cleaned_data.get("close_old_findings", None),
-            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings"),
+            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings", None),
         })
         # Override the form values of active and verified
         if activeChoice := form.cleaned_data.get("active", None):
@@ -962,6 +964,30 @@ class ReImportScanResultsView(View):
     ) -> str | None:
         """Attempt to import with all the supplied information"""
         try:
+            # Log only user-entered form values, excluding internal objects
+            user_values = {
+                "scan_type": context.get("scan_type"),
+                "scan_date": context.get("scan_date"),
+                "minimum_severity": context.get("minimum_severity"),
+                "active": context.get("active"),
+                "verified": context.get("verified"),
+                "tags": context.get("tags"),
+                "version": context.get("version"),
+                "branch_tag": context.get("branch_tag"),
+                "build_id": context.get("build_id"),
+                "commit_hash": context.get("commit_hash"),
+                "service": context.get("service"),
+                "close_old_findings": context.get("close_old_findings"),
+                "apply_tags_to_findings": context.get("apply_tags_to_findings"),
+                "apply_tags_to_endpoints": context.get("apply_tags_to_endpoints"),
+                "close_old_findings_product_scope": context.get("close_old_findings_product_scope"),
+                "group_by": context.get("group_by"),
+                "create_finding_groups_for_all_findings": context.get("create_finding_groups_for_all_findings"),
+                "push_to_jira": context.get("push_to_jira"),
+                "push_all_jira_issues": context.get("push_all_jira_issues"),
+                "do_not_reactivate": context.get("do_not_reactivate"),
+            }
+            logger.debug(f"reimport_findings called with user values: {user_values}")
             importer_client = self.get_reimporter(context)
             (
                 context["test"],

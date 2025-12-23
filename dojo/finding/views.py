@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
-from django.db.models import F, QuerySet
+from django.db.models import F, QuerySet, Value
 from django.db.models.functions import Coalesce, ExtractDay, Length, TruncDate
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
@@ -256,6 +256,11 @@ class BaseListFindings:
         return findings
 
     def filter_findings_by_form(self, request: HttpRequest, findings: QuerySet[Finding]):
+        # Apply default ordering if no ordering parameter is provided
+        # This maintains backward compatibility with the previous behavior
+        if not request.GET.get("o"):
+            findings = findings.order_by(self.get_order_by())
+
         # Set up the args for the form
         args = [request.GET, findings]
         # Set the initial form args
@@ -276,11 +281,19 @@ class BaseListFindings:
     def get_filtered_findings(self):
         findings = get_authorized_findings(Permissions.Finding_View)
         # Annotate computed SLA age in days: sla_expiration_date - (sla_start_date or date)
+        # Handle NULL sla_expiration_date by using Coalesce to provide a large default value
+        # so NULLs sort last when sorting ascending (most urgent first)
         findings = findings.annotate(
-            sla_age_days=ExtractDay(
-                F("sla_expiration_date") - Coalesce(F("sla_start_date"), TruncDate("created")),
+            sla_age_days=Coalesce(
+                ExtractDay(
+                    F("sla_expiration_date") - Coalesce(F("sla_start_date"), TruncDate("created")),
+                ),
+                Value(999999),  # Large value to push NULLs to the end when sorting ascending
+                output_field=models.IntegerField(),
             ),
-        ).order_by(self.get_order_by())
+        )
+        # Don't apply initial order_by here - let OrderingFilter handle it via request.GET['o']
+        # This prevents conflicts between initial ordering and user-requested sorting
         findings = self.filter_findings_by_object(findings)
         return self.filter_findings_by_filter_name(findings)
 
@@ -983,10 +996,11 @@ class EditFinding(View):
                     jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
                     jira_message = "Linked a JIRA issue successfully."
             # any existing finding should be updated
+            jira_instance = jira_helper.get_jira_instance(finding)
             push_to_jira = (
                 push_to_jira
                 and not (push_to_jira and finding.finding_group)
-                and (finding.has_jira_issue or jira_helper.get_jira_instance(finding).finding_jira_sync)
+                and (finding.has_jira_issue or (jira_instance and jira_instance.finding_jira_sync))
             )
             # Determine if a message should be added
             if jira_message:
@@ -1145,12 +1159,14 @@ def close_finding(request, fid):
     note_type_activation = Note_Type.objects.filter(is_active=True)
     missing_note_types = get_missing_mandatory_notetypes(finding) if len(note_type_activation) else note_type_activation
     form = CloseFindingForm(
+        instance=finding,
         missing_note_types=missing_note_types,
         can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user),
     )
     if request.method == "POST":
         form = CloseFindingForm(
             request.POST,
+            instance=finding,
             missing_note_types=missing_note_types,
             can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user),
         )
@@ -1249,8 +1265,9 @@ def defect_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
+                jira_instance = jira_helper.get_jira_instance(finding)
                 push_to_jira = jira_helper.is_push_all_issues(finding) \
-                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+                    or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
                 if defect_choice == "Close Finding":
@@ -1541,8 +1558,9 @@ def request_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
+                jira_instance = jira_helper.get_jira_instance(finding)
                 push_to_jira = jira_helper.is_push_all_issues(finding) \
-                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+                    or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
                 jira_helper.add_comment(finding, new_note, force_push=True)
@@ -1635,8 +1653,9 @@ def clear_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
+                jira_instance = jira_helper.get_jira_instance(finding)
                 push_to_jira = jira_helper.is_push_all_issues(finding) \
-                    or jira_helper.get_jira_instance(finding).finding_jira_sync
+                    or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
                 jira_helper.add_comment(finding, new_note, force_push=True)

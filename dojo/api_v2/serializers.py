@@ -114,6 +114,7 @@ from dojo.models import (
     Vulnerability_Id_Template,
     get_current_date,
 )
+from dojo.notifications.helper import create_notification
 from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
@@ -1692,6 +1693,9 @@ class FindingSerializer(serializers.ModelSerializer):
         many=True, read_only=True, source="risk_acceptance_set",
     )
     push_to_jira = serializers.BooleanField(default=False)
+    found_by = serializers.PrimaryKeyRelatedField(
+        queryset=Test_Type.objects.all(), many=True,
+    )
     age = serializers.IntegerField(read_only=True)
     sla_days_remaining = serializers.IntegerField(read_only=True, allow_null=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
@@ -1774,6 +1778,16 @@ class FindingSerializer(serializers.ModelSerializer):
         if parsed_vulnerability_ids:
             save_vulnerability_ids(instance, parsed_vulnerability_ids)
 
+        # Get found_by from validated_data
+        found_by = validated_data.pop("found_by", None)
+        # Handle updates to found_by data
+        if found_by:
+            instance.found_by.set(found_by)
+        # If there is no argument entered for found_by, the user would like to clear out the values on the Finding's found_by field
+        # Findings still maintain original found_by value associated with their test
+        # In the event the user does not supply the found_by field at all, we do not modify it
+        elif isinstance(found_by, list) and len(found_by) == 0:
+            instance.found_by.clear()
         instance = super().update(
             instance, validated_data,
         )
@@ -1936,6 +1950,16 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         if push_to_jira:
             jira_helper.push_to_jira(new_finding)
 
+        # Create a notification
+        create_notification(
+            event="finding_added",
+            title=_("Addition of %s") % new_finding.title,
+            finding=new_finding,
+            description=_('Finding "%s" was added by %s') % (new_finding.title, new_finding.reporter),
+            url=reverse("view_finding", args=(new_finding.id,)),
+            icon="exclamation-triangle",
+        )
+
         return new_finding
 
     def validate(self, data):
@@ -2089,6 +2113,11 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
+
+    business_criticality = serializers.ChoiceField(choices=Product.BUSINESS_CRITICALITY_CHOICES, allow_blank=True, allow_null=True, required=False)
+    platform = serializers.ChoiceField(choices=Product.PLATFORM_CHOICES, allow_blank=True, allow_null=True, required=False)
+    lifecycle = serializers.ChoiceField(choices=Product.LIFECYCLE_CHOICES, allow_blank=True, allow_null=True, required=False)
+    origin = serializers.ChoiceField(choices=Product.ORIGIN_CHOICES, allow_blank=True, allow_null=True, required=False)
 
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)
@@ -2252,6 +2281,7 @@ class CommonImportScanSerializer(serializers.Serializer):
         Raises exceptions in the event of an error
         """
         try:
+            logger.debug(f"process_scan called with context: {context}")
             start_time = time.perf_counter()
             importer = self.get_importer(**context)
             context["test"], _, _, _, _, _, _ = importer.process_scan(
@@ -2529,6 +2559,7 @@ class ReImportScanSerializer(CommonImportScanSerializer):
         """
         statistics_before, statistics_delta = None, None
         try:
+            logger.debug(f"process_scan called with context: {context}")
             start_time = time.perf_counter()
             if test := context.get("test"):
                 statistics_before = test.statistics

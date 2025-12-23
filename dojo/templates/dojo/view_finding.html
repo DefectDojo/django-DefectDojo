@@ -538,9 +538,7 @@
     <div class="panel panel-default">
         <table id="error_notes" class="table-striped table table-condensed table-hover centered">
             <tr>
-                {% if finding.service %}
                 <th>Service</th>
-                {% endif %}
                 {% if finding.file_path %}
                 <th>Location</th>
                 {% endif %}
@@ -555,6 +553,12 @@
                 {% endif %}
                 {% if finding.component_version %}
                 <th>Component Version</th>
+                {% endif %}
+                {% if finding.fix_available %}
+                <th>Fix Available</th>
+                {% endif %}
+                {% if finding.fix_version %}
+                <th>Fixed Version</th>
                 {% endif %}
                 {% if finding.has_jira_configured or finding.jira_issue %}
                 <th>JIRA</th>
@@ -571,13 +575,11 @@
                 {% endif %}
             </tr>
             <tr>
-                {% if finding.service %}
                 <td>
                     <span>
                         {{ finding.service }}
                     </span>
                 </td>
-                {% endif %}
                 {% if finding.file_path %}
                 <td>
                     <span>
@@ -612,6 +614,20 @@
                 <td>
                     <span>
                         {{ finding.component_version }}
+                    </span>
+                </td>
+                {% endif %}
+                {% if finding.fix_available %}
+                <td>
+                    <span>
+                        {{ finding.fix_available }}
+                    </span>
+                </td>
+                {% endif %}
+                {% if finding.fix_version %}
+                <td>
+                    <span>
+                        {{ finding.fix_version }}
                     </span>
                 </td>
                 {% endif %}

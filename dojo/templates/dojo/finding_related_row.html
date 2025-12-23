@@ -13,8 +13,8 @@
     {% else %}
         <td title="This finding shares fields values with the finding on this page because of which it looks similar">Similar</td>
     {% endif %}
-    <td class="centered" data-order="{% severity_number_value finding.severity %}">
-        <span class="label severity severity-{{ finding.severity }}">
+    <td class="centered" data-order="{% severity_number_value similar_finding.severity %}">
+        <span class="badge severity-{{ similar_finding.severity }}">
             {{ similar_finding.severity_display }}
         </span>
     </td>

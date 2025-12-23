@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.template import TemplateDoesNotExist
@@ -207,7 +208,6 @@ def can_be_pushed_to_jira(obj, form=None):
             return False, f"Finding below the minimum JIRA severity threshold ({System_Settings.objects.get().jira_minimum_severity}).", "error_below_minimum_threshold"
     elif isinstance(obj, Finding_Group):
         finding_group_status = _safely_get_obj_status_for_jira(obj)
-        logger.error("Finding group status: %s", finding_group_status)
         if "Empty" in finding_group_status:
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it contains no findings above minimum treshold.", "error_empty"
 
@@ -369,10 +369,10 @@ def get_jira_project_key(obj):
 def get_jira_issue_template(obj):
     jira_project = get_jira_project(obj)
 
-    template_dir = jira_project.issue_template_dir
+    template_dir = jira_project.issue_template_dir if jira_project else None
     if not template_dir:
         jira_instance = get_jira_instance(obj)
-        template_dir = jira_instance.issue_template_dir
+        template_dir = jira_instance.issue_template_dir if jira_instance else None
 
     # fallback to default as before
     if not template_dir:
@@ -432,14 +432,19 @@ def has_jira_configured(obj):
 
 
 def connect_to_jira(jira_server, jira_username, jira_password):
+    max_retries = getattr(settings, "JIRA_MAX_RETRIES", 3)
+    timeout = getattr(settings, "JIRA_TIMEOUT", (10, 30))
+
     return JIRA(
         server=jira_server,
         basic_auth=(jira_username, jira_password),
-        max_retries=0,
+        max_retries=max_retries,
+        timeout=timeout,
         options={
             "verify": settings.JIRA_SSL_VERIFY,
             "headers": settings.ADDITIONAL_HEADERS,
-        })
+        },
+    )
 
 
 def get_jira_connect_method():
@@ -782,7 +787,11 @@ def push_finding_to_jira(finding, *args, **kwargs):
 @app.task
 @dojo_model_from_id(model=Finding_Group)
 def push_finding_group_to_jira(finding_group, *args, **kwargs):
+    # Look for findings that have single ticket associations separate from the group
+    for finding in finding_group.findings.filter(jira_issue__isnull=False):
+        update_jira_issue(finding, *args, **kwargs)
     if finding_group.has_jira_issue:
+        # Update the jira issue for the group
         return update_jira_issue(finding_group, *args, **kwargs)
     return add_jira_issue(finding_group, *args, **kwargs)
 
@@ -893,7 +902,12 @@ def add_jira_issue(obj, *args, **kwargs):
     jira_project = get_jira_project(obj)
     jira_instance = get_jira_instance(obj)
 
-    obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
+
+    if not jira_instance:
+        message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
+        return failure_to_add_message(message, None, obj)
+
+    obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
         # Expected validation failures (not verified, not active, below threshold)
         # should not create alerts when auto-pushing via "push all issues"
@@ -1054,10 +1068,17 @@ def update_jira_issue(obj, *args, **kwargs):
         message = f"Object {obj.id} cannot be pushed to JIRA as there is no JIRA configuration for {to_str_typed(obj)}."
         return failure_to_update_message(message, None, obj)
 
+    if not jira_instance:
+        message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
+        return failure_to_update_message(message, None, obj)
+
     j_issue = obj.jira_issue
     try:
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
+        if not jira:
+            message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA connection could not be established."
+            return failure_to_update_message(message, None, obj)
         issue = jira.issue(j_issue.jira_id)
     except Exception as e:
         message = f"The following jira instance could not be connected: {jira_instance} - {e}"
@@ -1176,7 +1197,8 @@ def get_jira_issue_from_jira(find):
         return jira.issue(j_issue.jira_id)
 
     except JIRAError as e:
-        logger.exception("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
+        jira_url = jira_project.jira_instance.url if (jira_project and jira_project.jira_instance) else "N/A"
+        logger.exception("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key if jira_project else "N/A", jira_url, json.dumps(meta, indent=4))
         log_jira_alert(e.text, find)
         return None
 
@@ -1207,6 +1229,10 @@ def issue_from_jira_is_active(issue_from_jira):
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
+    if not jira_instance:
+        logger.warning("Cannot push status to JIRA for %d:%s - jira_instance is None", obj.id, to_str_typed(obj))
+        return False
+
     status_list = _safely_get_obj_status_for_jira(obj)
     issue_closed = False
     updated = False
@@ -1232,6 +1258,7 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
     if updated and save:
         obj.jira_issue.jira_change = timezone.now()
         obj.jira_issue.save()
+    return updated
 
 
 # gets the metadata for the provided issue type in the provided jira project
@@ -1308,6 +1335,8 @@ def get_issuetype_fields(
 
 
 def is_jira_project_valid(jira_project):
+    if not jira_project or not jira_project.jira_instance:
+        return False
     try:
         jira = get_jira_connection(jira_project)
         get_issuetype_fields(jira, jira_project.project_key, jira_project.jira_instance.default_issue_type)
@@ -1369,7 +1398,11 @@ def close_epic(eng, push_to_jira, **kwargs):
 
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
-    if jira_project.enable_engagement_epic_mapping:
+    if not jira_instance:
+        logger.warning("JIRA close epic failed: jira_instance is None")
+        return False
+
+    if jira_project and jira_project.enable_engagement_epic_mapping:
         if push_to_jira:
             try:
                 jissue = get_jira_issue(eng)
@@ -1457,7 +1490,11 @@ def add_epic(engagement, **kwargs):
 
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
-    if jira_project.enable_engagement_epic_mapping:
+    if not jira_instance:
+        logger.warning("JIRA add epic failed: jira_instance is None")
+        return False
+
+    if jira_project and jira_project.enable_engagement_epic_mapping:
         epic_name = kwargs.get("epic_name")
         epic_issue_type_name = getattr(jira_project, "epic_issue_type_name", "Epic")
         if not epic_name:
@@ -1819,9 +1856,14 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
 
                 if finding.test.engagement.product.enable_full_risk_acceptance:
                     logger.debug(f"Creating risk acceptance for finding linked to {jira_issue.jira_key}.")
+                    # loads the expiration from the system setting "Risk acceptance form default days" as otherwise
+                    # the acceptance will never expire
+                    risk_acceptance_form_default_days = get_system_setting("risk_acceptance_form_default_days", 90)
+                    expiration_date_from_system_settings = timezone.now() + relativedelta(days=risk_acceptance_form_default_days)
                     ra = Risk_Acceptance.objects.create(
                         accepted_by=assignee_name,
                         owner=finding.reporter,
+                        expiration_date=expiration_date_from_system_settings,
                         decision_details=f"Risk Acceptance automatically created from JIRA issue {jira_issue.jira_key} with resolution {resolution_name}",
                     )
                     finding.test.engagement.risk_acceptance.add(ra)

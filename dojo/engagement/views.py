@@ -4,7 +4,7 @@ import mimetypes
 import operator
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import partial, reduce
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -19,13 +19,14 @@ from django.db import DEFAULT_DB_ALIAS
 from django.db.models import OuterRef, Q, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.cache import cache_page
+from django.views.decorators.http import require_POST
 from django.views.decorators.vary import vary_on_cookie
 from openpyxl import Workbook
 from openpyxl.styles import Font
@@ -141,6 +142,9 @@ def engagement_calendar(request):
     engagements = engagements.select_related("lead")
     engagements = engagements.prefetch_related("product")
 
+    for e in engagements:
+        if e.target_end:
+            e.target_end += timedelta(days=1)
     add_breadcrumb(
         title="Engagement Calendar", top_level=True, request=request)
     return render(
@@ -932,6 +936,30 @@ class ImportScanResultsView(View):
     ) -> str | None:
         """Attempt to import with all the supplied information"""
         try:
+            # Log only user-entered form values, excluding internal objects
+            user_values = {
+                "scan_type": context.get("scan_type"),
+                "scan_date": context.get("scan_date"),
+                "minimum_severity": context.get("minimum_severity"),
+                "active": context.get("active"),
+                "verified": context.get("verified"),
+                "test_title": context.get("test_title"),
+                "tags": context.get("tags"),
+                "version": context.get("version"),
+                "branch_tag": context.get("branch_tag"),
+                "build_id": context.get("build_id"),
+                "commit_hash": context.get("commit_hash"),
+                "service": context.get("service"),
+                "close_old_findings": context.get("close_old_findings"),
+                "apply_tags_to_findings": context.get("apply_tags_to_findings"),
+                "apply_tags_to_endpoints": context.get("apply_tags_to_endpoints"),
+                "close_old_findings_product_scope": context.get("close_old_findings_product_scope"),
+                "group_by": context.get("group_by"),
+                "create_finding_groups_for_all_findings": context.get("create_finding_groups_for_all_findings"),
+                "push_to_jira": context.get("push_to_jira"),
+                "push_all_jira_issues": context.get("push_all_jira_issues"),
+            }
+            logger.debug(f"import_findings called with user values: {user_values}")
             importer_client = self.get_importer(context)
             context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
                 context.pop("scan", None),
@@ -961,20 +989,20 @@ class ImportScanResultsView(View):
             "active": None,
             "verified": None,
             "scan_type": request.POST.get("scan_type"),
-            "test_title": form.cleaned_data.get("test_title"),
+            "test_title": form.cleaned_data.get("test_title") or None,
             "tags": form.cleaned_data.get("tags"),
-            "version": form.cleaned_data.get("version"),
-            "branch_tag": form.cleaned_data.get("branch_tag", None),
-            "build_id": form.cleaned_data.get("build_id", None),
-            "commit_hash": form.cleaned_data.get("commit_hash", None),
-            "api_scan_configuration": form.cleaned_data.get("api_scan_configuration", None),
-            "service": form.cleaned_data.get("service", None),
+            "version": form.cleaned_data.get("version") or None,
+            "branch_tag": form.cleaned_data.get("branch_tag") or None,
+            "build_id": form.cleaned_data.get("build_id") or None,
+            "commit_hash": form.cleaned_data.get("commit_hash") or None,
+            "api_scan_configuration": form.cleaned_data.get("api_scan_configuration") or None,
+            "service": form.cleaned_data.get("service") or None,
             "close_old_findings": form.cleaned_data.get("close_old_findings", None),
             "apply_tags_to_findings": form.cleaned_data.get("apply_tags_to_findings", False),
             "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
             "close_old_findings_product_scope": form.cleaned_data.get("close_old_findings_product_scope", None),
-            "group_by": form.cleaned_data.get("group_by", None),
-            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings"),
+            "group_by": form.cleaned_data.get("group_by") or None,
+            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings", None),
             "environment": self.get_development_environment(environment_name=form.cleaned_data.get("environment")),
         })
         # Create the engagement if necessary
@@ -1132,6 +1160,40 @@ def close_eng(request, eid):
         "Engagement closed successfully.",
         extra_tags="alert-success")
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+
+
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
+@require_POST
+def unlink_jira(request, eid):
+    eng = get_object_or_404(Engagement, id=eid)
+    logger.info("trying to unlink a linked jira epic from engagement %d:%s", eng.id, eng.name)
+    if eng.has_jira_issue:
+        try:
+            jira_helper.unlink_jira(request, eng)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Link to JIRA epic successfully deleted",
+                extra_tags="alert-success",
+            )
+            return JsonResponse({"result": "OK"})
+        except Exception:
+            logger.exception("Link to JIRA epic could not be deleted")
+            messages.add_message(
+                request,
+                messages.ERROR,
+                "Link to JIRA epic could not be deleted, see alerts for details",
+                extra_tags="alert-danger",
+            )
+            return HttpResponse(status=500)
+    else:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Link to JIRA epic not found",
+            extra_tags="alert-danger",
+        )
+        return HttpResponse(status=400)
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")

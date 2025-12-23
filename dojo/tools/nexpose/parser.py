@@ -4,7 +4,7 @@ from datetime import datetime
 import html2text
 from defusedxml import ElementTree
 from django.conf import settings
-from hyperlink._url import SCHEME_PORT_MAP
+from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
 from dojo.models import Endpoint, Finding
 
@@ -63,7 +63,7 @@ class NexposeParser:
                 ret += "<li>" + str(node.text).strip() + "</li>"
         if tag == "orderedlist":
             i = 1
-            for item in list(node):
+            for i, item in enumerate(node):
                 ret += (
                     "<ol>"
                     + str(i)
@@ -71,7 +71,6 @@ class NexposeParser:
                     + self.parse_html_type(item)
                     + "</ol>"
                 )
-                i += 1
         if tag == "paragraph":
             if len(list(node)) > 0:
                 for child in list(node):

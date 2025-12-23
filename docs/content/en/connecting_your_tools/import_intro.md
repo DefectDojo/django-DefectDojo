@@ -4,18 +4,16 @@ description: "Learn how to import data manually, through the API, or via a conne
 weight: 1
 ---
 
-One of the things we understand at DefectDojo is that every company’s security needs are completely different. There is no ‘one\-size\-fits\-all’ approach. As your organization changes, having a flexible approach is key.
-
-DefectDojo allows you to connect your security tools in a flexible way to match those changes.
+One of the things we understand at DefectDojo is that every company’s security needs are completely different. There is no one-size-fits-all approach. As your organization changes, having a flexible approach is key, and DefectDojo allows you to connect your security tools in a flexible way to match those changes.
 
 ## Scan Upload Methods
 
-When DefectDojo receives a vulnerability report from a security tool, it will create Findings based on the vulnerabilities contained within that report. DefectDojo acts as the central repository for these Findings where they can be triaged, remediated or otherwise addressed by you and your team.
+When DefectDojo receives a vulnerability report from a security tool, it will create Findings based on the vulnerabilities contained within that report. DefectDojo acts as the central repository for these Findings where they can be triaged, remediated, or otherwise addressed by you and your team.
 
 There are two main ways that DefectDojo can upload Finding reports.
 
 * Via direct **import** through the UI: [Import Scan Form](../import_scan_files/import_scan_ui)
-* Via **API** endpoint (allowing for automated data ingest): See [API Docs](https://docs.defectdojo.com/en/api/api-v2-docs/)
+* Via **API** endpoint (allowing for automated data ingestion): See [API Docs](https://docs.defectdojo.com/en/api/api-v2-docs/)
 
 #### DefectDojo Pro Methods
 
@@ -29,8 +27,8 @@ There are two main ways that DefectDojo can upload Finding reports.
 
 |  | **UI Import** | **API** | **Connectors** <span style="background-color:rgba(242, 86, 29, 0.3)">(Pro)</span> | **Smart Upload**  <span style="background-color:rgba(242, 86, 29, 0.3)">(Pro)</span>|
 | --- | --- | --- | --- | --- |
-| **Supported Scan Types** | All: see [Supported Tools](/en/connecting_your_tools/parsers) | All: see [Supported Tools](/en/connecting_your_tools/parsers) | Snyk, Semgrep, Burp Suite, AWS Security Hub, Probely, Checkmarx, Tenable | Nexpose, NMap, OpenVas, Qualys, Tenable |
-| **Automation?** | Available via API: `/reimport` `/import` endpoints | Triggered from [CLI Importer](../external_tools) or external code | Connectors is inherently automated | Available via API: `/smart_upload_import` endpoint |
+| **Supported Scan Types** | All: see [Supported Tools](/supported_tools/) | All: see [Supported Tools](/supported_tools/) | Anchore, AWS Security Hub, BurpSuite, Checkmarx ONE, Dependency-Track, Probely, Semgrep, SonarQube, Snyk, Tenable, Wiz | Nexpose, NMap, OpenVas, Qualys, Tenable |
+| **Automation?** | Available via API: `/reimport` `/import` endpoints | Triggered from [CLI Importer](../external_tools) or external code | Connectors is an inherently automated feature | Available via API: `/smart_upload_import` endpoint |
 
 ### Product Hierarchy and organization
 

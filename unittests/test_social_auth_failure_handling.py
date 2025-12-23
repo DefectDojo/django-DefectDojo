@@ -7,7 +7,7 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpResponse
 from django.test import RequestFactory, override_settings
 from requests.exceptions import ConnectionError as RequestsConnectionError
-from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden
+from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden, AuthTokenError
 
 from dojo.middleware import CustomSocialAuthExceptionMiddleware
 
@@ -52,6 +52,7 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
             (AuthCanceled("User canceled login"), "Social login was canceled. Please try again or use the standard login."),
             (AuthFailed("Token exchange failed"), "Social login failed. Please try again or use the standard login."),
             (AuthForbidden("User not allowed"), "You are not authorized to log in via this method. Please contact support or use the standard login."),
+            (AuthTokenError("Invalid or expired token"), "Social login failed due to an invalid or expired token. Please try again or use the standard login."),
         ]
         for path in login_paths:
             for exception, expected_message in exceptions:
@@ -82,6 +83,16 @@ class TestSocialAuthMiddlewareUnit(DojoTestCase):
         self.assertEqual(response.url, "/login?force_login_form")
         storage = list(messages.get_messages(request))
         self.assertTrue(any("You are not authorized to log in via this method." in str(msg) for msg in storage))
+
+    def test_type_error_none_type_iterable_redirect(self):
+        """Ensure middleware catches 'NoneType' object is not iterable TypeError and redirects."""
+        request = self._prepare_request("/login/oidc/")
+        exception = TypeError("'NoneType' object is not iterable")
+        response = self.middleware.process_exception(request, exception)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/login?force_login_form")
+        storage = list(messages.get_messages(request))
+        self.assertTrue(any("An unexpected error occurred during social login." in str(msg) for msg in storage))
 
 
 @override_settings(

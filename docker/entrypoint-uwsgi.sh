@@ -3,6 +3,7 @@ set -e  # needed to handle "exit" correctly
 
 . /secret-file-loader.sh
 . /reach_database.sh
+. /reach_broker.sh
 
 # Allow for bind-mount multiple settings.py overrides
 FILES=$(ls /app/docker/extra_settings/* 2>/dev/null || true)
@@ -18,6 +19,7 @@ if [ "$NUM_FILES" -gt 0 ]; then
 fi
 
 wait_for_database_to_be_reachable
+wait_for_broker_to_be_reachable
 echo
 
 umask 0002
@@ -27,9 +29,9 @@ python3 manage.py check
 
 DD_UWSGI_LOGFORMAT_DEFAULT='[pid: %(pid)|app: -|req: -/-] %(addr) (%(dd_user)) {%(vars) vars in %(pktsize) bytes} [%(ctime)] %(method) %(uri) => generated %(rsize) bytes in %(msecs) msecs (%(proto) %(status)) %(headers) headers in %(hsize) bytes (%(switches) switches on core %(core))'
 
-EXTRA_ARGS=""
+DD_UWSGI_EXTRA_ARGS="${DD_UWSGI_EXTRA_ARGS:-}"
 if [ -n "${DD_UWSGI_MAX_FD}" ]; then
-    EXTRA_ARGS="${EXTRA_ARGS} --max-fd ${DD_UWSGI_MAX_FD}"
+    DD_UWSGI_EXTRA_ARGS="${DD_UWSGI_EXTRA_ARGS} --max-fd ${DD_UWSGI_MAX_FD}"
 fi
 
 exec uwsgi \
@@ -42,5 +44,5 @@ exec uwsgi \
   --buffer-size="${DD_UWSGI_BUFFER_SIZE:-8192}" \
   --http 0.0.0.0:8081 --http-to "${DD_UWSGI_ENDPOINT}" \
   --logformat "${DD_UWSGI_LOGFORMAT:-$DD_UWSGI_LOGFORMAT_DEFAULT}" \
-  $EXTRA_ARGS
+  $DD_UWSGI_EXTRA_ARGS
   # HTTP endpoint is enabled for Kubernetes liveness checks. It should not be exposed as a service.
