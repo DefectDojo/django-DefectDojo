@@ -27,9 +27,7 @@ class ProwlerParserCSV:
             if row.get("STATUS") == "PASS":
                 continue
 
-            provider = row.get("PROVIDER", "N/A")
-            # Set provider name to the correct capitalization format
-            provider = provider.capitalize() if provider in {"kubernetes", "azure"} else provider.upper()
+            provider = row.get("PROVIDER", "N/A").upper()
 
             description = (
                 "**Cloud Type** : "

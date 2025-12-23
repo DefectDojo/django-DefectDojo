@@ -48,7 +48,7 @@ class ProwlerParserJSON:
             )
             impact = node.get("risk_details", "")
             compliance = node.get("unmapped", {}).get("compliance", {})
-            references = "**Related URL** : " + node.get("unmapped", {}).get("related_url")
+            references = "**Related URL** : " + node.get("unmapped", {}).get("related_url", "")
             # Add data presnet in scan to References
             for key, values in compliance.items():
                 joined = ", ".join(values)
@@ -107,13 +107,13 @@ class ProwlerParserJSON:
             if account_type == "aws":
                 return "AWS"
             if account_type == "azure":
-                return "Azure"
+                return "AZURE"
 
         # Check for Kubernetes
         for resource in node.get("resources", []):
             namespace = resource.get("data", {}).get("metadata", {}).get("namespace")
             if namespace is not None:
-                return "Kubernetes"
+                return "KUBERNETES"
 
         # No Cloud Type information was found
         return "N/A"
