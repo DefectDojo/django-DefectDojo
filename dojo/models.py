@@ -3346,14 +3346,21 @@ class Finding(models.Model):
     def get_severity_related_to_priority(self):
         """Get severity related to priority the finding"""
 
-        severity_mapping = {
-            "Very Critical": "critical",
-            "Critical": "high",
-            "High": "medium",
-            "Medium Low": "low",
-        }
-        severity = self.severity.lower()
-        return severity_mapping.get(self.priority_classification, severity)
+        if (
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False and
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True
+        ):
+
+            severity_mapping = {
+                "Very Critical": "critical",
+                "Critical": "high",
+                "High": "medium",
+                "Medium Low": "low",
+            }
+            severity = self.severity.lower()
+            return severity_mapping.get(self.priority_classification, severity)
+        else:
+            return self.severity.lower()
 
 
     def get_sla_period(self):

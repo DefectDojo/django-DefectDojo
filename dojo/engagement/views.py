@@ -1939,7 +1939,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
 
             unaccepted_findings = priority_filter.filter(unaccepted_findings, [str(priority_value)])
         else:
-            unaccepted_findings = unaccepted_findings.filter(severity=risk_acceptance.severity)
+            unaccepted_findings = unaccepted_findings.filter(severity=risk_acceptance.severity.capitalize())
 
         if len(accepted_findings) > 0 and accepted_findings[0].impact and accepted_findings[0].impact in settings.COMPLIANCE_FILTER_RISK:
             unaccepted_findings = unaccepted_findings.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
