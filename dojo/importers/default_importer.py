@@ -365,11 +365,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=""))
         # Update the status of the findings and any endpoints
         for old_finding in old_findings:
-            url = get_full_url(reverse("view_test", args=(self.test.id,)))
+            url = str(get_full_url(reverse("view_test", args=(self.test.id,))))
+            test_title = str(self.test.title)
             self.mitigate_finding(
                 old_finding,
                 (
-                    'This Finding has been automatically closed by the Test: \n "' + self.test.title + '"\n' + url +
+                    'This Finding has been automatically closed by the Test: \n "' + test_title + '"\n' + url +
                     "\n\nThis is because this Finding is not present anymore in recent scans."
                 ),
                 finding_groups_enabled=self.findings_groups_enabled,
