@@ -19,7 +19,7 @@
     "@thulite/inline-svg": "1.2.1",
     "@thulite/seo": "2.4.2",
     "@tabler/icons": "3.34.1",
-    "thulite": "2.5.0"
+    "thulite": "2.6.3"
   },
   "devDependencies": {
     "prettier": "3.6.2",

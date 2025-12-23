@@ -8,6 +8,7 @@ from dojo.pipeline import update_product_type_azure_devops
 from azure.devops.v7_1.graph.models import GraphSubject, GraphGroup
 from dojo.models import Product_Type_Member, Product_Type
 import logging
+import uuid
 from io import StringIO
 
 
@@ -48,6 +49,7 @@ class PipelineTest(DojoTestCase):
         user_model = get_user_model()
         user = user_model._default_manager.create_user(username="test", password="pwd")
         UserSocialAuth.objects.create(
+            uid=uuid.uuid4(),
             user=user,
             provider="azuread-oauth2",
             extra_data={"access_token": "test", "resource": "url_graph"},
@@ -81,6 +83,7 @@ class PipelineTest(DojoTestCase):
         user_model = get_user_model()
         user = user_model._default_manager.create_user(username="test", password="pwd")
         UserSocialAuth.objects.create(
+            uid=uuid.uuid4(),
             user=user,
             provider="azuread-oauth2",
             extra_data={

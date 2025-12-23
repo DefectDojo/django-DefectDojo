@@ -20,7 +20,11 @@ import requests
 # Dojo
 from dojo.models import Finding, Dojo_Group, Notes, Vulnerability_Id
 from dojo.group.queries import get_group_members_for_group
-from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion, FindingExclusionLog
+from dojo.engine_tools.models import (
+    FindingExclusion,
+    FindingExclusionDiscussion,
+    FindingExclusionLog,
+)
 from dojo.engine_tools.queries import tag_filter, priority_tag_filter
 from dojo.celery import app
 from dojo.user.queries import get_user
@@ -88,7 +92,9 @@ def has_valid_comments(finding_exclusion, user) -> bool:
 
 
 @app.task
-def add_findings_to_whitelist(unique_id_from_tool, relative_url, engagement_ids=[], product_ids=[]):
+def add_findings_to_whitelist(
+    unique_id_from_tool, relative_url, engagement_ids=[], product_ids=[]
+):
     findings_to_update = (
         Finding.objects.filter(
             Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
@@ -99,10 +105,14 @@ def add_findings_to_whitelist(unique_id_from_tool, relative_url, engagement_ids=
     )
 
     if product_ids and not engagement_ids:
-        findings_to_update = findings_to_update.filter(test__engagement__product__in=product_ids)
+        findings_to_update = findings_to_update.filter(
+            test__engagement__product__in=product_ids
+        )
 
     if engagement_ids:
-        findings_to_update = findings_to_update.filter(test__engagement__in=engagement_ids)
+        findings_to_update = findings_to_update.filter(
+            test__engagement__in=engagement_ids
+        )
 
     if findings_to_update.exists():
         finding_exclusion_url = get_full_url(relative_url)
@@ -134,7 +144,7 @@ def accept_finding_exclusion_inmediately(finding_exclusion: FindingExclusion) ->
     finding_exclusion.save()
 
     relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
-    engagement_ids = finding_exclusion.engagements.values_list('id', flat=True)
+    engagement_ids = finding_exclusion.engagements.values_list("id", flat=True)
     add_findings_to_whitelist.apply_async(
         args=(
             finding_exclusion.unique_id_from_tool,
@@ -150,7 +160,7 @@ def accept_finding_exclusion_inmediately(finding_exclusion: FindingExclusion) ->
         finding_exclusion=finding_exclusion,
         changed_by=system_user,
         previous_status=finding_exclusion.status,
-        current_status="Accepted"
+        current_status="Accepted",
     )
 
     # Send notification to the developer owner
@@ -260,10 +270,17 @@ def remove_finding_from_list(finding: Finding, note: Notes, list_type: str) -> F
 def expire_finding_exclusion(expired_fex_id: str) -> None:
     expired_fex = FindingExclusion.objects.get(uuid=expired_fex_id)
     try:
+        system_user = get_user(settings.SYSTEM_USER)
+        FindingExclusionLog.objects.create(
+            finding_exclusion=expired_fex,
+            changed_by=system_user,
+            previous_status=expired_fex.status,
+            current_status="Expired",
+        )
+
         with transaction.atomic():
             expired_fex.status = "Expired"
             expired_fex.save()
-            system_user = get_user(settings.SYSTEM_USER)
             logger.info(f"Expired finding exclusion: {expired_fex}")
             note = get_note(
                 system_user,
@@ -285,12 +302,12 @@ def expire_finding_exclusion(expired_fex_id: str) -> None:
             engagement_ids = expired_fex.engagements.values_list("id", flat=True)
 
             if expired_fex.product and not engagement_ids:
-                findings = findings.filter(test__engagement__product=expired_fex.product)
+                findings = findings.filter(
+                    test__engagement__product=expired_fex.product
+                )
 
             if engagement_ids:
-                findings = findings.filter(
-                    test__engagement__in=list(engagement_ids)
-                )
+                findings = findings.filter(test__engagement__in=list(engagement_ids))
 
             findings_to_update = []
 
@@ -301,13 +318,6 @@ def expire_finding_exclusion(expired_fex_id: str) -> None:
 
             Finding.objects.bulk_update(
                 findings_to_update, ["active", "risk_status"], 1000
-            )
-
-            FindingExclusionLog.objects.create(
-                finding_exclusion=expired_fex,
-                changed_by=system_user,
-                previous_status=expired_fex.status,
-                current_status="Expired"
             )
 
             maintainers = get_reviewers_members()
@@ -349,7 +359,7 @@ def check_new_findings_to_exclusion_list():
     for finding_exclusion in finding_exclusions:
         relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
         if finding_exclusion.type == "white_list":
-            engagement_ids = finding_exclusion.engagements.values_list('id', flat=True)
+            engagement_ids = finding_exclusion.engagements.values_list("id", flat=True)
             add_findings_to_whitelist.apply_async(
                 args=(
                     finding_exclusion.unique_id_from_tool,
@@ -369,14 +379,10 @@ def check_new_findings_to_exclusion_list():
 
 @app.task
 def add_findings_to_blacklist(unique_id_from_tool, relative_url):
-    findings_to_update = (
-        Finding.objects.filter(
-            Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
-            active=True,
-        )
-        .exclude(risk_status=Constants.ON_BLACKLIST.value)
-        .filter(priority_tag_filter)
-    )
+    findings_to_update = Finding.objects.filter(
+        Q(cve=unique_id_from_tool) | Q(vuln_id_from_tool=unique_id_from_tool),
+        active=True,
+    ).exclude(risk_status=Constants.ON_BLACKLIST.value)
 
     if findings_to_update.exists():
         finding_exclusion_url = get_full_url(relative_url)
@@ -439,6 +445,7 @@ def update_finding_prioritization_per_cve(
     vulnerability_id = finding.cve
     severity = finding.severity
     scan_type = finding.test.scan_type
+    ids = []
     logger.info(
         f"Init update_finding_prioritization_per_cve with CVE {vulnerability_id}, severity {severity}, cve_greater {cve_greater}, scan_type {scan_type}"
     )
@@ -475,10 +482,13 @@ def update_finding_prioritization_per_cve(
         Finding.objects.filter(priority_cve_severity_filter, test__scan_type=scan_type)
         .filter(priority_tag_filter)
         .filter(active=settings.CELERY_CRON_STATUS_FINDINGS_PRIORIZATION)
+        .exclude(
+            tags__name__icontains=settings.CELERY_CRON_PRIORITY_EXCLUDED_TAGS_FILTER
+        )
     )
 
     # If we need to filter by vulnerability_id count, apply it after the initial query
-    if vulnerability_id and Constants.TAG_HACKING.value in finding.tags and not ids:
+    if Constants.TAG_HACKING.value in finding.tags and not ids:
         findings = findings.annotate(
             vulnerability_id_count=Count("vulnerability_id")
         ).filter(vulnerability_id_count=1)
@@ -645,7 +655,7 @@ def get_severity_risk_map():
             "Medium": float(priorization_weights.get("P_Low")),
             "High": float(priorization_weights.get("P_High")),
             "Critical": float(priorization_weights.get("P_Critical")),
-        }
+        },
     }
 
 
@@ -710,9 +720,13 @@ def calculate_priority_epss_kev_finding(
         if hasattr(finding.tags, "names")
         else str(finding.tags)
     )
+    # Remove unwanted tags and normalize the string
+    unwanted_tags = ["black_list", "white_list", "transferred", " ", ","]
+    for tag in unwanted_tags:
+        tags_str = tags_str.replace(tag, "")
 
     severity_risk_map = severity_risk_map.get(
-        settings.PRIORIZATION_FIELD_WEIGHTS.get(tags_str.replace(",", ":").replace(" ", ""), "Standard"),
+        settings.PRIORIZATION_FIELD_WEIGHTS.get(tags_str, "Standard"),
         severity_risk_map["Standard"],
     )
     if df_risk_score is not None and not df_risk_score.empty and finding.cve:
@@ -906,6 +920,9 @@ def check_priorization():
         .filter(priority_tag_filter)
         .order_by("cve", "test__scan_type", "severity")
         .distinct("cve", "test__scan_type", "severity")
+        .exclude(
+            tags__name__icontains=settings.CELERY_CRON_PRIORITY_EXCLUDED_TAGS_FILTER
+        )
     )
 
     logger.info(
@@ -918,7 +935,10 @@ def check_priorization():
 
 @app.task
 def remove_findings_from_deleted_finding_exclusions(
-    unique_id_from_tool: str, fx_type: str, engagement_ids: list = [], product_ids: list = []
+    unique_id_from_tool: str,
+    fx_type: str,
+    engagement_ids: list = [],
+    product_ids: list = [],
 ) -> None:
     try:
         with transaction.atomic():

@@ -165,8 +165,9 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
     ):
         soc = user.social_auth.get()
         token = soc.extra_data["access_token"]
+        resource = str(soc.extra_data["resource"])
         group_names = search_azure_groups(kwargs, token, soc)
-        logger.debug("detected groups " + str(group_names))
+        logger.debug(f"detected groups {group_names} for user {user}")
         groups_validate = settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP.split(',')
         if (
             group_names is not None
@@ -179,13 +180,13 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             user_login = kwargs["details"]["email"]
             request_headers = {"Authorization": "Bearer " + token}
             graph_user_request = requests.get(
-                (str(soc.extra_data["resource"]) + "/v1.0/users/" + user_login), headers=request_headers
+                (resource + "/v1.0/users/" + user_login), headers=request_headers
             )
             graph_user_request.raise_for_status()
             graph_user_request_json = graph_user_request.json()
             job_title = graph_user_request_json["jobTitle"]
             office_location = graph_user_request_json["officeLocation"]
-            logger.debug("detected jobTitle " + job_title + " and officeLocation " + office_location)
+            logger.debug(f"detected jobTitle {job_title} and officeLocation {office_location} for user {user_login}")
 
             # Assign global role
             if office_location in settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[1]:
@@ -212,10 +213,11 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                 role_assigned = {"role": Role.objects.get(id=Roles.Cibersecurity)}
 
             assign_mode = settings.SOCIAL_AUTH_AZURE_DEVOPS_ASSIGN_MODE
+            logger.debug(f"Assign mode {assign_mode}")
             if assign_mode == "AZURE_DEVOPS_PERMISSIONS":
                 assign_with_azuredevops_permission(user_login, user, user_product_types_names, role_assigned, is_cybersecurity, is_leader)
             elif assign_mode == "USER_MANAGER":
-                assign_with_user_manager(graph_user_request_json, user, token, user_product_types_names, role_assigned, is_cybersecurity)
+                assign_with_user_manager(graph_user_request_json, resource, user, token, user_product_types_names, role_assigned, is_cybersecurity)
         else:
             message = f"The user is not a member of any of the app's security groups. {groups_validate}"
             messages.error(
@@ -234,6 +236,7 @@ def assign_with_azuredevops_permission(user_login, user, user_product_types_name
     result_query_subjects = graph_client.query_subjects({"query": user_login, "subjectKind": ["User"]})
 
     if result_query_subjects is not None and len(result_query_subjects) > 0:
+        logger.debug(f"detected {len(result_query_subjects)} result_query_subjects for user {user_login}")
         # Get user's product type for become member
         result_memberships = graph_client.get_membership(result_query_subjects[0].descriptor, None)
 
@@ -242,11 +245,13 @@ def assign_with_azuredevops_permission(user_login, user, user_product_types_name
             graph_client,
             settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[0],
         )
+
+        logger.debug(f"detected {len(groups_team_leve1)} groups_team_leve1 for user {user_login}")
         
         if len(groups_team_leve1) > 0:
             groups_team_leve2 = []
             for group_team_leve1 in groups_team_leve1:
-                logger.debug("User %s is member of group %s", user, group_team_leve1.display_name)
+                logger.debug(f"User {user} is member of group {group_team_leve1.display_name}")
                 groups_team_leve2 += custom_filter_group(
                     graph_client.get_membership(group_team_leve1.descriptor, None).additional_properties["value"],
                     graph_client,
@@ -255,6 +260,7 @@ def assign_with_azuredevops_permission(user_login, user, user_product_types_name
 
             # create a new product type or update product's type authorized_users
             if len(groups_team_leve2) > 0 and user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM:
+                logger.debug(f"detected {len(groups_team_leve2)} groups_team_leve2 for user {user_login}")
                 for group_team_leve2 in groups_team_leve2:
                     update_member_product_type(group_team_leve2.display_name, user_product_types_names, user, role_assigned)
 
@@ -269,7 +275,7 @@ def assign_with_azuredevops_permission(user_login, user, user_product_types_name
 
 
 def assign_with_user_manager(
-    graph_user_request_json, user, token_graph, user_product_types_names, role_assigned, is_cybersecurity
+    graph_user_request_json, resource, user, token_graph, user_product_types_names, role_assigned, is_cybersecurity
 ):
     name_product_type = None
     if graph_user_request_json:
@@ -282,8 +288,10 @@ def assign_with_user_manager(
             name_product_type = graph_user_request_json["officeLocation"].replace("-", " ")
         else:
             name_product_type = get_user_manager(
-                graph_user_request_json["userPrincipalName"], graph_user_request_json["id"], token_graph
+                resource, graph_user_request_json["userPrincipalName"], graph_user_request_json["id"], token_graph
             )
+    
+    logger.debug(f"detected product type {name_product_type}")
 
     if name_product_type:
         products_types = Product_Type.objects.filter(description__contains=name_product_type).values_list('name', flat=True)
@@ -294,22 +302,24 @@ def assign_with_user_manager(
         else:
             update_member_product_type(name_product_type, user_product_types_names, user, role_assigned)
             user_product_types_names[:] = [name for name in user_product_types_names if name != name_product_type]
-
-        clean_project_type_user(user_product_types_names, user, graph_user_request_json["userPrincipalName"], False, is_cybersecurity)
     else:
         update_member_office_location_role(role_assigned, graph_user_request_json, user)
+    clean_project_type_user(user_product_types_names, user, graph_user_request_json["userPrincipalName"], False, is_cybersecurity)
 
 
-def get_user_manager(name, id, token_graph):
-    url = f"https://graph.microsoft.com/v1.0/users/{id}/manager"
+def get_user_manager(resource, name, id, token_graph):
+    url = f"{resource}/v1.0/users//{id}/manager"
     headers = {
         "content-type": "application/json",
         "Authorization": f"Bearer {token_graph}",
         "ConsistencyLevel": "eventual",
     }
-    response = requests.get(url, headers=headers).json()
+    requests_get_user_manager = requests.get(url, headers=headers)
+    logger.debug(f"User manager response status code: {requests_get_user_manager.status_code} with message {requests_get_user_manager.text}")
+    requests_get_user_manager.raise_for_status()
+    response = requests_get_user_manager.json()
     if "officeLocation" not in response:
-        print(f"User {name} does not have an office location")
+        logger.debug(f"User {name} does not have an office location")
         return None
     matches_cmdb = (
         re.search(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[1], response["officeLocation"], re.IGNORECASE)
@@ -323,12 +333,14 @@ def get_user_manager(name, id, token_graph):
         return response["officeLocation"].replace("-", " ")
     else:
         return get_user_manager(
-            name, response["id"], token_graph
+            resource, name, response["id"], token_graph
         )
 
 def update_member_office_location_role(role_assigned, graph_user_request_json, user):
     if role_assigned["role"].id == Roles.Developer:
+        logger.debug(f"Assigning to user {graph_user_request_json['mail']} product membership based on office location {graph_user_request_json['officeLocation']}")
         products = Product.objects.filter(description__contains=graph_user_request_json["officeLocation"])
+        logger.debug(f"detected products {len(products)}")
         # Get user's product names
         user_product_names = [prod.name for prod in get_authorized_products(Permissions.Product_View, user)]
         for product in products:
@@ -342,11 +354,12 @@ def update_member_office_location_role(role_assigned, graph_user_request_json, u
                 )
 
         # For each product: if user is not project member any more, remove him from product's list of product members
-        for product_name in user_product_names:
-            if product_name not in products.values_list('name', flat=True):
-                product = Product.objects.get(name=product_name)
-                Product_Member.objects.filter(product=product, user=user).delete()
-                logger.debug("Deleting membership of user %s from product %s", user, product_name)
+        if (graph_user_request_json["mail"].split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM):
+            for product_name in user_product_names:
+                if product_name not in products.values_list('name', flat=True):
+                    product = Product.objects.get(name=product_name)
+                    Product_Member.objects.filter(product=product, user=user).delete()
+                    logger.debug("Deleting membership of user %s from product %s", user, product_name)
 
 def update_member_product_type(product_type, user_product_types_names, user, role_assigned):
     if product_type not in user_product_types_names:
