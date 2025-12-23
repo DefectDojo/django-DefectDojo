@@ -1725,7 +1725,7 @@ class FindingSerializer(serializers.ModelSerializer):
         required=False, queryset=User.objects.all(),
     )
     permissions = serializers.SerializerMethodField(read_only=True, allow_null=True)
-
+    priority_classification = serializers.CharField(read_only=True)
     class Meta:
         model = Finding
         exclude = (
