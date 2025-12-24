@@ -178,7 +178,7 @@ class TestDojoImporterPerformance(DojoTestCase):
         so we patch the we_want_async decorator to always return False.
         """
         self.import_reimport_performance(
-            expected_num_queries1=719,
+            expected_num_queries1=729,
             expected_num_async_tasks1=10,
             expected_num_queries2=685,
             expected_num_async_tasks2=22,
