@@ -27,7 +27,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 * **(Findings)** Added new KEV fields for ransomware, exploits, and date handling.
 * **(Pro UI)** Added Table Preferences menu, allowing you to store preset lists of columns for each table.
 
-![image](images/pro-tablepreferences.png)
+![image](images/pro_tablepreferences.png)
 
 ### Dec 1, 2025: v2.53.0
 
