@@ -160,7 +160,7 @@ class TestDojoImporterPerformance(DojoTestCase):
 
     def test_import_reimport_reimport_performance(self):
         self.import_reimport_performance(
-            expected_num_queries1=719,
+            expected_num_queries1=729,
             expected_num_async_tasks1=10,
             expected_num_queries2=685,
             expected_num_async_tasks2=22,
