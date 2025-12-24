@@ -902,12 +902,11 @@ def add_jira_issue(obj, *args, **kwargs):
     jira_project = get_jira_project(obj)
     jira_instance = get_jira_instance(obj)
 
-
     if not jira_instance:
         message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
         return failure_to_add_message(message, None, obj)
 
-    obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
+    obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
         # Expected validation failures (not verified, not active, below threshold)
         # should not create alerts when auto-pushing via "push all issues"
