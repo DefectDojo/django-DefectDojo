@@ -1,0 +1,14 @@
+{
+    "name": "Test With Type Equal To Scan Type",
+    "type": "Generic Findings Import",
+    "findings": [
+        {
+            "title": "Test Finding With Type Equal To Scan Type",
+            "description": "This is a test finding with type equal to scan_type",
+            "severity": "High",
+            "active": true,
+            "verified": true
+        }
+    ]
+}
+

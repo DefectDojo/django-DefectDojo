@@ -317,6 +317,70 @@ class TestDojoDefaultImporter(DojoTestCase):
             # Verify test_type remains unchanged
             self.assertEqual(original_test_type_name, test.test_type.name)
 
+    def test_reimport_generic_type_equals_scan_type(self):
+        """Test reimport when type field equals scan_type (should succeed)"""
+        generic_no_type = get_unit_tests_scans_path("generic") / "generic_no_type.json"
+        generic_test_type_equals_scan_type = get_unit_tests_scans_path("generic") / "generic_test_type_equals_scan_type.json"
+        with generic_no_type.open(encoding="utf-8") as scan:
+            scan_type = "Generic Findings Import"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_generic_type_equals_scan_type")
+            product, _ = Product.objects.get_or_create(
+                name="TestGenericTypeEqualsScanType",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Generic Type Equals Scan Type Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            # Initial import without type field
+            importer = DefaultImporter(**import_options)
+            test, _, _, _, _, _, _ = importer.process_scan(scan)
+            original_test_type_name = test.test_type.name
+            # Should create test_type as just scan_type (no type field)
+            self.assertEqual("Generic Findings Import", original_test_type_name)
+
+            # Reimport with type field equal to scan_type
+            reimport_options = {
+                "test": test,
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "close_old_findings": False,
+            }
+            reimporter = DefaultReImporter(**reimport_options)
+            # Use file with type field equal to scan_type
+            with generic_test_type_equals_scan_type.open(encoding="utf-8") as scan2:
+                # Should succeed without ValidationError
+                test_after_reimport, _, len_new_findings, _, _, _, _ = reimporter.process_scan(scan2)
+                # Verify reimport succeeds
+                self.assertEqual(test.id, test_after_reimport.id)
+                # Verify test_type remains unchanged (should still be "Generic Findings Import")
+                test.refresh_from_db()
+                self.assertEqual("Generic Findings Import", test.test_type.name)
+                # Verify findings were processed
+                self.assertGreater(len_new_findings, 0)
+
 
 class FlexibleImportTestAPI(DojoAPITestCase):
     def __init__(self, *args, **kwargs):

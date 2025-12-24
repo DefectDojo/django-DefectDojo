@@ -205,18 +205,26 @@ class BaseImporter(ImporterOptions):
         if not self.test:
             # Determine if we should use a custom test type name
             if test_raw.type:
-                test_type_name = f"{tests[0].type} Scan"
-                if test_type_name != self.scan_type:
-                    test_type_name = f"{test_type_name} ({self.scan_type})"
+                # If test_raw.type equals scan_type, use scan_type directly
+                if test_raw.type == self.scan_type:
+                    test_type_name = self.scan_type
+                else:
+                    test_type_name = f"{tests[0].type} Scan"
+                    if test_type_name != self.scan_type:
+                        test_type_name = f"{test_type_name} ({self.scan_type})"
             self.test = self.create_test(test_type_name)
         else:
             # During reimport, validate that the test_type matches
             # Calculate the expected test_type_name from the incoming report
             expected_test_type_name = self.scan_type
             if test_raw.type:
-                expected_test_type_name = f"{test_raw.type} Scan"
-                if expected_test_type_name != self.scan_type:
-                    expected_test_type_name = f"{expected_test_type_name} ({self.scan_type})"
+                # If test_raw.type equals scan_type, use scan_type directly
+                if test_raw.type == self.scan_type:
+                    expected_test_type_name = self.scan_type
+                else:
+                    expected_test_type_name = f"{test_raw.type} Scan"
+                    if expected_test_type_name != self.scan_type:
+                        expected_test_type_name = f"{expected_test_type_name} ({self.scan_type})"
             # Compare with existing test's test_type name
             if self.test.test_type.name != expected_test_type_name:
                 msg = (
