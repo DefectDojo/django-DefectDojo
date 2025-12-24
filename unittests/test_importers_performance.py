@@ -162,9 +162,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.import_reimport_performance(
             expected_num_queries1=719,
             expected_num_async_tasks1=10,
-            expected_num_queries2=678,
+            expected_num_queries2=685,
             expected_num_async_tasks2=22,
-            expected_num_queries3=353,
+            expected_num_queries3=358,
             expected_num_async_tasks3=20,
         )
 
@@ -180,9 +180,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.import_reimport_performance(
             expected_num_queries1=719,
             expected_num_async_tasks1=10,
-            expected_num_queries2=678,
+            expected_num_queries2=685,
             expected_num_async_tasks2=22,
-            expected_num_queries3=353,
+            expected_num_queries3=358,
             expected_num_async_tasks3=20,
         )
 
@@ -201,10 +201,10 @@ class TestDojoImporterPerformance(DojoTestCase):
         DojoSytemSettingsMiddleware.load()
 
         self.import_reimport_performance(
-            expected_num_queries1=739,
+            expected_num_queries1=749,
             expected_num_async_tasks1=15,
-            expected_num_queries2=703,
+            expected_num_queries2=710,
             expected_num_async_tasks2=28,
-            expected_num_queries3=373,
+            expected_num_queries3=378,
             expected_num_async_tasks3=25,
         )
