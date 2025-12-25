@@ -104,6 +104,9 @@ class BlackduckBinaryAnalysisParser:
                     finding.fix_available = True
                 else:
                     finding.fix_available = False
+                # Add vulnerability ID for de-duplication
+                if cve:
+                    finding.unsaved_vulnerability_ids = [str(cve)]
                 findings[unique_finding_key] = finding
 
         return list(findings.values())

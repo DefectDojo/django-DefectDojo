@@ -228,17 +228,23 @@ class TenableCSVParser:
                         LOGGER.debug(
                             "more than one CPE for a finding. NOT supported by Nessus CSV parser",
                         )
-                    cpe_decoded = CPE(detected_cpe[0])
-                    find.component_name = (
-                        cpe_decoded.get_product()[0]
-                        if len(cpe_decoded.get_product()) > 0
-                        else None
-                    )
-                    find.component_version = (
-                        cpe_decoded.get_version()[0]
-                        if len(cpe_decoded.get_version()) > 0
-                        else None
-                    )
+                    try:
+                        cpe_decoded = CPE(detected_cpe[0])
+                        find.component_name = (
+                            cpe_decoded.get_product()[0]
+                            if len(cpe_decoded.get_product()) > 0
+                            else None
+                        )
+                        find.component_version = (
+                            cpe_decoded.get_version()[0]
+                            if len(cpe_decoded.get_version()) > 0
+                            else None
+                        )
+                    except Exception as e:
+                        LOGGER.debug(
+                            f"Failed to parse CPE '{detected_cpe[0]}': {e}. "
+                            "Skipping component_name and component_version.",
+                        )
 
                 find.unsaved_endpoints = []
                 find.unsaved_vulnerability_ids = []
