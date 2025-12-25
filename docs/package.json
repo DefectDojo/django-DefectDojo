@@ -16,7 +16,7 @@
     "preview": "vite preview --outDir public"
   },
   "dependencies": {
-    "@docsearch/css": "4.3.2",
+    "@docsearch/css": "4.4.0",
     "@docsearch/js": "4.3.2",
     "@tabler/icons": "3.36.0",
     "@thulite/doks-core": "1.8.3",
