@@ -18,7 +18,7 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
-from dojo.utils import perform_product_grading
+from dojo.utils import get_full_url, perform_product_grading
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -365,11 +365,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=""))
         # Update the status of the findings and any endpoints
         for old_finding in old_findings:
+            url = str(get_full_url(reverse("view_test", args=(self.test.id,))))
+            test_title = str(self.test.title)
             self.mitigate_finding(
                 old_finding,
                 (
-                    "This finding has been automatically closed "
-                    "as it is not present anymore in recent scans."
+                    'This Finding has been automatically closed by the Test: \n "' + test_title + '"\n' + url +
+                    "\n\nThis is because this Finding is not present anymore in recent scans."
                 ),
                 finding_groups_enabled=self.findings_groups_enabled,
                 product_grading_option=False,
