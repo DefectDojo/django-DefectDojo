@@ -1,0 +1,13 @@
+{
+    "name": "Test Without Type",
+    "findings": [
+        {
+            "title": "Test Finding Without Type",
+            "description": "This is a test finding without type field",
+            "severity": "Medium",
+            "active": true,
+            "verified": true
+        }
+    ]
+}
+
