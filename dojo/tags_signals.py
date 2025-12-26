@@ -4,6 +4,7 @@ import logging
 from django.db.models import signals
 from django.dispatch import receiver
 
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 from dojo.product import helpers as async_product_funcs
 from dojo.utils import get_system_setting
@@ -19,7 +20,7 @@ def product_tags_post_add_remove(sender, instance, action, **kwargs):
             running_async_process = instance.running_async_process
         # Check if the async process is already running to avoid calling it a second time
         if not running_async_process and inherit_product_tags(instance):
-            async_product_funcs.propagate_tags_on_product(instance.id, countdown=5)
+            dojo_dispatch_task(async_product_funcs.propagate_tags_on_product, instance.id, countdown=5)
             instance.running_async_process = True
 
 

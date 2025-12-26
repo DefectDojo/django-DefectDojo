@@ -18,6 +18,7 @@ from jira.exceptions import JIRAError
 from requests.auth import HTTPBasicAuth
 
 from dojo.celery import DojoAsyncTask, app
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.forms import JIRAEngagementForm, JIRAProjectForm
 from dojo.models import (
     Engagement,
@@ -759,14 +760,14 @@ def push_to_jira(obj, *args, **kwargs):
     if isinstance(obj, Finding):
         if obj.has_finding_group:
             logger.debug("pushing finding group for %s to JIRA", obj)
-            return push_finding_group_to_jira(obj.finding_group.id, *args, **kwargs)
-        return push_finding_to_jira(obj.id, *args, **kwargs)
+            return dojo_dispatch_task(push_finding_group_to_jira, obj.finding_group.id, *args, **kwargs)
+        return dojo_dispatch_task(push_finding_to_jira, obj.id, *args, **kwargs)
 
     if isinstance(obj, Finding_Group):
-        return push_finding_group_to_jira(obj.id, *args, **kwargs)
+        return dojo_dispatch_task(push_finding_group_to_jira, obj.id, *args, **kwargs)
 
     if isinstance(obj, Engagement):
-        return push_engagement_to_jira(obj.id, *args, **kwargs)
+        return dojo_dispatch_task(push_engagement_to_jira, obj.id, *args, **kwargs)
     logger.error("unsupported object passed to push_to_jira: %s %i %s", obj.__name__, obj.id, obj)
     return None
 
@@ -808,8 +809,8 @@ def push_engagement_to_jira(engagement_id, *args, **kwargs):
         return None
 
     if engagement.has_jira_issue:
-        return update_epic(engagement.id, *args, **kwargs)
-    return add_epic(engagement.id, *args, **kwargs)
+        return dojo_dispatch_task(update_epic, engagement.id, *args, **kwargs)
+    return dojo_dispatch_task(add_epic, engagement.id, *args, **kwargs)
 
 
 def add_issues_to_epic(jira, obj, epic_id, issue_keys, *, ignore_epics=True):
@@ -1574,7 +1575,7 @@ def add_comment(obj, note, *, force_push=False, **kwargs):
         return False
 
     # Call the internal task with IDs (runs synchronously within this task)
-    return add_comment_internal(jira_issue.id, note.id, force_push=force_push, **kwargs)
+    return dojo_dispatch_task(add_comment_internal, jira_issue.id, note.id, force_push=force_push, **kwargs)
 
 
 @app.task(base=DojoAsyncTask)

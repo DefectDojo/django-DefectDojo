@@ -1,6 +1,7 @@
 import logging
 
 from dojo.celery import DojoAsyncTask, app
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.models import Finding
 from dojo.tools.api_sonarqube.parser import SCAN_SONARQUBE_API
 from dojo.tools.api_sonarqube.updater import SonarQubeApiUpdater
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def async_tool_issue_update(finding, *args, **kwargs):
     if is_tool_issue_updater_needed(finding):
-        tool_issue_updater(finding.id)
+        dojo_dispatch_task(tool_issue_updater, finding.id)
 
 
 def is_tool_issue_updater_needed(finding, *args, **kwargs):

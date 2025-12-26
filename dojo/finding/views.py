@@ -38,6 +38,7 @@ from dojo.authorization.authorization_decorators import (
     user_is_authorized,
 )
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -1100,7 +1101,7 @@ class DeleteFinding(View):
             product = finding.test.engagement.product
             finding.delete()
             # Update the grade of the product async
-            calculate_grade(product.id)
+            dojo_dispatch_task(calculate_grade, product.id)
             # Add a message to the request that the finding was successfully deleted
             messages.add_message(
                 request,
@@ -1396,7 +1397,7 @@ def copy_finding(request, fid):
             test = form.cleaned_data.get("test")
             product = finding.test.engagement.product
             finding_copy = finding.copy(test=test)
-            calculate_grade(product.id)
+            dojo_dispatch_task(calculate_grade, product.id)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -2663,7 +2664,7 @@ def finding_bulk_update_all(request, pid=None):
                                     fp.save_no_options()
 
                 for prod in prods:
-                    calculate_grade(prod.id)
+                    dojo_dispatch_task(calculate_grade, prod.id)
 
             if form.cleaned_data["date"]:
                 for finding in finds:
@@ -2699,7 +2700,7 @@ def finding_bulk_update_all(request, pid=None):
                             ra_helper.risk_unaccept(request.user, finding)
 
                 for prod in prods:
-                    calculate_grade(prod.id)
+                    dojo_dispatch_task(calculate_grade, prod.id)
 
             if skipped_risk_accept_count > 0:
                 messages.add_message(

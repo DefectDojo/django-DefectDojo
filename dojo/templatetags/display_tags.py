@@ -304,7 +304,9 @@ def product_grade(product):
     if system_settings.enable_product_grade and product:
         prod_numeric_grade = product.prod_numeric_grade
         if not prod_numeric_grade or prod_numeric_grade is None:
-            calculate_grade(product.id)
+            from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+            dojo_dispatch_task(calculate_grade, product.id)
         if prod_numeric_grade:
             if prod_numeric_grade >= system_settings.product_grade_a:
                 grade = "A"
