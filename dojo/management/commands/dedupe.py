@@ -118,14 +118,25 @@ class Command(BaseCommand):
                     mass_model_updater(Finding, findings, do_dedupe_finding_task_internal, fields=None, order="desc", page_size=100, log_prefix="deduplicating ")
                 else:
                     # async tasks only need the id
-                    mass_model_updater(Finding, findings.only("id"), lambda f: do_dedupe_finding_task(f.id), fields=None, order="desc", log_prefix="deduplicating ")
+                    from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+                    mass_model_updater(
+                        Finding,
+                        findings.only("id"),
+                        lambda f: dojo_dispatch_task(do_dedupe_finding_task, f.id),
+                        fields=None,
+                        order="desc",
+                        log_prefix="deduplicating ",
+                    )
 
                 if dedupe_sync:
                     # update the grading (if enabled) and only useful in sync mode
                     # in async mode the background task that grades products every hour will pick it up
                     logger.debug("Updating grades for products...")
                     for product in Product.objects.all():
-                        calculate_grade(product.id)
+                        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+                        dojo_dispatch_task(calculate_grade, product.id)
 
                 logger.info("######## Done deduplicating (%s) ########", ("foreground" if dedupe_sync else "tasks submitted to celery"))
             else:
@@ -172,7 +183,9 @@ class Command(BaseCommand):
                     else:
                         # Asynchronous: submit task with finding IDs
                         logger.debug(f"Submitting async batch task for {len(batch_finding_ids)} findings for test {test_id}")
-                        do_dedupe_batch_task(batch_finding_ids)
+                        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+                        dojo_dispatch_task(do_dedupe_batch_task, batch_finding_ids)
 
                     total_processed += len(batch_finding_ids)
                     batch_finding_ids = []

@@ -38,6 +38,7 @@ from dojo.authorization.authorization_decorators import (
     user_is_authorized,
 )
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -1082,7 +1083,7 @@ class DeleteFinding(View):
             product = finding.test.engagement.product
             finding.delete()
             # Update the grade of the product async
-            calculate_grade(product.id)
+            dojo_dispatch_task(calculate_grade, product.id)
             # Add a message to the request that the finding was successfully deleted
             messages.add_message(
                 request,
@@ -1353,7 +1354,7 @@ def copy_finding(request, fid):
             test = form.cleaned_data.get("test")
             product = finding.test.engagement.product
             finding_copy = finding.copy(test=test)
-            calculate_grade(product.id)
+            dojo_dispatch_task(calculate_grade, product.id)
             messages.add_message(
                 request,
                 messages.SUCCESS,

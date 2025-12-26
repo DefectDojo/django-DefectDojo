@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from dojo.auditlog import run_flush_auditlog
 from dojo.celery import DojoAsyncTask, app
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.helper import fix_loop_duplicates
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
 from dojo.models import Alerts, Announcement, Endpoint, Engagement, Finding, Product, System_Settings, User
@@ -71,7 +72,7 @@ def add_alerts(self, runinterval):
     if system_settings.enable_product_grade:
         products = Product.objects.all()
         for product in products:
-            calculate_grade(product.id)
+            dojo_dispatch_task(calculate_grade, product.id)
 
 
 @app.task(bind=True)
@@ -168,7 +169,7 @@ def _async_dupe_delete_impl():
             if system_settings.enable_product_grade:
                 logger.info("performing batch product grading for %s products", len(affected_products))
                 for product in affected_products:
-                    calculate_grade(product.id)
+                    dojo_dispatch_task(calculate_grade, product.id)
 
 
 @app.task(ignore_result=False)

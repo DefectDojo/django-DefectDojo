@@ -7,6 +7,7 @@ from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.deduplication import (
     find_candidates_for_deduplication_hash,
     find_candidates_for_deduplication_uid_or_hash,
@@ -412,7 +413,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
-                        finding_helper.post_process_findings_batch(
+                        dojo_dispatch_task(
+                            finding_helper.post_process_findings_batch,
                             finding_ids_batch,
                             dedupe_option=True,
                             rules_option=True,

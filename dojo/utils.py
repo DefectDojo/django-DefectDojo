@@ -1291,7 +1291,9 @@ def calculate_grade_internal(product, *args, **kwargs):
 def perform_product_grading(product):
     system_settings = System_Settings.objects.get()
     if system_settings.enable_product_grade:
-        calculate_grade(product.id)
+        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+        dojo_dispatch_task(calculate_grade, product.id)
 
 
 def get_celery_worker_status():

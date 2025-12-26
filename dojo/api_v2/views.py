@@ -46,6 +46,7 @@ from dojo.api_v2 import (
 )
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.endpoint.queries import (
     get_authorized_endpoint_status,
@@ -678,13 +679,13 @@ class EngagementViewSet(
         try:
 
             if engagement.has_jira_issue:
-                jira_helper.update_epic(engagement.id, **request.data)
+                dojo_dispatch_task(jira_helper.update_epic, engagement.id, **request.data)
                 response = Response(
                     {"info": "Jira Epic update query sent"},
                     status=status.HTTP_200_OK,
                 )
             else:
-                jira_helper.add_epic(engagement.id, **request.data)
+                dojo_dispatch_task(jira_helper.add_epic, engagement.id, **request.data)
                 response = Response(
                     {"info": "Jira Epic create query sent"},
                     status=status.HTTP_200_OK,

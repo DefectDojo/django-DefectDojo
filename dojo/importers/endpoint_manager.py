@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.celery import DojoAsyncTask, app
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.models import (
     Dojo_User,
@@ -112,7 +113,7 @@ class EndpointManager:
         endpoints: list[Endpoint],
         **kwargs: dict,
     ) -> None:
-        self.add_endpoints_to_unsaved_finding(finding, endpoints, sync=True)
+        dojo_dispatch_task(self.add_endpoints_to_unsaved_finding, finding, endpoints, sync=True)
 
     @staticmethod
     def clean_unsaved_endpoints(
@@ -133,7 +134,7 @@ class EndpointManager:
         endpoint_status_list: list[Endpoint_Status],
         **kwargs: dict,
     ) -> None:
-        self.reactivate_endpoint_status(endpoint_status_list, sync=True)
+        dojo_dispatch_task(self.reactivate_endpoint_status, endpoint_status_list, sync=True)
 
     def chunk_endpoints_and_mitigate(
         self,
@@ -141,7 +142,7 @@ class EndpointManager:
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
+        dojo_dispatch_task(self.mitigate_endpoint_status, endpoint_status_list, user, sync=True)
 
     def update_endpoint_status(
         self,

@@ -37,6 +37,7 @@ import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import close_engagement, reopen_engagement
@@ -390,7 +391,7 @@ def copy_engagement(request, eid):
         form = DoneForm(request.POST)
         if form.is_valid():
             engagement_copy = engagement.copy()
-            calculate_grade(product.id)
+            dojo_dispatch_task(calculate_grade, product.id)
             messages.add_message(
                 request,
                 messages.SUCCESS,

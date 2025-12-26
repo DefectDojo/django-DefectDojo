@@ -16,6 +16,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.filters import (
     FindingFilter,
     FindingFilterWithoutObjectLookups,
@@ -100,7 +101,7 @@ def view_finding_group(request, fgid):
                 elif not finding_group.has_jira_issue:
                     jira_helper.finding_group_link_jira(request, finding_group, jira_issue)
             elif push_to_jira:
-                jira_helper.push_to_jira(finding_group, sync=True)
+                dojo_dispatch_task(jira_helper.push_to_jira, finding_group, sync=True)
 
             finding_group.save()
             return HttpResponseRedirect(reverse("view_test", args=(finding_group.test.id,)))
@@ -200,7 +201,7 @@ def push_to_jira(request, fgid):
 
         # it may look like success here, but the push_to_jira are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.
-        if jira_helper.push_to_jira(group, sync=True):
+        if dojo_dispatch_task(jira_helper.push_to_jira, group, sync=True):
             messages.add_message(
                 request,
                 messages.SUCCESS,

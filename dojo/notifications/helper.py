@@ -18,6 +18,7 @@ from django.utils.translation import gettext as _
 from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import DojoAsyncTask, app
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.decorators import we_want_async
 from dojo.labels import get_labels
 from dojo.models import (
@@ -828,7 +829,8 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending Slack Notification")
-                self._get_manager_instance("slack").send_slack_notification(
+                dojo_dispatch_task(
+                    self._get_manager_instance("slack").send_slack_notification,
                     event,
                     user=notifications.user,
                     **kwargs,
@@ -840,7 +842,8 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending MSTeams Notification")
-                self._get_manager_instance("msteams").send_msteams_notification(
+                dojo_dispatch_task(
+                    self._get_manager_instance("msteams").send_msteams_notification,
                     event,
                     user=notifications.user,
                     **kwargs,
@@ -852,7 +855,8 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending Mail Notification")
-                self._get_manager_instance("mail").send_mail_notification(
+                dojo_dispatch_task(
+                    self._get_manager_instance("mail").send_mail_notification,
                     event,
                     user=notifications.user,
                     **kwargs,
@@ -864,7 +868,8 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending Webhooks Notification")
-                self._get_manager_instance("webhooks").send_webhooks_notification(
+                dojo_dispatch_task(
+                    self._get_manager_instance("webhooks").send_webhooks_notification,
                     event,
                     user=notifications.user,
                     **kwargs,

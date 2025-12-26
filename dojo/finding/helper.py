@@ -434,7 +434,9 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
 
     if product_grading_option:
         if system_settings.enable_product_grade:
-            calculate_grade(finding.test.engagement.product.id)
+            from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+            dojo_dispatch_task(calculate_grade, finding.test.engagement.product.id)
         else:
             deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
 
@@ -493,7 +495,9 @@ def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_op
             tool_issue_updater.async_tool_issue_update(finding)
 
     if product_grading_option and system_settings.enable_product_grade:
-        calculate_grade(findings[0].test.engagement.product.id)
+        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id)
 
     if push_to_jira:
         for finding in findings:

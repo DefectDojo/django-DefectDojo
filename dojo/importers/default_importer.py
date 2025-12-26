@@ -7,6 +7,7 @@ from django.db.models.query_utils import Q
 from django.urls import reverse
 
 import dojo.jira_link.helper as jira_helper
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
@@ -254,7 +255,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 batch_finding_ids.clear()
                 logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
                              push_to_jira, len(finding_ids_batch), is_final_finding)
-                finding_helper.post_process_findings_batch(
+                dojo_dispatch_task(
+                    finding_helper.post_process_findings_batch,
                     finding_ids_batch,
                     dedupe_option=True,
                     rules_option=True,

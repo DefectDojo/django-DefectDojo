@@ -26,6 +26,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter, TestImportFilter
 from dojo.finding.queries import prefetch_for_findings
@@ -343,7 +344,7 @@ def copy_test(request, tid):
             engagement = form.cleaned_data.get("engagement")
             product = test.engagement.product
             test_copy = test.copy(engagement=engagement)
-            calculate_grade(product.id)
+            dojo_dispatch_task(calculate_grade, product.id)
             messages.add_message(
                 request,
                 messages.SUCCESS,
