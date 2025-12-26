@@ -284,9 +284,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             )
             if self.push_to_jira:
                 if findings[0].finding_group is not None:
-                    jira_helper.push_to_jira(findings[0].finding_group)
+                    jira_helper.push_to_jira(findings[0].finding_group, alert_on_error=True)
                 else:
-                    jira_helper.push_to_jira(findings[0])
+                    jira_helper.push_to_jira(findings[0], alert_on_error=True)
             else:
                 logger.debug("push_to_jira is False, not pushing to JIRA")
 
@@ -377,7 +377,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
-                jira_helper.push_to_jira(finding_group)
+                jira_helper.push_to_jira(finding_group, alert_on_error=True)
 
         # Calculate grade once after all findings have been closed
         if old_findings:

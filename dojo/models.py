@@ -475,11 +475,11 @@ class System_Settings(models.Model):
         help_text=_("Enables Benchmarks such as the OWASP ASVS "
                   "(Application Security Verification Standard)"))
 
-    enable_template_match = models.BooleanField(
-        default=False,
-        blank=False,
-        verbose_name=_("Enable Remediation Advice"),
-        help_text=_("Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner."))
+    # enable_template_match = models.BooleanField(
+    #     default=False,
+    #     blank=False,
+    #     verbose_name=_("Enable Remediation Advice"),
+    #     help_text=_("Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner."))
 
     enable_similar_findings = models.BooleanField(
         default=True,
@@ -2764,7 +2764,7 @@ class Finding(models.Model):
         return self.title
 
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+             issue_updater_option=True, push_to_jira=False, alert_on_error=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
         logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
 
@@ -2850,7 +2850,7 @@ class Finding(models.Model):
         system_settings = System_Settings.objects.get()
         if dedupe_option or issue_updater_option or (product_grading_option and system_settings.enable_product_grade) or push_to_jira:
             finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
-                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
+                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, alert_on_error=alert_on_error, user=user, *args, **kwargs)
         else:
             logger.debug("no options selected that require finding post processing")
 
@@ -3660,9 +3660,9 @@ class Finding_Template(models.Model):
     impact = models.TextField(null=True, blank=True)
     references = models.TextField(null=True, blank=True, db_column="refs")
     last_used = models.DateTimeField(null=True, editable=False)
-    numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
-    template_match = models.BooleanField(default=False, verbose_name=_("Template Match Enabled"), help_text=_("Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE."))
-    template_match_title = models.BooleanField(default=False, verbose_name=_("Match Template by Title and CWE"), help_text=_("Matches by title text (contains search) and CWE."))
+    # numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
+    # template_match = models.BooleanField(default=False, verbose_name=_("Template Match Enabled"), help_text=_("Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE."))
+    # template_match_title = models.BooleanField(default=False, verbose_name=_("Match Template by Title and CWE"), help_text=_("Matches by title text (contains search) and CWE."))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add."))
 

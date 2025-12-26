@@ -200,7 +200,7 @@ def push_to_jira(request, fgid):
 
         # it may look like success here, but the push_to_jira are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.
-        if jira_helper.push_to_jira(group, sync=True):
+        if jira_helper.push_to_jira(group, sync=True, alert_on_error=True):
             messages.add_message(
                 request,
                 messages.SUCCESS,

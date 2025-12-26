@@ -609,8 +609,23 @@ def log_jira_alert(error, obj):
         obj=obj)
 
 
-def log_jira_cannot_be_pushed_reason(error, obj):
-    """Creates an Alert for GUI display  when handling a specific (finding/group/epic) object"""
+def log_jira_cannot_be_pushed_reason(error, obj, alert_on_error=False):
+    """
+    Creates an Alert for GUI display when handling a specific (finding/group/epic) object.
+
+    Args:
+        error: Error message to display
+        obj: The object that cannot be pushed
+        alert_on_error: If True, create alerts. If False, only log. Defaults to False.
+    """
+    if not alert_on_error:
+        logger.debug(
+            "%s cannot be pushed to JIRA (alerts disabled): %s",
+            to_str_typed(obj),
+            error
+        )
+        return
+
     create_notification(
         event="jira_update",
         title="Error pushing to JIRA " + "(" + truncate_with_dots(prod_name(obj), 25) + ")",
@@ -883,6 +898,9 @@ def prepare_jira_issue_fields(
 
 
 def add_jira_issue(obj, *args, **kwargs):
+    # Extract alert_on_error from kwargs, default to False for backward compatibility
+    alert_on_error = kwargs.pop("alert_on_error", False)
+
     def failure_to_add_message(message: str, exception: Exception, _: Any) -> bool:
         if exception:
             logger.error("Exception occurred", exc_info=exception)
@@ -911,9 +929,9 @@ def add_jira_issue(obj, *args, **kwargs):
         # not sure why this check is not part of can_be_pushed_to_jira, but afraid to change it
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
             logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
-            log_jira_cannot_be_pushed_reason(error_message + " and findis a duplicate", obj)
+            log_jira_cannot_be_pushed_reason(error_message + " and findis a duplicate", obj, alert_on_error=alert_on_error)
         else:
-            log_jira_cannot_be_pushed_reason(error_message, obj)
+            log_jira_cannot_be_pushed_reason(error_message, obj, alert_on_error=alert_on_error)
             logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
             logger.warning("The JIRA issue will NOT be created.")
         return False
