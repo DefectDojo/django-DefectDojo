@@ -1064,7 +1064,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     # we take a shortcut here as creating an engagement with epic mapping via the API is not implemented yet
     def create_engagement_epic(self, engagement):
         with impersonate(self.testuser):
-            return jira_helper.add_epic(engagement)
+            return jira_helper.add_epic(engagement.id)
 
     def assert_epic_issue_count(self, engagement, count):
         jira_issues = self.get_epic_issues(engagement)
