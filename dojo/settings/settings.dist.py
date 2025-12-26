@@ -422,7 +422,7 @@ env = environ.FileAwareEnv(
                                         }),
     
     DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY=(dict, {
-        "Low": {
+        "low": {
             "roles": ["Developer"],
             "type_contacts": {
                 "PT1": {
@@ -435,7 +435,7 @@ env = environ.FileAwareEnv(
                 }
             }
         },
-        "Medium": {
+        "medium": {
             "roles": ["Leader"],
             "type_contacts": {
                 "PT1": {
@@ -448,7 +448,7 @@ env = environ.FileAwareEnv(
                 }
             }
         },
-        "High": {
+        "high": {
             "roles": ["Leader"],
             "type_contacts": {
                 "PT1": {
@@ -461,7 +461,7 @@ env = environ.FileAwareEnv(
                 }
             }
         },
-        "Critical": {
+        "critical": {
             "roles": ["Leader"],
             "type_contacts": {
                 "PT1": {

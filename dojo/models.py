@@ -3319,43 +3319,26 @@ class Finding(models.Model):
         if tags:
             if any(tag in tags for tag in settings.PRIORITY_FILTER_TAGS.split(",")):
                 priority = round(float(priority), 2)
-                RP_VERY_CRITICAL = priorization_weights.get(
-                    "RP_Very_Critical", None
-                )
-                RP_CRITICAL = priorization_weights.get("RP_Critical", None)
-                RP_HIGH = priorization_weights.get("RP_High", None)
-                RP_MEDIUM_LOW = priorization_weights.get(
-                    "RP_Medium_Low", None
-                )
 
-                if RP_VERY_CRITICAL and RP_CRITICAL and RP_HIGH and RP_MEDIUM_LOW:
+                RISK_PROFILES = [
+                    ("Very Critical", priorization_weights.get("RP_Very_Critical", None)),
+                    ("Critical", priorization_weights.get("RP_Critical", None)),
+                    ("High", priorization_weights.get("RP_High", None)),
+                    ("Medium Low", priorization_weights.get("RP_Medium_Low", None)),
+                ]
 
-                    if (
-                        float(RP_VERY_CRITICAL.split("-")[0])
-                        <= priority
-                        <= float(RP_VERY_CRITICAL.split("-")[1])
-                    ):
-                        return "Very Critical"
-                    elif (
-                        float(RP_CRITICAL.split("-")[0])
-                        <= priority
-                        <= float(RP_CRITICAL.split("-")[1])
-                    ):
-                        return "Critical"
-                    elif (
-                        float(RP_HIGH.split("-")[0])
-                        <= priority
-                        <= float(RP_HIGH.split("-")[1])
-                    ):
-                        return "High"
-                    elif (
-                        float(RP_MEDIUM_LOW.split("-")[0])
-                        <= priority
-                        <= float(RP_MEDIUM_LOW.split("-")[1])
-                    ):
-                        return "Medium Low"
-        return "Unknown"
-    
+                for label, rp in RISK_PROFILES:
+                    if not rp:
+                        continue
+
+                    min_rp, max_rp = map(float, rp.split("-"))
+
+                    if min_rp <= priority <= max_rp:
+                        return label
+
+        return "Unknown" 
+
+
     @property
     def priority_classification(self):
         return self._calculate_severity_priority(self.tags, self.priority)
@@ -3363,14 +3346,21 @@ class Finding(models.Model):
     def get_severity_related_to_priority(self):
         """Get severity related to priority the finding"""
 
-        severity_mapping = {
-            "Very Critical": "critical",
-            "Critical": "high",
-            "High": "medium",
-            "Medium Low": "low",
-        }
-        severity = self.severity.lower()
-        return severity_mapping.get(self.priority_classification, severity)
+        if (
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False and
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True
+        ):
+
+            severity_mapping = {
+                "Very Critical": "critical",
+                "Critical": "high",
+                "High": "medium",
+                "Medium Low": "low",
+            }
+            severity = self.severity.lower()
+            return severity_mapping.get(self.priority_classification, severity)
+        else:
+            return self.severity.lower()
 
 
     def get_sla_period(self):
@@ -4196,6 +4186,12 @@ class Risk_Acceptance(models.Model):
     @property
     def is_expired(self):
         return self.expiration_date_handled is not None
+    
+    @property
+    def priority(self):
+        if self.accepted_findings.exists():
+            return self.accepted_findings[0].priority_classification
+        raise ValueError("No accepted findings associated with this risk acceptance.")
 
     # relationship is many to many, but we use it as one-to-many
     @property

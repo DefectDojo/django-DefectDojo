@@ -155,7 +155,7 @@ def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_A
 def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
     permission_keys = []
     for finding in findings:
-        add_severity_to_risk_acceptance(risk_pending, finding.severity)
+        add_severity_to_risk_acceptance(risk_pending, finding.get_severity_related_to_priority())
         if not finding.duplicate:
             finding.risk_status = "Risk Pending"
             finding.acceptend_by = ""
@@ -205,7 +205,7 @@ def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Accep
         user = crum.get_current_user()
     for finding in findings:
         if not finding.duplicate or finding.risk_accepted:
-            add_severity_to_risk_acceptance(risk_acceptance, finding.severity)
+            add_severity_to_risk_acceptance(risk_acceptance, finding.get_severity_related_to_priority())
             finding.active = False
             finding.risk_accepted = True
             finding.accepted_by = user.username
