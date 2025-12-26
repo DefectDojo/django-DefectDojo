@@ -2,8 +2,7 @@ import logging
 
 import pghistory
 
-from dojo.celery import app
-from dojo.decorators import dojo_async_task
+from dojo.celery import DojoAsyncTask, app
 from dojo.models import Finding
 from dojo.tools.api_sonarqube.parser import SCAN_SONARQUBE_API
 from dojo.tools.api_sonarqube.updater import SonarQubeApiUpdater
@@ -23,8 +22,7 @@ def is_tool_issue_updater_needed(finding, *args, **kwargs):
     return test_type.name == SCAN_SONARQUBE_API
 
 
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def tool_issue_updater(finding_id, *args, **kwargs):
     finding = get_object_or_none(Finding, id=finding_id)
     if not finding:
@@ -37,8 +35,7 @@ def tool_issue_updater(finding_id, *args, **kwargs):
         SonarQubeApiUpdater().update_sonarqube_finding(finding)
 
 
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def update_findings_from_source_issues(**kwargs):
     # Wrap with pghistory context for audit trail
     with pghistory.context(source="sonarqube_sync"):

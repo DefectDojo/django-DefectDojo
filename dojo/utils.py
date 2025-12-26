@@ -45,8 +45,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 
 from dojo.authorization.roles_permissions import Permissions
-from dojo.celery import app
-from dojo.decorators import dojo_async_task
+from dojo.celery import DojoAsyncTask, app
 from dojo.finding.queries import get_authorized_findings
 from dojo.github import (
     add_external_issue_github,
@@ -1054,8 +1053,7 @@ def handle_uploaded_selenium(f, cred):
     cred.save()
 
 
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def add_external_issue(finding_id, external_issue_provider, **kwargs):
     finding = get_object_or_none(Finding, id=finding_id)
     if not finding:
@@ -1070,8 +1068,7 @@ def add_external_issue(finding_id, external_issue_provider, **kwargs):
         add_external_issue_github(finding, prod, eng)
 
 
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def update_external_issue(finding_id, old_status, external_issue_provider, **kwargs):
     finding = get_object_or_none(Finding, id=finding_id)
     if not finding:
@@ -1085,8 +1082,7 @@ def update_external_issue(finding_id, old_status, external_issue_provider, **kwa
         update_external_issue_github(finding, prod, eng)
 
 
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def close_external_issue(finding_id, note, external_issue_provider, **kwargs):
     finding = get_object_or_none(Finding, id=finding_id)
     if not finding:
@@ -1100,8 +1096,7 @@ def close_external_issue(finding_id, note, external_issue_provider, **kwargs):
         close_external_issue_github(finding, note, prod, eng)
 
 
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def reopen_external_issue(finding_id, note, external_issue_provider, **kwargs):
     finding = get_object_or_none(Finding, id=finding_id)
     if not finding:
@@ -1236,19 +1231,7 @@ def get_setting(setting):
     return getattr(settings, setting)
 
 
-@dojo_async_task(signature=True)
-@app.task
-def calculate_grade_signature(product_id, *args, **kwargs):
-    """Returns a signature for calculating product grade that can be used in chords or groups."""
-    product = get_object_or_none(Product, id=product_id)
-    if not product:
-        logger.warning("Product with id %s does not exist, skipping calculate_grade_signature", product_id)
-        return None
-    return calculate_grade_internal(product, *args, **kwargs)
-
-
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def calculate_grade(product_id, *args, **kwargs):
     product = get_object_or_none(Product, id=product_id)
     if not product:
@@ -2027,8 +2010,7 @@ class async_delete:
             "Test": [(Finding, "test__id")],
         }
 
-    @dojo_async_task
-    @app.task
+    @app.task(base=DojoAsyncTask)
     def delete_chunk(self, objects, **kwargs):
         # Now delete all objects with retry for deadlocks
         max_retries = 3
@@ -2076,8 +2058,7 @@ class async_delete:
                     obj.delete()
                     break
 
-    @dojo_async_task
-    @app.task
+    @app.task(base=DojoAsyncTask)
     def delete(self, obj, **kwargs):
         logger.debug("ASYNC_DELETE: Deleting " + self.get_object_name(obj) + ": " + str(obj))
         model_list = self.mapping.get(self.get_object_name(obj), None)
@@ -2089,8 +2070,7 @@ class async_delete:
             logger.debug("ASYNC_DELETE: " + self.get_object_name(obj) + " async delete not supported. Deleteing normally: " + str(obj))
             obj.delete()
 
-    @dojo_async_task
-    @app.task
+    @app.task(base=DojoAsyncTask)
     def crawl(self, obj, model_list, **kwargs):
         logger.debug("ASYNC_DELETE: Crawling " + self.get_object_name(obj) + ": " + str(obj))
         for model_info in model_list:

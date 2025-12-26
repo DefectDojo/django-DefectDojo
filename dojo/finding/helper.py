@@ -15,8 +15,7 @@ from fieldsignals import pre_save_changed
 
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
-from dojo.celery import app
-from dojo.decorators import dojo_async_task
+from dojo.celery import DojoAsyncTask, app
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.deduplication import (
@@ -391,8 +390,7 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
                     finding_group.findings.add(*findings)
 
 
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def post_process_finding_save(finding_id, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
     finding = get_object_or_none(Finding, id=finding_id)
@@ -453,8 +451,7 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
             jira_helper.push_to_jira(finding.finding_group)
 
 
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, **kwargs):
 

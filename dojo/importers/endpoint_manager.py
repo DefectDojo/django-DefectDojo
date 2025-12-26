@@ -4,8 +4,7 @@ from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.celery import app
-from dojo.decorators import dojo_async_task
+from dojo.celery import DojoAsyncTask, app
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.models import (
     Dojo_User,
@@ -18,17 +17,15 @@ logger = logging.getLogger(__name__)
 
 
 class EndpointManager:
-    @dojo_async_task
-    @app.task()
+    @app.task(base=DojoAsyncTask)
     def add_endpoints_to_unsaved_finding(
-        self,
-        finding: Finding,
+        finding: Finding,  # noqa: N805
         endpoints: list[Endpoint],
         **kwargs: dict,
     ) -> None:
         """Creates Endpoint objects for a single finding and creates the link via the endpoint status"""
         logger.debug(f"IMPORT_SCAN: Adding {len(endpoints)} endpoints to finding: {finding}")
-        self.clean_unsaved_endpoints(endpoints)
+        EndpointManager.clean_unsaved_endpoints(endpoints)
         for endpoint in endpoints:
             ep = None
             eps = []
@@ -41,7 +38,8 @@ class EndpointManager:
                     path=endpoint.path,
                     query=endpoint.query,
                     fragment=endpoint.fragment,
-                    product=finding.test.engagement.product)
+                    product=finding.test.engagement.product,
+                )
                 eps.append(ep)
             except (MultipleObjectsReturned):
                 msg = (
@@ -58,11 +56,9 @@ class EndpointManager:
 
         logger.debug(f"IMPORT_SCAN: {len(endpoints)} endpoints imported")
 
-    @dojo_async_task
-    @app.task()
+    @app.task(base=DojoAsyncTask)
     def mitigate_endpoint_status(
-        self,
-        endpoint_status_list: list[Endpoint_Status],
+        endpoint_status_list: list[Endpoint_Status],  # noqa: N805
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
@@ -85,11 +81,9 @@ class EndpointManager:
                 batch_size=1000,
             )
 
-    @dojo_async_task
-    @app.task()
+    @app.task(base=DojoAsyncTask)
     def reactivate_endpoint_status(
-        self,
-        endpoint_status_list: list[Endpoint_Status],
+        endpoint_status_list: list[Endpoint_Status],  # noqa: N805
         **kwargs: dict,
     ) -> None:
         """Reactivate all endpoint status objects that are supplied"""
@@ -120,8 +114,8 @@ class EndpointManager:
     ) -> None:
         self.add_endpoints_to_unsaved_finding(finding, endpoints, sync=True)
 
+    @staticmethod
     def clean_unsaved_endpoints(
-        self,
         endpoints: list[Endpoint],
     ) -> None:
         """

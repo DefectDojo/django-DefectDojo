@@ -17,8 +17,8 @@ from django.utils.translation import gettext as _
 
 from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
-from dojo.celery import app
-from dojo.decorators import dojo_async_task, we_want_async
+from dojo.celery import DojoAsyncTask, app
+from dojo.decorators import we_want_async
 from dojo.labels import get_labels
 from dojo.models import (
     Alerts,
@@ -199,8 +199,7 @@ class SlackNotificationManger(NotificationManagerHelpers):
 
     """Manger for slack notifications and their helpers."""
 
-    @dojo_async_task
-    @app.task
+    @app.task(base=DojoAsyncTask)
     def send_slack_notification(
         self,
         event: str,
@@ -317,8 +316,7 @@ class MSTeamsNotificationManger(NotificationManagerHelpers):
 
     """Manger for Microsoft Teams notifications and their helpers."""
 
-    @dojo_async_task
-    @app.task
+    @app.task(base=DojoAsyncTask)
     def send_msteams_notification(
         self,
         event: str,
@@ -368,8 +366,7 @@ class EmailNotificationManger(NotificationManagerHelpers):
 
     """Manger for email notifications and their helpers."""
 
-    @dojo_async_task
-    @app.task
+    @app.task(base=DojoAsyncTask)
     def send_mail_notification(
         self,
         event: str,
@@ -420,8 +417,7 @@ class WebhookNotificationManger(NotificationManagerHelpers):
     ERROR_PERMANENT = "permanent"
     ERROR_TEMPORARY = "temporary"
 
-    @dojo_async_task
-    @app.task
+    @app.task(base=DojoAsyncTask)
     def send_webhooks_notification(
         self,
         event: str,
