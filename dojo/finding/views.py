@@ -958,7 +958,7 @@ class EditFinding(View):
 
         return finding, request, False
 
- def process_jira_form(self, request: HttpRequest, finding: Finding, context: dict):
+    def process_jira_form(self, request: HttpRequest, finding: Finding, context: dict):
         # Capture case if the jira not being enabled
         if context["jform"] is None:
             return request, True, False
