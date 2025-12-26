@@ -129,6 +129,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             new_findings=new_findings,
             closed_findings=closed_findings,
         )
+        # Apply tags to findings and endpoints
+        self.apply_import_tags(
+            new_findings=new_findings,
+            closed_findings=closed_findings,
+        )
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
         create_notification(

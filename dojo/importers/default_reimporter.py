@@ -132,6 +132,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             reactivated_findings=reactivated_findings,
             untouched_findings=untouched_findings,
         )
+        # Apply tags to findings and endpoints
+        self.apply_import_tags(
+            new_findings=new_findings,
+            closed_findings=closed_findings,
+            reactivated_findings=reactivated_findings,
+            untouched_findings=untouched_findings,
+        )
         # Send out som notifications to the user
         logger.debug("REIMPORT_SCAN: Generating notifications")
         updated_count = (
