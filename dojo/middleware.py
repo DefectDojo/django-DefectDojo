@@ -114,6 +114,12 @@ class DojoSytemSettingsMiddleware:
     def __call__(self, request):
         self.load()
         try:
+            # Store error in request for context processor to display
+            # (We can't use messages here because MessageMiddleware runs after this middleware)
+            if hasattr(self._thread_local, "system_settings_error"):
+                request.system_settings_error = self._thread_local.system_settings_error
+                # Clear from thread-local after copying to request
+                delattr(self._thread_local, "system_settings_error")
             return self.get_response(request)
         finally:
             # ensure cleanup happens even if an exception occurs
@@ -132,6 +138,8 @@ class DojoSytemSettingsMiddleware:
     def cleanup(cls, *args, **kwargs):  # noqa: ARG003
         if hasattr(cls._thread_local, "system_settings"):
             del cls._thread_local.system_settings
+        if hasattr(cls._thread_local, "system_settings_error"):
+            delattr(cls._thread_local, "system_settings_error")
 
     @classmethod
     def load(cls):
@@ -147,13 +155,19 @@ class System_Settings_Manager(models.Manager):
 
     def get_from_db(self, *args, **kwargs):
         # logger.debug('refreshing system_settings from db')
+        from dojo.models import System_Settings  # noqa: PLC0415 circular import
         try:
             from_db = super().get(*args, **kwargs)
-        except:
-            from dojo.models import System_Settings  # noqa: PLC0415 circular import
-            # this mimics the existing code that was in filters.py and utils.py.
-            # cases I have seen triggering this is for example manage.py collectstatic inside a docker build where mysql is not available
-            # logger.debug('unable to get system_settings from database, constructing (new) default instance. Exception was:', exc_info=True)
+        except Exception as e:
+            # Store error message in thread-local for middleware to display
+            error_msg = str(e)
+            if hasattr(DojoSytemSettingsMiddleware._thread_local, "system_settings_error"):
+                # Only store the first error to avoid duplicates
+                pass
+            else:
+                DojoSytemSettingsMiddleware._thread_local.system_settings_error = error_msg
+            # Return defaults so app can still start - error will be displayed as warning message
+            # logger.debug('unable to get system_settings from database, returning defaults. Exception was:', exc_info=True)
             return System_Settings()
         return from_db
 
