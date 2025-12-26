@@ -1236,6 +1236,17 @@ def get_setting(setting):
     return getattr(settings, setting)
 
 
+@dojo_async_task(signature=True)
+@app.task
+def calculate_grade_signature(product_id, *args, **kwargs):
+    """Returns a signature for calculating product grade that can be used in chords or groups."""
+    product = get_object_or_none(Product, id=product_id)
+    if not product:
+        logger.warning("Product with id %s does not exist, skipping calculate_grade_signature", product_id)
+        return None
+    return calculate_grade_internal(product, *args, **kwargs)
+
+
 @dojo_async_task
 @app.task
 def calculate_grade(product_id, *args, **kwargs):
