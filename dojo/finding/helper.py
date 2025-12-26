@@ -453,14 +453,6 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
             jira_helper.push_to_jira(finding.finding_group)
 
 
-@dojo_async_task(signature=True)
-@app.task
-def post_process_findings_batch_signature(finding_ids, *args, dedupe_option=True, rules_option=True, product_grading_option=True,
-             issue_updater_option=True, push_to_jira=False, user=None, **kwargs):
-    return post_process_findings_batch(finding_ids, *args, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option, issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, **kwargs)
-    # Pass arguments as keyword arguments to ensure Celery properly serializes them
-
-
 @dojo_async_task
 @app.task
 def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_option=True, product_grading_option=True,

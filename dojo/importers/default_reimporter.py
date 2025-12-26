@@ -7,7 +7,6 @@ from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
-from dojo.decorators import we_want_async
 from dojo.finding.deduplication import (
     find_candidates_for_deduplication_hash,
     find_candidates_for_deduplication_uid_or_hash,
@@ -413,24 +412,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
-                        if we_want_async(async_user=self.user):
-                            finding_helper.post_process_findings_batch_signature(
-                                finding_ids_batch,
-                                dedupe_option=True,
-                                rules_option=True,
-                                product_grading_option=True,
-                                issue_updater_option=True,
-                                push_to_jira=push_to_jira,
-                            )()
-                        else:
-                            finding_helper.post_process_findings_batch(
-                                finding_ids_batch,
-                                dedupe_option=True,
-                                rules_option=True,
-                                product_grading_option=True,
-                                issue_updater_option=True,
-                                push_to_jira=push_to_jira,
-                            )
+                        finding_helper.post_process_findings_batch(
+                            finding_ids_batch,
+                            dedupe_option=True,
+                            rules_option=True,
+                            product_grading_option=True,
+                            issue_updater_option=True,
+                            push_to_jira=push_to_jira,
+                        )
 
         # No chord: tasks are dispatched immediately above per batch
 
