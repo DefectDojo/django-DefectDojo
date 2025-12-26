@@ -267,12 +267,14 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._import_reimport_performance(
 
 
+
             expected_num_queries1=306,
             expected_num_async_tasks1=305,
             expected_num_queries2=232,
             expected_num_async_tasks2=18,
             expected_num_queries3=114,
             expected_num_async_tasks3=17,
+
 
 
         )
