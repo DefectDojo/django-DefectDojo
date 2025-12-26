@@ -53,6 +53,7 @@ from dojo.filters import (
     EngagementTestFilterWithoutObjectLookups,
     ProductEngagementsFilter,
     ProductEngagementsFilterWithoutObjectLookups,
+    FindingPriorityFilter
 )
 from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
 from dojo.finding.views import find_available_notetypes
@@ -1250,36 +1251,36 @@ def get_risk_acceptance_pending(request,
                                                         product,
                                                         product_type):
             form = RiskPendingForm(
-                severity=finding.severity,
+                severity=finding.get_severity_related_to_priority(),
                 product_id=product.id,
                 product_type_id=product_type.id,
                 initial={
                     'owner': request.user,
                     'name': risk_acceptance_title_suggestion,
                     'accepted_by': [request.user],
-                    'severity': finding.severity,
+                    'severity': finding.get_severity_related_to_priority(),
                 })
         elif finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
             form = RiskPendingForm(
-                severity=finding.severity,
+                severity=finding.get_severity_related_to_priority(),
                 product_id=product.id,
                 product_type_id=product_type.id,
                 category=finding.impact,
                 initial={
                     "owner": request.user,
                     "name": risk_acceptance_title_suggestion,
-                    "severity": finding.severity,
+                    "severity": finding.get_severity_related_to_priority(),
                 },
             )
-        elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
+        elif rp_helper.rule_risk_acceptance_according_to_critical(finding.get_severity_related_to_priority(), request.user, product, product_type):
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
-            form = RiskPendingForm(severity=finding.severity,product_id=product.id, product_type_id=product_type.id,
+            form = RiskPendingForm(severity=finding.get_severity_related_to_priority(),product_id=product.id, product_type_id=product_type.id,
                 initial={'owner': request.user,
                         'name': risk_acceptance_title_suggestion,
-                        'accepted_by': get_contacts_product_type_and_product_by_serverity(eng, finding.severity, request.user),
-                        "severity": finding.severity})
+                        'accepted_by': get_contacts_product_type_and_product_by_serverity(eng, finding.get_severity_related_to_priority(), request.user),
+                        "severity": finding.get_severity_related_to_priority()})
     else:
-        form = RiskAcceptanceForm(severity=finding.severity, initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
+        form = RiskAcceptanceForm(severity=finding.get_severity_related_to_priority(), initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
     if form is None:
         raise ValueError("The user does not have the necessary permissions")
     return form
@@ -1289,7 +1290,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
     finding_correlated = []
     form = RiskPendingForm(request.POST,
                            request.FILES,
-                           severity=finding.severity,
+                           severity=finding.get_severity_related_to_priority(),
                            category=finding.impact,
                            product_id=product.id,
                            product_type_id=product_type.id)
@@ -1310,7 +1311,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             duplicate=False,
             test__engagement=eng,
             active=True,
-            severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+            severity=finding.get_severity_related_to_priority()).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         if form.cleaned_data['long_term_acceptance'] == "True":
             form.fields["approvers"].widget.attrs['value'] = "" 
         else:
@@ -1402,7 +1403,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 or rp_helper.role_has_exclusive_permissions(request.user)
                 or get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
-            elif (rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type)
+            elif (rp_helper.rule_risk_acceptance_according_to_critical(finding.get_severity_related_to_priority(), request.user, product, product_type)
                   or risk_acceptance.long_term_acceptance is True):
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
             else:
@@ -1441,19 +1442,39 @@ def add_risk_acceptance_pending(request, eid, fid):
             return post_risk_acceptance_pending(request, finding, eng, eid, product, product_type)
         else:
             form = get_risk_acceptance_pending(request, finding, eng, product, product_type)
+        
+        
+        query = Finding.objects.filter(
+                    duplicate=False,
+                    test__engagement=eng,
+                    active=True,
+                    risk_status__in=["Risk Active", "Risk Expired", "Transfer Rejected"],
+                ).filter(
+                    NOT_ACCEPTED_FINDINGS_QUERY
+                    & ~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-"))
+                ).order_by("title") 
+        if (
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False and
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True
+        ):
+            priority_level = finding.priority_classification
+
+            priority_filter = FindingPriorityFilter()
+            priority_map = {
+                "Very Critical": 4,
+                "Critical": 3,
+                "High": 2,
+                "Medium Low": 1,
+                "Unknown": 0,
+            }
+            priority_value = priority_map.get(priority_level, 0)
+
+            query = priority_filter.filter(query, [str(priority_value)])
+        else:
+            query = query.filter(severity=finding.severity)
+
         finding_choices = (
-            Finding.objects.filter(
-                duplicate=False,
-                test__engagement=eng,
-                active=True,
-                risk_status__in=["Risk Active", "Risk Expired", "Transfer Rejected"],
-                severity=finding.severity,
-            )
-            .filter(
-                NOT_ACCEPTED_FINDINGS_QUERY
-                & ~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-"))
-            )
-            .order_by("title")
+            query
         )
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
             finding_choices = exclude_test_or_finding_with_tag(
@@ -1630,7 +1651,7 @@ def add_transfer_finding(request, eid, fid=None):
                 "findings": finding,
                 "owner": request.user.username,
                 "status": "Transfer Pending",
-                "severity": finding.severity,
+                "severity": finding.get_severity_related_to_priority(),
                 "owner": request.user
             },
             product=product
@@ -1642,14 +1663,32 @@ def add_transfer_finding(request, eid, fid=None):
                 product=product,
                 user=request.user)
 
-        form.fields["findings"].queryset = form.fields["findings"].queryset.filter(
+        query = form.fields["findings"].queryset.filter(
             duplicate=False,
             test__engagement=origin_engagement,
-            active=True,
-            severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+            active=True).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+
+        if (
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False and
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True
+        ):
+            priority_level = finding.priority_classification
+
+            priority_filter = FindingPriorityFilter()
+            priority_map = {
+                "Very Critical": 4,
+                "Critical": 3,
+                "High": 2,
+                "Medium Low": 1,
+                "Unknown": 0,
+            }
+            priority_value = priority_map.get(priority_level, 0)
+            query = priority_filter.filter(form.fields["findings"].queryset, [str(priority_value)])
+            form.fields["findings"].queryset = query
+        else:
+            form.fields["findings"].queryset = query.filter(severity=finding.severity)
+            
         
-
-
     return render(request, 'dojo/add_transfer_finding.html', {
                   'eng': origin_engagement,
                   'product_tab': "product_tab test",
@@ -1881,8 +1920,27 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                                                      risk_status__in=["Risk Active", "Risk Expired", "Transfer Rejected"],
                                                      active=True,
                                                      risk_accepted=False,
-                                                     severity=risk_acceptance.severity,
                                                      duplicate=False).filter(~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")))
+        if (
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_SEVERITY", default=True) is False and
+            GeneralSettings.get_value(name_key="PRIORITIZATION_MODEL_PRIORITY", default=True) is True
+        ):
+            priority_level = accepted_findings[0].priority_classification
+
+            priority_filter = FindingPriorityFilter()
+            priority_map = {
+                "Very Critical": 4,
+                "Critical": 3,
+                "High": 2,
+                "Medium Low": 1,
+                "Unknown": 0,
+            }
+            priority_value = priority_map.get(priority_level, 0)
+
+            unaccepted_findings = priority_filter.filter(unaccepted_findings, [str(priority_value)])
+        else:
+            unaccepted_findings = unaccepted_findings.filter(severity=risk_acceptance.severity.capitalize())
+
         if len(accepted_findings) > 0 and accepted_findings[0].impact and accepted_findings[0].impact in settings.COMPLIANCE_FILTER_RISK:
             unaccepted_findings = unaccepted_findings.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
 
