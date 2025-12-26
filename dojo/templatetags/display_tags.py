@@ -304,7 +304,7 @@ def product_grade(product):
     if system_settings.enable_product_grade and product:
         prod_numeric_grade = product.prod_numeric_grade
         if not prod_numeric_grade or prod_numeric_grade is None:
-            calculate_grade(product)
+            calculate_grade(product.id)
         if prod_numeric_grade:
             if prod_numeric_grade >= system_settings.product_grade_a:
                 grade = "A"

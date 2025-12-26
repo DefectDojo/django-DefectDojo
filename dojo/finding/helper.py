@@ -21,7 +21,7 @@ from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.deduplication import (
     dedupe_batch_of_findings,
-    do_dedupe_finding,
+    do_dedupe_finding_task_internal,
     get_finding_models_for_deduplication,
 )
 from dojo.models import (
@@ -43,6 +43,7 @@ from dojo.utils import (
     close_external_issue,
     do_false_positive_history,
     get_current_user,
+    get_object_or_none,
     mass_model_updater,
     to_str_typed,
 )
@@ -392,8 +393,12 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
 
 @dojo_async_task
 @app.task
-def post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+def post_process_finding_save(finding_id, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+    finding = get_object_or_none(Finding, id=finding_id)
+    if not finding:
+        logger.warning("Finding with id %s does not exist, skipping post_process_finding_save", finding_id)
+        return None
 
     return post_process_finding_save_internal(finding, dedupe_option, rules_option, product_grading_option,
                                    issue_updater_option, push_to_jira, user, *args, **kwargs)
@@ -412,7 +417,7 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
     if dedupe_option:
         if finding.hash_code is not None:
             if system_settings.enable_deduplication:
-                do_dedupe_finding(finding, *args, **kwargs)
+                do_dedupe_finding_task_internal(finding, *args, **kwargs)
             else:
                 deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
         else:
@@ -431,7 +436,7 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
 
     if product_grading_option:
         if system_settings.enable_product_grade:
-            calculate_grade(finding.test.engagement.product)
+            calculate_grade(finding.test.engagement.product.id)
         else:
             deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
 
@@ -499,7 +504,7 @@ def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_op
             tool_issue_updater.async_tool_issue_update(finding)
 
     if product_grading_option and system_settings.enable_product_grade:
-        calculate_grade(findings[0].test.engagement.product)
+        calculate_grade(findings[0].test.engagement.product.id)
 
     if push_to_jira:
         for finding in findings:
@@ -1021,7 +1026,7 @@ def close_finding(
     ra_helper.risk_unaccept(user, finding, perform_save=False)
 
     # External issues (best effort)
-    close_external_issue(finding, "Closed by defectdojo", "github")
+    close_external_issue(finding.id, "Closed by defectdojo", "github")
 
     # JIRA sync
     push_to_jira = False

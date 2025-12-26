@@ -72,7 +72,7 @@ def add_alerts(self, runinterval):
     if system_settings.enable_product_grade:
         products = Product.objects.all()
         for product in products:
-            calculate_grade(product)
+            calculate_grade(product.id)
 
 
 @app.task(bind=True)
@@ -169,7 +169,7 @@ def _async_dupe_delete_impl():
             if system_settings.enable_product_grade:
                 logger.info("performing batch product grading for %s products", len(affected_products))
                 for product in affected_products:
-                    calculate_grade(product)
+                    calculate_grade(product.id)
 
 
 @app.task(ignore_result=False)

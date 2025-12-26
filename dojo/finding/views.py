@@ -1003,9 +1003,9 @@ class EditFinding(View):
 
         if context["gform"].is_valid():
             if GITHUB_Issue.objects.filter(finding=finding).exists():
-                update_external_issue(finding, old_status, "github")
+                update_external_issue(finding.id, old_status, "github")
             else:
-                add_external_issue(finding, "github")
+                add_external_issue(finding.id, "github")
 
             return request, True
         add_field_errors_to_response(context["gform"])
@@ -1082,7 +1082,7 @@ class DeleteFinding(View):
             product = finding.test.engagement.product
             finding.delete()
             # Update the grade of the product async
-            calculate_grade(product)
+            calculate_grade(product.id)
             # Add a message to the request that the finding was successfully deleted
             messages.add_message(
                 request,
@@ -1318,7 +1318,7 @@ def reopen_finding(request, fid):
     if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
         jira_helper.push_to_jira(finding)
 
-    reopen_external_issue(finding, "re-opened by defectdojo", "github")
+    reopen_external_issue(finding.id, "re-opened by defectdojo", "github")
 
     messages.add_message(
         request, messages.SUCCESS, "Finding Reopened.", extra_tags="alert-success",
@@ -1353,7 +1353,7 @@ def copy_finding(request, fid):
             test = form.cleaned_data.get("test")
             product = finding.test.engagement.product
             finding_copy = finding.copy(test=test)
-            calculate_grade(product)
+            calculate_grade(product.id)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -2101,7 +2101,7 @@ def promote_to_finding(request, fid):
                     ).push_all_issues,
                 )
                 if gform.is_valid():
-                    add_external_issue(new_finding, "github")
+                    add_external_issue(new_finding.id, "github")
 
             messages.add_message(
                 request,
@@ -2733,7 +2733,7 @@ def _bulk_update_finding_status_and_severity(finds, form, request, system_settin
                             fp.save_no_options()
 
         for prod in prods:
-            calculate_grade(prod)
+            calculate_grade(prod.id)
 
     if skipped_duplicate_count > 0:
         messages.add_message(
@@ -2789,7 +2789,7 @@ def _bulk_update_risk_acceptance(finds, form, request, prods):
                 ra_helper.risk_unaccept(request.user, finding)
 
         for prod in prods:
-            calculate_grade(prod)
+            calculate_grade(prod.id)
 
     if skipped_risk_accept_count > 0:
         messages.add_message(
@@ -3084,9 +3084,9 @@ def finding_bulk_update_all(request, pid=None):
                     old_status = finding.status()
                     if form.cleaned_data["push_to_github"]:
                         if GITHUB_Issue.objects.filter(finding=finding).exists():
-                            update_external_issue(finding, old_status, "github")
+                            update_external_issue(finding.id, old_status, "github")
                         else:
-                            add_external_issue(finding, "github")
+                            add_external_issue(finding.id, "github")
 
             if form.cleaned_data["notes"]:
                 logger.debug("Setting bulk notes")

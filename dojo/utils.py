@@ -46,7 +46,7 @@ from django.utils.translation import gettext as _
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
-from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+from dojo.decorators import dojo_async_task
 from dojo.finding.queries import get_authorized_findings
 from dojo.github import (
     add_external_issue_github,
@@ -1054,53 +1054,65 @@ def handle_uploaded_selenium(f, cred):
     cred.save()
 
 
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id
-def add_external_issue(find, external_issue_provider, **kwargs):
-    eng = Engagement.objects.get(test=find.test)
+def add_external_issue(finding_id, external_issue_provider, **kwargs):
+    finding = get_object_or_none(Finding, id=finding_id)
+    if not finding:
+        logger.warning("Finding with id %s does not exist, skipping add_external_issue", finding_id)
+        return
+
+    eng = Engagement.objects.get(test=finding.test)
     prod = Product.objects.get(engagement=eng)
     logger.debug("adding external issue with provider: " + external_issue_provider)
 
     if external_issue_provider == "github":
-        add_external_issue_github(find, prod, eng)
+        add_external_issue_github(finding, prod, eng)
 
 
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id
-def update_external_issue(find, old_status, external_issue_provider, **kwargs):
-    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
-    eng = Engagement.objects.get(test=find.test)
+def update_external_issue(finding_id, old_status, external_issue_provider, **kwargs):
+    finding = get_object_or_none(Finding, id=finding_id)
+    if not finding:
+        logger.warning("Finding with id %s does not exist, skipping update_external_issue", finding_id)
+        return
+
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=finding.test))
+    eng = Engagement.objects.get(test=finding.test)
 
     if external_issue_provider == "github":
-        update_external_issue_github(find, prod, eng)
+        update_external_issue_github(finding, prod, eng)
 
 
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id
-def close_external_issue(find, note, external_issue_provider, **kwargs):
-    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
-    eng = Engagement.objects.get(test=find.test)
+def close_external_issue(finding_id, note, external_issue_provider, **kwargs):
+    finding = get_object_or_none(Finding, id=finding_id)
+    if not finding:
+        logger.warning("Finding with id %s does not exist, skipping close_external_issue", finding_id)
+        return
+
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=finding.test))
+    eng = Engagement.objects.get(test=finding.test)
 
     if external_issue_provider == "github":
-        close_external_issue_github(find, note, prod, eng)
+        close_external_issue_github(finding, note, prod, eng)
 
 
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id
-def reopen_external_issue(find, note, external_issue_provider, **kwargs):
-    prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
-    eng = Engagement.objects.get(test=find.test)
+def reopen_external_issue(finding_id, note, external_issue_provider, **kwargs):
+    finding = get_object_or_none(Finding, id=finding_id)
+    if not finding:
+        logger.warning("Finding with id %s does not exist, skipping reopen_external_issue", finding_id)
+        return
+
+    prod = Product.objects.get(engagement=Engagement.objects.get(test=finding.test))
+    eng = Engagement.objects.get(test=finding.test)
 
     if external_issue_provider == "github":
-        reopen_external_issue_github(find, note, prod, eng)
+        reopen_external_issue_github(finding, note, prod, eng)
 
 
 def process_tag_notifications(request, note, parent_url, parent_title):
@@ -1224,20 +1236,24 @@ def get_setting(setting):
     return getattr(settings, setting)
 
 
-@dojo_model_to_id
 @dojo_async_task(signature=True)
 @app.task
-@dojo_model_from_id(model=Product)
-def calculate_grade_signature(product, *args, **kwargs):
+def calculate_grade_signature(product_id, *args, **kwargs):
     """Returns a signature for calculating product grade that can be used in chords or groups."""
+    product = get_object_or_none(Product, id=product_id)
+    if not product:
+        logger.warning("Product with id %s does not exist, skipping calculate_grade_signature", product_id)
+        return None
     return calculate_grade_internal(product, *args, **kwargs)
 
 
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id(model=Product)
-def calculate_grade(product, *args, **kwargs):
+def calculate_grade(product_id, *args, **kwargs):
+    product = get_object_or_none(Product, id=product_id)
+    if not product:
+        logger.warning("Product with id %s does not exist, skipping calculate_grade", product_id)
+        return None
     return calculate_grade_internal(product, *args, **kwargs)
 
 

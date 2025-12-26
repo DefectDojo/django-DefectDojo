@@ -48,7 +48,7 @@ def get_finding_models_for_deduplication(finding_ids):
 @dojo_async_task
 @app.task
 def do_dedupe_finding_task(new_finding_id, *args, **kwargs):
-    return do_dedupe_finding(Finding.objects.get(id=new_finding_id), *args, **kwargs)
+    return do_dedupe_finding_task_internal(Finding.objects.get(id=new_finding_id), *args, **kwargs)
 
 
 @dojo_async_task
@@ -69,7 +69,7 @@ def do_dedupe_batch_task(finding_ids, *args, **kwargs):
     dedupe_batch_of_findings(findings)
 
 
-def do_dedupe_finding(new_finding, *args, **kwargs):
+def do_dedupe_finding_task_internal(new_finding, *args, **kwargs):
     from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
     if dedupe_method := get_custom_method("FINDING_DEDUPE_METHOD"):
         return dedupe_method(new_finding, *args, **kwargs)
