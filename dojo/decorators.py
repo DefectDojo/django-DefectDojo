@@ -3,12 +3,11 @@ import threading
 from functools import wraps
 
 from django.conf import settings
-from django.db import models
 from django_ratelimit import UNSAFE
 from django_ratelimit.core import is_ratelimited
 from django_ratelimit.exceptions import Ratelimited
 
-from dojo.models import Dojo_User, Finding
+from dojo.models import Dojo_User
 
 logger = logging.getLogger(__name__)
 
@@ -114,81 +113,6 @@ def dojo_async_task(func=None, *, signature=False):
     if func is None:
         return decorator
     return decorator(func)
-
-
-# decorator with parameters needs another wrapper layer
-# example usage: @dojo_model_to_id(parameter=0) but defaults to parameter=0
-def dojo_model_to_id(_func=None, *, parameter=0):
-    # logger.debug('dec_args:' + str(dec_args))
-    # logger.debug('dec_kwargs:' + str(dec_kwargs))
-    # logger.debug('_func:%s', _func)
-
-    def dojo_model_to_id_internal(func, *args, **kwargs):
-        @wraps(func)
-        def __wrapper__(*args, **kwargs):
-            if not settings.CELERY_PASS_MODEL_BY_ID:
-                return func(*args, **kwargs)
-
-            model_or_id = get_parameter_froms_args_kwargs(args, kwargs, parameter)
-
-            if model_or_id:
-                if isinstance(model_or_id, models.Model) and we_want_async(*args, func=func, **kwargs):
-                    logger.debug("converting model_or_id to id: %s", model_or_id)
-                    args = list(args)
-                    args[parameter] = model_or_id.id
-
-            return func(*args, **kwargs)
-
-        return __wrapper__
-
-    if _func is None:
-        # decorator called without parameters
-        return dojo_model_to_id_internal
-    return dojo_model_to_id_internal(_func)
-
-
-# decorator with parameters needs another wrapper layer
-# example usage: @dojo_model_from_id(parameter=0, model=Finding) but defaults to parameter 0 and model Finding
-def dojo_model_from_id(_func=None, *, model=Finding, parameter=0):
-    # logger.debug('dec_args:' + str(dec_args))
-    # logger.debug('dec_kwargs:' + str(dec_kwargs))
-    # logger.debug('_func:%s', _func)
-    # logger.debug('model: %s', model)
-
-    def dojo_model_from_id_internal(func, *args, **kwargs):
-        @wraps(func)
-        def __wrapper__(*args, **kwargs):
-            if not settings.CELERY_PASS_MODEL_BY_ID:
-                return func(*args, **kwargs)
-
-            logger.debug("args:" + str(args))
-            logger.debug("kwargs:" + str(kwargs))
-
-            logger.debug("checking if we need to convert id to model: %s for parameter: %s", model.__name__, parameter)
-
-            model_or_id = get_parameter_froms_args_kwargs(args, kwargs, parameter)
-
-            if model_or_id:
-                if not isinstance(model_or_id, models.Model) and we_want_async(*args, func=func, **kwargs):
-                    logger.debug("instantiating model_or_id: %s for model: %s", model_or_id, model)
-                    try:
-                        instance = model.objects.get(id=model_or_id)
-                    except model.DoesNotExist:
-                        logger.warning("error instantiating model_or_id: %s for model: %s: DoesNotExist", model_or_id, model)
-                        instance = None
-                    args = list(args)
-                    args[parameter] = instance
-                else:
-                    logger.debug("model_or_id already a model instance %s for model: %s", model_or_id, model)
-
-            return func(*args, **kwargs)
-
-        return __wrapper__
-
-    if _func is None:
-        # decorator called without parameters
-        return dojo_model_from_id_internal
-    return dojo_model_from_id_internal(_func)
 
 
 def get_parameter_froms_args_kwargs(args, kwargs, parameter):
