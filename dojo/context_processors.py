@@ -3,6 +3,7 @@ import time
 
 # import the settings file
 from django.conf import settings
+from django.contrib import messages
 
 from dojo.labels import get_labels
 from dojo.models import Alerts, System_Settings, UserAnnouncement
@@ -39,7 +40,26 @@ def globalize_vars(request):
 
 
 def bind_system_settings(request):
-    return {"system_settings": System_Settings.objects.get()}
+    """Load system settings and display warning if there's a database error."""
+    try:
+        system_settings = System_Settings.objects.get()
+        # Check if there was an error stored on the request (from middleware)
+        if hasattr(request, "system_settings_error"):
+            error_msg = request.system_settings_error
+            messages.add_message(
+                request,
+                messages.WARNING,
+                f"Warning: Unable to load system settings from database: {error_msg}. "
+                "Default values are being used. Please check your database configuration and run migrations if needed.",
+                extra_tags="alert-warning",
+            )
+            # Clear after adding message
+            delattr(request, "system_settings_error")
+    except Exception:
+        # If we can't get settings, return empty dict (will cause errors elsewhere, but that's expected)
+        return {}
+
+    return {"system_settings": system_settings}
 
 
 def bind_alert_count(request):
