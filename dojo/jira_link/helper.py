@@ -617,12 +617,13 @@ def log_jira_cannot_be_pushed_reason(error, obj, alert_on_error=False):
         error: Error message to display
         obj: The object that cannot be pushed
         alert_on_error: If True, create alerts. If False, only log. Defaults to False.
+
     """
     if not alert_on_error:
         logger.debug(
             "%s cannot be pushed to JIRA (alerts disabled): %s",
             to_str_typed(obj),
-            error
+            error,
         )
         return
 
