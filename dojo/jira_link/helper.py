@@ -18,7 +18,7 @@ from jira.exceptions import JIRAError
 from requests.auth import HTTPBasicAuth
 
 from dojo.celery import app
-from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+from dojo.decorators import dojo_async_task
 from dojo.forms import JIRAEngagementForm, JIRAProjectForm
 from dojo.models import (
     Engagement,
@@ -1562,33 +1562,65 @@ def jira_get_issue(jira_project, issue_key):
         return None
 
 
-@dojo_model_to_id(parameter=1)
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id(model=Notes, parameter=1)
-@dojo_model_from_id
 def add_comment(obj, note, *, force_push=False, **kwargs):
+    """
+    Wrapper function that extracts jira_issue from obj and calls the internal Celery task.
+
+    The decorators convert obj and note to IDs before Celery serialization.
+    After deserialization, obj and note are model instances again.
+    """
     if not is_jira_configured_and_enabled(obj):
         return False
 
     logger.debug("trying to add a comment to a linked jira issue for: %d:%s", obj.id, obj)
-    if not note.private:
-        jira_project = get_jira_project(obj)
-        jira_instance = get_jira_instance(obj)
 
-        if jira_project.push_notes or force_push is True:
-            try:
-                jira = get_jira_connection(jira_instance)
-                j_issue = obj.jira_issue
-                jira.add_comment(
-                    j_issue.jira_id,
-                    f"({note.author.get_full_name() or note.author.username}): {note.entry}")
-            except JIRAError as e:
-                log_jira_generic_alert("Jira Add Comment Error", str(e))
-                return False
-            return True
+    # Get the jira_issue from obj
+    jira_issue = get_jira_issue(obj)
+    if not jira_issue:
+        logger.warning("No jira_issue found for obj %s, skipping add_comment", obj)
+        return False
+
+    # Call the internal task with IDs (runs synchronously within this task)
+    return add_comment_internal(jira_issue.id, note.id, force_push=force_push, **kwargs)
+
+
+@dojo_async_task
+@app.task
+def add_comment_internal(jira_issue_id, note_id, *, force_push=False, **kwargs):
+    """Internal Celery task that adds a comment to a JIRA issue."""
+    jira_issue = get_object_or_none(JIRA_Issue, id=jira_issue_id)
+    if not jira_issue:
+        logger.warning("JIRA_Issue with id %s does not exist, skipping add_comment_internal", jira_issue_id)
+        return False
+
+    note = get_object_or_none(Notes, id=note_id)
+    if not note:
+        logger.warning("Note with id %s does not exist, skipping add_comment_internal", note_id)
+        return False
+
+    if note.private:
         return None
+
+    jira_project = get_jira_project(jira_issue)
+    if not jira_project:
+        logger.warning("No jira_project found for jira_issue %s, skipping add_comment_internal", jira_issue_id)
+        return False
+
+    jira_instance = jira_project.jira_instance
+    if not jira_instance:
+        logger.warning("No jira_instance found for jira_project %s, skipping add_comment_internal", jira_project.id)
+        return False
+
+    if jira_project.push_notes or force_push is True:
+        try:
+            jira = get_jira_connection(jira_instance)
+            jira.add_comment(
+                jira_issue.jira_id,
+                f"({note.author.get_full_name() or note.author.username}): {note.entry}")
+        except JIRAError as e:
+            log_jira_generic_alert("Jira Add Comment Error", str(e))
+            return False
+        return True
     return None
 
 
