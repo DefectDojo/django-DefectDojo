@@ -40,6 +40,7 @@ from dojo.utils import (
     add_error_message_to_response,
     get_file_images,
     get_full_url,
+    get_object_or_none,
     get_system_setting,
     prod_name,
     to_str_typed,
@@ -759,34 +760,40 @@ def push_to_jira(obj, *args, **kwargs):
     if isinstance(obj, Finding):
         if obj.has_finding_group:
             logger.debug("pushing finding group for %s to JIRA", obj)
-            return push_finding_group_to_jira(obj.finding_group, *args, **kwargs)
-        return push_finding_to_jira(obj, *args, **kwargs)
+            return push_finding_group_to_jira(obj.finding_group.id, *args, **kwargs)
+        return push_finding_to_jira(obj.id, *args, **kwargs)
 
     if isinstance(obj, Finding_Group):
-        return push_finding_group_to_jira(obj, *args, **kwargs)
+        return push_finding_group_to_jira(obj.id, *args, **kwargs)
 
     if isinstance(obj, Engagement):
-        return push_engagement_to_jira(obj, *args, **kwargs)
+        return push_engagement_to_jira(obj.id, *args, **kwargs)
     logger.error("unsupported object passed to push_to_jira: %s %i %s", obj.__name__, obj.id, obj)
     return None
 
 
 # we need thre separate celery tasks due to the decorators we're using to map to/from ids
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id
-def push_finding_to_jira(finding, *args, **kwargs):
+def push_finding_to_jira(finding_id, *args, **kwargs):
+    finding = get_object_or_none(Finding, id=finding_id)
+    if not finding:
+        logger.warning("Finding with id %s does not exist, skipping push_finding_to_jira", finding_id)
+        return None
+
     if finding.has_jira_issue:
         return update_jira_issue(finding, *args, **kwargs)
     return add_jira_issue(finding, *args, **kwargs)
 
 
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id(model=Finding_Group)
-def push_finding_group_to_jira(finding_group, *args, **kwargs):
+def push_finding_group_to_jira(finding_group_id, *args, **kwargs):
+    finding_group = get_object_or_none(Finding_Group, id=finding_group_id)
+    if not finding_group:
+        logger.warning("Finding_Group with id %s does not exist, skipping push_finding_group_to_jira", finding_group_id)
+        return None
+
     # Look for findings that have single ticket associations separate from the group
     for finding in finding_group.findings.filter(jira_issue__isnull=False):
         update_jira_issue(finding, *args, **kwargs)
@@ -796,14 +803,17 @@ def push_finding_group_to_jira(finding_group, *args, **kwargs):
     return add_jira_issue(finding_group, *args, **kwargs)
 
 
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id(model=Engagement)
-def push_engagement_to_jira(engagement, *args, **kwargs):
+def push_engagement_to_jira(engagement_id, *args, **kwargs):
+    engagement = get_object_or_none(Engagement, id=engagement_id)
+    if not engagement:
+        logger.warning("Engagement with id %s does not exist, skipping push_engagement_to_jira", engagement_id)
+        return None
+
     if engagement.has_jira_issue:
-        return update_epic(engagement, *args, **kwargs)
-    return add_epic(engagement, *args, **kwargs)
+        return update_epic(engagement.id, *args, **kwargs)
+    return add_epic(engagement.id, *args, **kwargs)
 
 
 def add_issues_to_epic(jira, obj, epic_id, issue_keys, *, ignore_epics=True):
@@ -1366,12 +1376,13 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id(model=Engagement)
-def close_epic(eng, push_to_jira, **kwargs):
-    engagement = eng
+def close_epic(engagement_id, push_to_jira, **kwargs):
+    engagement = get_object_or_none(Engagement, id=engagement_id)
+    if not engagement:
+        logger.warning("Engagement with id %s does not exist, skipping close_epic", engagement_id)
+        return False
     if not is_jira_enabled():
         return False
 
@@ -1387,7 +1398,7 @@ def close_epic(eng, push_to_jira, **kwargs):
     if jira_project and jira_project.enable_engagement_epic_mapping:
         if push_to_jira:
             try:
-                jissue = get_jira_issue(eng)
+                jissue = get_jira_issue(engagement)
                 if jissue is None:
                     logger.warning("JIRA close epic failed: no issue found")
                     return False
@@ -1414,11 +1425,14 @@ def close_epic(eng, push_to_jira, **kwargs):
     return False
 
 
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id(model=Engagement)
-def update_epic(engagement, **kwargs):
+def update_epic(engagement_id, **kwargs):
+    engagement = get_object_or_none(Engagement, id=engagement_id)
+    if not engagement:
+        logger.warning("Engagement with id %s does not exist, skipping update_epic", engagement_id)
+        return False
+
     logger.debug("trying to update jira EPIC for %d:%s", engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
@@ -1458,11 +1472,14 @@ def update_epic(engagement, **kwargs):
     return False
 
 
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id(model=Engagement)
-def add_epic(engagement, **kwargs):
+def add_epic(engagement_id, **kwargs):
+    engagement = get_object_or_none(Engagement, id=engagement_id)
+    if not engagement:
+        logger.warning("Engagement with id %s does not exist, skipping add_epic", engagement_id)
+        return False
+
     logger.debug("trying to create a new jira EPIC for %d:%s", engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):

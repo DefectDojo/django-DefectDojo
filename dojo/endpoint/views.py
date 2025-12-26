@@ -373,7 +373,7 @@ def endpoint_bulk_update_all(request, pid=None):
             product_calc = list(Product.objects.filter(endpoint__id__in=endpoints_to_update).distinct())
             endpoints.delete()
             for prod in product_calc:
-                calculate_grade(prod)
+                calculate_grade(prod.id)
 
             if skipped_endpoint_count > 0:
                 add_error_message_to_response(f"Skipped deletion of {skipped_endpoint_count} endpoints because you are not authorized.")
