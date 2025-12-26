@@ -268,12 +268,14 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
 
 
-            expected_num_queries1=306,
-            expected_num_async_tasks1=305,
+
+            expected_num_queries1=305,
+            expected_num_async_tasks1=6,
             expected_num_queries2=232,
-            expected_num_async_tasks2=18,
+            expected_num_async_tasks2=17,
             expected_num_queries3=114,
-            expected_num_async_tasks3=17,
+            expected_num_async_tasks3=16,
+
 
 
 
@@ -445,10 +447,10 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=275,
-            expected_num_async_tasks1=8,
+            expected_num_queries1=274,
+            expected_num_async_tasks1=7,
             expected_num_queries2=185,
-            expected_num_async_tasks2=8,
+            expected_num_async_tasks2=7,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
 
