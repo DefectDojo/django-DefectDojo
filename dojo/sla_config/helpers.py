@@ -1,15 +1,13 @@
 import logging
 
-from dojo.celery import app
-from dojo.decorators import dojo_async_task
+from dojo.celery import DojoAsyncTask, app
 from dojo.models import Finding, Product, SLA_Configuration, System_Settings
 from dojo.utils import get_custom_method, mass_model_updater
 
 logger = logging.getLogger(__name__)
 
 
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def async_update_sla_expiration_dates_sla_config_sync(sla_config: SLA_Configuration, products: list[Product], *args, severities: list[str] | None = None, **kwargs):
     if method := get_custom_method("FINDING_SLA_EXPIRATION_CALCULATION_METHOD"):
         method(sla_config, products, severities=severities)
