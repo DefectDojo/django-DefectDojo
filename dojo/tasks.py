@@ -10,8 +10,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.auditlog import run_flush_auditlog
-from dojo.celery import app
-from dojo.decorators import dojo_async_task
+from dojo.celery import DojoAsyncTask, app
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.helper import fix_loop_duplicates
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
 from dojo.models import Alerts, Announcement, Endpoint, Engagement, Finding, Product, System_Settings, User
@@ -71,7 +71,7 @@ def add_alerts(self, runinterval):
     if system_settings.enable_product_grade:
         products = Product.objects.all()
         for product in products:
-            calculate_grade(product)
+            dojo_dispatch_task(calculate_grade, product.id)
 
 
 @app.task(bind=True)
@@ -161,7 +161,7 @@ def async_dupe_delete(*args, **kwargs):
             if system_settings.enable_product_grade:
                 logger.info("performing batch product grading for %s products", len(affected_products))
                 for product in affected_products:
-                    calculate_grade(product)
+                    dojo_dispatch_task(calculate_grade, product.id)
 
 
 @app.task(ignore_result=False)
@@ -222,8 +222,7 @@ def clear_sessions(*args, **kwargs):
     call_command("clearsessions")
 
 
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
     """
     Async task to update watson search indexes for a specific model type.

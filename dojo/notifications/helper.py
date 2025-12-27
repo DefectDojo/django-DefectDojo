@@ -17,8 +17,9 @@ from django.utils.translation import gettext as _
 
 from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
-from dojo.celery import app
-from dojo.decorators import dojo_async_task, we_want_async
+from dojo.celery import DojoAsyncTask, app
+from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.decorators import we_want_async
 from dojo.labels import get_labels
 from dojo.models import (
     Alerts,
@@ -199,8 +200,6 @@ class SlackNotificationManger(NotificationManagerHelpers):
 
     """Manger for slack notifications and their helpers."""
 
-    @dojo_async_task
-    @app.task
     def send_slack_notification(
         self,
         event: str,
@@ -317,8 +316,6 @@ class MSTeamsNotificationManger(NotificationManagerHelpers):
 
     """Manger for Microsoft Teams notifications and their helpers."""
 
-    @dojo_async_task
-    @app.task
     def send_msteams_notification(
         self,
         event: str,
@@ -368,8 +365,6 @@ class EmailNotificationManger(NotificationManagerHelpers):
 
     """Manger for email notifications and their helpers."""
 
-    @dojo_async_task
-    @app.task
     def send_mail_notification(
         self,
         event: str,
@@ -420,8 +415,6 @@ class WebhookNotificationManger(NotificationManagerHelpers):
     ERROR_PERMANENT = "permanent"
     ERROR_TEMPORARY = "temporary"
 
-    @dojo_async_task
-    @app.task
     def send_webhooks_notification(
         self,
         event: str,
@@ -480,11 +473,7 @@ class WebhookNotificationManger(NotificationManagerHelpers):
                         endpoint.first_error = now
                     endpoint.status = Notification_Webhooks.Status.STATUS_INACTIVE_TMP
                     # In case of failure within one day, endpoint can be deactivated temporally only for one minute
-                    self._webhook_reactivation.apply_async(
-                        args=[self],
-                        kwargs={"endpoint_id": endpoint.pk},
-                        countdown=60,
-                    )
+                    webhook_reactivation.apply_async(kwargs={"endpoint_id": endpoint.pk}, countdown=60)
             # There is no reason to keep endpoint active if it is returning 4xx errors
             else:
                 endpoint.status = Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT
@@ -559,7 +548,6 @@ class WebhookNotificationManger(NotificationManagerHelpers):
         # in "send_webhooks_notification", we are doing deeper analysis, why it failed
         # for now, "raise_for_status" should be enough
 
-    @app.task(ignore_result=True)
     def _webhook_reactivation(self, endpoint_id: int, **_kwargs: dict):
         endpoint = Notification_Webhooks.objects.get(pk=endpoint_id)
         # User already changed status of endpoint
@@ -832,9 +820,10 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending Slack Notification")
-                self._get_manager_instance("slack").send_slack_notification(
+                dojo_dispatch_task(
+                    send_slack_notification,
                     event,
-                    user=notifications.user,
+                    user_id=getattr(notifications.user, "id", None),
                     **kwargs,
                 )
 
@@ -844,9 +833,10 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending MSTeams Notification")
-                self._get_manager_instance("msteams").send_msteams_notification(
+                dojo_dispatch_task(
+                    send_msteams_notification,
                     event,
-                    user=notifications.user,
+                    user_id=getattr(notifications.user, "id", None),
                     **kwargs,
                 )
 
@@ -856,9 +846,10 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending Mail Notification")
-                self._get_manager_instance("mail").send_mail_notification(
+                dojo_dispatch_task(
+                    send_mail_notification,
                     event,
-                    user=notifications.user,
+                    user_id=getattr(notifications.user, "id", None),
                     **kwargs,
                 )
 
@@ -868,11 +859,41 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending Webhooks Notification")
-                self._get_manager_instance("webhooks").send_webhooks_notification(
+                dojo_dispatch_task(
+                    send_webhooks_notification,
                     event,
-                    user=notifications.user,
+                    user_id=getattr(notifications.user, "id", None),
                     **kwargs,
                 )
+
+
+@app.task(base=DojoAsyncTask)
+def send_slack_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
+    user = Dojo_User.objects.get(pk=user_id) if user_id else None
+    SlackNotificationManger().send_slack_notification(event, user=user, **kwargs)
+
+
+@app.task(base=DojoAsyncTask)
+def send_msteams_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
+    user = Dojo_User.objects.get(pk=user_id) if user_id else None
+    MSTeamsNotificationManger().send_msteams_notification(event, user=user, **kwargs)
+
+
+@app.task(base=DojoAsyncTask)
+def send_mail_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
+    user = Dojo_User.objects.get(pk=user_id) if user_id else None
+    EmailNotificationManger().send_mail_notification(event, user=user, **kwargs)
+
+
+@app.task(base=DojoAsyncTask)
+def send_webhooks_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
+    user = Dojo_User.objects.get(pk=user_id) if user_id else None
+    WebhookNotificationManger().send_webhooks_notification(event, user=user, **kwargs)
+
+
+@app.task(ignore_result=True)
+def webhook_reactivation(endpoint_id: int, **_kwargs: dict) -> None:
+    WebhookNotificationManger()._webhook_reactivation(endpoint_id=endpoint_id)
 
 
 @app.task(ignore_result=True)
@@ -902,4 +923,4 @@ def webhook_status_cleanup(*_args: list, **_kwargs: dict):
     )
     for endpoint in broken_endpoints:
         manager = WebhookNotificationManger()
-        manager._webhook_reactivation(manager, endpoint_id=endpoint.pk)
+        manager._webhook_reactivation(endpoint_id=endpoint.pk)

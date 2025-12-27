@@ -1096,7 +1096,9 @@ class SLA_Configuration(models.Model):
                     super(Product, product).save()
                 # launch the async task to update all finding sla expiration dates
                 from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
-                async_update_sla_expiration_dates_sla_config_sync(self, products, severities=severities)
+                from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+                dojo_dispatch_task(async_update_sla_expiration_dates_sla_config_sync, self, products, severities=severities)
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -1258,7 +1260,9 @@ class Product(models.Model):
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
                 from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
-                async_update_sla_expiration_dates_sla_config_sync(sla_config, Product.objects.filter(id=self.id))
+                from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+                dojo_dispatch_task(async_update_sla_expiration_dates_sla_config_sync, sla_config, Product.objects.filter(id=self.id))
 
     def get_absolute_url(self):
         return reverse("view_product", args=[str(self.id)])
@@ -2849,7 +2853,7 @@ class Finding(models.Model):
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
         system_settings = System_Settings.objects.get()
         if dedupe_option or issue_updater_option or (product_grading_option and system_settings.enable_product_grade) or push_to_jira:
-            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
+            finding_helper.post_process_finding_save(self.id, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
                 issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
         else:
             logger.debug("no options selected that require finding post processing")

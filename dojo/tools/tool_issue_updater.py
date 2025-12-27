@@ -1,13 +1,19 @@
-from dojo.celery import app
-from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+import logging
+
+from dojo.celery import DojoAsyncTask, app
+from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.models import Finding
 from dojo.tools.api_sonarqube.parser import SCAN_SONARQUBE_API
 from dojo.tools.api_sonarqube.updater import SonarQubeApiUpdater
 from dojo.tools.api_sonarqube.updater_from_source import SonarQubeApiUpdaterFromSource
+from dojo.utils import get_object_or_none
+
+logger = logging.getLogger(__name__)
 
 
 def async_tool_issue_update(finding, *args, **kwargs):
     if is_tool_issue_updater_needed(finding):
-        tool_issue_updater(finding)
+        dojo_dispatch_task(tool_issue_updater, finding.id)
 
 
 def is_tool_issue_updater_needed(finding, *args, **kwargs):
@@ -15,11 +21,12 @@ def is_tool_issue_updater_needed(finding, *args, **kwargs):
     return test_type.name == SCAN_SONARQUBE_API
 
 
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
-def tool_issue_updater(finding, *args, **kwargs):
+@app.task(base=DojoAsyncTask)
+def tool_issue_updater(finding_id, *args, **kwargs):
+    finding = get_object_or_none(Finding, id=finding_id)
+    if not finding:
+        logger.warning("Finding with id %s does not exist, skipping tool_issue_updater", finding_id)
+        return
 
     test_type = finding.test.test_type
 
@@ -27,8 +34,7 @@ def tool_issue_updater(finding, *args, **kwargs):
         SonarQubeApiUpdater().update_sonarqube_finding(finding)
 
 
-@dojo_async_task
-@app.task
+@app.task(base=DojoAsyncTask)
 def update_findings_from_source_issues(**kwargs):
 
     findings = SonarQubeApiUpdaterFromSource().get_findings_to_update()
