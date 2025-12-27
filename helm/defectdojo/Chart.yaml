@@ -34,4 +34,6 @@ dependencies:
 #     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "true"
-  artifacthub.io/changes: ""
+  artifacthub.io/changes: |
+    - kind: changed
+      description: chore(deps)_ update valkey docker tag from 0.10.2 to v0.13.0 (helm/defectdojo/chart.yaml)
