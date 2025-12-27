@@ -649,7 +649,7 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.subTest("active"):
             wh = Notification_Webhooks.objects.filter(owner=None).first()
             manager = WebhookNotificationManger()
-            manager._webhook_reactivation(manager, endpoint_id=wh.pk)
+            manager._webhook_reactivation(endpoint_id=wh.pk)
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
             self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE)
@@ -668,7 +668,7 @@ class TestNotificationWebhooks(DojoTestCase):
 
             with self.assertLogs("dojo.notifications.helper", level="DEBUG") as cm:
                 manager = WebhookNotificationManger()
-                manager._webhook_reactivation(manager, endpoint_id=wh.pk)
+                manager._webhook_reactivation(endpoint_id=wh.pk)
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
             self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE_TMP)
