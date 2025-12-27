@@ -1522,15 +1522,18 @@ class TestImportSerializer(serializers.ModelSerializer):
 
 
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(
+            queryset=Product.objects.all(), required=True,
+        )
     path = serializers.SerializerMethodField()
 
     def create(self, validated_data):
         instance = super().create(validated_data)
         user = getattr(self.context.get("request", None), "user", None)
-        ra_helper.add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())
+        ra_helper.add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())  # TODO: check this if needed
         return instance
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data):  # TODO: check what is happening here as well
         # Determine findings to risk accept, and findings to unaccept risk
         existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
         new_findings_ids = [x.id for x in validated_data.get("accepted_findings", [])]
@@ -1551,13 +1554,10 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.CharField())
     def get_path(self, obj):
-        engagement = Engagement.objects.filter(
-            risk_acceptance__id__in=[obj.id],
-        ).first()
         path = "No proof has been supplied"
-        if engagement and obj.filename() is not None:
+        if obj.product and obj.filename() is not None:
             path = reverse(
-                "download_risk_acceptance", args=(engagement.id, obj.id),
+                "download_risk_acceptance", args=(obj.id,),
             )
             request = self.context.get("request")
             if request:
@@ -1565,19 +1565,23 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         return path
 
     @extend_schema_field(serializers.IntegerField())
-    def get_engagement(self, obj):
-        engagement = Engagement.objects.filter(
-            risk_acceptance__id__in=[obj.id],
-        ).first()
-        return EngagementSerializer(read_only=True).to_representation(
-            engagement,
+    def get_product(self, obj):
+        return ProductSerializer(read_only=True).to_representation(
+            obj.product,
         )
 
     def validate(self, data):
-        def validate_findings_have_same_engagement(finding_objects: list[Finding]):
-            engagements = finding_objects.values_list("test__engagement__id", flat=True).distinct().count()
-            if engagements > 1:
-                msg = "You are not permitted to add findings from multiple engagements"
+        super().validate(data)
+
+        if self.context["request"].method != "POST":
+            if "product" in data and data["product"] != self.instance.product:
+                msg = f"Change of product is not possible. Current: {self.instance.product.pk}, new: {data["product"].pk}."
+                raise serializers.ValidationError(msg)
+
+        def validate_findings_have_same_product(finding_objects: list[Finding]):  # TODO: 'clean' might be enought?
+            products = finding_objects.values_list("test__engagement__product__id", flat=True).distinct().count()
+            if products > 1:
+                msg = "You are not permitted to add findings from multiple products"
                 raise PermissionDenied(msg)
 
         findings = data.get("accepted_findings", [])
@@ -1588,11 +1592,11 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
             msg = "You are not permitted to add one or more selected findings to this risk acceptance"
             raise PermissionDenied(msg)
         if self.context["request"].method == "POST":
-            validate_findings_have_same_engagement(finding_objects)
+            validate_findings_have_same_product(finding_objects)
         elif self.context["request"].method in {"PATCH", "PUT"}:
             existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
             existing_and_new_findings = existing_findings | finding_objects
-            validate_findings_have_same_engagement(existing_and_new_findings)
+            validate_findings_have_same_product(existing_and_new_findings)
         return data
 
     class Meta:
@@ -1765,6 +1769,7 @@ class FindingSerializer(serializers.ModelSerializer):
         if not isinstance(is_risk_accepted, bool):
             return
         # Determine how to proceed based on the value of `risk_accepted`
+        # TODO: this should be more sofisticated: better resnonses
         if is_risk_accepted and not self.instance.risk_accepted and self.instance.test.engagement.product.enable_simple_risk_acceptance and not data.get("active", False):
             ra_helper.simple_risk_accept(self.context["request"].user, self.instance)
         elif not is_risk_accepted and self.instance.risk_accepted:  # turning off risk_accepted

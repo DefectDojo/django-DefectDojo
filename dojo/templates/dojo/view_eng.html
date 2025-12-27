@@ -378,7 +378,7 @@
                                 {% if eng.product.enable_full_risk_acceptance %}
                                     {% if eng|has_object_permission:"Risk_Acceptance" %}
                                         <a title="Add Risk Acceptance..." class="pull-right btn btn-sm btn-primary"
-                                            href="{% url 'add_risk_acceptance' eng.id %}?return_url={{ request.get_full_path|urlencode }}"><span class="fa-solid fa-plus"></span></a>
+                                            href="{% url 'add_risk_acceptance' eng.product.id %}?return_url={{ request.get_full_path|urlencode }}"><span class="fa-solid fa-plus"></span></a>
                                         </a>
                                     {% endif %}
                                 {% endif %}
@@ -420,9 +420,9 @@
                                                         </li>
                                                     </ul>
                                                 </td>
-                                                <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.created|date }}</a></td>
+                                                <td><a href="{% url 'view_risk_acceptance' risk_acceptance.id %}">{{ risk_acceptance.created|date }}</a></td>
                                                 <td>{{ risk_acceptance.accepted_by }}</td>
-                                                <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.name }}</a></td>
+                                                <td><a href="{% url 'view_risk_acceptance' risk_acceptance.id %}">{{ risk_acceptance.name }}</a></td>
                                                 <td>
                                                     {{ risk_acceptance.get_decision_display|default_if_none:"" }}
                                                     {% if risk_acceptance.decision_details %}
@@ -438,9 +438,9 @@
                                                         Never
                                                     {% endif %}
                                                 </td>
-                                                <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.accepted_findings_count }}</a></td>
+                                                <td><a href="{% url 'view_risk_acceptance' risk_acceptance.id %}">{{ risk_acceptance.accepted_findings_count }}</a></td>
                                                 {% if risk_acceptance.filename %}
-                                                    <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">Yes</a>
+                                                    <td><a href="{% url 'download_risk_acceptance' risk_acceptance.id %}">Yes</a>
                                                         &nbsp;<i style="position:absolute;" class="fa has-popover fa-info-circle" title="Uploaded proof" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
                                                             data-content="{{ risk_acceptance.filename }}"></i>
                                                     </td>

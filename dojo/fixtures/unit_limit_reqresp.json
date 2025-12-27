@@ -82,7 +82,6 @@
           "report_type": null,
           "first_contacted": null,
           "tmodel_path": "none",
-          "risk_acceptance": [],
           "lead": 1,
           "version": null,
           "progress": "threat_model",

@@ -36,7 +36,7 @@
                 </div>
             </div>
             <br/>
-            <form id="edit_risk_acceptance" enctype="multipart/form-data"  class="form-horizontal" action="{% url 'edit_risk_acceptance' engagement.id risk_acceptance.id %}" method="post">
+            <form id="edit_risk_acceptance" enctype="multipart/form-data"  class="form-horizontal" action="{% url 'edit_risk_acceptance' risk_acceptance.id %}" method="post">
                 {% csrf_token %}
                 {% if return_url %}
                     <input type="hidden" name="return_url" value="{{ return_url }}" />
@@ -107,7 +107,7 @@
                         <td>{{ risk_acceptance.expiration_date_handled|date }}</td>
                         <td>{{ risk_acceptance.accepted_findings.count }}</td>
                         {% if risk_acceptance.filename %}
-                            <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a></td>
+                            <td><a href="{% url 'download_risk_acceptance' risk_acceptance.id %}">{{ risk_acceptance.filename }}</a></td>
                         {% else %}
                             <td>No</a></td>
                         {% endif %}
@@ -253,7 +253,7 @@
             <tr>
                 {% if risk_acceptance.filename %}
                     <td>
-                        <a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a>
+                        <a href="{% url 'download_risk_acceptance' risk_acceptance.id %}">{{ risk_acceptance.filename }}</a>
                     </td>
                     <td>
                         {{ risk_acceptance.created }}
@@ -346,7 +346,7 @@
         // keyboard shortcuts
         document.addEventListener('keydown', function(e) {
             if (e.key == 'e') {
-                window.location.assign('{% url 'edit_risk_acceptance' eng.id risk_acceptance.id %}')
+                window.location.assign('{% url 'edit_risk_acceptance' risk_acceptance.id %}')
             }
         });
 

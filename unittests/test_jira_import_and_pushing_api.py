@@ -318,8 +318,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_issue_count_in_test(test_id1, 0)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
 
-    def add_risk_acceptance(self, eid, data_risk_accceptance, fid=None):
-        args = (eid, fid) if fid else (eid,)
+    def add_risk_acceptance(self, pid, data_risk_accceptance, fid=None):
+        args = (pid, fid) if fid else (pid,)
         response = self.client.post(reverse("add_risk_acceptance", args=args), data_risk_accceptance)
         self.assertEqual(302, response.status_code, response.content[:1000])
         return response
@@ -345,6 +345,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
             "decision_details": "it has been decided!",
             "accepted_by": "pointy haired boss",
             "owner": 1,
+            "product": Finding.objects.get(pk=finding_id).test.engagement.product.pk,
             "expiration_date": "2024-12-31",
             "reactivate_expired": True,
             }
@@ -354,8 +355,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         pre_jira_status = self.get_jira_issue_status(finding_id)
 
-        response = self.add_risk_acceptance(1, data_risk_accceptance=ra_data)
-        self.assertEqual("/engagement/1", response.url)
+        response = self.add_risk_acceptance(2, data_risk_accceptance=ra_data)
+        self.assertEqual("/product/2", response.url)
 
         # We do this to update the JIRA
         for finding in ra_data["accepted_findings"]:
@@ -401,6 +402,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
             "decision_details": "it has been decided!",
             "accepted_by": "pointy haired boss",
             "owner": 1,
+            "product": Finding.objects.get(pk=finding_id).test.engagement.product.pk,
             "expiration_date": "2024-12-31",
             "reactivate_expired": True,
             }
@@ -410,8 +412,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         pre_jira_status = self.get_jira_issue_status(finding_id)
 
-        response = self.add_risk_acceptance(1, data_risk_accceptance=ra_data)
-        self.assertEqual("/engagement/1", response.url)
+        response = self.add_risk_acceptance(2, data_risk_accceptance=ra_data)
+        self.assertEqual("/product/2", response.url)
 
         # we don't do any explicit push to JIRA here as it should happen automatically
 

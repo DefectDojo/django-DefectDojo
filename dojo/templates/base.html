@@ -693,6 +693,12 @@
                                                 <span class="hidden-xs">{% trans "Components" %}</span>
                                             </a>
                                         </li>
+                                        <li role="presentation"{% if product_tab.tab == 'risk_acceptance' %} class="active"{% endif %}>
+                                            <a href="{% url 'view_product_risk_acceptances' product_tab.product.id %}">
+                                                <span class="fa-solid fa-circle-exclamation" aria-hidden="true"></span>
+                                                <span class="hidden-xs">{% trans "Risk Acceptance" %}</span>
+                                            </a>
+                                        </li>
                                         <li role="presentation"{% if product_tab.tab == 'metrics' %} class="active"{% endif %}>
                                             <a href="{% url 'view_product_metrics' product_tab.product.id %}">
                                                 <span class="fa-solid fa-chart-column" aria-hidden="true"></span>
