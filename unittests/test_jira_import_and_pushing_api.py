@@ -971,7 +971,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     @patch("dojo.jira_link.helper.can_be_pushed_to_jira", return_value=(True, None, None))
     @patch("dojo.jira_link.helper.is_push_all_issues", return_value=False)
     @patch("dojo.jira_link.helper.push_to_jira", return_value=None)
-    @patch("dojo.notifications.helper.WebhookNotificationManger.send_webhooks_notification")
+    @patch("dojo.notifications.helper.send_webhooks_notification")
     def test_bulk_edit_mixed_findings_and_groups_jira_push_bug(self, mock_webhooks, mock_push_to_jira, mock_is_push_all_issues, mock_can_be_pushed):
         """
         Test the bug in bulk edit: when bulk editing findings where some are in groups
