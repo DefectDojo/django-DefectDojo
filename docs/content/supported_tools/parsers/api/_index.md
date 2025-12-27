@@ -29,3 +29,10 @@ Follow these steps to set up API importing:
 4.  After this is done, you can import the findings on the `Product` page through
     `Findings -> Import Scan Results`. As the `Scan type`, select the related type
     (the `API Scan Configuration` created above) and click `Import`.
+
+## Custom Trust
+
+If you are connecting to any of these tools via HTTPS, the issuer of the certificate that is presented by
+the tool must be trusted.
+
+For details, have a look at the [custom trust](../../custom_trust) documentation.
