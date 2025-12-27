@@ -76,6 +76,7 @@ jobs:
           push: true
           file: ./Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
           context: .
+          target: release
           outputs: type=image,"name=${{ env.DOCKER_ORG }}/defectdojo-${{ matrix.docker-image}}",push-by-digest=true,name-canonical=true
           cache-from: type=gha,scope=${{ matrix.docker-image}}-${{ matrix.os }}-${{ env.PLATFORM }}-${{ github.head_ref || github.ref_name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.docker-image}}-${{ matrix.os }}-${{ env.PLATFORM }}-${{ github.head_ref || github.ref_name }}
