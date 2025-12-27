@@ -594,7 +594,7 @@ class AddFindingView(View):
             # if we're removing the "duplicate" in the edit finding screen
             finding_helper.save_vulnerability_ids(finding, context["form"].cleaned_data["vulnerability_ids"].split())
             # Push things to jira if needed
-            finding.save(push_to_jira=push_to_jira)
+            finding.save(push_to_jira=push_to_jira, alert_on_error=True)
             # Save the burp req resp
             if "request" in context["form"].cleaned_data or "response" in context["form"].cleaned_data:
                 burp_rr = BurpRawRequestResponse(
@@ -714,7 +714,7 @@ def add_temp_finding(request, tid, fid):
                 jform = JIRAFindingForm(request.POST, prefix="jiraform", instance=new_finding, push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
                 if jform.is_valid():
                     if jform.cleaned_data.get("push_to_jira"):
-                        jira_helper.push_to_jira(new_finding)
+                        jira_helper.push_to_jira(new_finding, alert_on_error=True)
                 else:
                     add_error_message_to_response(f"jira form validation failed: {jform.errors}")
             if "request" in form.cleaned_data or "response" in form.cleaned_data:

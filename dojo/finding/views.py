@@ -970,8 +970,9 @@ class EditFinding(View):
             logger.debug("jform.jira_issue: %s", context["jform"].cleaned_data.get("jira_issue"))
             logger.debug(JFORM_PUSH_TO_JIRA_MESSAGE, context["jform"].cleaned_data.get("push_to_jira"))
             # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
+            push_to_jira_checkbox = context["jform"].cleaned_data.get("push_to_jira")
             push_all_jira_issues = jira_helper.is_push_all_issues(finding)
-            push_to_jira = push_all_jira_issues or context["jform"].cleaned_data.get("push_to_jira")
+            push_to_jira = push_all_jira_issues or push_to_jira_checkbox or jira_helper.is_keep_in_sync_with_jira(finding)
             logger.debug("push_to_jira: %s", push_to_jira)
             logger.debug("push_all_jira_issues: %s", push_all_jira_issues)
             logger.debug("has_jira_group_issue: %s", finding.has_jira_group_issue)
@@ -998,12 +999,6 @@ class EditFinding(View):
                     jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
                     jira_message = "Linked a JIRA issue successfully."
             # any existing finding should be updated
-            jira_instance = jira_helper.get_jira_instance(finding)
-            push_to_jira = (
-                push_to_jira
-                and not (push_to_jira and finding.finding_group)
-                and (finding.has_jira_issue or (jira_instance and jira_instance.finding_jira_sync))
-            )
             # Determine if a message should be added
             if jira_message:
                 messages.add_message(
@@ -1052,13 +1047,13 @@ class EditFinding(View):
             # do not relaunch deduplication, otherwise, it's never taken into account
             if old_finding.duplicate and not new_finding.duplicate:
                 new_finding.duplicate_finding = None
-                new_finding.save(push_to_jira=push_to_jira, dedupe_option=False)
+                new_finding.save(push_to_jira=push_to_jira, alert_on_error=True, dedupe_option=False)
             else:
-                new_finding.save(push_to_jira=push_to_jira)
+                new_finding.save(push_to_jira=push_to_jira, alert_on_error=True)
             # we only push the group after storing the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding.finding_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_helper.push_to_jira(finding.finding_group, alert_on_error=True)
 
         return request, all_forms_valid
 
@@ -1278,12 +1273,12 @@ def defect_finding_review(request, fid):
                     new_note.entry += "\nJira issue re-opened."
                 jira_helper.add_comment(finding, new_note, force_push=True)
             # Save the finding
-            finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+            finding.save(push_to_jira=(push_to_jira and not finding_in_group), alert_on_error=True)
 
             # we only push the group after saving the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_helper.push_to_jira(finding.finding_group, alert_on_error=True)
 
             messages.add_message(
                 request, messages.SUCCESS, "Defect Reviewed", extra_tags="alert-success",
@@ -1567,12 +1562,12 @@ def request_finding_review(request, fid):
             if push_to_jira and not finding_in_group:
                 jira_helper.add_comment(finding, new_note, force_push=True)
             # Save the finding
-            finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+            finding.save(push_to_jira=(push_to_jira and not finding_in_group), alert_on_error=True)
 
             # we only push the group after saving the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_helper.push_to_jira(finding.finding_group, alert_on_error=True)
 
             reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
             reviewers_string = ", ".join([f"{user} ({user.id})" for user in reviewers])
@@ -1662,12 +1657,12 @@ def clear_finding_review(request, fid):
             if push_to_jira and not finding_in_group:
                 jira_helper.add_comment(finding, new_note, force_push=True)
             # Save the finding
-            finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+            finding.save(push_to_jira=(push_to_jira and not finding_in_group), alert_on_error=True)
 
             # we only push the group after saving the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_helper.push_to_jira(finding.finding_group, alert_on_error=True)
 
             messages.add_message(
                 request,
@@ -2033,7 +2028,7 @@ def promote_to_finding(request, fid):
                 new_finding, form.cleaned_data["vulnerability_ids"].split(),
             )
 
-            new_finding.save(push_to_jira=push_to_jira)
+            new_finding.save(push_to_jira=push_to_jira, alert_on_error=True)
 
             finding.delete()
             if "githubform" in request.POST:
@@ -2873,12 +2868,12 @@ def finding_bulk_update_all(request, pid=None):
                     ) = jira_helper.can_be_pushed_to_jira(group)
                     if not can_be_pushed_to_jira:
                         error_counts[error_message] += 1
-                        jira_helper.log_jira_cannot_be_pushed_reason(error_message, group)
+                        jira_helper.log_jira_cannot_be_pushed_reason(error_message, group, alert_on_error=True)
                     else:
                         logger.debug(
                             "pushing to jira from finding.finding_bulk_update_all()",
                         )
-                        jira_helper.push_to_jira(group)
+                        jira_helper.push_to_jira(group, alert_on_error=True)
                         success_count += 1
 
             for error_message, error_count in error_counts.items():
@@ -2921,15 +2916,15 @@ def finding_bulk_update_all(request, pid=None):
                             "finding already pushed as part of Finding Group"
                         )
                         error_counts[error_message] += 1
-                        jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
+                        jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding, alert_on_error=True)
                     elif not can_be_pushed_to_jira:
                         error_counts[error_message] += 1
-                        jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
+                        jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding, alert_on_error=True)
                     else:
                         logger.debug(
                             "pushing to jira from finding.finding_bulk_update_all()",
                         )
-                        jira_helper.push_to_jira(finding)
+                        jira_helper.push_to_jira(finding, alert_on_error=True)
                         if note is not None and isinstance(note, Notes):
                             jira_helper.add_comment(finding, note)
                         success_count += 1
@@ -3218,7 +3213,7 @@ def push_to_jira(request, fid):
         # but cant't change too much now without having a test suite,
         # so leave as is for now with the addition warning message
         # to check alerts for background errors.
-        if jira_helper.push_to_jira(finding):
+        if jira_helper.push_to_jira(finding, alert_on_error=True):
             messages.add_message(
                 request,
                 messages.SUCCESS,

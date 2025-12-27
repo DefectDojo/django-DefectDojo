@@ -1546,7 +1546,7 @@ class AdHocFindingView(View):
             # if we're removing the "duplicate" in the edit finding screen
             finding_helper.save_vulnerability_ids(finding, context["form"].cleaned_data["vulnerability_ids"].split())
             # Push things to jira if needed
-            finding.save(push_to_jira=push_to_jira)
+            finding.save(push_to_jira=push_to_jira, alert_on_error=True)
             # Save the burp req resp
             if "request" in context["form"].cleaned_data or "response" in context["form"].cleaned_data:
                 burp_rr = BurpRawRequestResponse(

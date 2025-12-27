@@ -483,7 +483,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in findings if finding.finding_group is not None}:
-                jira_helper.push_to_jira(finding_group)
+                jira_helper.push_to_jira(finding_group, alert_on_error=True)
 
         # Calculate grade once after all findings have been closed
         if mitigated_findings:
@@ -949,9 +949,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             )
             if self.push_to_jira:
                 if findings[0].finding_group is not None:
-                    jira_helper.push_to_jira(findings[0].finding_group)
+                    jira_helper.push_to_jira(findings[0].finding_group, alert_on_error=True)
                 else:
-                    jira_helper.push_to_jira(findings[0])
+                    jira_helper.push_to_jira(findings[0], alert_on_error=True)
 
         if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {
@@ -959,7 +959,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     for finding in self.reactivated_items + self.unchanged_items
                     if finding.finding_group is not None and not finding.is_mitigated
             }:
-                jira_helper.push_to_jira(finding_group)
+                jira_helper.push_to_jira(finding_group, alert_on_error=True)
 
     def process_results(
         self,

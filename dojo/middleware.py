@@ -147,10 +147,10 @@ class System_Settings_Manager(models.Manager):
 
     def get_from_db(self, *args, **kwargs):
         # logger.debug('refreshing system_settings from db')
+        from dojo.models import System_Settings  # noqa: PLC0415 circular import
         try:
             from_db = super().get(*args, **kwargs)
-        except:
-            from dojo.models import System_Settings  # noqa: PLC0415 circular import
+        except System_Settings.DoesNotExist:
             # this mimics the existing code that was in filters.py and utils.py.
             # cases I have seen triggering this is for example manage.py collectstatic inside a docker build where mysql is not available
             # logger.debug('unable to get system_settings from database, constructing (new) default instance. Exception was:', exc_info=True)

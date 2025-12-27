@@ -396,14 +396,14 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
 @app.task
 @dojo_model_from_id
 def post_process_finding_save_signature(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+             issue_updater_option=True, push_to_jira=False, alert_on_error=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
     """
     Returns a task signature for post-processing a finding. This is useful for creating task signatures
     that can be used in chords or groups or to await results. We need this extra method because of our dojo_async decorator.
     If we use more of these celery features, we should probably move away from that decorator.
     """
     return post_process_finding_save_internal(finding, dedupe_option, rules_option, product_grading_option,
-                                   issue_updater_option, push_to_jira, user, *args, **kwargs)
+                                   issue_updater_option, push_to_jira, alert_on_error, user, *args, **kwargs)
 
 
 @dojo_model_to_id
@@ -411,14 +411,14 @@ def post_process_finding_save_signature(finding, dedupe_option=True, rules_optio
 @app.task
 @dojo_model_from_id
 def post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+             issue_updater_option=True, push_to_jira=False, alert_on_error=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
 
     return post_process_finding_save_internal(finding, dedupe_option, rules_option, product_grading_option,
-                                   issue_updater_option, push_to_jira, user, *args, **kwargs)
+                                   issue_updater_option, push_to_jira, alert_on_error, user, *args, **kwargs)
 
 
 def post_process_finding_save_internal(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+             issue_updater_option=True, push_to_jira=False, alert_on_error=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
 
     if not finding:
         logger.warning("post_process_finding_save called with finding==None, skipping post processing")
@@ -461,9 +461,9 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
         # based on feedback we could introduct another push_group_to_jira boolean everywhere
         # but what about the push_all boolean? Let's see how this works for now and get some feedback.
         if finding.has_jira_issue or not finding.finding_group:
-            jira_helper.push_to_jira(finding)
+            jira_helper.push_to_jira(finding, alert_on_error=alert_on_error)
         elif finding.finding_group:
-            jira_helper.push_to_jira(finding.finding_group)
+            jira_helper.push_to_jira(finding.finding_group, alert_on_error=alert_on_error)
 
 
 @dojo_async_task(signature=True)
