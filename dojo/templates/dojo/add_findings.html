@@ -23,7 +23,7 @@
     </div>
     <div>
         {% if temp %}
-            <form id="add_finding" class="form-horizontal" action="{% url 'add_temp_finding' tid fid %}" method="post">
+            <form id="add_finding" class="form-horizontal" action="{% url 'add_finding_from_template' tid fid %}" method="post">
                 {% csrf_token %}
                 {% include "dojo/form_fields.html" with form=form %}
                 {% if jform %}

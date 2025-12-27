@@ -23,7 +23,7 @@ urlpatterns = [
         views.AddFindingView.as_view(),
         name="add_findings"),
     re_path(r"^test/(?P<tid>\d+)/add_findings/(?P<fid>\d+)$",
-        views.add_temp_finding, name="add_temp_finding"),
+        views.add_finding_from_template, name="add_finding_from_template"),
     re_path(r"^test/(?P<tid>\d+)/search$", views.search, name="search"),
     re_path(
         r"^test/(?P<test_id>\d+)/re_import_scan_results",

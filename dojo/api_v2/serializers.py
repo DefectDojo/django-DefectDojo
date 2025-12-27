@@ -29,6 +29,7 @@ from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
 from dojo.finding.helper import (
+    save_endpoints_template,
     save_vulnerability_ids,
     save_vulnerability_ids_template,
 )
@@ -111,7 +112,6 @@ from dojo.models import (
     User,
     UserContactInfo,
     Vulnerability_Id,
-    Vulnerability_Id_Template,
     get_current_date,
 )
 from dojo.notifications.helper import create_notification
@@ -2029,56 +2029,79 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         return value
 
 
-class VulnerabilityIdTemplateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Vulnerability_Id_Template
-        fields = ["vulnerability_id"]
-
-
 class FindingTemplateSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
-    vulnerability_ids = VulnerabilityIdTemplateSerializer(
-        source="vulnerability_id_template_set", many=True, required=False,
-    )
+    vulnerability_ids = serializers.SerializerMethodField()
+    endpoints = serializers.SerializerMethodField()
 
     class Meta:
         model = Finding_Template
-        exclude = ("cve",)
+        exclude = ("cve", "vulnerability_ids_text")
+
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
+    def get_vulnerability_ids(self, obj):
+        """Return vulnerability IDs as a list of strings."""
+        return obj.vulnerability_ids
+
+    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
+    def get_endpoints(self, obj):
+        """Return endpoints as a list of URL strings."""
+        return obj.endpoints if hasattr(obj, "endpoints") else []
 
     def create(self, validated_data):
 
-        # Save vulnerability ids and pop them
-        if "vulnerability_id_template_set" in validated_data:
-            vulnerability_id_set = validated_data.pop(
-                "vulnerability_id_template_set",
-            )
-        else:
-            vulnerability_id_set = None
+        # Handle vulnerability_ids if provided as list
+        vulnerability_ids = None
+        if "vulnerability_ids" in self.initial_data:
+            vulnerability_ids = self.initial_data.get("vulnerability_ids", [])
+            if isinstance(vulnerability_ids, str):
+                # If it's a string, split by newlines
+                vulnerability_ids = [vid.strip() for vid in vulnerability_ids.split("\n") if vid.strip()]
+            elif not isinstance(vulnerability_ids, list):
+                vulnerability_ids = []
+
+        # Handle endpoints if provided as list
+        endpoint_urls = None
+        if "endpoints" in self.initial_data:
+            endpoint_urls = self.initial_data.get("endpoints", [])
+            if isinstance(endpoint_urls, str):
+                # If it's a string, split by newlines
+                endpoint_urls = [url.strip() for url in endpoint_urls.split("\n") if url.strip()]
+            elif not isinstance(endpoint_urls, list):
+                endpoint_urls = []
 
         new_finding_template = super().create(
             validated_data,
         )
 
-        if vulnerability_id_set:
-            vulnerability_ids = [vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set]
-            validated_data["cve"] = vulnerability_ids[0]
-            save_vulnerability_ids_template(
-                new_finding_template, vulnerability_ids,
-            )
-            new_finding_template.save()
+        # Save vulnerability IDs using helper
+        if vulnerability_ids:
+            save_vulnerability_ids_template(new_finding_template, vulnerability_ids)
+
+        # Save endpoints using helper
+        if endpoint_urls:
+            save_endpoints_template(new_finding_template, endpoint_urls)
 
         return new_finding_template
 
     def update(self, instance, validated_data):
-        # Save vulnerability ids and pop them
-        if "vulnerability_id_template_set" in validated_data:
-            vulnerability_id_set = validated_data.pop(
-                "vulnerability_id_template_set",
-            )
-            vulnerability_ids = []
-            if vulnerability_id_set:
-                vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_id_set)
+        # Handle vulnerability_ids if provided
+        if "vulnerability_ids" in self.initial_data:
+            vulnerability_ids = self.initial_data.get("vulnerability_ids", [])
+            if isinstance(vulnerability_ids, str):
+                vulnerability_ids = [vid.strip() for vid in vulnerability_ids.split("\n") if vid.strip()]
+            elif not isinstance(vulnerability_ids, list):
+                vulnerability_ids = []
             save_vulnerability_ids_template(instance, vulnerability_ids)
+
+        # Handle endpoints if provided
+        if "endpoints" in self.initial_data:
+            endpoint_urls = self.initial_data.get("endpoints", [])
+            if isinstance(endpoint_urls, str):
+                endpoint_urls = [url.strip() for url in endpoint_urls.split("\n") if url.strip()]
+            elif not isinstance(endpoint_urls, list):
+                endpoint_urls = []
+            save_endpoints_template(instance, endpoint_urls)
 
         return super().update(instance, validated_data)
 

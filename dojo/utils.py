@@ -1427,27 +1427,6 @@ def add_language(product, language, files=1, code=1):
             pass
 
 
-# Apply finding template data by matching CWE + Title or CWE
-def apply_cwe_to_template(finding, *, override=False):
-    if System_Settings.objects.get().enable_template_match or override:
-        # Attempt to match on CWE and Title First
-        template = Finding_Template.objects.filter(
-            cwe=finding.cwe, title__icontains=finding.title, template_match=True).first()
-
-        # If none then match on CWE
-        template = Finding_Template.objects.filter(
-            cwe=finding.cwe, template_match=True).first()
-
-        if template:
-            finding.mitigation = template.mitigation
-            finding.impact = template.impact
-            finding.references = template.references
-            template.last_used = timezone.now()
-            template.save()
-
-    return finding
-
-
 def truncate_with_dots(the_string, max_length_including_dots):
     if not the_string:
         return the_string

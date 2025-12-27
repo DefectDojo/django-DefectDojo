@@ -10,7 +10,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
-from dojo.models import Finding, Finding_Template, Test, Vulnerability_Id, Vulnerability_Id_Template
+from dojo.models import Finding, Finding_Template, Test, Vulnerability_Id
 
 from .dojo_test_case import DojoAPITestCase, DojoTestCase
 
@@ -233,19 +233,15 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         self.assertEqual(save_mock.call_count, 2)
         self.assertEqual("REF-1", finding.cve)
 
-    @patch("dojo.finding.helper.Vulnerability_Id_Template.objects.filter")
-    @patch("django.db.models.query.QuerySet.delete")
-    @patch("dojo.finding.helper.Vulnerability_Id_Template.save")
-    def test_save_vulnerability_id_templates(self, save_mock, delete_mock, filter_mock):
+    @patch("dojo.models.Finding_Template.save")
+    def test_save_vulnerability_id_templates(self, save_mock):
         finding_template = Finding_Template()
         new_vulnerability_ids = ["REF-1", "REF-2", "REF-2"]
-        filter_mock.return_value = Vulnerability_Id_Template.objects.none()
 
         save_vulnerability_ids_template(finding_template, new_vulnerability_ids)
 
-        filter_mock.assert_called_with(finding_template=finding_template)
-        delete_mock.assert_called_once()
-        self.assertEqual(save_mock.call_count, 2)
+        save_mock.assert_called_once()
+        self.assertEqual("REF-1\nREF-2", finding_template.vulnerability_ids_text)
         self.assertEqual("REF-1", finding_template.cve)
 
 

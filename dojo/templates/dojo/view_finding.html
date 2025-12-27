@@ -101,24 +101,7 @@
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if cwe_template.cwe and finding|has_object_permission:"Finding_Edit" %}
-                                    <li role="presentation">
-                                        <a class="apply-cwe-finding" href="#">
-                                            <i class="fa-solid fa-copy"></i> Apply CWE Template Remediation to Finding
-                                        </a>
-                                    </li>
-                                    <form id="apply-cwe-finding-form" method="post" action="{% url 'apply_template_cwe' finding.id %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" label="apply_template" aria-label="apply_template" name="id" value="{{ finding.id }}"/>
-                                    </form>
-                            {% endif %}
-                            {% if not cwe_template.cwe and "Finding_Add"|has_global_permission %}
-                                    <li role="presentation">
-                                        <a href="{% url 'add_template' %}">
-                                            <i class="fa-solid fa-copy"></i> Create a CWE Remediation Template
-                                        </a>
-                                    </li>
-                            {% endif %}
+
                             {% if finding|has_object_permission:"Finding_Edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'find_template_to_apply' finding.id %}">
@@ -1273,12 +1256,6 @@
 
         });
 
-        $('a.apply-cwe-finding').on('click', function (e) {
-            if (confirm('Apply CWE template to this finding? (This will overwrite mitigation, impact and references.)')) {
-                $("form#apply-cwe-finding-form").submit();
-            }
-
-        });
 
         $("a#next").on('click', function (e) {
             e.preventDefault();
