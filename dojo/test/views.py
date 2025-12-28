@@ -6,6 +6,7 @@ import time
 from datetime import datetime, timedelta
 from functools import reduce
 
+import pghistory
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import ValidationError
@@ -1075,6 +1076,12 @@ class ReImportScanResultsView(View):
         if form_error := self.process_form(request, context.get("form"), context):
             add_error_message_to_response(form_error)
             return self.failure_redirect(request, context)
+        # Add pghistory context for audit trail (adds to existing middleware context)
+        pghistory.context(
+            source="reimport",
+            test_id=context.get("test").id,
+            scan_type=context.get("scan_type"),
+        )
         # Kick off the import process
         if import_error := self.reimport_findings(context):
             add_error_message_to_response(import_error)
