@@ -2531,9 +2531,11 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
 
-        # Add pghistory context for audit trail (adds to existing middleware context)
+        # Add pghistory context for audit trail (adds to existing middleware context).
+        # /api/vue is the Pro UI
+        source = "import_vue" if "/api/vue/" in self.request.path else "import_api"
         pghistory.context(
-            source="import_api",
+            source=source,
             scan_type=serializer.validated_data.get("scan_type"),
         )
         serializer.save(push_to_jira=push_to_jira)
@@ -2692,8 +2694,10 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         test_id = test.id if test else serializer.validated_data.get("test", {})
         if hasattr(test_id, "id"):
             test_id = test_id.id
+        # /api/vue is the Pro UI
+        source = "reimport_vue" if "/api/vue/" in self.request.path else "reimport_api"
         pghistory.context(
-            source="reimport_api",
+            source=source,
             test_id=test_id if isinstance(test_id, int) else None,
             scan_type=serializer.validated_data.get("scan_type"),
         )
