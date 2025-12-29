@@ -1843,6 +1843,9 @@ class FindingBulkUpdateForm(forms.ModelForm):
         if cleaned_data["false_p"] and cleaned_data["verified"]:
             msg = "False positive findings cannot be verified."
             raise forms.ValidationError(msg)
+        if cleaned_data["active"] and cleaned_data.get("risk_acceptance") and cleaned_data.get("risk_accept"):
+            msg = "Active findings cannot be risk accepted."
+            raise forms.ValidationError(msg)
         return cleaned_data
 
     def clean_tags(self):

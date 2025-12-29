@@ -2635,6 +2635,393 @@ def merge_finding_product(request, pid):
 
 
 # bulk update and delete are combined, so we can't have the nice user_is_authorized decorator
+
+
+def _bulk_delete_findings(request, pid, form, finding_to_update, finds, total_find_count):
+    """Helper function to handle bulk deletion of findings."""
+    if form.is_valid() and finding_to_update:
+        if pid is not None:
+            product = get_object_or_404(Product, id=pid)
+            user_has_permission_or_403(
+                request.user, product, Permissions.Finding_Delete,
+            )
+
+        finds = get_authorized_findings(
+            Permissions.Finding_Delete, finds,
+        ).distinct()
+
+        skipped_find_count = total_find_count - finds.count()
+        deleted_find_count = finds.count()
+
+        for find in finds:
+            find.delete()
+
+        if skipped_find_count > 0:
+            add_error_message_to_response(
+                f"Skipped deletion of {skipped_find_count} findings because you are not authorized.",
+            )
+
+        if deleted_find_count > 0:
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                f"Bulk delete of {deleted_find_count} findings was successful.",
+                extra_tags="alert-success",
+            )
+
+
+def _bulk_update_finding_status_and_severity(finds, form, request, system_settings, prods, now):
+    """Helper function to handle status and severity updates for findings."""
+    skipped_duplicate_count = 0
+    actually_updated_count = 0
+
+    if form.cleaned_data["severity"] or form.cleaned_data["status"]:
+        for find in finds:
+            old_find = copy.deepcopy(find)
+
+            if form.cleaned_data["severity"]:
+                find.severity = form.cleaned_data["severity"]
+                find.numerical_severity = Finding.get_numerical_severity(
+                    form.cleaned_data["severity"],
+                )
+                find.last_reviewed = now
+                find.last_reviewed_by = request.user
+
+            if form.cleaned_data["status"]:
+                # logger.debug('setting status from bulk edit form: %s', form)
+                # Check if finding is duplicate and user wants to set active/verified
+                if find.duplicate and (form.cleaned_data["active"] or form.cleaned_data["verified"]):
+                    # Skip active/verified but allow other status changes
+                    skipped_duplicate_count += 1
+                    # Set other fields but not active/verified
+                    find.false_p = form.cleaned_data["false_p"]
+                    find.out_of_scope = form.cleaned_data["out_of_scope"]
+                    find.is_mitigated = form.cleaned_data["is_mitigated"]
+                    find.under_review = form.cleaned_data["under_review"]
+                else:
+                    # Apply all status changes normally
+                    find.active = form.cleaned_data["active"]
+                    find.verified = form.cleaned_data["verified"]
+                    find.false_p = form.cleaned_data["false_p"]
+                    find.out_of_scope = form.cleaned_data["out_of_scope"]
+                    find.is_mitigated = form.cleaned_data["is_mitigated"]
+                    find.under_review = form.cleaned_data["under_review"]
+                find.last_reviewed = timezone.now()
+                find.last_reviewed_by = request.user
+
+            # use super to avoid all custom logic in our overriden save method
+            # it will trigger the pre_save signal
+            find.save_no_options()
+            actually_updated_count += 1
+
+            if system_settings.false_positive_history:
+                # If finding is being marked as false positive
+                if find.false_p:
+                    do_false_positive_history(find)
+
+                # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
+                elif old_find.false_p and not find.false_p:
+                    if system_settings.retroactive_false_positive_history:
+                        logger.debug("FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s", find)
+
+                        existing_fp_findings = match_finding_to_existing_findings(
+                            find, product=find.test.engagement.product,
+                        ).filter(false_p=True)
+
+                        for fp in existing_fp_findings:
+                            logger.debug("FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s", fp.id, fp)
+                            fp.active = find.active
+                            fp.verified = find.verified
+                            fp.false_p = False
+                            fp.out_of_scope = find.out_of_scope
+                            fp.is_mitigated = find.is_mitigated
+                            fp.save_no_options()
+
+        for prod in prods:
+            calculate_grade(prod)
+
+    if skipped_duplicate_count > 0:
+        messages.add_message(
+            request,
+            messages.WARNING,
+            f"Skipped status update of {skipped_duplicate_count} duplicate findings. Duplicate findings cannot be active or verified.",
+            extra_tags="alert-warning",
+        )
+
+    return skipped_duplicate_count, actually_updated_count
+
+
+def _bulk_update_simple_fields(finds, form):
+    """Helper function to handle simple field updates (date, planned_remediation_date, etc.)."""
+    if form.cleaned_data["date"]:
+        for finding in finds:
+            finding.date = form.cleaned_data["date"]
+            finding.save_no_options()
+
+    if form.cleaned_data["planned_remediation_date"]:
+        for finding in finds:
+            finding.planned_remediation_date = form.cleaned_data[
+                "planned_remediation_date"
+            ]
+            finding.save_no_options()
+
+    if form.cleaned_data["planned_remediation_version"]:
+        for finding in finds:
+            finding.planned_remediation_version = form.cleaned_data[
+                "planned_remediation_version"
+            ]
+            finding.save_no_options()
+
+
+def _bulk_update_risk_acceptance(finds, form, request, prods):
+    """Helper function to handle risk acceptance updates."""
+    skipped_risk_accept_count = 0
+    skipped_active_risk_accept_count = 0
+
+    if form.cleaned_data["risk_acceptance"]:
+        for finding in finds:
+            if finding.active:
+                skipped_active_risk_accept_count += 1
+            # Allow risk acceptance for inactive findings (whether duplicate or not)
+            elif form.cleaned_data["risk_accept"]:
+                if (
+                    not finding.test.engagement.product.enable_simple_risk_acceptance
+                ):
+                    skipped_risk_accept_count += 1
+                else:
+                    ra_helper.simple_risk_accept(request.user, finding)
+            elif form.cleaned_data["risk_unaccept"]:
+                ra_helper.risk_unaccept(request.user, finding)
+
+        for prod in prods:
+            calculate_grade(prod)
+
+    if skipped_risk_accept_count > 0:
+        messages.add_message(
+            request,
+            messages.WARNING,
+            (f"Skipped simple risk acceptance of {skipped_risk_accept_count} findings, "
+             "simple risk acceptance is disabled on the related products"),
+            extra_tags="alert-warning",
+        )
+
+    if skipped_active_risk_accept_count > 0:
+        messages.add_message(
+            request,
+            messages.WARNING,
+            f"Skipped risk acceptance of {skipped_active_risk_accept_count} active findings. Active findings cannot be risk accepted.",
+            extra_tags="alert-warning",
+        )
+
+    return skipped_risk_accept_count, skipped_active_risk_accept_count
+
+
+def _bulk_update_finding_groups(finds, form):
+    """Helper function to handle finding group operations."""
+    return_url = None
+
+    if form.cleaned_data["finding_group_create"]:
+        logger.debug("finding_group_create checked!")
+        finding_group_name = form.cleaned_data["finding_group_create_name"]
+        logger.debug("finding_group_create_name: %s", finding_group_name)
+        finding_group, added, skipped = finding_helper.create_finding_group(
+            finds, finding_group_name,
+        )
+
+        if added:
+            add_success_message_to_response(
+                f"Created finding group with {added} findings",
+            )
+            return_url = reverse(
+                "view_finding_group", args=(finding_group.id,),
+            )
+
+        if skipped:
+            add_success_message_to_response(
+                f"Skipped {skipped} findings in group creation, findings already part of another group",
+            )
+
+        # refresh findings from db
+        finds = finds.all()
+
+    if form.cleaned_data["finding_group_add"]:
+        logger.debug("finding_group_add checked!")
+        fgid = form.cleaned_data["add_to_finding_group_id"]
+        finding_group = Finding_Group.objects.get(id=fgid)
+        finding_group, added, skipped = finding_helper.add_to_finding_group(
+            finding_group, finds,
+        )
+
+        if added:
+            add_success_message_to_response(
+                f"Added {added} findings to finding group {finding_group.name}",
+            )
+            return_url = reverse(
+                "view_finding_group", args=(finding_group.id,),
+            )
+
+        if skipped:
+            add_success_message_to_response(
+                f"Skipped {skipped} findings when adding to finding group {finding_group.name}, "
+                "findings already part of another group",
+            )
+
+        # refresh findings from db
+        finds = finds.all()
+
+    if form.cleaned_data["finding_group_remove"]:
+        logger.debug("finding_group_remove checked!")
+        (
+            finding_groups,
+            removed,
+            skipped,
+        ) = finding_helper.remove_from_finding_group(finds)
+
+        if removed:
+            add_success_message_to_response(
+                "Removed {} findings from finding groups {}".format(
+                    removed,
+                    ",".join(
+                        [
+                            finding_group.name
+                            for finding_group in finding_groups
+                        ],
+                    ),
+                ),
+            )
+
+        if skipped:
+            add_success_message_to_response(
+                f"Skipped {skipped} findings when removing from any finding group, findings not part of any group",
+            )
+
+        # refresh findings from db
+        finds = finds.all()
+
+    if form.cleaned_data["finding_group_by"]:
+        logger.debug("finding_group_by checked!")
+        logger.debug(form.cleaned_data)
+        finding_group_by_option = form.cleaned_data[
+            "finding_group_by_option"
+        ]
+        logger.debug("finding_group_by_option: %s", finding_group_by_option)
+
+        (
+            finding_groups,
+            grouped,
+            skipped,
+            groups_created,
+        ) = finding_helper.group_findings_by(finds, finding_group_by_option)
+
+        if grouped:
+            add_success_message_to_response(
+                f"Grouped {grouped} findings into {len(finding_groups)} ({groups_created} newly created) finding groups",
+            )
+
+        if skipped:
+            add_success_message_to_response(
+                f"Skipped {skipped} findings when grouping by {finding_group_by_option} as these findings "
+                "were already in an existing group",
+            )
+
+        # refresh findings from db
+        finds = finds.all()
+
+    return return_url, finds
+
+
+def _bulk_push_to_jira(finds, form, note):
+    """Helper function to handle JIRA push operations."""
+    error_counts = defaultdict(lambda: 0)
+    success_count = 0
+    finding_groups = set(  # noqa: C401
+        finding.finding_group
+        for finding in finds
+        if finding.has_finding_group
+        and (
+            jira_helper.is_push_all_issues(finding)
+            or jira_helper.is_keep_in_sync_with_jira(finding)
+            or form.cleaned_data.get("push_to_jira")
+        )
+    )
+    logger.debug("finding_groups: %s", finding_groups)
+    for group in finding_groups:
+        if form.cleaned_data.get("push_to_jira"):
+            (
+                can_be_pushed_to_jira,
+                error_message,
+                _error_code,
+            ) = jira_helper.can_be_pushed_to_jira(group)
+            if not can_be_pushed_to_jira:
+                error_counts[error_message] += 1
+                jira_helper.log_jira_cannot_be_pushed_reason(error_message, group)
+            else:
+                logger.debug(
+                    "pushing to jira from finding.finding_bulk_update_all()",
+                )
+                jira_helper.push_to_jira(group)
+                success_count += 1
+
+    for error_message, error_count in error_counts.items():
+        add_error_message_to_response(f"{error_count} finding groups could not be pushed to JIRA: {error_message}")
+
+    if success_count > 0:
+        add_success_message_to_response(f"{success_count} finding groups pushed to JIRA successfully")
+
+    # refresh from db
+    finds = finds.all()
+
+    error_counts = defaultdict(lambda: 0)
+    success_count = 0
+    for finding in finds:
+        tool_issue_updater.async_tool_issue_update(finding)
+
+        # not sure yet if we want to support bulk unlink, so leave as commented out for now
+        # if form.cleaned_data['unlink_from_jira']:
+        #     if finding.has_jira_issue:
+        #         jira_helper.finding_unlink_jira(request, finding)
+
+        # Because we never call finding.save() in a bulk update, we need to actually
+        # push the JIRA stuff here, rather than in finding.save()
+        # can't use helper as when push_all_jira_issues is True,
+        # the checkbox gets disabled and is always false
+        # push_to_jira = jira_helper.is_push_to_jira(new_finding,
+        # form.cleaned_data.get('push_to_jira'))
+        if (
+            form.cleaned_data.get("push_to_jira")
+            or jira_helper.is_push_all_issues(finding)
+            or jira_helper.is_keep_in_sync_with_jira(finding)
+        ) and not finding.has_finding_group:
+            (
+                can_be_pushed_to_jira,
+                error_message,
+                _error_code,
+            ) = jira_helper.can_be_pushed_to_jira(finding)
+            if finding.has_jira_group_issue and not finding.has_jira_issue:
+                error_message = (
+                    "finding already pushed as part of Finding Group"
+                )
+                error_counts[error_message] += 1
+                jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
+            elif not can_be_pushed_to_jira:
+                error_counts[error_message] += 1
+                jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
+            else:
+                logger.debug(
+                    "pushing to jira from finding.finding_bulk_update_all()",
+                )
+                jira_helper.push_to_jira(finding)
+                if note is not None and isinstance(note, Notes):
+                    jira_helper.add_comment(finding, note)
+                success_count += 1
+
+    for error_message, error_count in error_counts.items():
+        add_error_message_to_response(f"{error_count} findings could not be pushed to JIRA: {error_message}")
+
+    if success_count > 0:
+        add_success_message_to_response(f"{success_count} findings pushed to JIRA successfully")
+
+
 def finding_bulk_update_all(request, pid=None):
     system_settings = System_Settings.objects.get()
 
@@ -2656,35 +3043,7 @@ def finding_bulk_update_all(request, pid=None):
         total_find_count = finds.count()
         prods = set(find.test.engagement.product for find in finds)  # noqa: C401
         if request.POST.get("delete_bulk_findings"):
-            if form.is_valid() and finding_to_update:
-                if pid is not None:
-                    product = get_object_or_404(Product, id=pid)
-                    user_has_permission_or_403(
-                        request.user, product, Permissions.Finding_Delete,
-                    )
-
-                finds = get_authorized_findings(
-                    Permissions.Finding_Delete, finds,
-                ).distinct()
-
-                skipped_find_count = total_find_count - finds.count()
-                deleted_find_count = finds.count()
-
-                for find in finds:
-                    find.delete()
-
-                if skipped_find_count > 0:
-                    add_error_message_to_response(
-                        f"Skipped deletion of {skipped_find_count} findings because you are not authorized.",
-                    )
-
-                if deleted_find_count > 0:
-                    messages.add_message(
-                        request,
-                        messages.SUCCESS,
-                        f"Bulk delete of {deleted_find_count} findings was successful.",
-                        extra_tags="alert-success",
-                    )
+            _bulk_delete_findings(request, pid, form, finding_to_update, finds, total_find_count)
         elif form.is_valid() and finding_to_update:
             if pid is not None:
                 product = get_object_or_404(Product, id=pid)
@@ -2707,210 +3066,21 @@ def finding_bulk_update_all(request, pid=None):
 
             finds = prefetch_for_findings(finds)
             note = None
-            if form.cleaned_data["severity"] or form.cleaned_data["status"]:
-                for find in finds:
-                    old_find = copy.deepcopy(find)
+            actually_updated_count = 0
 
-                    if form.cleaned_data["severity"]:
-                        find.severity = form.cleaned_data["severity"]
-                        find.numerical_severity = Finding.get_numerical_severity(
-                            form.cleaned_data["severity"],
-                        )
-                        find.last_reviewed = now
-                        find.last_reviewed_by = request.user
+            _skipped_duplicate_count, actually_updated_count = _bulk_update_finding_status_and_severity(
+                finds, form, request, system_settings, prods, now,
+            )
 
-                    if form.cleaned_data["status"]:
-                        # logger.debug('setting status from bulk edit form: %s', form)
-                        find.active = form.cleaned_data["active"]
-                        find.verified = form.cleaned_data["verified"]
-                        find.false_p = form.cleaned_data["false_p"]
-                        find.out_of_scope = form.cleaned_data["out_of_scope"]
-                        find.is_mitigated = form.cleaned_data["is_mitigated"]
-                        find.under_review = form.cleaned_data["under_review"]
-                        find.last_reviewed = timezone.now()
-                        find.last_reviewed_by = request.user
+            _bulk_update_simple_fields(finds, form)
 
-                    # use super to avoid all custom logic in our overriden save method
-                    # it will trigger the pre_save signal
-                    find.save_no_options()
+            _skipped_risk_accept_count, _skipped_active_risk_accept_count = _bulk_update_risk_acceptance(
+                finds, form, request, prods,
+            )
 
-                    if system_settings.false_positive_history:
-                        # If finding is being marked as false positive
-                        if find.false_p:
-                            do_false_positive_history(find)
-
-                        # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
-                        elif old_find.false_p and not find.false_p:
-                            if system_settings.retroactive_false_positive_history:
-                                logger.debug("FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s", find)
-
-                                existing_fp_findings = match_finding_to_existing_findings(
-                                    find, product=find.test.engagement.product,
-                                ).filter(false_p=True)
-
-                                for fp in existing_fp_findings:
-                                    logger.debug("FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s", fp.id, fp)
-                                    fp.active = find.active
-                                    fp.verified = find.verified
-                                    fp.false_p = False
-                                    fp.out_of_scope = find.out_of_scope
-                                    fp.is_mitigated = find.is_mitigated
-                                    fp.save_no_options()
-
-                for prod in prods:
-                    calculate_grade(prod)
-
-            if form.cleaned_data["date"]:
-                for finding in finds:
-                    finding.date = form.cleaned_data["date"]
-                    finding.save_no_options()
-
-            if form.cleaned_data["planned_remediation_date"]:
-                for finding in finds:
-                    finding.planned_remediation_date = form.cleaned_data[
-                        "planned_remediation_date"
-                    ]
-                    finding.save_no_options()
-
-            if form.cleaned_data["planned_remediation_version"]:
-                for finding in finds:
-                    finding.planned_remediation_version = form.cleaned_data[
-                        "planned_remediation_version"
-                    ]
-                    finding.save_no_options()
-
-            skipped_risk_accept_count = 0
-            if form.cleaned_data["risk_acceptance"]:
-                for finding in finds:
-                    if not finding.duplicate:
-                        if form.cleaned_data["risk_accept"]:
-                            if (
-                                not finding.test.engagement.product.enable_simple_risk_acceptance
-                            ):
-                                skipped_risk_accept_count += 1
-                            else:
-                                ra_helper.simple_risk_accept(request.user, finding)
-                        elif form.cleaned_data["risk_unaccept"]:
-                            ra_helper.risk_unaccept(request.user, finding)
-
-                for prod in prods:
-                    calculate_grade(prod)
-
-            if skipped_risk_accept_count > 0:
-                messages.add_message(
-                    request,
-                    messages.WARNING,
-                    (f"Skipped simple risk acceptance of {skipped_risk_accept_count} findings, "
-                     "simple risk acceptance is disabled on the related products"),
-                    extra_tags="alert-warning",
-                )
-
-            if form.cleaned_data["finding_group_create"]:
-                logger.debug("finding_group_create checked!")
-                finding_group_name = form.cleaned_data["finding_group_create_name"]
-                logger.debug("finding_group_create_name: %s", finding_group_name)
-                finding_group, added, skipped = finding_helper.create_finding_group(
-                    finds, finding_group_name,
-                )
-
-                if added:
-                    add_success_message_to_response(
-                        f"Created finding group with {added} findings",
-                    )
-                    return_url = reverse(
-                        "view_finding_group", args=(finding_group.id,),
-                    )
-
-                if skipped:
-                    add_success_message_to_response(
-                        f"Skipped {skipped} findings in group creation, findings already part of another group",
-                    )
-
-                # refresh findings from db
-                finds = finds.all()
-
-            if form.cleaned_data["finding_group_add"]:
-                logger.debug("finding_group_add checked!")
-                fgid = form.cleaned_data["add_to_finding_group_id"]
-                finding_group = Finding_Group.objects.get(id=fgid)
-                finding_group, added, skipped = finding_helper.add_to_finding_group(
-                    finding_group, finds,
-                )
-
-                if added:
-                    add_success_message_to_response(
-                        f"Added {added} findings to finding group {finding_group.name}",
-                    )
-                    return_url = reverse(
-                        "view_finding_group", args=(finding_group.id,),
-                    )
-
-                if skipped:
-                    add_success_message_to_response(
-                        f"Skipped {skipped} findings when adding to finding group {finding_group.name}, "
-                        "findings already part of another group",
-                    )
-
-                # refresh findings from db
-                finds = finds.all()
-
-            if form.cleaned_data["finding_group_remove"]:
-                logger.debug("finding_group_remove checked!")
-                (
-                    finding_groups,
-                    removed,
-                    skipped,
-                ) = finding_helper.remove_from_finding_group(finds)
-
-                if removed:
-                    add_success_message_to_response(
-                        "Removed {} findings from finding groups {}".format(
-                            removed,
-                            ",".join(
-                                [
-                                    finding_group.name
-                                    for finding_group in finding_groups
-                                ],
-                            ),
-                        ),
-                    )
-
-                if skipped:
-                    add_success_message_to_response(
-                        f"Skipped {skipped} findings when removing from any finding group, findings not part of any group",
-                    )
-
-                # refresh findings from db
-                finds = finds.all()
-
-            if form.cleaned_data["finding_group_by"]:
-                logger.debug("finding_group_by checked!")
-                logger.debug(form.cleaned_data)
-                finding_group_by_option = form.cleaned_data[
-                    "finding_group_by_option"
-                ]
-                logger.debug("finding_group_by_option: %s", finding_group_by_option)
-
-                (
-                    finding_groups,
-                    grouped,
-                    skipped,
-                    groups_created,
-                ) = finding_helper.group_findings_by(finds, finding_group_by_option)
-
-                if grouped:
-                    add_success_message_to_response(
-                        f"Grouped {grouped} findings into {len(finding_groups)} ({groups_created} newly created) finding groups",
-                    )
-
-                if skipped:
-                    add_success_message_to_response(
-                        f"Skipped {skipped} findings when grouping by {finding_group_by_option} as these findings "
-                        "were already in an existing group",
-                    )
-
-                # refresh findings from db
-                finds = finds.all()
+            group_return_url, finds = _bulk_update_finding_groups(finds, form)
+            if group_return_url:
+                return_url = group_return_url
 
             if form.cleaned_data["push_to_github"]:
                 logger.debug("push selected findings to github")
@@ -2946,96 +3116,25 @@ def finding_bulk_update_all(request, pid=None):
                 # Delegate parsing and handling of strings/iterables to helper
                 bulk_add_tags_to_instances(tag_or_tags=tags, instances=finds, tag_field_name="tags")
 
-            error_counts = defaultdict(lambda: 0)
-            success_count = 0
-            finding_groups = set(  # noqa: C401
-                finding.finding_group
-                for finding in finds
-                if finding.has_finding_group
-                and (
-                    jira_helper.is_push_all_issues(finding)
-                    or jira_helper.is_keep_in_sync_with_jira(finding)
-                    or form.cleaned_data.get("push_to_jira")
+            _bulk_push_to_jira(finds, form, note)
+
+            # Show success message if status/severity updates were made (using actually_updated_count)
+            # or if other updates were made (using updated_find_count)
+            if (form.cleaned_data["severity"] or form.cleaned_data["status"]) and actually_updated_count > 0:
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    f"Bulk update of {actually_updated_count} findings was successful.",
+                    extra_tags="alert-success",
                 )
-            )
-            logger.debug("finding_groups: %s", finding_groups)
-            for group in finding_groups:
-                if form.cleaned_data.get("push_to_jira"):
-                    (
-                        can_be_pushed_to_jira,
-                        error_message,
-                        _error_code,
-                    ) = jira_helper.can_be_pushed_to_jira(group)
-                    if not can_be_pushed_to_jira:
-                        error_counts[error_message] += 1
-                        jira_helper.log_jira_cannot_be_pushed_reason(error_message, group)
-                    else:
-                        logger.debug(
-                            "pushing to jira from finding.finding_bulk_update_all()",
-                        )
-                        jira_helper.push_to_jira(group)
-                        success_count += 1
-
-            for error_message, error_count in error_counts.items():
-                add_error_message_to_response(f"{error_count} finding groups could not be pushed to JIRA: {error_message}")
-
-            if success_count > 0:
-                add_success_message_to_response(f"{success_count} finding groups pushed to JIRA successfully")
-
-            # refresh from db
-            finds = finds.all()
-
-            error_counts = defaultdict(lambda: 0)
-            success_count = 0
-            for finding in finds:
-                tool_issue_updater.async_tool_issue_update(finding)
-
-                # not sure yet if we want to support bulk unlink, so leave as commented out for now
-                # if form.cleaned_data['unlink_from_jira']:
-                #     if finding.has_jira_issue:
-                #         jira_helper.finding_unlink_jira(request, finding)
-
-                # Because we never call finding.save() in a bulk update, we need to actually
-                # push the JIRA stuff here, rather than in finding.save()
-                # can't use helper as when push_all_jira_issues is True,
-                # the checkbox gets disabled and is always false
-                # push_to_jira = jira_helper.is_push_to_jira(new_finding,
-                # form.cleaned_data.get('push_to_jira'))
-                if (
-                    form.cleaned_data.get("push_to_jira")
-                    or jira_helper.is_push_all_issues(finding)
-                    or jira_helper.is_keep_in_sync_with_jira(finding)
-                ) and not finding.has_finding_group:
-                    (
-                        can_be_pushed_to_jira,
-                        error_message,
-                        _error_code,
-                    ) = jira_helper.can_be_pushed_to_jira(finding)
-                    if finding.has_jira_group_issue and not finding.has_jira_issue:
-                        error_message = (
-                            "finding already pushed as part of Finding Group"
-                        )
-                        error_counts[error_message] += 1
-                        jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
-                    elif not can_be_pushed_to_jira:
-                        error_counts[error_message] += 1
-                        jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
-                    else:
-                        logger.debug(
-                            "pushing to jira from finding.finding_bulk_update_all()",
-                        )
-                        jira_helper.push_to_jira(finding)
-                        if note is not None and isinstance(note, Notes):
-                            jira_helper.add_comment(finding, note)
-                        success_count += 1
-
-            for error_message, error_count in error_counts.items():
-                add_error_message_to_response(f"{error_count} findings could not be pushed to JIRA: {error_message}")
-
-            if success_count > 0:
-                add_success_message_to_response(f"{success_count} findings pushed to JIRA successfully")
-
-            if updated_find_count > 0:
+            elif updated_find_count > 0 and (
+                form.cleaned_data["date"] or form.cleaned_data["planned_remediation_date"]
+                or form.cleaned_data["planned_remediation_version"] or form.cleaned_data["tags"]
+                or form.cleaned_data["notes"] or form.cleaned_data["risk_acceptance"]
+                or form.cleaned_data["finding_group_create"] or form.cleaned_data["finding_group_add"]
+                or form.cleaned_data["finding_group_remove"] or form.cleaned_data["finding_group_by"]
+                or form.cleaned_data["push_to_jira"] or form.cleaned_data["push_to_github"]
+            ):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
