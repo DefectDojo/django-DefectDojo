@@ -799,7 +799,12 @@ class FileUpload(models.Model):
     def copy(self):
         copy = copy_model_util(self)
         # Add unique modifier to file name
-        copy.title = f"{self.title} - clone-{str(uuid4())[:8]}"
+        # Truncate title to ensure it doesn't exceed max_length (100) when appending suffix
+        # Suffix " - clone-{8 chars}" is 17 characters, so truncate to 83 chars
+        clone_suffix = f" - clone-{str(uuid4())[:8]}"
+        max_title_length = 100 - len(clone_suffix)
+        truncated_title = self.title[:max_title_length] if len(self.title) > max_title_length else self.title
+        copy.title = f"{truncated_title}{clone_suffix}"
         # Create new unique file name
         current_url = self.file.url
         _, current_full_filename = current_url.rsplit("/", 1)
