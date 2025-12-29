@@ -10,6 +10,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from time import strftime
 
+import pghistory
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
@@ -1138,10 +1139,18 @@ class ImportScanResultsView(View):
         if form_error := self.process_form(request, context.get("form"), context):
             add_error_message_to_response(form_error)
             return self.failure_redirect(request, context)
+        # Add pghistory context for audit trail (adds to existing middleware context)
+        pghistory.context(
+            source="import",
+            scan_type=context.get("scan_type"),
+        )
         # Kick off the import process
         if import_error := self.import_findings(context):
             add_error_message_to_response(import_error)
             return self.failure_redirect(request, context)
+        # Add test_id to pghistory context now that test is created
+        if test := context.get("test"):
+            pghistory.context(test_id=test.id)
         # Process the credential form
         if form_error := self.process_credentials_form(request, context.get("cred_form"), context):
             add_error_message_to_response(form_error)
