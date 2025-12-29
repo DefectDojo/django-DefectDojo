@@ -11,8 +11,6 @@ WORKDIR /app
 RUN \
   apk update && \
   apk add --no-cache \
-    gcc \
-    build-base \
     bind-tools \
     postgresql16-client \
     xmlsec \
@@ -20,16 +18,12 @@ RUN \
     util-linux \
     curl-dev \
     openssl \
-    libffi-dev \
-    python3-dev \
     && \
     rm -rf /var/cache/apk/* && \
   true
 COPY requirements.txt ./
-# CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
-# https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
 RUN export PYCURL_SSL_LIBRARY=openssl && \
-    CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+    pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM base AS release
 WORKDIR /app
@@ -50,6 +44,9 @@ RUN \
     postgresql16-client \
     curl-dev \
     openssl \
+    # uwsgi from system packages (avoids compilation)
+    uwsgi \
+    uwsgi-python3 \
     # needed for integration-tests
     bash \
     && \
