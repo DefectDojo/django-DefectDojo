@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.cred.queries import get_authorized_cred_mappings
+from dojo.cred.queries import get_authorized_cred_mappings_for_queryset
 from dojo.forms import CredMappingForm, CredMappingFormProd, CredUserForm, NoteForm
 from dojo.models import Cred_Mapping, Cred_User, Engagement, Finding, Product, Test
 from dojo.utils import Product_Tab, add_breadcrumb, dojo_crypto_encrypt, prepare_for_view
@@ -85,7 +85,7 @@ def view_cred_details(request, ttid):
     notes = cred.notes.all()
     cred_products = Cred_Mapping.objects.select_related("product").filter(
         product_id__isnull=False, cred_id=ttid).order_by("product__name")
-    cred_products = get_authorized_cred_mappings(Permissions.Product_View, cred_products)
+    cred_products = get_authorized_cred_mappings_for_queryset(Permissions.Product_View, cred_products)
 
     if request.method == "POST":
         form = NoteForm(request.POST)

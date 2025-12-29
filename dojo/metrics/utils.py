@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from dojo.authorization.roles_permissions import Permissions
-from dojo.endpoint.queries import get_authorized_endpoint_status
+from dojo.endpoint.queries import get_authorized_endpoint_status_for_queryset
 from dojo.filters import (
     MetricsEndpointFilter,
     MetricsEndpointFilterWithoutObjectLookups,
@@ -184,7 +184,7 @@ def endpoint_queries(
         "finding__reporter",
     )
 
-    endpoints_query = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_query, request.user)
+    endpoints_query = get_authorized_endpoint_status_for_queryset(Permissions.Endpoint_View, endpoints_query, request.user)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = MetricsEndpointFilterWithoutObjectLookups if filter_string_matching else MetricsEndpointFilter
     endpoints = filter_class(request.GET, queryset=endpoints_query)
@@ -230,8 +230,8 @@ def endpoint_queries(
             "finding__test__engagement__product",
         )
 
-    endpoints_closed = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_closed, request.user)
-    accepted_endpoints = get_authorized_endpoint_status(Permissions.Endpoint_View, accepted_endpoints, request.user)
+    endpoints_closed = get_authorized_endpoint_status_for_queryset(Permissions.Endpoint_View, endpoints_closed, request.user)
+    accepted_endpoints = get_authorized_endpoint_status_for_queryset(Permissions.Endpoint_View, accepted_endpoints, request.user)
     accepted_endpoints_counts = severity_count(accepted_endpoints, "aggregate", "finding__severity")
 
     weeks_between, months_between = period_deltas(start_date, end_date)
