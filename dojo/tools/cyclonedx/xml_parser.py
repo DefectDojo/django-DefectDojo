@@ -194,6 +194,15 @@ class CycloneDXXMLParser:
             "b:ratings/b:rating/b:severity", namespaces=ns,
         )
         severity = Cyclonedxhelper().fix_severity(severity)
+        # by the schema, only id is mandatory, even the severity and description are
+        # optional
+        if not description:
+            description = "\n".join(
+                [
+                    f"**Id:** {vuln_id}",
+                    f"**Severity:** {severity}",
+                ],
+            )
         references = ""
         for advisory in vulnerability.findall(
             "b:advisories/b:advisory", namespaces=ns,
