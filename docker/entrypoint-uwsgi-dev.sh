@@ -36,8 +36,7 @@ echo -n "Starting uwsgi"
 exec uwsgi \
   "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
   --protocol uwsgi \
-  --plugin python3 \
-  --home /usr/local \
+  --plugin python313 \
   --module dojo.wsgi:application \
   --enable-threads \
   --processes "${DD_UWSGI_NUM_OF_PROCESSES:-4}" \
