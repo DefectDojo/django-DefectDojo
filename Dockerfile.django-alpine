@@ -55,9 +55,17 @@ RUN \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-  -r ./requirements.txt && \
-  # Install uwsgi via pip for Alpine (system package is compiled for Python 3.12, but we use Python 3.13)
-  pip3 install --no-cache-dir uwsgi==2.0.28
+  -r ./requirements.txt
+
+# Install uwsgi via pip for Alpine (system package is compiled for Python 3.12, but we use Python 3.13)
+# uwsgi needs build dependencies to compile
+RUN apk add --no-cache --virtual .uwsgi-build-deps \
+    gcc \
+    musl-dev \
+    linux-headers \
+    python3-dev \
+    && pip3 install --no-cache-dir uwsgi==2.0.28 \
+    && apk del .uwsgi-build-deps
 
 COPY \
   docker/entrypoint-celery-beat.sh \
