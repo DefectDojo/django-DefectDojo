@@ -81,7 +81,7 @@ class Location(BaseModel):
         elif "False Positive" in finding_status:
             status = FindingLocationStatus.FalsePositive
         elif "Risk Accepted" in finding_status:
-            status = FindingLocationStatus.RiskExcepted
+            status = FindingLocationStatus.RiskAccepted
         return status
 
     def status_from_product(self, product: Product) -> str:
