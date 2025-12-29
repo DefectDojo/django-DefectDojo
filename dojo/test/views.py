@@ -6,6 +6,7 @@ import time
 from datetime import datetime, timedelta
 from functools import reduce
 
+import pghistory
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import ValidationError
@@ -658,12 +659,12 @@ class AddFindingView(View):
 
 
 @user_is_authorized(Test, Permissions.Finding_Add, "tid")
-def add_temp_finding(request, tid, fid):
+def add_finding_from_template(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)
-    finding = get_object_or_404(Finding_Template, id=fid)
+    template = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
-    push_all_jira_issues = jira_helper.is_push_all_issues(finding)
+    push_all_jira_issues = jira_helper.is_push_all_issues(template)
 
     if request.method == "POST":
 
@@ -690,8 +691,8 @@ def add_temp_finding(request, tid, fid):
                                      _("Can not set a finding as inactive or false positive without adding all mandatory notes"),
                                      extra_tags="alert-danger")
         if form.is_valid():
-            finding.last_used = timezone.now()
-            finding.save()
+            template.last_used = timezone.now()
+            template.save()
             new_finding = form.save(commit=False)
             new_finding.test = test
             new_finding.reporter = request.user
@@ -699,14 +700,23 @@ def add_temp_finding(request, tid, fid):
                 new_finding.severity)
 
             new_finding.tags = form.cleaned_data["tags"]
-            new_finding.cvssv3 = finding.cvssv3
             new_finding.date = form.cleaned_data["date"] or datetime.today()
 
             finding_helper.update_finding_status(new_finding, request.user)
 
             new_finding.save(dedupe_option=False)
 
-            # Save and add new endpoints
+            # Copy all fields from template
+            finding_helper.copy_template_fields_to_finding(
+                finding=new_finding,
+                template=template,
+                user=request.user,
+                copy_vulnerability_ids=True,
+                copy_endpoints=True,
+                copy_notes=True,
+            )
+
+            # Save and add new endpoints from form (user may have added more)
             finding_helper.add_endpoints(new_finding, form)
 
             new_finding.save()
@@ -737,20 +747,64 @@ def add_temp_finding(request, tid, fid):
                              extra_tags="alert-danger")
 
     else:
-        form = AddFindingForm(req_resp=None, product=test.engagement.product, initial={"active": False,
-                                    "date": timezone.now().date(),
-                                    "verified": False,
-                                    "false_p": False,
-                                    "duplicate": False,
-                                    "out_of_scope": False,
-                                    "title": finding.title,
-                                    "description": finding.description,
-                                    "cwe": finding.cwe,
-                                    "severity": finding.severity,
-                                    "mitigation": finding.mitigation,
-                                    "impact": finding.impact,
-                                    "references": finding.references,
-                                    "numerical_severity": finding.numerical_severity})
+        # Build initial data with all template fields
+        initial_data = {
+            "active": False,
+            "date": timezone.now().date(),
+            "verified": False,
+            "false_p": False,
+            "duplicate": False,
+            "out_of_scope": False,
+            "title": template.title,
+            "description": template.description,
+            "cwe": template.cwe,
+            "severity": template.severity,
+            "mitigation": template.mitigation,
+            "impact": template.impact,
+            "references": template.references,
+            "numerical_severity": template.numerical_severity,
+        }
+
+        # Add CVSS fields
+        if template.cvssv3:
+            initial_data["cvssv3"] = template.cvssv3
+        if template.cvssv3_score is not None:
+            initial_data["cvssv3_score"] = template.cvssv3_score
+        if template.cvssv4:
+            initial_data["cvssv4"] = template.cvssv4
+        if template.cvssv4_score is not None:
+            initial_data["cvssv4_score"] = template.cvssv4_score
+
+        # Add remediation fields
+        if template.fix_available is not None:
+            initial_data["fix_available"] = template.fix_available
+        if template.fix_version:
+            initial_data["fix_version"] = template.fix_version
+        if template.planned_remediation_version:
+            initial_data["planned_remediation_version"] = template.planned_remediation_version
+        if template.effort_for_fixing:
+            initial_data["effort_for_fixing"] = template.effort_for_fixing
+
+        # Add technical details fields
+        if template.steps_to_reproduce:
+            initial_data["steps_to_reproduce"] = template.steps_to_reproduce
+        if template.severity_justification:
+            initial_data["severity_justification"] = template.severity_justification
+        if template.component_name:
+            initial_data["component_name"] = template.component_name
+        if template.component_version:
+            initial_data["component_version"] = template.component_version
+
+        # Add vulnerability IDs
+        if template.vulnerability_ids:
+            initial_data["vulnerability_ids"] = " ".join(template.vulnerability_ids)
+
+        # Add endpoints to endpoints_to_add field
+        if template.endpoints:
+            endpoint_urls = template.endpoints if isinstance(template.endpoints, list) else template.endpoints.split("\n")
+            initial_data["endpoints_to_add"] = "\n".join([url.strip() for url in endpoint_urls if url.strip()])
+
+        form = AddFindingForm(req_resp=None, product=test.engagement.product, initial=initial_data)
 
         if jira_helper.get_jira_project(test):
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix="jiraform", jira_project=jira_helper.get_jira_project(test), finding_form=form)
@@ -763,7 +817,7 @@ def add_temp_finding(request, tid, fid):
                    "jform": jform,
                    "findings": findings,
                    "temp": True,
-                   "fid": finding.id,
+                   "fid": template.id,
                    "tid": test.id,
                    "test": test,
                    })
@@ -1075,6 +1129,12 @@ class ReImportScanResultsView(View):
         if form_error := self.process_form(request, context.get("form"), context):
             add_error_message_to_response(form_error)
             return self.failure_redirect(request, context)
+        # Add pghistory context for audit trail (adds to existing middleware context)
+        pghistory.context(
+            source="reimport",
+            test_id=context.get("test").id,
+            scan_type=context.get("scan_type"),
+        )
         # Kick off the import process
         if import_error := self.reimport_findings(context):
             add_error_message_to_response(import_error)

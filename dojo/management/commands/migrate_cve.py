@@ -2,11 +2,11 @@ import logging
 
 from django.core.management.base import BaseCommand
 
+from dojo.finding.helper import save_vulnerability_ids_template
 from dojo.models import (
     Finding,
     Finding_Template,
     Vulnerability_Id,
-    Vulnerability_Id_Template,
 )
 from dojo.utils import mass_model_updater
 
@@ -20,9 +20,9 @@ def create_vulnerability_id(finding):
 
 
 def create_vulnerability_id_template(finding_template):
-    Vulnerability_Id_Template.objects.get_or_create(
-        finding_template=finding_template, vulnerability_id=finding_template.cve,
-    )
+    # Use the new TextField-based approach
+    if finding_template.cve:
+        save_vulnerability_ids_template(finding_template, [finding_template.cve])
 
 
 class Command(BaseCommand):
