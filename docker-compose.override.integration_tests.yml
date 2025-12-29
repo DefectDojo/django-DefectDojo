@@ -23,6 +23,8 @@ services:
     volumes:
       - defectdojo_media_integration_tests:/usr/share/nginx/html/media
   uwsgi:
+    build:
+      target: development
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
     volumes:
       - '.:/app:z'

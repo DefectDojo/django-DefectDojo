@@ -68,6 +68,7 @@ class EndpointManager:
     ) -> None:
         """Mitigates all endpoint status objects that are supplied"""
         now = timezone.now()
+        to_update = []
         for endpoint_status in endpoint_status_list:
             # Only mitigate endpoints that are actually active
             if endpoint_status.mitigated is False:
@@ -75,7 +76,14 @@ class EndpointManager:
                 endpoint_status.last_modified = now
                 endpoint_status.mitigated_by = user
                 endpoint_status.mitigated = True
-                endpoint_status.save()
+                to_update.append(endpoint_status)
+
+        if to_update:
+            Endpoint_Status.objects.bulk_update(
+                to_update,
+                ["mitigated", "mitigated_time", "last_modified", "mitigated_by"],
+                batch_size=1000,
+            )
 
     @dojo_async_task
     @app.task()
@@ -85,6 +93,8 @@ class EndpointManager:
         **kwargs: dict,
     ) -> None:
         """Reactivate all endpoint status objects that are supplied"""
+        now = timezone.now()
+        to_update = []
         for endpoint_status in endpoint_status_list:
             # Only reactivate endpoints that are actually mitigated
             if endpoint_status.mitigated:
@@ -92,8 +102,15 @@ class EndpointManager:
                 endpoint_status.mitigated_by = None
                 endpoint_status.mitigated_time = None
                 endpoint_status.mitigated = False
-                endpoint_status.last_modified = timezone.now()
-                endpoint_status.save()
+                endpoint_status.last_modified = now
+                to_update.append(endpoint_status)
+
+        if to_update:
+            Endpoint_Status.objects.bulk_update(
+                to_update,
+                ["mitigated", "mitigated_time", "mitigated_by", "last_modified"],
+                batch_size=1000,
+            )
 
     def chunk_endpoints_and_disperse(
         self,
@@ -149,17 +166,17 @@ class EndpointManager:
             # New finding is mitigated, so mitigate all old endpoints
             endpoint_status_to_mitigate = existing_finding_endpoint_status_list
         else:
+            # Convert to set for O(1) lookups instead of O(n) linear search
+            new_finding_endpoints_set = set(new_finding_endpoints_list)
             # Mitigate any endpoints in the old finding not found in the new finding
-            endpoint_status_to_mitigate = list(
-                filter(
-                    lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint not in new_finding_endpoints_list,
-                    existing_finding_endpoint_status_list),
-            )
+            endpoint_status_to_mitigate = [
+                eps for eps in existing_finding_endpoint_status_list
+                if eps.endpoint not in new_finding_endpoints_set
+            ]
             # Re-activate any endpoints in the old finding that are in the new finding
-            endpoint_status_to_reactivate = list(
-                filter(
-                    lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint in new_finding_endpoints_list,
-                    existing_finding_endpoint_status_list),
-            )
+            endpoint_status_to_reactivate = [
+                eps for eps in existing_finding_endpoint_status_list
+                if eps.endpoint in new_finding_endpoints_set
+            ]
             self.chunk_endpoints_and_reactivate(endpoint_status_to_reactivate)
         self.chunk_endpoints_and_mitigate(endpoint_status_to_mitigate, user)
