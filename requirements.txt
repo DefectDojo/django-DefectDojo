@@ -36,8 +36,10 @@ redis==7.1.0
 requests==2.32.5
 sqlalchemy==2.0.45  # Required by Celery broker transport
 urllib3==2.6.2
-# uWSGI is installed via system packages (uwsgi + uwsgi-plugin-python3 on Debian,
-# uwsgi + uwsgi-python3 on Alpine) to avoid compilation during Docker builds and to have official binaries
+# uWSGI is installed via system packages on Debian (uwsgi + uwsgi-plugin-python3) to avoid compilation.
+# On Alpine, uwsgi is installed via pip because the system package (uwsgi-python3) is compiled for Python 3.12
+# but the container uses Python 3.13.7 from the official Python Docker image.
+# uwsgi==2.0.28
 vobject==0.9.9
 whitenoise==5.2.0
 titlecase==2.4.1

@@ -36,10 +36,18 @@ fi
 
 echo -n "Starting uwsgi"
 
-exec uwsgi \
+# Only use --home on Debian; pip-installed uwsgi on Alpine doesn't need it
+if [ ! -f /etc/alpine-release ]; then
+  UWSGI_HOME_OPT="--home /usr/local"
+else
+  UWSGI_HOME_OPT=""
+fi
+
+uwsgi \
   "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
   --protocol uwsgi \
-  --plugin python313 \
+  --plugin python3 \
+  ${UWSGI_HOME_OPT} \
   --module dojo.wsgi:application \
   --enable-threads \
   --processes "${DD_UWSGI_NUM_OF_PROCESSES:-4}" \

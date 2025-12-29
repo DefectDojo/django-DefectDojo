@@ -43,9 +43,6 @@ RUN \
     openssl \
     # py3-curl for Celery SQS broker support (avoids compilation)
     py3-curl \
-    # uwsgi from system packages (avoids compilation)
-    uwsgi \
-    uwsgi-python3 \
     # needed for integration-tests
     bash \
     && \
@@ -58,7 +55,9 @@ RUN \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-  -r ./requirements.txt
+  -r ./requirements.txt && \
+  # Install uwsgi via pip for Alpine (system package is compiled for Python 3.12, but we use Python 3.13)
+  pip3 install --no-cache-dir uwsgi==2.0.28
 
 COPY \
   docker/entrypoint-celery-beat.sh \
