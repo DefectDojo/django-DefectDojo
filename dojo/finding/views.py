@@ -9,6 +9,7 @@ from collections import OrderedDict, defaultdict
 from itertools import chain
 from pathlib import Path
 
+import pghistory
 from django.conf import settings
 from django.contrib import messages
 from django.core import serializers
@@ -2557,6 +2558,11 @@ def finding_bulk_update_all(request, pid=None):
         logger.debug("bulk 20")
 
         finding_to_update = request.POST.getlist("finding_to_update")
+        # Add pghistory context for audit trail (adds to existing middleware context)
+        pghistory.context(
+            source="bulk_edit",
+            finding_count=len(finding_to_update),
+        )
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
         total_find_count = finds.count()
         prods = set(find.test.engagement.product for find in finds)  # noqa: C401
