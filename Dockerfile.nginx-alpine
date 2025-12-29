@@ -18,7 +18,6 @@ RUN \
     xmlsec \
     git \
     util-linux \
-    curl-dev \
     openssl \
     libffi-dev \
     python3-dev \
@@ -35,7 +34,8 @@ RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements-dev.txt
 
 
 FROM build AS collectstatic
-RUN apk add nodejs npm
+# py3-curl for Celery SQS broker support (avoids compilation)
+RUN apk add nodejs npm py3-curl
 RUN npm install -g yarn --force
 
 

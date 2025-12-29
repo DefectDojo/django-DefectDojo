@@ -19,8 +19,6 @@ RUN \
     xmlsec1 \
     git \
     uuid-runtime \
-    # libcurl4-openssl-dev is required for installing pycurl python package
-    libcurl4-openssl-dev \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -28,8 +26,7 @@ RUN \
 COPY requirements.txt ./
 # CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
 # https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
-RUN export PYCURL_SSL_LIBRARY=openssl && \
-    CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM base AS release
 WORKDIR /app
@@ -53,8 +50,8 @@ RUN \
     libpq-dev \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
-    # libcurl4-openssl-dev is required for installing pycurl python package
-    libcurl4-openssl-dev \
+    # python3-pycurl for Celery SQS broker support (avoids compilation)
+    python3-pycurl \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
