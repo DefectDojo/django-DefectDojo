@@ -1335,12 +1335,8 @@ class Product_Tab:
 
     @cached_property
     def _active_endpoints(self):
-        if settings.V3_FEATURE_LOCATIONS:
-            return Location.objects.filter(
-                products__product=self.product,
-                products__status=ProductLocationStatus.Active,
-            )
-        else:
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
             return Endpoint.objects.filter(
                 product=self.product,
                 status_endpoint__mitigated=False,
@@ -1348,6 +1344,10 @@ class Product_Tab:
                 status_endpoint__out_of_scope=False,
                 status_endpoint__risk_accepted=False,
             )
+        return Location.objects.filter(
+            products__product=self.product,
+            products__status=ProductLocationStatus.Active,
+        )
 
     @cached_property
     def endpoints_count(self):
@@ -1355,10 +1355,10 @@ class Product_Tab:
 
     @cached_property
     def endpoint_hosts_count(self):
-        if settings.V3_FEATURE_LOCATIONS:
-            return  self._active_endpoints.values("url__host").distinct().count()
-        else:
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
             return self._active_endpoints.values("host").distinct().count()
+        return self._active_endpoints.values("url__host").distinct().count()
 
     @cached_property
     def benchmark_type(self):
