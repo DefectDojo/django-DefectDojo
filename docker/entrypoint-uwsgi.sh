@@ -34,13 +34,17 @@ if [ -n "${DD_UWSGI_MAX_FD}" ]; then
     DD_UWSGI_EXTRA_ARGS="${DD_UWSGI_EXTRA_ARGS} --max-fd ${DD_UWSGI_MAX_FD}"
 fi
 
+echo -n "Starting uwsgi"
+
 exec uwsgi \
   "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
   --protocol uwsgi \
+  --plugin python3 \
+  --home /usr/local \
+  --module dojo.wsgi:application \
   --enable-threads \
   --processes "${DD_UWSGI_NUM_OF_PROCESSES:-4}" \
   --threads "${DD_UWSGI_NUM_OF_THREADS:-4}" \
-  --wsgi dojo.wsgi:application \
   --buffer-size="${DD_UWSGI_BUFFER_SIZE:-8192}" \
   --http 0.0.0.0:8081 --http-to "${DD_UWSGI_ENDPOINT}" \
   --logformat "${DD_UWSGI_LOGFORMAT:-$DD_UWSGI_LOGFORMAT_DEFAULT}" \

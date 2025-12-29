@@ -31,10 +31,14 @@ watchmedo shell-command \
   /app/dojo &
 
 
+echo -n "Starting uwsgi"
+
 exec uwsgi \
   "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
   --protocol uwsgi \
-  --wsgi dojo.wsgi:application \
+  --plugin python3 \
+  --home /usr/local \
+  --module dojo.wsgi:application \
   --enable-threads \
   --processes "${DD_UWSGI_NUM_OF_PROCESSES:-4}" \
   --threads "${DD_UWSGI_NUM_OF_THREADS:-4}" \
