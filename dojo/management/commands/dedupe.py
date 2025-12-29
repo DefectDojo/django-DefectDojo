@@ -1,5 +1,6 @@
 import logging
 
+import pghistory
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models import Prefetch
@@ -64,6 +65,21 @@ class Command(BaseCommand):
         dedupe_sync = options["dedupe_sync"]
         dedupe_batch_mode = options.get("dedupe_batch_mode", True)  # Default to True (batch mode enabled)
 
+        # Wrap with pghistory context for audit trail
+        with pghistory.context(
+            source="dedupe_command",
+            dedupe_sync=dedupe_sync,
+        ):
+            self._run_dedupe(
+                restrict_to_parsers=restrict_to_parsers,
+                hash_code_only=hash_code_only,
+                dedupe_only=dedupe_only,
+                dedupe_sync=dedupe_sync,
+                dedupe_batch_mode=dedupe_batch_mode,
+            )
+
+    def _run_dedupe(self, *, restrict_to_parsers, hash_code_only, dedupe_only, dedupe_sync, dedupe_batch_mode):
+        """Internal method to run the dedupe logic within pghistory context."""
         if restrict_to_parsers is not None:
             findings = Finding.objects.filter(test__test_type__name__in=restrict_to_parsers).exclude(duplicate=True)
             logger.info("######## Will process only parsers %s and %d findings ########", *restrict_to_parsers, findings.count())
