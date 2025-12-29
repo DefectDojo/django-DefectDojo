@@ -920,7 +920,7 @@ def add_jira_issue(obj, *args, **kwargs):
 
         # not sure why this check is not part of can_be_pushed_to_jira, but afraid to change it
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
-            logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
+            logger.info("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
             # Duplicates are expected, don't create alerts
             logger.info("%s cannot be pushed to JIRA: %s (expected - duplicate finding)",
                        to_str_typed(obj), error_message)
