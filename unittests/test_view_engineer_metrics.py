@@ -235,6 +235,7 @@ class ViewEngineerMetricsTest(DojoTestCase):
             decision="A",
             owner=self.user1,
             created=fixed_now,
+            product=finding.test.engagement.product,
         )
         risk_acceptance.accepted_findings.add(finding)
 

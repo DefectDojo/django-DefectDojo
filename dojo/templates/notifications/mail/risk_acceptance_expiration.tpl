@@ -1,9 +1,8 @@
 {% load i18n %}
 {% load navigation_tags %}
 {% load display_tags %}
-{% url 'view_risk_acceptance' risk_acceptance.engagement.id risk_acceptance.id as risk_acceptance_url %}
-{% url 'view_product' risk_acceptance.engagement.product.id as product_url %}
-{% url 'view_engagement' risk_acceptance.engagement.id as engagement_url %}
+{% url 'view_risk_acceptance' risk_acceptance.id as risk_acceptance_url %}
+{% url 'view_product' risk_acceptance.product.id as product_url %}
 <html>
     <body>
         {% autoescape on %}

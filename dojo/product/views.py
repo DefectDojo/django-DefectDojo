@@ -91,6 +91,7 @@ from dojo.models import (
     Product_Group,
     Product_Member,
     Product_Type,
+    Risk_Acceptance,
     System_Settings,
     Test,
     Test_Import,
@@ -378,6 +379,24 @@ def view_product_components(request, pid):
     })
 
 
+@user_is_authorized(Product, Permissions.Risk_Acceptance, "pid")
+def view_product_risk_acceptances(request, pid):
+    prod = get_object_or_404(Product, id=pid)
+    product_tab = Product_Tab(prod, title=_("Product"), tab="risk_acceptance")
+
+    # Get all risk acceptances for this product
+    risk_acceptances = Risk_Acceptance.objects.filter(product=prod).select_related("owner").annotate(
+        accepted_findings_count=Count("accepted_findings__id"),
+    ).order_by("-created")
+
+    return render(request, "dojo/risk_acceptances.html", {
+        "prod": prod,
+        "product_tab": product_tab,
+        "risk_acceptances": risk_acceptances,
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
+    })
+
+
 def identify_view(request):
     get_data = request.GET
     view = get_data.get("type", None)
@@ -403,7 +422,7 @@ def finding_queries(request, prod):
     # prefetch only what's needed to avoid lots of repeated queries
     findings_query = findings_query.prefetch_related(
         # 'test__engagement',
-        # 'test__engagement__risk_acceptance',
+        # 'test__engagement__product__risk_acceptance',
         # 'found_by',
         # 'test',
         # 'test__test_type',
@@ -473,7 +492,7 @@ def endpoint_queries(request, prod):
                                                      finding__severity__in=(
                                                          "Critical", "High", "Medium", "Low", "Info")).prefetch_related(
         "finding__test__engagement",
-        "finding__test__engagement__risk_acceptance",
+        "finding__test__engagement__product__risk_acceptances",
         "finding__risk_acceptance_set",
         "finding__reporter").annotate(severity=F("finding__severity"))
     filter_string_matching = get_system_setting("filter_string_matching", False)

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% load humanize %}
+{% load authorization_tags %}
+{% block content %}
+    {{ block.super }}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading tight">
+                <h3 class="has-filters">
+                    Risk Acceptances
+                    {% if prod|has_object_permission:"Risk_Acceptance" %}
+                        {% if prod.enable_full_risk_acceptance %}
+                            <a title="Add Risk Acceptance..." class="pull-right btn btn-sm btn-primary"
+                                href="{% url 'add_risk_acceptance' prod.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                <span class="fa-solid fa-plus"></span>
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </h3>
+            </div>
+        </div>
+        {% if risk_acceptances %}
+        <div class="panel panel-default table-responsive">
+            <table id="risk-acceptances-table" class="tablesorter-bootstrap table table-condensed table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Owner</th>
+                        <th>Accepted Findings</th>
+                        <th>Expiration Date</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ra in risk_acceptances %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'view_risk_acceptance' ra.id %}">
+                                <b>{{ ra.name }}</b>
+                            </a>
+                        </td>
+                        <td>{{ ra.owner }}</td>
+                        <td class="text-center">
+                            <span class="badge">{{ ra.accepted_findings_count }}</span>
+                        </td>
+                        <td>
+                            {% if ra.expiration_date %}
+                                {{ ra.expiration_date|date:"M d, Y" }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ra.is_expired %}
+                                <span class="label label-danger">Expired</span>
+                            {% elif ra.expiration_date %}
+                                <span class="label label-success">Active</span>
+                            {% else %}
+                                <span class="label label-info">No Expiration</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ ra.created|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{% url 'view_risk_acceptance' ra.id %}" class="btn btn-sm btn-primary" title="View">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                {% if prod|has_object_permission:"Risk_Acceptance" %}
+                                    <a href="{% url 'edit_risk_acceptance' ra.id %}" class="btn btn-sm btn-primary" title="Edit">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+                                    {% if not ra.is_expired %}
+                                        <a href="{% url 'expire_risk_acceptance' ra.id %}?return_url={{ request.get_full_path|urlencode }}"
+                                           class="btn btn-sm btn-warning" title="Expire"
+                                           onclick="return confirm('Are you sure you want to expire this risk acceptance?')">
+                                            <i class="fa-solid fa-hourglass-end"></i>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'reinstate_risk_acceptance' ra.id %}?return_url={{ request.get_full_path|urlencode }}"
+                                           class="btn btn-sm btn-success" title="Reinstate">
+                                            <i class="fa-solid fa-rotate-left"></i>
+                                        </a>
+                                    {% endif %}
+                                    <a href="{% url 'delete_risk_acceptance' ra.id %}?return_url={{ request.get_full_path|urlencode }}"
+                                       class="btn btn-sm btn-danger" title="Delete"
+                                       onclick="return confirm('Are you sure you want to delete this risk acceptance? This will reactivate all accepted findings.')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="panel panel-default">
+            <div class="panel-body text-center">
+                <h4>No risk acceptances found for this product.</h4>
+                {% if prod|has_object_permission:"Risk_Acceptance" and prod.enable_full_risk_acceptance %}
+                    <a href="{% url 'add_risk_acceptance' prod.id %}?return_url={{ request.get_full_path|urlencode }}" class="btn btn-primary">
+                        <i class="fa-solid fa-plus"></i> Add Risk Acceptance
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if enable_table_filtering %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#risk-acceptances-table').DataTable({
+            "order": [[5, "desc"]], // Sort by Created date descending
+            "pageLength": 25,
+            "responsive": true
+        });
+    });
+</script>
+{% endif %}
+
+{% endblock %}
