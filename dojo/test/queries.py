@@ -1,5 +1,5 @@
 from crum import get_current_user
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Q, Subquery
 
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 from dojo.models import Product_Group, Product_Member, Product_Type_Group, Product_Type_Member, Test, Test_Import
@@ -22,35 +22,31 @@ def get_authorized_tests(permission, product=None):
         return Test.objects.all().order_by("id")
 
     roles = get_roles_for_permission(permission)
+
+    # Get authorized product/product_type IDs via subqueries
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef("engagement__product__prod_type_id"),
-        user=user,
-        role__in=roles)
+        user=user, role__in=roles,
+    ).values("product_type_id")
+
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef("engagement__product_id"),
-        user=user,
-        role__in=roles)
+        user=user, role__in=roles,
+    ).values("product_id")
 
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("engagement__product__prod_type_id"),
-        group__users=user,
-        role__in=roles)
+        group__users=user, role__in=roles,
+    ).values("product_type_id")
+
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef("engagement__product_id"),
-        group__users=user,
-        role__in=roles)
+        group__users=user, role__in=roles,
+    ).values("product_id")
 
-    tests = tests.annotate(
-        engagement__product__prod_type__member=Exists(authorized_product_type_roles),
-        engagement__product__member=Exists(authorized_product_roles),
-        engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        engagement__product__authorized_group=Exists(authorized_product_groups))
-
+    # Filter using IN with Subquery - no annotations needed
     return tests.filter(
-        Q(engagement__product__prod_type__member=True)
-        | Q(engagement__product__member=True)
-        | Q(engagement__product__prod_type__authorized_group=True)
-        | Q(engagement__product__authorized_group=True))
+        Q(engagement__product__prod_type_id__in=Subquery(authorized_product_type_roles))
+        | Q(engagement__product_id__in=Subquery(authorized_product_roles))
+        | Q(engagement__product__prod_type_id__in=Subquery(authorized_product_type_groups))
+        | Q(engagement__product_id__in=Subquery(authorized_product_groups)),
+    )
 
 
 def get_authorized_test_imports(permission):
@@ -66,29 +62,28 @@ def get_authorized_test_imports(permission):
         return Test_Import.objects.all().order_by("id")
 
     roles = get_roles_for_permission(permission)
+
+    # Get authorized product/product_type IDs via subqueries
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef("test__engagement__product__prod_type_id"),
-        user=user,
-        role__in=roles)
+        user=user, role__in=roles,
+    ).values("product_type_id")
+
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef("test__engagement__product_id"),
-        user=user,
-        role__in=roles)
+        user=user, role__in=roles,
+    ).values("product_id")
+
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("test__engagement__product__prod_type_id"),
-        group__users=user,
-        role__in=roles)
+        group__users=user, role__in=roles,
+    ).values("product_type_id")
+
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef("test__engagement__product_id"),
-        group__users=user,
-        role__in=roles)
-    test_imports = Test_Import.objects.annotate(
-        test__engagement__product__prod_type__member=Exists(authorized_product_type_roles),
-        test__engagement__product__member=Exists(authorized_product_roles),
-        test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        test__engagement__product__authorized_group=Exists(authorized_product_groups)).order_by("id")
-    return test_imports.filter(
-        Q(test__engagement__product__prod_type__member=True)
-        | Q(test__engagement__product__member=True)
-        | Q(test__engagement__product__prod_type__authorized_group=True)
-        | Q(test__engagement__product__authorized_group=True))
+        group__users=user, role__in=roles,
+    ).values("product_id")
+
+    # Filter using IN with Subquery - no annotations needed
+    return Test_Import.objects.filter(
+        Q(test__engagement__product__prod_type_id__in=Subquery(authorized_product_type_roles))
+        | Q(test__engagement__product_id__in=Subquery(authorized_product_roles))
+        | Q(test__engagement__product__prod_type_id__in=Subquery(authorized_product_type_groups))
+        | Q(test__engagement__product_id__in=Subquery(authorized_product_groups)),
+    ).order_by("id")

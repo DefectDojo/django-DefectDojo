@@ -1,5 +1,5 @@
 from crum import get_current_user
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Q, Subquery
 
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 from dojo.models import Finding_Group, Product_Group, Product_Member, Product_Type_Group, Product_Type_Member
@@ -22,29 +22,28 @@ def get_authorized_finding_groups(permission, queryset=None, user=None):
         return finding_groups
 
     roles = get_roles_for_permission(permission)
+
+    # Get authorized product/product_type IDs via subqueries
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef("test__engagement__product__prod_type_id"),
-        user=user,
-        role__in=roles)
+        user=user, role__in=roles,
+    ).values("product_type_id")
+
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef("test__engagement__product_id"),
-        user=user,
-        role__in=roles)
+        user=user, role__in=roles,
+    ).values("product_id")
+
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("test__engagement__product__prod_type_id"),
-        group__users=user,
-        role__in=roles)
+        group__users=user, role__in=roles,
+    ).values("product_type_id")
+
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef("test__engagement__product_id"),
-        group__users=user,
-        role__in=roles)
-    finding_groups = finding_groups.annotate(
-        test__engagement__product__prod_type__member=Exists(authorized_product_type_roles),
-        test__engagement__product__member=Exists(authorized_product_roles),
-        test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        test__engagement__product__authorized_group=Exists(authorized_product_groups))
+        group__users=user, role__in=roles,
+    ).values("product_id")
+
+    # Filter using IN with Subquery - no annotations needed
     return finding_groups.filter(
-        Q(test__engagement__product__prod_type__member=True)
-        | Q(test__engagement__product__member=True)
-        | Q(test__engagement__product__prod_type__authorized_group=True)
-        | Q(test__engagement__product__authorized_group=True))
+        Q(test__engagement__product__prod_type_id__in=Subquery(authorized_product_type_roles))
+        | Q(test__engagement__product_id__in=Subquery(authorized_product_roles))
+        | Q(test__engagement__product__prod_type_id__in=Subquery(authorized_product_type_groups))
+        | Q(test__engagement__product_id__in=Subquery(authorized_product_groups)),
+    )

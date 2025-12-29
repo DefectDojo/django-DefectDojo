@@ -2,7 +2,7 @@ import logging
 from functools import partial
 
 from crum import get_current_user
-from django.db.models import Exists, OuterRef, Q, Value
+from django.db.models import OuterRef, Q, Subquery, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
 
@@ -24,33 +24,6 @@ from dojo.query_utils import build_count_subquery
 logger = logging.getLogger(__name__)
 
 
-def get_authorized_groups(permission, user=None):
-    roles = get_roles_for_permission(permission)
-    authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef("test__engagement__product__prod_type_id"),
-        user=user,
-        role__in=roles)
-    authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef("test__engagement__product_id"),
-        user=user,
-        role__in=roles)
-    authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("test__engagement__product__prod_type_id"),
-        group__users=user,
-        role__in=roles)
-    authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef("test__engagement__product_id"),
-        group__users=user,
-        role__in=roles)
-
-    return (
-        authorized_product_type_roles,
-        authorized_product_roles,
-        authorized_product_type_groups,
-        authorized_product_groups,
-    )
-
-
 def get_authorized_findings(permission, queryset=None, user=None):
     if user is None:
         user = get_current_user()
@@ -64,23 +37,32 @@ def get_authorized_findings(permission, queryset=None, user=None):
     if user_has_global_permission(user, permission):
         return findings
 
-    (
-        authorized_product_type_roles,
-        authorized_product_roles,
-        authorized_product_type_groups,
-        authorized_product_groups,
-    ) = get_authorized_groups(permission, user=user)
+    roles = get_roles_for_permission(permission)
 
-    findings = findings.annotate(
-        test__engagement__product__prod_type__member=Exists(authorized_product_type_roles),
-        test__engagement__product__member=Exists(authorized_product_roles),
-        test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        test__engagement__product__authorized_group=Exists(authorized_product_groups))
+    # Get authorized product/product_type IDs via subqueries
+    authorized_product_type_roles = Product_Type_Member.objects.filter(
+        user=user, role__in=roles,
+    ).values("product_type_id")
+
+    authorized_product_roles = Product_Member.objects.filter(
+        user=user, role__in=roles,
+    ).values("product_id")
+
+    authorized_product_type_groups = Product_Type_Group.objects.filter(
+        group__users=user, role__in=roles,
+    ).values("product_type_id")
+
+    authorized_product_groups = Product_Group.objects.filter(
+        group__users=user, role__in=roles,
+    ).values("product_id")
+
+    # Filter using IN with Subquery - no annotations needed
     return findings.filter(
-        Q(test__engagement__product__prod_type__member=True)
-        | Q(test__engagement__product__member=True)
-        | Q(test__engagement__product__prod_type__authorized_group=True)
-        | Q(test__engagement__product__authorized_group=True))
+        Q(test__engagement__product__prod_type_id__in=Subquery(authorized_product_type_roles))
+        | Q(test__engagement__product_id__in=Subquery(authorized_product_roles))
+        | Q(test__engagement__product__prod_type_id__in=Subquery(authorized_product_type_groups))
+        | Q(test__engagement__product_id__in=Subquery(authorized_product_groups)),
+    )
 
 
 def get_authorized_stub_findings(permission):
@@ -95,23 +77,32 @@ def get_authorized_stub_findings(permission):
     if user_has_global_permission(user, permission):
         return Stub_Finding.objects.all().order_by("id")
 
-    (
-        authorized_product_type_roles,
-        authorized_product_roles,
-        authorized_product_type_groups,
-        authorized_product_groups,
-    ) = get_authorized_groups(permission, user=user)
+    roles = get_roles_for_permission(permission)
 
-    findings = Stub_Finding.objects.annotate(
-        test__engagement__product__prod_type__member=Exists(authorized_product_type_roles),
-        test__engagement__product__member=Exists(authorized_product_roles),
-        test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        test__engagement__product__authorized_group=Exists(authorized_product_groups)).order_by("id")
-    return findings.filter(
-        Q(test__engagement__product__prod_type__member=True)
-        | Q(test__engagement__product__member=True)
-        | Q(test__engagement__product__prod_type__authorized_group=True)
-        | Q(test__engagement__product__authorized_group=True))
+    # Get authorized product/product_type IDs via subqueries
+    authorized_product_type_roles = Product_Type_Member.objects.filter(
+        user=user, role__in=roles,
+    ).values("product_type_id")
+
+    authorized_product_roles = Product_Member.objects.filter(
+        user=user, role__in=roles,
+    ).values("product_id")
+
+    authorized_product_type_groups = Product_Type_Group.objects.filter(
+        group__users=user, role__in=roles,
+    ).values("product_type_id")
+
+    authorized_product_groups = Product_Group.objects.filter(
+        group__users=user, role__in=roles,
+    ).values("product_id")
+
+    # Filter using IN with Subquery - no annotations needed
+    return Stub_Finding.objects.filter(
+        Q(test__engagement__product__prod_type_id__in=Subquery(authorized_product_type_roles))
+        | Q(test__engagement__product_id__in=Subquery(authorized_product_roles))
+        | Q(test__engagement__product__prod_type_id__in=Subquery(authorized_product_type_groups))
+        | Q(test__engagement__product_id__in=Subquery(authorized_product_groups)),
+    ).order_by("id")
 
 
 def get_authorized_vulnerability_ids(permission, queryset=None, user=None):
@@ -131,32 +122,31 @@ def get_authorized_vulnerability_ids(permission, queryset=None, user=None):
         return vulnerability_ids
 
     roles = get_roles_for_permission(permission)
+
+    # Get authorized product/product_type IDs via subqueries
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef("finding__test__engagement__product__prod_type_id"),
-        user=user,
-        role__in=roles)
+        user=user, role__in=roles,
+    ).values("product_type_id")
+
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef("finding__test__engagement__product_id"),
-        user=user,
-        role__in=roles)
+        user=user, role__in=roles,
+    ).values("product_id")
+
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("finding__test__engagement__product__prod_type_id"),
-        group__users=user,
-        role__in=roles)
+        group__users=user, role__in=roles,
+    ).values("product_type_id")
+
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef("finding__test__engagement__product_id"),
-        group__users=user,
-        role__in=roles)
-    vulnerability_ids = vulnerability_ids.annotate(
-        finding__test__engagement__product__prod_type__member=Exists(authorized_product_type_roles),
-        finding__test__engagement__product__member=Exists(authorized_product_roles),
-        finding__test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        finding__test__engagement__product__authorized_group=Exists(authorized_product_groups))
+        group__users=user, role__in=roles,
+    ).values("product_id")
+
+    # Filter using IN with Subquery - no annotations needed
     return vulnerability_ids.filter(
-        Q(finding__test__engagement__product__prod_type__member=True)
-        | Q(finding__test__engagement__product__member=True)
-        | Q(finding__test__engagement__product__prod_type__authorized_group=True)
-        | Q(finding__test__engagement__product__authorized_group=True))
+        Q(finding__test__engagement__product__prod_type_id__in=Subquery(authorized_product_type_roles))
+        | Q(finding__test__engagement__product_id__in=Subquery(authorized_product_roles))
+        | Q(finding__test__engagement__product__prod_type_id__in=Subquery(authorized_product_type_groups))
+        | Q(finding__test__engagement__product_id__in=Subquery(authorized_product_groups)),
+    )
 
 
 def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=True):

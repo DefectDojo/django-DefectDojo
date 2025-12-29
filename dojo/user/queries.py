@@ -1,5 +1,5 @@
 from crum import get_current_user
-from django.db.models import Q
+from django.db.models import Q, Subquery
 
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 from dojo.models import (
@@ -18,21 +18,33 @@ from dojo.request_cache import cache_for_request
 
 def get_authorized_users_for_product_type(users, product_type, permission):
     roles = get_roles_for_permission(permission)
-    product_type_members = Product_Type_Member.objects \
-        .filter(product_type=product_type, role__in=roles) \
-        .select_related("user")
-    product_type_groups = Product_Type_Group.objects \
-        .filter(product_type=product_type, role__in=roles)
-    global_roles = Global_Role.objects.filter(role__in=roles)
-    group_members = Dojo_Group_Member.objects \
-        .filter(Q(group__in=[ptg.group for ptg in product_type_groups])
-                | Q(group__in=[gr.group for gr in global_roles])) \
-        .select_related("user")
 
-    return users.filter(Q(id__in=[ptm.user.id for ptm in product_type_members])
-        | Q(id__in=[gm.user.id for gm in group_members])
+    # Get user IDs via subqueries instead of materializing into Python lists
+    product_type_member_users = Product_Type_Member.objects.filter(
+        product_type=product_type, role__in=roles,
+    ).values("user_id")
+
+    # Get group IDs that have access to this product type
+    product_type_group_ids = Product_Type_Group.objects.filter(
+        product_type=product_type, role__in=roles,
+    ).values("group_id")
+
+    global_role_group_ids = Global_Role.objects.filter(
+        role__in=roles, group__isnull=False,
+    ).values("group_id")
+
+    # Get users from those groups
+    group_member_users = Dojo_Group_Member.objects.filter(
+        Q(group_id__in=Subquery(product_type_group_ids))
+        | Q(group_id__in=Subquery(global_role_group_ids)),
+    ).values("user_id")
+
+    return users.filter(
+        Q(id__in=Subquery(product_type_member_users))
+        | Q(id__in=Subquery(group_member_users))
         | Q(global_role__role__in=roles)
-        | Q(is_superuser=True))
+        | Q(is_superuser=True),
+    )
 
 
 def get_authorized_users_for_product_and_product_type(users, product, permission):
@@ -41,29 +53,42 @@ def get_authorized_users_for_product_and_product_type(users, product, permission
 
     roles = get_roles_for_permission(permission)
 
-    product_members = Product_Member.objects \
-        .filter(product=product, role__in=roles) \
-        .select_related("user")
-    product_type_members = Product_Type_Member.objects \
-        .filter(product_type=product.prod_type, role__in=roles) \
-        .select_related("user")
-    product_groups = Product_Group.objects \
-        .filter(product=product, role__in=roles)
-    product_type_groups = Product_Type_Group.objects \
-        .filter(product_type=product.prod_type, role__in=roles)
-    global_roles = Global_Role.objects.filter(role__in=roles)
-    group_members = Dojo_Group_Member.objects \
-        .filter(
-            Q(group__in=[pg.group for pg in product_groups])
-            | Q(group__in=[ptg.group for ptg in product_type_groups])
-            | Q(group__in=[gr.group for gr in global_roles])) \
-        .select_related("user")
+    # Get user IDs via subqueries instead of materializing into Python lists
+    product_member_users = Product_Member.objects.filter(
+        product=product, role__in=roles,
+    ).values("user_id")
 
-    return users.filter(Q(id__in=[pm.user.id for pm in product_members])
-        | Q(id__in=[ptm.user.id for ptm in product_type_members])
-        | Q(id__in=[gm.user.id for gm in group_members])
+    product_type_member_users = Product_Type_Member.objects.filter(
+        product_type=product.prod_type, role__in=roles,
+    ).values("user_id")
+
+    # Get group IDs that have access to this product or product type
+    product_group_ids = Product_Group.objects.filter(
+        product=product, role__in=roles,
+    ).values("group_id")
+
+    product_type_group_ids = Product_Type_Group.objects.filter(
+        product_type=product.prod_type, role__in=roles,
+    ).values("group_id")
+
+    global_role_group_ids = Global_Role.objects.filter(
+        role__in=roles, group__isnull=False,
+    ).values("group_id")
+
+    # Get users from those groups
+    group_member_users = Dojo_Group_Member.objects.filter(
+        Q(group_id__in=Subquery(product_group_ids))
+        | Q(group_id__in=Subquery(product_type_group_ids))
+        | Q(group_id__in=Subquery(global_role_group_ids)),
+    ).values("user_id")
+
+    return users.filter(
+        Q(id__in=Subquery(product_member_users))
+        | Q(id__in=Subquery(product_type_member_users))
+        | Q(id__in=Subquery(group_member_users))
         | Q(global_role__role__in=roles)
-        | Q(is_superuser=True))
+        | Q(is_superuser=True),
+    )
 
 
 # Cached because it is a complex SQL query and it is called 3 times for the engagement lists in products
@@ -87,23 +112,35 @@ def get_authorized_users(permission, user=None):
     authorized_product_types = get_authorized_product_types(permission).values("id")
 
     roles = get_roles_for_permission(permission)
-    product_members = Product_Member.objects \
-        .filter(product_id__in=authorized_products, role__in=roles) \
-        .select_related("user")
-    product_type_members = Product_Type_Member.objects \
-        .filter(product_type_id__in=authorized_product_types, role__in=roles) \
-        .select_related("user")
-    product_groups = Product_Group.objects \
-        .filter(product_id__in=authorized_products, role__in=roles)
-    product_type_groups = Product_Type_Group.objects \
-        .filter(product_type_id__in=authorized_product_types, role__in=roles)
-    group_members = Dojo_Group_Member.objects \
-        .filter(
-            Q(group__in=[pg.group for pg in product_groups])
-            | Q(group__in=[ptg.group for ptg in product_type_groups])) \
-        .select_related("user")
-    return users.filter(Q(id__in=[pm.user.id for pm in product_members])
-        | Q(id__in=[ptm.user.id for ptm in product_type_members])
-        | Q(id__in=[gm.user.id for gm in group_members])
+
+    # Get user IDs via subqueries instead of materializing into Python lists
+    product_member_users = Product_Member.objects.filter(
+        product_id__in=Subquery(authorized_products), role__in=roles,
+    ).values("user_id")
+
+    product_type_member_users = Product_Type_Member.objects.filter(
+        product_type_id__in=Subquery(authorized_product_types), role__in=roles,
+    ).values("user_id")
+
+    # Get group IDs that have access to authorized products/product types
+    product_group_ids = Product_Group.objects.filter(
+        product_id__in=Subquery(authorized_products), role__in=roles,
+    ).values("group_id")
+
+    product_type_group_ids = Product_Type_Group.objects.filter(
+        product_type_id__in=Subquery(authorized_product_types), role__in=roles,
+    ).values("group_id")
+
+    # Get users from those groups
+    group_member_users = Dojo_Group_Member.objects.filter(
+        Q(group_id__in=Subquery(product_group_ids))
+        | Q(group_id__in=Subquery(product_type_group_ids)),
+    ).values("user_id")
+
+    return users.filter(
+        Q(id__in=Subquery(product_member_users))
+        | Q(id__in=Subquery(product_type_member_users))
+        | Q(id__in=Subquery(group_member_users))
         | Q(global_role__role__in=roles)
-        | Q(is_superuser=True))
+        | Q(is_superuser=True),
+    )

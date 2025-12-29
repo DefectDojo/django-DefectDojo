@@ -788,8 +788,6 @@ class QuickReportView(View):
 
 def get_excludes():
     return ["SEVERITIES", "age", "github_issue", "jira_issue", "objects", "risk_acceptance",
-    "test__engagement__product__authorized_group", "test__engagement__product__member",
-    "test__engagement__product__prod_type__authorized_group", "test__engagement__product__prod_type__member",
     "unsaved_endpoints", "unsaved_vulnerability_ids", "unsaved_files", "unsaved_request", "unsaved_response",
     "unsaved_tags", "vulnerability_ids", "cve"]
 
