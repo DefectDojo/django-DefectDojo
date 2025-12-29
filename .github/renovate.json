@@ -13,8 +13,7 @@
     "components/package.json",
     "components/package-lock.json",
     "dojo/components/yarn.lock",
-    "dojo/components/package.json",
-    "Dockerfile**"
+    "dojo/components/package.json"
   ],
   "ignoreDeps": [],
   "packageRules": [{

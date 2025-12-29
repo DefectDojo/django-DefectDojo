@@ -968,8 +968,9 @@ class EditFinding(View):
             logger.debug("jform.jira_issue: %s", context["jform"].cleaned_data.get("jira_issue"))
             logger.debug(JFORM_PUSH_TO_JIRA_MESSAGE, context["jform"].cleaned_data.get("push_to_jira"))
             # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
+            push_to_jira_checkbox = context["jform"].cleaned_data.get("push_to_jira")
             push_all_jira_issues = jira_helper.is_push_all_issues(finding)
-            push_to_jira = push_all_jira_issues or context["jform"].cleaned_data.get("push_to_jira")
+            push_to_jira = push_all_jira_issues or push_to_jira_checkbox or jira_helper.is_keep_in_sync_with_jira(finding)
             logger.debug("push_to_jira: %s", push_to_jira)
             logger.debug("push_all_jira_issues: %s", push_all_jira_issues)
             logger.debug("has_jira_group_issue: %s", finding.has_jira_group_issue)
@@ -996,12 +997,6 @@ class EditFinding(View):
                     jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
                     jira_message = "Linked a JIRA issue successfully."
             # any existing finding should be updated
-            jira_instance = jira_helper.get_jira_instance(finding)
-            push_to_jira = (
-                push_to_jira
-                and not (push_to_jira and finding.finding_group)
-                and (finding.has_jira_issue or (jira_instance and jira_instance.finding_jira_sync))
-            )
             # Determine if a message should be added
             if jira_message:
                 messages.add_message(
