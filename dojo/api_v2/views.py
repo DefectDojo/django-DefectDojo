@@ -4,6 +4,7 @@ import mimetypes
 from datetime import datetime
 from pathlib import Path
 
+import pghistory
 import tagulous
 from crum import get_current_user
 from dateutil.relativedelta import relativedelta
@@ -2530,7 +2531,17 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
 
+        # Add pghistory context for audit trail (adds to existing middleware context).
+        # /api/vue is the Pro UI
+        source = "import_vue" if "/api/vue/" in self.request.path else "import_api"
+        pghistory.context(
+            source=source,
+            scan_type=serializer.validated_data.get("scan_type"),
+        )
         serializer.save(push_to_jira=push_to_jira)
+        # Add test_id to pghistory context now that test is created
+        if test_id := serializer.data.get("test"):
+            pghistory.context(test_id=test_id)
 
     def get_queryset(self):
         return get_authorized_tests(Permissions.Import_Scan_Result)
@@ -2678,7 +2689,22 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
         logger.debug("push_to_jira: %s", push_to_jira)
+        # Add pghistory context for audit trail (adds to existing middleware context)
+        # For reimport, test may already exist or be created during save
+        test_id = test.id if test else serializer.validated_data.get("test", {})
+        if hasattr(test_id, "id"):
+            test_id = test_id.id
+        # /api/vue is the Pro UI
+        source = "reimport_vue" if "/api/vue/" in self.request.path else "reimport_api"
+        pghistory.context(
+            source=source,
+            test_id=test_id if isinstance(test_id, int) else None,
+            scan_type=serializer.validated_data.get("scan_type"),
+        )
         serializer.save(push_to_jira=push_to_jira)
+        # Update test_id if it wasn't available before save
+        if test_id_from_response := serializer.data.get("test"):
+            pghistory.context(test_id=test_id_from_response)
 
 
 # Authorization: configuration
