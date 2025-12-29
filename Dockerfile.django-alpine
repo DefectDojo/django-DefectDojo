@@ -16,14 +16,12 @@ RUN \
     xmlsec \
     git \
     util-linux \
-    curl-dev \
     openssl \
     && \
     rm -rf /var/cache/apk/* && \
   true
 COPY requirements.txt ./
-RUN export PYCURL_SSL_LIBRARY=openssl && \
-    pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM base AS release
 WORKDIR /app
@@ -42,8 +40,9 @@ RUN \
     git \
     util-linux \
     postgresql16-client \
-    curl-dev \
     openssl \
+    # py3-curl for Celery SQS broker support (avoids compilation)
+    py3-curl \
     # uwsgi from system packages (avoids compilation)
     uwsgi \
     uwsgi-python3 \

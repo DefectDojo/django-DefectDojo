@@ -16,15 +16,12 @@ RUN \
     xmlsec1 \
     git \
     uuid-runtime \
-    # libcurl4-openssl-dev is required for installing pycurl python package
-    libcurl4-openssl-dev \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN export PYCURL_SSL_LIBRARY=openssl && \
-    pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM base AS release
 WORKDIR /app
@@ -47,8 +44,8 @@ RUN \
     uuid-runtime \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
-    # libcurl4-openssl-dev is required for installing pycurl python package
-    libcurl4-openssl-dev \
+    # python3-pycurl for Celery SQS broker support (avoids compilation)
+    python3-pycurl \
     # uwsgi from system packages (avoids compilation)
     uwsgi \
     uwsgi-plugin-python3 \
