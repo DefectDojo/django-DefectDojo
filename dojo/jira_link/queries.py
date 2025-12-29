@@ -3,8 +3,11 @@ from django.db.models import Q, Subquery
 
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 from dojo.models import JIRA_Issue, JIRA_Project, Product_Group, Product_Member, Product_Type_Group, Product_Type_Member
+from dojo.request_cache import cache_for_request
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_jira_projects(permission, user=None):
 
     if user is None:
@@ -56,6 +59,8 @@ def get_authorized_jira_projects(permission, user=None):
     )
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_jira_issues(permission):
     user = get_current_user()
 

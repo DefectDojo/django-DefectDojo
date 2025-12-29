@@ -22,8 +22,11 @@ from dojo.models import (
     Product_Type_Group,
     Product_Type_Member,
 )
+from dojo.request_cache import cache_for_request
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_products(permission, user=None):
 
     if user is None:
@@ -144,6 +147,8 @@ def get_authorized_product_groups(permission):
     return Product_Group.objects.filter(product__in=products).order_by("id").select_related("role")
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_app_analysis(permission):
     user = get_current_user()
 
@@ -184,6 +189,8 @@ def get_authorized_app_analysis(permission):
     ).order_by("id")
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_dojo_meta(permission):
     user = get_current_user()
 
@@ -237,6 +244,8 @@ def get_authorized_dojo_meta(permission):
     ).order_by("id")
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_languages(permission):
     user = get_current_user()
 
@@ -277,6 +286,8 @@ def get_authorized_languages(permission):
     ).order_by("id")
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_engagement_presets(permission):
     user = get_current_user()
 
@@ -317,6 +328,8 @@ def get_authorized_engagement_presets(permission):
     ).order_by("id")
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_product_api_scan_configurations(permission):
     user = get_current_user()
 

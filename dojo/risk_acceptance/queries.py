@@ -3,8 +3,11 @@ from django.db.models import Q, Subquery
 
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 from dojo.models import Product_Group, Product_Member, Product_Type_Group, Product_Type_Member, Risk_Acceptance
+from dojo.request_cache import cache_for_request
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_risk_acceptances(permission):
     user = get_current_user()
 

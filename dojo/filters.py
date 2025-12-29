@@ -38,7 +38,7 @@ from polymorphic.base import ManagerInheritanceWarning
 # from tagulous.forms import TagWidget
 # import tagulous
 from dojo.authorization.roles_permissions import Permissions
-from dojo.endpoint.queries import get_authorized_endpoints
+from dojo.endpoint.queries import get_authorized_endpoints_for_queryset
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.helper import (
     ACCEPTED_FINDINGS_QUERY,
@@ -52,8 +52,8 @@ from dojo.finding.helper import (
     VERIFIED_FINDINGS_QUERY,
     WAS_ACCEPTED_FINDINGS_QUERY,
 )
-from dojo.finding.queries import get_authorized_findings
-from dojo.finding_group.queries import get_authorized_finding_groups
+from dojo.finding.queries import get_authorized_findings_for_queryset
+from dojo.finding_group.queries import get_authorized_finding_groups_for_queryset
 from dojo.labels import get_labels
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
@@ -2098,7 +2098,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         if self.form.fields.get("test__engagement__product"):
             self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
         if self.form.fields.get("finding_group", None):
-            self.form.fields["finding_group"].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View, queryset=finding_group_query)
+            self.form.fields["finding_group"].queryset = get_authorized_finding_groups_for_queryset(Permissions.Finding_Group_View, finding_group_query)
         self.form.fields["reporter"].queryset = get_authorized_users(Permissions.Finding_View)
         self.form.fields["reviewers"].queryset = self.form.fields["reporter"].queryset
 
@@ -2205,7 +2205,7 @@ class SimilarFindingHelper(FilterSet):
 
     def filter_queryset(self, *args: list, **kwargs: dict):
         queryset = super().filter_queryset(*args, **kwargs)
-        queryset = get_authorized_findings(Permissions.Finding_View, queryset, self.user)
+        queryset = get_authorized_findings_for_queryset(Permissions.Finding_View, queryset, self.user)
         return queryset.exclude(pk=self.finding.pk)
 
 
@@ -2751,7 +2751,7 @@ class EndpointFilter(EndpointFilterHelper, DojoFilter):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_endpoints(Permissions.Endpoint_View, parent)
+        return get_authorized_endpoints_for_queryset(Permissions.Endpoint_View, parent)
 
     class Meta:
         model = Endpoint
@@ -2892,7 +2892,7 @@ class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_endpoints(Permissions.Endpoint_View, parent)
+        return get_authorized_endpoints_for_queryset(Permissions.Endpoint_View, parent)
 
     class Meta:
         model = Endpoint
@@ -3240,7 +3240,7 @@ class ReportFindingFilterHelper(FilterSet):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_findings(Permissions.Finding_View, parent)
+        return get_authorized_findings_for_queryset(Permissions.Finding_View, parent)
 
 
 class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
@@ -3260,7 +3260,7 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
         # duplicate_finding queryset needs to restricted in line with permissions
         # and inline with report scope to avoid a dropdown with 100K entries
         duplicate_finding_query_set = self.form.fields["duplicate_finding"].queryset
-        duplicate_finding_query_set = get_authorized_findings(Permissions.Finding_View, duplicate_finding_query_set)
+        duplicate_finding_query_set = get_authorized_findings_for_queryset(Permissions.Finding_View, duplicate_finding_query_set)
 
         if self.test:
             duplicate_finding_query_set = duplicate_finding_query_set.filter(test=self.test)

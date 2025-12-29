@@ -14,6 +14,7 @@ from dojo.endpoint.queries import get_authorized_endpoint_status, get_authorized
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import (
     get_authorized_findings,
+    get_authorized_findings_for_queryset,
     get_authorized_stub_findings,
     get_authorized_vulnerability_ids,
 )
@@ -317,7 +318,7 @@ class TestGetAuthorizedFindings(AuthorizationQueriesTestBase):
     def test_queryset_parameter_filters_correctly(self):
         """Passing a queryset should filter within that queryset"""
         base_queryset = Finding.objects.filter(severity="High")
-        findings = get_authorized_findings(Permissions.Finding_View, queryset=base_queryset, user=self.superuser)
+        findings = get_authorized_findings_for_queryset(Permissions.Finding_View, base_queryset, user=self.superuser)
         self.assertIn(self.finding_1, findings)
         self.assertNotIn(self.finding_2, findings)
 

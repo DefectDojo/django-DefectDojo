@@ -10,8 +10,11 @@ from dojo.authorization.authorization import (
 from dojo.authorization.roles_permissions import Permissions
 from dojo.group.queries import get_authorized_groups
 from dojo.models import Global_Role, Product_Type, Product_Type_Group, Product_Type_Member
+from dojo.request_cache import cache_for_request
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_product_types(permission):
     user = get_current_user()
 

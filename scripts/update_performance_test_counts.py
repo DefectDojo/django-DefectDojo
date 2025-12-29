@@ -219,66 +219,62 @@ def parse_test_output(output: str) -> list[TestCount]:
     # The test output format is:
     # FAIL: test_name (step='import1', metric='queries')
     # AssertionError: 118 != 120 : 118 queries executed, 120 expected
-    # OR for async tasks:
+    #
+    # For async tasks we may see:
     # FAIL: test_name (step='import1', metric='async_tasks')
-    # AssertionError: 7 != 8 : 7 async tasks executed, 8 expected
+    # AssertionError: Expected 7 celery tasks, but 6 were created.
 
-    # Pattern to match the full failure block:
-    # FAIL: test_name (full.path.to.test) (step='...', metric='...')
-    # AssertionError: actual != expected : actual ... executed, expected expected
-    # The test name may include the full path in parentheses, so we extract just the method name
-    failure_pattern = re.compile(
-        r"FAIL:\s+(test_\w+)\s+\([^)]+\)\s+\(step=['\"](\w+)['\"],\s*metric=['\"](\w+)['\"]\)\s*\n"
-        r".*?AssertionError:\s+(\d+)\s+!=\s+(\d+)\s+:\s+\d+\s+(?:queries|async tasks?)\s+executed,\s+\d+\s+expected",
-        re.MULTILINE | re.DOTALL,
+    # Parse failures by splitting into individual FAIL blocks, to avoid accidentally
+    # associating an assertion from a different FAIL with the wrong metric.
+    fail_header = re.compile(
+        r"^FAIL:\s+(test_\w+)\s+\([^)]+\)\s+\(step=['\"](\w+)['\"],\s*metric=['\"](\w+)['\"]\)\s*$",
+        re.MULTILINE,
     )
 
-    for match in failure_pattern.finditer(output):
+    headers = list(fail_header.finditer(output))
+    for idx, match in enumerate(headers):
         test_name = match.group(1)
         step = match.group(2)
         metric = match.group(3)
-        actual = int(match.group(4))
-        expected = int(match.group(5))
+
+        block_start = match.end()
+        block_end = headers[idx + 1].start() if idx + 1 < len(headers) else len(output)
+        block = output[block_start:block_end]
+
+        actual: int | None = None
+        expected: int | None = None
+
+        if metric == "queries":
+            m = re.search(
+                r"AssertionError:\s+(\d+)\s+!=\s+(\d+)\s+:\s+\d+\s+queries\s+executed,\s+\d+\s+expected",
+                block,
+            )
+            if m:
+                actual = int(m.group(1))
+                expected = int(m.group(2))
+        elif metric == "async_tasks":
+            # Celery task count assertions can be in a different format.
+            m = re.search(r"AssertionError:\s+Expected\s+(\d+)\s+celery tasks?,\s+but\s+(\d+)\s+were created\.", block)
+            if m:
+                expected = int(m.group(1))
+                actual = int(m.group(2))
+            else:
+                m = re.search(
+                    r"AssertionError:\s+(\d+)\s+!=\s+(\d+)\s+:\s+\d+\s+async tasks?\s+executed,\s+\d+\s+expected",
+                    block,
+                )
+                if m:
+                    actual = int(m.group(1))
+                    expected = int(m.group(2))
+
+        if actual is None or expected is None:
+            continue
 
         count = TestCount(test_name, step, metric)
         count.actual = actual
         count.expected = expected
         count.difference = expected - actual
         counts.append(count)
-
-    # Also try a simpler pattern in case the format is slightly different
-    if not counts:
-        # Look for lines with step/metric followed by AssertionError on nearby lines
-        lines = output.split("\n")
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-
-            # Look for FAIL: test_name (may include full path in parentheses)
-            # Format: FAIL: test_name (full.path) (step='...', metric='...')
-            fail_match = re.search(r"FAIL:\s+(test_\w+)\s+\([^)]+\)\s+\(step=['\"](\w+)['\"],\s*metric=['\"](\w+)['\"]\)", line)
-            if fail_match:
-                test_name = fail_match.group(1)
-                step = fail_match.group(2)
-                metric = fail_match.group(3)
-                # Look ahead for AssertionError
-                for j in range(i, min(i + 15, len(lines))):
-                    assertion_match = re.search(
-                        r"AssertionError:\s+(\d+)\s+!=\s+(\d+)\s+:\s+\d+\s+(?:queries|async tasks?)\s+executed,\s+\d+\s+expected",
-                        lines[j],
-                    )
-
-                    if assertion_match:
-                        actual = int(assertion_match.group(1))
-                        expected = int(assertion_match.group(2))
-
-                        count = TestCount(test_name, step, metric)
-                        count.actual = actual
-                        count.expected = expected
-                        count.difference = expected - actual
-                        counts.append(count)
-                        break
-            i += 1
 
     if counts:
         print(f"\n📊 Parsed {len(counts)} count mismatch(es) from test output:")
@@ -378,6 +374,27 @@ def update_test_file(counts: list[TestCount]):
 
     content = TEST_FILE.read_text()
 
+    def _extract_call_span(method_content: str, call_name: str) -> tuple[int, int] | None:
+        """Return (start, end) indices of the first call to `call_name(...)` within method_content."""
+        start = method_content.find(call_name)
+        if start == -1:
+            return None
+
+        open_paren = method_content.find("(", start)
+        if open_paren == -1:
+            return None
+
+        depth = 0
+        for idx in range(open_paren, len(method_content)):
+            ch = method_content[idx]
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+                if depth == 0:
+                    return start, idx + 1
+        return None
+
     # Create a mapping of test_name -> step_metric -> new_value
     updates = {}
     for count in counts:
@@ -419,100 +436,49 @@ def update_test_file(counts: list[TestCount]):
         test_method_start = test_match.start()
         test_method_end = test_match.end()
 
-        # Try to find _import_reimport_performance call first
-        perf_call_pattern_import_reimport = re.compile(
-            r"(self\._import_reimport_performance\s*\(\s*)"
-            r"expected_num_queries1\s*=\s*(\d+)\s*,\s*"
-            r"expected_num_async_tasks1\s*=\s*(\d+)\s*,\s*"
-            r"expected_num_queries2\s*=\s*(\d+)\s*,\s*"
-            r"expected_num_async_tasks2\s*=\s*(\d+)\s*,\s*"
-            r"expected_num_queries3\s*=\s*(\d+)\s*,\s*"
-            r"expected_num_async_tasks3\s*=\s*(\d+)\s*,"
-            r"(\s*\))",
-            re.DOTALL,
-        )
-
-        # Try to find _deduplication_performance call
-        perf_call_pattern_deduplication = re.compile(
-            r"(self\._deduplication_performance\s*\(\s*)"
-            r"expected_num_queries1\s*=\s*(\d+)\s*,\s*"
-            r"expected_num_async_tasks1\s*=\s*(\d+)\s*,\s*"
-            r"expected_num_queries2\s*=\s*(\d+)\s*,\s*"
-            r"expected_num_async_tasks2\s*=\s*(\d+)\s*,"
-            r"(\s*\))",
-            re.DOTALL,
-        )
-
-        perf_match = perf_call_pattern_import_reimport.search(test_method_content)
-        method_type = "import_reimport"
+        call_span = _extract_call_span(test_method_content, "self._import_reimport_performance")
         param_map = param_map_import_reimport
-        param_order = [
-            "import1_queries",
-            "import1_async_tasks",
-            "reimport1_queries",
-            "reimport1_async_tasks",
-            "reimport2_queries",
-            "reimport2_async_tasks",
-        ]
-
-        if not perf_match:
-            perf_match = perf_call_pattern_deduplication.search(test_method_content)
-            if perf_match:
-                method_type = "deduplication"
+        if call_span is None:
+            call_span = _extract_call_span(test_method_content, "self._deduplication_performance")
+            if call_span is not None:
                 param_map = param_map_deduplication
-                param_order = [
-                    "first_import_queries",
-                    "first_import_async_tasks",
-                    "second_import_queries",
-                    "second_import_async_tasks",
-                ]
             else:
-                print(f"⚠️  Warning: Could not find _import_reimport_performance or _deduplication_performance call in {test_name}")
+                print(
+                    f"⚠️  Warning: Could not find _import_reimport_performance or _deduplication_performance call in {test_name}",
+                )
                 continue
 
-        # Get the indentation from the original call (first line after opening paren)
-        call_lines = test_method_content[perf_match.start():perf_match.end()].split("\n")
-        indent = ""
-        for line in call_lines:
-            if "expected_num_queries1" in line:
-                # Extract indentation (spaces before the parameter)
-                indent_match = re.match(r"(\s*)expected_num_queries1", line)
-                if indent_match:
-                    indent = indent_match.group(1)
-                break
+        call_start, call_end = call_span
+        original_call = test_method_content[call_start:call_end]
+        updated_call = original_call
 
-        # If we couldn't find indentation, use a default
-        if not indent:
-            indent = "            "  # 12 spaces default
-
-        replacement_parts = [perf_match.group(1)]  # Opening: "self._import_reimport_performance("
         updated_params = []
-        for i, step_metric in enumerate(param_order):
-            param_name = param_map[step_metric]
-            old_value = int(perf_match.group(i + 2))  # +2 because group 1 is the opening
-            if step_metric in test_updates:
-                new_value = test_updates[step_metric]
-                if old_value != new_value:
-                    updated_params.append(f"{param_name}: {old_value} → {new_value}")
-            else:
-                # Keep the existing value
-                new_value = old_value
-
-            replacement_parts.append(f"{indent}{param_name}={new_value},")
-
-        # Closing parenthesis - group number depends on method type
-        closing_group = 8 if method_type == "import_reimport" else 6
-        replacement_parts.append(perf_match.group(closing_group))  # Closing parenthesis
-        replacement = "\n".join(replacement_parts)
+        for step_metric, param_name in param_map.items():
+            if step_metric not in test_updates:
+                continue
+            new_value = test_updates[step_metric]
+            m = re.search(rf"({re.escape(param_name)}\s*=\s*)(\d+)", updated_call)
+            if not m:
+                continue
+            old_value = int(m.group(2))
+            if old_value == new_value:
+                continue
+            updated_params.append(f"{param_name}: {old_value} → {new_value}")
+            updated_call = re.sub(
+                rf"({re.escape(param_name)}\s*=\s*)\d+",
+                rf"\g<1>{new_value}",
+                updated_call,
+                count=1,
+            )
 
         if updated_params:
             print(f"    Updated: {', '.join(updated_params)}")
 
-        # Replace the method call within the test method content
+        # Replace the method call within the test method content (in-place; do not reformat)
         updated_method_content = (
-            test_method_content[: perf_match.start()]
-            + replacement
-            + test_method_content[perf_match.end() :]
+            test_method_content[:call_start]
+            + updated_call
+            + test_method_content[call_end:]
         )
 
         # Replace the entire test method in the original content
@@ -545,6 +511,30 @@ def verify_tests(test_class: str) -> bool:
     else:  # noqa: RET505
         print("\n✅ All tests pass!")
         return True
+
+
+def verify_and_get_mismatches(test_class: str) -> tuple[bool, list[TestCount]]:
+    """Run the full test class and return (success, parsed mismatches)."""
+    print(f"Verifying tests for {test_class}...")
+    output, return_code = run_tests(test_class)
+
+    success, error_msg = check_test_execution_success(output, return_code)
+    if not success:
+        print(f"\n❌ Test execution failed: {error_msg}")
+        return False, []
+
+    counts = parse_test_output(output)
+    if counts:
+        print("\n❌ Some tests still have count mismatches:")
+        for count in counts:
+            print(
+                f"  {count.test_name} - {count.step} {count.metric}: "
+                f"expected {count.expected}, got {count.actual}",
+            )
+        return False, counts
+
+    print("\n✅ All tests pass!")
+    return True, []
 
 
 def main():
@@ -657,7 +647,17 @@ def main():
         if all_counts:
             print(f"\n{'=' * 80}")
             print(f"✅ Updated {len(all_counts)} count(s) across {len({c.test_name for c in all_counts})} test(s)")
-            print("\nNext step: Run --verify to ensure all tests pass")
+            # Some performance counts can vary depending on test ordering / keepdb state.
+            # Do a final full-suite pass and apply any remaining mismatches so the suite passes as run in CI.
+            print("\nRunning a final verify pass for stability...")
+            success, suite_mismatches = verify_and_get_mismatches(args.test_class)
+            if not success and suite_mismatches:
+                print("\nApplying remaining mismatches from full-suite run...")
+                update_test_file(suite_mismatches)
+                print("\nRe-running verify...")
+                success, _ = verify_and_get_mismatches(args.test_class)
+                sys.exit(0 if success else 1)
+            sys.exit(0 if success else 1)
         else:
             print(f"\n{'=' * 80}")
             print("\n✅ No differences found. All tests are already up to date.")
