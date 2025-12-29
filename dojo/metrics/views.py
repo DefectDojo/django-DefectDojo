@@ -320,8 +320,7 @@ def metrics_panel_tenable(request: HttpRequest) -> HttpResponse:
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
     return render(request, 'dojo/generic_view.html', {
         'actions': page_name,
-        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/metrics/tenable",  
-        'parameters': base_params,
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/metrics/tenable{base_params}",
         'user': user})
 
 
