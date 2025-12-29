@@ -22,7 +22,6 @@ RUN \
     openssl \
     libffi-dev \
     python3-dev \
-    libpq-dev \
     && \
     rm -rf /var/cache/apk/* && \
   true
