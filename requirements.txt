@@ -54,7 +54,7 @@ django-split-settings==1.3.2
 git+https://github.com/valentijnscholten/django-tagulous.git@2b514f9140acfce608238d1426d864185b3c60a2#egg=django-tagulous
 PyJWT==2.10.1
 cvss==3.6
-django-fieldsignals==0.7.0
+django-fieldsignals==0.8.0
 hyperlink==21.0.0
 djangosaml2==1.11.1
 drf-spectacular==0.29.0
