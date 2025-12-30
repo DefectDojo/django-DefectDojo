@@ -1,6 +1,7 @@
 import logging
 from contextlib import suppress
 
+import pghistory
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
@@ -175,39 +176,42 @@ def expiration_handler(*args, **kwargs):
     If configured also sends a JIRA comment in both case to each jira issue.
     This is per finding.
     """
-    try:
-        system_settings = System_Settings.objects.get()
-    except System_Settings.DoesNotExist:
-        logger.warning("Unable to get system_settings, skipping risk acceptance expiration job")
+    # Wrap with pghistory context for audit trail
+    with pghistory.context(source="risk_acceptance_expiration"):
+        try:
+            system_settings = System_Settings.objects.get()
+        except System_Settings.DoesNotExist:
+            logger.warning("Unable to get system_settings, skipping risk acceptance expiration job")
+            return
 
-    risk_acceptances = get_expired_risk_acceptances_to_handle()
+        risk_acceptances = get_expired_risk_acceptances_to_handle()
 
-    logger.info("expiring %i risk acceptances that are past expiration date", len(risk_acceptances))
-    for risk_acceptance in risk_acceptances:
-        expire_now(risk_acceptance)
-        # notification created by expire_now code
-
-    heads_up_days = system_settings.risk_acceptance_notify_before_expiration
-    if heads_up_days > 0:
-        risk_acceptances = get_almost_expired_risk_acceptances_to_handle(heads_up_days)
-
-        logger.info("notifying for %i risk acceptances that are expiring within %i days", len(risk_acceptances), heads_up_days)
+        logger.info("expiring %i risk acceptances that are past expiration date", len(risk_acceptances))
         for risk_acceptance in risk_acceptances:
-            logger.debug("notifying for risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
+            expire_now(risk_acceptance)
+            # notification created by expire_now code
 
-            notification_title = "Risk acceptance with " + str(len(risk_acceptance.accepted_findings.all())) + " accepted findings will expire on " + \
-                timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
-                str(risk_acceptance.engagement.product) + ": " + str(risk_acceptance.engagement.name)
+        heads_up_days = system_settings.risk_acceptance_notify_before_expiration
+        if heads_up_days > 0:
+            risk_acceptances = get_almost_expired_risk_acceptances_to_handle(heads_up_days)
 
-            create_notification(event="risk_acceptance_expiration", title=notification_title, risk_acceptance=risk_acceptance,
-                                accepted_findings=risk_acceptance.accepted_findings.all(), engagement=risk_acceptance.engagement,
-                                product=risk_acceptance.engagement.product,
-                                url=reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)))
+            logger.info("notifying for %i risk acceptances that are expiring within %i days", len(risk_acceptances), heads_up_days)
+            for risk_acceptance in risk_acceptances:
+                logger.debug("notifying for risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
-            post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_warning_message_creator, heads_up_days)
+                notification_title = "Risk acceptance with " + str(len(risk_acceptance.accepted_findings.all())) + " accepted findings will expire on " + \
+                    timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
+                    str(risk_acceptance.engagement.product) + ": " + str(risk_acceptance.engagement.name)
 
-            risk_acceptance.expiration_date_warned = timezone.now()
-            risk_acceptance.save()
+                create_notification(event="risk_acceptance_expiration", title=notification_title, risk_acceptance=risk_acceptance,
+                                    accepted_findings=risk_acceptance.accepted_findings.all(), engagement=risk_acceptance.engagement,
+                                    product=risk_acceptance.engagement.product,
+                                    url=reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)))
+
+                post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_warning_message_creator, heads_up_days)
+
+                risk_acceptance.expiration_date_warned = timezone.now()
+                risk_acceptance.save()
 
 
 def get_view_risk_acceptance(risk_acceptance: Risk_Acceptance) -> str:

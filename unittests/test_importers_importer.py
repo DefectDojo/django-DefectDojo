@@ -2,6 +2,7 @@ import logging
 import uuid
 from unittest.mock import patch
 
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -157,6 +158,237 @@ class TestDojoDefaultImporter(DojoTestCase):
             self.assertEqual("GitLab SAST Report", test.test_type.name)
             self.assertEqual(1, len_new_findings)
             self.assertEqual(0, len_closed_findings)
+
+    def test_import_generic_with_custom_test_type(self):
+        """Test Case 4: Initial import (should not trigger validation, should create new test)"""
+        generic_test_type_1 = get_unit_tests_scans_path("generic") / "generic_test_type_1.json"
+        with generic_test_type_1.open(encoding="utf-8") as scan:
+            scan_type = "Generic Findings Import"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_generic")
+            product, _ = Product.objects.get_or_create(
+                name="TestGenericImporter",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Generic Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            importer = DefaultImporter(**import_options)
+            test, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(scan)
+            # Verify test is created successfully
+            self.assertIsNotNone(test)
+            # Verify test_type is set correctly based on report's type field
+            self.assertEqual("Tool1 Scan (Generic Findings Import)", test.test_type.name)
+            self.assertEqual(1, len_new_findings)
+            self.assertEqual(0, len_closed_findings)
+
+    def test_reimport_generic_with_matching_test_type(self):
+        """Test Case 1: Reimport with matching test_type (should succeed)"""
+        generic_test_type_1 = get_unit_tests_scans_path("generic") / "generic_test_type_1.json"
+        with generic_test_type_1.open(encoding="utf-8") as scan:
+            scan_type = "Generic Findings Import"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_generic_reimport")
+            product, _ = Product.objects.get_or_create(
+                name="TestGenericReimport",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Generic Reimport Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            # Initial import
+            importer = DefaultImporter(**import_options)
+            test, _, _, _, _, _, _ = importer.process_scan(scan)
+            original_test_type_name = test.test_type.name
+            self.assertEqual("Tool1 Scan (Generic Findings Import)", original_test_type_name)
+
+            # Reimport with same test_type
+            reimport_options = {
+                "test": test,
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "close_old_findings": False,
+            }
+            reimporter = DefaultReImporter(**reimport_options)
+            # Reset file pointer for reimport
+            scan.seek(0)
+            test_after_reimport, _, _, _, _, _, _ = reimporter.process_scan(scan)
+            # Verify reimport succeeds without ValidationError
+            self.assertEqual(test.id, test_after_reimport.id)
+            # Verify test_type remains unchanged
+            test.refresh_from_db()
+            self.assertEqual(original_test_type_name, test.test_type.name)
+
+    def test_reimport_generic_with_different_test_type(self):
+        """Test Case 2: Reimport with different test_type (should fail with ValidationError)"""
+        generic_test_type_1 = get_unit_tests_scans_path("generic") / "generic_test_type_1.json"
+        generic_test_type_2 = get_unit_tests_scans_path("generic") / "generic_test_type_2.json"
+        with generic_test_type_1.open(encoding="utf-8") as scan:
+            scan_type = "Generic Findings Import"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_generic_mismatch")
+            product, _ = Product.objects.get_or_create(
+                name="TestGenericMismatch",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Generic Mismatch Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            # Initial import with Tool1
+            importer = DefaultImporter(**import_options)
+            test, _, _, _, _, _, _ = importer.process_scan(scan)
+            original_test_type_name = test.test_type.name
+            self.assertEqual("Tool1 Scan (Generic Findings Import)", original_test_type_name)
+            original_finding_count = test.finding_set.count()
+
+            # Attempt to reimport with Tool2 (different test_type)
+            reimport_options = {
+                "test": test,
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "close_old_findings": False,
+            }
+            reimporter = DefaultReImporter(**reimport_options)
+            # Reset file pointer and use different file
+            with generic_test_type_2.open(encoding="utf-8") as scan2:
+                # Verify ValidationError is raised with appropriate message
+                with self.assertRaises(ValidationError) as context:
+                    reimporter.process_scan(scan2)
+                error_message = str(context.exception)
+                self.assertIn("Test type mismatch", error_message)
+                self.assertIn("Tool1 Scan (Generic Findings Import)", error_message)
+                self.assertIn("Tool2 Scan (Generic Findings Import)", error_message)
+                self.assertIn(str(test.id), error_message)
+
+            # Verify no findings are processed/updated
+            test.refresh_from_db()
+            self.assertEqual(original_finding_count, test.finding_set.count())
+            # Verify test_type remains unchanged
+            self.assertEqual(original_test_type_name, test.test_type.name)
+
+    def test_reimport_generic_type_equals_scan_type(self):
+        """Test reimport when type field equals scan_type (should succeed)"""
+        generic_no_type = get_unit_tests_scans_path("generic") / "generic_no_type.json"
+        generic_test_type_equals_scan_type = get_unit_tests_scans_path("generic") / "generic_test_type_equals_scan_type.json"
+        with generic_no_type.open(encoding="utf-8") as scan:
+            scan_type = "Generic Findings Import"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_generic_type_equals_scan_type")
+            product, _ = Product.objects.get_or_create(
+                name="TestGenericTypeEqualsScanType",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Generic Type Equals Scan Type Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            # Initial import without type field
+            importer = DefaultImporter(**import_options)
+            test, _, _, _, _, _, _ = importer.process_scan(scan)
+            original_test_type_name = test.test_type.name
+            # Should create test_type as just scan_type (no type field)
+            self.assertEqual("Generic Findings Import", original_test_type_name)
+
+            # Reimport with type field equal to scan_type
+            reimport_options = {
+                "test": test,
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "close_old_findings": False,
+            }
+            reimporter = DefaultReImporter(**reimport_options)
+            # Use file with type field equal to scan_type
+            with generic_test_type_equals_scan_type.open(encoding="utf-8") as scan2:
+                # Should succeed without ValidationError
+                test_after_reimport, _, len_new_findings, _, _, _, _ = reimporter.process_scan(scan2)
+                # Verify reimport succeeds
+                self.assertEqual(test.id, test_after_reimport.id)
+                # Verify test_type remains unchanged (should still be "Generic Findings Import")
+                test.refresh_from_db()
+                self.assertEqual("Generic Findings Import", test.test_type.name)
+                # Verify findings were processed
+                self.assertGreater(len_new_findings, 0)
 
 
 class FlexibleImportTestAPI(DojoAPITestCase):
