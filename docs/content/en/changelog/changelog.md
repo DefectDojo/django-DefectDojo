@@ -10,6 +10,11 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Dec 2025: v2.53
 
+### Dec 29, 2025: v2.53.5
+
+* **(Pro UI)** Added Finding count columns to Engagement table.
+* **(Pro UI)** Enter/Return no longer automatically submits forms.
+
 ### Dec 22, 2025: v2.53.4
 
 * **(Pro UI)** Asset Hierarchy now uses separate tabs for Asset selection and for the rendered Asset tree:
