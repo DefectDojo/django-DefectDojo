@@ -777,6 +777,11 @@ def add_endpoints(new_finding, form):
             endpoint=endpoint, defaults={"date": form.cleaned_data["date"] or timezone.now()})
 
 
+def sanitize_vulnerability_ids(vulnerability_ids) -> None:
+    """Remove undisired vulnerability id values"""
+    vulnerability_ids = [x for x in vulnerability_ids if x.strip()]
+
+
 def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool = True):
     # Remove duplicates
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
@@ -787,6 +792,8 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
     if delete_existing:
         Vulnerability_Id.objects.filter(finding=finding).delete()
 
+    # Remove undisired vulnerability ids
+    sanitize_vulnerability_ids(vulnerability_ids)
     # Save new vulnerability ids
     # Using bulk create throws Django 50 warnings about unsaved models...
     for vulnerability_id in vulnerability_ids:
@@ -804,6 +811,8 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
     # Remove duplicates and empty strings
     vulnerability_ids = list(dict.fromkeys([vid.strip() for vid in vulnerability_ids if vid.strip()]))
 
+    # Remove undisired vulnerability ids
+    sanitize_vulnerability_ids(vulnerability_ids)
     # Save as newline-separated string
     finding_template.vulnerability_ids_text = "\n".join(vulnerability_ids) if vulnerability_ids else None
 
