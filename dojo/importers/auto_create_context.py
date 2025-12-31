@@ -1,10 +1,9 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from crum import get_current_user
 from django.db import transaction
-from django.http.request import QueryDict
 from django.utils import timezone
 
 from dojo.models import (
@@ -17,6 +16,9 @@ from dojo.models import (
     Test,
 )
 from dojo.utils import get_last_object_or_none, get_object_or_none
+
+if TYPE_CHECKING:
+    from django.http.request import QueryDict
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

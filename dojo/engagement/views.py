@@ -9,6 +9,7 @@ from functools import partial, reduce
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from time import strftime
+from typing import TYPE_CHECKING
 
 import pghistory
 from django.conf import settings
@@ -71,7 +72,6 @@ from dojo.forms import (
     TypedNoteForm,
     UploadThreatForm,
 )
-from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.models import (
     Check_List,
@@ -118,6 +118,9 @@ from dojo.utils import (
     handle_uploaded_threat,
     redirect_to_return_url_or_else,
 )
+
+if TYPE_CHECKING:
+    from dojo.importers.base_importer import BaseImporter
 
 logger = logging.getLogger(__name__)
 

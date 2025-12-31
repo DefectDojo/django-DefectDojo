@@ -1,15 +1,18 @@
 import logging
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.views import View
 
 from dojo.forms import SystemSettingsForm
 from dojo.models import System_Settings
 from dojo.utils import add_breadcrumb, get_celery_worker_status
+
+if TYPE_CHECKING:
+    from django.http import HttpRequest, HttpResponse
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,8 @@
 import logging
-from collections.abc import Callable
 from datetime import datetime
 from functools import wraps
 from pprint import pformat as pp
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.contrib.auth.models import User
 from django.db.models import Model
@@ -21,6 +20,9 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.utils import get_current_user, is_finding_groups_enabled
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 

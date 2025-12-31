@@ -1,11 +1,13 @@
 # noqa: RUF100
 import hashlib
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from dojo.models import Finding
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo import RlJsonInfo
-from dojo.tools.reversinglabs_spectraassure.rlJsonInfo.cve_info_node import CveInfoNode
+
+if TYPE_CHECKING:
+    from dojo.tools.reversinglabs_spectraassure.rlJsonInfo.cve_info_node import CveInfoNode
 
 logger = logging.getLogger(__name__)
 

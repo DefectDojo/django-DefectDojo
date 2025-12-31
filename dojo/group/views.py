@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING
 
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
@@ -7,7 +8,6 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models.deletion import RestrictedError
-from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -48,6 +48,9 @@ from dojo.utils import (
     is_title_in_breadcrumbs,
     redirect_to_return_url_or_else,
 )
+
+if TYPE_CHECKING:
+    from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)
 

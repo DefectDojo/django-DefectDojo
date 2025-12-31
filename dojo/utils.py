@@ -10,11 +10,11 @@ import random
 import re
 import time
 from calendar import monthrange
-from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from functools import cached_property
 from math import pi, sqrt
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import bleach
 import crum
@@ -76,6 +76,9 @@ from dojo.models import (
     User,
 )
 from dojo.notifications.helper import create_notification
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -246,7 +249,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
     return None
 
 
-def count_findings(findings: QuerySet) -> tuple[dict["Product", list[int]], dict[str, int]]:
+def count_findings(findings: QuerySet) -> tuple[dict[Product, list[int]], dict[str, int]]:
     agg = (
         findings.values(prod_id=F("test__engagement__product_id"))
         .annotate(

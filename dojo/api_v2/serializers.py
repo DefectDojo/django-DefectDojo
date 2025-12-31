@@ -5,6 +5,7 @@ import logging
 import re
 import time
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import six
 import tagulous
@@ -36,7 +37,6 @@ from dojo.finding.helper import (
 from dojo.finding.queries import get_authorized_findings
 from dojo.group.utils import get_auth_group_name
 from dojo.importers.auto_create_context import AutoCreateContextManager
-from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
@@ -128,6 +128,9 @@ from dojo.user.queries import get_authorized_users
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import is_scan_file_too_large
 from dojo.validators import ImporterFileExtensionValidator, tag_validator
+
+if TYPE_CHECKING:
+    from dojo.importers.base_importer import BaseImporter
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

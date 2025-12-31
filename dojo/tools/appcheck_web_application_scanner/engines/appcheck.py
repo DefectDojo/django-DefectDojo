@@ -1,7 +1,10 @@
 import re
+from typing import TYPE_CHECKING
 
-from dojo.models import Finding
 from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser
+
+if TYPE_CHECKING:
+    from dojo.models import Finding
 
 
 class AppCheckScanningEngineParser(BaseEngineParser):

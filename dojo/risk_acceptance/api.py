@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
-from django.db.models import QuerySet
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
@@ -13,6 +12,9 @@ from dojo.api_v2.serializers import RiskAcceptanceSerializer
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.models import Risk_Acceptance, User, Vulnerability_Id
+
+if TYPE_CHECKING:
+    from django.db.models import QuerySet
 
 AcceptedRisk = NamedTuple("AcceptedRisk", (("vulnerability_id", str), ("justification", str), ("accepted_by", str)))
 
