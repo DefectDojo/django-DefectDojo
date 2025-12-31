@@ -57,7 +57,6 @@
                         <tr>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th nowrap="nowrap">{% dojo_sort request 'CWE' 'cwe' 'asc' %}</th>
-                            <th nowrap="nowrap">Match Enabled</th>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th nowrap="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
@@ -76,10 +75,9 @@
                                         </a>
                                     {% endif %}
                                 </td>
-                                <td>{{ finding.template_match }}</td>
                                 <td>
                                     {% if add_from_template %}
-                                        <a href="{% url 'add_temp_finding' tid finding.id %}"
+                                        <a href="{% url 'add_finding_from_template' tid finding.id %}"
                                            class="template-popover" data-placement="auto bottom" data-toggle="popover"
                                            data-trigger="hover" title="{{ finding.title|truncatechars_html:100 }}"
                                            data-content="{{ finding.description|truncatechars_html:500 }}">
@@ -110,7 +108,7 @@
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
                                 {% if add_from_template %}
                                     <td nowrap="nowrap">
-                                        <a href="{% url 'add_temp_finding' tid finding.id %}"
+                                        <a href="{% url 'add_finding_from_template' tid finding.id %}"
                                            class="btn btn-success btn-sm">
                                             Use This Template
                                         </a>

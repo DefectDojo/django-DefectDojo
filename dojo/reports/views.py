@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.db.models import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -28,10 +29,12 @@ from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
 from dojo.labels import get_labels
+
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
+
 from dojo.reports.widgets import (
     CoverPage,
     CustomReportJsonForm,
@@ -846,6 +849,7 @@ class CSVExportView(View):
 
     def get(self, request):
         findings, _obj = get_findings(request)
+        findings = prefetch_related_findings_for_report(findings)
         self.findings = findings
         findings = self.add_findings_data()
         response = HttpResponse(content_type="text/csv")
@@ -881,6 +885,8 @@ class CSVExportView(View):
                     "endpoints",
                     "vulnerability_ids",
                     "tags",
+                    "status",
+                    "notes",
                 ))
                 self.fields = fields
                 self.add_extra_headers()
@@ -944,6 +950,20 @@ class CSVExportView(View):
                 tags_value = tags_value.removesuffix("; ")
                 fields.append(tags_value)
 
+                # Status
+                status_value = finding.status()
+                fields.append(status_value)
+
+                # Notes
+                notes_value = ""
+                for note in finding.notes.filter(private=False):
+                    note_entry = note.entry.replace("\n", " NEWLINE ").replace("\r", "")
+                    notes_value += f"{note_entry}; "
+                notes_value = notes_value.removesuffix("; ")
+                if len(notes_value) > EXCEL_CHAR_LIMIT:
+                    notes_value = notes_value[:EXCEL_CHAR_LIMIT - 3] + "..."
+                fields.append(notes_value)
+
                 self.fields = fields
                 self.finding = finding
                 self.add_extra_values()
@@ -966,6 +986,7 @@ class ExcelExportView(View):
 
     def get(self, request):
         findings, _obj = get_findings(request)
+        findings = prefetch_related_findings_for_report(findings)
         self.findings = findings
         findings = self.add_findings_data()
         workbook = Workbook()
@@ -1019,6 +1040,12 @@ class ExcelExportView(View):
                 cell.font = font_bold
                 col_num += 1
                 cell = worksheet.cell(row=row_num, column=col_num, value="tags")
+                cell.font = font_bold
+                col_num += 1
+                cell = worksheet.cell(row=row_num, column=col_num, value="status")
+                cell.font = font_bold
+                col_num += 1
+                cell = worksheet.cell(row=row_num, column=col_num, value="notes")
                 cell.font = font_bold
                 col_num += 1
                 self.row_num = row_num
@@ -1087,6 +1114,23 @@ class ExcelExportView(View):
                 tags_value = tags_value.removesuffix("; \n")
                 worksheet.cell(row=row_num, column=col_num, value=tags_value)
                 col_num += 1
+
+                # Status
+                status_value = finding.status()
+                worksheet.cell(row=row_num, column=col_num, value=status_value)
+                col_num += 1
+
+                # Notes
+                notes_value = ""
+                for note in finding.notes.filter(private=False):
+                    note_entry = note.entry.replace("\r", "")
+                    notes_value += f"{note_entry}; \n"
+                notes_value = notes_value.removesuffix("; \n")
+                if len(notes_value) > EXCEL_CHAR_LIMIT:
+                    notes_value = notes_value[:EXCEL_CHAR_LIMIT - 3] + "..."
+                worksheet.cell(row=row_num, column=col_num, value=notes_value)
+                col_num += 1
+
                 self.col_num = col_num
                 self.row_num = row_num
                 self.finding = finding
