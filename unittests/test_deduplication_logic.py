@@ -952,14 +952,18 @@ class TestDuplicationLogic(DojoTestCase):
         Test deduplication with multiple findings having the same unique_id,
         where some are mitigated and some are active. The deduplication should
         skip mitigated ones and use the first active one.
-        This test may fail initially if the current implementation doesn't properly
-        handle multiple candidates with mixed states.
 
         Related to: https://github.com/DefectDojo/django-DefectDojo/issues/14010
         """
         # Get an existing finding with unique_id (finding 124)
         finding_124 = Finding.objects.get(id=124)
         original_unique_id = finding_124.unique_id_from_tool
+
+        # Mitigate the original finding so it's not a candidate
+        finding_124.active = False
+        finding_124.is_mitigated = True
+        finding_124.mitigated = timezone.now()
+        finding_124.save()
 
         # Create multiple findings with the same unique_id
         # First: active finding (this should become the original)
@@ -968,7 +972,7 @@ class TestDuplicationLogic(DojoTestCase):
         finding_active.is_mitigated = False
         finding_active.mitigated = None
         finding_active.unique_id_from_tool = original_unique_id
-        finding_active.save()
+        finding_active.save(dedupe_option=False)  # Don't deduplicate so it remains active
 
         # Second: mitigated finding
         finding_mitigated, _ = self.copy_and_reset_finding(find_id=124)

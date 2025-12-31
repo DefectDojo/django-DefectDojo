@@ -737,9 +737,6 @@ class ImportReimportMixin:
         4. Import again → should find both A (mitigated) and B (active) as candidates,
            and deduplicate against B (active), not A (mitigated)
 
-        This test will initially fail because the current implementation doesn't
-        try the next candidate when set_duplicate raises an exception.
-
         Related to: https://github.com/DefectDojo/django-DefectDojo/issues/14010
         """
         logger.debug("testing deduplication with mitigated finding - should continue to next candidate")
@@ -821,8 +818,8 @@ class ImportReimportMixin:
             deduplication_on_engagement=False,  # Product-level deduplication
         )
 
-        # This will fail initially because exceptions prevent trying the next candidate
-        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=0):
+        # The finding is created first, then deduplicated, so created=1 is expected
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
             import3 = self.import_scan_with_params(
                 self.checkmarx_one_format_two,
                 scan_type=self.scan_type_checkmarx_one,
@@ -867,8 +864,6 @@ class ImportReimportMixin:
         5. Mitigate finding B
         6. Import again → should find A (mitigated), B (mitigated), C (active) as candidates,
            and deduplicate against C (active), not A or B (mitigated)
-
-        This test will initially fail because exceptions prevent trying the next candidate.
 
         Related to: https://github.com/DefectDojo/django-DefectDojo/issues/14010
         """
@@ -934,7 +929,8 @@ class ImportReimportMixin:
         self.assertTrue(finding2.active, "Finding 2 should be active")
         self.assertFalse(finding2.duplicate, "Finding 2 should NOT be a duplicate")
 
-        # Step 4: Import again into engagement 3 → exception, finding C created as new active
+        # Step 4: Import again into engagement 3 → should skip finding1 (mitigated, exception),
+        # then deduplicate against finding2 (active), so finding C becomes a duplicate
         eng3 = Engagement.objects.create(
             name="Engagement 3",
             product=product,
@@ -943,6 +939,7 @@ class ImportReimportMixin:
             deduplication_on_engagement=False,
         )
 
+        # The finding is created first, then deduplicated, so created=1 is expected
         with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
             import3 = self.import_scan_with_params(
                 self.checkmarx_one_format_two,
@@ -957,8 +954,9 @@ class ImportReimportMixin:
         findings3 = self.get_test_findings_api(test3_id)
         finding3_id = findings3["results"][0]["id"]
         finding3 = Finding.objects.get(id=finding3_id)
-        self.assertTrue(finding3.active, "Finding 3 should be active")
-        self.assertFalse(finding3.duplicate, "Finding 3 should NOT be a duplicate")
+        # Finding 3 should be a duplicate of finding 2 (active), not finding 1 (mitigated)
+        self.assertTrue(finding3.duplicate, "Finding 3 should be a duplicate")
+        self.assertEqual(finding3.duplicate_finding.id, finding2.id, "Finding 3 should be duplicate of finding 2 (active)")
 
         # Step 5: Mitigate finding B
         finding2.active = False
@@ -968,8 +966,8 @@ class ImportReimportMixin:
         finding2.false_p = False
         finding2.save(dedupe_option=False)
 
-        # Step 6: Import again into engagement 4 → should find A (mitigated), B (mitigated), C (active)
-        # as candidates, and deduplicate against C (active), not A or B (mitigated)
+        # Step 6: Import again into engagement 4 → should find A (mitigated, exception), B (mitigated, exception),
+        # C (duplicate, skipped), so finding D is created as new active
         eng4 = Engagement.objects.create(
             name="Engagement 4",
             product=product,
@@ -978,8 +976,8 @@ class ImportReimportMixin:
             deduplication_on_engagement=False,
         )
 
-        # This will fail initially because exceptions prevent trying the next candidate
-        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=0):
+        # The finding is created first, then deduplicated, so created=1 is expected
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
             import4 = self.import_scan_with_params(
                 self.checkmarx_one_format_two,
                 scan_type=self.scan_type_checkmarx_one,
@@ -994,25 +992,15 @@ class ImportReimportMixin:
         finding4_id = findings4["results"][0]["id"]
         finding4 = Finding.objects.get(id=finding4_id)
 
-        # Verify that finding4 is a duplicate of finding3 (active), not finding1 or finding2 (mitigated)
-        self.assertTrue(finding4.duplicate, "Finding 4 should be a duplicate")
-        self.assertIsNotNone(finding4.duplicate_finding, "Finding 4 should have a duplicate_finding")
+        # Since finding3 is a duplicate (excluded from candidates), and finding1 and finding2 are mitigated (exceptions),
+        # finding4 should be created as new active (not a duplicate)
+        self.assertTrue(finding4.active, "Finding 4 should be active")
+        self.assertFalse(finding4.duplicate, "Finding 4 should NOT be a duplicate (all candidates raised exceptions or are duplicates)")
 
-        mitigated_ids = {finding1.id, finding2.id}
-        active_ids = {finding3.id}
-
-        # Should NOT be duplicate of mitigated findings
-        self.assertNotIn(
-            finding4.duplicate_finding.id,
-            mitigated_ids,
-            f"Finding 4 should not be duplicate of mitigated finding {finding4.duplicate_finding.id}",
-        )
-        # Should be duplicate of the active finding
-        self.assertIn(
-            finding4.duplicate_finding.id,
-            active_ids,
-            f"Finding 4 should be duplicate of active finding, not {finding4.duplicate_finding.id}",
-        )
+        # Finding4 is not a duplicate because:
+        # - finding1 and finding2 are mitigated (exceptions raised)
+        # - finding3 is a duplicate (excluded from candidates)
+        # So finding4 is created as new active finding
 
     # import 0 and then reimport 1 with zap4 as extra finding, zap1 closed.
     # - active findings count should be 4
