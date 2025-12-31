@@ -345,7 +345,7 @@ def _is_candidate_older(new_finding, candidate):
     return is_older
 
 
-def match_hash_candidate(new_finding, candidates_by_hash) -> Iterator[Finding]:
+def get_matches_from_hash_candidates(new_finding, candidates_by_hash) -> Iterator[Finding]:
     if new_finding.hash_code is None:
         return
     possible_matches = candidates_by_hash.get(new_finding.hash_code, [])
@@ -361,7 +361,7 @@ def match_hash_candidate(new_finding, candidates_by_hash) -> Iterator[Finding]:
             yield candidate
 
 
-def match_unique_id_candidate(new_finding, candidates_by_uid) -> Iterator[Finding]:
+def get_matches_from_unique_id_candidates(new_finding, candidates_by_uid) -> Iterator[Finding]:
     if new_finding.unique_id_from_tool is None:
         return
 
@@ -377,7 +377,7 @@ def match_unique_id_candidate(new_finding, candidates_by_uid) -> Iterator[Findin
         yield candidate
 
 
-def match_uid_or_hash_candidate(new_finding, candidates_by_uid, candidates_by_hash) -> Iterator[Finding]:
+def get_matches_from_uid_or_hash_candidates(new_finding, candidates_by_uid, candidates_by_hash) -> Iterator[Finding]:
     # Combine UID and hash candidates and walk oldest-first
     uid_list = candidates_by_uid.get(new_finding.unique_id_from_tool, []) if new_finding.unique_id_from_tool is not None else []
     hash_list = candidates_by_hash.get(new_finding.hash_code, []) if new_finding.hash_code is not None else []
@@ -400,7 +400,7 @@ def match_uid_or_hash_candidate(new_finding, candidates_by_uid, candidates_by_ha
             deduplicationLogger.debug("UID_OR_HASH: endpoints mismatch, skipping candidate %s", candidate.id)
 
 
-def match_legacy_candidate(new_finding, candidates_by_title, candidates_by_cwe) -> Iterator[Finding]:
+def get_matches_from_legacy_candidates(new_finding, candidates_by_title, candidates_by_cwe) -> Iterator[Finding]:
     # ---------------------------------------------------------
     # 1) Collects all the findings that have the same:
     #      (title  and static_finding and dynamic_finding)
@@ -469,7 +469,7 @@ def _dedupe_batch_hash_code(findings):
         return
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_HASH_CODE")
-        for match in match_hash_candidate(new_finding, candidates_by_hash):
+        for match in get_matches_from_hash_candidates(new_finding, candidates_by_hash):
             try:
                 set_duplicate(new_finding, match)
                 break
@@ -486,7 +486,7 @@ def _dedupe_batch_unique_id(findings):
         return
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL")
-        for match in match_unique_id_candidate(new_finding, candidates_by_uid):
+        for match in get_matches_from_unique_id_candidates(new_finding, candidates_by_uid):
             deduplicationLogger.debug(f"Trying to deduplicate finding {new_finding.id} against candidate {match.id}")
             try:
                 set_duplicate(new_finding, match)
@@ -509,7 +509,7 @@ def _dedupe_batch_uid_or_hash(findings):
         if new_finding.duplicate:
             continue
 
-        for match in match_uid_or_hash_candidate(new_finding, candidates_by_uid, existing_by_hash):
+        for match in get_matches_from_uid_or_hash_candidates(new_finding, candidates_by_uid, existing_by_hash):
             try:
                 set_duplicate(new_finding, match)
                 break
@@ -526,7 +526,7 @@ def _dedupe_batch_legacy(findings):
         return
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_LEGACY")
-        for match in match_legacy_candidate(new_finding, candidates_by_title, candidates_by_cwe):
+        for match in get_matches_from_legacy_candidates(new_finding, candidates_by_title, candidates_by_cwe):
             try:
                 set_duplicate(new_finding, match)
                 break
