@@ -174,17 +174,6 @@ def finding_not_human_set_status(finding: Finding) -> bool:
     return finding.out_of_scope is False and finding.false_p is False
 
 
-def set_duplicate_reopen(new_finding, existing_finding):
-    logger.debug("duplicate reopen existing finding")
-    existing_finding.mitigated = new_finding.mitigated
-    existing_finding.is_mitigated = new_finding.is_mitigated
-    existing_finding.active = new_finding.active
-    existing_finding.verified = new_finding.verified
-    existing_finding.notes.create(author=existing_finding.reporter,
-                                    entry="This finding has been automatically re-opened as it was found in recent scans.")
-    existing_finding.save()
-
-
 def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     if new_finding.test.engagement != to_duplicate_finding.test.engagement:
         deduplication_mismatch = new_finding.test.engagement.deduplication_on_engagement \
