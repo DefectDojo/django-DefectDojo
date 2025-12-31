@@ -76,8 +76,13 @@ def finding_queries(
 
     # Filter by the date ranges supplied
     all_findings_within_date_range = all_authorized_findings.filter(date__range=[start_date, end_date])
-    # Get the list of closed and risk accepted findings
-    closed_filtered_findings = all_findings_within_date_range.filter(CLOSED_FINDINGS_QUERY)
+    # Get the list of closed findings filtered by mitigated date (not discovery date)
+    # This ensures findings closed within the date range are included even if discovered outside it
+    closed_filtered_findings = all_authorized_findings.filter(
+        CLOSED_FINDINGS_QUERY,
+        mitigated__range=[start_date, end_date],
+        mitigated__isnull=False,
+    )
     accepted_filtered_findings = all_findings_within_date_range.filter(ACCEPTED_FINDINGS_QUERY)
     active_filtered_findings = all_findings_within_date_range.filter(OPEN_FINDINGS_QUERY)
 

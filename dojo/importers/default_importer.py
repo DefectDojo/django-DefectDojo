@@ -18,7 +18,7 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
-from dojo.utils import perform_product_grading
+from dojo.utils import get_full_url, perform_product_grading
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -126,6 +126,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # This operation will return None if the user does not have the import history
         # feature enabled
         test_import_history = self.update_import_history(
+            new_findings=new_findings,
+            closed_findings=closed_findings,
+        )
+        # Apply tags to findings and endpoints
+        self.apply_import_tags(
             new_findings=new_findings,
             closed_findings=closed_findings,
         )
@@ -238,22 +243,30 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # Categorize this finding as a new one
             new_findings.append(finding)
             # all data is already saved on the finding, we only need to trigger post processing in batches
+            logger.debug("process_findings: self.push_to_jira=%s, self.findings_groups_enabled=%s, self.group_by=%s",
+                         self.push_to_jira, self.findings_groups_enabled, self.group_by)
             push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+            logger.debug("process_findings: computed push_to_jira=%s", push_to_jira)
             batch_finding_ids.append(finding.id)
 
             # If batch is full or we're at the end, dispatch one batched task
             if len(batch_finding_ids) >= batch_max_size or is_final_finding:
                 finding_ids_batch = list(batch_finding_ids)
                 batch_finding_ids.clear()
+                logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
+                             push_to_jira, len(finding_ids_batch), is_final_finding)
                 if we_want_async(async_user=self.user):
-                    finding_helper.post_process_findings_batch_signature(
+                    signature = finding_helper.post_process_findings_batch_signature(
                         finding_ids_batch,
                         dedupe_option=True,
                         rules_option=True,
                         product_grading_option=True,
                         issue_updater_option=True,
                         push_to_jira=push_to_jira,
-                    )()
+                    )
+                    logger.debug("process_findings: signature created with push_to_jira=%s, signature.kwargs=%s",
+                                 push_to_jira, signature.kwargs)
+                    signature()
                 else:
                     finding_helper.post_process_findings_batch(
                         finding_ids_batch,
@@ -279,6 +292,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     jira_helper.push_to_jira(findings[0].finding_group)
                 else:
                     jira_helper.push_to_jira(findings[0])
+            else:
+                logger.debug("push_to_jira is False, not pushing to JIRA")
 
         # Note: All chord batching is now handled within the loop above
 
@@ -355,11 +370,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=""))
         # Update the status of the findings and any endpoints
         for old_finding in old_findings:
+            url = str(get_full_url(reverse("view_test", args=(self.test.id,))))
+            test_title = str(self.test.title)
             self.mitigate_finding(
                 old_finding,
                 (
-                    "This finding has been automatically closed "
-                    "as it is not present anymore in recent scans."
+                    'This Finding has been automatically closed by the Test: \n "' + test_title + '"\n' + url +
+                    "\n\nThis is because this Finding is not present anymore in recent scans."
                 ),
                 finding_groups_enabled=self.findings_groups_enabled,
                 product_grading_option=False,

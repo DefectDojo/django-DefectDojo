@@ -134,8 +134,6 @@ urlpatterns = [
         views.clear_finding_review, name="clear_finding_review"),
     re_path(r"^finding/(?P<fid>\d+)/copy$",
         views.copy_finding, name="copy_finding"),
-    re_path(r"^finding/(?P<fid>\d+)/apply_cwe$",
-        views.apply_template_cwe, name="apply_template_cwe"),
     re_path(r"^finding/(?P<fid>\d+)/mktemplate$", views.mktemplate,
         name="mktemplate"),
     re_path(r"^finding/(?P<fid>\d+)/find_template_to_apply$", views.find_template_to_apply,

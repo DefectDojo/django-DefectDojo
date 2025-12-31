@@ -18,7 +18,7 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@75d2e84710de30f6ff7268e08f310b60ef14033f # v3.0.0
         with:
-          hugo-version: '0.152.2' # renovate: datasource=github-releases depName=gohugoio/hugo
+          hugo-version: '0.153.4' # renovate: datasource=github-releases depName=gohugoio/hugo
           extended: true
 
       - name: Setup Node
@@ -46,13 +46,12 @@ jobs:
 
       - name: Install dependencies
         run: cd docs && npm ci
-      
+
       - name: Build production website
         env:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: cd docs && hugo --minify --gc --config config/production/hugo.toml
-
       - name: Deploy
         uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
         if: github.repository == 'DefectDojo/django-DefectDojo' # Deploy docs only in core repo, not in forks - it would just fail in fork

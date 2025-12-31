@@ -27,6 +27,7 @@ def get_finding_models_for_deduplication(finding_ids):
 
     """
     if not finding_ids:
+        logger.debug("get_finding_models_for_deduplication called with no finding_ids")
         return []
 
     return list(
@@ -195,7 +196,18 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 
 def get_endpoints_as_url(finding):
-    return [hyperlink.parse(str(e)) for e in finding.endpoints.all()]
+    # Fix for https://github.com/DefectDojo/django-DefectDojo/issues/10215
+    # When endpoints lack a protocol (scheme), str(e) returns a string like "10.20.197.218:6379"
+    # without the "//" prefix. hyperlink.parse() then misinterprets the hostname as the scheme.
+    # We replicate the behavior from dojo/endpoint/utils.py line 265: prepend "//" if "://" is missing
+    # to ensure hyperlink.parse() correctly identifies host, port, and path components.
+    urls = []
+    for e in finding.endpoints.all():
+        endpoint_str = str(e)
+        if "://" not in endpoint_str:
+            endpoint_str = "//" + endpoint_str
+        urls.append(hyperlink.parse(endpoint_str))
+    return urls
 
 
 def are_urls_equal(url1, url2, fields):
@@ -659,6 +671,7 @@ def dedupe_batch_of_findings(findings, *args, **kwargs):
         return batch_dedupe_method(findings, *args, **kwargs)
 
     if not findings:
+        logger.debug("dedupe_batch_of_findings called with no findings")
         return None
 
     enabled = System_Settings.objects.get().enable_deduplication

@@ -1,6 +1,7 @@
 import base64
 import logging
 import time
+from collections.abc import Iterable
 
 from celery import chord, group
 from django.conf import settings
@@ -204,10 +205,34 @@ class BaseImporter(ImporterOptions):
         if not self.test:
             # Determine if we should use a custom test type name
             if test_raw.type:
-                test_type_name = f"{tests[0].type} Scan"
-                if test_type_name != self.scan_type:
-                    test_type_name = f"{test_type_name} ({self.scan_type})"
+                # If test_raw.type equals scan_type, use scan_type directly
+                if test_raw.type == self.scan_type:
+                    test_type_name = self.scan_type
+                else:
+                    test_type_name = f"{tests[0].type} Scan"
+                    if test_type_name != self.scan_type:
+                        test_type_name = f"{test_type_name} ({self.scan_type})"
             self.test = self.create_test(test_type_name)
+        else:
+            # During reimport, validate that the test_type matches
+            # Calculate the expected test_type_name from the incoming report
+            expected_test_type_name = self.scan_type
+            if test_raw.type:
+                # If test_raw.type equals scan_type, use scan_type directly
+                if test_raw.type == self.scan_type:
+                    expected_test_type_name = self.scan_type
+                else:
+                    expected_test_type_name = f"{test_raw.type} Scan"
+                    if expected_test_type_name != self.scan_type:
+                        expected_test_type_name = f"{expected_test_type_name} ({self.scan_type})"
+            # Compare with existing test's test_type name
+            if self.test.test_type.name != expected_test_type_name:
+                msg = (
+                    f"Test type mismatch: Test {self.test.id} has test_type '{self.test.test_type.name}', "
+                    f"but the report contains test_type '{expected_test_type_name}'. "
+                    f"Reimport with matching test_type or create a new test."
+                )
+                raise ValidationError(msg)
         # This part change the name of the Test
         # we get it from the data of the parser
         # Update the test and test type with meta from the raw test
@@ -335,6 +360,71 @@ class BaseImporter(ImporterOptions):
         if self.tags is not None and len(self.tags) > 0:
             self.test.tags.set(self.tags)
 
+    def apply_import_tags(
+        self,
+        new_findings: Iterable[Finding] | None = None,
+        closed_findings: Iterable[Finding] | None = None,
+        reactivated_findings: Iterable[Finding] | None = None,
+        untouched_findings: Iterable[Finding] | None = None,
+    ) -> None:
+        """Apply tags to findings and endpoints from an import operation."""
+        # Normalize None values to empty lists and convert sets/other iterables to lists
+        if untouched_findings is None:
+            untouched_findings = []
+        elif not isinstance(untouched_findings, list):
+            untouched_findings = list(untouched_findings)
+
+        if reactivated_findings is None:
+            reactivated_findings = []
+        elif not isinstance(reactivated_findings, list):
+            reactivated_findings = list(reactivated_findings)
+
+        if closed_findings is None:
+            closed_findings = []
+        elif not isinstance(closed_findings, list):
+            closed_findings = list(closed_findings)
+
+        if new_findings is None:
+            new_findings = []
+        elif not isinstance(new_findings, list):
+            new_findings = list(new_findings)
+
+        # Collect all affected findings
+        findings_to_tag = new_findings + closed_findings + reactivated_findings + untouched_findings
+
+        if not findings_to_tag:
+            return
+
+        # Add any tags to the findings imported if necessary
+        if self.apply_tags_to_findings and self.tags:
+            findings_qs = Finding.objects.filter(id__in=[f.id for f in findings_to_tag])
+            try:
+                bulk_add_tags_to_instances(
+                    tag_or_tags=self.tags,
+                    instances=findings_qs,
+                    tag_field_name="tags",
+                )
+            except IntegrityError:
+                # Fallback to safe per-instance tagging if concurrent deletes occur
+                for finding in findings_to_tag:
+                    for tag in self.tags:
+                        self.add_tags_safe(finding, tag)
+
+        # Add any tags to any endpoints of the findings imported if necessary
+        if self.apply_tags_to_endpoints and self.tags:
+            endpoints_qs = Endpoint.objects.filter(finding__in=findings_to_tag).distinct()
+            try:
+                bulk_add_tags_to_instances(
+                    tag_or_tags=self.tags,
+                    instances=endpoints_qs,
+                    tag_field_name="tags",
+                )
+            except IntegrityError:
+                for finding in findings_to_tag:
+                    for endpoint in finding.endpoints.all():
+                        for tag in self.tags:
+                            self.add_tags_safe(endpoint, tag)
+
     def update_import_history(
         self,
         new_findings: list[Finding] | None = None,
@@ -355,6 +445,7 @@ class BaseImporter(ImporterOptions):
             closed_findings = []
         if new_findings is None:
             new_findings = []
+
         # Log the current state of what has occurred in case there could be
         # deviation from what is displayed in the view
         logger.debug(
@@ -429,37 +520,6 @@ class BaseImporter(ImporterOptions):
             logger.warning("IntegrityError occurred while bulk creating Test_Import_Finding_Actions, falling back to individual inserts")
             for record in import_history_records:
                 self.create_import_history_record_safe(record)
-
-        # Add any tags to the findings imported if necessary
-        if self.apply_tags_to_findings and self.tags:
-            findings_qs = test_import.findings_affected.all()
-            try:
-                bulk_add_tags_to_instances(
-                    tag_or_tags=self.tags,
-                    instances=findings_qs,
-                    tag_field_name="tags",
-                )
-            except IntegrityError:
-                # Fallback to safe per-instance tagging if concurrent deletes occur
-                for finding in findings_qs:
-                    for tag in self.tags:
-                        self.add_tags_safe(finding, tag)
-
-        # Add any tags to any endpoints of the findings imported if necessary
-        if self.apply_tags_to_endpoints and self.tags:
-            # Collect all endpoints linked to the affected findings
-            endpoints_qs = Endpoint.objects.filter(finding__in=test_import.findings_affected.all()).distinct()
-            try:
-                bulk_add_tags_to_instances(
-                    tag_or_tags=self.tags,
-                    instances=endpoints_qs,
-                    tag_field_name="tags",
-                )
-            except IntegrityError:
-                for finding in test_import.findings_affected.all():
-                    for endpoint in finding.endpoints.all():
-                        for tag in self.tags:
-                            self.add_tags_safe(endpoint, tag)
 
         return test_import
 
