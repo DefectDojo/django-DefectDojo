@@ -2834,13 +2834,12 @@ class Finding(BaseModel):
                     self.dynamic_finding = False
                 elif (self.file_path is not None):
                     self.static_finding = True
-            else:
-                # TODO: Delete this after the move to Locations
-                if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
-                    self.static_finding = True
-                    self.dynamic_finding = False
-                elif (self.file_path is not None):
-                    self.static_finding = True
+            # TODO: Delete this after the move to Locations
+            elif (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
+                self.static_finding = True
+                self.dynamic_finding = False
+            elif (self.file_path is not None):
+                self.static_finding = True
 
             # because we have reduced the number of (super()).save() calls, the helper is no longer called for new findings
             # so we call it manually
