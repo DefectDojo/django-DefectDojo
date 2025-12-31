@@ -1,7 +1,7 @@
 # from unittest import skip
 import logging
 import zoneinfo
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -106,6 +106,9 @@ class ImportReimportMixin:
 
         self.checkmarx_one_open_and_false_positive = get_unit_tests_scans_path("checkmarx_one") / "one-open-one-false-positive.json"
         self.checkmarx_one_two_false_positive = get_unit_tests_scans_path("checkmarx_one") / "two-false-positive.json"
+        self.checkmarx_one_same_unique_id_3 = get_unit_tests_scans_path("checkmarx_one") / "many_findings_same_unique_id_3.json"
+        self.checkmarx_one_same_unique_id_4 = get_unit_tests_scans_path("checkmarx_one") / "many_findings_same_unique_id_4.json"
+        self.checkmarx_one_format_two = get_unit_tests_scans_path("checkmarx_one") / "checkmarx_one_format_two.json"
         self.scan_type_checkmarx_one = "Checkmarx One Scan"
 
     # import zap scan, testing:
@@ -720,6 +723,296 @@ class ImportReimportMixin:
 
         # 1 added note for the migitated finding
         self.assertEqual(notes_count_before + 1, self.db_notes_count())
+
+    def test_deduplication_continues_to_next_candidate_when_regression_detected_unique_id(self):
+        """
+        Test that deduplication continues to try the next candidate match when
+        the first candidate triggers a regression exception (mitigated finding).
+
+        Real-world scenario:
+        1. Import scan → finding A (active)
+        2. Mitigate finding A
+        3. Reimport/import again → tries to deduplicate against A (mitigated),
+           exception is raised, finding B is created as new active (not duplicate)
+        4. Import again → should find both A (mitigated) and B (active) as candidates,
+           and deduplicate against B (active), not A (mitigated)
+
+        This test will initially fail because the current implementation doesn't
+        try the next candidate when set_duplicate raises an exception.
+
+        Related to: https://github.com/DefectDojo/django-DefectDojo/issues/14010
+        """
+        logger.debug("testing deduplication with mitigated finding - should continue to next candidate")
+
+        product = Product.objects.get(id=1)
+
+        # Step 1: Import scan into engagement 1 → finding A (active)
+        eng1 = Engagement.objects.create(
+            name="Engagement 1",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,  # Product-level deduplication
+        )
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import1 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng1.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        # Get finding A
+        test1_id = import1["test"]
+        findings1 = self.get_test_findings_api(test1_id)
+        self.assert_finding_count_json(1, findings1)
+        finding1_id = findings1["results"][0]["id"]
+        finding1 = Finding.objects.get(id=finding1_id)
+        self.assertTrue(finding1.active, "Finding 1 should be active")
+
+        # Step 2: Mitigate finding A
+        finding1.active = False
+        finding1.is_mitigated = True
+        finding1.mitigated = timezone.now()
+        finding1.out_of_scope = False
+        finding1.false_p = False
+        finding1.save(dedupe_option=False)
+
+        # Step 3: Import again into engagement 2 → tries to deduplicate against A (mitigated),
+        # exception is raised, finding B is created as new active (not duplicate)
+        eng2 = Engagement.objects.create(
+            name="Engagement 2",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,  # Product-level deduplication
+        )
+
+        # The exception will be caught and logged, but finding B will be created as new
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import2 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng2.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        # Get finding B (should be active, not a duplicate because exception was raised)
+        test2_id = import2["test"]
+        findings2 = self.get_test_findings_api(test2_id)
+        self.assert_finding_count_json(1, findings2)
+        finding2_id = findings2["results"][0]["id"]
+        finding2 = Finding.objects.get(id=finding2_id)
+        self.assertTrue(finding2.active, "Finding 2 should be active")
+        self.assertFalse(finding2.duplicate, "Finding 2 should NOT be a duplicate (exception was raised)")
+
+        # Step 4: Import again into engagement 3 → should find both A (mitigated) and B (active)
+        # as candidates, and deduplicate against B (active), not A (mitigated)
+        eng3 = Engagement.objects.create(
+            name="Engagement 3",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,  # Product-level deduplication
+        )
+
+        # This will fail initially because exceptions prevent trying the next candidate
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=0):
+            import3 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng3.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        # Get finding from engagement 3
+        test3_id = import3["test"]
+        findings3 = self.get_test_findings_api(test3_id)
+        self.assert_finding_count_json(1, findings3)
+        finding3_id = findings3["results"][0]["id"]
+        finding3 = Finding.objects.get(id=finding3_id)
+
+        # Verify that finding3 is a duplicate of finding2 (active), not finding1 (mitigated)
+        self.assertTrue(finding3.duplicate, "Finding 3 should be a duplicate")
+        self.assertIsNotNone(finding3.duplicate_finding, "Finding 3 should have a duplicate_finding")
+        self.assertEqual(
+            finding3.duplicate_finding.id,
+            finding2.id,
+            "Finding 3 should be duplicate of finding 2 (active), not finding 1 (mitigated)",
+        )
+        self.assertNotEqual(
+            finding3.duplicate_finding.id,
+            finding1.id,
+            "Finding 3 should NOT be duplicate of finding 1 (mitigated)",
+        )
+
+    def test_deduplication_multiple_candidates_mixed_states_unique_id(self):
+        """
+        Test deduplication with multiple findings having the same unique_id,
+        where some are mitigated and some are active. The deduplication should
+        skip mitigated ones and use the first active one.
+
+        Real-world scenario:
+        1. Import scan → finding A (active)
+        2. Mitigate finding A
+        3. Import again → exception, finding B created as new active
+        4. Import again → exception, finding C created as new active
+        5. Mitigate finding B
+        6. Import again → should find A (mitigated), B (mitigated), C (active) as candidates,
+           and deduplicate against C (active), not A or B (mitigated)
+
+        This test will initially fail because exceptions prevent trying the next candidate.
+
+        Related to: https://github.com/DefectDojo/django-DefectDojo/issues/14010
+        """
+        logger.debug("testing deduplication with multiple candidates in mixed states")
+
+        product = Product.objects.get(id=1)
+
+        # Step 1: Import scan into engagement 1 → finding A (active)
+        eng1 = Engagement.objects.create(
+            name="Engagement 1",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,
+        )
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import1 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng1.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        test1_id = import1["test"]
+        findings1 = self.get_test_findings_api(test1_id)
+        finding1_id = findings1["results"][0]["id"]
+        finding1 = Finding.objects.get(id=finding1_id)
+
+        # Step 2: Mitigate finding A
+        finding1.active = False
+        finding1.is_mitigated = True
+        finding1.mitigated = timezone.now()
+        finding1.out_of_scope = False
+        finding1.false_p = False
+        finding1.save(dedupe_option=False)
+
+        # Step 3: Import again into engagement 2 → exception, finding B created as new active
+        eng2 = Engagement.objects.create(
+            name="Engagement 2",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,
+        )
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import2 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng2.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        test2_id = import2["test"]
+        findings2 = self.get_test_findings_api(test2_id)
+        finding2_id = findings2["results"][0]["id"]
+        finding2 = Finding.objects.get(id=finding2_id)
+        self.assertTrue(finding2.active, "Finding 2 should be active")
+        self.assertFalse(finding2.duplicate, "Finding 2 should NOT be a duplicate")
+
+        # Step 4: Import again into engagement 3 → exception, finding C created as new active
+        eng3 = Engagement.objects.create(
+            name="Engagement 3",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,
+        )
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import3 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng3.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        test3_id = import3["test"]
+        findings3 = self.get_test_findings_api(test3_id)
+        finding3_id = findings3["results"][0]["id"]
+        finding3 = Finding.objects.get(id=finding3_id)
+        self.assertTrue(finding3.active, "Finding 3 should be active")
+        self.assertFalse(finding3.duplicate, "Finding 3 should NOT be a duplicate")
+
+        # Step 5: Mitigate finding B
+        finding2.active = False
+        finding2.is_mitigated = True
+        finding2.mitigated = timezone.now()
+        finding2.out_of_scope = False
+        finding2.false_p = False
+        finding2.save(dedupe_option=False)
+
+        # Step 6: Import again into engagement 4 → should find A (mitigated), B (mitigated), C (active)
+        # as candidates, and deduplicate against C (active), not A or B (mitigated)
+        eng4 = Engagement.objects.create(
+            name="Engagement 4",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,
+        )
+
+        # This will fail initially because exceptions prevent trying the next candidate
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=0):
+            import4 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng4.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        test4_id = import4["test"]
+        findings4 = self.get_test_findings_api(test4_id)
+        finding4_id = findings4["results"][0]["id"]
+        finding4 = Finding.objects.get(id=finding4_id)
+
+        # Verify that finding4 is a duplicate of finding3 (active), not finding1 or finding2 (mitigated)
+        self.assertTrue(finding4.duplicate, "Finding 4 should be a duplicate")
+        self.assertIsNotNone(finding4.duplicate_finding, "Finding 4 should have a duplicate_finding")
+
+        mitigated_ids = {finding1.id, finding2.id}
+        active_ids = {finding3.id}
+
+        # Should NOT be duplicate of mitigated findings
+        self.assertNotIn(
+            finding4.duplicate_finding.id,
+            mitigated_ids,
+            f"Finding 4 should not be duplicate of mitigated finding {finding4.duplicate_finding.id}",
+        )
+        # Should be duplicate of the active finding
+        self.assertIn(
+            finding4.duplicate_finding.id,
+            active_ids,
+            f"Finding 4 should be duplicate of active finding, not {finding4.duplicate_finding.id}",
+        )
 
     # import 0 and then reimport 1 with zap4 as extra finding, zap1 closed.
     # - active findings count should be 4

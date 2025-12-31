@@ -127,7 +127,7 @@ def set_duplicate(new_finding, existing_finding):
         msg = "Can not add duplicate to itself"
         raise Exception(msg)
     if is_duplicate_reopen(new_finding, existing_finding):
-        msg = "Found a regression. Ignore this so that a new duplicate chain can be made"
+        msg = "Found a regression where a duplicate of a mitigated finding is found. We do not reopen this, but create a new duplicate chain as per @PR 9558: Deduplication: Do not reopen original finding"
         raise Exception(msg)
     if new_finding.duplicate and finding_mitigated(existing_finding):
         msg = "Skip this finding as we do not want to attach a new duplicate to a mitigated finding"
