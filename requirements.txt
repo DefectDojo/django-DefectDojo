@@ -5,7 +5,7 @@ asteval==1.0.8
 beautifulsoup4==4.14.3
 bleach==6.3.0
 bleach[css]
-celery==5.6.0
+celery==5.6.1
 defusedxml==0.7.1
 django_celery_results==2.6.0
 django-cors-headers==4.9.0
