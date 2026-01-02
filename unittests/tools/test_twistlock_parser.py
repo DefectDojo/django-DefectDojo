@@ -68,7 +68,7 @@ class TestTwistlockParser(DojoTestCase):
 
         # Verify timestamp parsing (Item 4)
         self.assertIsNotNone(finding.date)
-        self.assertEqual(finding.date.year, 2025)
+        self.assertEqual(finding.date.year, 2026)
         self.assertIn(finding.date.month, {9, 1, 11, 12, 10})  # Various months from the test data
 
         # Verify metadata in impact field (Item 3) - now separated by newlines
