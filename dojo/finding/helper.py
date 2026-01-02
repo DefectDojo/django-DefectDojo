@@ -808,8 +808,6 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
     # Remove old vulnerability ids
     Vulnerability_Id_Template.objects.filter(finding_template=finding_template).delete()
 
-    # Remove undisired vulnerability ids
-    sanitize_vulnerability_ids(vulnerability_ids)
     # Save new vulnerability ids
     for vulnerability_id in vulnerability_ids:
         Vulnerability_Id_Template(finding_template=finding_template, vulnerability_id=vulnerability_id).save()
