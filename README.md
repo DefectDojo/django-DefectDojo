@@ -79,7 +79,7 @@ docker compose logs initializer | grep "Admin password:"
 
 ## Community, Getting Involved, and Updates
 
-[<img src="https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/assets/images/updated-dojo-chop.png" alt="Dojo" height="64"/>](https://community-defectdojo.tightknit.community/)
+[<img src="https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/assets/images/updated-dojo-chop.png" alt="Dojo" height="50"/>](https://community-defectdojo.tightknit.community/)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/slack-logo-icon.png" alt="Slack" height="50"/>](https://join.slack.com/t/defectdojocommunity/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/Linkedin-logo-icon-png.png" alt="LinkedIn" height="50"/>](https://www.linkedin.com/company/defectdojo)
 [<img src="https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/assets/images/x_logo.jpg" alt="Twitter" height="50"/>](https://x.com/defectdojo)
