@@ -45,12 +45,3 @@ be supplied in the `branch_tag` field at import/re-import time. If the branch do
 a notification will be generated in the alerts table, indicating that branch to be imported
 does not exist. If a branch name is not supplied during import/re-import, the default branch
 of the SonarQube project will be used.
-
-## Custom Trust
-
-If you are connecting to SonarQube via HTTPS, the issuer of the certificate that is presented by
-SonarQube must be trusted.
-
-One way of achieving this is by defining the `REQUESTS_CA_BUNDLE` environment variable to point
-to a PEM-encoded certificate file in the container (e.g. `REQUESTS_CA_BUNDLE=/app/media/cacerts.pem`).
-To ensure the certificate is persisted, the file should be in a mounted volume.
