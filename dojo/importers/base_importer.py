@@ -833,6 +833,11 @@ class BaseImporter(ImporterOptions):
             logger.debug("endpoints_to_add: %s", endpoints_to_add)
             self.endpoint_manager.chunk_endpoints_and_disperse(finding, endpoints_to_add)
 
+    def sanitize_vulnerability_ids(self, finding) -> None:
+        """Remove undisired vulnerability id values"""
+        if finding.unsaved_vulnerability_ids:
+            finding.unsaved_vulnerability_ids = [x for x in finding.unsaved_vulnerability_ids if x.strip()]
+
     def process_cve(
         self,
         finding: Finding,
@@ -841,6 +846,8 @@ class BaseImporter(ImporterOptions):
         # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
         # the cve field is not needed anymore and can be removed.
+        # Remove undisired vulnerability ids
+        self.sanitize_vulnerability_ids(finding)
         if finding.unsaved_vulnerability_ids and finding.cve:
             # Make sure the first entry of the list is the value of the cve field
             finding.unsaved_vulnerability_ids.insert(0, finding.cve)
@@ -868,6 +875,7 @@ class BaseImporter(ImporterOptions):
             The finding object
 
         """
+        self.sanitize_vulnerability_ids(finding)
         vulnerability_ids_to_process = finding.unsaved_vulnerability_ids or []
         finding_helper.save_vulnerability_ids(finding, vulnerability_ids_to_process, delete_existing=False)
         return finding

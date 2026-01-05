@@ -3,7 +3,7 @@ services:
   uwsgi:
     build:
       context: .
-      dockerfile: Dockerfile.django-debian
+      dockerfile: Dockerfile.django-${DEFECT_DOJO_OS:-debian}
       target: development
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
     volumes:

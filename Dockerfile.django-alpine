@@ -69,7 +69,6 @@ COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
   docker/entrypoint-initializer.sh \
-  docker/entrypoint-first-boot.sh \
   docker/entrypoint-uwsgi.sh \
   docker/wait-for-it.sh \
   docker/secret-file-loader.sh \

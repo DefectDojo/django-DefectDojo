@@ -2735,15 +2735,24 @@ class BurpRawRequestResponseViewSet(
     queryset = BurpRawRequestResponse.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["finding"]
+    permission_classes = (
+        IsAuthenticated,
+        permissions.UserHasFindingPermission,
+    )
 
     def get_queryset(self):
-        results = BurpRawRequestResponse.objects.all()
-        empty_value = b""
-        results = results.exclude(
-            burpRequestBase64__exact=empty_value,
-            burpResponseBase64__exact=empty_value,
+        return (
+            BurpRawRequestResponse.objects.filter(
+                finding__in=get_authorized_findings(
+                    Permissions.Finding_View,
+                ),
+            )
+            .exclude(
+                burpRequestBase64__exact=b"",
+                burpResponseBase64__exact=b"",
+            )
+            .order_by("id")
         )
-        return results.order_by("id")
 
 
 # Authorization: superuser
