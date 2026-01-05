@@ -32,12 +32,12 @@ deduplication, remediation, and reporting.
 
 Pro Edition: [pro.demo.defectdojo.com](https://pro.demo.defectdojo.com)
 
-Community Edition: [demo.defectdojo.org](https://demo.defectdojo.org)
+OWASP Community Edition: [demo.defectdojo.org](https://demo.defectdojo.org)
 
 Either demo enviornment can be logged into with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demos are publicly accessible
 and reset every day. Do not put sensitive data in the demo. An easy way to test DefectDojo is to upload some [sample scan reports](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans).
 
-## Quick Start for Docker Compose V2
+## Quick Start for Docker Compose
 
 ```sh
 # Clone the project
@@ -73,8 +73,8 @@ docker compose logs initializer | grep "Admin password:"
 
 ## Supported Installation Options
 
-* [SaaS](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1) - New UI, addittional features, includes support & supports the project
-* [Docker / Docker Compose](readme-docs/DOCKER.md)
+* Pro - SaaS or self-hosted via K8s or docker compose. [Speak to our team](https://defectdojo.com/contact) or [sign-up for SaaS directly](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1)
+* OS - [docker compose](readme-docs/DOCKER.md)
 
 
 ## Community, Getting Involved, and Updates
