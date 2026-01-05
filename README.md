@@ -85,7 +85,7 @@ docker compose logs initializer | grep "Admin password:"
 [<img src="https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/assets/images/x_logo.jpg" alt="Twitter" height="50"/>](https://x.com/defectdojo)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/YouTube-Emblem.png" alt="Youtube" height="50"/>](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ)
 
-[Join the DefectDojo Community on Slack](https://join.slack.com/t/defectdojocommunity/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA)! 
+Checkout our new [Community Portal](https://community-defectdojo.tightknit.community/) and join the DefectDojo community on [Slack](https://join.slack.com/t/defectdojocommunity/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA)! 
 
 Follow DefectDojo on [LinkedIn](https://www.linkedin.com/company/defectdojo), [YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ), and [X](https://twitter.com/defectdojo) for platform updates!
 
@@ -95,7 +95,7 @@ Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for detail
 
 ## Pro Edition
 
-[Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro transcends the do-it-yourself approach of open-source: A new UI, incredibile scalability, API connectors, ServiceNow, GitHub, GitLab, Azure DevOps, automatic data enrichment, prioritization, and more! See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
+[Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro transcends the do-it-yourself approach of open-source: A new UI, risk-based vulnerability management, incredibile scalability, API connectors, ServiceNow, GitHub, GitLab, Azure DevOps, automatic data enrichment, prioritization, and more! See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
 
 Alternatively, for information please email hello@defectdojo.com
 
