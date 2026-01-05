@@ -8,6 +8,11 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
+## Jan 2025: v2.54
+
+### Jan 5, 2025: v2.54.0
+
+
 ## Dec 2025: v2.53
 
 ### Dec 29, 2025: v2.53.5
@@ -64,7 +69,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Oct 2025: v2.51
 
-### Oct 27, 2025: v2.51.3
+#### Oct 27, 2025: v2.51.3
 
 * **(Tools)** Added Nuclei scan support for Smart Upload.
 * **(Priority)** Added Prioritization Engine to allow for configurable Priority and Risk calculations for individual Findings under a given Product.
@@ -73,12 +78,12 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 
 
-### Oct 20, 2025: v2.51.2
+#### Oct 20, 2025: v2.51.2
 
 * **(Connectors)** Added Anchore Enterprise Connector.
 
 
-### Oct 14, 2025: v2.51.1
+#### Oct 14, 2025: v2.51.1
 
 * **(Pro UI)** Added Finding Quick Report feature.  Quick report allows users to quickly render an HTML report with the currently displayed Findings on a Finding table.
 
@@ -95,7 +100,7 @@ Click the calculator button to render a score based on the vector string.
 * **(Pro UI)** File names (for attached artifacts) can now be edited directly in the UI.
 * **(Pro UI)** Redirect user to Home after a successful Support Inquiry submission.  
 
-### Oct 6, 2025: v2.51.0
+#### Oct 6, 2025: v2.51.0
 
 No significant Pro changes are present in this release.
 
