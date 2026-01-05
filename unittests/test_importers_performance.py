@@ -1,3 +1,23 @@
+"""
+Performance tests for importers.
+
+These tests verify that import and reimport operations maintain acceptable query counts
+and async task counts to prevent performance regressions.
+
+Counts can be updated via the Python script at scripts/update_performance_test_counts.py.
+However, counts must be verified to ensure no implicit performance regressions are introduced.
+When counts change, review the differences carefully to determine if they represent:
+- Legitimate optimizations (counts decreasing)
+- Acceptable changes due to feature additions (counts increasing with justification)
+- Unintended performance regressions (counts increasing without clear reason)
+
+Always verify updated counts by:
+1. Running the update script to see the differences
+2. Reviewing the changes to understand why counts changed
+3. Running the verification step to ensure all tests pass
+4. Investigating any unexpected increases in query or task counts
+"""
+
 import logging
 from contextlib import contextmanager
 
@@ -33,7 +53,9 @@ STACK_HAWK_SUBSET_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk
 STACK_HAWK_SCAN_TYPE = "StackHawk HawkScan"
 
 
-class TestDojoImporterPerformance(DojoTestCase):
+class TestDojoImporterPerformanceBase(DojoTestCase):
+
+    """Base class for performance tests with shared setup and helper methods."""
 
     def setUp(self):
         super().setUp()
@@ -77,113 +99,163 @@ class TestDojoImporterPerformance(DojoTestCase):
         )
         logger.debug(msg)
 
-    def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
-        """
-        Log output can be quite large as when the assertNumQueries fails, all queries are printed.
-        It could be usefule to capture the output in `less`:
-            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformance 2>&1 | less
-        Then search for `expected` to find the lines where the expected number of queries is printed.
-        Or you can use `grep` to filter the output:
-            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformance 2>&1 | grep expected -B 10
-        """
+    def _create_test_objects(self, product_name, engagement_name):
+        """Helper method to create test product, engagement, lead user, and environment."""
         product_type, _created = Product_Type.objects.get_or_create(name="test")
         product, _created = Product.objects.get_or_create(
-            name="TestDojoDefaultImporter",
+            name=product_name,
             prod_type=product_type,
         )
         engagement, _created = Engagement.objects.get_or_create(
-            name="Test Create Engagement",
+            name=engagement_name,
             product=product,
             target_start=timezone.now(),
             target_end=timezone.now(),
         )
         lead, _ = User.objects.get_or_create(username="admin")
         environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        return product, engagement, lead, environment
 
-        # first import the subset which missed one finding and a couple of endpoints on some of the findings
-        with (
-            self.subTest("import1"), impersonate(Dojo_User.objects.get(username="admin")),
-            self.assertNumQueries(expected_num_queries1),
-            self._assertNumAsyncTask(expected_num_async_tasks1),
-            STACK_HAWK_SUBSET_FILENAME.open(encoding="utf-8") as scan,
-        ):
-            import_options = {
-                "user": lead,
-                "lead": lead,
-                "scan_date": None,
-                "environment": environment,
-                "minimum_severity": "Info",
-                "active": True,
-                "verified": True,
-                "sync": True,
-                "scan_type": STACK_HAWK_SCAN_TYPE,
-                "engagement": engagement,
-                "tags": ["performance-test", "tag-in-param", "go-faster"],
-                "apply_tags_to_findings": True,
-            }
-            importer = DefaultImporter(**import_options)
-            test, _, _len_new_findings, _len_closed_findings, _, _, _ = importer.process_scan(scan)
-
-        # use reimport with the full report so it add a finding and some endpoints
-        with (
-            self.subTest("reimport1"), impersonate(Dojo_User.objects.get(username="admin")),
-            self.assertNumQueries(expected_num_queries2),
-            self._assertNumAsyncTask(expected_num_async_tasks2),
-            STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
-        ):
-            reimport_options = {
-                "test": test,
-                "user": lead,
-                "lead": lead,
-                "scan_date": None,
-                "minimum_severity": "Info",
-                "active": True,
-                "verified": True,
-                "sync": True,
-                "scan_type": STACK_HAWK_SCAN_TYPE,
-                "tags": ["performance-test-reimport", "reimport-tag-in-param", "reimport-go-faster"],
-                "apply_tags_to_findings": True,
-            }
-            reimporter = DefaultReImporter(**reimport_options)
-            test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
-
-        # use reimport with the subset again to close a finding and mitigate some endpoints
-        with (
-            self.subTest("reimport2"), impersonate(Dojo_User.objects.get(username="admin")),
-            self.assertNumQueries(expected_num_queries3),
-            self._assertNumAsyncTask(expected_num_async_tasks3),
-            STACK_HAWK_SUBSET_FILENAME.open(encoding="utf-8") as scan,
-        ):
-            reimport_options = {
-                "test": test,
-                "user": lead,
-                "lead": lead,
-                "scan_date": None,
-                "minimum_severity": "Info",
-                "active": True,
-                "verified": True,
-                "sync": True,
-                "scan_type": STACK_HAWK_SCAN_TYPE,
-            }
-            reimporter = DefaultReImporter(**reimport_options)
-            test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
-
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
-    def test_import_reimport_reimport_performance_async(self):
-        # Ensure django-auditlog is properly configured for this test
-        configure_audit_system()
-        configure_pghistory_triggers()
-
-        self._import_reimport_performance(
-            expected_num_queries1=340,
-            expected_num_async_tasks1=7,
-            expected_num_queries2=288,
-            expected_num_async_tasks2=18,
-            expected_num_queries3=175,
-            expected_num_async_tasks3=17,
+    def _import_reimport_performance(
+        self,
+        expected_num_queries1,
+        expected_num_async_tasks1,
+        expected_num_queries2,
+        expected_num_async_tasks2,
+        expected_num_queries3,
+        expected_num_async_tasks3,
+        scan_file1,
+        scan_file2,
+        scan_file3,
+        scan_type,
+        product_name,
+        engagement_name,
+    ):
+        """
+        Test import/reimport/reimport performance with specified scan files and scan type.
+        Log output can be quite large as when the assertNumQueries fails, all queries are printed.
+        """
+        _, engagement, lead, environment = self._create_test_objects(
+            product_name,
+            engagement_name,
         )
 
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+        # First import
+        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+        with (  # noqa: SIM117
+            self.subTest("import1"), impersonate(Dojo_User.objects.get(username="admin")),
+            scan_file1.open(encoding="utf-8") as scan,
+        ):
+            with self.subTest(step="import1", metric="queries"):
+                with self.assertNumQueries(expected_num_queries1):
+                    with self.subTest(step="import1", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks1):
+                            import_options = {
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "environment": environment,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "sync": True,
+                                "scan_type": scan_type,
+                                "engagement": engagement,
+                                "tags": ["performance-test", "tag-in-param", "go-faster"],
+                                "apply_tags_to_findings": True,
+                            }
+                            importer = DefaultImporter(**import_options)
+                            test, _, _len_new_findings, _len_closed_findings, _, _, _ = importer.process_scan(scan)
+
+        # Second import (reimport)
+        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+        with (  # noqa: SIM117
+            self.subTest("reimport1"), impersonate(Dojo_User.objects.get(username="admin")),
+            scan_file2.open(encoding="utf-8") as scan,
+        ):
+            with self.subTest(step="reimport1", metric="queries"):
+                with self.assertNumQueries(expected_num_queries2):
+                    with self.subTest(step="reimport1", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks2):
+                            reimport_options = {
+                                "test": test,
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "sync": True,
+                                "scan_type": scan_type,
+                                "tags": ["performance-test-reimport", "reimport-tag-in-param", "reimport-go-faster"],
+                                "apply_tags_to_findings": True,
+                            }
+                            reimporter = DefaultReImporter(**reimport_options)
+                            test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
+
+        # Third import (reimport again)
+        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+        with (  # noqa: SIM117
+            self.subTest("reimport2"), impersonate(Dojo_User.objects.get(username="admin")),
+            scan_file3.open(encoding="utf-8") as scan,
+        ):
+            with self.subTest(step="reimport2", metric="queries"):
+                with self.assertNumQueries(expected_num_queries3):
+                    with self.subTest(step="reimport2", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks3):
+                            reimport_options = {
+                                "test": test,
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "sync": True,
+                                "scan_type": scan_type,
+                            }
+                            reimporter = DefaultReImporter(**reimport_options)
+                            test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
+
+
+class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
+
+    """Performance tests using small sample files (StackHawk, ~6 findings)."""
+
+    def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
+        """
+        Log output can be quite large as when the assertNumQueries fails, all queries are printed.
+        It could be usefule to capture the output in `less`:
+            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformanceSmall 2>&1 | less
+        Then search for `expected` to find the lines where the expected number of queries is printed.
+        Or you can use `grep` to filter the output:
+            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformanceSmall 2>&1 | grep expected -B 10
+        """
+        return super()._import_reimport_performance(
+            expected_num_queries1,
+            expected_num_async_tasks1,
+            expected_num_queries2,
+            expected_num_async_tasks2,
+            expected_num_queries3,
+            expected_num_async_tasks3,
+            scan_file1=STACK_HAWK_SUBSET_FILENAME,
+            scan_file2=STACK_HAWK_FILENAME,
+            scan_file3=STACK_HAWK_SUBSET_FILENAME,
+            scan_type=STACK_HAWK_SCAN_TYPE,
+            product_name="TestDojoDefaultImporter",
+            engagement_name="Test Create Engagement",
+        )
+
+    @override_settings(ENABLE_AUDITLOG=True)
     def test_import_reimport_reimport_performance_pghistory_async(self):
         """
         This test checks the performance of the importers when using django-pghistory with async enabled.
@@ -195,37 +267,13 @@ class TestDojoImporterPerformance(DojoTestCase):
         self._import_reimport_performance(
             expected_num_queries1=306,
             expected_num_async_tasks1=7,
-            expected_num_queries2=281,
+            expected_num_queries2=232,
             expected_num_async_tasks2=18,
-            expected_num_queries3=170,
+            expected_num_queries3=114,
             expected_num_async_tasks3=17,
         )
 
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
-    def test_import_reimport_reimport_performance_no_async(self):
-        """
-        This test checks the performance of the importers when they are run in sync mode.
-        The reason for this is that we also want to be aware of when a PR affects the number of queries
-        or async tasks created by a background task.
-        The impersonate context manager above does not work as expected for disabling async,
-        so we patch the we_want_async decorator to always return False.
-        """
-        configure_audit_system()
-        configure_pghistory_triggers()
-
-        testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.block_execution = True
-        testuser.usercontactinfo.save()
-        self._import_reimport_performance(
-            expected_num_queries1=346,
-            expected_num_async_tasks1=6,
-            expected_num_queries2=294,
-            expected_num_async_tasks2=17,
-            expected_num_queries3=181,
-            expected_num_async_tasks3=16,
-        )
-
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    @override_settings(ENABLE_AUDITLOG=True)
     def test_import_reimport_reimport_performance_pghistory_no_async(self):
         """
         This test checks the performance of the importers when using django-pghistory with async disabled.
@@ -239,41 +287,15 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=312,
+            expected_num_queries1=313,
             expected_num_async_tasks1=6,
-            expected_num_queries2=287,
+            expected_num_queries2=239,
             expected_num_async_tasks2=17,
-            expected_num_queries3=176,
+            expected_num_queries3=121,
             expected_num_async_tasks3=16,
         )
 
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
-    def test_import_reimport_reimport_performance_no_async_with_product_grading(self):
-        """
-        This test checks the performance of the importers when they are run in sync mode.
-        The reason for this is that we also want to be aware of when a PR affects the number of queries
-        or async tasks created by a background task.
-        The impersonate context manager above does not work as expected for disabling async,
-        so we patch the we_want_async decorator to always return False.
-        """
-        configure_audit_system()
-        configure_pghistory_triggers()
-
-        testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.block_execution = True
-        testuser.usercontactinfo.save()
-        self.system_settings(enable_product_grade=True)
-
-        self._import_reimport_performance(
-            expected_num_queries1=348,
-            expected_num_async_tasks1=8,
-            expected_num_queries2=296,
-            expected_num_async_tasks2=19,
-            expected_num_queries3=183,
-            expected_num_async_tasks3=18,
-        )
-
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    @override_settings(ENABLE_AUDITLOG=True)
     def test_import_reimport_reimport_performance_pghistory_no_async_with_product_grading(self):
         """
         This test checks the performance of the importers when using django-pghistory with async disabled and product grading enabled.
@@ -288,11 +310,11 @@ class TestDojoImporterPerformance(DojoTestCase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=314,
+            expected_num_queries1=315,
             expected_num_async_tasks1=8,
-            expected_num_queries2=289,
+            expected_num_queries2=241,
             expected_num_async_tasks2=19,
-            expected_num_queries3=178,
+            expected_num_queries3=123,
             expected_num_async_tasks3=18,
         )
 
@@ -303,61 +325,64 @@ class TestDojoImporterPerformance(DojoTestCase):
         The second import should result in all findings being marked as duplicates.
         This is different from reimport as we create a new test each time.
         """
-        product_type, _created = Product_Type.objects.get_or_create(name="test")
-        product, _created = Product.objects.get_or_create(
-            name="TestDojoDeduplicationPerformance",
-            prod_type=product_type,
+        _, engagement, lead, environment = self._create_test_objects(
+            "TestDojoDeduplicationPerformance",
+            "Test Deduplication Performance Engagement",
         )
-        engagement, _created = Engagement.objects.get_or_create(
-            name="Test Deduplication Performance Engagement",
-            product=product,
-            target_start=timezone.now(),
-            target_end=timezone.now(),
-        )
-        lead, _ = User.objects.get_or_create(username="admin")
-        environment, _ = Development_Environment.objects.get_or_create(name="Development")
 
         # First import - all findings should be new
-        with (
+        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+        with (  # noqa: SIM117
             self.subTest("first_import"), impersonate(Dojo_User.objects.get(username="admin")),
-            self.assertNumQueries(expected_num_queries1),
-            self._assertNumAsyncTask(expected_num_async_tasks1),
             STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
         ):
-            import_options = {
-                "user": lead,
-                "lead": lead,
-                "scan_date": None,
-                "environment": environment,
-                "minimum_severity": "Info",
-                "active": True,
-                "verified": True,
-                "scan_type": STACK_HAWK_SCAN_TYPE,
-                "engagement": engagement,
-            }
-            importer = DefaultImporter(**import_options)
-            _, _, len_new_findings1, len_closed_findings1, _, _, _ = importer.process_scan(scan)
+            with self.subTest(step="first_import", metric="queries"):
+                with self.assertNumQueries(expected_num_queries1):
+                    with self.subTest(step="first_import", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks1):
+                            import_options = {
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "environment": environment,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "scan_type": STACK_HAWK_SCAN_TYPE,
+                                "engagement": engagement,
+                            }
+                            importer = DefaultImporter(**import_options)
+                            _, _, len_new_findings1, len_closed_findings1, _, _, _ = importer.process_scan(scan)
 
         # Second import - all findings should be duplicates
-        with (
+        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+        with (  # noqa: SIM117
             self.subTest("second_import"), impersonate(Dojo_User.objects.get(username="admin")),
-            self.assertNumQueries(expected_num_queries2),
-            self._assertNumAsyncTask(expected_num_async_tasks2),
             STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
         ):
-            import_options = {
-                "user": lead,
-                "lead": lead,
-                "scan_date": None,
-                "environment": environment,
-                "minimum_severity": "Info",
-                "active": True,
-                "verified": True,
-                "scan_type": STACK_HAWK_SCAN_TYPE,
-                "engagement": engagement,
-            }
-            importer = DefaultImporter(**import_options)
-            _, _, len_new_findings2, len_closed_findings2, _, _, _ = importer.process_scan(scan)
+            with self.subTest(step="second_import", metric="queries"):
+                with self.assertNumQueries(expected_num_queries2):
+                    with self.subTest(step="second_import", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks2):
+                            import_options = {
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "environment": environment,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "scan_type": STACK_HAWK_SCAN_TYPE,
+                                "engagement": engagement,
+                            }
+                            importer = DefaultImporter(**import_options)
+                            _, _, len_new_findings2, len_closed_findings2, _, _, _ = importer.process_scan(scan)
 
         # Log the results for analysis
         logger.debug(f"First import: {len_new_findings1} new findings, {len_closed_findings1} closed findings")
@@ -398,27 +423,7 @@ class TestDojoImporterPerformance(DojoTestCase):
             total_findings = Finding.objects.filter(test__engagement=engagement).count()
             self.assertEqual(total_findings, 12, f"Expected 12 total findings, got {total_findings}")
 
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
-    def test_deduplication_performance_async(self):
-        """
-        Test deduplication performance with async tasks enabled.
-        This test imports the same scan twice to measure deduplication query and task overhead.
-        """
-        configure_audit_system()
-        configure_pghistory_triggers()
-
-        # Enable deduplication
-        self.system_settings(enable_deduplication=True)
-
-        self._deduplication_performance(
-            expected_num_queries1=311,
-            expected_num_async_tasks1=8,
-            expected_num_queries2=204,
-            expected_num_async_tasks2=8,
-            check_duplicates=False,  # Async mode - deduplication happens later
-        )
-
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    @override_settings(ENABLE_AUDITLOG=True)
     def test_deduplication_performance_pghistory_async(self):
         """Test deduplication performance with django-pghistory and async tasks enabled."""
         configure_audit_system()
@@ -435,27 +440,7 @@ class TestDojoImporterPerformance(DojoTestCase):
             check_duplicates=False,  # Async mode - deduplication happens later
         )
 
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-auditlog")
-    def test_deduplication_performance_no_async(self):
-        """Test deduplication performance with async tasks disabled."""
-        configure_audit_system()
-        configure_pghistory_triggers()
-
-        # Enable deduplication
-        self.system_settings(enable_deduplication=True)
-
-        testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.block_execution = True
-        testuser.usercontactinfo.save()
-
-        self._deduplication_performance(
-            expected_num_queries1=317,
-            expected_num_async_tasks1=7,
-            expected_num_queries2=282,
-            expected_num_async_tasks2=7,
-        )
-
-    @override_settings(ENABLE_AUDITLOG=True, AUDITLOG_TYPE="django-pghistory")
+    @override_settings(ENABLE_AUDITLOG=True)
     def test_deduplication_performance_pghistory_no_async(self):
         """Test deduplication performance with django-pghistory and async tasks disabled."""
         configure_audit_system()
@@ -469,8 +454,9 @@ class TestDojoImporterPerformance(DojoTestCase):
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=281,
+            expected_num_queries1=282,
             expected_num_async_tasks1=7,
-            expected_num_queries2=245,
+            expected_num_queries2=246,
             expected_num_async_tasks2=7,
+
         )

@@ -17,7 +17,7 @@ import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
-from dojo.endpoint.utils import save_endpoints_to_add
+from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.deduplication import (
     dedupe_batch_of_findings,
@@ -34,7 +34,6 @@ from dojo.models import (
     System_Settings,
     Test,
     Vulnerability_Id,
-    Vulnerability_Id_Template,
 )
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
@@ -767,7 +766,10 @@ def add_endpoints(new_finding, form):
     added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, new_finding.test.engagement.product)
     endpoint_ids = [endpoint.id for endpoint in added_endpoints]
 
-    new_finding.endpoints.set(form.cleaned_data["endpoints"] | Endpoint.objects.filter(id__in=endpoint_ids))
+    # Merge form endpoints with existing endpoints (don't replace)
+    form_endpoints = form.cleaned_data.get("endpoints", Endpoint.objects.none())
+    new_endpoints = Endpoint.objects.filter(id__in=endpoint_ids)
+    new_finding.endpoints.set(form_endpoints | new_endpoints | new_finding.endpoints.all())
 
     for endpoint in new_finding.endpoints.all():
         _eps, _created = Endpoint_Status.objects.get_or_create(
@@ -779,13 +781,16 @@ def sanitize_vulnerability_ids(vulnerability_ids) -> None:
     """Remove undisired vulnerability id values"""
     vulnerability_ids = [x for x in vulnerability_ids if x.strip()]
 
-
-def save_vulnerability_ids(finding, vulnerability_ids):
+    
+def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool = True):
     # Remove duplicates
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
 
-    # Remove old vulnerability ids
-    Vulnerability_Id.objects.filter(finding=finding).delete()
+    # Remove old vulnerability ids if requested
+    # Callers can set delete_existing=False when they know there are no existing IDs
+    # to avoid an unnecessary delete query (e.g., for new findings)
+    if delete_existing:
+        Vulnerability_Id.objects.filter(finding=finding).delete()
 
     # Remove undisired vulnerability ids
     sanitize_vulnerability_ids(vulnerability_ids)
@@ -802,21 +807,168 @@ def save_vulnerability_ids(finding, vulnerability_ids):
 
 
 def save_vulnerability_ids_template(finding_template, vulnerability_ids):
-    # Remove duplicates
-    vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
+    """Save vulnerability IDs as newline-separated string in TextField."""
+    # Remove duplicates and empty strings
+    vulnerability_ids = list(dict.fromkeys([vid.strip() for vid in vulnerability_ids if vid.strip()]))
 
-    # Remove old vulnerability ids
-    Vulnerability_Id_Template.objects.filter(finding_template=finding_template).delete()
+    # Save as newline-separated string
+    finding_template.vulnerability_ids_text = "\n".join(vulnerability_ids) if vulnerability_ids else None
 
-    # Save new vulnerability ids
-    for vulnerability_id in vulnerability_ids:
-        Vulnerability_Id_Template(finding_template=finding_template, vulnerability_id=vulnerability_id).save()
-
-    # Set CVE
+    # Set CVE for backward compatibility
     if vulnerability_ids:
         finding_template.cve = vulnerability_ids[0]
     else:
         finding_template.cve = None
+
+    finding_template.save()
+
+
+def save_endpoints_template(finding_template, endpoint_urls):
+    """Save endpoint URLs as newline-separated string in TextField."""
+    # Remove duplicates and empty strings
+    endpoint_urls = list(dict.fromkeys([url.strip() for url in endpoint_urls if url.strip()]))
+    # Save as newline-separated string
+    finding_template.endpoints_text = "\n".join(endpoint_urls) if endpoint_urls else None
+    finding_template.save()
+
+
+def copy_template_fields_to_finding(
+    finding,
+    template,
+    form_data=None,
+    user=None,
+    *,
+    copy_vulnerability_ids=True,
+    copy_endpoints=True,
+    copy_notes=True,
+):
+    """
+    Copy fields from Finding_Template to Finding.
+
+    Args:
+        finding: Finding instance to update
+        template: Finding_Template instance (source)
+        form_data: Optional dict of form cleaned_data (if provided, uses form values instead of template)
+        user: User instance (required for notes)
+        copy_vulnerability_ids: Whether to copy vulnerability IDs (default True)
+        copy_endpoints: Whether to copy endpoints (default True)
+        copy_notes: Whether to copy notes (default True)
+
+    """
+    # Helper to get value from form_data or template
+    def get_value(field_name, default=None):
+        if form_data and field_name in form_data:
+            value = form_data.get(field_name)
+            # Handle None checks for boolean/optional fields
+            if value is not None or field_name not in form_data:
+                return value
+        return getattr(template, field_name, default)
+
+    # Copy CVSS fields
+    cvssv3 = get_value("cvssv3")
+    if cvssv3:
+        finding.cvssv3 = cvssv3
+    cvssv3_score = get_value("cvssv3_score")
+    if cvssv3_score is not None:
+        finding.cvssv3_score = cvssv3_score
+    cvssv4 = get_value("cvssv4")
+    if cvssv4:
+        finding.cvssv4 = cvssv4
+    cvssv4_score = get_value("cvssv4_score")
+    if cvssv4_score is not None:
+        finding.cvssv4_score = cvssv4_score
+
+    # Copy remediation planning fields
+    fix_available = get_value("fix_available")
+    if fix_available is not None:
+        finding.fix_available = fix_available
+    fix_version = get_value("fix_version")
+    if fix_version:
+        finding.fix_version = fix_version
+    planned_remediation_version = get_value("planned_remediation_version")
+    if planned_remediation_version:
+        finding.planned_remediation_version = planned_remediation_version
+    effort_for_fixing = get_value("effort_for_fixing")
+    if effort_for_fixing:
+        finding.effort_for_fixing = effort_for_fixing
+
+    # Copy technical details fields
+    steps_to_reproduce = get_value("steps_to_reproduce")
+    if steps_to_reproduce:
+        finding.steps_to_reproduce = steps_to_reproduce
+    severity_justification = get_value("severity_justification")
+    if severity_justification:
+        finding.severity_justification = severity_justification
+    component_name = get_value("component_name")
+    if component_name:
+        finding.component_name = component_name
+    component_version = get_value("component_version")
+    if component_version:
+        finding.component_version = component_version
+
+    # Copy vulnerability IDs
+    if copy_vulnerability_ids:
+        if form_data and "vulnerability_ids" in form_data:
+            # Split form data (space or newline separated)
+            vulnerability_ids = form_data["vulnerability_ids"]
+            if isinstance(vulnerability_ids, str):
+                vulnerability_ids = vulnerability_ids.split()
+            save_vulnerability_ids(finding, vulnerability_ids, delete_existing=True)
+        elif template.vulnerability_ids:
+            save_vulnerability_ids(finding, template.vulnerability_ids, delete_existing=False)
+
+    # Copy endpoints
+    if copy_endpoints:
+        endpoint_urls = None
+        if form_data and form_data.get("endpoints"):
+            # Parse from form data (newline-separated string)
+            endpoint_urls = [url.strip() for url in form_data["endpoints"].split("\n") if url.strip()]
+        elif template.endpoints:
+            # Parse from template (list or newline-separated string)
+            if isinstance(template.endpoints, list):
+                endpoint_urls = template.endpoints
+            else:
+                endpoint_urls = [url.strip() for url in template.endpoints.split("\n") if url.strip()]
+
+        if endpoint_urls:
+            product = finding.test.engagement.product
+            for endpoint_url in endpoint_urls:
+                try:
+                    endpoint = Endpoint.from_uri(endpoint_url)
+                    ep, _ = endpoint_get_or_create(
+                        protocol=endpoint.protocol,
+                        host=endpoint.host,
+                        port=endpoint.port,
+                        path=endpoint.path,
+                        query=endpoint.query,
+                        fragment=endpoint.fragment,
+                        product=product,
+                    )
+                    Endpoint_Status.objects.get_or_create(
+                        finding=finding,
+                        endpoint=ep,
+                        defaults={"date": finding.date or timezone.now()},
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to parse endpoint URL '{endpoint_url}': {e}")
+
+    # Copy notes
+    if copy_notes and user:
+        notes_content = None
+        if form_data and form_data.get("notes"):
+            notes_content = form_data["notes"]
+        elif template.notes:
+            notes_content = template.notes
+
+        if notes_content:
+            note = Notes(
+                entry=notes_content,
+                author=user,
+                date=timezone.now(),
+                private=False,
+            )
+            note.save()
+            finding.notes.add(note)
 
 
 def normalize_datetime(value):

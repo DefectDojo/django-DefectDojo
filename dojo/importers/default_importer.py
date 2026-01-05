@@ -129,6 +129,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             new_findings=new_findings,
             closed_findings=closed_findings,
         )
+        # Apply tags to findings and endpoints
+        self.apply_import_tags(
+            new_findings=new_findings,
+            closed_findings=closed_findings,
+        )
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
         create_notification(
@@ -234,7 +239,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # Process any files
             self.process_files(finding)
             # Process vulnerability IDs
-            finding = self.process_vulnerability_ids(finding)
+            finding = self.store_vulnerability_ids(finding)
             # Categorize this finding as a new one
             new_findings.append(finding)
             # all data is already saved on the finding, we only need to trigger post processing in batches
