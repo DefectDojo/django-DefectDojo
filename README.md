@@ -79,15 +79,13 @@ docker compose logs initializer | grep "Admin password:"
 
 ## Community, Getting Involved, and Updates
 
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/slack-logo-icon.png" alt="Slack" height="50"/>](https://owasp.org/slack/invite)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/slack-logo-icon.png" alt="Slack" height="50"/>](https://join.slack.com/t/defectdojocommunity/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/slack-logo-icon.png" alt="Slack" height="50"/>](https://join.slack.com/t/defectdojocommunity/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/Linkedin-logo-icon-png.png" alt="LinkedIn" height="50"/>](https://www.linkedin.com/company/defectdojo)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/Twitter_Logo.png" alt="Twitter" height="50"/>](https://twitter.com/defectdojo)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/YouTube-Emblem.png" alt="Youtube" height="50"/>](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ)
 
-[Join the OWASP Slack Community](https://owasp.org/slack/invite) and participate in the discussion! You can find us in
-our channel there, [#defectdojo](https://owasp.slack.com/channels/defectdojo). Follow DefectDojo on
-[Twitter](https://twitter.com/defectdojo), [LinkedIn](https://www.linkedin.com/company/defectdojo), and
-[YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) for project updates!
+[Join the DefectDojo Slack Community](https://join.slack.com/t/defectdojocommunity/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA)! Follow DefectDojo on [LinkedIn](https://www.linkedin.com/company/defectdojo), [YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ), and [Twitter](https://twitter.com/defectdojo) for platform updates!
 
 ## Contributing
 
@@ -110,7 +108,6 @@ Core Moderators can help you with pull requests or feedback on dev ideas:
 * Cody Maffucci ([@Maffooch](https://github.com/maffooch) | [LinkedIn](https://www.linkedin.com/in/cody-maffucci))
 
 Moderators can help you with pull requests or feedback on dev ideas:
-* Charles Neill ([@cneill](https://github.com/cneill) | [@ccneill](https://twitter.com/ccneill))
 * Blake Owens ([@blakeaowens](https://github.com/blakeaowens))
 
 ## Hall of Fame
