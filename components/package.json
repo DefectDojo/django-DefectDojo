@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "2.53.5",
+  "version": "2.54.0",
   "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
@@ -12,8 +12,8 @@
     "chosen-bootstrap": "https://github.com/dbtek/chosen-bootstrap",
     "chosen-js": "^1.8.7",
     "clipboard": "^2.0.11",
-    "datatables.net": "^2.3.5",
-    "datatables.net-buttons-bs": "^3.2.5",
+    "datatables.net": "^2.3.6",
+    "datatables.net-buttons-bs": "^3.2.6",
     "datatables.net-colreorder": "^2.1.2",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
@@ -33,7 +33,7 @@
     "metismenu": "~3.0.7",
     "moment": "^2.30.1",
     "morris.js": "morrisjs/morris.js",
-    "pdfmake": "^0.2.20",
+    "pdfmake": "^0.3.0",
     "startbootstrap-sb-admin-2": "1.0.7"
   },
   "engines": {

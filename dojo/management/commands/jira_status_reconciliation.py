@@ -1,5 +1,6 @@
 import logging
 
+import pghistory
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -216,10 +217,9 @@ class Command(BaseCommand):
         parser.add_argument("--dryrun", action="store_true", help="Only print actions to be performed, but make no modifications.")
 
     def handle(self, *args, **options):
-        # mode = options['mode']
-        # product = options['product']
-        # engagement = options['engagement']
-        # daysback = options['daysback']
-        # dryrun = options['dryrun']
-
-        return jira_status_reconciliation(*args, **options)
+        # Wrap with pghistory context for audit trail
+        with pghistory.context(
+            source="jira_reconciliation",
+            mode=options.get("mode", "reconcile"),
+        ):
+            return jira_status_reconciliation(*args, **options)
