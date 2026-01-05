@@ -2,7 +2,7 @@
 asteval==1.0.8
 bleach==6.3.0
 bleach[css]
-celery==5.6.0
+celery==5.6.1
 defusedxml==0.7.1
 django_celery_results==2.6.0
 django-auditlog==3.2.1
