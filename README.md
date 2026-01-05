@@ -37,13 +37,7 @@ Community Edition: [demo.defectdojo.org](https://demo.defectdojo.org)
 Either demo enviornment can be logged into with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demos are publicly accessible
 and reset every day. Do not put sensitive data in the demo. An easy way to test DefectDojo is to upload some [sample scan reports](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans).
 
-## Quick Start for Compose V2
-
-From July 2023 Compose V1 [stopped receiving updates](https://docs.docker.com/compose/reference/).
-
-Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous
-docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using
-`docker compose` instead of `docker-compose`.
+## Quick Start for Docker Compose V2
 
 ```sh
 # Clone the project
@@ -65,18 +59,6 @@ docker compose up -d
 docker compose logs initializer | grep "Admin password:"
 ```
 
-## For Docker Compose V1
-
-You can run Compose V1 by calling `docker-compose` (by adding the hyphen (-) between `docker compose`).
-
-Following commands are using original version so you might need to adjust them:
-```sh
-docker/docker-compose-check.sh
-docker/entrypoint-initializer.sh
-docker/setEnv.sh
-```
-
-Navigate to `http://localhost:8080` to see your new instance!
 
 ## Documentation
 
@@ -148,6 +130,11 @@ Moderators can help you with pull requests or feedback on dev ideas:
   Aaron has been a long time contributor and user of DefectDojo. He did the second major UI overhaul and his
   contributions include automation enhancements, CI/CD engagements, increased metadata at the product level, and many
   more.
+* Jay Paz ([@jjpaz](https://github.com/grendel513)) – Jay was a DefectDojo
+  maintainer for years. He performed Dojo's first UI overhaul, optomized code structure/features, and added numerous enhancements.
+* Charles Neill ([@ccneill](https://github.com/cneill)) – Charles served as a
+    maintainer of DefectDojo for years and wrote some of Dojo's core functionality.
+
 
 ## Security
 
