@@ -150,13 +150,12 @@
       -->
           <div class="offcanvas-body d-flex flex-column flex-lg-row justify-content-between">
             <ul class="navbar-nav flex-grow-1">
-              {{- $current := . -}}
-              {{- $section := $current.Section -}}
-              {{ range .Site.Menus.main -}}
-              {{- $active := or ($current.IsMenuCurrent "main" .) ($current.HasMenuCurrent "main" .) -}}
-              {{- $active = or $active (eq .Name $current.Title) -}}
-              {{- $active = or $active (and (eq .Name ($section | humanize)) (eq $current.Section $section)) -}}
-              {{- $active = or $active (and (eq .Name "Blog") (eq $current.Section "blog" "authors")) -}}
+              {{ $current := index (split .RelPermalink "/") 1 }}
+              {{ if eq $current "" }}{{ $current = "en" }}{{ end }}
+
+              {{ range .Site.Menus.main }}
+                {{ $menuSegment := index (split .URL "/") 1 }}
+                {{ $active := eq $menuSegment $current }}
               {{ if .HasChildren -}}
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
