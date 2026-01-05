@@ -511,7 +511,7 @@ The HELM schema will be generated for you.
 
 # General information about chart values
 
-![Version: 1.9.5](https://img.shields.io/badge/Version-1.9.5-informational?style=flat-square) ![AppVersion: 2.53.5](https://img.shields.io/badge/AppVersion-2.53.5-informational?style=flat-square)
+![Version: 1.9.6](https://img.shields.io/badge/Version-1.9.6-informational?style=flat-square) ![AppVersion: 2.54.0](https://img.shields.io/badge/AppVersion-2.54.0-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -525,7 +525,7 @@ A Helm chart for Kubernetes to install DefectDojo
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://registry-1.docker.io/cloudpirates | valkey | 0.10.2 |
+| oci://registry-1.docker.io/cloudpirates | valkey | 0.13.0 |
 | oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | postgresql | 16.7.27 |
 
 ## Values
@@ -589,13 +589,13 @@ A Helm chart for Kubernetes to install DefectDojo
 | celery.worker.startupProbe | object | `{}` | Enable startup probe for Celery worker container. |
 | celery.worker.terminationGracePeriodSeconds | int | `300` |  |
 | celery.worker.tolerations | list | `[]` |  |
-| cloudsql | object | `{"containerSecurityContext":{},"enable_iam_login":false,"enabled":false,"extraEnv":[],"extraVolumeMounts":[],"image":{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.10"},"instance":"","resources":{},"use_private_ip":false,"verbose":true}` | Google CloudSQL support in GKE via gce-proxy |
+| cloudsql | object | `{"containerSecurityContext":{},"enable_iam_login":false,"enabled":false,"extraEnv":[],"extraVolumeMounts":[],"image":{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.11"},"instance":"","resources":{},"use_private_ip":false,"verbose":true}` | Google CloudSQL support in GKE via gce-proxy |
 | cloudsql.containerSecurityContext | object | `{}` | Optional: security context for the CloudSQL proxy container. |
 | cloudsql.enable_iam_login | bool | `false` | use IAM database authentication |
 | cloudsql.enabled | bool | `false` | To use CloudSQL in GKE set 'enable: true' |
 | cloudsql.extraEnv | list | `[]` | Additional environment variables for the CloudSQL proxy container. |
 | cloudsql.extraVolumeMounts | list | `[]` | Array of additional volume mount points for the CloudSQL proxy container |
-| cloudsql.image | object | `{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.10"}` | set repo and image tag of gce-proxy |
+| cloudsql.image | object | `{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloudsql-docker/gce-proxy","tag":"1.37.11"}` | set repo and image tag of gce-proxy |
 | cloudsql.instance | string | `""` | set CloudSQL instance: 'project:zone:instancename' |
 | cloudsql.resources | object | `{}` | Optional: add resource requests/limits for the CloudSQL proxy container. |
 | cloudsql.use_private_ip | bool | `false` | whether to use a private IP to connect to the database |

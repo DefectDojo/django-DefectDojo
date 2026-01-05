@@ -40,7 +40,7 @@ class SnykParser:
             "severity_justification",
             "description",
             "mitigation",
-            "component_name"
+            "component_name",
             "component_version",
             "false_p",
             "duplicate",
