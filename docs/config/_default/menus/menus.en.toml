@@ -9,18 +9,28 @@
   weight = 11
 
 [[main]]
-  name = "Pro Features"
-  url = "/en/about_defectdojo/pro_features"
+  name = "Vuln Management"
+  url = "/vuln_management/"
   weight = 12
 
 [[main]]
-  name = "Changelog"
-  url = "/en/changelog/changelog/"
+  name = "Reporting"
+  url = "/reporting/"
   weight = 13
 
 [[main]]
-  name = "Support"
-  url = "/en/about_defectdojo/contact_defectdojo_support"
+  name = "Administration"
+  url = "/admin/"
+  weight = 14
+
+[[main]]
+  name = "Issue Tracking"
+  url = "/integrators/"
+  weight = 14
+
+[[main]]
+  name = "Automation"
+  url = "/integrators/"
   weight = 14
 
 [[social]]
