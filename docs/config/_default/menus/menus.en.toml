@@ -1,6 +1,6 @@
 [[main]]
-  name = "Docs Home"
-  url = "/en/about_defectdojo/about_docs/"
+  name = "Get Started"
+  url = "/get_started/about/about_defectdojo"
   weight = 10
 
 [[main]]
