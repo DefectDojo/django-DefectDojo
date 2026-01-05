@@ -1075,6 +1075,7 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.is_mitigated = False
         finding_new.unique_id_from_tool = original_unique_id
         finding_new.save()
+        finding_new.refresh_from_db()
 
         # The new finding should be marked as duplicate of the active finding,
         # not the mitigated one (even though mitigated has lower ID)
