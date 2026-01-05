@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.13.7-alpine3.22@sha256:9ba6d8cbebf0fb6546ae71f2a1c14f6ffd2fdab83af7fa5669734ef30ad48844 AS base
+FROM python:3.13.11-alpine3.22@sha256:ab45bd32143151fe060d48218b91df43a289166e72ec7877823b1c972580bed3 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -68,25 +68,20 @@ RUN \
 COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
-  docker/entrypoint-celery-worker-dev.sh \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-uwsgi.sh \
-  docker/entrypoint-uwsgi-dev.sh \
-  docker/entrypoint-unit-tests.sh \
-  docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
   docker/secret-file-loader.sh \
   docker/reach_database.sh \
   docker/reach_broker.sh \
   docker/certs/* \
   /
-COPY wsgi.py manage.py docker/unit-tests.sh ./
+COPY wsgi.py manage.py ./
 COPY dojo/ ./dojo/
 
 # Add extra fixtures to docker image which are loaded by the initializer
 COPY docker/extra_fixtures/* /app/dojo/fixtures/
 
-COPY tests/ ./tests/
 RUN \
   # Remove placeholder copied from docker/certs
   rm -f /readme.txt && \
@@ -139,9 +134,20 @@ ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
 FROM release AS development
 USER root
-COPY requirements-dev.txt ./
-RUN pip3 install --no-cache-dir -r requirements-dev.txt
+COPY \
+  requirements-dev.txt \
+  docker/unit-tests.sh \
+  ./
+COPY \
+  docker/entrypoint-celery-worker-dev.sh \
+  docker/entrypoint-uwsgi-dev.sh \
+  docker/entrypoint-unit-tests.sh \
+  docker/entrypoint-unit-tests-devDocker.sh \
+  /
+RUN pip3 install --no-cache-dir -r requirements-dev.txt && \
+    chmod 775 /*.sh
 USER ${uid}
 
 FROM development AS django-unittests
 COPY unittests/ ./unittests/
+COPY tests/ ./tests/

@@ -31,7 +31,7 @@ from polymorphic.base import ManagerInheritanceWarning
 from tagulous.forms import TagField
 
 import dojo.jira_link.helper as jira_helper
-from dojo.authorization.authorization import user_has_configuration_permission
+from dojo.authorization.authorization import user_has_configuration_permission, user_is_superuser_or_global_owner
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
@@ -114,7 +114,7 @@ from dojo.utils import (
     is_finding_groups_enabled,
     is_scan_file_too_large,
 )
-from dojo.validators import ImporterFileExtensionValidator, tag_validator
+from dojo.validators import ImporterFileExtensionValidator, cvss3_validator, cvss4_validator, tag_validator
 from dojo.widgets import TableCheckboxWidget
 
 logger = logging.getLogger(__name__)
@@ -1612,7 +1612,9 @@ class ApplyFindingTemplateForm(forms.Form):
     cwe = forms.IntegerField(label="CWE", required=False)
     vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(label="CVSSv3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv4 = forms.CharField(label="CVSSv3", max_length=117, required=False)
+    cvssv3_score = forms.FloatField(required=False, label="CVSSv3 Score")
+    cvssv4 = forms.CharField(label="CVSSv4", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(required=False, label="CVSSv4 Score")
 
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={"required": "Select valid choice: In Progress, On Hold, Completed", "invalid_choice": "Select valid choice: Critical,High,Medium,Low"})
 
@@ -1621,6 +1623,26 @@ class ApplyFindingTemplateForm(forms.Form):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     references = forms.CharField(widget=forms.Textarea, required=False)
 
+    # Remediation planning fields
+    fix_available = forms.BooleanField(required=False)
+    fix_version = forms.CharField(max_length=100, required=False)
+    planned_remediation_version = forms.CharField(max_length=99, required=False)
+    effort_for_fixing = forms.CharField(max_length=99, required=False)
+
+    # Technical details fields
+    steps_to_reproduce = forms.CharField(widget=forms.Textarea, required=False)
+    severity_justification = forms.CharField(widget=forms.Textarea, required=False)
+    component_name = forms.CharField(max_length=500, required=False)
+    component_version = forms.CharField(max_length=100, required=False)
+
+    # Notes field
+    notes = forms.CharField(widget=forms.Textarea, required=False, help_text="Note content to add when applying template")
+
+    # Endpoints field
+    endpoints = forms.CharField(max_length=5000, required=False,
+                                help_text="Endpoint URLs (one per line)",
+                                widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
+
     tags = TagField(required=False, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.", initial=Finding.tags.tag_model.objects.all().order_by("name"))
 
     def __init__(self, template=None, *args, **kwargs):
@@ -1628,7 +1650,36 @@ class ApplyFindingTemplateForm(forms.Form):
         self.fields["tags"].autocomplete_tags = Finding.tags.tag_model.objects.all().order_by("name")
         self.template = template
         if template:
-            self.template.vulnerability_ids = "\n".join(template.vulnerability_ids)
+            # Populate vulnerability_ids field initial value
+            self.fields["vulnerability_ids"].initial = "\n".join(template.vulnerability_ids)
+
+            # Populate CVSS fields from template
+            if hasattr(template, "cvssv3"):
+                self.fields["cvssv3"].initial = template.cvssv3
+            if hasattr(template, "cvssv4"):
+                self.fields["cvssv4"].initial = template.cvssv4
+            if hasattr(template, "cvssv3_score"):
+                self.fields["cvssv3_score"].initial = template.cvssv3_score
+            if hasattr(template, "cvssv4_score"):
+                self.fields["cvssv4_score"].initial = template.cvssv4_score
+
+            # Populate all other new fields from template
+            for field_name in ["fix_available", "fix_version", "planned_remediation_version",
+                              "effort_for_fixing", "steps_to_reproduce", "severity_justification",
+                              "component_name", "component_version", "notes"]:
+                if hasattr(template, field_name):
+                    value = getattr(template, field_name)
+                    if value is not None:
+                        self.fields[field_name].initial = value
+
+            # Populate endpoints
+            if hasattr(template, "endpoints"):
+                endpoints_value = template.endpoints
+                if endpoints_value:
+                    if isinstance(endpoints_value, list):
+                        self.fields["endpoints"].initial = "\n".join(endpoints_value)
+                    else:
+                        self.fields["endpoints"].initial = endpoints_value
 
         # Hide CVSS fields based on system settings
         hide_cvss_fields_if_disabled(self)
@@ -1651,17 +1702,27 @@ class ApplyFindingTemplateForm(forms.Form):
         return self.cleaned_data.get("tags")
 
     class Meta:
-        fields = ["title", "cwe", "vulnerability_ids", "cvssv3", "cvssv4", "severity", "description", "mitigation", "impact", "references", "tags"]
-        order = ("title", "cwe", "vulnerability_ids", "cvssv3", "cvssv4", "severity", "description", "impact", "is_mitigated")
+        fields = ["title", "cwe", "vulnerability_ids", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score",
+                 "severity", "description", "mitigation", "impact", "references", "tags",
+                 "fix_available", "fix_version", "planned_remediation_version", "effort_for_fixing",
+                 "steps_to_reproduce", "severity_justification", "component_name", "component_version",
+                 "notes", "endpoints"]
+        order = ("title", "cwe", "vulnerability_ids", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score",
+                 "severity", "description", "impact", "steps_to_reproduce", "severity_justification",
+                 "mitigation", "fix_available", "fix_version", "planned_remediation_version",
+                 "effort_for_fixing", "component_name", "component_version", "references", "notes",
+                 "endpoints", "tags")
 
 
 class FindingTemplateForm(forms.ModelForm):
-    apply_to_findings = forms.BooleanField(required=False, help_text="Apply template to all findings that match this CWE. (Update will overwrite mitigation, impact and references for any active, verified findings.)")
     title = forms.CharField(max_length=1000, required=True)
 
     cwe = forms.IntegerField(label="CWE", required=False)
     vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(required=False, label="CVSSv3 Score")
+    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
+    cvssv4_score = forms.FloatField(required=False, label="CVSSv4 Score")
     severity = forms.ChoiceField(
         required=False,
         choices=SEVERITY_CHOICES,
@@ -1669,7 +1730,30 @@ class FindingTemplateForm(forms.ModelForm):
             "required": "Select valid choice: In Progress, On Hold, Completed",
             "invalid_choice": "Select valid choice: Critical,High,Medium,Low"})
 
-    field_order = ["title", "cwe", "vulnerability_ids", "severity", "cvssv3", "description", "mitigation", "impact", "references", "tags", "template_match", "template_match_cwe", "template_match_title", "apply_to_findings"]
+    # Remediation planning fields
+    fix_available = forms.BooleanField(required=False)
+    fix_version = forms.CharField(max_length=100, required=False)
+    planned_remediation_version = forms.CharField(max_length=99, required=False)
+    effort_for_fixing = forms.CharField(max_length=99, required=False)
+
+    # Technical details fields
+    steps_to_reproduce = forms.CharField(widget=forms.Textarea, required=False)
+    severity_justification = forms.CharField(widget=forms.Textarea, required=False)
+    component_name = forms.CharField(max_length=500, required=False)
+    component_version = forms.CharField(max_length=100, required=False)
+
+    # Notes field
+    notes = forms.CharField(widget=forms.Textarea, required=False, help_text="Note content to add when applying template")
+
+    # Endpoints field
+    endpoints = forms.CharField(max_length=5000, required=False,
+                                help_text="Endpoint URLs (one per line)",
+                                widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
+
+    field_order = ["title", "cwe", "vulnerability_ids", "severity", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score",
+                   "description", "impact", "steps_to_reproduce", "severity_justification", "mitigation",
+                   "fix_available", "fix_version", "planned_remediation_version", "effort_for_fixing",
+                   "component_name", "component_version", "references", "notes", "endpoints", "tags"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1680,8 +1764,29 @@ class FindingTemplateForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Template
-        order = ("title", "cwe", "vulnerability_ids", "cvssv3", "severity", "description", "impact")
-        exclude = ("numerical_severity", "is_mitigated", "last_used", "endpoint_status", "cve")
+        order = ("title", "cwe", "vulnerability_ids", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "severity", "description", "impact",
+                 "steps_to_reproduce", "severity_justification", "mitigation", "fix_available", "fix_version",
+                 "planned_remediation_version", "effort_for_fixing", "component_name", "component_version",
+                 "references", "notes", "endpoints", "tags")
+        exclude = ("numerical_severity", "is_mitigated", "last_used", "endpoint_status", "cve", "vulnerability_ids_text")
+
+    def clean_cvssv3(self):
+        value = self.cleaned_data.get("cvssv3")
+        if value:
+            try:
+                cvss3_validator(value)
+            except ValidationError as e:
+                raise forms.ValidationError(e.messages)
+        return value
+
+    def clean_cvssv4(self):
+        value = self.cleaned_data.get("cvssv4")
+        if value:
+            try:
+                cvss4_validator(value)
+            except ValidationError as e:
+                raise forms.ValidationError(e.messages)
+        return value
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
@@ -1737,6 +1842,9 @@ class FindingBulkUpdateForm(forms.ModelForm):
             raise forms.ValidationError(msg)
         if cleaned_data["false_p"] and cleaned_data["verified"]:
             msg = "False positive findings cannot be verified."
+            raise forms.ValidationError(msg)
+        if cleaned_data["active"] and cleaned_data.get("risk_acceptance") and cleaned_data.get("risk_accept"):
+            msg = "Active findings cannot be risk accepted."
             raise forms.ValidationError(msg)
         return cleaned_data
 
@@ -2420,13 +2528,32 @@ class DeleteUserForm(forms.ModelForm):
 
 
 class UserContactInfoForm(forms.ModelForm):
+    reset_api_token = forms.BooleanField(
+        required=False,
+        label=_("Reset API token"),
+        help_text=_("Upon saving, a new token will be generated and a notification of category 'Other' is triggered."),
+    )
+
     class Meta:
         model = UserContactInfo
         exclude = ["user", "slack_user_id"]
+        # Swap order: password_last_reset before token_last_reset
+        field_order = [
+            "title", "phone_number", "cell_number", "twitter_username", "github_username",
+            "slack_username", "block_execution", "force_password_reset", "reset_api_token",
+            "password_last_reset", "token_last_reset",
+        ]
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+        # Make timestamp fields readonly.
+        # NOTE: `disabled=True` is enforced server-side by Django forms: posted values for disabled fields
+        # are ignored during binding/cleaning, so these timestamps cannot be modified via this form.
+        if "password_last_reset" in self.fields:
+            self.fields["password_last_reset"].disabled = True
+        if "token_last_reset" in self.fields:
+            self.fields["token_last_reset"].disabled = True
         # Do not expose force password reset if the current user does not have a password to reset
         if user is not None:
             if not user.has_usable_password():
@@ -2437,10 +2564,14 @@ class UserContactInfoForm(forms.ModelForm):
         if not current_user.is_superuser:
             if not user_has_configuration_permission(current_user, "auth.change_user") and \
                not user_has_configuration_permission(current_user, "auth.add_user"):
-                del self.fields["force_password_reset"]
+                self.fields.pop("force_password_reset", None)
             if not get_system_setting("enable_user_profile_editable"):
                 for field in self.fields:
                     self.fields[field].disabled = True
+
+        # Only show reset_api_token to superusers or global owners, and only if API tokens are enabled
+        if not settings.API_TOKENS_ENABLED or not user_is_superuser_or_global_owner(current_user):
+            self.fields.pop("reset_api_token", None)
 
 
 class GlobalRoleForm(forms.ModelForm):
