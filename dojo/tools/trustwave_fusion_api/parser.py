@@ -1,14 +1,15 @@
-import json
 import hashlib
+import json
 from datetime import datetime
-from dojo.models import Finding, Endpoint
+
 from cpe import CPE
 
+from dojo.models import Endpoint, Finding
 
-class TrustwaveFusionAPIParser(object):
-    """
-    Import Trustwave Fusion Report from its API in JSON format
-    """
+
+class TrustwaveFusionAPIParser:
+
+    """Import Trustwave Fusion Report from its API in JSON format"""
 
     def get_scan_types(self):
         return ["Trustwave Fusion API Scan"]
@@ -17,7 +18,9 @@ class TrustwaveFusionAPIParser(object):
         return "Trustwave Fusion API Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Trustwave Fusion API report file can be imported in JSON format"
+        return (
+            "Trustwave Fusion API report file can be imported in JSON format"
+        )
 
     def get_findings(self, file, test):
         tree = json.load(file)
@@ -28,13 +31,13 @@ class TrustwaveFusionAPIParser(object):
             item = get_item(node, test)
 
             item_key = hashlib.sha256(
-                "|".join([item.severity, item.title,
-                         item.description]).encode()
+                f"{item.severity}|{item.title}|{item.description}".encode(),
             ).hexdigest()
 
             if item_key in items:
                 items[item_key].unsaved_endpoints.extend(
-                    item.unsaved_endpoints)
+                    item.unsaved_endpoints,
+                )
                 items[item_key].nb_occurences += 1
             else:
                 items[item_key] = item
@@ -45,12 +48,11 @@ class TrustwaveFusionAPIParser(object):
         """Convert severity value"""
         if num_severity >= -10:
             return "Low"
-        elif -11 >= num_severity > -26:
+        if -11 >= num_severity > -26:
             return "Medium"
-        elif num_severity <= -26:
+        if num_severity <= -26:
             return "High"
-        else:
-            return "Info"
+        return "Info"
 
 
 def get_item(vuln, test):
@@ -68,23 +70,26 @@ def get_item(vuln, test):
     if "url" in location and location["url"] and location["url"] != "None":
         endpoint = Endpoint.from_uri(location["url"])
     # fallback to using old way of creating endpoints
-    elif "domain" in location and location["domain"] and location["domain"] != "None":
+    elif (
+        "domain" in location
+        and location["domain"]
+        and location["domain"] != "None"
+    ):
         endpoint = Endpoint(host=str(location["domain"]))
-    else:  # no domain, use ip instead
-        if "ip" in location and location["ip"] and location["ip"] != "None":
-            endpoint = Endpoint(host=str(location["ip"]))
+    elif "ip" in location and location["ip"] and location["ip"] != "None":
+        endpoint = Endpoint(host=str(location["ip"]))
     # check for protocol
     if (
-        "applicationProtocol" in location and
-        location["applicationProtocol"] and
-        location["applicationProtocol"] != "None"
+        "applicationProtocol" in location
+        and location["applicationProtocol"]
+        and location["applicationProtocol"] != "None"
     ):
         endpoint.protocol = location["applicationProtocol"]
     # check for port
     if (
-        "port" in location and
-        location["port"] in location and
-        location["port"] != "None"
+        "port" in location
+        and location["port"] in location
+        and location["port"] != "None"
     ):
         endpoint.port = location["port"]
     finding.unsaved_endpoints = [endpoint]  # assigning endpoint
@@ -112,19 +117,21 @@ def get_item(vuln, test):
 
     # Component Name and Version
     if (
-        "applicationCpe" in location and
-        location["applicationCpe"] and
-        location["applicationCpe"] != "None"
+        "applicationCpe" in location
+        and location["applicationCpe"]
+        and location["applicationCpe"] != "None"
     ):
         cpe = CPE(location["applicationCpe"])
 
-        component_name = cpe.get_vendor()[0] + ":" if len(
-            cpe.get_vendor()) > 0 else ""
+        component_name = (
+            cpe.get_vendor()[0] + ":" if len(cpe.get_vendor()) > 0 else ""
+        )
 
-        component_name += cpe.get_product()[0] if len(
-            cpe.get_product()) > 0 else ""
+        component_name += (
+            cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
+        )
 
-        finding.component_name = component_name if component_name else None
+        finding.component_name = component_name or None
         finding.component_version = (
             cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
         )

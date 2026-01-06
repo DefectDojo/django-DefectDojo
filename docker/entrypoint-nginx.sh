@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e  # needed to handle "exit" correctly
+
 umask 0002
 if [ "${GENERATE_TLS_CERTIFICATE}" = true ]; then
   openssl req  \
@@ -18,6 +20,10 @@ else
   NGINX_CONFIG="/etc/nginx/nginx.conf"
 fi
 
+if ! ip -6 addr show dev lo | grep -q 'inet6 ::1'; then
+    sed -i '/listen \[::\]:/d' "$NGINX_CONFIG"
+fi
+
 if [ "${NGINX_METRICS_ENABLED}" = true ]; then
   sed -i "s/#stub_status/stub_status/g;" $NGINX_CONFIG
   echo "Nginx metrics are enabled"
@@ -26,7 +32,8 @@ fi
 if [ "${METRICS_HTTP_AUTH_PASSWORD}" != "" ]; then
   sed -i "s/#auth_basic/auth_basic/g;" $NGINX_CONFIG
   rm -rf /etc/nginx/.htpasswd
-  echo -n $METRICS_HTTP_AUTH_USER:$(openssl passwd -apr1 $METRICS_HTTP_AUTH_PASSWORD) >> /etc/nginx/.htpasswd
+  openssl_passwd=$(openssl passwd -apr1 "$METRICS_HTTP_AUTH_PASSWORD")
+  echo "$METRICS_HTTP_AUTH_USER":"$openssl_passwd" >> /etc/nginx/.htpasswd
   echo "Basic auth is on for user ${HTTP_AUTH_LOGIN}..."
 else
   echo "Basic auth is off (HTTP_AUTH_PASSWORD not provided)"

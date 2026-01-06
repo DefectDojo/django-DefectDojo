@@ -1,0 +1,130 @@
+{
+    "imageDigest": "sha256:91f5c377c6b3c8eabe4112057f71794a648fc7d88e06336384fb4ea1042a2dee",
+    "vulnerabilities": [
+        {
+            "feed": "nvdv2",
+            "feed_group": "nvdv2:cves",
+            "fix": "None",
+            "nvd_data": [
+                {
+                    "cvss_v2": {
+                        "base_score": 7.5,
+                        "exploitability_score": 10.0,
+                        "impact_score": 6.4
+                    },
+                    "cvss_v3": {
+                        "base_score": -1.0,
+                        "exploitability_score": -1.0,
+                        "impact_score": -1.0
+                    },
+                    "id": "CVE-2005-3906"
+                }
+            ],
+            "package": "jdk-1.4",
+            "package_cpe": "cpe:/a:-:jdk:1.4:-:-",
+            "package_cpe23": "cpe:2.3:a:-:jdk:1.4:-:-:-:-:-:-:-",
+            "package_name": "jdk",
+            "package_path": "/usr/share/contoso-petstore/contoso-petstore.war:WEB-INF/deployed-addons/jdk-tool.hpi",
+            "package_type": "java",
+            "package_version": "1.4",
+            "severity": "High",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2005-3906",
+            "vendor_data": [],
+            "vuln": "CVE-2005-3906"
+        },
+        {
+            "feed": "nvdv2",
+            "feed_group": "nvdv2:cves",
+            "fix": "None",
+            "nvd_data": [
+                {
+                    "cvss_v2": {
+                        "base_score": 7.5,
+                        "exploitability_score": 10.0,
+                        "impact_score": 6.4
+                    },
+                    "cvss_v3": {
+                        "base_score": -1.0,
+                        "exploitability_score": -1.0,
+                        "impact_score": -1.0
+                    },
+                    "id": "CVE-2005-3906"
+                }
+            ],
+            "package": "jdk-1.4",
+            "package_cpe": "cpe:/a:-:jdk:1.4:-:-",
+            "package_cpe23": "cpe:2.3:a:-:jdk:1.4:-:-:-:-:-:-:-",
+            "package_name": "jdk",
+            "package_path": "/usr/share/contoso-petstore/contoso-petstore.war:WEB-INF/deployed-addons/jdk-tool.hpi:WEB-INF/lib/jdk-tool.jar",
+            "package_type": "java",
+            "package_version": "1.4",
+            "severity": "High",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2005-3906",
+            "vendor_data": [],
+            "vuln": "CVE-2005-3906"
+        },
+        {
+            "feed": "nvdv2",
+            "feed_group": "nvdv2:cves",
+            "fix": "None",
+            "nvd_data": [
+                {
+                    "cvss_v2": {
+                        "base_score": 7.5,
+                        "exploitability_score": 10.0,
+                        "impact_score": 6.4
+                    },
+                    "cvss_v3": {
+                        "base_score": -1.0,
+                        "exploitability_score": -1.0,
+                        "impact_score": -1.0
+                    },
+                    "id": "CVE-2005-3906"
+                }
+            ],
+            "package": "jdk-1.4",
+            "package_cpe": "cpe:/a:-:jdk:1.4:-:-",
+            "package_cpe23": "cpe:2.3:a:-:jdk:1.4:-:-:-:-:-:-:-",
+            "package_name": "jdk",
+            "package_path": "/usr/share/contoso-petstore/contoso-petstore.war:WEB-INF/addons/jdk-tool.hpi",
+            "package_type": "java",
+            "package_version": "1.4",
+            "severity": "High",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2005-3906",
+            "vendor_data": [],
+            "vuln": "CVE-2005-3906"
+        },
+        {
+            "feed": "nvdv2",
+            "feed_group": "nvdv2:cves",
+            "fix": "None",
+            "nvd_data": [
+                {
+                    "cvss_v2": {
+                        "base_score": 7.5,
+                        "exploitability_score": 10.0,
+                        "impact_score": 6.4
+                    },
+                    "cvss_v3": {
+                        "base_score": -1.0,
+                        "exploitability_score": -1.0,
+                        "impact_score": -1.0
+                    },
+                    "id": "CVE-2005-3906"
+                }
+            ],
+            "package": "jdk-1.4",
+            "package_cpe": "cpe:/a:-:jdk:1.4:-:-",
+            "package_cpe23": "cpe:2.3:a:-:jdk:1.4:-:-:-:-:-:-:-",
+            "package_name": "jdk",
+            "package_path": "/usr/share/contoso-petstore/contoso-petstore.war:WEB-INF/addons/jdk-tool.hpi:WEB-INF/lib/jdk-tool.jar",
+            "package_type": "java",
+            "package_version": "1.4",
+            "severity": "High",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2005-3906",
+            "vendor_data": [],
+            "vuln": "CVE-2005-3906"
+        }
+    ],
+    "vulnerability_type": "all"
+}

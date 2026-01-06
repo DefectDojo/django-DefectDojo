@@ -1,0 +1,29 @@
+{
+  "data": {
+    "affected_items": [
+      {
+        "name": "asdf",
+        "version": "1",
+        "cve": "CVE-1234-1234",
+        "cvss2_score": 0,
+        "title": "CVE-1234-1234 affects curl",
+        "published": "2023-12-07",
+        "architecture": "amd64",
+        "status": "VALID",
+        "cvss3_score": 6.5,
+        "external_references": [
+          "https://nvd.nist.gov/vuln/detail/CVE-1234-1234",
+          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-1234-1234"
+        ],
+        "updated": "2023-12-24",
+        "severity": "Medium",
+        "type": "PACKAGE",
+        "detection_time": "2023-12-13T22:11:57+00:00",
+        "condition": "Package less than 2",
+        "agent_ip": "111.111.111.111",
+        "agent_name": "agent-1"
+      }
+    ],
+    "total_affected_items": 1
+  }
+}

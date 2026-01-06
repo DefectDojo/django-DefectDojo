@@ -1,16 +1,16 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-
-from dojo.models import Test, Engagement, Product
-from dojo.tools.checkmarx_osa.parser import CheckmarxOsaParser
 from datetime import datetime
+
+from dojo.models import Engagement, Product, Test
+from dojo.tools.checkmarx_osa.parser import CheckmarxOsaParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestCheckmarxOsaParser(DojoTestCase):
     # comment out to get full diff with big reports
     # maxDiff = None
 
-    def init(self, report_filename):
-        my_file_handle = open(report_filename)
+    def init(self, report_path):
+        my_file_handle = report_path.open(encoding="utf-8")
         product = Product()
         engagement = Engagement()
         test = Test()
@@ -27,8 +27,8 @@ class TestCheckmarxOsaParser(DojoTestCase):
     def test_checkmarx_osa_parse_file_with_no_vulnerabilities_has_no_findings(
         self,
     ):
-        my_file_handle, product, engagement, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_osa/no_finding.json"
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_scans_path("checkmarx_osa") / "no_finding.json",
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -41,8 +41,8 @@ class TestCheckmarxOsaParser(DojoTestCase):
     def test_checkmarx_osa_parse_file_with_single_vulnerability_has_single_finding(
         self,
     ):
-        my_file_handle, product, engagement, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_osa/single_finding.json"
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_scans_path("checkmarx_osa") / "single_finding.json",
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -59,7 +59,7 @@ class TestCheckmarxOsaParser(DojoTestCase):
         self.assertEqual(float, type(item.cvssv3_score))
         self.assertEqual(7.5, item.cvssv3_score)
         self.assertEqual(datetime, type(item.publish_date))
-        self.assertEqual(datetime.strptime("2020-12-03T17:15:00", '%Y-%m-%dT%H:%M:%S'), item.publish_date)
+        self.assertEqual(datetime.strptime("2020-12-03T17:15:00", "%Y-%m-%dT%H:%M:%S"), item.publish_date)
         self.assertEqual(str, type(item.component_name))
         self.assertEqual("com.fasterxml.jackson.core:jackson-databind", item.component_name)
         self.assertEqual(str, type(item.component_version))
@@ -93,8 +93,8 @@ class TestCheckmarxOsaParser(DojoTestCase):
     def test_checkmarx_osa_parse_file_with_false_positive_is_false_positive(
         self,
     ):
-        my_file_handle, product, engagement, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_osa/single_finding_false_positive.json"
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_scans_path("checkmarx_osa") / "single_finding_false_positive.json",
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -114,8 +114,8 @@ class TestCheckmarxOsaParser(DojoTestCase):
     def test_checkmarx_osa_parse_file_with_confirmed_is_verified(
         self,
     ):
-        my_file_handle, product, engagement, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_osa/single_finding_confirmed.json"
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_scans_path("checkmarx_osa") / "single_finding_confirmed.json",
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -135,8 +135,8 @@ class TestCheckmarxOsaParser(DojoTestCase):
     def test_checkmarx_osa_parse_file_with_multiple_findings(
         self,
     ):
-        my_file_handle, product, engagement, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_osa/multiple_findings.json"
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_scans_path("checkmarx_osa") / "multiple_findings.json",
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -149,8 +149,8 @@ class TestCheckmarxOsaParser(DojoTestCase):
     def test_checkmarx_osa_parse_file_with_no_score(
         self,
     ):
-        my_file_handle, product, engagement, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_osa/single_finding_no_score.json"
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_scans_path("checkmarx_osa") / "single_finding_no_score.json",
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -165,8 +165,8 @@ class TestCheckmarxOsaParser(DojoTestCase):
     def test_checkmarx_osa_parse_file_with_no_url(
         self,
     ):
-        my_file_handle, product, engagement, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_osa/single_finding_no_url.json"
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_scans_path("checkmarx_osa") / "single_finding_no_url.json",
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -182,12 +182,13 @@ class TestCheckmarxOsaParser(DojoTestCase):
         self,
     ):
         with self.assertRaises(ValueError) as context:
-            my_file_handle, product, engagement, test = self.init(
-                get_unit_tests_path() + "/scans/checkmarx_osa/single_finding_no_libraryId.json"
+            my_file_handle, _product, _engagement, test = self.init(
+                get_unit_tests_scans_path("checkmarx_osa") / "single_finding_no_libraryId.json",
             )
-            parser = CheckmarxOsaParser()
-            parser.get_findings(my_file_handle, test)
-            self.teardown(my_file_handle)
-            self.assertTrue(
-                "Invalid format: missing mandatory field libraryId:" in str(context.exception)
-            )
+            with my_file_handle:
+                parser = CheckmarxOsaParser()
+                parser.get_findings(my_file_handle, test)
+
+        self.assertEqual(
+            "Invalid format: missing mandatory field libraryId", str(context.exception),
+        )

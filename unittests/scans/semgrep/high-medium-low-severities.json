@@ -1,0 +1,95 @@
+    {
+    "errors": [],
+    "interfile_languages_used": [],
+    "paths": {
+        "scanned": []
+    },
+    "results": [
+        {
+            "check_id": "rules.sast.dev.generic.internal.detect-cdn-usage-react-express",
+            "end": {
+                "col": 89,
+                "line": 48,
+                "offset": 1772
+            },
+            "extra": {
+                "engine_kind": "OSS",
+                "fingerprint": "d30b51e68d2d56fb34e5a87920208e0f18b71dbec62b2ad91d1b55e566c5796c64b1e161d7fd3c0f65834756474c0617c29b7c5bd76b76f14f2d3fc537a664b9_0",
+                "is_ignored": false,
+                "lines": "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>",
+                "message": "Potential CDN usage detected. Consider removing or replacing CDN references to comply with GDPR and also avoid supply chain risk",
+                "metadata": {
+                    "category": "security",
+                    "technology": "cdn"
+                },
+                "metavars": {},
+                "severity": "LOW",
+                "validation_state": "NO_VALIDATOR"
+            },
+            "path": "/Users/user.example/git/company/full-codebase/company/lead-magnet/src/templates/base.html.twig",
+            "start": {
+                "col": 1,
+                "line": 48,
+                "offset": 1684
+            }
+        },
+        {
+            "check_id": "rules.sast.dev.generic.internal.detect-cdn-usage-react-express",
+            "end": {
+                "col": 206,
+                "line": 49,
+                "offset": 1978
+            },
+            "extra": {
+                "engine_kind": "OSS",
+                "fingerprint": "d30b51e68d2d56fb34e5a87920208e0f18b71dbec62b2ad91d1b55e566c5796c64b1e161d7fd3c0f65834756474c0617c29b7c5bd76b76f14f2d3fc537a664b9_1",
+                "is_ignored": false,
+                "lines": "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js\" integrity=\"sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1\" crossorigin=\"anonymous\"></script>",
+                "message": "Potential CDN usage detected. Consider removing or replacing CDN references to comply with GDPR and also avoid supply chain risk",
+                "metadata": {
+                    "category": "security",
+                    "technology": "cdn"
+                },
+                "metavars": {},
+                "severity": "LOW",
+                "validation_state": "NO_VALIDATOR"
+            },
+            "path": "/Users/user.example/git/company/full-codebase/company/lead-magnet/src/templates/base.html.twig",
+            "start": {
+                "col": 1,
+                "line": 49,
+                "offset": 1773
+            }
+        },
+        {
+            "check_id": "rules.sast.dev.generic.internal.detect-cdn-usage-react-express",
+            "end": {
+                "col": 203,
+                "line": 50,
+                "offset": 2181
+            },
+            "extra": {
+                "engine_kind": "OSS",
+                "fingerprint": "d30b51e68d2d56fb34e5a87920208e0f18b71dbec62b2ad91d1b55e566c5796c64b1e161d7fd3c0f65834756474c0617c29b7c5bd76b76f14f2d3fc537a664b9_2",
+                "is_ignored": false,
+                "lines": "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js\" integrity=\"sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM\" crossorigin=\"anonymous\"></script>{% block javascripts %}{% endblock %}",
+                "message": "Potential CDN usage detected. Consider removing or replacing CDN references to comply with GDPR and also avoid supply chain risk",
+                "metadata": {
+                    "category": "security",
+                    "technology": "cdn"
+                },
+                "metavars": {},
+                "severity": "LOW",
+                "validation_state": "NO_VALIDATOR"
+            },
+            "path": "/Users/user.example/git/company/full-codebase/company/lead-magnet/src/templates/base.html.twig",
+            "start": {
+                "col": 1,
+                "line": 50,
+                "offset": 1979
+            }
+        }
+    ],
+    "skipped_rules": [],
+    "version": "1.84.1"
+}

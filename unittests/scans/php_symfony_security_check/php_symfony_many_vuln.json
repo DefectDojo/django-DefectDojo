@@ -1,0 +1,77 @@
+{
+    "symfony/cache": {
+        "version": "v3.4.16",
+        "advisories": [
+            {
+                "title": "CVE-2019-10912: Prevent destructors with side-effects from being unserialized",
+                "link": "https://symfony.com/cve-2019-10912",
+                "cve": "CVE-2019-10912"
+            }
+        ]
+    },
+    "symfony/dependency-injection": {
+        "version": "v3.4.16",
+        "advisories": [
+            {
+                "title": "CVE-2019-10910: Check service IDs are valid",
+                "link": "https://symfony.com/cve-2019-10910",
+                "cve": "CVE-2019-10910"
+            }
+        ]
+    },
+    "symfony/form": {
+        "version": "v3.4.16",
+        "advisories": [
+            {
+                "title": "CVE-2018-19789: Temporary uploaded file path disclosure",
+                "link": "https://symfony.com/cve-2018-19789",
+                "cve": "CVE-2018-19789"
+            }
+        ]
+    },
+    "symfony/framework-bundle": {
+        "version": "v3.4.16",
+        "advisories": [
+            {
+                "title": "CVE-2019-10909: Escape validation messages in the PHP templating engine",
+                "link": "https://symfony.com/cve-2019-10909",
+                "cve": "CVE-2019-10909"
+            }
+        ]
+    },
+    "symfony/http-foundation": {
+        "version": "v3.4.16",
+        "advisories": [
+            {
+                "title": "CVE-2019-10913: Reject invalid HTTP method overrides",
+                "link": "https://symfony.com/cve-2019-10913",
+                "cve": "CVE-2019-10913"
+            }
+        ]
+    },
+    "symfony/security": {
+        "version": "v3.4.16",
+        "advisories": [
+            {
+                "title": "CVE-2018-19790: Open Redirect Vulnerability on login",
+                "link": "https://symfony.com/cve-2018-19790",
+                "cve": "CVE-2018-19790"
+            },
+            {
+                "title": "CVE-2019-10911: Add a separator in the remember me cookie hash",
+                "link": "https://symfony.com/cve-2019-10911",
+                "cve": "CVE-2019-10911"
+            }
+        ]
+    },
+    "twig/twig": {
+        "version": "v2.5.0",
+        "advisories": [
+            {
+                "title": "Sandbox Information Disclosure",
+                "link": "https://symfony.com/blog/twig-sandbox-information-disclosure",
+                "cve": ""
+            }
+        ]
+    }
+}

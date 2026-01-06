@@ -1,12 +1,17 @@
 import json
-from json.decoder import JSONDecodeError
+import logging
 import re
+from json.decoder import JSONDecodeError
+
+# import cvss.parser
 from dojo.models import Finding
-from cvss import CVSS3, CVSS2
-import cvss.parser
+from dojo.utils import parse_cvss_data
+
+logger = logging.getLogger(__name__)
 
 
-class AuditJSParser(object):
+class AuditJSParser:
+
     """Parser for AuditJS Scan tool"""
 
     def get_scan_types(self):
@@ -23,72 +28,101 @@ class AuditJSParser(object):
         cvss = float(cvss)
         if cvss > 0 and cvss < 4:
             return "Low"
-        elif cvss >= 4 and cvss < 7:
+        if cvss >= 4 and cvss < 7:
             return "Medium"
-        elif cvss >= 7 and cvss < 9:
+        if cvss >= 7 and cvss < 9:
             return "High"
-        elif cvss >= 9:
+        if cvss >= 9:
             return "Critical"
-        else:
-            return "Informational"
+        return "Informational"
 
     def get_findings(self, filename, test):
         try:
             data = json.load(filename)
         except JSONDecodeError:
-            raise ValueError("Invalid JSON format. Are you sure you used --json option ?")
-        dupes = dict()
+            msg = "Invalid JSON format. Are you sure you used --json option ?"
+            raise ValueError(msg)
+        dupes = {}
 
         for dependency in data:
             # reading package name in format pkg:npm/PACKAGE_NAME@PACKAGE_VERSION
+            # or pkg:npm/PACKAGE_SCOPE/PACKAGE_NAME@PACKAGE_VERSION
             if "coordinates" in dependency:
                 file_path = dependency["coordinates"]
-                component_name, component_version = file_path.split('/')[1].split('@')
+                file_path_splitted = file_path.split("/")
+                pacakge_full_name = (
+                    f"{file_path_splitted[1]}/{file_path_splitted[2]}"
+                    if len(file_path_splitted) == 3
+                    else file_path_splitted[1]
+                )
+
+                component_name, component_version = pacakge_full_name.split(
+                    "@",
+                )
 
             # Check if there are any vulnerabilities
-            if dependency['vulnerabilities']:
+            if dependency["vulnerabilities"]:
                 # Get vulnerability data from JSON and setup variables
-                for vulnerability in dependency['vulnerabilities']:
-                    unique_id_from_tool = title = description = cvss_score = cvss_vector = vulnerability_id = cwe = references = severity = None
+                for vulnerability in dependency["vulnerabilities"]:
+                    unique_id_from_tool = (
+                        title
+                    ) = (
+                        description
+                    ) = (
+                        cvss_score
+                    ) = (
+                        cvssv3
+                    ) = (
+                        cvssv4
+                    ) = (
+                        cvssv3_score
+                    ) = (
+                        cvssv4_score
+                    ) = vulnerability_id = cwe = references = severity = None
                     # Check mandatory
-                    if "id" in vulnerability and 'title' in vulnerability and 'description' in vulnerability:
+                    if (
+                        "id" in vulnerability
+                        and "title" in vulnerability
+                        and "description" in vulnerability
+                    ):
                         unique_id_from_tool = vulnerability["id"]
-                        title = vulnerability['title']
-                        description = vulnerability['description']
+                        title = vulnerability["title"]
+                        description = vulnerability["description"]
                         # Find CWE in title in form "CWE-****"
                         cwe_find = re.findall(r"^CWE-[0-9]{1,4}", title)
                         if cwe_find:
                             cwe = int(cwe_find[0][4:])
                     else:
-                        raise ValueError("Missing mandatory attributes (id, title, description). Please check your report or ask community.")
-                    if 'cvssScore' in vulnerability:
-                        cvss_score = vulnerability['cvssScore']
-                    if 'cvssVector' in vulnerability:
-                        cvss_vectors = cvss.parser.parse_cvss_from_text(vulnerability['cvssVector'])
-                        if len(cvss_vectors) > 0 and type(cvss_vectors[0]) == CVSS3:
-                            # Only set finding vector if it's version 3
-                            cvss_vector = cvss_vectors[0].clean_vector()
-                            severity = cvss_vectors[0].severities()[0]
-                        elif len(cvss_vectors) > 0 and type(cvss_vectors[0]) == CVSS2:
-                            # Otherwise add it to description
-                            description = description + "\nCVSS V2 Vector:" + cvss_vectors[0].clean_vector()
-                            severity = cvss_vectors[0].severities()[0]
+                        msg = "Missing mandatory attributes (id, title, description). Please check your report or ask community."
+                        raise ValueError(msg)
+                    if "cvssScore" in vulnerability:
+                        cvss_score = vulnerability["cvssScore"]
+                    cvss_data = parse_cvss_data(vulnerability.get("cvssVector"))
+                    if cvss_data:
+                        severity = cvss_data["severity"]
+                        cvssv3 = cvss_data["cvssv3"]
+                        cvssv4 = cvss_data["cvssv4"]
+                        # The score in the report can be different from what the cvss library calulates
+                        if cvss_data["major_version"] == 2:
+                            description += "\nCVSS V2 Vector:" + cvss_data["cvssv2"] + " (Score: " + str(cvss_score) + ")"
                     else:
-                        # If there is no vector, calculate severity based on score and CVSS V3 (AuditJS does not always include it)
+                        # If there is no vector, calculate severity based on CVSS score
                         severity = self.get_severity(cvss_score)
-                    if 'cve' in vulnerability:
-                        vulnerability_id = vulnerability['cve']
-                    if 'reference' in vulnerability:
-                        references = vulnerability['reference']
+                    if "cve" in vulnerability:
+                        vulnerability_id = vulnerability["cve"]
+                    if "reference" in vulnerability:
+                        references = vulnerability["reference"]
 
                     finding = Finding(
                         title=title,
                         test=test,
                         cwe=cwe,
-                        cvssv3=cvss_vector,
-                        cvssv3_score=cvss_score,
                         description=description,
                         severity=severity,
+                        cvssv3=cvssv3,
+                        cvssv3_score=cvssv3_score,
+                        cvssv4=cvssv4,
+                        cvssv4_score=cvssv4_score,
                         references=references,
                         file_path=file_path,
                         component_name=component_name,
@@ -97,6 +131,9 @@ class AuditJSParser(object):
                         dynamic_finding=False,
                         unique_id_from_tool=unique_id_from_tool,
                     )
+                    logger.debug("Finding fields:")
+                    for field, value in finding.__dict__.items():
+                        logger.debug("  %s: %r", field, value)
                     if vulnerability_id:
                         finding.unsaved_vulnerability_ids = [vulnerability_id]
 
@@ -106,7 +143,9 @@ class AuditJSParser(object):
                         find = dupes[dupe_key]
                         if finding.description:
                             find.description += "\n" + finding.description
-                        find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                        find.unsaved_endpoints.extend(
+                            finding.unsaved_endpoints,
+                        )
                         dupes[dupe_key] = find
                     else:
                         dupes[dupe_key] = finding

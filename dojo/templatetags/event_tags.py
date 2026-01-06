@@ -1,25 +1,23 @@
 import re
 
-from django import template
-from django import forms
-
+from django import forms, template
 
 register = template.Library()
 
 
 def _process_field_attributes(field, attr, process):
     # split attribute name and value from 'attr:value' string
-    params = attr.split(':', 1)
+    params = attr.split(":", 1)
     attribute = params[0]
-    value = params[1] if len(params) == 2 else ''
+    value = params[1] if len(params) == 2 else ""
 
     # decorate field.as_widget method with updated attributes
     old_as_widget = field.as_widget
 
-    def as_widget(self, widget=None, attrs=None, only_initial=False):
+    def as_widget(self, widget=None, attrs=None, *, only_initial=False):
         attrs = attrs or {}
         process(widget or self.field.widget, attrs, attribute, value)
-        return old_as_widget(widget, attrs, only_initial)
+        return old_as_widget(widget, attrs, only_initial=only_initial)
 
     bound_method = type(old_as_widget)
     try:
@@ -33,9 +31,9 @@ def _process_field_attributes(field, attr, process):
 def addcss(field, attr):
     def process(widget, attrs, attribute, value):
         if attrs.get(attribute):
-            attrs[attribute] += ' ' + value
+            attrs[attribute] += " " + value
         elif widget.attrs.get(attribute):
-            attrs[attribute] = widget.attrs[attribute] + ' ' + value
+            attrs[attribute] = widget.attrs[attribute] + " " + value
         else:
             attrs[attribute] = value
 
@@ -65,24 +63,22 @@ def is_file(field):
 
 @register.filter
 def is_text(field):
-    return isinstance(field.field.widget, forms.TextInput) or \
-            isinstance(field.field.widget, forms.Textarea)
+    return isinstance(field.field.widget, forms.TextInput | forms.Textarea)
 
 
 @register.filter
 def sum_dict(d):
     total = 0
-    for key, value in list(d.items()):
+    for value in d.values():
         total += value
     return total
 
 
 @register.filter
 def nice_title(title):
-    pat = re.compile(r'Finding [0-9][0-9][0-9]:*')
+    pat = re.compile(r"Finding [0-9][0-9][0-9]:*")
     s = pat.split(title, 2)
     try:
-        ret = s[1]
-        return ret
+        return s[1]
     except:
         return title

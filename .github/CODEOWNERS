@@ -1,0 +1,19 @@
+# Any kind of package updates only need 2 approvals,
+# So let's add three folks here
+requirements.txt @cneill @mtesauro @Maffooch
+# Any dockerfile or compose changes will need to be viewed by
+# these people
+Dockerfile.* @mtesauro @Maffooch 
+docker-compose.* @mtesauro @Maffooch 
+/docker/ @mtesauro @Maffooch 
+# Documentation changes 
+/docs/content/ @paulOsinski @valentijnscholten @Maffooch
+# Kubernetes should be reviewed by reviewed first by those that know it
+/helm/ @cneill @kiblik @Maffooch
+# Anything UI related needs to be checked out by those with the eye for it
+/dojo/static/ @blakeaowens @Maffooch
+/dojo/templates/ @blakeaowens @Maffooch
+# Any model changes should be closely looked at
+/dojo/models.py @Maffooch
+# All other code changes should be reviewed by someone
+* @Maffooch @mtesauro

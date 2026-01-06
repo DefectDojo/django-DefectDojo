@@ -4,6 +4,7 @@
 {% load static %}
 {% block content %}
     {{ block.super }}
+
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-default">
@@ -11,13 +12,13 @@
                 <h3 class="has-filters">
                     Components
                     <div class="dropdown pull-right">
-                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                     </div>
                 </h3>
             </div>
-        </div>
-        <div id="the-filters" class="is-filters panel-body collapse {% if filter.form.has_changed %}in{% endif %}">
-            {% include "dojo/filter_snippet.html" with form=filter.form %}
+            <div id="the-filters" class="is-filters panel-body collapse {% if filter.form.has_changed %}in{% endif %}">
+                {% include "dojo/filter_snippet.html" with form=filter.form %}
+            </div>
         </div>
         <div class="clearfix">
             {% include "dojo/paging_snippet.html" with page=result page_size=True %}
@@ -28,9 +29,9 @@
                     <tr>
                         <th>Name</th>
                         <th>Version</th>
-                        <th class="text-center">Active</th>
-                        <th class="text-center">Duplicate</th>
-                        <th class="text-center">Total</th>
+                        <th>Active</th>
+                        <th>Duplicate</th>
+                        <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,7 +46,7 @@
                         </td>
 
                         <td>{{result.component_version}} </td>
-                        <td class="text-center">
+                        <td class="text-right">
                             {% if result.active and result.component_name == none %}
                             <a href="{% url 'open_findings' %}?has_component=false"><b>{{ result.active }}</b></a>
                             {% elif result.active%}
@@ -54,7 +55,7 @@
                             0
                             {% endif %}
                         </td>
-                        <td class="text-center">
+                        <td class="text-right">
                             {% if result.duplicate and result.component_name == none %}
                             <a href="{% url 'all_findings' %}?has_component=false&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% elif result.duplicate %}
@@ -63,7 +64,7 @@
                             0
                             {% endif %}
                         </td>
-                        <td class="text-center">
+                        <td class="text-right">
                             {% if result.total and result.component_name == none %}
                             <a href="{% url 'all_findings' %}?has_component=false"><b>{{ result.total }}</b></a>
                             {% elif result.total %}
@@ -122,52 +123,57 @@
         };
 
         // Mapping of table columns to objects for proper cleanup and data formatting
-        var dojoTable = $('#components').DataTable({
-            drawCallback: function(){
-                 $('.has-popover').popover({'trigger':'hover'});
-             },
-             "columns": [
-                    { "data": "Component_name" },
-                    { "data": "Version" },
-                    { "data": "Active" },
-                    { "data": "Duplicate" },
-                    { "data": "Total" },
-            ],
-            order: [],
-            columnDefs: [
-                {
-                    "orderable": false,
+        {% if enable_table_filtering %}
+            var dojoTable = $('#components').DataTable({
+                drawCallback: function(){
+                    $('#components .has-popover').hover(
+                        function() { $(this).popover('show'); }, // hover
+                        function() { $(this).popover('hide'); } // unhover
+                    );
                 },
-            ],
-            dom: 'Bfrtip',
-            paging: false,
-            info: false,
-            buttons: [
-                {
-                    extend: 'colvis',
-                    columns: ':not(.noVis)'
-                },
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'copy'
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'excel',
-                    autoFilter: true,
-                    sheetName: 'Exported data',
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'csv'
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'pdf',
-                    orientation: 'landscape',
-                    pageSize: 'LETTER'
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'print'
-                }),
-            ],
-        });
+                "columns": [
+                        { "data": "Component_name" },
+                        { "data": "Version" },
+                        { "data": "Active" },
+                        { "data": "Duplicate" },
+                        { "data": "Total" },
+                ],
+                order: [],
+                columnDefs: [
+                    {
+                        "orderable": false,
+                    },
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                info: false,
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        {% endif %}
     });
 </script>
 {% include "dojo/filter_js_snippet.html" %}

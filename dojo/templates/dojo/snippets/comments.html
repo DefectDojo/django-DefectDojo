@@ -29,7 +29,7 @@
                 {% csrf_token %}
                 <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
                 <button type="submit" aria-label="Delete Note" class="btn-delete">
-                  <i class="fa fa-trash"></i>
+                  <i class="fa-solid fa-trash"></i>
                 </button>
             </form>
           </div>
@@ -40,7 +40,7 @@
                 {% csrf_token %}
                 <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
                 <button type="submit" aria-label="Edit Note" class="btn-edit">
-                  <i class="fa fa-edit"></i>
+                  <i class="fa-solid fa-pen-to-square"></i>
                 </button>
             </form>
           </div>
@@ -51,7 +51,7 @@
                 {% csrf_token %}
                 <input type="hidden" aria-label="id" name="id" value="{{note.id}}" id="id_id" />
                 <button type="submit" aria-label="history" class="btn-history">
-                  <i class="fa fa-history"></i>
+                  <i class="fa-solid fa-clock-rotate-left"></i>
                 </button>
             </form>
           </div>

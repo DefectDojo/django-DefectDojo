@@ -1,0 +1,462 @@
+<?xml version="1.0"?><OWASPZAPReport version="D-2021-03-29" generated="Mon, 26 Apr 2021 07:03:32">
+<site name="http://172.17.0.2" host="172.17.0.2" port="80" ssl="false"><alerts><alertitem>
+  <pluginid>10020</pluginid>
+  <alertRef>10020</alertRef>
+  <alert>X-Frame-Options Header Not Set</alert>
+  <name>X-Frame-Options Header Not Set</name>
+  <riskcode>2</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Medium (Medium)</riskdesc>
+  <desc>&lt;p&gt;X-Frame-Options header is not included in the HTTP response to protect against &apos;ClickJacking&apos; attacks.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli_blind/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/setup.php</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=include.php</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  <param>X-Frame-Options</param>
+  </instance>
+  </instances>
+  <count>11</count>
+  <solution>&lt;p&gt;Most modern Web browsers support the X-Frame-Options HTTP header. Ensure it&apos;s set on all web pages returned by your site (if you expect the page to be framed only by pages on your server (e.g. it&apos;s part of a FRAMESET) then you&apos;ll want to use SAMEORIGIN, otherwise if you never expect the page to be framed, you should use DENY. Alternatively consider implementing Content Security Policy&apos;s &quot;frame-ancestors&quot; directive. &lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options&lt;/p&gt;</reference>
+  <cweid>16</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10038</pluginid>
+  <alertRef>10038</alertRef>
+  <alert>Content Security Policy (CSP) Header Not Set</alert>
+  <name>Content Security Policy (CSP) Header Not Set</name>
+  <riskcode>2</riskcode>
+  <confidence>3</confidence>
+  <riskdesc>Medium (High)</riskdesc>
+  <desc>&lt;p&gt;Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=include.php</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/sitemap.xml</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/setup.php</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/</uri>
+  <method>GET</method>
+  </instance>
+  </instances>
+  <count>11</count>
+  <solution>&lt;p&gt;Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header, to achieve optimal browser support: &quot;Content-Security-Policy&quot; for Chrome 25+, Firefox 23+ and Safari 7+, &quot;X-Content-Security-Policy&quot; for Firefox 4.0+ and Internet Explorer 10+, and &quot;X-WebKit-CSP&quot; for Chrome 14+ and Safari 6+.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://developer.mozilla.org/en-US/docs/Web/Security/CSP/Introducing_Content_Security_Policy&lt;/p&gt;&lt;p&gt;https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html&lt;/p&gt;&lt;p&gt;http://www.w3.org/TR/CSP/&lt;/p&gt;&lt;p&gt;http://w3c.github.io/webappsec/specs/content-security-policy/csp-specification.dev.html&lt;/p&gt;&lt;p&gt;http://www.html5rocks.com/en/tutorials/security/content-security-policy/&lt;/p&gt;&lt;p&gt;http://caniuse.com/#feat=contentsecuritypolicy&lt;/p&gt;&lt;p&gt;http://content-security-policy.com/&lt;/p&gt;</reference>
+  <cweid>16</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10038</pluginid>
+  <alertRef>10038</alertRef>
+  <alert>Content Security Policy (CSP) Header Not Set</alert>
+  <name>Content Security Policy (CSP) Header Not Set</name>
+  <riskcode>2</riskcode>
+  <confidence>3</confidence>
+  <riskdesc>Medium (High)</riskdesc>
+  <desc>&lt;p&gt;Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=include.php</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/sitemap.xml</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/setup.php</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/</uri>
+  <method>GET</method>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/</uri>
+  <method>GET</method>
+  </instance>
+  </instances>
+  <count>11</count>
+  <solution>&lt;p&gt;Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header, to achieve optimal browser support: &quot;Content-Security-Policy&quot; for Chrome 25+, Firefox 23+ and Safari 7+, &quot;X-Content-Security-Policy&quot; for Firefox 4.0+ and Internet Explorer 10+, and &quot;X-WebKit-CSP&quot; for Chrome 14+ and Safari 6+.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://developer.mozilla.org/en-US/docs/Web/Security/CSP/Introducing_Content_Security_Policy&lt;/p&gt;&lt;p&gt;https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html&lt;/p&gt;&lt;p&gt;http://www.w3.org/TR/CSP/&lt;/p&gt;&lt;p&gt;http://w3c.github.io/webappsec/specs/content-security-policy/csp-specification.dev.html&lt;/p&gt;&lt;p&gt;http://www.html5rocks.com/en/tutorials/security/content-security-policy/&lt;/p&gt;&lt;p&gt;http://caniuse.com/#feat=contentsecuritypolicy&lt;/p&gt;&lt;p&gt;http://content-security-policy.com/&lt;/p&gt;</reference>
+  <cweid>16</cweid>
+  <wascid>15</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10108</pluginid>
+  <alertRef>10108</alertRef>
+  <alert>Reverse Tabnabbing</alert>
+  <name>Reverse Tabnabbing</name>
+  <riskcode>2</riskcode>
+  <confidence>2</confidence>
+  <riskdesc>Medium (Medium)</riskdesc>
+  <desc>&lt;p&gt;At least one link on this page is vulnerable to Reverse tabnabbing as it uses a target attribute without using both of the &quot;noopener&quot; and &quot;noreferrer&quot; keywords in the &quot;rel&quot; attribute, which allows the target page to take control of this page.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.owasp.org/index.php/Testing_for_Brute_Force_(OWASP-AT-004)&quot; target=&quot;_blank&quot;&gt;https://www.owasp.org/index.php/Testing_for_Brute_Force_(OWASP-AT-004)&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.virtualbox.org/&quot; target=&quot;_blank&quot;&gt;VirtualBox&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;http://www.securiteam.com/securityreviews/5DP0N1P76E.html&quot; target=&quot;_blank&quot;&gt;http://www.securiteam.com/securityreviews/5DP0N1P76E.html&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/sqli_blind/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;http://www.securiteam.com/securityreviews/5DP0N1P76E.html&quot; target=&quot;_blank&quot;&gt;http://www.securiteam.com/securityreviews/5DP0N1P76E.html&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/xss_d/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)&quot; target=&quot;_blank&quot;&gt;https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.virtualbox.org/&quot; target=&quot;_blank&quot;&gt;https://www.virtualbox.org/&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.owasp.org/index.php/Cross-Site_Request_Forgery&quot; target=&quot;_blank&quot;&gt;https://www.owasp.org/index.php/Cross-Site_Request_Forgery&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.owasp.org/index.php/Unrestricted_File_Upload&quot; target=&quot;_blank&quot;&gt;https://www.owasp.org/index.php/Unrestricted_File_Upload&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=include.php</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://en.wikipedia.org/wiki/Remote_File_Inclusion&quot; target=&quot;_blank&quot;&gt;https://en.wikipedia.org/wiki/Remote_File_Inclusion&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;https://www.google.com/recaptcha/admin/create&quot; target=&quot;_blank&quot;&gt;https://www.google.com/recaptcha/admin/create&lt;/a&gt;</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>GET</method>
+  <evidence>&lt;a href=&quot;http://www.scribd.com/doc/2530476/Php-Endangers-Remote-Code-Execution&quot; target=&quot;_blank&quot;&gt;http://www.scribd.com/doc/2530476/Php-Endangers-Remote-Code-Execution&lt;/a&gt;</evidence>
+  </instance>
+  </instances>
+  <count>11</count>
+  <solution>&lt;p&gt;Do not use a target attribute, or if you have to then also add the attribute: rel=&quot;noopener noreferrer&quot;.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;https://owasp.org/www-community/attacks/Reverse_Tabnabbing&lt;/p&gt;&lt;p&gt;https://dev.to/ben/the-targetblank-vulnerability-by-example&lt;/p&gt;&lt;p&gt;https://mathiasbynens.github.io/rel-noopener/&lt;/p&gt;&lt;p&gt;https://medium.com/@jitbit/target-blank-the-most-underestimated-vulnerability-ever-96e328301f4c&lt;/p&gt;</reference>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10096</pluginid>
+  <alertRef>10096</alertRef>
+  <alert>Timestamp Disclosure - Unix</alert>
+  <name>Timestamp Disclosure - Unix</name>
+  <riskcode>0</riskcode>
+  <confidence>1</confidence>
+  <riskdesc>Informational (Low)</riskdesc>
+  <desc>&lt;p&gt;A timestamp was disclosed by the application/web server - Unix&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1019803690</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1839030562</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>909522486</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>722521979</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>40341101</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1309151649</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1732584194</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>405537848</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1894986606</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1473231341</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>155497632</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1990404162</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1700485571</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1069501632</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>38016083</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>2022574463</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>373897302</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1163531501</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>643717713</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/javascript/</uri>
+  <method>GET</method>
+  <evidence>1444681467</evidence>
+  </instance>
+  </instances>
+  <count>67</count>
+  <solution>&lt;p&gt;Manually confirm that the timestamp data is not sensitive, and that the data cannot be aggregated to disclose exploitable patterns.&lt;/p&gt;</solution>
+  <otherinfo>&lt;p&gt;1019803690, which evaluates to: 2002-04-26 06:48:10&lt;/p&gt;</otherinfo>
+  <reference>&lt;p&gt;http://projects.webappsec.org/w/page/13246936/Information%20Leakage&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+<alertitem>
+  <pluginid>10036</pluginid>
+  <alertRef>10036</alertRef>
+  <alert>Server Leaks Version Information via &quot;Server&quot; HTTP Response Header Field</alert>
+  <name>Server Leaks Version Information via &quot;Server&quot; HTTP Response Header Field</name>
+  <riskcode>1</riskcode>
+  <confidence>3</confidence>
+  <riskdesc>Low (High)</riskdesc>
+  <desc>&lt;p&gt;The web/application server is leaking version information via the &quot;Server&quot; HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.&lt;/p&gt;</desc>
+  <instances>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/brute/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/captcha/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/csrf/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/instructions.php</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/setup.php</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/upload/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/robots.txt</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/sitemap.xml</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/fi/?page=include.php</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  <instance>
+  <uri>http://172.17.0.2/vulnerabilities/exec/</uri>
+  <method>GET</method>
+  <evidence>Apache/2.4.25 (Debian)</evidence>
+  </instance>
+  </instances>
+  <count>11</count>
+  <solution>&lt;p&gt;Ensure that your web server, application server, load balancer, etc. is configured to suppress the &quot;Server&quot; header or provide generic details.&lt;/p&gt;</solution>
+  <reference>&lt;p&gt;http://httpd.apache.org/docs/current/mod/core.html#servertokens&lt;/p&gt;&lt;p&gt;http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007&lt;/p&gt;&lt;p&gt;http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx&lt;/p&gt;&lt;p&gt;http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html&lt;/p&gt;</reference>
+  <cweid>200</cweid>
+  <wascid>13</wascid>
+  <sourceid>3</sourceid>
+</alertitem>
+</alerts></site></OWASPZAPReport>

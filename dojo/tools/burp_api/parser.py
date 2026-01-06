@@ -1,6 +1,6 @@
+import base64
 import json
 import logging
-import base64
 
 from dojo.models import Endpoint, Finding
 
@@ -15,7 +15,8 @@ DESCRIPTION_TEMPLATE = """**{title}**
 """
 
 
-class BurpApiParser(object):
+class BurpApiParser:
+
     """Parser that can load data from Burp API"""
 
     def get_scan_types(self):
@@ -33,8 +34,11 @@ class BurpApiParser(object):
 
         items = []
         # for each issue found
-        for issue_event in tree.get("issue_events", list()):
-            if "issue_found" == issue_event.get("type") and "issue" in issue_event:
+        for issue_event in tree.get("issue_events", []):
+            if (
+                issue_event.get("type") == "issue_found"
+                and "issue" in issue_event
+            ):
                 issue = issue_event.get("issue")
 
                 title = issue.get("name", "Burp issue")
@@ -48,7 +52,7 @@ class BurpApiParser(object):
                 )
                 false_p = False
                 # manage special case of false positives
-                if "false_positive" == issue.get("severity", "undefined"):
+                if issue.get("severity", "undefined") == "false_positive":
                     false_p = True
 
                 finding = Finding(
@@ -62,10 +66,10 @@ class BurpApiParser(object):
                     static_finding=False,  # by definition
                     dynamic_finding=True,  # by definition
                     unique_id_from_tool=str(
-                        issue.get("serial_number", "")
+                        issue.get("serial_number", ""),
                     ),  # the serial number is a good candidate for this attribute
                     vuln_id_from_tool=str(
-                        issue.get("type_index", "")
+                        issue.get("type_index", ""),
                     ),  # the type index is a good candidate for this attribute
                 )
                 # manage confidence
@@ -73,14 +77,27 @@ class BurpApiParser(object):
                     finding.scanner_confidence = convert_confidence(issue)
                 # manage endpoints
                 if "origin" in issue and "path" in issue:
-                    finding.unsaved_endpoints = [Endpoint.from_uri(issue.get("origin") + issue.get("path"))]
+                    finding.unsaved_endpoints = [
+                        Endpoint.from_uri(
+                            issue.get("origin") + issue.get("path"),
+                        ),
+                    ]
                 finding.unsaved_req_resp = []
-                for evidence in issue.get('evidence', []):
-                    if not evidence.get('type') in ['InformationListEvidence', "FirstOrderEvidence"]:
+                for evidence in issue.get("evidence", []):
+                    if evidence.get("type") not in {
+                        "InformationListEvidence",
+                        "FirstOrderEvidence",
+                    }:
                         continue
-                    request = self.get_clean_base64(evidence.get('request_response').get('request'))
-                    response = self.get_clean_base64(evidence.get('request_response').get('response'))
-                    finding.unsaved_req_resp.append({"req": request, "resp": response})
+                    request = self.get_clean_base64(
+                        evidence.get("request_response").get("request"),
+                    )
+                    response = self.get_clean_base64(
+                        evidence.get("request_response").get("response"),
+                    )
+                    finding.unsaved_req_resp.append(
+                        {"req": request, "resp": response},
+                    )
 
                 items.append(finding)
         return items
@@ -90,18 +107,25 @@ class BurpApiParser(object):
         if value is not None:
             for segment in value:
                 if segment["type"] == "DataSegment":
-                    output += base64.b64decode(segment["data"]).decode()
+                    data = base64.b64decode(segment["data"])
+                    try:
+                        output += data.decode()
+                    except UnicodeDecodeError:
+                        output += "Decoding of the DataSegment failed. Thus, decoded with `latin1`. The result is the following one:\n"
+                        output += data.decode("latin1")
                 elif segment["type"] == "SnipSegment":
                     output += f"\n<...> ({segment['length']} bytes)"
                 elif segment["type"] == "HighlightSegment":
                     output += "\n\n------------------------------------------------------------------\n\n"
                 else:
-                    raise ValueError(f"uncknown segment type in Burp data {segment['type']}")
+                    msg = f"unknown segment type in Burp data {segment['type']}"
+                    raise ValueError(msg)
         return output
 
 
 def convert_severity(issue):
-    """According to OpenAPI definition of the API
+    """
+    According to OpenAPI definition of the API
 
     "Severity":{
              "type":"string",
@@ -115,14 +139,15 @@ def convert_severity(issue):
              ]
           },
     """
-    value = issue.get('severity', 'info').lower()
-    if value in ["high", "medium", "low", "info"]:
+    value = issue.get("severity", "info").lower()
+    if value in {"high", "medium", "low", "info"}:
         return value.title()
-    return 'Info'
+    return "Info"
 
 
 def convert_confidence(issue):
-    """According to OpenAPI definition:
+    """
+    According to OpenAPI definition:
 
     "Confidence":{
              "type":"string",
@@ -134,12 +159,11 @@ def convert_confidence(issue):
              ]
           },
     """
-    value = issue.get('confidence', 'undefined').lower()
-    if "certain" == value:
+    value = issue.get("confidence", "undefined").lower()
+    if value == "certain":
         return 2
-    elif "firm" == value:
+    if value == "firm":
         return 3
-    elif "tentative" == value:
+    if value == "tentative":
         return 6
-    else:
-        return None
+    return None

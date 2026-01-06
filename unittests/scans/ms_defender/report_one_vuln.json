@@ -1,0 +1,16 @@
+{
+    "@odata.context": "https://api-eu.securitycenter.windows.com/api/asfDto)",
+    "value": [
+      {
+        "id": "fjweoifjewiofjweoifjeowifjowei-_-CVE-1234-5678-_-packagvendor-_-tools-_-1.2.3.4-_-",
+        "cveId": "CVE-1234-5678",
+        "machineId": "fjweoifjewiofjweoifjeowifjowei",
+        "fixingKbId": null,
+        "productName": "tools",
+        "productVendor": "packagvendor",
+        "productVersion": "1.2.3.4",
+        "severity": "Low"
+      }
+    ],
+    "@odata.nextLink": "https://apiofazure?$skip=10000"
+  }

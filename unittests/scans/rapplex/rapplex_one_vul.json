@@ -1,0 +1,237 @@
+{
+    "ScanId": "a2azd6fe",
+    "Target": "http://testphp.vulnweb.com/",
+    "Description": null,
+    "CreatedDate": "05/03/2024 10:14:05",
+    "StartedDate": "05/03/2024 10:14:05",
+    "ScanTime": 30,
+    "ScanTimeAsStr": "30s",
+    "ScanPolicy": {
+      "Title": "Default",
+      "Scope": {
+        "CrawlDepth": 5,
+        "OnlySameOrigin": true,
+        "EnableParentPath": false,
+        "AllowSubDomain": false,
+        "BaseDomain": null,
+        "InScopeDomains": [],
+        "PreferMobileVersion": false,
+        "MobileDevice": null,
+        "MaximumLinks": 500,
+        "MaximumFilesPerFolder": 30,
+        "MaximumAttackToRecurringParam": 5
+      },
+      "SecurityChecks": "<div class=\"legend\">Q = Query String\r\nP = Post\r\nH = Header\r\nC = Cookie\r\nU = Url\r\nR = Url Rewrite\r\nE = Extra Parameter\r\n</div>Engine              Q    P    H    C    U    R    E\r\n====================================================\r\nBackup Files       [ ]  [ ]  [ ]  [ ]  [X]  [ ]  [ ]\r\nCORS Tests         [ ]  [ ]  [X]  [ ]  [ ]  [ ]  [ ]\r\nDOM based XSS      [ ]  [ ]  [ ]  [ ]  [X]  [ ]  [ ]\r\nFile Upload        [ ]  [X]  [ ]  [ ]  [ ]  [ ]  [ ]\r\nOpen Redirect      [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nShort (8.3) Files  [ ]  [ ]  [ ]  [ ]  [X]  [ ]  [ ]\r\nCommand Injection  [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nHeader Injection   [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nFile Inclusion     [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nCode Injection     [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nSQL Injection      [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nHTML Injection     [X]  [X]  [ ]  [ ]  [ ]  [X]  [X]\r\n",
+      "EnabledAuthentication": false,
+      "Connection": {
+        "IsRateLimited": false,
+        "Rate": 100,
+        "Failure": "AutoRetry",
+        "MaxRetryCount": 3
+      }
+    },
+    "Fingerprinting": {
+      "IsEnabled": true,
+      "Groups": [
+        {
+          "Title": "Web Server",
+          "Items": [
+            {
+              "Title": "nginx",
+              "Value": 100
+            }
+          ]
+        },
+        {
+          "Title": "Programming Language",
+          "Items": [
+            {
+              "Title": "PHP",
+              "Value": 100
+            }
+          ]
+        },
+        {
+          "Title": "Operating System",
+          "Items": [
+            {
+              "Title": "Linux",
+              "Value": 100
+            }
+          ]
+        },
+        {
+          "Title": "Database",
+          "Items": [
+            {
+              "Title": "MySQL",
+              "Value": 100
+            }
+          ]
+        }
+      ]
+    },
+    "Severities": {
+      "Information": {
+        "Name": "Information",
+        "IssueGroups": [],
+        "Total": 0
+      },
+      "Low": {
+        "Name": "Low",
+        "IssueGroups": [],
+        "Total": 0
+      },
+      "Medium": {
+        "Name": "Medium",
+        "IssueGroups": [],
+        "Total": 0
+      },
+      "High": {
+        "Name": "High",
+        "IssueGroups": [],
+        "Total": 0
+      },
+      "Critical": {
+        "Name": "Critical",
+        "IssueGroups": [
+          {
+            "gIndex": 0,
+            "Group": "SQL Injection",
+            "Severity": "Critical",
+            "Definition": {
+              "MarkdownContent": null,
+              "Title": "SQL Injection",
+              "Severity": "Critical",
+              "Sections": {
+                "Classification": "<p>PCI 3.2-6.5.1, OWASP 2013-A1, CWE 89, WASC 19</p>",
+                "Summary": "<p>SQL Injection is an attack technique used to exploit applications that construct SQL statements from user-supplied input. When successful, the attacker is able to change the logic of SQL statements executed against the database.</p>\n<p>With a successful attack, an attacker can gain:</p>\n<ul>\n<li><strong>Unauthorized access to an application</strong>: An attacker can successfully bypass an application's authentication mechanism to have illegitimate access to it.</li>\n<li><strong>Information disclosure</strong>: A SQL injection attack could lead to a complete data leakage from the database server.</li>\n<li><strong>Loss of data availability</strong>: An attacker can delete records from the database server.</li>\n<li><strong>Compromised data integrity</strong>: As SQL statements are also used to modify or add the record, an attacker can use SQL injection to modify or add data stored in a database. This would lead to compromised data integrity.</li>\n</ul>",
+                "Remediation": "<ul>\n<li>Whitelisting is the best practice to validate input against blacklisting whenever it is practicable.</li>\n<li>Do not create SQL queries with string concatenation. Instead use prepared statements or stored procedures.</li>\n</ul>",
+                "References": "<ul>\n<li><a href=\"http://projects.webappsec.org/SQL-Injection\">SQL Injection</a></li>\n<li><a href=\"https://www.owasp.org/index.php/SQL_Injection_Prevention_Cheat_Sheet\">SQL Injection Prevention Cheat Sheet</a></li>\n<li><a href=\"http://cwe.mitre.org/data/definitions/89.html\">Improper Neutralization of Special Elements used in an SQL Command</a></li>\n<li><a href=\"https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator?vector=AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H\">CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H</a></li>\n</ul>"
+              },
+              "References": [
+                {
+                  "Title": "SQL Injection",
+                  "Link": "http://projects.webappsec.org/SQL-Injection"
+                },
+                {
+                  "Title": "SQL Injection Prevention Cheat Sheet",
+                  "Link": "https://www.owasp.org/index.php/SQL_Injection_Prevention_Cheat_Sheet"
+                },
+                {
+                  "Title": "Improper Neutralization of Special Elements used in an SQL Command",
+                  "Link": "http://cwe.mitre.org/data/definitions/89.html"
+                },
+                {
+                  "Title": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                  "Link": "https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator?vector=AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H"
+                }
+              ],
+              "Classifications": [
+                {
+                  "Foundation": "PCI",
+                  "Version": "3.2",
+                  "Value": "6.5.1",
+                  "Formatted": "PCI 3.2-6.5.1"
+                },
+                {
+                  "Foundation": "OWASP",
+                  "Version": "2013",
+                  "Value": "A1",
+                  "Formatted": "OWASP 2013-A1"
+                },
+                {
+                  "Foundation": "CWE",
+                  "Version": "",
+                  "Value": "89",
+                  "Formatted": "CWE 89"
+                },
+                {
+                  "Foundation": "WASC",
+                  "Version": "",
+                  "Value": "19",
+                  "Formatted": "WASC 19"
+                }
+              ]
+            },
+            "Issues": [
+              {
+                "vIndex": 61,
+                "Title": "SQL Injection",
+                "Severity": "Critical",
+                "Url": "http://testphp.vulnweb.com/listproducts.php?cat=1",
+                "Path": "/listproducts.php?cat=1",
+                "Html": null,
+                "IsR2Visible": true,
+                "HttpRequest": "GET /listproducts.php?cat=1%20AND%20GTID_SUBSET(CONCAT(0x3a%2c0x35714C314E6A33633731306E)%2c6148) HTTP/1.1\nCache-Control: no-cache\nAccept-Encoding: gzip, deflate\nAccept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\nAccept-Language: en-us,en;q=0.5\nAccept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5\nUser-Agent: Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.56 Safari/536.5\nReferer: http://testphp.vulnweb.com/categories.php\nHost: testphp.vulnweb.com\n\n",
+                "HttpResponse": "HTTP/1.1 200 OK\nConnection: keep-alive\nDate: Fri, 03 May 2024 07:18:31 GMT\nTransfer-Encoding: chunked\nServer: nginx/1.19.0\nX-Powered-By: PHP/5.6.40-38+ubuntu20.04.1+deb.sury.org+1\nContent-Encoding: gzip\nContent-Type: text/html; charset=UTF-8\n\r\n\r\n<ellipsis>...</ellipsis>\r\neBeginEditable name=&quot;content_rgn&quot; --&gt;\n&lt;div id=&quot;content&quot;&gt;\n\tError: Malformed GTID set specification &#39;:<mark>5qL1Nj3c710n</mark>&#39;.\nWarning: mysql_fetch_array() expects parameter 1 to be resource, boolean given in /hj/var/www/lis\r\n<ellipsis>...</ellipsis>\r\n",
+                "ResponseTime": null,
+                "Active": true,
+                "Exploitable": true,
+                "Payload": "1 AND GTID_SUBSET(CONCAT(0x3a,0x35714C314E6A33633731306E),6148)",
+                "InjectionPoint": {
+                  "Name": "cat",
+                  "Type": "QueryString"
+                },
+                "CommentGroups": [
+                  {
+                    "Name": "Proof",
+                    "Items": [
+                      {
+                        "Title": "Database Type",
+                        "Text": "MySQL",
+                        "Note": null
+                      },
+                      {
+                        "Title": "Database Version",
+                        "Text": "8.0.22-0ubuntu0.20.04.2",
+                        "Note": null
+                      },
+                      {
+                        "Title": "Tables",
+                        "Text": "artists (adesc,aname,artist_id)\r\ncarts (cart_id,item,price)\r\ncateg (cat_id,cdesc,cname)\r\nfeatured (feature_text,pic_id)\r\nguestbook (mesaj,sender,senttime)\r\npictures (a_id,cat_id,img,pic_id,plong,price,pshort,title)\r\nproducts (description,id,name,price,rewritename)\r\nusers (address,cart,cc,email,name,pass,phone,uname)\r\n",
+                        "Note": null
+                      }
+                    ]
+                  },
+                  {
+                    "Name": "WAF",
+                    "Items": [
+                      {
+                        "Title": "Cloudflare",
+                        "Text": "Rule name: SQL Injection - Rapplex\r\n\r\nRule: http.request.query eq 1 AND GTID_SUBSET(CONCAT(0x3a,0x35714C314E6A33633731306E),6148)\r\n\r\nAction: Block",
+                        "Note": "This rule can be imported via Cloudflare dashboard."
+                      },
+                      {
+                        "Title": "TR7",
+                        "Text": "Etkinlik durumu: Devrede\r\nAçıklama: 89277915 - Rapplex Ruleset\r\nRegex: 1\\ AND\\ GTID_SUBSET\\(CONCAT\\(0x3a,0x35714C314E6A33633731306E\\),6148\\)\r\nRisk ölçeği: Kritik\r\n\r\nSaldırı alanı;\r\n- Path\r\n- Query\r\n- Header\r\n- From\r\n- JSON\r\n- XML\r\n- RAW",
+                        "Note": "This rule can be imported with TR7 dashboard."
+                      },
+                      {
+                        "Title": "F5 BIG-IP",
+                        "Text": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<vulnerabilities>\r\n  <vulnerability>\r\n    <attack_type>SQL-Injection</attack_type>\r\n    <name>SQL Injection</name>\r\n    <url><![CDATA[http://testphp.vulnweb.com/listproducts.php?cat=1]]></url>\r\n    <parameter><![CDATA[cat]]></parameter>\r\n    <threat>Critical</threat>\r\n    <severity>Critical</severity>\r\n  </vulnerability>\r\n</vulnerabilities>",
+                        "Note": ""
+                      },
+                      {
+                        "Title": "FortiWeb",
+                        "Text": "config waf custom-protection-rule\r\n edit Rapplex - SQL Injection\r\n  set type Request\r\n  set action alert_deny\r\n  set severity High\r\n  config meet-condition\r\n   edit <Fill with unique value>\r\n    set request-target REQUEST_URI\r\n    set pattern 1 AND GTID_SUBSET(CONCAT(0x3a,0x35714C314E6A33633731306E),6148)\r\n   next\r\n  end\r\n next\r\nend",
+                        "Note": "This rule is compatible with FortiWeb 7.4.0+"
+                      },
+                      {
+                        "Title": "ModSecurity",
+                        "Text": "SecRule REQUEST_URI '1 AND GTID_SUBSET(CONCAT(0x3a,0x35714C314E6A33633731306E),6148)' 'id: <Fill with unique id value>', t:none, deny, log, msg:'SQL Injection - Rapplex'",
+                        "Note": ""
+                      }
+                    ]
+                  }
+                ],
+                "Comment": null
+              }
+            ]
+          }
+        ],
+        "Total": 1
+      }
+    }
+  }
+  

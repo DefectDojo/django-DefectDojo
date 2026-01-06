@@ -1,0 +1,77 @@
+import contextlib
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.db.models.signals import post_delete, pre_delete, pre_save
+from django.dispatch import receiver
+from django.urls import reverse
+from django.utils.translation import gettext as _
+
+from dojo.file_uploads.helper import delete_related_files
+from dojo.models import Engagement, Finding, Product, Test
+from dojo.notes.helper import delete_related_notes
+from dojo.notifications.helper import create_notification
+from dojo.pghistory_models import DojoEvents
+
+
+@receiver(post_delete, sender=Test)
+def test_post_delete(sender, instance, using, origin, **kwargs):
+    # Catch instances in async delete where a single object is deleted more than once
+    with contextlib.suppress(sender.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+        if instance == origin:
+            description = _('The test "%(name)s" was deleted') % {"name": str(instance)}
+            user = None
+
+            if settings.ENABLE_AUDITLOG:
+                # Find deletion author in pghistory events
+                # Look for delete events for this specific test instance
+                pghistory_delete_events = DojoEvents.objects.filter(
+                    pgh_obj_model="dojo.Test",
+                    pgh_obj_id=instance.id,
+                    pgh_label="delete",
+                ).order_by("-pgh_created_at")
+
+                if pghistory_delete_events.exists():
+                    latest_delete = pghistory_delete_events.first()
+                    # Extract user from pghistory context
+                    if latest_delete.user:
+                        User = get_user_model()
+                        with contextlib.suppress(User.DoesNotExist):
+                            user = User.objects.get(id=latest_delete.user)
+
+                # Update description with user if found
+                if user:
+                    description = _('The test "%(name)s" was deleted by %(user)s') % {
+                                    "name": str(instance), "user": user}
+
+            create_notification(event="test_deleted",  # Template does not exist, it will default to "other" but this event name needs to stay because of unit testing
+                                title=_("Deletion of %(name)s") % {"name": str(instance)},
+                                description=description,
+                                product=instance.engagement.product,
+                                url=reverse("view_engagement", args=(instance.engagement.id, )),
+                                recipients=[instance.engagement.lead],
+                                icon="exclamation-triangle")
+
+
+@receiver(pre_save, sender=Test)
+def update_found_by_for_findings(sender, instance, **kwargs):
+    with contextlib.suppress(sender.DoesNotExist):
+        obj = sender.objects.get(pk=instance.pk)
+        # Check if the test type has changed
+        if obj.test_type != instance.test_type:
+            # Save a reference to the old test type ID to replace with the new one
+            old_test_type = obj.test_type
+            new_test_type = instance.test_type
+            # Get all the findings in this test
+            findings = Finding.objects.filter(test=instance)
+            # Update each of the findings found by column
+            for find in findings:
+                find.found_by.remove(old_test_type)
+                find.found_by.add(new_test_type)
+
+
+@receiver(pre_delete, sender=Test)
+def test_pre_delete(sender, instance, **kwargs):
+    with contextlib.suppress(sender.DoesNotExist):
+        delete_related_notes(instance)
+        delete_related_files(instance)

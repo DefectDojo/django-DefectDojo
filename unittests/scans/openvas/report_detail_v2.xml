@@ -1,0 +1,217 @@
+<?xml version="1.0"?>
+<report content_type="text/xml" extension="xml" id="88bbda4b-25db-43cf-896d-b90686833b29" format_id="a994b278-1f62-11e1-96ac-406186ea4fc5" config_id="">
+  <owner>
+    <name>admin</name>
+  </owner>
+  <name>2025-08-22T15:00:08+02:00</name>
+  <comment/>
+  <creation_time>2025-08-22T15:00:08+02:00</creation_time>
+  <modification_time>2025-08-22T17:09:58+02:00</modification_time>
+  <writable>0</writable>
+  <in_use>0</in_use>
+  <task id="4949d3d6-705b-41d5-b494-383860f8c970">
+    <name>Report</name>
+  </task>
+  <report_format id="a994b278-1f62-11e1-96ac-406186ea4fc5">
+    <name>XML</name>
+  </report_format>
+  <report id="88bbda4b-25db-43cf-896d-b90686833b29">
+    <gmp>
+      <version>22.6</version>
+    </gmp>
+    <sort>
+      <field>severity<order>descending</order></field>
+    </sort>
+    <scan_run_status>Done</scan_run_status>
+    <task id="4949d3d6-705b-41d5-b494-383860f8c970">
+      <name>Report</name>
+      <comment>disable_BruteForce_default</comment>
+      <target id="1a9c3697-d422-4280-96d8-2381138a7b70">
+        <trash>0</trash>
+        <name>Test</name>
+        <comment/>
+      </target>
+      <progress>100</progress>
+    </task>
+    <timestamp>2025-08-22T15:00:08+02:00</timestamp>
+    <scan_start>2025-08-22T15:01:38+02:00</scan_start>
+    <timezone>Europe/Berlin</timezone>
+    <timezone_abbrev>CEST</timezone_abbrev>
+    <ports max="-1" start="1">
+      <count>1</count>
+      <port>42/tcp<host>10.99.99.99</host><severity>9.8</severity><threat>High</threat></port>
+    </ports>
+    <results max="-1" start="1">
+      <result id="ec5f93ff-3447-4171-8485-3b3b3af2edc0">
+        <name>Microsoft Windows Multiple Vulnerabilities (KB5062557)</name>
+        <owner>
+          <name>admin</name>
+        </owner>
+        <modification_time>2025-08-22T16:55:31+02:00</modification_time>
+        <comment/>
+        <creation_time>2025-08-22T16:55:31+02:00</creation_time>
+        <host>10.99.99.99<asset asset_id="96329f0e-5bb4-4164-958f-a78f76f634da"/><hostname>server99</hostname></host>
+        <port>42/tcp</port>
+        <nvt oid="1.3.6.1.4.1.25623.1.0.836484">
+          <type>nvt</type>
+          <name>Microsoft Windows Multiple Vulnerabilities (KB5062557)</name>
+          <family>Windows : Microsoft Bulletins</family>
+          <cvss_base>9.8</cvss_base>
+          <severities score="9.8">
+            <severity type="cvss_base_v3">
+              <origin>NVD</origin>
+              <date>2025-07-08T19:15:38+02:00</date>
+              <score>9.8</score>
+              <value>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</value>
+            </severity>
+          </severities>
+          <tags>cvss_base_vector=CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H|summary=This host is missing an important security
+  update according to Microsoft KB5062557|insight=|affected=- Microsoft Windows 10 Version 1809 for 32-bit Systems
+
+  - Microsoft Windows 10 Version 1809 for x64-based Systems
+
+  - Microsoft Windows Server 2019|impact=Successful exploitation allows an attacker
+  to elevate privileges, execute arbitrary commands, disclose information,
+  bypass security restrictions, conduct spoofing and denial of service attacks.|solution=The vendor has released updates. Please see
+  the references for more information.|vuldetect=Checks if a vulnerable version is present
+  on the target host.|solution_type=VendorFix</tags>
+          <solution type="VendorFix">The vendor has released updates. Please see
+  the references for more information.</solution>
+          <epss>
+            <max_severity>
+              <score>0.00143</score>
+              <percentile>0.35177</percentile>
+              <cve id="CVE-2025-47981">
+                <severity>9.8</severity>
+              </cve>
+            </max_severity>
+            <max_epss>
+              <score>0.09023</score>
+              <percentile>0.92284</percentile>
+              <cve id="CVE-2025-49716">
+                <severity>7.5</severity>
+              </cve>
+            </max_epss>
+          </epss>
+          <refs>
+            <ref type="cve" id="CVE-2025-49659"/>
+            <ref type="cve" id="CVE-2025-48823"/>
+            <ref type="cve" id="CVE-2025-49684"/>
+            <ref type="cve" id="CVE-2025-49668"/>
+            <ref type="cve" id="CVE-2025-49744"/>
+            <ref type="cve" id="CVE-2025-49683"/>
+            <ref type="cve" id="CVE-2025-49663"/>
+            <ref type="cve" id="CVE-2025-49725"/>
+            <ref type="cve" id="CVE-2025-49675"/>
+            <ref type="cve" id="CVE-2025-49732"/>
+            <ref type="cve" id="CVE-2025-49722"/>
+            <ref type="cve" id="CVE-2025-49669"/>
+            <ref type="cve" id="CVE-2025-48822"/>
+            <ref type="cve" id="CVE-2025-49740"/>
+            <ref type="cve" id="CVE-2025-49729"/>
+            <ref type="cve" id="CVE-2025-49679"/>
+            <ref type="cve" id="CVE-2025-49667"/>
+            <ref type="cve" id="CVE-2025-49666"/>
+            <ref type="cve" id="CVE-2025-48819"/>
+            <ref type="cve" id="CVE-2025-49742"/>
+            <ref type="cve" id="CVE-2025-49733"/>
+            <ref type="cve" id="CVE-2025-49727"/>
+            <ref type="cve" id="CVE-2025-49680"/>
+            <ref type="cve" id="CVE-2025-49678"/>
+            <ref type="cve" id="CVE-2025-48816"/>
+            <ref type="cve" id="CVE-2025-49673"/>
+            <ref type="cve" id="CVE-2025-49665"/>
+            <ref type="cve" id="CVE-2025-49660"/>
+            <ref type="cve" id="CVE-2025-48821"/>
+            <ref type="cve" id="CVE-2025-48818"/>
+            <ref type="cve" id="CVE-2025-48811"/>
+            <ref type="cve" id="CVE-2025-48806"/>
+            <ref type="cve" id="CVE-2025-48001"/>
+            <ref type="cve" id="CVE-2025-47982"/>
+            <ref type="cve" id="CVE-2025-49753"/>
+            <ref type="cve" id="CVE-2025-49686"/>
+            <ref type="cve" id="CVE-2025-47999"/>
+            <ref type="cve" id="CVE-2025-49730"/>
+            <ref type="cve" id="CVE-2025-49724"/>
+            <ref type="cve" id="CVE-2025-49685"/>
+            <ref type="cve" id="CVE-2025-49681"/>
+            <ref type="cve" id="CVE-2025-49664"/>
+            <ref type="cve" id="CVE-2025-48820"/>
+            <ref type="cve" id="CVE-2025-48817"/>
+            <ref type="cve" id="CVE-2025-48815"/>
+            <ref type="cve" id="CVE-2025-48814"/>
+            <ref type="cve" id="CVE-2025-48808"/>
+            <ref type="cve" id="CVE-2025-48805"/>
+            <ref type="cve" id="CVE-2025-48804"/>
+            <ref type="cve" id="CVE-2025-48803"/>
+            <ref type="cve" id="CVE-2025-48800"/>
+            <ref type="cve" id="CVE-2025-48799"/>
+            <ref type="cve" id="CVE-2025-48003"/>
+            <ref type="cve" id="CVE-2025-48000"/>
+            <ref type="cve" id="CVE-2025-47998"/>
+            <ref type="cve" id="CVE-2025-47996"/>
+            <ref type="cve" id="CVE-2025-47981"/>
+            <ref type="cve" id="CVE-2025-47980"/>
+            <ref type="cve" id="CVE-2025-47975"/>
+            <ref type="cve" id="CVE-2025-47973"/>
+            <ref type="cve" id="CVE-2025-49760"/>
+            <ref type="cve" id="CVE-2025-49726"/>
+            <ref type="cve" id="CVE-2025-49723"/>
+            <ref type="cve" id="CVE-2025-49721"/>
+            <ref type="cve" id="CVE-2025-49716"/>
+            <ref type="cve" id="CVE-2025-36350"/>
+            <ref type="cve" id="CVE-2025-36357"/>
+            <ref type="cve" id="CVE-2025-47991"/>
+            <ref type="cve" id="CVE-2025-49691"/>
+            <ref type="cve" id="CVE-2025-49690"/>
+            <ref type="cve" id="CVE-2025-49689"/>
+            <ref type="cve" id="CVE-2025-49688"/>
+            <ref type="cve" id="CVE-2025-49687"/>
+            <ref type="cve" id="CVE-2025-49676"/>
+            <ref type="cve" id="CVE-2025-49674"/>
+            <ref type="cve" id="CVE-2025-49672"/>
+            <ref type="cve" id="CVE-2025-49671"/>
+            <ref type="cve" id="CVE-2025-49670"/>
+            <ref type="cve" id="CVE-2025-49661"/>
+            <ref type="cve" id="CVE-2025-49658"/>
+            <ref type="cve" id="CVE-2025-49657"/>
+            <ref type="cve" id="CVE-2025-48824"/>
+            <ref type="cve" id="CVE-2025-47987"/>
+            <ref type="cve" id="CVE-2025-47986"/>
+            <ref type="cve" id="CVE-2025-47985"/>
+            <ref type="cve" id="CVE-2025-47984"/>
+            <ref type="cve" id="CVE-2025-47976"/>
+            <ref type="cve" id="CVE-2025-47972"/>
+            <ref type="cve" id="CVE-2025-47971"/>
+            <ref type="cve" id="CVE-2025-47159"/>
+            <ref type="cve" id="CVE-2025-48807"/>
+            <ref type="cve" id="CVE-2025-53789"/>
+            <ref type="cve" id="CVE-2025-49757"/>
+            <ref type="url" id="https://support.microsoft.com/en-us/help/5062557"/>
+            <ref type="cert-bund" id="WID-SEC-2025-1850"/>
+            <ref type="cert-bund" id="WID-SEC-2025-1790"/>
+            <ref type="cert-bund" id="WID-SEC-2025-1495"/>
+            <ref type="dfn-cert" id="DFN-CERT-2025-2181"/>
+            <ref type="dfn-cert" id="DFN-CERT-2025-1825"/>
+          </refs>
+        </nvt>
+        <scan_nvt_version>2025-08-15T07:40:49+02:00</scan_nvt_version>
+        <threat>High</threat>
+        <severity>9.8</severity>
+        <qod>
+          <value>80</value>
+          <type/>
+        </qod>
+        <description>Vulnerable range:  10.0.17763.0 - 10.0.17763.7557
+File checked:      C:\Windows\system32\Ntoskrnl.exe
+File version:      10.0.17763.7434
+
+</description>
+        <original_threat>High</original_threat>
+        <original_severity>9.8</original_severity>
+        <compliance>undefined</compliance>
+      </result>
+    </results>
+    <scan_end>2025-08-22T17:09:57+02:00</scan_end>
+  </report>
+</report>

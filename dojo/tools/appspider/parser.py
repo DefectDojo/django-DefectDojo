@@ -1,12 +1,11 @@
-from xml.dom import NamespaceErr
-
 import html2text
 from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
 
-class AppSpiderParser(object):
+class AppSpiderParser:
+
     """Parser for Rapid7 AppSpider reports"""
 
     def get_scan_types(self):
@@ -19,20 +18,22 @@ class AppSpiderParser(object):
         return "AppSpider (Rapid7) - Use the VulnerabilitiesSummary.xml file found in the zipped report download."
 
     def get_findings(self, filename, test):
-
         if filename is None:
-            return
+            return None
 
         vscan = ElementTree.parse(filename)
         root = vscan.getroot()
 
         if "VulnSummary" not in str(root.tag):
-            raise NamespaceErr('Please ensure that you are uploading AppSpider\'s VulnerabilitiesSummary.xml file.'
-                               'At this time it is the only file that is consumable by DefectDojo.')
+            msg = (
+                "Please ensure that you are uploading AppSpider's VulnerabilitiesSummary.xml file."
+                "At this time it is the only file that is consumable by DefectDojo."
+            )
+            raise ValueError(msg)
 
-        dupes = dict()
+        dupes = {}
 
-        for finding in root.iter('Vuln'):
+        for finding in root.iter("Vuln"):
             severity = self.convert_severity(finding.find("AttackScore").text)
             title = finding.find("VulnType").text
             description = finding.find("Description").text
@@ -42,15 +43,15 @@ class AppSpiderParser(object):
             cwe = int(finding.find("CweId").text)
 
             dupe_key = severity + title
-            unsaved_endpoints = list()
-            unsaved_req_resp = list()
+            unsaved_endpoints = []
+            unsaved_req_resp = []
 
             if title is None:
-                title = ''
+                title = ""
             if description is None:
-                description = ''
+                description = ""
             if mitigation is None:
-                mitigation = ''
+                mitigation = ""
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -59,14 +60,16 @@ class AppSpiderParser(object):
                 unsaved_req_resp.append(find.unsaved_req_resp)
 
             else:
-                find = Finding(title=title,
-                               test=test,
-                               description=html2text.html2text(description),
-                               severity=severity,
-                               mitigation=html2text.html2text(mitigation),
-                               impact="N/A",
-                               references=None,
-                               cwe=cwe)
+                find = Finding(
+                    title=title,
+                    test=test,
+                    description=html2text.html2text(description),
+                    severity=severity,
+                    mitigation=html2text.html2text(mitigation),
+                    impact="N/A",
+                    references=None,
+                    cwe=cwe,
+                )
                 find.unsaved_endpoints = unsaved_endpoints
                 find.unsaved_req_resp = unsaved_req_resp
                 dupes[dupe_key] = find

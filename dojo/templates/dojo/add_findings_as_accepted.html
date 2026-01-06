@@ -1,0 +1,56 @@
+{% load i18n %}
+{% load display_tags %}
+{% load static %}
+<table id="findings_table" class="tablesorter-bootstrap table table-condensed table-striped table-hover">
+    {% for finding in findings %}
+    <tr>
+        <td>
+            <label for="accepted_findings"></span>
+            <input type="checkbox" name="accepted_findings" value="{{ finding.id }}">
+        </td>
+        <td>{{finding.id}}</td>
+        <td>
+            <span class="label severity severity-{{ finding.severity }}">
+                {{ finding.severity_display }}
+            </span>
+          </td>
+          <td>
+            {% if finding.title %}
+                <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
+            {% else %}
+                <a title="{{ finding.id }}" href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
+            {% endif %}
+          </td>
+          <td>
+            {% if finding.cwe > 0 %}
+                <a target="_blank" href="{{ finding.cwe|cwe_url }}">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe|default:"" }}
+                </a>
+            {% endif %}
+          </td>
+          <td class="nowrap">
+            {% with finding|first_vulnerability_id as first_vulnerability_id %}
+                {% if first_vulnerability_id %}
+                    {% if first_vulnerability_id|has_vulnerability_url %}
+                        <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ first_vulnerability_id }}
+                    </a>
+                    {% else %}
+                        {{ first_vulnerability_id }}
+                    {% endif %}
+                {% endif %}
+            {% endwith %}
+        </td>
+          <td>
+              {{ finding.epss_score|format_epss }}
+            </td>
+            <td>
+              {{ finding.epss_percentile|format_epss }}
+          </td>
+          <td>{{ finding.date }}</td>
+          
+          <td>{{ finding.active }}</td>
+    </tr>
+    {% endfor %}
+</table>
+

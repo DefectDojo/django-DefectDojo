@@ -1,13 +1,14 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block content %}
     {{ block.super }}
-    <h3> Delete Benchmarks for {{ product }}</h3>
+    <h3>{% blocktrans %}Delete Benchmarks for {{ product }}{% endblocktrans %}</h3>
     <p>
-        Deleting these benchmarks will remove the benchmarks from the product and any related notes on the benchmarks.
+        {% trans "Deleting these benchmarks will remove the benchmarks from the product and any related notes on the benchmarks." %}
     </p>
     <div class="danger-zone panel panel-danger">
         <div class="panel-heading">
-            <h3>Danger Zone</h3>
+            <h3>{% trans "Danger Zone" %}</h3>
         </div>
 
         <form class="form-horizontal" method="post">
@@ -15,7 +16,7 @@
             {{ form }}
             <br><br><br>
             <div class="form-group">
-                <button class="btn btn-danger" type="submit" name="delete_name" value="delete_test">Delete Benchmarks</button>
+                <button class="btn btn-danger" type="submit" name="delete_name" value="delete_test">{% trans "Delete Benchmarks" %}</button>
             </div>
         </form>
     </div>

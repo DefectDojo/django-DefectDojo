@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<OWASPZAPReport version="2.11.1" generated="Fr., 30 Sep. 2022 08:40:35">
+		<site name="http://localhost:8080" host="localhost" port="8080" ssl="false">
+			<alerts>
+					<alertitem>
+						<pluginid>90028</pluginid>
+						<alertRef>90028</alertRef>
+						<alert>Insecure HTTP Method - PUT</alert>
+						<name>Insecure HTTP Method - PUT</name>
+						<riskcode>2</riskcode>
+						<confidence>2</confidence>
+						<riskdesc>Medium (Medium)</riskdesc>
+						<confidencedesc>Medium</confidencedesc>
+						<desc>This method was originally intended for file managemant operations. It is now most commonly used in REST services, PUT is most-often utilized for **update** capabilities, PUT-ing to a known resource URI with the request body containing the newly-updated representation of the original resource..</desc>
+						<instances>
+							
+								<instance>
+									<uri>http://localhost:8080/bodgeit/js/qndto7n63d</uri>
+									<method>PUT</method>
+									<param></param>
+									<attack></attack>
+									<evidence>response code 403 for potentially insecure HTTP METHOD</evidence>
+									<requestheader>PUT http://localhost:8080/bodgeit/js/qndto7n63d HTTP/1.1
+Host: localhost:8080
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:105.0) Gecko/20100101 Firefox/105.0
+Accept: */*
+Accept-Language: de,en-US;q=0.7,en;q=0.3
+Connection: keep-alive
+Referer: https://localhost:8080/bodgeit/
+Cookie: JSESSIONID=9E75E26E50F681208096FFAA0B566901
+Sec-Fetch-Dest: script
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Site: same-origin
+Content-Length: 35
+
+</requestheader>
+									<requestbody>&quot;J0O0glajHdR0Mgp&quot;:&quot;UToh9IpCY5zh3CB&quot;</requestbody>
+									<responseheader>HTTP/1.1 403 Forbidden
+Server: Apache-Coyote/1.1
+Content-Type: text/html;charset=utf-8
+Content-Language: en
+Content-Length: 1004
+Date: Fri, 30 Sep 2022 06:40:15 GMT
+
+</responseheader>
+									<responsebody>&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;title&gt;Apache Tomcat/8.0.37 - Error report&lt;/title&gt;&lt;style type=&quot;text/css&quot;&gt;H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}A {color : black;}A.name {color : black;}.line {height: 1px; background-color: #525D76; border: none;}&lt;/style&gt; &lt;/head&gt;&lt;body&gt;&lt;h1&gt;HTTP Status 403 - &lt;/h1&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;p&gt;&lt;b&gt;type&lt;/b&gt; Status report&lt;/p&gt;&lt;p&gt;&lt;b&gt;message&lt;/b&gt; &lt;u&gt;&lt;/u&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;description&lt;/b&gt; &lt;u&gt;Access to the specified resource has been forbidden.&lt;/u&gt;&lt;/p&gt;&lt;hr class=&quot;line&quot;&gt;&lt;h3&gt;Apache Tomcat/8.0.37&lt;/h3&gt;&lt;/body&gt;&lt;/html&gt;</responsebody>
+								</instance>
+						</instances>
+						<count>1</count>
+						<solution>TBA</solution>
+						<otherinfo>See the discussion on stackexchange: https://security.stackexchange.com/questions/21413/how-to-exploit-http-methods, for understanding REST operations see http://www.restapitutorial.com/lessons/httpmethods.html</otherinfo>
+						<reference>http://projects.webappsec.org/Fingerprinting
+</reference>
+						<cweid>200</cweid>
+						<wascid>45</wascid>
+						<sourceid>2303</sourceid>
+					</alertitem>
+			</alerts>
+		</site>
+</OWASPZAPReport>
