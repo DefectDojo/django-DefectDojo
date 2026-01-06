@@ -3129,7 +3129,7 @@ class SystemSettingsForm(forms.ModelForm):
 
     class Meta:
         model = System_Settings
-        exclude = ["product_grade"]
+        fields = "__all__"
 
 
 class BenchmarkForm(forms.ModelForm):

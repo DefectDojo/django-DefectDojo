@@ -20,7 +20,6 @@ import bleach
 import crum
 import cvss
 import vobject
-from asteval import Interpreter
 from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -1224,6 +1223,26 @@ def get_setting(setting):
     return getattr(settings, setting)
 
 
+def grade_product(crit, high, med, low):
+    health = 100
+    if crit > 0:
+        health = 40
+        health -= ((crit - 1) * 5)
+    if high > 0:
+        if health == 100:
+            health = 60
+        health -= ((high - 1) * 3)
+    if med > 0:
+        if health == 100:
+            health = 80
+        health -= ((med - 1) * 2)
+    if low > 0:
+        if health == 100:
+            health = 95
+        health -= low
+    return max(health, 5)
+
+
 @dojo_model_to_id
 @dojo_async_task(signature=True)
 @app.task
@@ -1276,17 +1295,14 @@ def calculate_grade_internal(product, *args, **kwargs):
                 medium = severity_count["numerical_severity__count"]
             elif severity_count["severity"] == "Low":
                 low = severity_count["numerical_severity__count"]
-        aeval = Interpreter()
-        aeval(system_settings.product_grade)
-        grade_product = f"grade_product({critical}, {high}, {medium}, {low})"
-        prod_numeric_grade = aeval(grade_product)
-        if prod_numeric_grade != product.prod_numeric_grade:
-            logger.debug("Updating product %s grade from %s to %s", product.id, product.prod_numeric_grade, prod_numeric_grade)
-            product.prod_numeric_grade = prod_numeric_grade
+        grade = grade_product(critical, high, medium, low)
+        if grade != product.prod_numeric_grade:
+            logger.debug("Updating product %s grade from %s to %s", product.id, product.prod_numeric_grade, grade)
+            product.prod_numeric_grade = grade
             super(Product, product).save()
         else:
             # Use %s to safely handle None grades without formatter errors
-            logger.debug("Product %s grade %s is up to date", product.id, prod_numeric_grade)
+            logger.debug("Product %s grade %s is up to date", product.id, product.prod_numeric_grade)
 
 
 def perform_product_grading(product):
