@@ -1,0 +1,25 @@
+{{- if .Values.localsettingspy }}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  {{- with .Values.extraAnnotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
+  labels:
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  name: {{ $fullName }}-localsettingspy
+  namespace: {{ .Release.Namespace }}
+data:
+  file: 
+    {{ toYaml .Values.localsettingspy | indent 4 }}
+{{- end }}

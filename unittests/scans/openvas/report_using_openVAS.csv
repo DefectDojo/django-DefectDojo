@@ -1,0 +1,251 @@
+IP,Hostname,Port,Port Protocol,CVSS,Severity,QoD,Solution Type,NVT Name,Summary,Specific Result,NVT OID,CVEs,Task ID,Task Name,Timestamp,Result ID,Impact,Solution,Affected Software/OS,Vulnerability Insight,Vulnerability Detection Method,Product Detection Result,BIDs,CERTs,Other References
+45.33.32.156,,,,2.6,Low,80,"Mitigation","TCP Timestamps Information Disclosure","The remote host implements TCP timestamps and therefore allows
+  to compute the uptime.","It was detected that the host implements RFC1323/RFC7323.
+
+The following timestamps were retrieved with a delay of 1 seconds in-between:
+Packet 1: 1912048204
+Packet 2: 1912049513
+",1.3.6.1.4.1.25623.1.0.80091,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,167b0841-3f29-450b-bb44-a7d88999b3bc,"A side effect of this feature is that the uptime of the remote
+  host can sometimes be computed.","To disable TCP timestamps on linux add the line
+  'net.ipv4.tcp_timestamps = 0' to /etc/sysctl.conf. Execute 'sysctl -p' to apply the settings at
+  runtime.
+
+  To disable TCP timestamps on Windows execute 'netsh int tcp set global timestamps=disabled'
+
+  Starting with Windows Server 2008 and Vista, the timestamp can not be completely disabled.
+
+  The default behavior of the TCP/IP stack on this Systems is to not use the Timestamp options when
+  initiating TCP connections, but use them if the TCP peer that is initiating communication includes
+  them in their synchronize (SYN) segment.
+
+  See the references for more information.","TCP implementations that implement RFC1323/RFC7323.","The remote host implements TCP timestamps, as defined by
+  RFC1323/RFC7323.","Special IP packets are forged and sent with a little delay in
+  between to the target IP. The responses are searched for a timestamps. If found, the timestamps
+  are reported.
+Details:
+TCP Timestamps Information Disclosure
+(OID: 1.3.6.1.4.1.25623.1.0.80091)
+Version used: 2023-12-15T16:10:08Z
+","","","",""
+45.33.32.156,,443,tcp,0.0,Log,80,"","Services","This plugin performs service detection.","An unknown service is running on this port.
+It is usually reserved for HTTPS
+",1.3.6.1.4.1.25623.1.0.10330,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,63a8e1b3-d8d3-46f4-b6b4-a0bc5458cc11,"","","","This plugin attempts to guess which service is running on the
+  remote port(s). For instance, it searches for a web server which could listen on another port than
+  80 or 443 and makes this information available for other check routines.","
+Details:
+Services
+(OID: 1.3.6.1.4.1.25623.1.0.10330)
+Version used: 2023-06-14T05:05:19Z
+","","","",""
+45.33.32.156,,,,0.0,Log,80,"","Apache HTTP Server Detection Consolidation","Consolidation of Apache HTTP Server detections.","Detected Apache HTTP Server
+
+Version:       2.4.7
+Location:      80/tcp
+CPE:           cpe:/a:apache:http_server:2.4.7
+
+Concluded from version/product identification result:
+Server: Apache/2.4.7 (Ubuntu)
+",1.3.6.1.4.1.25623.1.0.117232,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,7278de91-b9dc-4c61-86a5-3973f22a5d3f,"","","","","
+Details:
+Apache HTTP Server Detection Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.117232)
+Version used: 2021-02-25T13:36:35Z
+","","","",""
+45.33.32.156,,,,0.0,Log,80,"","Traceroute","Collect information about the network route and
+  network distance between the scanner host and the target host.","Network route from scanner (172.25.0.3) to target (45.33.32.156):
+
+172.25.0.3
+45.33.32.156
+
+Network distance between scanner and target: 2
+",1.3.6.1.4.1.25623.1.0.51662,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,251e825d-83d7-4028-ac67-eb548de2c0f7,"","","","For internal networks, the distances are usually
+  small, often less than 4 hosts between scanner and target. For public targets the
+  distance is greater and might be 10 hosts or more.","A combination of the protocols ICMP and TCP is used
+  to determine the route. This method is applicable for IPv4 only and it is also known as
+  'traceroute'.
+Details:
+Traceroute
+(OID: 1.3.6.1.4.1.25623.1.0.51662)
+Version used: 2022-10-17T11:13:19Z
+","","","",""
+45.33.32.156,,80,tcp,0.0,Log,80,"","HTTP Server type and version","This script detects and reports the HTTP Server's banner
+  which might provide the type and version of it.","The remote HTTP Server banner is:
+
+Server: Apache/2.4.7 (Ubuntu)
+",1.3.6.1.4.1.25623.1.0.10107,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,deeeae8d-9869-4346-b1b9-0373ddeda800,"","","","","
+Details:
+HTTP Server type and version
+(OID: 1.3.6.1.4.1.25623.1.0.10107)
+Version used: 2023-08-01T13:29:10Z
+","","","",""
+45.33.32.156,,80,tcp,0.0,Log,80,"","HTTP Server Banner Enumeration","This script tries to detect / enumerate different HTTP server
+  banner (e.g. from a frontend, backend or proxy server) by sending various different HTTP requests
+  (valid and invalid ones).","It was possible to enumerate the following HTTP server banner(s):
+
+Server banner                 | Enumeration technique
+-----------------------------------------------------------------------------------------
+Server: Apache/2.4.7 (Ubuntu) | Valid HTTP 1.1 GET request (with extended headers) to '/'
+",1.3.6.1.4.1.25623.1.0.108708,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,850e6204-e972-4988-9f24-4e1238e19c7c,"","","","","
+Details:
+HTTP Server Banner Enumeration
+(OID: 1.3.6.1.4.1.25623.1.0.108708)
+Version used: 2022-06-28T10:11:01Z
+","","","",""
+45.33.32.156,,80,tcp,0.0,Log,80,"","HTTP Security Headers Detection","All known security headers are being checked on the remote web
+  server.
+
+  On completion a report will hand back whether a specific security header has been implemented
+  (including its value and if it is deprecated) or is missing on the target.","Missing Headers                   | More Information
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Content-Security-Policy           | https://owasp.org/www-project-secure-headers/#content-security-policy
+Cross-Origin-Embedder-Policy      | https://scotthelme.co.uk/coop-and-coep/, Note: This is an upcoming header
+Cross-Origin-Opener-Policy        | https://scotthelme.co.uk/coop-and-coep/, Note: This is an upcoming header
+Cross-Origin-Resource-Policy      | https://scotthelme.co.uk/coop-and-coep/, Note: This is an upcoming header
+Document-Policy                   | https://w3c.github.io/webappsec-feature-policy/document-policy#document-policy-http-header
+Feature-Policy                    | https://owasp.org/www-project-secure-headers/#feature-policy, Note: The Feature Policy header has been renamed to Permissions Policy
+Permissions-Policy                | https://w3c.github.io/webappsec-feature-policy/#permissions-policy-http-header-field
+Referrer-Policy                   | https://owasp.org/www-project-secure-headers/#referrer-policy
+Sec-Fetch-Dest                    | https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers#fetch_metadata_request_headers, Note: This is a new header supported only in newer browsers like e.g. Firefox 90
+Sec-Fetch-Mode                    | https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers#fetch_metadata_request_headers, Note: This is a new header supported only in newer browsers like e.g. Firefox 90
+Sec-Fetch-Site                    | https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers#fetch_metadata_request_headers, Note: This is a new header supported only in newer browsers like e.g. Firefox 90
+Sec-Fetch-User                    | https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers#fetch_metadata_request_headers, Note: This is a new header supported only in newer browsers like e.g. Firefox 90
+X-Content-Type-Options            | https://owasp.org/www-project-secure-headers/#x-content-type-options
+X-Frame-Options                   | https://owasp.org/www-project-secure-headers/#x-frame-options
+X-Permitted-Cross-Domain-Policies | https://owasp.org/www-project-secure-headers/#x-permitted-cross-domain-policies
+X-XSS-Protection                  | https://owasp.org/www-project-secure-headers/#x-xss-protection, Note: Most major browsers have dropped / deprecated support for this header in 2020.
+",1.3.6.1.4.1.25623.1.0.112081,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,b4455363-ff0d-4188-a0a4-d5fdd3660b2e,"","","","","
+Details:
+HTTP Security Headers Detection
+(OID: 1.3.6.1.4.1.25623.1.0.112081)
+Version used: 2021-07-14T06:19:43Z
+","","","",""
+45.33.32.156,,,,0.0,Log,80,"","OS Detection Consolidation and Reporting","This script consolidates the OS information detected by several
+  VTs and tries to find the best matching OS.
+
+  Furthermore it reports all previously collected information leading to this best matching OS. It
+  also reports possible additional information which might help to improve the OS detection.
+
+  If any of this information is wrong or could be improved please consider to report these to the
+  referenced community forum.","Best matching OS:
+
+OS:           Ubuntu
+CPE:          cpe:/o:canonical:ubuntu_linux
+Found by VT:  1.3.6.1.4.1.25623.1.0.111067 (Operating System (OS) Detection (HTTP))
+Concluded from HTTP Server banner on port 80/tcp: Server: Apache/2.4.7 (Ubuntu)
+Setting key ""Host/runs_unixoide"" based on this information
+",1.3.6.1.4.1.25623.1.0.105937,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,08a57efa-fdf6-4206-a165-f16ff7410406,"","","","","
+Details:
+OS Detection Consolidation and Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.105937)
+Version used: 2024-02-21T14:36:44Z
+","","","",""
+45.33.32.156,,80,tcp,0.0,Log,80,"","CGI Scanning Consolidation","The script consolidates various information for CGI (Web
+  application) scanning.
+
+  This information is based on the following scripts / settings:
+
+  - HTTP-Version Detection (OID: 1.3.6.1.4.1.25623.1.0.100034)
+
+  - No 404 check (OID: 1.3.6.1.4.1.25623.1.0.10386)
+
+  - Web mirroring / webmirror.nasl (OID: 1.3.6.1.4.1.25623.1.0.10662)
+
+  - Directory Scanner / DDI_Directory_Scanner.nasl (OID: 1.3.6.1.4.1.25623.1.0.11032)
+
+  - The configured 'cgi_path' within the 'Scanner Preferences' of the scan config in use
+
+  - The configured 'Enable CGI scanning', 'Enable generic web application scanning' and
+    'Add historic /scripts and /cgi-bin to directories for CGI scanning' within the
+    'Global variable settings' of the scan config in use
+
+  If you think any of this information is wrong please report it to the referenced community
+  forum.","The Hostname/IP ""45.33.32.156"" was used to access the remote host.
+
+Generic web application scanning is disabled for this host via the ""Enable generic web application scanning"" option within the ""Global variable settings"" of the scan config in use.
+
+Requests to this service are done via HTTP/1.1.
+
+This service seems to be able to host PHP scripts.
+
+This service seems to be NOT able to host ASP scripts.
+
+The User-Agent ""Mozilla/5.0 [en] (X11, U; OpenVAS-VT 22.7.7)"" was used to access the remote host.
+
+Historic /scripts and /cgi-bin are not added to the directories used for CGI scanning. You can enable this again with the ""Add historic /scripts and /cgi-bin to directories for CGI scanning"" option within the ""Global variable settings"" of the scan config in use.
+
+The following directories were used for CGI scanning:
+
+http://45.33.32.156/
+http://45.33.32.156/shared
+
+While this is not, in and of itself, a bug, you should manually inspect these directories to ensure that they are in compliance with company security standards
+
+The following directories were excluded from CGI scanning because the ""Regex pattern to exclude directories from CGI scanning"" setting of the VT ""Global variable settings"" (OID: 1.3.6.1.4.1.25623.1.0.12288) for this scan was: ""/(index\.php|image|img|css|js$|js/|javascript|style|theme|icon|jquery|graphic|grafik|picture|bilder|thumbnail|media/|skins?/)""
+
+http://45.33.32.156/icons
+http://45.33.32.156/images
+",1.3.6.1.4.1.25623.1.0.111038,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,64a7320c-947f-4efb-8306-2b366fbb2af2,"","","","","
+Details:
+CGI Scanning Consolidation
+(OID: 1.3.6.1.4.1.25623.1.0.111038)
+Version used: 2024-02-08T05:05:59Z
+","","","",""
+45.33.32.156,,443,tcp,0.0,Log,80,"","Unknown OS and Service Banner Reporting","This VT consolidates and reports the information collected by
+  the following VTs:
+
+  - Collect banner of unknown services (OID: 1.3.6.1.4.1.25623.1.0.11154)
+
+  - Service Detection (unknown) with nmap (OID: 1.3.6.1.4.1.25623.1.0.66286)
+
+  - Service Detection (wrapped) with nmap (OID: 1.3.6.1.4.1.25623.1.0.108525)
+
+  - OS Detection Consolidation and Reporting (OID: 1.3.6.1.4.1.25623.1.0.105937)
+
+  If you know any of the information reported here, please send the full output to
+  the referenced community forum.","Nmap service detection (unknown) result for this port: https
+
+This is a guess. A confident identification of the service was not possible.
+
+Hint: If you're running a recent nmap version try to run nmap with the following command: 'nmap -sV -Pn -p 443 45.33.32.156' and submit a possible collected fingerprint to the nmap database.
+",1.3.6.1.4.1.25623.1.0.108441,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,0ed3e8ad-b403-4675-900f-05cc54c245e2,"","","","","
+Details:
+Unknown OS and Service Banner Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.108441)
+Version used: 2023-06-22T10:34:15Z
+","","","",""
+45.33.32.156,,,,0.0,Log,80,"","CPE Inventory","This routine uses information collected by other routines about
+  CPE identities of operating systems, services and applications detected during the scan.
+
+  Note: Some CPEs for specific products might show up twice or more in the output. Background:
+
+  After a product got renamed or a specific vendor was acquired by another one it might happen that
+  a product gets a new CPE within the NVD CPE Dictionary but older entries are kept with the older
+  CPE.","45.33.32.156|cpe:/a:apache:http_server:2.4.7
+45.33.32.156|cpe:/o:canonical:ubuntu_linux
+
+",1.3.6.1.4.1.25623.1.0.810002,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,e312a1d8-b961-4327-9089-3c4ea41393cd,"","","","","
+Details:
+CPE Inventory
+(OID: 1.3.6.1.4.1.25623.1.0.810002)
+Version used: 2022-07-27T10:11:28Z
+","","","",""
+45.33.32.156,,80,tcp,0.0,Log,80,"","Services","This plugin performs service detection.","A web server is running on this port
+",1.3.6.1.4.1.25623.1.0.10330,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,9a93736a-bd4f-4da3-8ba4-dd6aae462f09,"","","","This plugin attempts to guess which service is running on the
+  remote port(s). For instance, it searches for a web server which could listen on another port than
+  80 or 443 and makes this information available for other check routines.","
+Details:
+Services
+(OID: 1.3.6.1.4.1.25623.1.0.10330)
+Version used: 2023-06-14T05:05:19Z
+","","","",""
+45.33.32.156,,,,0.0,Log,80,"","Hostname Determination Reporting","The script reports information on how the hostname of the target
+  was determined.","Hostname determination for IP 45.33.32.156:
+
+Hostname|Source
+45.33.32.156|IP-address
+",1.3.6.1.4.1.25623.1.0.108449,"",ef9cd713-0144-4fe5-a19d-6849983ae3d1,"ScanmeNmap",2024-03-18T12:46:31Z,aa30b186-4a56-40bd-89b2-80bfe404a949,"","","","","
+Details:
+Hostname Determination Reporting
+(OID: 1.3.6.1.4.1.25623.1.0.108449)
+Version used: 2022-07-27T10:11:28Z
+","","","",""

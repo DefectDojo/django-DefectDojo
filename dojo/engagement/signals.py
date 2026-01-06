@@ -1,0 +1,84 @@
+import contextlib
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
+from django.dispatch import receiver
+from django.urls import reverse
+from django.utils.translation import gettext as _
+
+from dojo.file_uploads.helper import delete_related_files
+from dojo.models import Engagement, Product
+from dojo.notes.helper import delete_related_notes
+from dojo.notifications.helper import create_notification
+from dojo.pghistory_models import DojoEvents
+
+
+@receiver(post_save, sender=Engagement)
+def engagement_post_save(sender, instance, created, **kwargs):
+    if created:
+        title = _('Engagement created for "%(product)s": %(name)s') % {"product": instance.product, "name": instance.name}
+        create_notification(event="engagement_added", title=title, engagement=instance, product=instance.product,
+                            url=reverse("view_engagement", args=(instance.id,)), url_api=reverse("engagement-detail", args=(instance.id,)))
+
+
+@receiver(pre_save, sender=Engagement)
+def engagement_pre_save(sender, instance, **kwargs):
+    old = sender.objects.filter(pk=instance.pk).first()
+    if old and instance.status != old.status:
+        if instance.status in {"Cancelled", "Completed"}:
+            create_notification(event="engagement_closed",
+                                title=_("Closure of %s") % instance.name,
+                                description=_('The engagement "%s" was closed') % (instance.name),
+                                engagement=instance, url=reverse("engagement_all_findings", args=(instance.id, )))
+        elif instance.status == "In Progress" and old.status != "Not Started":
+            create_notification(event="engagement_reopened",
+                                title=_("Reopening of %s") % instance.name,
+                                engagement=instance,
+                                description=_('The engagement "%s" was reopened') % (instance.name),
+                                url=reverse("view_engagement", args=(instance.id, )))
+
+
+@receiver(post_delete, sender=Engagement)
+def engagement_post_delete(sender, instance, using, origin, **kwargs):
+    # Catch instances in async delete where a single object is deleted more than once
+    with contextlib.suppress(sender.DoesNotExist, Product.DoesNotExist):
+        if instance == origin:
+            description = _('The engagement "%(name)s" was deleted') % {"name": instance.name}
+            user = None
+
+            if settings.ENABLE_AUDITLOG:
+                # Find deletion author in pghistory events
+                # Look for delete events for this specific engagement instance
+                pghistory_delete_events = DojoEvents.objects.filter(
+                    pgh_obj_model="dojo.Engagement",
+                    pgh_obj_id=instance.id,
+                    pgh_label="delete",
+                ).order_by("-pgh_created_at")
+
+                if pghistory_delete_events.exists():
+                    latest_delete = pghistory_delete_events.first()
+                    # Extract user from pghistory context
+                    if latest_delete.user:
+                        User = get_user_model()
+                        with contextlib.suppress(User.DoesNotExist):
+                            user = User.objects.get(id=latest_delete.user)
+
+                # Update description with user if found
+                if user:
+                    description = _('The engagement "%(name)s" was deleted by %(user)s') % {
+                                    "name": instance.name, "user": user}
+            create_notification(event="engagement_deleted",  # template does not exists, it will default to "other" but this event name needs to stay because of unit testing
+                                title=_("Deletion of %(name)s") % {"name": instance.name},
+                                description=description,
+                                product=instance.product,
+                                url=reverse("view_product", args=(instance.product.id, )),
+                                recipients=[instance.lead],
+                                icon="exclamation-triangle")
+
+
+@receiver(pre_delete, sender=Engagement)
+def engagement_pre_delete(sender, instance, **kwargs):
+    with contextlib.suppress(sender.DoesNotExist):
+        delete_related_notes(instance)
+        delete_related_files(instance)

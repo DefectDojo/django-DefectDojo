@@ -1,7 +1,9 @@
-from django.conf.urls import url
+from django.urls import re_path
+
 from dojo.banner import views
 
 urlpatterns = [
-    url(r'^configure_banner$', views.configure_banner,
-     name='configure_banner'),
+    re_path(
+        r"^configure_banner$", views.configure_banner, name="configure_banner",
+    ),
 ]

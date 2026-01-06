@@ -1,0 +1,659 @@
+{
+  "version": "3.0.0",
+  "vulnerabilities": [
+    {
+      "id": "8a562c9eec7059db9bda22cc3b58657c4bd1f4213e87fcae8876635c0d5803d8",
+      "category": "dependency_scanning",
+      "name": "Nil Pointer Dereference",
+      "message": "Nil Pointer Dereference in golang.org/x/crypto",
+      "description": "A nil pointer dereference in the `golang.org/x/crypto/ssh` component allows remote attackers to cause a denial of service against SSH servers.",
+      "cve": "service/go.sum:golang.org/x/crypto:gemnasium:ffb814a0-404c-11eb-b378-0242ac130002",
+      "severity": "High",
+      "solution": "Upgrade to version v0.0.0-20201216223049-8b5274cf687f or above.",
+      "scanner": {
+        "id": "gemnasium",
+        "name": "Gemnasium"
+      },
+      "location": {
+        "file": "service/go.sum",
+        "dependency": {
+          "package": {
+            "name": "golang.org/x/crypto"
+          },
+          "version": "v0.0.0-20190219172222-a4c6cb3142f2"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "gemnasium",
+          "name": "Gemnasium-ffb814a0-404c-11eb-b378-0242ac130002",
+          "value": "ffb814a0-404c-11eb-b378-0242ac130002",
+          "url": "https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/go/golang.org/x/crypto/CVE-2020-29652.yml"
+        },
+        {
+          "type": "cve",
+          "name": "CVE-2020-29652",
+          "value": "CVE-2020-29652",
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-29652"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://go-review.googlesource.com/c/crypto/+/278852"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/ouZIlBimOsE?pli=1"
+        },
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-29652"
+        }
+      ]
+    },
+    {
+      "id": "e4f855103139f6af7b2ac8c83aa6779fc97a168e06a45235fb6f072cf707c1b5",
+      "category": "dependency_scanning",
+      "name": "Nil Pointer Dereference",
+      "message": "Nil Pointer Dereference in golang.org/x/crypto",
+      "description": "A nil pointer dereference in the `golang.org/x/crypto/ssh` component allows remote attackers to cause a denial of service against SSH servers.",
+      "cve": "service/go.sum:golang.org/x/crypto:gemnasium:ffb814a0-404c-11eb-b378-0242ac130002",
+      "severity": "High",
+      "solution": "Upgrade to version v0.0.0-20201216223049-8b5274cf687f or above.",
+      "scanner": {
+        "id": "gemnasium",
+        "name": "Gemnasium"
+      },
+      "location": {
+        "file": "service/go.sum",
+        "dependency": {
+          "package": {
+            "name": "golang.org/x/crypto"
+          },
+          "version": "v0.0.0-20190308221718-c2843e01d9a2"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "gemnasium",
+          "name": "Gemnasium-ffb814a0-404c-11eb-b378-0242ac130002",
+          "value": "ffb814a0-404c-11eb-b378-0242ac130002",
+          "url": "https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/go/golang.org/x/crypto/CVE-2020-29652.yml"
+        },
+        {
+          "type": "cve",
+          "name": "CVE-2020-29652",
+          "value": "CVE-2020-29652",
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-29652"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://go-review.googlesource.com/c/crypto/+/278852"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/ouZIlBimOsE?pli=1"
+        },
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-29652"
+        }
+      ]
+    },
+    {
+      "id": "52bd3ac2d5a6e23e85c8e56356e6abefdda9907cba630c6c31e25ef745dd7c5d",
+      "category": "dependency_scanning",
+      "name": "Nil Pointer Dereference",
+      "message": "Nil Pointer Dereference in golang.org/x/crypto",
+      "description": "A nil pointer dereference in the `golang.org/x/crypto/ssh` component allows remote attackers to cause a denial of service against SSH servers.",
+      "cve": "service/go.sum:golang.org/x/crypto:gemnasium:ffb814a0-404c-11eb-b378-0242ac130002",
+      "severity": "High",
+      "solution": "Upgrade to version v0.0.0-20201216223049-8b5274cf687f or above.",
+      "scanner": {
+        "id": "gemnasium",
+        "name": "Gemnasium"
+      },
+      "location": {
+        "file": "service/go.sum",
+        "dependency": {
+          "package": {
+            "name": "golang.org/x/crypto"
+          },
+          "version": "v0.0.0-20200302210943-78000ba7a073"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "gemnasium",
+          "name": "Gemnasium-ffb814a0-404c-11eb-b378-0242ac130002",
+          "value": "ffb814a0-404c-11eb-b378-0242ac130002",
+          "url": "https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/go/golang.org/x/crypto/CVE-2020-29652.yml"
+        },
+        {
+          "type": "cve",
+          "name": "CVE-2020-29652",
+          "value": "CVE-2020-29652",
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-29652"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://go-review.googlesource.com/c/crypto/+/278852"
+        },
+        {
+          "url": "https://groups.google.com/g/golang-announce/c/ouZIlBimOsE?pli=1"
+        },
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-29652"
+        }
+      ]
+    },
+    {
+      "id": "957c4dc61df3f8927b2ad51a6c25644d9ac75cd902d5c93e6366719118e34180",
+      "category": "dependency_scanning",
+      "name": "Loop with Unreachable Exit Condition (Infinite Loop)",
+      "message": "Loop with Unreachable Exit Condition (Infinite Loop) in golang.org/x/text",
+      "description": "The `x/text` package for Go has a vulnerability in `encoding/unicode` that could lead to the `UTF-16` decoder entering an infinite loop, causing the program to crash or run out of memory. An attacker could provide a single byte to a `UTF16` decoder instantiated with `UseBOM` or `ExpectBOM` to trigger an infinite loop if the String function on the Decoder is called, or the Decoder is passed to `golang.org/x/text/transform.String`.",
+      "cve": "service/go.sum:golang.org/x/text:gemnasium:8ab0265a-d1a9-4085-a661-0d9d9931f0ad",
+      "severity": "High",
+      "solution": "Upgrade to version 0.3.3 or above.",
+      "scanner": {
+        "id": "gemnasium",
+        "name": "Gemnasium"
+      },
+      "location": {
+        "file": "service/go.sum",
+        "dependency": {
+          "package": {
+            "name": "golang.org/x/text"
+          },
+          "version": "v0.3.0"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "gemnasium",
+          "name": "Gemnasium-8ab0265a-d1a9-4085-a661-0d9d9931f0ad",
+          "value": "8ab0265a-d1a9-4085-a661-0d9d9931f0ad",
+          "url": "https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/go/golang.org/x/text/CVE-2020-14040.yml"
+        },
+        {
+          "type": "cve",
+          "name": "CVE-2020-14040",
+          "value": "CVE-2020-14040",
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-14040"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-14040"
+        }
+      ]
+    },
+    {
+      "id": "f9d0c9f6512b04b2c2414a3cb81389e27c6b73291d3471ff2cf365f7fe8ca388",
+      "category": "dependency_scanning",
+      "name": "Loop with Unreachable Exit Condition (Infinite Loop)",
+      "message": "Loop with Unreachable Exit Condition (Infinite Loop) in golang.org/x/text",
+      "description": "The `x/text` package for Go has a vulnerability in `encoding/unicode` that could lead to the `UTF-16` decoder entering an infinite loop, causing the program to crash or run out of memory. An attacker could provide a single byte to a `UTF16` decoder instantiated with `UseBOM` or `ExpectBOM` to trigger an infinite loop if the String function on the Decoder is called, or the Decoder is passed to `golang.org/x/text/transform.String`.",
+      "cve": "service/go.sum:golang.org/x/text:gemnasium:8ab0265a-d1a9-4085-a661-0d9d9931f0ad",
+      "severity": "High",
+      "solution": "Upgrade to version 0.3.3 or above.",
+      "scanner": {
+        "id": "gemnasium",
+        "name": "Gemnasium"
+      },
+      "location": {
+        "file": "service/go.sum",
+        "dependency": {
+          "package": {
+            "name": "golang.org/x/text"
+          },
+          "version": "v0.3.2"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "gemnasium",
+          "name": "Gemnasium-8ab0265a-d1a9-4085-a661-0d9d9931f0ad",
+          "value": "8ab0265a-d1a9-4085-a661-0d9d9931f0ad",
+          "url": "https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/go/golang.org/x/text/CVE-2020-14040.yml"
+        },
+        {
+          "type": "cve",
+          "name": "CVE-2020-14040",
+          "value": "CVE-2020-14040",
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-14040"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-14040"
+        }
+      ]
+    },
+    {
+      "id": "2d8b607cb56d9866c73cdcf33a016f64b4fa37d909c1dd300037b1ac026a3ca5",
+      "category": "dependency_scanning",
+      "name": "XML Entity Expansion",
+      "message": "XML Entity Expansion in gopkg.in/yaml.v2",
+      "description": "go-yaml is vulnerable to a Billion Laughs Attack.",
+      "cve": "service/go.sum:gopkg.in/yaml.v2:gemnasium:7368f513-0aa9-4e34-a08d-40ea81f48e0e",
+      "severity": "Unknown",
+      "solution": "Upgrade to version 2.2.3 or above.",
+      "scanner": {
+        "id": "gemnasium",
+        "name": "Gemnasium"
+      },
+      "location": {
+        "file": "service/go.sum",
+        "dependency": {
+          "package": {
+            "name": "gopkg.in/yaml.v2"
+          },
+          "version": "v2.2.2"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "gemnasium",
+          "name": "Gemnasium-7368f513-0aa9-4e34-a08d-40ea81f48e0e",
+          "value": "7368f513-0aa9-4e34-a08d-40ea81f48e0e",
+          "url": "https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/go/gopkg.in/yaml.v2/GMS-2019-2.yml"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://github.com/docker/cli/pull/2117"
+        }
+      ]
+    }
+  ],
+  "remediations": [],
+  "dependency_files": [
+    {
+      "path": "service/go.sum",
+      "package_manager": "go",
+      "dependencies": [
+        {
+          "package": {
+            "name": "github.com/alcortesm/tgz"
+          },
+          "version": "v0.0.0-20161220082320-9c5fe88206d7"
+        },
+        {
+          "package": {
+            "name": "github.com/anmitsu/go-shlex"
+          },
+          "version": "v0.0.0-20161002113705-648efa622239"
+        },
+        {
+          "package": {
+            "name": "github.com/armon/go-socks5"
+          },
+          "version": "v0.0.0-20160902184237-e75332964ef5"
+        },
+        {
+          "package": {
+            "name": "github.com/creack/pty"
+          },
+          "version": "v1.1.9"
+        },
+        {
+          "package": {
+            "name": "github.com/davecgh/go-spew"
+          },
+          "version": "v1.1.0"
+        },
+        {
+          "package": {
+            "name": "github.com/davecgh/go-spew"
+          },
+          "version": "v1.1.1"
+        },
+        {
+          "package": {
+            "name": "github.com/emirpasic/gods"
+          },
+          "version": "v1.12.0"
+        },
+        {
+          "package": {
+            "name": "github.com/flynn/go-shlex"
+          },
+          "version": "v0.0.0-20150515145356-3f9db97f8568"
+        },
+        {
+          "package": {
+            "name": "github.com/gliderlabs/ssh"
+          },
+          "version": "v0.2.2"
+        },
+        {
+          "package": {
+            "name": "github.com/go-git/gcfg"
+          },
+          "version": "v1.5.0"
+        },
+        {
+          "package": {
+            "name": "github.com/go-git/go-billy/v5"
+          },
+          "version": "v5.0.0"
+        },
+        {
+          "package": {
+            "name": "github.com/go-git/go-git-fixtures/v4"
+          },
+          "version": "v4.0.2-0.20200613231340-f56387b50c12"
+        },
+        {
+          "package": {
+            "name": "github.com/go-git/go-git/v5"
+          },
+          "version": "v5.2.0"
+        },
+        {
+          "package": {
+            "name": "github.com/golang/protobuf"
+          },
+          "version": "v1.2.0"
+        },
+        {
+          "package": {
+            "name": "github.com/google/go-cmp"
+          },
+          "version": "v0.3.0"
+        },
+        {
+          "package": {
+            "name": "github.com/google/go-querystring"
+          },
+          "version": "v1.0.0"
+        },
+        {
+          "package": {
+            "name": "github.com/hashicorp/go-cleanhttp"
+          },
+          "version": "v0.5.1"
+        },
+        {
+          "package": {
+            "name": "github.com/hashicorp/go-hclog"
+          },
+          "version": "v0.9.2"
+        },
+        {
+          "package": {
+            "name": "github.com/hashicorp/go-retryablehttp"
+          },
+          "version": "v0.6.4"
+        },
+        {
+          "package": {
+            "name": "github.com/imdario/mergo"
+          },
+          "version": "v0.3.9"
+        },
+        {
+          "package": {
+            "name": "github.com/jbenet/go-context"
+          },
+          "version": "v0.0.0-20150711004518-d14ea06fba99"
+        },
+        {
+          "package": {
+            "name": "github.com/jessevdk/go-flags"
+          },
+          "version": "v1.4.0"
+        },
+        {
+          "package": {
+            "name": "github.com/kevinburke/ssh_config"
+          },
+          "version": "v0.0.0-20190725054713-01f96b0aa0cd"
+        },
+        {
+          "package": {
+            "name": "github.com/kr/pretty"
+          },
+          "version": "v0.1.0"
+        },
+        {
+          "package": {
+            "name": "github.com/kr/pty"
+          },
+          "version": "v1.1.1"
+        },
+        {
+          "package": {
+            "name": "github.com/kr/text"
+          },
+          "version": "v0.1.0"
+        },
+        {
+          "package": {
+            "name": "github.com/kr/text"
+          },
+          "version": "v0.2.0"
+        },
+        {
+          "package": {
+            "name": "github.com/mitchellh/go-homedir"
+          },
+          "version": "v1.1.0"
+        },
+        {
+          "package": {
+            "name": "github.com/niemeyer/pretty"
+          },
+          "version": "v0.0.0-20200227124842-a10e7caefd8e"
+        },
+        {
+          "package": {
+            "name": "github.com/pkg/errors"
+          },
+          "version": "v0.8.1"
+        },
+        {
+          "package": {
+            "name": "github.com/pmezard/go-difflib"
+          },
+          "version": "v1.0.0"
+        },
+        {
+          "package": {
+            "name": "github.com/sergi/go-diff"
+          },
+          "version": "v1.1.0"
+        },
+        {
+          "package": {
+            "name": "github.com/stretchr/objx"
+          },
+          "version": "v0.1.0"
+        },
+        {
+          "package": {
+            "name": "github.com/stretchr/testify"
+          },
+          "version": "v1.2.2"
+        },
+        {
+          "package": {
+            "name": "github.com/stretchr/testify"
+          },
+          "version": "v1.4.0"
+        },
+        {
+          "package": {
+            "name": "github.com/xanzy/go-gitlab"
+          },
+          "version": "v0.38.2"
+        },
+        {
+          "package": {
+            "name": "github.com/xanzy/ssh-agent"
+          },
+          "version": "v0.2.1"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/crypto"
+          },
+          "version": "v0.0.0-20190219172222-a4c6cb3142f2"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/crypto"
+          },
+          "version": "v0.0.0-20190308221718-c2843e01d9a2"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/crypto"
+          },
+          "version": "v0.0.0-20200302210943-78000ba7a073"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/net"
+          },
+          "version": "v0.0.0-20180724234803-3673e40ba225"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/net"
+          },
+          "version": "v0.0.0-20181108082009-03003ca0c849"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/net"
+          },
+          "version": "v0.0.0-20190404232315-eb5bcb51f2a3"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/net"
+          },
+          "version": "v0.0.0-20200301022130-244492dfa37a"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/oauth2"
+          },
+          "version": "v0.0.0-20181106182150-f42d05182288"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/sync"
+          },
+          "version": "v0.0.0-20181108010431-42b317875d0f"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/sys"
+          },
+          "version": "v0.0.0-20190215142949-d0b11bdaac8a"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/sys"
+          },
+          "version": "v0.0.0-20190221075227-b4e8571b14e0"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/sys"
+          },
+          "version": "v0.0.0-20190412213103-97732733099d"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/sys"
+          },
+          "version": "v0.0.0-20200302150141-5c8b2ff67527"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/text"
+          },
+          "version": "v0.3.0"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/text"
+          },
+          "version": "v0.3.2"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/time"
+          },
+          "version": "v0.0.0-20191024005414-555d28b269f0"
+        },
+        {
+          "package": {
+            "name": "golang.org/x/tools"
+          },
+          "version": "v0.0.0-20180917221912-90fa682c2a6e"
+        },
+        {
+          "package": {
+            "name": "google.golang.org/appengine"
+          },
+          "version": "v1.3.0"
+        },
+        {
+          "package": {
+            "name": "gopkg.in/check.v1"
+          },
+          "version": "v0.0.0-20161208181325-20d25e280405"
+        },
+        {
+          "package": {
+            "name": "gopkg.in/check.v1"
+          },
+          "version": "v1.0.0-20190902080502-41f04d3bba15"
+        },
+        {
+          "package": {
+            "name": "gopkg.in/check.v1"
+          },
+          "version": "v1.0.0-20200227125254-8fa46927fb4f"
+        },
+        {
+          "package": {
+            "name": "gopkg.in/warnings.v0"
+          },
+          "version": "v0.1.2"
+        },
+        {
+          "package": {
+            "name": "gopkg.in/yaml.v2"
+          },
+          "version": "v2.2.2"
+        },
+        {
+          "package": {
+            "name": "gopkg.in/yaml.v2"
+          },
+          "version": "v2.2.4"
+        }
+      ]
+    }
+  ],
+  "scan": {
+    "scanner": {
+      "id": "gemnasium",
+      "name": "Gemnasium",
+      "url": "https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "2.24.1"
+    },
+    "type": "dependency_scanning",
+    "start_time": "2020-12-23T09:49:18",
+    "end_time": "2020-12-23T09:49:19",
+    "status": "success"
+  }
+}

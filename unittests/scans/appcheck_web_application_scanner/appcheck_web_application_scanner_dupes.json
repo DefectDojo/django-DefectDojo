@@ -1,0 +1,763 @@
+{
+  "items": [
+    {
+      "status": "unfixed",
+      "domain": "d10b91e0ff3947b7",
+      "manually_altered": false,
+      "probability": "1.0-info",
+      "cvss_base_score": -0.0,
+      "cvss_v3_base_score": 0.0,
+      "cpe": [],
+      "cvss_v3_impact": "1.0-info",
+      "meta": {
+        "discovered_after": 40330.817857027054,
+        "scanning_engine": {
+          "type": "web_app_scanner",
+          "name": "NewAppCheckScannerMultiple",
+          "_meta": {
+            "ordered_keys": [
+              "type",
+              "name"
+            ]
+          }
+        },
+        "_meta": {
+          "ordered_keys": [
+            "discovered_after",
+            "scanning_engine"
+          ]
+        }
+      },
+      "modified": "2024-06-27T19:23:25.032000",
+      "first_detected_at": "2024-06-27T19:23:24.954000",
+      "cvss_v4_impact": "1.0-info",
+      "cves": [],
+      "impact": "1.0-info",
+      "last_detected_at": "2024-06-27T19:23:24.954000",
+      "authenticated": false,
+      "title": "Packages Checked for Dependency Confusion Issues",
+      "epss_base_score": 0.0,
+      "integration": [],
+      "port": 443,
+      "priority": "2.0-low",
+      "results_set_id": [
+        "55d9dbee1df64828"
+      ],
+      "details": {
+        "Technical Details": "[[markup]]The following application paths disclosed packages which were checked for ambiguity and lack of registration.\n\n[[code:/dist/js/mystatements/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/privacyandcookies/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/pphomepage/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/loginpage/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/supportandhelp/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/privacy/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/support/bundle.js.map]]\n\n\n\n\n\n[[code:/lib/bootstrap/package.json]]\n\n * @babel/cli\n * @babel/core\n * @babel/preset-env\n * @rollup/plugin-babel\n * @rollup/plugin-commonjs\n * @rollup/plugin-node-resolve\n * autoprefixer\n * babel-eslint\n * babel-plugin-istanbul\n * bundlewatch\n * clean-css-cli\n * cross-env\n * eslint\n * find-unused-sass-variables\n * glob\n * hammer-simulator\n * ip\n * jquery\n * karma\n * karma-browserstack-launcher\n * karma-chrome-launcher\n * karma-coverage-istanbul-reporter\n * karma-detect-browsers\n * karma-firefox-launcher\n * karma-qunit\n * karma-sinon\n * linkinator\n * lockfile-lint\n * node-sass\n * nodemon\n * npm-run-all\n * popper.js\n * postcss-cli\n * qunit\n * rollup\n * shelljs\n * shx\n * sinon\n * stylelint\n * stylelint-config-twbs-bootstrap\n * terser\n * vnu-jar\n\n\n\n\n[[code:/dist/js/registeragent/bundle.js.map]]\n\n\n\n\n\n[[code:/lib/bootstrap/dist/js/bootstrap.js.map]]\n\n\n\n\n\n[[code:/dist/js/epos/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/productcategorymaintenance/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/training/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/termsandconditions/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/news/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/resources/bundle.js.map]]\n\n\n\n\n\n",
+        "_meta": {
+          "ordered_keys": [
+            "Technical Details"
+          ]
+        }
+      },
+      "cvss_score": 0.0,
+      "type": "WEB_APP",
+      "web_app": "https://example.x73zjffz.com",
+      "cvss_v4_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
+      "mss_confirmed": false,
+      "category": "web_app",
+      "description": "[[markup]]The application discloses depdendency information which has been checked for Depdendency Confusion issues.\n\nThis finding is informational and reports all depdendencies identified, a separate issue is reported if any\ndependency was found to be vulnerable.",
+      "tags": [
+        "web_app"
+      ],
+      "cvss_v4_base_score": 0.0,
+      "ipv4_address": "0.18.4.3",
+      "host": "my.x73zjffz.com",
+      "cvss_v3_vector": "CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N",
+      "internal": false,
+      "OWASP": [],
+      "_meta": {
+        "ordered_keys": [
+          "mss_confirmed",
+          "domain",
+          "manually_altered",
+          "probability",
+          "cvss_base_score",
+          "results_set_id",
+          "cvss_v3_base_score",
+          "solution",
+          "cvss_v3_impact",
+          "meta",
+          "first_detected_at",
+          "cvss_v4_impact",
+          "cves",
+          "impact",
+          "last_detected_at",
+          "authenticated",
+          "title",
+          "epss_base_score",
+          "signature",
+          "integration",
+          "port",
+          "priority",
+          "internal",
+          "details",
+          "cvss_score",
+          "type",
+          "web_app",
+          "cvss_v4_vector",
+          "status",
+          "category",
+          "description",
+          "tags",
+          "cpe",
+          "ipv4_address",
+          "host",
+          "cvss_v3_vector",
+          "OWASP",
+          "appcheck",
+          "disabled",
+          "cvss_vector",
+          "fixed",
+          "target",
+          "created",
+          "url",
+          "latest_detected_result",
+          "plugin",
+          "modified",
+          "patch",
+          "attachments",
+          "suppression_days",
+          "synopsis",
+          "meta_migration",
+          "trashed",
+          "cvss_v4_base_score",
+          "_id"
+        ]
+      },
+      "appcheck": {
+        "_meta": {
+          "ordered_keys": [
+            "cls"
+          ]
+        },
+        "cls": "CheckedPackagesVuln"
+      },
+      "disabled": false,
+      "cvss_vector": "AV:L/AC:H/Au:M/C:N/I:N/A:N",
+      "_id": "96a22c5675a1b3d5c925eaed66d245f80d855b88d0d22b17",
+      "target": "/",
+      "created": "2024-06-27T19:23:24.953000",
+      "url": "https://example.x73zjffz.com",
+      "latest_detected_result": true,
+      "plugin": "DependencyConfusion",
+      "solution": "[[markup]]No action is required.",
+      "patch": [],
+      "attachments": [],
+      "suppression_days": 14,
+      "synopsis": "[[markup]]The application discloses depdendency information which has been checked for Depdendency Confusion issues.",
+      "meta_migration": [],
+      "trashed": false,
+      "signature": 6874219054588837261,
+      "fixed": false
+    },
+    {
+      "status": "unfixed",
+      "domain": "d10b91e0ff3947b7",
+      "manually_altered": false,
+      "probability": "1.0-info",
+      "cvss_base_score": -0.0,
+      "cvss_v3_base_score": 0.0,
+      "cpe": [],
+      "cvss_v3_impact": "1.0-info",
+      "meta": {
+        "discovered_after": 40330.817857027054,
+        "scanning_engine": {
+          "type": "web_app_scanner",
+          "name": "NewAppCheckScannerMultiple",
+          "_meta": {
+            "ordered_keys": [
+              "type",
+              "name"
+            ]
+          }
+        },
+        "_meta": {
+          "ordered_keys": [
+            "discovered_after",
+            "scanning_engine"
+          ]
+        }
+      },
+      "modified": "2024-06-27T19:23:25.032000",
+      "first_detected_at": "2024-06-27T19:23:24.954000",
+      "cvss_v4_impact": "1.0-info",
+      "cves": [],
+      "impact": "1.0-info",
+      "last_detected_at": "2024-06-27T19:23:24.954000",
+      "authenticated": false,
+      "title": "Packages Checked for Dependency Confusion Issues",
+      "epss_base_score": 0.0,
+      "integration": [],
+      "port": 443,
+      "priority": "2.0-low",
+      "results_set_id": [
+        "55d9dbee1df64828"
+      ],
+      "details": {
+        "Technical Details": "[[markup]]The following application paths disclosed packages which were checked for ambiguity and lack of registration.\n\n[[code:/dist/js/mystatements/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/privacyandcookies/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/pphomepage/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/loginpage/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/supportandhelp/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/privacy/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/support/bundle.js.map]]\n\n\n\n\n\n[[code:/lib/bootstrap/package.json]]\n\n * @babel/cli\n * @babel/core\n * @babel/preset-env\n * @rollup/plugin-babel\n * @rollup/plugin-commonjs\n * @rollup/plugin-node-resolve\n * autoprefixer\n * babel-eslint\n * babel-plugin-istanbul\n * bundlewatch\n * clean-css-cli\n * cross-env\n * eslint\n * find-unused-sass-variables\n * glob\n * hammer-simulator\n * ip\n * jquery\n * karma\n * karma-browserstack-launcher\n * karma-chrome-launcher\n * karma-coverage-istanbul-reporter\n * karma-detect-browsers\n * karma-firefox-launcher\n * karma-qunit\n * karma-sinon\n * linkinator\n * lockfile-lint\n * node-sass\n * nodemon\n * npm-run-all\n * popper.js\n * postcss-cli\n * qunit\n * rollup\n * shelljs\n * shx\n * sinon\n * stylelint\n * stylelint-config-twbs-bootstrap\n * terser\n * vnu-jar\n\n\n\n\n[[code:/dist/js/registeragent/bundle.js.map]]\n\n\n\n\n\n[[code:/lib/bootstrap/dist/js/bootstrap.js.map]]\n\n\n\n\n\n[[code:/dist/js/epos/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/productcategorymaintenance/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/training/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/termsandconditions/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/news/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/resources/bundle.js.map]]\n\n\n\n\n\n",
+        "_meta": {
+          "ordered_keys": [
+            "Technical Details"
+          ]
+        }
+      },
+      "cvss_score": 0.0,
+      "type": "WEB_APP",
+      "web_app": "https://example.x73zjffz.com",
+      "cvss_v4_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
+      "mss_confirmed": false,
+      "category": "web_app",
+      "description": "[[markup]]The application discloses depdendency information which has been checked for Depdendency Confusion issues.\n\nThis finding is informational and reports all depdendencies identified, a separate issue is reported if any\ndependency was found to be vulnerable.",
+      "tags": [
+        "web_app"
+      ],
+      "cvss_v4_base_score": 0.0,
+      "ipv4_address": "0.18.4.3",
+      "host": "my.x73zjffz.com",
+      "cvss_v3_vector": "CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N",
+      "internal": false,
+      "OWASP": [],
+      "_meta": {
+        "ordered_keys": [
+          "mss_confirmed",
+          "domain",
+          "manually_altered",
+          "probability",
+          "cvss_base_score",
+          "results_set_id",
+          "cvss_v3_base_score",
+          "solution",
+          "cvss_v3_impact",
+          "meta",
+          "first_detected_at",
+          "cvss_v4_impact",
+          "cves",
+          "impact",
+          "last_detected_at",
+          "authenticated",
+          "title",
+          "epss_base_score",
+          "signature",
+          "integration",
+          "port",
+          "priority",
+          "internal",
+          "details",
+          "cvss_score",
+          "type",
+          "web_app",
+          "cvss_v4_vector",
+          "status",
+          "category",
+          "description",
+          "tags",
+          "cpe",
+          "ipv4_address",
+          "host",
+          "cvss_v3_vector",
+          "OWASP",
+          "appcheck",
+          "disabled",
+          "cvss_vector",
+          "fixed",
+          "target",
+          "created",
+          "url",
+          "latest_detected_result",
+          "plugin",
+          "modified",
+          "patch",
+          "attachments",
+          "suppression_days",
+          "synopsis",
+          "meta_migration",
+          "trashed",
+          "cvss_v4_base_score",
+          "_id"
+        ]
+      },
+      "appcheck": {
+        "_meta": {
+          "ordered_keys": [
+            "cls"
+          ]
+        },
+        "cls": "CheckedPackagesVuln"
+      },
+      "disabled": false,
+      "cvss_vector": "AV:L/AC:H/Au:M/C:N/I:N/A:N",
+      "_id": "96a22c5675a1b3d5c925eaed66d245f80d855b88d0d22b17",
+      "target": "/",
+      "created": "2024-06-27T19:23:24.953000",
+      "url": "https://example.x73zjffz.com",
+      "latest_detected_result": true,
+      "plugin": "DependencyConfusion",
+      "solution": "[[markup]]No action is required.",
+      "patch": [],
+      "attachments": [],
+      "suppression_days": 14,
+      "synopsis": "[[markup]]The application discloses depdendency information which has been checked for Depdendency Confusion issues.",
+      "meta_migration": [],
+      "trashed": false,
+      "signature": 6874219054588837261,
+      "fixed": false
+    },
+    {
+      "status": "unfixed",
+      "domain": "d10b91e0ff3947b7",
+      "manually_altered": false,
+      "probability": "1.0-info",
+      "cvss_base_score": -0.0,
+      "cvss_v3_base_score": 0.0,
+      "cpe": [],
+      "cvss_v3_impact": "1.0-info",
+      "meta": {
+        "discovered_after": 40330.817857027054,
+        "scanning_engine": {
+          "type": "web_app_scanner",
+          "name": "OpenVASScanner",
+          "_meta": {
+            "ordered_keys": [
+              "type",
+              "name"
+            ]
+          }
+        },
+        "_meta": {
+          "ordered_keys": [
+            "discovered_after",
+            "scanning_engine"
+          ]
+        }
+      },
+      "modified": "2024-06-27T19:23:25.032000",
+      "first_detected_at": "2024-06-27T19:23:24.954000",
+      "cvss_v4_impact": "1.0-info",
+      "cves": [],
+      "impact": "1.0-info",
+      "last_detected_at": "2024-06-27T19:23:24.954000",
+      "authenticated": false,
+      "title": "Packages Checked for Dependency Confusion Issues",
+      "epss_base_score": 0.0,
+      "integration": [],
+      "port": 443,
+      "priority": "2.0-low",
+      "results_set_id": [
+        "55d9dbee1df64828"
+      ],
+      "details": {
+        "Technical Details": "[[markup]]The following application paths disclosed packages which were checked for ambiguity and lack of registration.\n\n[[code:/dist/js/mystatements/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/privacyandcookies/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/pphomepage/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/loginpage/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/supportandhelp/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/privacy/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/support/bundle.js.map]]\n\n\n\n\n\n[[code:/lib/bootstrap/package.json]]\n\n * @babel/cli\n * @babel/core\n * @babel/preset-env\n * @rollup/plugin-babel\n * @rollup/plugin-commonjs\n * @rollup/plugin-node-resolve\n * autoprefixer\n * babel-eslint\n * babel-plugin-istanbul\n * bundlewatch\n * clean-css-cli\n * cross-env\n * eslint\n * find-unused-sass-variables\n * glob\n * hammer-simulator\n * ip\n * jquery\n * karma\n * karma-browserstack-launcher\n * karma-chrome-launcher\n * karma-coverage-istanbul-reporter\n * karma-detect-browsers\n * karma-firefox-launcher\n * karma-qunit\n * karma-sinon\n * linkinator\n * lockfile-lint\n * node-sass\n * nodemon\n * npm-run-all\n * popper.js\n * postcss-cli\n * qunit\n * rollup\n * shelljs\n * shx\n * sinon\n * stylelint\n * stylelint-config-twbs-bootstrap\n * terser\n * vnu-jar\n\n\n\n\n[[code:/dist/js/registeragent/bundle.js.map]]\n\n\n\n\n\n[[code:/lib/bootstrap/dist/js/bootstrap.js.map]]\n\n\n\n\n\n[[code:/dist/js/epos/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/productcategorymaintenance/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/training/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/termsandconditions/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/news/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/resources/bundle.js.map]]\n\n\n\n\n\n",
+        "_meta": {
+          "ordered_keys": [
+            "Technical Details"
+          ]
+        }
+      },
+      "cvss_score": 0.0,
+      "type": "WEB_APP",
+      "web_app": "https://example.x73zjffz.com",
+      "cvss_v4_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
+      "mss_confirmed": false,
+      "category": "web_app",
+      "description": "[[markup]]The application discloses depdendency information which has been checked for Depdendency Confusion issues.\n\nThis finding is informational and reports all depdendencies identified, a separate issue is reported if any\ndependency was found to be vulnerable.",
+      "tags": [
+        "web_app"
+      ],
+      "cvss_v4_base_score": 0.0,
+      "ipv4_address": "0.18.4.3",
+      "host": "my.x73zjffz.com",
+      "cvss_v3_vector": "CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N",
+      "internal": false,
+      "OWASP": [],
+      "_meta": {
+        "ordered_keys": [
+          "mss_confirmed",
+          "domain",
+          "manually_altered",
+          "probability",
+          "cvss_base_score",
+          "results_set_id",
+          "cvss_v3_base_score",
+          "solution",
+          "cvss_v3_impact",
+          "meta",
+          "first_detected_at",
+          "cvss_v4_impact",
+          "cves",
+          "impact",
+          "last_detected_at",
+          "authenticated",
+          "title",
+          "epss_base_score",
+          "signature",
+          "integration",
+          "port",
+          "priority",
+          "internal",
+          "details",
+          "cvss_score",
+          "type",
+          "web_app",
+          "cvss_v4_vector",
+          "status",
+          "category",
+          "description",
+          "tags",
+          "cpe",
+          "ipv4_address",
+          "host",
+          "cvss_v3_vector",
+          "OWASP",
+          "appcheck",
+          "disabled",
+          "cvss_vector",
+          "fixed",
+          "target",
+          "created",
+          "url",
+          "latest_detected_result",
+          "plugin",
+          "modified",
+          "patch",
+          "attachments",
+          "suppression_days",
+          "synopsis",
+          "meta_migration",
+          "trashed",
+          "cvss_v4_base_score",
+          "_id"
+        ]
+      },
+      "appcheck": {
+        "_meta": {
+          "ordered_keys": [
+            "cls"
+          ]
+        },
+        "cls": "CheckedPackagesVuln"
+      },
+      "disabled": false,
+      "cvss_vector": "AV:L/AC:H/Au:M/C:N/I:N/A:N",
+      "_id": "96a22c5675a1b3d5c925eaed66d245f80d855b88d0d22b17",
+      "target": "/",
+      "created": "2024-06-27T19:23:24.953000",
+      "url": "https://example.x73zjffz.com",
+      "latest_detected_result": true,
+      "plugin": "DependencyConfusion",
+      "solution": "[[markup]]No action is required.",
+      "patch": [],
+      "attachments": [],
+      "suppression_days": 14,
+      "synopsis": "[[markup]]The application discloses depdendency information which has been checked for Depdendency Confusion issues.",
+      "meta_migration": [],
+      "trashed": false,
+      "signature": 6874219054588837261,
+      "fixed": false
+    },
+    {
+      "status": "unfixed",
+      "domain": "d10b91e0ff3947b7",
+      "manually_altered": false,
+      "probability": "1.0-info",
+      "cvss_base_score": -0.0,
+      "cvss_v3_base_score": 0.0,
+      "OWASP": [],
+      "cvss_v3_impact": "1.0-info",
+      "meta": {
+        "discovered_after": 40330.81006002426,
+        "scanning_engine": {
+          "type": "web_app_scanner",
+          "name": "NewAppCheckScannerMultiple",
+          "_meta": {
+            "ordered_keys": [
+              "type",
+              "name"
+            ]
+          }
+        },
+        "_meta": {
+          "ordered_keys": [
+            "discovered_after",
+            "scanning_engine"
+          ]
+        }
+      },
+      "modified": "2024-06-27T19:23:25.053000",
+      "first_detected_at": "2024-06-27T19:23:24.943000",
+      "cvss_v4_impact": "1.0-info",
+      "cves": [],
+      "impact": "1.0-info",
+      "last_detected_at": "2024-06-27T19:23:24.943000",
+      "authenticated": false,
+      "title": "Permitted HTTP Methods",
+      "epss_base_score": 0.0,
+      "integration": [],
+      "port": 443,
+      "priority": "2.0-low",
+      "results_set_id": [
+        "55d9dbee1df64828"
+      ],
+      "details": {
+        "Permitted HTTP Methods": "https://example.x73zjffz.com/Content/css/font-awesome-4.7.0/css permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/SitefinityTheme permits: [TRACE]\n\nhttps://example.x73zjffz.com/content permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/mstile-144x144.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/top-logo-linkedin.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/SitefinityTheme/Global permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images/myx73zjffz/header_bg_small.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon-160x160.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/Settings-icon.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/fonts permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/font-awesome-4.7.0 permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon.ico permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/css permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/media permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-114x114.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/api/SubmitAgentRegistration permits: [POST]\n\nhttps://example.x73zjffz.com/Content/css/fonts/Foundry/FOUCONDM.otf permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/js/bootstrap/modernizr-2.6.2.min.js permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-152x152.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/PPoint_Logo_76x24.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon-96x96.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-120x120.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images/alert.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/css/font-awesome-4.7.0/css/font-awesome.min.css permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/fonts/glyphicons-halflings-regular.woff permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-57x57.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/api/myStatements/GetAgentNumbers permits: [GET]\n\nhttps://example.x73zjffz.com/content/css/font-awesome-4.7.0 permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/fonts/glyphicons-halflings-regular.svg permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/fonts/Foundry/FOUCONMD.otf permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/css/font-awesome-4.7.0/css permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-60x60.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/api/myStatements/GetDateRanges permits: [GET]\n\nhttps://example.x73zjffz.com/content/fonts/glyphicons-halflings-regular.eot permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/font-awesome-4.7.0/css/font-awesome.min.css permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon-196x196.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/js/bootstrap permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/fonts/glyphicons-halflings-regular.ttf permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon-32x32.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon-16x16.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/fonts permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-76x76.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images/Tick.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/js/bootstrap/bootstrap.min.js permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-144x144.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/media/PPoint%20Privacy%20Statement%20-%2016%20September%202020.pdf permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/js permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/fonts/Foundry/FOUCONRG.otf permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/fonts/glyphicons-halflings-regular.woff2 permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/fonts/Foundry permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/PPoint_Logo_152x48.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images/myx73zjffz permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/css/quba.css permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images/myx73zjffz/bg_whole.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-72x72.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/SitefinityTheme/Global/menu.min.css permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css permits: [TRACE]",
+        "_meta": {
+          "ordered_keys": [
+            "Permitted HTTP Methods"
+          ]
+        }
+      },
+      "cvss_score": 0.0,
+      "type": "WEB_APP",
+      "web_app": "https://example.x73zjffz.com",
+      "cvss_v4_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
+      "mss_confirmed": false,
+      "category": "web_app",
+      "description": "[[markup]]This is simply a report of HTTP request methods supported by the web application.",
+      "tags": [
+        "web_app"
+      ],
+      "cvss_v4_base_score": 0.0,
+      "ipv4_address": "0.18.4.3",
+      "host": "my.x73zjffz.com",
+      "cvss_v3_vector": "CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N",
+      "internal": false,
+      "_meta": {
+        "ordered_keys": [
+          "mss_confirmed",
+          "domain",
+          "manually_altered",
+          "probability",
+          "cvss_base_score",
+          "results_set_id",
+          "cvss_v3_base_score",
+          "OWASP",
+          "cvss_v3_impact",
+          "meta",
+          "first_detected_at",
+          "cvss_v4_impact",
+          "cves",
+          "impact",
+          "last_detected_at",
+          "authenticated",
+          "title",
+          "epss_base_score",
+          "signature",
+          "integration",
+          "port",
+          "priority",
+          "internal",
+          "details",
+          "cvss_score",
+          "type",
+          "web_app",
+          "cvss_v4_vector",
+          "status",
+          "category",
+          "description",
+          "tags",
+          "cpe",
+          "ipv4_address",
+          "host",
+          "cvss_v3_vector",
+          "appcheck",
+          "disabled",
+          "cvss_vector",
+          "fixed",
+          "target",
+          "created",
+          "url",
+          "latest_detected_result",
+          "plugin",
+          "modified",
+          "patch",
+          "attachments",
+          "suppression_days",
+          "synopsis",
+          "meta_migration",
+          "trashed",
+          "cvss_v4_base_score",
+          "_id"
+        ]
+      },
+      "appcheck": {
+        "_meta": {
+          "ordered_keys": [
+            "cls"
+          ]
+        },
+        "cls": "Permitted_HTTP_Methods"
+      },
+      "disabled": false,
+      "cvss_vector": "AV:L/AC:H/Au:M/C:N/I:N/A:N",
+      "_id": "02769aa244c456f0aad810354748faaa70d089c1129dc9c5",
+      "target": "/",
+      "created": "2024-06-27T19:23:24.942000",
+      "url": "https://example.x73zjffz.com/",
+      "latest_detected_result": true,
+      "plugin": "HttpChecks",
+      "cpe": [],
+      "patch": [],
+      "attachments": [],
+      "suppression_days": 14,
+      "synopsis": "[[markup]]This is simply a report of HTTP request methods supported by the web application.",
+      "meta_migration": [],
+      "trashed": false,
+      "signature": 6875022891344669627,
+      "fixed": false
+    },
+    {
+      "status": "unfixed",
+      "domain": "d10b91e0ff3947b7",
+      "manually_altered": false,
+      "probability": "1.0-info",
+      "cvss_base_score": -0.0,
+      "cvss_v3_base_score": 0.0,
+      "cpe": [],
+      "cvss_v3_impact": "1.0-info",
+      "meta": {
+        "discovered_after": 40330.817857027054,
+        "scanning_engine": {
+          "type": "web_app_scanner",
+          "name": "NewAppCheckScannerMultiple",
+          "_meta": {
+            "ordered_keys": [
+              "type",
+              "name"
+            ]
+          }
+        },
+        "_meta": {
+          "ordered_keys": [
+            "discovered_after",
+            "scanning_engine"
+          ]
+        }
+      },
+      "modified": "2024-06-27T19:23:25.032000",
+      "first_detected_at": "2024-06-27T19:23:24.954000",
+      "cvss_v4_impact": "1.0-info",
+      "cves": [],
+      "impact": "1.0-info",
+      "last_detected_at": "2024-06-27T19:23:24.954000",
+      "authenticated": false,
+      "title": "Packages Checked for Dependency Confusion Issues",
+      "epss_base_score": 0.0,
+      "integration": [],
+      "port": 443,
+      "priority": "2.0-low",
+      "results_set_id": [
+        "55d9dbee1df64828"
+      ],
+      "details": {
+        "Technical Details": "[[markup]]The following application paths disclosed packages which were checked for ambiguity and lack of registration.\n\n[[code:/dist/js/mystatements/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/privacyandcookies/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/pphomepage/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/loginpage/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/supportandhelp/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/privacy/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/support/bundle.js.map]]\n\n\n\n\n\n[[code:/lib/bootstrap/package.json]]\n\n * @babel/cli\n * @babel/core\n * @babel/preset-env\n * @rollup/plugin-babel\n * @rollup/plugin-commonjs\n * @rollup/plugin-node-resolve\n * autoprefixer\n * babel-eslint\n * babel-plugin-istanbul\n * bundlewatch\n * clean-css-cli\n * cross-env\n * eslint\n * find-unused-sass-variables\n * glob\n * hammer-simulator\n * ip\n * jquery\n * karma\n * karma-browserstack-launcher\n * karma-chrome-launcher\n * karma-coverage-istanbul-reporter\n * karma-detect-browsers\n * karma-firefox-launcher\n * karma-qunit\n * karma-sinon\n * linkinator\n * lockfile-lint\n * node-sass\n * nodemon\n * npm-run-all\n * popper.js\n * postcss-cli\n * qunit\n * rollup\n * shelljs\n * shx\n * sinon\n * stylelint\n * stylelint-config-twbs-bootstrap\n * terser\n * vnu-jar\n\n\n\n\n[[code:/dist/js/registeragent/bundle.js.map]]\n\n\n\n\n\n[[code:/lib/bootstrap/dist/js/bootstrap.js.map]]\n\n\n\n\n\n[[code:/dist/js/epos/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/productcategorymaintenance/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/training/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/termsandconditions/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/news/bundle.js.map]]\n\n\n\n\n\n[[code:/dist/js/resources/bundle.js.map]]\n\n\n\n\n\n",
+        "_meta": {
+          "ordered_keys": [
+            "Technical Details"
+          ]
+        }
+      },
+      "cvss_score": 0.0,
+      "type": "WEB_APP",
+      "web_app": "https://example.x73zjffz.com",
+      "cvss_v4_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
+      "mss_confirmed": false,
+      "category": "web_app",
+      "description": "[[markup]]The application discloses depdendency information which has been checked for Depdendency Confusion issues.\n\nThis finding is informational and reports all depdendencies identified, a separate issue is reported if any\ndependency was found to be vulnerable.",
+      "tags": [
+        "web_app"
+      ],
+      "cvss_v4_base_score": 0.0,
+      "ipv4_address": "0.18.4.3",
+      "host": "my.x73zjffz.com",
+      "cvss_v3_vector": "CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N",
+      "internal": false,
+      "OWASP": [],
+      "_meta": {
+        "ordered_keys": [
+          "mss_confirmed",
+          "domain",
+          "manually_altered",
+          "probability",
+          "cvss_base_score",
+          "results_set_id",
+          "cvss_v3_base_score",
+          "solution",
+          "cvss_v3_impact",
+          "meta",
+          "first_detected_at",
+          "cvss_v4_impact",
+          "cves",
+          "impact",
+          "last_detected_at",
+          "authenticated",
+          "title",
+          "epss_base_score",
+          "signature",
+          "integration",
+          "port",
+          "priority",
+          "internal",
+          "details",
+          "cvss_score",
+          "type",
+          "web_app",
+          "cvss_v4_vector",
+          "status",
+          "category",
+          "description",
+          "tags",
+          "cpe",
+          "ipv4_address",
+          "host",
+          "cvss_v3_vector",
+          "OWASP",
+          "appcheck",
+          "disabled",
+          "cvss_vector",
+          "fixed",
+          "target",
+          "created",
+          "url",
+          "latest_detected_result",
+          "plugin",
+          "modified",
+          "patch",
+          "attachments",
+          "suppression_days",
+          "synopsis",
+          "meta_migration",
+          "trashed",
+          "cvss_v4_base_score",
+          "_id"
+        ]
+      },
+      "appcheck": {
+        "_meta": {
+          "ordered_keys": [
+            "cls"
+          ]
+        },
+        "cls": "CheckedPackagesVuln"
+      },
+      "disabled": false,
+      "cvss_vector": "AV:L/AC:H/Au:M/C:N/I:N/A:N",
+      "_id": "96a22c5675a1b3d5c925eaed66d245f80d855b88d0d22b17",
+      "target": "/",
+      "created": "2024-06-27T19:23:24.953000",
+      "url": "https://example.x73zjffz.com",
+      "latest_detected_result": true,
+      "plugin": "DependencyConfusion",
+      "solution": "[[markup]]No action is required.",
+      "patch": [],
+      "attachments": [],
+      "suppression_days": 14,
+      "synopsis": "[[markup]]The application discloses depdendency information which has been checked for Depdendency Confusion issues.",
+      "meta_migration": [],
+      "trashed": false,
+      "signature": 6874219054588837261,
+      "fixed": false
+    }
+  ],
+  "hosts": []
+}

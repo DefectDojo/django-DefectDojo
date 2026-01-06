@@ -1,0 +1,105 @@
+[
+    {
+      "apiVersion": "aquasecurity.github.io/v1alpha1",
+      "kind": "ClusterComplianceReport",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "trivy-operator-asdf",
+          "meta.helm.sh/release-namespace": "asdf"
+        },
+        "creationTimestamp": "2021-1-1T10:10:10Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/instance": "trivy-operator",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "trivy-operator",
+          "app.kubernetes.io/version": "0.17.1"
+        },
+        "name": "cis",
+        "resourceVersion": "asdf",
+        "uid": "afsewfwefwfw"
+      },
+      "spec": {
+        "compliance": {
+          "controls": [
+            {
+              "checks": [
+                {
+                  "id": "AVD-KCV-0087"
+                }
+              ],
+              "description": "Security relevant information should be captured. The --event-qps flag on the Kubelet can be used to limit the rate at which events are gathered",
+              "id": "4.2.9",
+              "name": "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture",
+              "severity": "HIGH"
+            },
+            {
+              "checks": [
+                {
+                  "id": "AVD-KCV-0088"
+                },
+                {
+                  "id": "AVD-KCV-0089"
+                }
+              ],
+              "description": "Setup TLS connection on the Kubelets",
+              "id": "4.2.10",
+              "name": "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate",
+              "severity": "CRITICAL"
+            },
+            {
+              "checks": [
+                {
+                  "id": "AVD-KCV-0090"
+                }
+              ],
+              "description": "Enable kubelet client certificate rotation",
+              "id": "4.2.11",
+              "name": "Ensure that the --rotate-certificates argument is not set to false",
+              "severity": "CRITICAL"
+            }
+          ],
+          "description": "CIS Kubernetes Benchmarks",
+          "id": "cis",
+          "relatedResources": [
+            "https://www.cisecurity.org/benchmark/kubernetes"
+          ],
+          "title": "CIS Kubernetes Benchmarks v1.23",
+          "version": "1.0"
+        },
+        "cron": "0 */6 * * *",
+        "reportType": "summary"
+      },
+      "status": {
+        "summary": {
+          "failCount": 2,
+          "passCount": 1
+        },
+        "summaryReport": {
+          "controlCheck": [
+            {
+              "id": "4.2.9",
+              "name": "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture",
+              "severity": "HIGH",
+              "totalFail": 0
+            },
+            {
+              "id": "4.2.10",
+              "name": "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate",
+              "severity": "CRITICAL",
+              "totalFail": 10
+            },
+            {
+              "id": "4.2.11",
+              "name": "Ensure that the --rotate-certificates argument is not set to false",
+              "severity": "CRITICAL",
+              "totalFail": 5
+            }
+          ],
+          "id": "cis",
+          "title": "CIS Kubernetes Benchmarks v1.23"
+        },
+        "updateTimestamp": "2021-1-1T10:10:10Z"
+      }
+    }
+  ]

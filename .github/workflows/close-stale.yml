@@ -1,0 +1,38 @@
+name: Close Stale Issues and PRs
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  close-stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close issues and PRs that are pending closure
+        uses: actions/stale@997185467fa4f803885201cee163a9f38240193d # v10.1.1
+        with:
+          # Disable automatic stale marking - only close manually labeled items
+          days-before-stale: -1
+          days-before-close: 7
+          stale-issue-label: 'pending-closure'
+          stale-pr-label: 'pending-closure'
+          close-issue-message: 'This issue has been automatically closed because it was manually labeled as stale. If you believe this was closed in error, please reopen it and remove the stale label.'
+          close-pr-message: 'This PR has been automatically closed because it was manually labeled as stale. If you believe this was closed in error, please reopen it and remove the stale label.'
+
+      - name: Close stale issues and PRs
+        uses: actions/stale@997185467fa4f803885201cee163a9f38240193d # v10.1.1
+        with:
+          # Disable automatic stale marking - only close manually labeled items
+          days-before-stale: -1
+          days-before-close: 7
+          stale-issue-label: 'stale'
+          stale-pr-label: 'stale'
+          close-issue-message: 'This issue has been automatically closed because it was labeled as stale. If you believe this was closed in error, please reopen it and remove the stale label.'
+          close-pr-message: 'This PR has been automatically closed because it was labeled as stale. If you believe this was closed in error, please reopen it and remove the stale label.'

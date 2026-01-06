@@ -1,18 +1,19 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block content %}
     {{ block.super }}
     <form method="GET" id="calfilter" action="/calendar">
         <div class="container-fluid chosen-container side-by-side">
             <div class="row">
-                <div class="col-lg-6" style="width:200px;">
+                <div style="display: inline-block;">
                     <select data-placeholder="Calendar type" id="caltype" class="chosen-select">
                         <option value="engagements">Engagements</option>
                         <option value="tests">Tests</option>
                     </select>
                 </div>
-                <div class="col-lg-6" style="width:400px;">
+                <div style="display: inline-block;">
                     <select data-placeholder="All users" multiple id="lead" name="lead" class="chosen-select">
                         <option value="0">All users</option>
                         <option value="-1">Unassigned</option>
@@ -21,7 +22,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-lg-6">
+                <div style="display: inline-block;">
                     <input class="btn btn-primary" type="submit" value="Apply" />
                 </div>
             </div>
@@ -34,9 +35,9 @@
 {% block postscript %}
     {{ block.super }}
     <script>
-          $(function () {
+        $(function () {
             $('#caltype').change(function() {
-                 $('#calfilter').attr('action', '/calendar/' + $(this).val());
+                $('#calfilter').attr('action', '/calendar/' + $(this).val());
             });
             if (caltype) {
                 $('#caltype').val('{{ caltype }}');
@@ -75,10 +76,16 @@
                             },
                         {%  endfor %}
                     {% endif %}
-                ]
+                ],
+                viewRender: function(view, element) {
+                // Updating aria-label attributes calendar switches after the view is rendered
+                $('.fc-prev-button').attr('aria-label', '{% trans "Previous month" %}');
+                $('.fc-next-button').attr('aria-label', '{% trans "Next month" %}');
+                $('.fc-month-button').attr('aria-label', '{% trans "Month preview" %}');
+                $('.fc-basicWeek-button').attr('aria-label', '{% trans "Week preview" %}');
+                $('.fc-basicDay-button').attr('aria-label', '{% trans "Day preview" %}');
+            }
             });
-
-
         });
     </script>
 {% endblock %}

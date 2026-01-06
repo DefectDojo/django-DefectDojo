@@ -1,0 +1,2221 @@
+{
+  "actions": [
+    {
+      "isMajor": true,
+      "action": "install",
+      "resolves": [
+        {
+          "id": 1059337,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>ansi-html",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059356,
+          "path": "@angular-devkit/build-angular>postcss",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059413,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>selfsigned>node-forge",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059432,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>selfsigned>node-forge",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059434,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>selfsigned>node-forge",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059599,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>yargs>cliui>string-width>strip-ansi>ansi-regex",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059599,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>yargs>cliui>strip-ansi>ansi-regex",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059698,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1059701,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1059704,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1059733,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1059737,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1059799,
+          "path": "@angular-devkit/build-angular>postcss",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059828,
+          "path": "@angular-devkit/build-angular>copy-webpack-plugin>glob-parent",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059828,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>chokidar>glob-parent",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059828,
+          "path": "@angular-devkit/build-angular>webpack>watchpack>watchpack-chokidar2>chokidar>glob-parent",
+          "dev": true,
+          "optional": true,
+          "bundled": false
+        },
+        {
+          "id": 1059870,
+          "path": "@angular-devkit/build-angular>browserslist",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059915,
+          "path": "@angular-devkit/build-angular>ajv",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059915,
+          "path": "@angular-devkit/build-angular>@angular-devkit/core>ajv",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059915,
+          "path": "@angular-devkit/build-angular>@angular-devkit/architect>@angular-devkit/core>ajv",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059915,
+          "path": "@angular-devkit/build-angular>@angular-devkit/build-webpack>@angular-devkit/architect>@angular-devkit/core>ajv",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059915,
+          "path": "@angular-devkit/build-angular>istanbul-instrumenter-loader>schema-utils>ajv",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1060025,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>sockjs",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1060267,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>rc>ini",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1060279,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>yargs>yargs-parser",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1060396,
+          "path": "@angular-devkit/build-angular>tree-kill",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1060396,
+          "path": "@angular-devkit/build-angular>@ngtools/webpack>tree-kill",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1061294,
+          "path": "@angular-devkit/build-angular>copy-webpack-plugin>serialize-javascript",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1061404,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>rc>minimist",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1061405,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>mkdirp>minimist",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1061405,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar>mkdirp>minimist",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1061457,
+          "path": "@angular-devkit/build-angular>copy-webpack-plugin>serialize-javascript",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "@angular-devkit/build-angular",
+      "target": "13.2.6"
+    },
+    {
+      "isMajor": true,
+      "action": "install",
+      "resolves": [
+        {
+          "id": 1059382,
+          "path": "karma",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059406,
+          "path": "karma>log4js",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059778,
+          "path": "karma>socket.io>socket.io-parser",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059778,
+          "path": "karma>socket.io>socket.io-client>socket.io-parser",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059871,
+          "path": "karma>socket.io>socket.io-client>engine.io-client>xmlhttprequest-ssl",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059976,
+          "path": "karma>socket.io>socket.io-client>engine.io-client>xmlhttprequest-ssl",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1060087,
+          "path": "karma>socket.io>engine.io",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1060234,
+          "path": "karma>socket.io",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1061405,
+          "path": "karma>optimist>minimist",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1061952,
+          "path": "karma",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "karma",
+      "target": "6.3.17"
+    },
+    {
+      "isMajor": true,
+      "action": "install",
+      "resolves": [
+        {
+          "id": 1059599,
+          "path": "@angular/cli>inquirer>string-width>strip-ansi>ansi-regex",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059599,
+          "path": "@angular/cli>inquirer>strip-ansi>ansi-regex",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1060267,
+          "path": "@angular/cli>ini",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1060267,
+          "path": "@angular/cli>@schematics/update>ini",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1061322,
+          "path": "@angular/cli>pacote>npm-registry-fetch",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1061322,
+          "path": "@angular/cli>@schematics/update>pacote>npm-registry-fetch",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "@angular/cli",
+      "target": "13.2.6"
+    },
+    {
+      "isMajor": true,
+      "action": "install",
+      "resolves": [
+        {
+          "id": 1059599,
+          "path": "@angular/compiler-cli>yargs>cliui>string-width>strip-ansi>ansi-regex",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059599,
+          "path": "@angular/compiler-cli>yargs>cliui>strip-ansi>ansi-regex",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059599,
+          "path": "@angular/compiler-cli>yargs>string-width>strip-ansi>ansi-regex",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059698,
+          "path": "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1059701,
+          "path": "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1059704,
+          "path": "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1059733,
+          "path": "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1059737,
+          "path": "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1060267,
+          "path": "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>rc>ini",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1061404,
+          "path": "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>rc>minimist",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1061405,
+          "path": "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>mkdirp>minimist",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        },
+        {
+          "id": 1061405,
+          "path": "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar>mkdirp>minimist",
+          "dev": true,
+          "optional": true,
+          "bundled": true
+        }
+      ],
+      "module": "@angular/compiler-cli",
+      "target": "13.2.6"
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1059351,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>url-parse",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059351,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>eventsource>original>url-parse",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059355,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>url-parse",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059355,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>eventsource>original>url-parse",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059360,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>url-parse",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059360,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>eventsource>original>url-parse",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059365,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>url-parse",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059365,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>eventsource>original>url-parse",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "url-parse",
+      "target": "1.5.10",
+      "depth": 6
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1059367,
+          "path": "karma>http-proxy>follow-redirects",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059367,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>http-proxy-middleware>http-proxy>follow-redirects",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059420,
+          "path": "karma>http-proxy>follow-redirects",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059420,
+          "path": "@angular-devkit/build-angular>webpack-dev-server>http-proxy-middleware>http-proxy>follow-redirects",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "follow-redirects",
+      "target": "1.14.9",
+      "depth": 5
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1059404,
+          "path": "@angular/compiler-cli>shelljs",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1059412,
+          "path": "@angular/compiler-cli>shelljs",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "shelljs",
+      "target": "0.8.5",
+      "depth": 2
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1059486,
+          "path": "@angular-devkit/build-angular>less>request>http-signature>jsprim>json-schema",
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "jsprim",
+      "target": "1.4.2",
+      "depth": 5
+    }
+  ],
+  "advisories": {
+    "1059337": {
+      "findings": [
+        {
+          "version": "0.0.7",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>ansi-html"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<0.0.8",
+      "module_name": "ansi-html",
+      "severity": "high",
+      "github_advisory_id": "GHSA-whgm-jr23-g3j9",
+      "cves": [
+        "CVE-2021-23424"
+      ],
+      "access": "public",
+      "patched_versions": ">=0.0.8",
+      "cvss": {
+        "score": 7.5,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+      },
+      "updated": "2022-03-08T22:23:35.000Z",
+      "recommendation": "Upgrade to version 0.0.8 or later",
+      "cwe": "[\"CWE-400\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059337,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-23424\n- https://github.com/Tjatse/ansi-html/issues/19\n- https://snyk.io/vuln/SNYK-JS-ANSIHTML-1296849\n- https://github.com/ioet/time-tracker-ui/security/advisories/GHSA-4fjc-8q3h-8r69\n- https://github.com/Tjatse/ansi-html/commit/8142b25bca3133ea060bcc1889277dc482327a63\n- https://github.com/advisories/GHSA-whgm-jr23-g3j9",
+      "created": "2022-03-09T20:00:43.984Z",
+      "reported_by": null,
+      "title": "Uncontrolled Resource Consumption in ansi-html",
+      "npm_advisory_id": null,
+      "overview": "This affects all versions of package ansi-html. If an attacker provides a malicious string, it will get stuck processing the input for an extremely long time.",
+      "url": "https://github.com/advisories/GHSA-whgm-jr23-g3j9"
+    },
+    "1059351": {
+      "findings": [
+        {
+          "version": "1.5.3",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>url-parse",
+            "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>eventsource>original>url-parse"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.5.9",
+      "module_name": "url-parse",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-jf5r-8hm2-f872",
+      "cves": [
+        "CVE-2022-0691"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.5.9",
+      "cvss": {
+        "score": 6.5,
+        "vectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N"
+      },
+      "updated": "2022-03-01T19:05:21.000Z",
+      "recommendation": "Upgrade to version 1.5.9 or later",
+      "cwe": "[\"CWE-639\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059351,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2022-0691\n- https://github.com/unshiftio/url-parse/commit/0e3fb542d60ddbf6933f22eb9b1e06e25eaa5b63\n- https://huntr.dev/bounties/57124ed5-4b68-4934-8325-2c546257f2e4\n- https://github.com/advisories/GHSA-jf5r-8hm2-f872",
+      "created": "2022-03-09T20:00:43.986Z",
+      "reported_by": null,
+      "title": "Authorization Bypass Through User-Controlled Key in url-parse",
+      "npm_advisory_id": null,
+      "overview": "url-parse prior to 1.5.9 is vulnerable to authorization bypass by adding a backspace character to the input.",
+      "url": "https://github.com/advisories/GHSA-jf5r-8hm2-f872"
+    },
+    "1059355": {
+      "findings": [
+        {
+          "version": "1.5.3",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>url-parse",
+            "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>eventsource>original>url-parse"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.5.8",
+      "module_name": "url-parse",
+      "severity": "critical",
+      "github_advisory_id": "GHSA-hgjh-723h-mx2j",
+      "cves": [
+        "CVE-2022-0686"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.5.8",
+      "cvss": {
+        "score": 9.1,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N"
+      },
+      "updated": "2022-02-23T21:26:49.000Z",
+      "recommendation": "Upgrade to version 1.5.8 or later",
+      "cwe": "[\"CWE-639\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059355,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2022-0686\n- https://github.com/unshiftio/url-parse/commit/d5c64791ef496ca5459ae7f2176a31ea53b127e5\n- https://huntr.dev/bounties/55fd06cd-9054-4d80-83be-eb5a454be78c\n- https://github.com/advisories/GHSA-hgjh-723h-mx2j",
+      "created": "2022-03-09T20:00:43.986Z",
+      "reported_by": null,
+      "title": "Authorization Bypass Through User-Controlled Key in url-parse",
+      "npm_advisory_id": null,
+      "overview": "url-parse prior to version 1.5.8 is vulnerable to Authorization Bypass Through User-Controlled Key.",
+      "url": "https://github.com/advisories/GHSA-hgjh-723h-mx2j"
+    },
+    "1059356": {
+      "findings": [
+        {
+          "version": "7.0.17",
+          "paths": [
+            "@angular-devkit/build-angular>postcss"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<7.0.36",
+      "module_name": "postcss",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-566m-qj78-rww5",
+      "cves": [
+        "CVE-2021-23382"
+      ],
+      "access": "public",
+      "patched_versions": ">=7.0.36",
+      "cvss": {
+        "score": 5.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+      },
+      "updated": "2022-02-23T20:31:16.000Z",
+      "recommendation": "Upgrade to version 7.0.36 or later",
+      "cwe": "[\"CWE-400\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059356,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-23382\n- https://github.com/postcss/postcss/commit/2b1d04c867995e55124e0a165b7c6622c1735956\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1255641\n- https://snyk.io/vuln/SNYK-JS-POSTCSS-1255640\n- https://github.com/postcss/postcss/releases/tag/7.0.36\n- https://github.com/advisories/GHSA-566m-qj78-rww5",
+      "created": "2022-03-09T20:00:43.987Z",
+      "reported_by": null,
+      "title": "Regular Expression Denial of Service in postcss",
+      "npm_advisory_id": null,
+      "overview": "The package postcss versions before 7.0.36 or between 8.0.0 and 8.2.13 are vulnerable to Regular Expression Denial of Service (ReDoS) via getAnnotationURL() and loadAnnotation() in lib/previous-map.js. The vulnerable regexes are caused mainly by the sub-pattern \\/\\*\\s* sourceMappingURL=(.*).",
+      "url": "https://github.com/advisories/GHSA-566m-qj78-rww5"
+    },
+    "1059360": {
+      "findings": [
+        {
+          "version": "1.5.3",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>url-parse",
+            "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>eventsource>original>url-parse"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.5.7",
+      "module_name": "url-parse",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-8v38-pw62-9cw2",
+      "cves": [
+        "CVE-2022-0639"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.5.7",
+      "cvss": {
+        "score": 6.5,
+        "vectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N"
+      },
+      "updated": "2022-02-22T18:08:06.000Z",
+      "recommendation": "Upgrade to version 1.5.7 or later",
+      "cwe": "[\"CWE-639\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059360,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2022-0639\n- https://github.com/unshiftio/url-parse/commit/ef45a1355375a8244063793a19059b4f62fc8788\n- https://huntr.dev/bounties/83a6bc9a-b542-4a38-82cd-d995a1481155\n- https://github.com/advisories/GHSA-8v38-pw62-9cw2",
+      "created": "2022-03-09T20:00:43.987Z",
+      "reported_by": null,
+      "title": "Authorization Bypass Through User-Controlled Key in url-parse",
+      "npm_advisory_id": null,
+      "overview": "url-parse prior to version 1.5.7 is vulnerable to Authorization Bypass Through User-Controlled Key. Url-parse is not able to verify broken protocol. This will allow to bypass hostname validation.",
+      "url": "https://github.com/advisories/GHSA-8v38-pw62-9cw2"
+    },
+    "1059365": {
+      "findings": [
+        {
+          "version": "1.5.3",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>url-parse",
+            "@angular-devkit/build-angular>webpack-dev-server>sockjs-client>eventsource>original>url-parse"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.5.6",
+      "module_name": "url-parse",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-rqff-837h-mm52",
+      "cves": [
+        "CVE-2022-0512"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.5.6",
+      "cvss": {
+        "score": 5.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N"
+      },
+      "updated": "2022-02-16T22:37:40.000Z",
+      "recommendation": "Upgrade to version 1.5.6 or later",
+      "cwe": "[\"CWE-639\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059365,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2022-0512\n- https://github.com/unshiftio/url-parse/commit/9be7ee88afd2bb04e4d5a1a8da9a389ac13f8c40\n- https://huntr.dev/bounties/6d1bc51f-1876-4f5b-a2c2-734e09e8e05b\n- https://github.com/advisories/GHSA-rqff-837h-mm52",
+      "created": "2022-03-09T20:00:43.988Z",
+      "reported_by": null,
+      "title": "Authorization bypass in url-parse",
+      "npm_advisory_id": null,
+      "overview": "Authorization Bypass Through User-Controlled Key in NPM url-parse prior to 1.5.6.",
+      "url": "https://github.com/advisories/GHSA-rqff-837h-mm52"
+    },
+    "1059367": {
+      "findings": [
+        {
+          "version": "1.7.0",
+          "paths": [
+            "karma>http-proxy>follow-redirects",
+            "@angular-devkit/build-angular>webpack-dev-server>http-proxy-middleware>http-proxy>follow-redirects"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.14.8",
+      "module_name": "follow-redirects",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-pw2r-vq6v-hr8c",
+      "cves": [
+        "CVE-2022-0536"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.14.8",
+      "cvss": {
+        "score": 5.9,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+      },
+      "updated": "2022-02-11T21:18:03.000Z",
+      "recommendation": "Upgrade to version 1.14.8 or later",
+      "cwe": "[\"CWE-200\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059367,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2022-0536\n- https://github.com/follow-redirects/follow-redirects/commit/62e546a99c07c3ee5e4e0718c84a6ca127c5c445\n- https://huntr.dev/bounties/7cf2bf90-52da-4d59-8028-a73b132de0db\n- https://github.com/advisories/GHSA-pw2r-vq6v-hr8c",
+      "created": "2022-03-09T20:00:43.988Z",
+      "reported_by": null,
+      "title": "Exposure of Sensitive Information to an Unauthorized Actor in follow-redirects",
+      "npm_advisory_id": null,
+      "overview": "Exposure of Sensitive Information to an Unauthorized Actor in NPM follow-redirects prior to 1.14.8.",
+      "url": "https://github.com/advisories/GHSA-pw2r-vq6v-hr8c"
+    },
+    "1059382": {
+      "findings": [
+        {
+          "version": "4.2.0",
+          "paths": [
+            "karma"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<6.3.14",
+      "module_name": "karma",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-7x7c-qm48-pq9c",
+      "cves": [
+        "CVE-2022-0437"
+      ],
+      "access": "public",
+      "patched_versions": ">=6.3.14",
+      "cvss": {
+        "score": 6.1,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N"
+      },
+      "updated": "2022-02-07T21:57:21.000Z",
+      "recommendation": "Upgrade to version 6.3.14 or later",
+      "cwe": "[\"CWE-79\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059382,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2022-0437\n- https://github.com/karma-runner/karma/commit/839578c45a8ac42fbc1d72105f97eab77dd3eb8a\n- https://huntr.dev/bounties/64b67ea1-5487-4382-a5f6-e8a95f798885\n- https://github.com/karma-runner/karma/releases/tag/v6.3.14\n- https://github.com/advisories/GHSA-7x7c-qm48-pq9c",
+      "created": "2022-03-09T20:00:43.990Z",
+      "reported_by": null,
+      "title": "Cross-site Scripting in karma",
+      "npm_advisory_id": null,
+      "overview": "karma prior to version 6.3.14 contains a cross-site scripting vulnerability.",
+      "url": "https://github.com/advisories/GHSA-7x7c-qm48-pq9c"
+    },
+    "1059404": {
+      "findings": [
+        {
+          "version": "0.8.3",
+          "paths": [
+            "@angular/compiler-cli>shelljs"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<0.8.5",
+      "module_name": "shelljs",
+      "severity": "high",
+      "github_advisory_id": "GHSA-4rq4-32rv-6wp6",
+      "cves": [
+        "CVE-2022-0144"
+      ],
+      "access": "public",
+      "patched_versions": ">=0.8.5",
+      "cvss": {
+        "score": 7.1,
+        "vectorString": "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:H"
+      },
+      "updated": "2022-01-21T21:05:53.000Z",
+      "recommendation": "Upgrade to version 0.8.5 or later",
+      "cwe": "[\"CWE-269\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059404,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2022-0144\n- https://github.com/shelljs/shelljs/commit/d919d22dd6de385edaa9d90313075a77f74b338c\n- https://huntr.dev/bounties/50996581-c08e-4eed-a90e-c0bac082679c\n- https://github.com/advisories/GHSA-4rq4-32rv-6wp6",
+      "created": "2022-03-09T20:00:43.993Z",
+      "reported_by": null,
+      "title": "Improper Privilege Management in shelljs",
+      "npm_advisory_id": null,
+      "overview": "shelljs is vulnerable to Improper Privilege Management",
+      "url": "https://github.com/advisories/GHSA-4rq4-32rv-6wp6"
+    },
+    "1059406": {
+      "findings": [
+        {
+          "version": "4.5.1",
+          "paths": [
+            "karma>log4js"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<6.4.0",
+      "module_name": "log4js",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-82v2-mx6x-wq7q",
+      "cves": [
+        "CVE-2022-21704"
+      ],
+      "access": "public",
+      "patched_versions": ">=6.4.0",
+      "cvss": {
+        "score": 5.5,
+        "vectorString": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N"
+      },
+      "updated": "2022-01-19T22:47:15.000Z",
+      "recommendation": "Upgrade to version 6.4.0 or later",
+      "cwe": "[\"CWE-276\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059406,
+      "references": "- https://github.com/log4js-node/log4js-node/security/advisories/GHSA-82v2-mx6x-wq7q\n- https://github.com/log4js-node/log4js-node/pull/1141/commits/8042252861a1b65adb66931fdf702ead34fa9b76\n- https://github.com/log4js-node/streamroller/pull/87\n- https://github.com/log4js-node/log4js-node/blob/v6.4.0/CHANGELOG.md#640\n- https://nvd.nist.gov/vuln/detail/CVE-2022-21704\n- https://github.com/advisories/GHSA-82v2-mx6x-wq7q",
+      "created": "2022-03-09T20:00:43.993Z",
+      "reported_by": null,
+      "title": "Incorrect Default Permissions in log4js",
+      "npm_advisory_id": null,
+      "overview": "### Impact\r\nDefault file permissions for log files created by the file, fileSync and dateFile appenders are world-readable (in unix). This could cause problems if log files contain sensitive information. This would affect any users that have not supplied their own permissions for the files via the mode parameter in the config.\r\n\r\n### Patches\r\nFixed by:\r\n* https://github.com/log4js-node/log4js-node/pull/1141\r\n* https://github.com/log4js-node/streamroller/pull/87\r\n\r\nReleased to NPM in log4js@6.4.0\r\n\r\n### Workarounds\r\nEvery version of log4js published allows passing the mode parameter to the configuration of file appenders, see the documentation for details.\r\n\r\n### References\r\n\r\nThanks to [ranjit-git](https://www.huntr.dev/users/ranjit-git) for raising the issue, and to @peteriman for fixing the problem.\r\n\r\n### For more information\r\nIf you have any questions or comments about this advisory:\r\n* Open an issue in [logj4s-node](https://github.com/log4js-node/log4js-node)\r\n* Ask a question in the [slack channel](https://join.slack.com/t/log4js-node/shared_invite/enQtODkzMDQ3MzExMDczLWUzZmY0MmI0YWI1ZjFhODY0YjI0YmU1N2U5ZTRkOTYyYzg3MjY5NWI4M2FjZThjYjdiOGM0NjU2NzBmYTJjOGI)\r\n* Email us at [gareth.nomiddlename@gmail.com](mailto:gareth.nomiddlename@gmail.com)\r\n",
+      "url": "https://github.com/advisories/GHSA-82v2-mx6x-wq7q"
+    },
+    "1059412": {
+      "findings": [
+        {
+          "version": "0.8.3",
+          "paths": [
+            "@angular/compiler-cli>shelljs"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<0.8.5",
+      "module_name": "shelljs",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-64g7-mvw6-v9qj",
+      "cves": [],
+      "access": "public",
+      "patched_versions": ">=0.8.5",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "updated": "2022-01-14T20:50:59.000Z",
+      "recommendation": "Upgrade to version 0.8.5 or later",
+      "cwe": "[\"CWE-269\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059412,
+      "references": "- https://github.com/shelljs/shelljs/security/advisories/GHSA-64g7-mvw6-v9qj\n- https://huntr.dev/bounties/50996581-c08e-4eed-a90e-c0bac082679c/\n- https://github.com/advisories/GHSA-64g7-mvw6-v9qj",
+      "created": "2022-03-09T20:00:43.994Z",
+      "reported_by": null,
+      "title": "Improper Privilege Management in shelljs",
+      "npm_advisory_id": null,
+      "overview": "### Impact\nOutput from the synchronous version of `shell.exec()` may be visible to other users on the same system. You may be affected if you execute `shell.exec()` in multi-user Mac, Linux, or WSL environments, or if you execute `shell.exec()` as the root user.\n\nOther shelljs functions (including the asynchronous version of `shell.exec()`) are not impacted.\n\n### Patches\nPatched in shelljs 0.8.5\n\n### Workarounds\nRecommended action is to upgrade to 0.8.5.\n\n### References\nhttps://huntr.dev/bounties/50996581-c08e-4eed-a90e-c0bac082679c/\n\n### For more information\nIf you have any questions or comments about this advisory:\n* Ask at https://github.com/shelljs/shelljs/issues/1058\n* Open an issue at https://github.com/shelljs/shelljs/issues/new\n",
+      "url": "https://github.com/advisories/GHSA-64g7-mvw6-v9qj"
+    },
+    "1059413": {
+      "findings": [
+        {
+          "version": "0.10.0",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>selfsigned>node-forge"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.0.0",
+      "module_name": "node-forge",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-8fr3-hfg3-gpgp",
+      "cves": [
+        "CVE-2022-0122"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.0.0",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "updated": "2022-01-13T18:50:00.000Z",
+      "recommendation": "Upgrade to version 1.0.0 or later",
+      "cwe": "[\"CWE-601\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059413,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2022-0122\n- https://github.com/digitalbazaar/forge/commit/db8016c805371e72b06d8e2edfe0ace0df934a5e\n- https://huntr.dev/bounties/41852c50-3c6d-4703-8c55-4db27164a4ae\n- https://github.com/advisories/GHSA-8fr3-hfg3-gpgp",
+      "created": "2022-03-09T20:00:43.994Z",
+      "reported_by": null,
+      "title": "Open Redirect in node-forge",
+      "npm_advisory_id": null,
+      "overview": "parseUrl functionality in node-forge mishandles certain uses of backslash such as https:/\\/\\/\\ and interprets the URI as a relative path. ",
+      "url": "https://github.com/advisories/GHSA-8fr3-hfg3-gpgp"
+    },
+    "1059420": {
+      "findings": [
+        {
+          "version": "1.7.0",
+          "paths": [
+            "karma>http-proxy>follow-redirects",
+            "@angular-devkit/build-angular>webpack-dev-server>http-proxy-middleware>http-proxy>follow-redirects"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.14.7",
+      "module_name": "follow-redirects",
+      "severity": "high",
+      "github_advisory_id": "GHSA-74fj-2j2h-c42q",
+      "cves": [
+        "CVE-2022-0155"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.14.7",
+      "cvss": {
+        "score": 8,
+        "vectorString": "CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H"
+      },
+      "updated": "2022-01-11T18:41:09.000Z",
+      "recommendation": "Upgrade to version 1.14.7 or later",
+      "cwe": "[\"CWE-359\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059420,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2022-0155\n- https://github.com/follow-redirects/follow-redirects/commit/8b347cbcef7c7b72a6e9be20f5710c17d6163c22\n- https://huntr.dev/bounties/fc524e4b-ebb6-427d-ab67-a64181020406\n- https://github.com/advisories/GHSA-74fj-2j2h-c42q",
+      "created": "2022-03-09T20:00:43.995Z",
+      "reported_by": null,
+      "title": "Exposure of sensitive information in follow-redirects",
+      "npm_advisory_id": null,
+      "overview": "follow-redirects is vulnerable to Exposure of Private Personal Information to an Unauthorized Actor",
+      "url": "https://github.com/advisories/GHSA-74fj-2j2h-c42q"
+    },
+    "1059432": {
+      "findings": [
+        {
+          "version": "0.10.0",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>selfsigned>node-forge"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.0.0",
+      "module_name": "node-forge",
+      "severity": "low",
+      "github_advisory_id": "GHSA-5rrq-pxf6-6jx5",
+      "cves": [],
+      "access": "public",
+      "patched_versions": ">=1.0.0",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "updated": "2022-01-07T22:20:53.000Z",
+      "recommendation": "Upgrade to version 1.0.0 or later",
+      "cwe": "[\"CWE-1321\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059432,
+      "references": "- https://github.com/digitalbazaar/forge/security/advisories/GHSA-5rrq-pxf6-6jx5\n- https://github.com/advisories/GHSA-5rrq-pxf6-6jx5",
+      "created": "2022-03-09T20:00:43.997Z",
+      "reported_by": null,
+      "title": "Prototype Pollution in node-forge debug API.",
+      "npm_advisory_id": null,
+      "overview": "### Impact\nThe `forge.debug` API had a potential prototype pollution issue if called with untrusted input. The API was only used for internal debug purposes in a safe way and never documented or advertised.  It is suspected that uses of this API, if any exist, would likely not have used untrusted inputs in a vulnerable way.\n\n### Patches\nThe `forge.debug` API and related functions were removed in 1.0.0.\n\n### Workarounds\nDon't use the `forge.debug` API directly or indirectly with untrusted input.\n\n### References\n- https://www.huntr.dev/bounties/1-npm-node-forge/\n\n### For more information\nIf you have any questions or comments about this advisory:\n* Open an issue in [forge](https://github.com/digitalbazaar/forge).\n* Email us at support@digitalbazaar.com.",
+      "url": "https://github.com/advisories/GHSA-5rrq-pxf6-6jx5"
+    },
+    "1059434": {
+      "findings": [
+        {
+          "version": "0.10.0",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>selfsigned>node-forge"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.0.0",
+      "module_name": "node-forge",
+      "severity": "low",
+      "github_advisory_id": "GHSA-gf8q-jrpm-jvxq",
+      "cves": [],
+      "access": "public",
+      "patched_versions": ">=1.0.0",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "updated": "2022-01-07T22:20:43.000Z",
+      "recommendation": "Upgrade to version 1.0.0 or later",
+      "cwe": "[]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059434,
+      "references": "- https://github.com/digitalbazaar/forge/security/advisories/GHSA-gf8q-jrpm-jvxq\n- https://github.com/advisories/GHSA-gf8q-jrpm-jvxq",
+      "created": "2022-03-09T20:00:43.997Z",
+      "reported_by": null,
+      "title": "URL parsing in node-forge could lead to undesired behavior.",
+      "npm_advisory_id": null,
+      "overview": "### Impact\nThe regex used for the `forge.util.parseUrl` API would not properly parse certain inputs resulting in a parsed data structure that could lead to undesired behavior.\n\n### Patches\n`forge.util.parseUrl` and other very old related URL APIs were removed in 1.0.0 in favor of letting applications use the more modern WHATWG URL Standard API.\n\n### Workarounds\nEnsure code does not directly or indirectly call `forge.util.parseUrl` with untrusted input.\n\n### References\n- https://www.huntr.dev/bounties/41852c50-3c6d-4703-8c55-4db27164a4ae/\n\n### For more information\nIf you have any questions or comments about this advisory:\n* Open an issue in [forge](https://github.com/digitalbazaar/forge)\n* Email us at support@digitalbazaar.com\n",
+      "url": "https://github.com/advisories/GHSA-gf8q-jrpm-jvxq"
+    },
+    "1059486": {
+      "findings": [
+        {
+          "version": "0.2.3",
+          "paths": [
+            "@angular-devkit/build-angular>less>request>http-signature>jsprim>json-schema"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<0.4.0",
+      "module_name": "json-schema",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-896r-f27r-55mw",
+      "cves": [
+        "CVE-2021-3918"
+      ],
+      "access": "public",
+      "patched_versions": ">=0.4.0",
+      "cvss": {
+        "score": 9.8,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+      },
+      "updated": "2021-11-15T22:44:28.000Z",
+      "recommendation": "Upgrade to version 0.4.0 or later",
+      "cwe": "[\"CWE-915\",\"CWE-1321\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059486,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-3918\n- https://github.com/kriszyp/json-schema/commit/22f146111f541d9737e832823699ad3528ca7741\n- https://huntr.dev/bounties/bb6ccd63-f505-4e3a-b55f-cd2662c261a9\n- https://github.com/kriszyp/json-schema/commit/b62f1da1ff5442f23443d6be6a92d00e65cba93a\n- https://github.com/kriszyp/json-schema/commit/f6f6a3b02d667aa4ba2d5d50cc19208c4462abfa\n- https://github.com/advisories/GHSA-896r-f27r-55mw",
+      "created": "2022-03-09T20:00:44.009Z",
+      "reported_by": null,
+      "title": "json-schema is vulnerable to Prototype Pollution",
+      "npm_advisory_id": null,
+      "overview": "json-schema is vulnerable to Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')",
+      "url": "https://github.com/advisories/GHSA-896r-f27r-55mw"
+    },
+    "1059599": {
+      "findings": [
+        {
+          "version": "3.0.0",
+          "paths": [
+            "@angular/cli>inquirer>string-width>strip-ansi>ansi-regex",
+            "@angular/compiler-cli>yargs>cliui>string-width>strip-ansi>ansi-regex",
+            "@angular-devkit/build-angular>webpack-dev-server>yargs>cliui>string-width>strip-ansi>ansi-regex"
+          ]
+        },
+        {
+          "version": "3.0.0",
+          "paths": [
+            "@angular/compiler-cli>yargs>cliui>strip-ansi>ansi-regex",
+            "@angular-devkit/build-angular>webpack-dev-server>yargs>cliui>strip-ansi>ansi-regex"
+          ]
+        },
+        {
+          "version": "4.1.0",
+          "paths": [
+            "@angular/cli>inquirer>strip-ansi>ansi-regex"
+          ]
+        },
+        {
+          "version": "4.1.0",
+          "paths": [
+            "@angular/compiler-cli>yargs>string-width>strip-ansi>ansi-regex"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": ">2.1.1 <5.0.1",
+      "module_name": "ansi-regex",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-93q8-gq69-wqmw",
+      "cves": [
+        "CVE-2021-3807"
+      ],
+      "access": "public",
+      "patched_versions": ">=5.0.1",
+      "cvss": {
+        "score": 7.5,
+        "vectorString": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+      },
+      "updated": "2021-09-23T15:45:50.000Z",
+      "recommendation": "Upgrade to version 5.0.1 or later",
+      "cwe": "[\"CWE-918\",\"CWE-1333\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059599,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-3807\n- https://github.com/chalk/ansi-regex/commit/8d1d7cdb586269882c4bdc1b7325d0c58c8f76f9\n- https://huntr.dev/bounties/5b3cf33b-ede0-4398-9974-800876dfd994\n- https://github.com/chalk/ansi-regex/issues/38#issuecomment-924086311\n- https://app.snyk.io/vuln/SNYK-JS-ANSIREGEX-1583908\n- https://github.com/chalk/ansi-regex/issues/38#issuecomment-925924774\n- https://github.com/advisories/GHSA-93q8-gq69-wqmw",
+      "created": "2022-03-09T20:00:44.023Z",
+      "reported_by": null,
+      "title": " Inefficient Regular Expression Complexity in chalk/ansi-regex",
+      "npm_advisory_id": null,
+      "overview": "ansi-regex is vulnerable to Inefficient Regular Expression Complexity",
+      "url": "https://github.com/advisories/GHSA-93q8-gq69-wqmw"
+    },
+    "1059698": {
+      "findings": [
+        {
+          "version": "4.4.8",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar"
+          ]
+        },
+        {
+          "version": "4.4.8",
+          "paths": [
+            "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<4.4.18",
+      "module_name": "tar",
+      "severity": "high",
+      "github_advisory_id": "GHSA-5955-9wpr-37jh",
+      "cves": [
+        "CVE-2021-37713"
+      ],
+      "access": "public",
+      "patched_versions": ">=4.4.18",
+      "cvss": {
+        "score": 8.2,
+        "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:N"
+      },
+      "updated": "2021-08-31T16:02:33.000Z",
+      "recommendation": "Upgrade to version 4.4.18 or later",
+      "cwe": "[\"CWE-22\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059698,
+      "references": "- https://github.com/npm/node-tar/security/advisories/GHSA-5955-9wpr-37jh\n- https://www.npmjs.com/package/tar\n- https://nvd.nist.gov/vuln/detail/CVE-2021-37713\n- https://www.oracle.com/security-alerts/cpuoct2021.html\n- https://github.com/advisories/GHSA-5955-9wpr-37jh",
+      "created": "2022-03-09T20:00:44.036Z",
+      "reported_by": null,
+      "title": "Arbitrary File Creation/Overwrite on Windows via insufficient relative path sanitization",
+      "npm_advisory_id": null,
+      "overview": "### Impact\n\nArbitrary File Creation, Arbitrary File Overwrite, Arbitrary Code Execution\n\nnode-tar aims to guarantee that any file whose location would be outside of the extraction target directory is not extracted. This is, in part, accomplished by sanitizing absolute paths of entries within the archive, skipping archive entries that contain `..` path portions, and resolving the sanitized paths against the extraction target directory.\n\nThis logic was insufficient on Windows systems when extracting tar files that contained a path that was not an absolute path, but specified a drive letter different from the extraction target, such as `C:some\\path`.  If the drive letter does not match the extraction target, for example `D:\\extraction\\dir`, then the result of `path.resolve(extractionDirectory, entryPath)` would resolve against the current working directory on the `C:` drive, rather than the extraction target directory.\n\nAdditionally, a `..` portion of the path could occur immediately after the drive letter, such as `C:../foo`, and was not properly sanitized by the logic that checked for `..` within the normalized and split portions of the path.\n\nThis only affects users of `node-tar` on Windows systems.\n\n### Patches\n\n4.4.18 || 5.0.10 || 6.1.9\n\n### Workarounds\n\nThere is no reasonable way to work around this issue without performing the same path normalization procedures that node-tar now does.\n\nUsers are encouraged to upgrade to the latest patched versions of node-tar, rather than attempt to sanitize paths themselves.\n\n### Fix\n\nThe fixed versions strip path roots from all paths prior to being resolved against the extraction target folder, even if such paths are not \"absolute\".\n\nAdditionally, a path starting with a drive letter and then two dots, like `c:../`, would bypass the check for `..` path portions.  This is checked properly in the patched versions.\n\nFinally, a defense in depth check is added, such that if the `entry.absolute` is outside of the extraction taret, and we are not in preservePaths:true mode, a warning is raised on that entry, and it is skipped.  Currently, it is believed that this check is redundant, but it did catch some oversights in development.\n",
+      "url": "https://github.com/advisories/GHSA-5955-9wpr-37jh"
+    },
+    "1059701": {
+      "findings": [
+        {
+          "version": "4.4.8",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar"
+          ]
+        },
+        {
+          "version": "4.4.8",
+          "paths": [
+            "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<4.4.18",
+      "module_name": "tar",
+      "severity": "high",
+      "github_advisory_id": "GHSA-qq89-hq3f-393p",
+      "cves": [
+        "CVE-2021-37712"
+      ],
+      "access": "public",
+      "patched_versions": ">=4.4.18",
+      "cvss": {
+        "score": 8.2,
+        "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:N"
+      },
+      "updated": "2021-08-31T16:02:05.000Z",
+      "recommendation": "Upgrade to version 4.4.18 or later",
+      "cwe": "[\"CWE-22\",\"CWE-59\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059701,
+      "references": "- https://github.com/npm/node-tar/security/advisories/GHSA-qq89-hq3f-393p\n- https://www.npmjs.com/package/tar\n- https://nvd.nist.gov/vuln/detail/CVE-2021-37712\n- https://www.oracle.com/security-alerts/cpuoct2021.html\n- https://www.debian.org/security/2021/dsa-5008\n- https://github.com/advisories/GHSA-qq89-hq3f-393p",
+      "created": "2022-03-09T20:00:44.036Z",
+      "reported_by": null,
+      "title": "Arbitrary File Creation/Overwrite via insufficient symlink protection due to directory cache poisoning using symbolic links",
+      "npm_advisory_id": null,
+      "overview": "### Impact\nArbitrary File Creation, Arbitrary File Overwrite, Arbitrary Code Execution\n\nnode-tar aims to guarantee that any file whose location would be modified by a symbolic link is not extracted. This is, in part, achieved by ensuring that extracted directories are not symlinks. Additionally, in order to prevent unnecessary stat calls to determine whether a given path is a directory, paths are cached when directories are created.\n\nThis logic was insufficient when extracting tar files that contained two directories and a symlink with names containing unicode values that normalized to the same value. Additionally, on Windows systems, long path portions would resolve to the same file system entities as their 8.3 \"short path\" counterparts. A specially crafted tar archive could thus include directories with two forms of the path that resolve to the same file system entity, followed by a symbolic link with a name in the first form, lastly followed by a file using the second form. It led to bypassing node-tar symlink checks on directories, essentially allowing an untrusted tar file to symlink into an arbitrary location and subsequently extracting arbitrary files into that location, thus allowing arbitrary file creation and overwrite.\n\nThe v3 branch of `node-tar` has been deprecated and did not receive patches for these issues. If you are still using a v3 release we recommend you update to a more recent version of `node-tar`. If this is not possible, a workaround is available below.\n\n### Patches\n\n6.1.9 || 5.0.10 || 4.4.18\n\n### Workarounds\n\nUsers may work around this vulnerability without upgrading by creating a custom filter method which prevents the extraction of symbolic links.\n\n```js\nconst tar = require('tar')\n\ntar.x({\n  file: 'archive.tgz',\n  filter: (file, entry) => {\n    if (entry.type === 'SymbolicLink') {\n      return false\n    } else {\n      return true\n    }\n  }\n})\n```\n\nUsers are encouraged to upgrade to the latest patched versions, rather than attempt to sanitize tar input themselves.\n\n#### Fix\n\nThe problem is addressed in the following ways, when comparing paths in the directory cache and path reservation systems:\n\n1. The `String.normalize('NFKD')` method is used to first normalize all unicode to its maximally compatible and multi-code-point form.\n2. All slashes are normalized to `/` on Windows systems (on posix systems, `\\` is a valid filename character, and thus left intact).\n3. When a symbolic link is encountered on Windows systems, the entire directory cache is cleared.  Collisions related to use of 8.3 short names to replace directories with other (non-symlink) types of entries may make archives fail to extract properly, but will not result in arbitrary file writes.\n",
+      "url": "https://github.com/advisories/GHSA-qq89-hq3f-393p"
+    },
+    "1059704": {
+      "findings": [
+        {
+          "version": "4.4.8",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar"
+          ]
+        },
+        {
+          "version": "4.4.8",
+          "paths": [
+            "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<4.4.16",
+      "module_name": "tar",
+      "severity": "high",
+      "github_advisory_id": "GHSA-9r2w-394v-53qc",
+      "cves": [
+        "CVE-2021-37701"
+      ],
+      "access": "public",
+      "patched_versions": ">=4.4.16",
+      "cvss": {
+        "score": 8.2,
+        "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:N"
+      },
+      "updated": "2021-08-31T16:01:51.000Z",
+      "recommendation": "Upgrade to version 4.4.16 or later",
+      "cwe": "[\"CWE-22\",\"CWE-59\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059704,
+      "references": "- https://github.com/npm/node-tar/security/advisories/GHSA-9r2w-394v-53qc\n- https://www.npmjs.com/package/tar\n- https://nvd.nist.gov/vuln/detail/CVE-2021-37701\n- https://www.oracle.com/security-alerts/cpuoct2021.html\n- https://www.debian.org/security/2021/dsa-5008\n- https://github.com/advisories/GHSA-9r2w-394v-53qc",
+      "created": "2022-03-09T20:00:44.036Z",
+      "reported_by": null,
+      "title": "Arbitrary File Creation/Overwrite via insufficient symlink protection due to directory cache poisoning using symbolic links",
+      "npm_advisory_id": null,
+      "overview": "### Impact\n\nArbitrary File Creation, Arbitrary File Overwrite, Arbitrary Code Execution\n\n`node-tar` aims to guarantee that any file whose location would be modified by a symbolic link is not extracted. This is, in part, achieved by ensuring that extracted directories are not symlinks. Additionally, in order to prevent unnecessary stat calls to determine whether a given path is a directory, paths are cached when directories are created.\n\nThis logic was insufficient when extracting tar files that contained both a directory and a symlink with the same name as the directory, where the symlink and directory names in the archive entry used backslashes as a path separator on posix systems. The cache checking logic used both `\\` and `/` characters as path separators, however `\\` is a valid filename character on posix systems.\n\nBy first creating a directory, and then replacing that directory with a symlink, it was thus possible to bypass node-tar symlink checks on directories, essentially allowing an untrusted tar file to symlink into an arbitrary location and subsequently extracting arbitrary files into that location, thus allowing arbitrary file creation and overwrite.\n\nAdditionally, a similar confusion could arise on case-insensitive filesystems.  If a tar archive contained a directory at `FOO`, followed by a symbolic link named `foo`, then on case-insensitive file systems, the creation of the symbolic link would remove the directory from the filesystem, but _not_ from the internal directory cache, as it would not be treated as a cache hit.  A subsequent file entry within the `FOO` directory would then be placed in the target of the symbolic link, thinking that the directory had already been created. \n\nThese issues were addressed in releases 4.4.16, 5.0.8 and 6.1.7.\n\nThe v3 branch of `node-tar` has been deprecated and did not receive patches for these issues. If you are still using a v3 release we recommend you update to a more recent version of `node-tar`. If this is not possible, a workaround is available below.\n\n### Patches\n\n4.4.16 || 5.0.8 || 6.1.7\n\n### Workarounds\n\nUsers may work around this vulnerability without upgrading by creating a custom filter method which prevents the extraction of symbolic links.\n\n```js\nconst tar = require('tar')\n\ntar.x({\n  file: 'archive.tgz',\n  filter: (file, entry) => {\n    if (entry.type === 'SymbolicLink') {\n      return false\n    } else {\n      return true\n    }\n  }\n})\n```\n\nUsers are encouraged to upgrade to the latest patched versions, rather than attempt to sanitize tar input themselves.\n\n### Fix\n\nThe problem is addressed in the following ways:\n\n1. All paths are normalized to use `/` as a path separator, replacing `\\` with `/` on Windows systems, and leaving `\\` intact in the path on posix systems.  This is performed in depth, at every level of the program where paths are consumed.\n2. Directory cache pruning is performed case-insensitively.  This _may_ result in undue cache misses on case-sensitive file systems, but the performance impact is negligible.\n\n#### Caveat\n\nNote that this means that the `entry` objects exposed in various parts of tar's API will now always use `/` as a path separator, even on Windows systems.  This is not expected to cause problems, as `/` is a valid path separator on Windows systems, but _may_ result in issues if `entry.path` is compared against a path string coming from some other API such as `fs.realpath()` or `path.resolve()`.\n\nUsers are encouraged to always normalize paths using a well-tested method such as `path.resolve()` before comparing paths to one another.",
+      "url": "https://github.com/advisories/GHSA-9r2w-394v-53qc"
+    },
+    "1059733": {
+      "findings": [
+        {
+          "version": "4.4.8",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar"
+          ]
+        },
+        {
+          "version": "4.4.8",
+          "paths": [
+            "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": ">=4.0.0 <4.4.14",
+      "module_name": "tar",
+      "severity": "high",
+      "github_advisory_id": "GHSA-3jfq-g458-7qm9",
+      "cves": [
+        "CVE-2021-32804"
+      ],
+      "access": "public",
+      "patched_versions": ">=4.4.14",
+      "cvss": {
+        "score": 8.2,
+        "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:N"
+      },
+      "updated": "2021-08-03T19:06:16.000Z",
+      "recommendation": "Upgrade to version 4.4.14 or later",
+      "cwe": "[\"CWE-22\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059733,
+      "references": "- https://github.com/npm/node-tar/security/advisories/GHSA-3jfq-g458-7qm9\n- https://github.com/npm/node-tar/commit/1f036ca23f64a547bdd6c79c1a44bc62e8115da4\n- https://www.npmjs.com/advisories/1770\n- https://www.npmjs.com/package/tar\n- https://nvd.nist.gov/vuln/detail/CVE-2021-32804\n- https://www.oracle.com/security-alerts/cpuoct2021.html\n- https://github.com/advisories/GHSA-3jfq-g458-7qm9",
+      "created": "2022-03-09T20:00:44.039Z",
+      "reported_by": null,
+      "title": "Arbitrary File Creation/Overwrite due to insufficient absolute path sanitization",
+      "npm_advisory_id": null,
+      "overview": "### Impact\n\nArbitrary File Creation, Arbitrary File Overwrite, Arbitrary Code Execution\n\n`node-tar` aims to prevent extraction of absolute file paths by turning absolute paths into relative paths when the `preservePaths` flag is not set to `true`. This is achieved by stripping the absolute path root from any absolute file paths contained in a tar file. For example `/home/user/.bashrc` would turn into `home/user/.bashrc`. \n\nThis logic was insufficient when file paths contained repeated path roots such as `////home/user/.bashrc`. `node-tar` would only strip a single path root from such paths. When given an absolute file path with repeating path roots, the resulting path (e.g. `///home/user/.bashrc`) would still resolve to an absolute path, thus allowing arbitrary file creation and overwrite. \n\n### Patches\n\n3.2.2 || 4.4.14 || 5.0.6 || 6.1.1\n\nNOTE: an adjacent issue [CVE-2021-32803](https://github.com/npm/node-tar/security/advisories/GHSA-r628-mhmh-qjhw) affects this release level. Please ensure you update to the latest patch levels that address CVE-2021-32803 as well if this adjacent issue affects your `node-tar` use case.\n\n### Workarounds\n\nUsers may work around this vulnerability without upgrading by creating a custom `onentry` method which sanitizes the `entry.path` or a `filter` method which removes entries with absolute paths.\n\n```js\nconst path = require('path')\nconst tar = require('tar')\n\ntar.x({\n  file: 'archive.tgz',\n  // either add this function...\n  onentry: (entry) => {\n    if (path.isAbsolute(entry.path)) {\n      entry.path = sanitizeAbsolutePathSomehow(entry.path)\n      entry.absolute = path.resolve(entry.path)\n    }\n  },\n\n  // or this one\n  filter: (file, entry) => {\n    if (path.isAbsolute(entry.path)) {\n      return false\n    } else {\n      return true\n    }\n  }\n})\n```\n\nUsers are encouraged to upgrade to the latest patch versions, rather than attempt to sanitize tar input themselves.",
+      "url": "https://github.com/advisories/GHSA-3jfq-g458-7qm9"
+    },
+    "1059737": {
+      "findings": [
+        {
+          "version": "4.4.8",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar"
+          ]
+        },
+        {
+          "version": "4.4.8",
+          "paths": [
+            "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": ">=4.0.0 <4.4.15",
+      "module_name": "tar",
+      "severity": "high",
+      "github_advisory_id": "GHSA-r628-mhmh-qjhw",
+      "cves": [
+        "CVE-2021-32803"
+      ],
+      "access": "public",
+      "patched_versions": ">=4.4.15",
+      "cvss": {
+        "score": 8.2,
+        "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:N"
+      },
+      "updated": "2021-08-03T18:59:59.000Z",
+      "recommendation": "Upgrade to version 4.4.15 or later",
+      "cwe": "[\"CWE-22\",\"CWE-23\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059737,
+      "references": "- https://github.com/npm/node-tar/security/advisories/GHSA-r628-mhmh-qjhw\n- https://github.com/npm/node-tar/commit/9dbdeb6df8e9dbd96fa9e84341b9d74734be6c20\n- https://www.npmjs.com/advisories/1771\n- https://nvd.nist.gov/vuln/detail/CVE-2021-32803\n- https://www.npmjs.com/package/tar\n- https://www.oracle.com/security-alerts/cpuoct2021.html\n- https://github.com/advisories/GHSA-r628-mhmh-qjhw",
+      "created": "2022-03-09T20:00:44.040Z",
+      "reported_by": null,
+      "title": "Arbitrary File Creation/Overwrite via insufficient symlink protection due to directory cache poisoning",
+      "npm_advisory_id": null,
+      "overview": "### Impact\n\nArbitrary File Creation, Arbitrary File Overwrite, Arbitrary Code Execution\n\n`node-tar` aims to guarantee that any file whose location would be modified by a symbolic link is not extracted. This is, in part, achieved by ensuring that extracted directories are not symlinks.  Additionally, in order to prevent unnecessary `stat` calls to determine whether a given path is a directory, paths are cached when directories are created.\n\nThis logic was insufficient when extracting tar files that contained both a directory and a symlink with the same name as the directory. This order of operations resulted in the directory being created and added to the `node-tar` directory cache. When a directory is present in the directory cache, subsequent calls to mkdir for that directory are skipped. However, this is also where `node-tar` checks for symlinks occur.\n\nBy first creating a directory, and then replacing that directory with a symlink, it was thus possible to bypass `node-tar` symlink checks on directories, essentially allowing an untrusted tar file to symlink into an arbitrary location and subsequently extracting arbitrary files into that location, thus allowing arbitrary file creation and overwrite.\n\nThis issue was addressed in releases 3.2.3, 4.4.15, 5.0.7 and 6.1.2.\n\n### Patches\n\n3.2.3 || 4.4.15 || 5.0.7 || 6.1.2\n\n### Workarounds\n\nUsers may work around this vulnerability without upgrading by creating a custom `filter` method which prevents the extraction of symbolic links.\n\n```js\nconst tar = require('tar')\n\ntar.x({\n  file: 'archive.tgz',\n  filter: (file, entry) => {\n    if (entry.type === 'SymbolicLink') {\n      return false\n    } else {\n      return true\n    }\n  }\n})\n```\n\nUsers are encouraged to upgrade to the latest patch versions, rather than attempt to sanitize tar input themselves.",
+      "url": "https://github.com/advisories/GHSA-r628-mhmh-qjhw"
+    },
+    "1059778": {
+      "findings": [
+        {
+          "version": "3.2.0",
+          "paths": [
+            "karma>socket.io>socket.io-parser",
+            "karma>socket.io>socket.io-client>socket.io-parser"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<3.3.2",
+      "module_name": "socket.io-parser",
+      "severity": "high",
+      "github_advisory_id": "GHSA-xfhh-g9f5-x4m4",
+      "cves": [
+        "CVE-2020-36049"
+      ],
+      "access": "public",
+      "patched_versions": ">=3.3.2",
+      "cvss": {
+        "score": 7.5,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+      },
+      "updated": "2021-06-30T16:54:43.000Z",
+      "recommendation": "Upgrade to version 3.3.2 or later",
+      "cwe": "[\"CWE-400\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059778,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-36049\n- https://github.com/socketio/socket.io-parser/commit/dcb942d24db97162ad16a67c2a0cf30875342d55\n- https://blog.caller.xyz/socketio-engineio-dos/\n- https://github.com/bcaller/kill-engine-io\n- https://github.com/socketio/socket.io-parser/releases/tag/3.3.2\n- https://github.com/socketio/socket.io-parser/releases/tag/3.4.1\n- https://www.npmjs.com/package/socket.io-parser\n- https://github.com/advisories/GHSA-xfhh-g9f5-x4m4",
+      "created": "2022-03-09T20:00:44.044Z",
+      "reported_by": null,
+      "title": "Resource exhaustion in socket.io-parser",
+      "npm_advisory_id": null,
+      "overview": "The `socket.io-parser` npm package before versions 3.3.2 and 3.4.1 allows attackers to cause a denial of service (memory consumption) via a large packet because a concatenation approach is used.",
+      "url": "https://github.com/advisories/GHSA-xfhh-g9f5-x4m4"
+    },
+    "1059799": {
+      "findings": [
+        {
+          "version": "7.0.17",
+          "paths": [
+            "@angular-devkit/build-angular>postcss"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": ">=7.0.0 <7.0.36",
+      "module_name": "postcss",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-hwj9-h5mp-3pm3",
+      "cves": [
+        "CVE-2021-23368"
+      ],
+      "access": "public",
+      "patched_versions": ">=7.0.36",
+      "cvss": {
+        "score": 5.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+      },
+      "updated": "2021-06-15T15:12:13.000Z",
+      "recommendation": "Upgrade to version 7.0.36 or later",
+      "cwe": "[\"CWE-400\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059799,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-23368\n- https://github.com/postcss/postcss/commit/8682b1e4e328432ba692bed52326e84439cec9e4\n- https://github.com/postcss/postcss/commit/b6f3e4d5a8d7504d553267f80384373af3a3dec5\n- https://lists.apache.org/thread.html/r00158f5d770d75d0655c5eef1bdbc6150531606c8f8bcb778f0627be@%3Cdev.myfaces.apache.org%3E\n- https://lists.apache.org/thread.html/r16e295b4f02d81b79981237d602cb0b9e59709bafaa73ac98be7cef1@%3Cdev.myfaces.apache.org%3E\n- https://lists.apache.org/thread.html/r49afb49b38748897211b1f89c3a64dc27f9049474322b05715695aab@%3Cdev.myfaces.apache.org%3E\n- https://lists.apache.org/thread.html/r5acd89f3827ad9a9cad6d24ed93e377f7114867cd98cfba616c6e013@%3Ccommits.myfaces.apache.org%3E\n- https://lists.apache.org/thread.html/r8def971a66cf3e375178fbee752e1b04a812a047cc478ad292007e33@%3Cdev.myfaces.apache.org%3E\n- https://lists.apache.org/thread.html/rad5af2044afb51668b1008b389ac815a28ecea9eb75ae2cab5a00ebb@%3Ccommits.myfaces.apache.org%3E\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1244795\n- https://snyk.io/vuln/SNYK-JS-POSTCSS-1090595\n- https://github.com/postcss/postcss/commit/54cbf3c4847eb0fb1501b9d2337465439e849734\n- https://github.com/advisories/GHSA-hwj9-h5mp-3pm3",
+      "created": "2022-03-09T20:00:44.046Z",
+      "reported_by": null,
+      "title": "Regular Expression Denial of Service in postcss",
+      "npm_advisory_id": null,
+      "overview": "The npm package `postcss` from 7.0.0 and before versions 7.0.36 and 8.2.10 is vulnerable to Regular Expression Denial of Service (ReDoS) during source map parsing.",
+      "url": "https://github.com/advisories/GHSA-hwj9-h5mp-3pm3"
+    },
+    "1059828": {
+      "findings": [
+        {
+          "version": "3.1.0",
+          "paths": [
+            "@angular-devkit/build-angular>copy-webpack-plugin>glob-parent",
+            "@angular-devkit/build-angular>webpack-dev-server>chokidar>glob-parent",
+            "@angular-devkit/build-angular>webpack>watchpack>watchpack-chokidar2>chokidar>glob-parent"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<5.1.2",
+      "module_name": "glob-parent",
+      "severity": "high",
+      "github_advisory_id": "GHSA-ww39-953v-wcq6",
+      "cves": [
+        "CVE-2020-28469"
+      ],
+      "access": "public",
+      "patched_versions": ">=5.1.2",
+      "cvss": {
+        "score": 7.5,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+      },
+      "updated": "2021-06-04T18:30:46.000Z",
+      "recommendation": "Upgrade to version 5.1.2 or later",
+      "cwe": "[\"CWE-400\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059828,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-28469\n- https://github.com/gulpjs/glob-parent/pull/36\n- https://github.com/gulpjs/glob-parent/blob/6ce8d11f2f1ed8e80a9526b1dc8cf3aa71f43474/index.js%23L9\n- https://github.com/gulpjs/glob-parent/releases/tag/v5.1.2\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSBOWERGITHUBES128-1059093\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1059092\n- https://snyk.io/vuln/SNYK-JS-GLOBPARENT-1016905\n- https://www.oracle.com/security-alerts/cpujan2022.html\n- https://github.com/advisories/GHSA-ww39-953v-wcq6",
+      "created": "2022-03-09T20:00:44.048Z",
+      "reported_by": null,
+      "title": "Regular expression denial of service",
+      "npm_advisory_id": null,
+      "overview": "This affects the package glob-parent before 5.1.2. The enclosure regex used to check for strings ending in enclosure containing path separator.",
+      "url": "https://github.com/advisories/GHSA-ww39-953v-wcq6"
+    },
+    "1059870": {
+      "findings": [
+        {
+          "version": "4.6.3",
+          "paths": [
+            "@angular-devkit/build-angular>browserslist"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": ">=4.0.0 <4.16.5",
+      "module_name": "browserslist",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-w8qv-6jwh-64r5",
+      "cves": [
+        "CVE-2021-23364"
+      ],
+      "access": "public",
+      "patched_versions": ">=4.16.5",
+      "cvss": {
+        "score": 5.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+      },
+      "updated": "2021-05-20T22:03:37.000Z",
+      "recommendation": "Upgrade to version 4.16.5 or later",
+      "cwe": "[\"CWE-400\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059870,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-23364\n- https://github.com/browserslist/browserslist/pull/593\n- https://github.com/browserslist/browserslist/commit/c091916910dfe0b5fd61caad96083c6709b02d98\n- https://github.com/browserslist/browserslist/blob/e82f32d1d4100d6bc79ea0b6b6a2d281a561e33c/index.js%23L472-L474\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1277182\n- https://snyk.io/vuln/SNYK-JS-BROWSERSLIST-1090194\n- https://github.com/advisories/GHSA-w8qv-6jwh-64r5",
+      "created": "2022-03-09T20:00:44.054Z",
+      "reported_by": null,
+      "title": "Regular Expression Denial of Service in browserslist",
+      "npm_advisory_id": null,
+      "overview": "The package browserslist from 4.0.0 and before 4.16.5 are vulnerable to Regular Expression Denial of Service (ReDoS) during parsing of queries.",
+      "url": "https://github.com/advisories/GHSA-w8qv-6jwh-64r5"
+    },
+    "1059871": {
+      "findings": [
+        {
+          "version": "1.5.5",
+          "paths": [
+            "karma>socket.io>socket.io-client>engine.io-client>xmlhttprequest-ssl"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.6.1",
+      "module_name": "xmlhttprequest-ssl",
+      "severity": "critical",
+      "github_advisory_id": "GHSA-72mh-269x-7mh5",
+      "cves": [
+        "CVE-2021-31597"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.6.1",
+      "cvss": {
+        "score": 9.4,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L"
+      },
+      "updated": "2021-05-20T21:59:29.000Z",
+      "recommendation": "Upgrade to version 1.6.1 or later",
+      "cwe": "[\"CWE-295\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059871,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-31597\n- https://github.com/mjwwit/node-XMLHttpRequest/commit/bf53329b61ca6afc5d28f6b8d2dc2e3ca740a9b2\n- https://github.com/mjwwit/node-XMLHttpRequest/compare/v1.6.0...1.6.1\n- https://people.kingsds.network/wesgarland/xmlhttprequest-ssl-vuln.txt\n- https://security.netapp.com/advisory/ntap-20210618-0004/\n- https://github.com/advisories/GHSA-72mh-269x-7mh5",
+      "created": "2022-03-09T20:00:44.054Z",
+      "reported_by": null,
+      "title": "Improper Certificate Validation in xmlhttprequest-ssl",
+      "npm_advisory_id": null,
+      "overview": "The xmlhttprequest-ssl package before 1.6.1 for Node.js disables SSL certificate validation by default, because rejectUnauthorized (when the property exists but is undefined) is considered to be false within the https.request function of Node.js. In other words, no certificate is ever rejected.",
+      "url": "https://github.com/advisories/GHSA-72mh-269x-7mh5"
+    },
+    "1059915": {
+      "findings": [
+        {
+          "version": "6.10.0",
+          "paths": [
+            "@angular-devkit/build-angular>ajv",
+            "@angular-devkit/build-angular>@angular-devkit/core>ajv",
+            "@angular-devkit/build-angular>@angular-devkit/architect>@angular-devkit/core>ajv",
+            "@angular-devkit/build-angular>@angular-devkit/build-webpack>@angular-devkit/architect>@angular-devkit/core>ajv"
+          ]
+        },
+        {
+          "version": "5.5.2",
+          "paths": [
+            "@angular-devkit/build-angular>istanbul-instrumenter-loader>schema-utils>ajv"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<6.12.3",
+      "module_name": "ajv",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-v88g-cgmw-v5xw",
+      "cves": [
+        "CVE-2020-15366"
+      ],
+      "access": "public",
+      "patched_versions": ">=6.12.3",
+      "cvss": {
+        "score": 5.6,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L"
+      },
+      "updated": "2021-05-10T21:23:42.000Z",
+      "recommendation": "Upgrade to version 6.12.3 or later",
+      "cwe": "[\"CWE-915\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059915,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-15366\n- https://github.com/ajv-validator/ajv/commit/65b2f7d76b190ac63a0d4e9154c712d7aa37049f\n- https://github.com/ajv-validator/ajv/releases/tag/v6.12.3\n- https://hackerone.com/bugs?subject=user&report_id=894259\n- https://github.com/ajv-validator/ajv/tags\n- https://github.com/advisories/GHSA-v88g-cgmw-v5xw",
+      "created": "2022-03-09T20:00:44.058Z",
+      "reported_by": null,
+      "title": "Prototype Pollution in Ajv",
+      "npm_advisory_id": null,
+      "overview": "An issue was discovered in ajv.validate() in Ajv (aka Another JSON Schema Validator) 6.12.2. A carefully crafted JSON schema could be provided that allows execution of other code by prototype pollution. (While untrusted schemas are recommended against, the worst case of an untrusted schema should be a denial of service, not execution of code.)",
+      "url": "https://github.com/advisories/GHSA-v88g-cgmw-v5xw"
+    },
+    "1059976": {
+      "findings": [
+        {
+          "version": "1.5.5",
+          "paths": [
+            "karma>socket.io>socket.io-client>engine.io-client>xmlhttprequest-ssl"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.6.2",
+      "module_name": "xmlhttprequest-ssl",
+      "severity": "high",
+      "github_advisory_id": "GHSA-h4j5-c7cj-74xg",
+      "cves": [
+        "CVE-2020-28502"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.6.2",
+      "cvss": {
+        "score": 9.8,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+      },
+      "updated": "2021-05-04T18:00:49.000Z",
+      "recommendation": "Upgrade to version 1.6.2 or later",
+      "cwe": "[\"CWE-94\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1059976,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-28502\n- https://github.com/driverdan/node-XMLHttpRequest/commit/983cfc244c7567ad6a59e366e55a8037e0497fe6\n- https://github.com/driverdan/node-XMLHttpRequest/blob/1.6.0/lib/XMLHttpRequest.js#L480\n- https://github.com/driverdan/node-XMLHttpRequest/blob/1.6.0/lib/XMLHttpRequest.js%23L480\n- https://github.com/mjwwit/node-XMLHttpRequest/blob/ae38832a0f1347c5e96dda665402509a3458e302/lib/XMLHttpRequest.js#L531\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1082937\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1082938\n- https://snyk.io/vuln/SNYK-JS-XMLHTTPREQUEST-1082935\n- https://snyk.io/vuln/SNYK-JS-XMLHTTPREQUESTSSL-1082936\n- https://github.com/mjwwit/node-XMLHttpRequest/commit/ee1e81fc67729c7c0eba5537ed7fe1e30a6b3291\n- https://github.com/advisories/GHSA-h4j5-c7cj-74xg",
+      "created": "2022-03-09T20:00:44.064Z",
+      "reported_by": null,
+      "title": "Arbitrary Code Injection",
+      "npm_advisory_id": null,
+      "overview": "This affects the package xmlhttprequest before 1.7.0; all versions of package xmlhttprequest-ssl. Provided requests are sent synchronously (async=False on xhr.open), malicious user input flowing into xhr.send could result in arbitrary code being injected and run.",
+      "url": "https://github.com/advisories/GHSA-h4j5-c7cj-74xg"
+    },
+    "1060025": {
+      "findings": [
+        {
+          "version": "0.3.19",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>sockjs"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<0.3.20",
+      "module_name": "sockjs",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-c9g6-9335-x697",
+      "cves": [
+        "CVE-2020-7693"
+      ],
+      "access": "public",
+      "patched_versions": ">=0.3.20",
+      "cvss": {
+        "score": 5.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+      },
+      "updated": "2021-04-20T15:25:19.000Z",
+      "recommendation": "Upgrade to version 0.3.20 or later",
+      "cwe": "[\"CWE-20\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1060025,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-7693\n- https://github.com/sockjs/sockjs-node/issues/252\n- https://github.com/sockjs/sockjs-node/pull/265\n- https://github.com/sockjs/sockjs-node/commit/dd7e642cd69ee74385825816d30642c43e051d16\n- https://github.com/andsnw/sockjs-dos-py\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-575448\n- https://snyk.io/vuln/SNYK-JS-SOCKJS-575261\n- https://www.npmjs.com/package/sockjs\n- https://github.com/advisories/GHSA-c9g6-9335-x697",
+      "created": "2022-03-09T20:00:44.068Z",
+      "reported_by": null,
+      "title": "Improper Input Validation in SocksJS-Node",
+      "npm_advisory_id": null,
+      "overview": "Incorrect handling of Upgrade header with the value websocket leads in crashing of containers hosting sockjs apps. This affects the package sockjs before 0.3.20.",
+      "url": "https://github.com/advisories/GHSA-c9g6-9335-x697"
+    },
+    "1060087": {
+      "findings": [
+        {
+          "version": "3.2.1",
+          "paths": [
+            "karma>socket.io>engine.io"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<4.0.0",
+      "module_name": "engine.io",
+      "severity": "high",
+      "github_advisory_id": "GHSA-j4f2-536g-r55m",
+      "cves": [
+        "CVE-2020-36048"
+      ],
+      "access": "public",
+      "patched_versions": ">=4.0.0",
+      "cvss": {
+        "score": 7.5,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+      },
+      "updated": "2021-04-06T22:58:34.000Z",
+      "recommendation": "Upgrade to version 4.0.0 or later",
+      "cwe": "[\"CWE-400\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1060087,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-36048\n- https://github.com/socketio/engine.io/commit/734f9d1268840722c41219e69eb58318e0b2ac6b\n- https://blog.caller.xyz/socketio-engineio-dos/\n- https://github.com/bcaller/kill-engine-io\n- https://github.com/advisories/GHSA-j4f2-536g-r55m",
+      "created": "2022-03-09T20:00:44.073Z",
+      "reported_by": null,
+      "title": "Resource exhaustion in engine.io ",
+      "npm_advisory_id": null,
+      "overview": "Engine.IO before 4.0.0 allows attackers to cause a denial of service (resource consumption) via a POST request to the long polling transport.",
+      "url": "https://github.com/advisories/GHSA-j4f2-536g-r55m"
+    },
+    "1060234": {
+      "findings": [
+        {
+          "version": "2.1.1",
+          "paths": [
+            "karma>socket.io"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<2.4.0",
+      "module_name": "socket.io",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-fxwf-4rqh-v8g3",
+      "cves": [
+        "CVE-2020-28481"
+      ],
+      "access": "public",
+      "patched_versions": ">=2.4.0",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "updated": "2021-01-20T05:39:25.000Z",
+      "recommendation": "Upgrade to version 2.4.0 or later",
+      "cwe": "[\"CWE-346\",\"CWE-453\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1060234,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-28481\n- https://github.com/socketio/socket.io/issues/3671\n- https://github.com/socketio/socket.io/commit/f78a575f66ab693c3ea96ea88429ddb1a44c86c7\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSBOWER-1056358\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1056357\n- https://snyk.io/vuln/SNYK-JS-SOCKETIO-1024859\n- https://github.com/advisories/GHSA-fxwf-4rqh-v8g3",
+      "created": "2022-03-09T20:00:44.087Z",
+      "reported_by": null,
+      "title": "Insecure defaults due to CORS misconfiguration in socket.io",
+      "npm_advisory_id": null,
+      "overview": "The package socket.io before 2.4.0 are vulnerable to Insecure Defaults due to CORS Misconfiguration. All domains are whitelisted by default.",
+      "url": "https://github.com/advisories/GHSA-fxwf-4rqh-v8g3"
+    },
+    "1060267": {
+      "findings": [
+        {
+          "version": "1.3.5",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>rc>ini"
+          ]
+        },
+        {
+          "version": "1.3.5",
+          "paths": [
+            "@angular/cli>ini",
+            "@angular/cli>@schematics/update>ini"
+          ]
+        },
+        {
+          "version": "1.3.5",
+          "paths": [
+            "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>rc>ini"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.3.6",
+      "module_name": "ini",
+      "severity": "high",
+      "github_advisory_id": "GHSA-qqgx-2p2h-9c37",
+      "cves": [
+        "CVE-2020-7788"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.3.6",
+      "cvss": {
+        "score": 7.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L"
+      },
+      "updated": "2020-12-10T16:51:40.000Z",
+      "recommendation": "Upgrade to version 1.3.6 or later",
+      "cwe": "[\"CWE-1321\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1060267,
+      "references": "- https://github.com/npm/ini/commit/56d2805e07ccd94e2ba0984ac9240ff02d44b6f1\n- https://www.npmjs.com/advisories/1589\n- https://snyk.io/vuln/SNYK-JS-INI-1048974\n- https://nvd.nist.gov/vuln/detail/CVE-2020-7788\n- https://lists.debian.org/debian-lts-announce/2020/12/msg00032.html\n- https://github.com/advisories/GHSA-qqgx-2p2h-9c37",
+      "created": "2022-03-09T20:00:44.090Z",
+      "reported_by": null,
+      "title": "Prototype Pollution",
+      "npm_advisory_id": null,
+      "overview": "### Overview\nThe `ini` npm package before version 1.3.6 has a Prototype Pollution vulnerability.\n\nIf an attacker submits a malicious INI file to an application that parses it with `ini.parse`, they will pollute the prototype on the application. This can be exploited further depending on the context.\n\n### Patches\n\nThis has been patched in 1.3.6\n\n### Steps to reproduce\n\npayload.ini\n```\n[__proto__]\npolluted = \"polluted\"\n```\n\npoc.js:\n```\nvar fs = require('fs')\nvar ini = require('ini')\n\nvar parsed = ini.parse(fs.readFileSync('./payload.ini', 'utf-8'))\nconsole.log(parsed)\nconsole.log(parsed.__proto__)\nconsole.log(polluted)\n```\n\n```\n> node poc.js\n{}\n{ polluted: 'polluted' }\n{ polluted: 'polluted' }\npolluted\n```",
+      "url": "https://github.com/advisories/GHSA-qqgx-2p2h-9c37"
+    },
+    "1060279": {
+      "findings": [
+        {
+          "version": "11.1.1",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>yargs>yargs-parser"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": ">=6.0.0 <13.1.2",
+      "module_name": "yargs-parser",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-p9pc-299p-vxgp",
+      "cves": [
+        "CVE-2020-7608"
+      ],
+      "access": "public",
+      "patched_versions": ">=13.1.2",
+      "cvss": {
+        "score": 5.3,
+        "vectorString": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L"
+      },
+      "updated": "2020-11-10T21:06:04.000Z",
+      "recommendation": "Upgrade to version 13.1.2 or later",
+      "cwe": "[\"CWE-915\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1060279,
+      "references": "- https://snyk.io/vuln/SNYK-JS-YARGSPARSER-560381\n- https://www.npmjs.com/advisories/1500\n- https://github.com/yargs/yargs-parser/commit/63810ca1ae1a24b08293a4d971e70e058c7a41e2\n- https://nvd.nist.gov/vuln/detail/CVE-2020-7608\n- https://github.com/advisories/GHSA-p9pc-299p-vxgp",
+      "created": "2022-03-09T20:00:44.091Z",
+      "reported_by": null,
+      "title": "Prototype Pollution in yargs-parser",
+      "npm_advisory_id": null,
+      "overview": "Affected versions of `yargs-parser` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.  \nParsing the argument `--foo.__proto__.bar baz'` adds a `bar` property with value `baz` to all objects. This is only exploitable if attackers have control over the arguments being passed to `yargs-parser`.\n\n\n\n## Recommendation\n\nUpgrade to versions 13.1.2, 15.0.1, 18.1.1 or later.",
+      "url": "https://github.com/advisories/GHSA-p9pc-299p-vxgp"
+    },
+    "1060396": {
+      "findings": [
+        {
+          "version": "1.2.1",
+          "paths": [
+            "@angular-devkit/build-angular>tree-kill",
+            "@angular-devkit/build-angular>@ngtools/webpack>tree-kill"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<1.2.2",
+      "module_name": "tree-kill",
+      "severity": "high",
+      "github_advisory_id": "GHSA-884p-74jh-xrg2",
+      "cves": [],
+      "access": "public",
+      "patched_versions": ">=1.2.2",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "updated": "2020-08-31T18:59:06.000Z",
+      "recommendation": "Upgrade to version 1.2.2 or later",
+      "cwe": "[\"CWE-77\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1060396,
+      "references": "- https://hackerone.com/reports/701183\n- https://www.npmjs.com/advisories/1432\n- https://github.com/advisories/GHSA-884p-74jh-xrg2",
+      "created": "2022-03-09T20:00:44.102Z",
+      "reported_by": null,
+      "title": "Command Injection in tree-kill",
+      "npm_advisory_id": null,
+      "overview": "Versions of `tree-kill` prior to 1.2.2 are vulnerable to Command Injection. The package fails to sanitize values passed to the  `kill` function. If this value is user-controlled it  may allow attackers to run arbitrary commands in the server. The issue only affects Windows systems.\n\n\n## Recommendation\n\nUpgrade to version 1.2.2 or later.",
+      "url": "https://github.com/advisories/GHSA-884p-74jh-xrg2"
+    },
+    "1061294": {
+      "findings": [
+        {
+          "version": "1.7.0",
+          "paths": [
+            "@angular-devkit/build-angular>copy-webpack-plugin>serialize-javascript"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<3.1.0",
+      "module_name": "serialize-javascript",
+      "severity": "high",
+      "github_advisory_id": "GHSA-hxcc-f52p-wc94",
+      "cves": [
+        "CVE-2020-7660"
+      ],
+      "access": "public",
+      "patched_versions": ">=3.1.0",
+      "cvss": {
+        "score": 8.1,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+      },
+      "updated": "2020-08-11T14:14:52.000Z",
+      "recommendation": "Upgrade to version 3.1.0 or later",
+      "cwe": "[\"CWE-502\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1061294,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-7660\n- https://github.com/yahoo/serialize-javascript/commit/f21a6fb3ace2353413761e79717b2d210ba6ccbd\n- https://github.com/advisories/GHSA-hxcc-f52p-wc94",
+      "created": "2022-03-09T20:00:44.179Z",
+      "reported_by": null,
+      "title": "Insecure serialization leading to RCE in serialize-javascript",
+      "npm_advisory_id": null,
+      "overview": "serialize-javascript prior to 3.1.0 allows remote attackers to inject arbitrary code via the function \"deleteFunctions\" within \"index.js\". \n\nAn object such as `{\"foo\": /1\"/, \"bar\": \"a\\\"@__R-<UID>-0__@\"}` was serialized as `{\"foo\": /1\"/, \"bar\": \"a\\/1\"/}`, which allows an attacker to escape the `bar` key. This requires the attacker to control the values of both `foo` and `bar` and guess the value of `<UID>`. The UID has a keyspace of approximately 4 billion making it a realistic network attack.",
+      "url": "https://github.com/advisories/GHSA-hxcc-f52p-wc94"
+    },
+    "1061322": {
+      "findings": [
+        {
+          "version": "3.9.1",
+          "paths": [
+            "@angular/cli>pacote>npm-registry-fetch",
+            "@angular/cli>@schematics/update>pacote>npm-registry-fetch"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<4.0.5",
+      "module_name": "npm-registry-fetch",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-jmqm-f2gx-4fjv",
+      "cves": [],
+      "access": "public",
+      "patched_versions": ">=4.0.5",
+      "cvss": {
+        "score": 5.3,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+      },
+      "updated": "2020-07-07T18:26:22.000Z",
+      "recommendation": "Upgrade to version 4.0.5 or later",
+      "cwe": "[\"CWE-352\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1061322,
+      "references": "- https://github.com/npm/npm-registry-fetch/security/advisories/GHSA-jmqm-f2gx-4fjv\n- https://github.com/npm/npm-registry-fetch/pull/29\n- https://github.com/npm/npm-registry-fetch/commit/18bf9b97fb1deecdba01ffb05580370846255c88\n- https://snyk.io/vuln/SNYK-JS-NPMREGISTRYFETCH-575432\n- https://github.com/advisories/GHSA-jmqm-f2gx-4fjv",
+      "created": "2022-03-09T20:00:44.181Z",
+      "reported_by": null,
+      "title": "Sensitive information exposure through logs in npm-registry-fetch",
+      "npm_advisory_id": null,
+      "overview": "Affected versions of `npm-registry-fetch` are vulnerable to an information exposure vulnerability through log files. The cli supports URLs like `<protocol>://[<user>[:<password>]@]<hostname>[:<port>][:][/]<path>`. The password value is not redacted and is printed to stdout and also to any generated log files.",
+      "url": "https://github.com/advisories/GHSA-jmqm-f2gx-4fjv"
+    },
+    "1061404": {
+      "findings": [
+        {
+          "version": "1.2.0",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>rc>minimist"
+          ]
+        },
+        {
+          "version": "1.2.0",
+          "paths": [
+            "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>rc>minimist"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": ">=1.0.0 <1.2.3",
+      "module_name": "minimist",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-vh95-rmgr-6w4m",
+      "cves": [
+        "CVE-2020-7598"
+      ],
+      "access": "public",
+      "patched_versions": ">=1.2.3",
+      "cvss": {
+        "score": 5.6,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L"
+      },
+      "updated": "2020-04-03T21:42:10.000Z",
+      "recommendation": "Upgrade to version 1.2.3 or later",
+      "cwe": "[\"CWE-915\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1061404,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-7598\n- https://github.com/substack/minimist/commit/38a4d1caead72ef99e824bb420a2528eec03d9ab\n- https://github.com/substack/minimist/commit/63e7ed05aa4b1889ec2f3b196426db4500cbda94\n- https://snyk.io/vuln/SNYK-JS-MINIMIST-559764\n- http://lists.opensuse.org/opensuse-security-announce/2020-06/msg00024.html\n- https://github.com/substack/minimist/commit/4cf1354839cb972e38496d35e12f806eea92c11f#diff-a1e0ee62c91705696ddb71aa30ad4f95\n- https://www.npmjs.com/advisories/1179\n- https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
+      "created": "2022-03-09T20:00:44.187Z",
+      "reported_by": null,
+      "title": "Prototype Pollution in minimist",
+      "npm_advisory_id": null,
+      "overview": "Affected versions of `minimist` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.  \nParsing the argument `--__proto__.y=Polluted` adds a `y` property with value `Polluted` to all objects. The argument `--__proto__=Polluted` raises and uncaught error and crashes the application.  \nThis is exploitable if attackers have control over the arguments being passed to `minimist`.\n\n\n\n## Recommendation\n\nUpgrade to versions 0.2.1, 1.2.3 or later.",
+      "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m"
+    },
+    "1061405": {
+      "findings": [
+        {
+          "version": "0.0.8",
+          "paths": [
+            "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>mkdirp>minimist",
+            "@angular-devkit/build-angular>webpack-dev-server>chokidar>fsevents>node-pre-gyp>tar>mkdirp>minimist"
+          ]
+        },
+        {
+          "version": "0.0.8",
+          "paths": [
+            "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>mkdirp>minimist",
+            "@angular/compiler-cli>chokidar>fsevents>node-pre-gyp>tar>mkdirp>minimist"
+          ]
+        },
+        {
+          "version": "0.0.10",
+          "paths": [
+            "karma>optimist>minimist"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<0.2.1",
+      "module_name": "minimist",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-vh95-rmgr-6w4m",
+      "cves": [
+        "CVE-2020-7598"
+      ],
+      "access": "public",
+      "patched_versions": ">=0.2.1",
+      "cvss": {
+        "score": 5.6,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L"
+      },
+      "updated": "2020-04-03T21:42:10.000Z",
+      "recommendation": "Upgrade to version 0.2.1 or later",
+      "cwe": "[\"CWE-915\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1061405,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2020-7598\n- https://github.com/substack/minimist/commit/38a4d1caead72ef99e824bb420a2528eec03d9ab\n- https://github.com/substack/minimist/commit/63e7ed05aa4b1889ec2f3b196426db4500cbda94\n- https://snyk.io/vuln/SNYK-JS-MINIMIST-559764\n- http://lists.opensuse.org/opensuse-security-announce/2020-06/msg00024.html\n- https://github.com/substack/minimist/commit/4cf1354839cb972e38496d35e12f806eea92c11f#diff-a1e0ee62c91705696ddb71aa30ad4f95\n- https://www.npmjs.com/advisories/1179\n- https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
+      "created": "2022-03-09T20:00:44.187Z",
+      "reported_by": null,
+      "title": "Prototype Pollution in minimist",
+      "npm_advisory_id": null,
+      "overview": "Affected versions of `minimist` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.  \nParsing the argument `--__proto__.y=Polluted` adds a `y` property with value `Polluted` to all objects. The argument `--__proto__=Polluted` raises and uncaught error and crashes the application.  \nThis is exploitable if attackers have control over the arguments being passed to `minimist`.\n\n\n\n## Recommendation\n\nUpgrade to versions 0.2.1, 1.2.3 or later.",
+      "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m"
+    },
+    "1061457": {
+      "findings": [
+        {
+          "version": "1.7.0",
+          "paths": [
+            "@angular-devkit/build-angular>copy-webpack-plugin>serialize-javascript"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<2.1.1",
+      "module_name": "serialize-javascript",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-h9rv-jmmf-4pgx",
+      "cves": [
+        "CVE-2019-16769"
+      ],
+      "access": "public",
+      "patched_versions": ">=2.1.1",
+      "cvss": {
+        "score": 4.2,
+        "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:L"
+      },
+      "updated": "2019-12-05T18:44:25.000Z",
+      "recommendation": "Upgrade to version 2.1.1 or later",
+      "cwe": "[\"CWE-79\"]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1061457,
+      "references": "- https://github.com/yahoo/serialize-javascript/security/advisories/GHSA-h9rv-jmmf-4pgx\n- https://nvd.nist.gov/vuln/detail/CVE-2019-16769\n- https://github.com/advisories/GHSA-h9rv-jmmf-4pgx\n- https://www.npmjs.com/advisories/1426",
+      "created": "2022-03-09T20:00:44.190Z",
+      "reported_by": null,
+      "title": "Cross-Site Scripting in serialize-javascript",
+      "npm_advisory_id": null,
+      "overview": "Versions of `serialize-javascript` prior to 2.1.1 are vulnerable to Cross-Site Scripting (XSS). The package fails to sanitize serialized regular expressions. This vulnerability does not affect Node.js applications.\n\n\n## Recommendation\n\nUpgrade to version 2.1.1 or later.",
+      "url": "https://github.com/advisories/GHSA-h9rv-jmmf-4pgx"
+    },
+    "1061952": {
+      "findings": [
+        {
+          "version": "4.2.0",
+          "paths": [
+            "karma"
+          ]
+        }
+      ],
+      "metadata": null,
+      "vulnerable_versions": "<6.3.16",
+      "module_name": "karma",
+      "severity": "moderate",
+      "github_advisory_id": "GHSA-rc3x-jf5g-xvc5",
+      "cves": [
+        "CVE-2021-23495"
+      ],
+      "access": "public",
+      "patched_versions": ">=6.3.16",
+      "cvss": {
+        "score": 5.4,
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N"
+      },
+      "updated": "2022-03-01T19:17:54.000Z",
+      "recommendation": "Upgrade to version 6.3.16 or later",
+      "cwe": "[]",
+      "found_by": null,
+      "deleted": null,
+      "id": 1061952,
+      "references": "- https://nvd.nist.gov/vuln/detail/CVE-2021-23495\n- https://github.com/karma-runner/karma/commit/ff7edbb2ffbcdd69761bece86b7dc1ef0740508d\n- https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-2412347\n- https://snyk.io/vuln/SNYK-JS-KARMA-2396325\n- https://github.com/advisories/GHSA-rc3x-jf5g-xvc5",
+      "created": "2022-03-09T22:00:43.328Z",
+      "reported_by": null,
+      "title": "Open redirect in karma",
+      "npm_advisory_id": null,
+      "overview": "Karma before 6.3.16 is vulnerable to Open Redirect due to missing validation of the return_url query parameter.",
+      "url": "https://github.com/advisories/GHSA-rc3x-jf5g-xvc5"
+    }
+  },
+  "muted": [],
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 2,
+      "moderate": 42,
+      "high": 28,
+      "critical": 3
+    },
+    "dependencies": 24,
+    "devDependencies": 1227,
+    "optionalDependencies": 167,
+    "totalDependencies": 1251
+  },
+  "runId": "cef9e967-13de-44ae-985f-af2d11a30ed4"
+}

@@ -1,6 +1,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
+
 from dojo.checks import check_configuration_deduplication
 
 logger = logging.getLogger(__name__)

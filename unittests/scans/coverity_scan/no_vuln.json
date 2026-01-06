@@ -1,0 +1,9 @@
+{
+  "type" : "Coverity issues",
+  "formatVersion" : 10,
+  "suppressedIssueCount" : 0,
+  "issues" : [],
+  "desktopAnalysisSettings" : null,
+  "error" : null,
+  "warnings" : []
+}

@@ -1,23 +1,26 @@
-import json
 import hashlib
+import json
+
 import hyperlink
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 
-class WFuzzParser(object):
-    """
-    A class that can be used to parse the WFuzz JSON report files
-    """
+class WFuzzParser:
 
-    # table to match HTTP error code and severity
-    SEVERITY = {
-        "200": "High",
-        "500": "Low",
-        "401": "Medium",
-        "407": "Medium",
-        "403": "Medium",
-    }
+    """A class that can be used to parse the WFuzz JSON report files"""
+
+    # match HTTP error code and severity
+    def severity_mapper(self, severity_input):
+        if 200 <= int(severity_input) <= 299:
+            return "High"
+        if 300 <= int(severity_input) <= 399:
+            return "Low"
+        if 400 <= int(severity_input) <= 499:
+            return "Medium"
+        if int(severity_input) >= 500:
+            return "Low"
+        return None
 
     def get_scan_types(self):
         return ["WFuzz JSON report"]
@@ -29,19 +32,15 @@ class WFuzzParser(object):
         return "Import WFuzz findings in JSON format."
 
     def get_findings(self, filename, test):
-
         data = json.load(filename)
-
         dupes = {}
         for item in data:
             url = hyperlink.parse(item["url"])
-            payload = item["payload"]
-            return_code = str(item["code"])
-            severity = self.SEVERITY[return_code]
+            return_code = item.get("code", None)
+            severity = "Low" if return_code is None else self.severity_mapper(severity_input=return_code)
             description = f"The URL {url.to_text()} must not be exposed\n Please review your configuration\n"
-
             dupe_key = hashlib.sha256(
-                (url.to_text() + return_code).encode("utf-8")
+                (url.to_text() + str(return_code)).encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:
@@ -65,10 +64,10 @@ class WFuzzParser(object):
                         host=url.host,
                         protocol=url.scheme,
                         port=url.port,
-                    )
+                    ),
                 ]
                 finding.unsaved_req_resp = [
-                    {"req": item["payload"], "resp": str(item["code"])}
+                    {"req": item["payload"], "resp": str(return_code)},
                 ]
                 dupes[dupe_key] = finding
         return list(dupes.values())

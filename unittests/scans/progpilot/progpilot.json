@@ -1,0 +1,51 @@
+[
+    {
+        "source_name": [
+            "$sql"
+        ],
+        "source_line": [
+            590
+        ],
+        "source_column": [
+            25854
+        ],
+        "source_file": [
+            "\/home\/kali\/Modules\/progpilot\/Order.php"
+        ],
+        "tainted_flow": [
+            [
+                {
+                    "flow_name": "$dni",
+                    "flow_line": 588,
+                    "flow_column": 25832,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/Order.php"
+                },
+                {
+                    "flow_name": "$getValue_return",
+                    "flow_line": 565,
+                    "flow_column": 25050,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/Order.php"
+                }
+            ]
+        ],
+        "sink_name": "executeS",
+        "sink_line": 593,
+        "sink_column": 26002,
+        "sink_file": "\/home\/User\/Modules\/progpilot\/Order.php",
+        "vuln_name": "sql_injection",
+        "vuln_cwe": "CWE_89",
+        "vuln_id": "9c4f078e57a235d34183ddb1dd39ef8b91fc2eeed26718c5c5eb053874e401e6",
+        "vuln_type": "taint-style"
+    },
+    {
+        "vuln_rule": "MUST_VERIFY_DEFINITION",
+        "vuln_name": "security misconfiguration",
+        "vuln_line": 461,
+        "vuln_column": 18375,
+        "vuln_file": "\/home\/User\/Modules\/progpilot\/Order.php",
+        "vuln_description": "curl must verify that the certificate is trusted (CURLOPT_SSL_VERIFYPEER set to true)",
+        "vuln_cwe": "CWE_295",
+        "vuln_id": "797d1acd46cbf6305ec0a2480ed29414a76326bab6bebe533df8050f0205040d",
+        "vuln_type": "custom"
+    }
+]

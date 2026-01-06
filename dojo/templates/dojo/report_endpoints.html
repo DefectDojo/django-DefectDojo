@@ -3,7 +3,7 @@
     <div class="panel-heading tight" title="Click and drag to move" data-toggle="tooltip">
         <div class="clearfix">
             <h5 class="pull-left">Vulnerable Endpoints</h5>
-            <span class="fa fa-arrows pull-right icon"></span>
+            <span class="fa-solid fa-arrows-up-down-left-right pull-right icon"></span>
         </div>
     </div>
     <div class="panel-body">
@@ -47,8 +47,8 @@
                     </tbody>
                 </table>
             </div>
-            <div class="clearfix">
-                {% include "dojo/paging_snippet.html" with page=findings page_size=False %}
+            <div class="clearfix endpoint-pagination">
+                {% include "dojo/paging_snippet.html" with page=endpoints page_size=False %}
             </div>
 
         {% endif %}

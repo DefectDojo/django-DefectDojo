@@ -6,7 +6,8 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 
-class DependencyTrackParser(object):
+class DependencyTrackParser:
+
     """
     A class that can be used to parse the JSON Finding Packaging Format (FPF) export from OWASP Dependency Track.
 
@@ -92,16 +93,15 @@ class DependencyTrackParser(object):
         severity = dependency_track_severity.lower()
         if severity == "critical":
             return "Critical"
-        elif severity == "high":
+        if severity == "high":
             return "High"
-        elif severity == "medium":
+        if severity == "medium":
             return "Medium"
-        elif severity == "low":
+        if severity == "low":
             return "Low"
-        elif severity.startswith("info"):
+        if severity.startswith("info"):
             return "Informational"
-        else:
-            return None
+        return None
 
     def _convert_dependency_track_finding_to_dojo_finding(self, dependency_track_finding, test):
         """
@@ -112,88 +112,111 @@ class DependencyTrackParser(object):
         :return: A DefectDojo Finding model
         """
         # Validation of required fields
-        if 'vulnerability' not in dependency_track_finding:
-            raise Exception("Missing 'vulnerability' node from finding!")
-        if 'vulnId' not in dependency_track_finding['vulnerability']:
-            raise Exception("Missing 'vulnId' node from vulnerability!")
-        vuln_id = dependency_track_finding['vulnerability']['vulnId']
-        if 'source' not in dependency_track_finding['vulnerability']:
-            raise Exception("Missing 'source' node from vulnerability!")
-        source = dependency_track_finding['vulnerability']['source']
-        if 'component' not in dependency_track_finding:
-            raise Exception("Missing 'component' node from finding!")
-        if 'name' not in dependency_track_finding['component']:
-            raise Exception("Missing 'name' node from component!")
-        component_name = dependency_track_finding['component']['name']
+        if "vulnerability" not in dependency_track_finding:
+            msg = "Missing 'vulnerability' node from finding!"
+            raise ValueError(msg)
+        if "vulnId" not in dependency_track_finding["vulnerability"]:
+            msg = "Missing 'vulnId' node from vulnerability!"
+            raise ValueError(msg)
+        vuln_id = dependency_track_finding["vulnerability"]["vulnId"]
+        if "source" not in dependency_track_finding["vulnerability"]:
+            msg = "Missing 'source' node from vulnerability!"
+            raise ValueError(msg)
+        source = dependency_track_finding["vulnerability"]["source"]
+        if "component" not in dependency_track_finding:
+            msg = "Missing 'component' node from finding!"
+            raise ValueError(msg)
+        if "name" not in dependency_track_finding["component"]:
+            msg = "Missing 'name' node from component!"
+            raise ValueError(msg)
+        component_name = dependency_track_finding["component"]["name"]
 
         # Build the title of the Dojo finding
         # Note: the 'version' of a component is not a requirement in the Dependency Track data model.
         # As such we only add in version information if it is present.
-        if 'version' in dependency_track_finding['component'] and dependency_track_finding['component']['version'] is not None:
-            component_version = dependency_track_finding['component']['version']
+        if "version" in dependency_track_finding["component"] and dependency_track_finding["component"]["version"] is not None:
+            component_version = dependency_track_finding["component"]["version"]
         else:
             component_version = None
-        if component_version is not None:
-            version_description = component_version
+        version_description = component_version if component_version is not None else ""
+
+        title = f"{component_name}:{version_description} affected by: {vuln_id} ({source})"
+
+        # We should collect all the vulnerability ids, the FPF format can add additional IDs as aliases
+        # we add these aliases in the vulnerability_id list making sure duplicate findings get correctly deduplicated
+        # older version of Dependency-track might not include these field therefore lets check first
+        if dependency_track_finding["vulnerability"].get("aliases"):
+            # There can be multiple alias entries
+            set_of_ids = set()
+            set_of_sources = {"cveId", "sonatypeId", "ghsaId", "osvId", "snykId", "gsdId", "vulnDbId"}
+            for alias in dependency_track_finding["vulnerability"]["aliases"]:
+                for source in set_of_sources:
+                    if source in alias:
+                        set_of_ids.add(alias[source])
+            vulnerability_id = list(set_of_ids)
         else:
-            version_description = ''
-
-        title = "{component_name}:{version_description} affected by: {vuln_id} ({source})"\
-            .format(vuln_id=vuln_id, source=source, version_description=version_description, component_name=component_name)
-
-        # The vulnId is not always a CVE (e.g. if the vulnerability is not from the NVD source)
-        # So here we set the cve for the DefectDojo finding to null unless the source of the
-        # Dependency Track vulnerability is NVD
-        vulnerability_id = vuln_id if source is not None and source.upper() == 'NVD' else None
+            # The vulnId is not always a CVE (e.g. if the vulnerability is not from the NVD source)
+            # So here we set the cve for the DefectDojo finding to null unless the source of the
+            # Dependency Track vulnerability is NVD
+            vulnerability_id = [vuln_id] if source is not None and source.upper() == "NVD" else None
 
         # Default CWE to CWE-1035 Using Components with Known Vulnerabilities if there is no CWE
-        if 'cweId' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['cweId'] is not None:
-            cwe = dependency_track_finding['vulnerability']['cweId']
+        if "cweId" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["cweId"] is not None:
+            cwe = dependency_track_finding["vulnerability"]["cweId"]
         else:
             cwe = 1035
 
         # Build the description of the Dojo finding
         # We already know (from above) that the version information is not always present
         if component_version is not None:
-            component_description = "Version {component_version} of the {component_name} component".format(component_version=component_version, component_name=component_name)
+            component_description = f"Version {component_version} of the {component_name} component"
         else:
-            component_description = "The {component_name} component".format(component_name=component_name)
-        vulnerability_description = "You are using a component with a known vulnerability. " \
-                "{component_description} is affected by the vulnerability with an id of {vuln_id} as " \
-                "identified by {source}." \
-            .format(component_description=component_description, vuln_id=vuln_id, source=source)
+            component_description = f"The {component_name} component"
+        vulnerability_description = (
+            "You are using a component with a known vulnerability. "
+            f"{component_description} is affected by the vulnerability with an id of {vuln_id} as "
+            f"identified by {source}."
+        )
         # Append purl info if it is present
-        if 'purl' in dependency_track_finding['component'] and dependency_track_finding['component']['purl'] is not None:
-            component_purl = dependency_track_finding['component']['purl']
-            vulnerability_description = vulnerability_description + "\nThe purl of the affected component is: {purl}.".format(purl=component_purl)
+        if "purl" in dependency_track_finding["component"] and dependency_track_finding["component"]["purl"] is not None:
+            component_purl = dependency_track_finding["component"]["purl"]
+            vulnerability_description += f"\nThe purl of the affected component is: {component_purl}."
             # there is no file_path in the report, but defect dojo needs it otherwise it skips deduplication:
             # see https://github.com/DefectDojo/django-DefectDojo/issues/3647
             # might be no longer needed in the future, and is not needed if people use the default
             # hash code dedupe config for this parser
             file_path = component_purl
         else:
-            file_path = 'unknown'
+            file_path = "unknown"
 
         # Append other info about vulnerability description info if it is present
-        if 'title' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['title'] is not None:
-            vulnerability_description = vulnerability_description + "\nVulnerability Title: {title}".format(title=dependency_track_finding['vulnerability']['title'])
-        if 'subtitle' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['subtitle'] is not None:
-            vulnerability_description = vulnerability_description + "\nVulnerability Subtitle: {subtitle}".format(subtitle=dependency_track_finding['vulnerability']['subtitle'])
-        if 'description' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['description'] is not None:
-            vulnerability_description = vulnerability_description + "\nVulnerability Description: {description}".format(description=dependency_track_finding['vulnerability']['description'])
-        if 'uuid' in dependency_track_finding['vulnerability'] and dependency_track_finding['vulnerability']['uuid'] is not None:
-            vuln_id_from_tool = dependency_track_finding['vulnerability']['uuid']
+        if "title" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["title"] is not None:
+            vulnerability_description += "\nVulnerability Title: {title}".format(title=dependency_track_finding["vulnerability"]["title"])
+        if "subtitle" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["subtitle"] is not None:
+            vulnerability_description += "\nVulnerability Subtitle: {subtitle}".format(subtitle=dependency_track_finding["vulnerability"]["subtitle"])
+        if "description" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["description"] is not None:
+            vulnerability_description += "\nVulnerability Description: {description}".format(description=dependency_track_finding["vulnerability"]["description"])
+        if "uuid" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["uuid"] is not None:
+            vuln_id_from_tool = dependency_track_finding["vulnerability"]["uuid"]
 
         # Get severity according to Dependency Track and convert it to a severity DefectDojo understands
-        dependency_track_severity = dependency_track_finding['vulnerability']['severity']
+        dependency_track_severity = dependency_track_finding["vulnerability"]["severity"]
         vulnerability_severity = self._convert_dependency_track_severity_to_dojo_severity(dependency_track_severity)
         if vulnerability_severity is None:
-            logger.warn("Detected severity of %s that could not be mapped for %s. Defaulting to Critical!", dependency_track_severity, title)
-            vulnerability_severity = "Critical"
+            logger.warning("Detected severity of %s that could not be mapped for %s. Defaulting to Informational!", dependency_track_severity, title)
+            vulnerability_severity = "Informational"
+
+        # Get the cvss score of the vulnerabililty
+        cvss_score = dependency_track_finding["vulnerability"].get("cvssV3BaseScore")
 
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
-        analysis = dependency_track_finding.get('analysis')
-        is_false_positive = True if analysis is not None and analysis.get('state') == 'FALSE_POSITIVE' else False
+        analysis = dependency_track_finding.get("analysis")
+        is_false_positive = bool(analysis is not None and analysis.get("state") == "FALSE_POSITIVE")
+
+        # Get the EPSS details
+        epss_percentile = dependency_track_finding["vulnerability"].get("epssPercentile", None)
+
+        epss_score = dependency_track_finding["vulnerability"].get("epssScore", None)
 
         # Build and return Finding model
         finding = Finding(
@@ -210,8 +233,20 @@ class DependencyTrackParser(object):
             static_finding=True,
             dynamic_finding=False)
 
+        if is_false_positive:
+            finding.is_mitigated = True
+            finding.active = False
+
         if vulnerability_id:
-            finding.unsaved_vulnerability_ids = [vulnerability_id]
+            finding.unsaved_vulnerability_ids = vulnerability_id
+
+        if cvss_score:
+            finding.cvssv3_score = cvss_score
+
+        if epss_score:
+            finding.epss_score = epss_score
+        if epss_percentile:
+            finding.epss_percentile = epss_percentile
 
         return finding
 
@@ -228,30 +263,30 @@ class DependencyTrackParser(object):
 
         # Exit if file is not provided
         if file is None:
-            return list()
+            return []
 
         # Load the contents of the JSON file into a dictionary
         data = file.read()
         try:
-            findings_export_dict = json.loads(str(data, 'utf-8'))
+            findings_export_dict = json.loads(str(data, "utf-8"))
         except:
             findings_export_dict = json.loads(data)
 
         # Exit if file is an empty JSON dictionary
         if len(findings_export_dict.keys()) == 0:
-            return list()
+            return []
 
         # Make sure the findings key exists in the dictionary and that it is not null or an empty list
         # If it is null or an empty list then exit
-        if 'findings' not in findings_export_dict or not findings_export_dict['findings']:
-            return list()
+        if "findings" not in findings_export_dict or not findings_export_dict["findings"]:
+            return []
 
         # Start with an empty list of findings
-        items = list()
+        items = []
 
         # If we have gotten this far then there should be one or more findings
         # Loop through each finding from Dependency Track
-        for dependency_track_finding in findings_export_dict['findings']:
+        for dependency_track_finding in findings_export_dict["findings"]:
             # Convert a Dependency Track finding to a DefectDojo finding
             dojo_finding = self._convert_dependency_track_finding_to_dojo_finding(dependency_track_finding, test)
 

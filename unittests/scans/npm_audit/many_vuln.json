@@ -1,0 +1,394 @@
+{
+  "actions": [
+    {
+      "action": "install",
+      "module": "express",
+      "target": "4.16.3",
+      "isMajor": false,
+      "resolves": [
+        {
+          "id": 534,
+          "path": "express>debug",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 534,
+          "path": "express>finalhandler>debug",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 534,
+          "path": "express>send>debug",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 534,
+          "path": "express>serve-static>send>debug",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 106,
+          "path": "express>accepts>negotiator",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 526,
+          "path": "express>fresh",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 526,
+          "path": "express>send>fresh",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 526,
+          "path": "express>serve-static>send>fresh",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 535,
+          "path": "express>send>mime",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 535,
+          "path": "express>serve-static>send>mime",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "action": "install",
+      "module": "serve-favicon",
+      "target": "2.5.0",
+      "isMajor": false,
+      "resolves": [
+        {
+          "id": 526,
+          "path": "serve-favicon>fresh",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "action": "install",
+      "module": "pg-promise",
+      "target": "8.4.5",
+      "isMajor": true,
+      "resolves": [
+        {
+          "id": 521,
+          "path": "pg-promise>pg",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "action": "install",
+      "module": "body-parser",
+      "target": "1.18.3",
+      "isMajor": false,
+      "resolves": [
+        {
+          "id": 534,
+          "path": "body-parser>debug",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "action": "install",
+      "module": "debug",
+      "target": "3.1.0",
+      "isMajor": true,
+      "resolves": [
+        {
+          "id": 534,
+          "path": "debug",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "action": "install",
+      "module": "morgan",
+      "target": "1.9.0",
+      "isMajor": false,
+      "resolves": [
+        {
+          "id": 534,
+          "path": "morgan>debug",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    }
+  ],
+  "advisories": {
+    "106": {
+      "findings": [
+        {
+          "version": "0.5.3",
+          "paths": [
+            "express>accepts>negotiator"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 106,
+      "created": "2016-05-04T16:34:12.000Z",
+      "updated": "2018-04-17T12:58:40.142Z",
+      "deleted": null,
+      "title": "Regular Expression Denial of Service",
+      "found_by": {
+        "name": "Adam Baldwin"
+      },
+      "reported_by": {
+        "name": "Adam Baldwin"
+      },
+      "module_name": "negotiator",
+      "cves": [
+        "CVE-2016-10539"
+      ],
+      "vulnerable_versions": "<= 0.6.0",
+      "patched_versions": ">= 0.6.1",
+      "overview": "Affected versions of `negotiator` are vulnerable to regular expression denial of service attacks, which trigger upon parsing a specially crafted `Accept-Language` header value.\n\n",
+      "recommendation": "Update to version 0.6.1 or later.",
+      "references": "",
+      "access": "public",
+      "severity": "high",
+      "cwe": "CWE-400",
+      "metadata": {
+        "module_type": "Network.Library",
+        "exploitability": 6,
+        "affected_components": "Internal::Code::Function::acceptsLanguages()"
+      },
+      "url": "https://nodesecurity.io/advisories/106"
+    },
+    "521": {
+      "findings": [
+        {
+          "version": "5.1.0",
+          "paths": [
+            "pg-promise>pg"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 521,
+      "created": "2017-08-13T04:26:17.960Z",
+      "updated": "2018-04-08T22:40:41.503Z",
+      "deleted": null,
+      "title": "Remote Code Execution",
+      "found_by": {
+        "name": "Sehrope Sarkuni"
+      },
+      "reported_by": {
+        "name": "Sehrope Sarkuni"
+      },
+      "module_name": "pg",
+      "cves": [
+        "CVE-2017-16082"
+      ],
+      "vulnerable_versions": "< 2.11.2 || >= 3.0.0 < 3.6.4 ||  >= 4.0.0 < 4.5.7 || >= 5.0.0 < 5.2.1 || >= 6.0.0 < 6.0.5 || >= 6.1.0 < 6.1.6 || >= 6.2.0 < 6.2.5 || >= 6.3.0 < 6.3.3 || >= 6.4.0 < 6.4.2 || >= 7.0.0 < 7.0.2 || >= 7.1.0 < 7.1.2",
+      "patched_versions": ">= 2.11.2 < 3.0.0|| >= 3.6.4 < 4.0.0 ||  >= 4.5.7 < 5.0.0 || >= 5.2.1 < 6.0.0 || >= 6.0.5  < 6.1.0 || >= 6.1.6 < 6.2.0 || >= 6.2.5 < 6.3.0 || >= 6.3.3 < 6.4.0 || >= 6.4.2 < 7.0.0 || >= 7.0.2 < 7.1.0 || >= 7.1.2",
+      "overview": "Affected versions of `pg` contain a remote code execution vulnerability that occurs when the remote database or query specifies a crafted column name. \n\nThere are two specific scenarios in which it is likely for an application to be vulnerable:\n1. The application executes unsafe, user-supplied sql which contains malicious column names.\n2. The application connects to an untrusted database and executes a query returning results which contain a malicious column name.\n\n## Proof of Concept\n```\nconst { Client } = require('pg')\nconst client = new Client()\nclient.connect()\n\nconst sql = `SELECT 1 AS \"\\\\'/*\", 2 AS \"\\\\'*/\\n + console.log(process.env)] = null;\\n//\"`\n\nclient.query(sql, (err, res) => {\n  client.end()\n})\n```",
+      "recommendation": "* Version 2.x.x: Update to version 2.11.2 or later.\n* Version 3.x.x: Update to version 3.6.4 or later.\n* Version 4.x.x: Update to version 4.5.7 or later.\n* Version 5.x.x: Update to version 5.2.1 or later.\n* Version 6.x.x: Update to version 6.4.2 or later. ( Note that versions 6.1.6, 6.2.5, and 6.3.3 are also patched. )\n* Version 7.x.x: Update to version 7.1.2 or later. ( Note that version 7.0.2 is also patched. )",
+      "references": "[Node Postgres: Code Execution Vulnerability Announcement](https://node-postgres.com/announcements#2017-08-12-code-execution-vulnerability)",
+      "access": "public",
+      "severity": "high",
+      "cwe": "CWE-94",
+      "metadata": {
+        "module_type": "Network.Library",
+        "exploitability": 5,
+        "affected_components": ""
+      },
+      "url": "https://nodesecurity.io/advisories/521"
+    },
+    "526": {
+      "findings": [
+        {
+          "version": "0.3.0",
+          "paths": [
+            "express>fresh",
+            "express>send>fresh",
+            "express>serve-static>send>fresh",
+            "serve-favicon>fresh"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 526,
+      "created": "2017-09-08T20:23:54.164Z",
+      "updated": "2018-04-09T00:15:21.807Z",
+      "deleted": null,
+      "title": "Regular Expression Denial of Service",
+      "found_by": {
+        "name": "Cristian-Alexandru Staicu"
+      },
+      "reported_by": {
+        "name": "Cristian-Alexandru Staicu"
+      },
+      "module_name": "fresh",
+      "cves": [
+        "CVE-2017-16119"
+      ],
+      "vulnerable_versions": "< 0.5.2",
+      "patched_versions": ">= 0.5.2",
+      "overview": "Affected versions of `fresh` are vulnerable to regular expression denial of service when parsing specially crafted user input.",
+      "recommendation": "Update to version 0.5.2 or later.",
+      "references": "",
+      "access": "public",
+      "severity": "high",
+      "cwe": "CWE-400",
+      "metadata": {
+        "module_type": "Multi.Library",
+        "exploitability": 5,
+        "affected_components": ""
+      },
+      "url": "https://nodesecurity.io/advisories/526"
+    },
+    "534": {
+      "findings": [
+        {
+          "version": "2.2.0",
+          "paths": [
+            "body-parser>debug",
+            "debug",
+            "express>debug",
+            "express>finalhandler>debug",
+            "express>send>debug",
+            "express>serve-static>send>debug",
+            "morgan>debug"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 534,
+      "created": "2017-09-25T18:55:55.956Z",
+      "updated": "2018-05-16T19:37:43.686Z",
+      "deleted": null,
+      "title": "Regular Expression Denial of Service",
+      "found_by": {
+        "name": "Cristian-Alexandru Staicu"
+      },
+      "reported_by": {
+        "name": "Cristian-Alexandru Staicu"
+      },
+      "module_name": "debug",
+      "cves": [
+        "CVE-2017-16137"
+      ],
+      "vulnerable_versions": "<= 2.6.8 || >= 3.0.0 <= 3.0.1",
+      "patched_versions": ">= 2.6.9 < 3.0.0 || >= 3.1.0",
+      "overview": "Affected versions of `debug` are vulnerable to regular expression denial of service when untrusted user input is passed into the `o` formatter. \n\nAs it takes 50,000 characters to block the event loop for 2 seconds, this issue is a low severity issue.",
+      "recommendation": "Version 2.x.x: Update to version 2.6.9 or later.\nVersion 3.x.x: Update to version 3.1.0 or later.\n",
+      "references": "- [Issue #501](https://github.com/visionmedia/debug/issues/501)\n- [PR #504](https://github.com/visionmedia/debug/pull/504)",
+      "access": "public",
+      "severity": "low",
+      "cwe": "CWE-400",
+      "metadata": {
+        "module_type": "",
+        "exploitability": 5,
+        "affected_components": ""
+      },
+      "url": "https://nodesecurity.io/advisories/534"
+    },
+    "535": {
+      "findings": [
+        {
+          "version": "1.3.4",
+          "paths": [
+            "c748e76b6a1b63450590f72e14f9b53ad357bc64632ff0bda73d00799c4a0a91>send>mime",
+            "express>serve-static>send>mime"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 535,
+      "created": "2017-09-25T19:02:28.152Z",
+      "updated": "2018-04-09T00:38:22.785Z",
+      "deleted": null,
+      "title": "Regular Expression Denial of Service",
+      "found_by": {
+        "name": "Cristian-Alexandru Staicu"
+      },
+      "reported_by": {
+        "name": "Cristian-Alexandru Staicu"
+      },
+      "module_name": "mime",
+      "cves": [
+        "CVE-2017-16138"
+      ],
+      "vulnerable_versions": "< 1.4.1 || > 2.0.0 < 2.0.3",
+      "patched_versions": ">= 1.4.1 < 2.0.0 || >= 2.0.3",
+      "overview": "Affected versions of `mime` are vulnerable to regular expression denial of service when a mime lookup is performed on untrusted user input.",
+      "recommendation": "Update to version 2.0.3 or later.",
+      "references": "[Issue #167](https://github.com/broofa/node-mime/issues/167)",
+      "access": "public",
+      "severity": "moderate",
+      "cwe": "CWE-",
+      "metadata": {
+        "module_type": "Multi.Library",
+        "exploitability": 4,
+        "affected_components": ""
+      },
+      "url": "https://nodesecurity.io/advisories/535"
+    }
+  },
+  "muted": [],
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 7,
+      "moderate": 2,
+      "high": 6,
+      "critical": 0
+    },
+    "dependencies": 159,
+    "devDependencies": 0,
+    "optionalDependencies": 0,
+    "totalDependencies": 159
+  },
+  "runId": "849ed1f1-5dd8-4fda-872a-05cd46957c82"
+}

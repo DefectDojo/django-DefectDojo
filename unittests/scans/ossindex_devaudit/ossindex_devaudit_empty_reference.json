@@ -1,0 +1,24 @@
+{
+	"Packages Audited": 1,
+	"Vulnerabilities Found": 1,
+	"Packages": [
+    {
+        "Package": {
+            "pm": "npm",
+            "group": "None",
+            "name": "react-dom",
+            "version": "16.4.1",
+            "vendor": "None"
+        },
+        "Vulnerabilities": [{
+                "id": "422fd048-4155-4213-8126-75b4c3135820",
+                "title": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+                "description": "The software does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users.",
+                "cvssScore": "6.1",
+                "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+                "cwe": "CWE-79",
+                "reference": ""
+            }
+        ]
+    }]
+}

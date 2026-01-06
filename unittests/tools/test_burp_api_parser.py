@@ -1,14 +1,13 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.models import Test
-from dojo.tools.burp_api.parser import BurpApiParser
-from dojo.tools.burp_api.parser import convert_severity, convert_confidence
+from dojo.tools.burp_api.parser import BurpApiParser, convert_confidence, convert_severity
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestParser(DojoTestCase):
 
     def test_example_report(self):
-        testfile = get_unit_tests_path() + "/scans/burp_api/example.json"
-        with open(testfile) as f:
+        testfile = get_unit_tests_scans_path("burp_api") / "example.json"
+        with testfile.open(encoding="utf-8") as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
             for finding in findings:
@@ -25,8 +24,8 @@ class TestParser(DojoTestCase):
             self.assertIsNotNone(item.impact)
 
     def test_validate_more(self):
-        testfile = get_unit_tests_path() + "/scans/burp_api/many_vulns.json"
-        with open(testfile) as f:
+        testfile = get_unit_tests_scans_path("burp_api") / "many_vulns.json"
+        with testfile.open(encoding="utf-8") as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
             for finding in findings:
@@ -49,7 +48,6 @@ class TestParser(DojoTestCase):
             self.assertEqual("Info", convert_severity({}))
 
     def test_convert_confidence(self):
-        confidence = None
         with self.subTest(confidence="certain"):
             self.assertGreater(3, convert_confidence({"confidence": "certain"}))
         with self.subTest(confidence="firm"):
@@ -61,3 +59,14 @@ class TestParser(DojoTestCase):
             self.assertIsNone(convert_confidence({"confidence": "undefined"}))
         with self.subTest(confidence=None):
             self.assertIsNone(convert_confidence({}))
+
+    def test_fix_issue_9128(self):
+        testfile = get_unit_tests_scans_path("burp_api") / "fix_issue_9128.json"
+        with testfile.open(encoding="utf-8") as f:
+            parser = BurpApiParser()
+            findings = parser.get_findings(f, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            for item in findings:
+                self.assertIsNotNone(item.impact)

@@ -1,0 +1,29 @@
+{{- if and .Values.django.podDisruptionBudget.enabled (or (gt (int .Values.django.replicas) 1) .Values.django.autoscaling.enabled) }}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.django.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
+  labels:
+    defectdojo.org/component: django
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  name: {{ $fullName }}-django
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+      defectdojo.org/component: django
+{{ toYaml (omit .Values.django.podDisruptionBudget "enabled" ) | indent 2 }}
+{{- end }}

@@ -4,7 +4,8 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class CoverityApiParser(object):
+class CoverityApiParser:
+
     """Parser that can load data from Synopsys Coverity API"""
 
     def get_scan_types(self):
@@ -20,13 +21,13 @@ class CoverityApiParser(object):
         tree = json.load(file)
 
         if "viewContentsV1" not in tree:
-            raise ValueError("Report file is not a well-formed Coverity REST view report", file.name)
+            msg = "Report file is not a well-formed Coverity REST view report"
+            raise ValueError(msg, file.name)
 
-        items = list()
+        items = []
         for issue in tree["viewContentsV1"]["rows"]:
-
             # get only security findings
-            if "Security" != issue.get("displayIssueKind"):
+            if issue.get("displayIssueKind") != "Security":
                 continue
 
             description_formated = "\n".join(
@@ -35,22 +36,26 @@ class CoverityApiParser(object):
                     f"**Type:** `{issue.get('displayType')}`",
                     f"**Status:** `{issue.get('status')}`",
                     f"**Classification:** `{issue.get('classification')}`",
-                ]
+                ],
             )
 
             finding = Finding()
             finding.test = test
             finding.title = issue["displayType"]
-            finding.severity = self.convert_displayImpact(issue.get("displayImpact"))
+            finding.severity = self.convert_displayImpact(
+                issue.get("displayImpact"),
+            )
             finding.description = description_formated
             finding.static_finding = True
             finding.dynamic_finding = False
             finding.unique_id_from_tool = issue.get("cid")
 
             if "firstDetected" in issue:
-                finding.date = datetime.strptime(issue["firstDetected"], "%m/%d/%y").date()
+                finding.date = datetime.strptime(
+                    issue["firstDetected"], "%m/%d/%y",
+                ).date()
 
-            if "cwe" in issue and type(issue["cwe"]) == int:
+            if "cwe" in issue and isinstance(issue["cwe"], int):
                 finding.cwe = issue["cwe"]
 
             if "displayFile" in issue:
@@ -61,17 +66,17 @@ class CoverityApiParser(object):
             else:
                 finding.nb_occurences = 1
 
-            if "New" == issue.get("status"):
+            if issue.get("status") == "New":
                 finding.active = True
                 finding.verified = False
-            elif "Triaged" == issue.get("status"):
+            elif issue.get("status") == "Triaged":
                 finding.active = True
                 finding.verified = True
-            elif "Fixed" == issue.get("status"):
+            elif issue.get("status") == "Fixed":
                 finding.active = False
                 finding.verified = True
             else:
-                if "False Positive" == issue.get("classification"):
+                if issue.get("classification") == "False Positive":
                     finding.false_p = True
                 if "lastTriaged" in issue:
                     ds = issue["lastTriaged"][0:10]
@@ -87,29 +92,31 @@ class CoverityApiParser(object):
     def convert_displayImpact(self, val):
         if val is None:
             return "Info"
-        if "Audit" == val:
+        if val == "Audit":
             return "Info"
-        if "Low" == val:
+        if val == "Low":
             return "Low"
-        if "Medium" == val:
+        if val == "Medium":
             return "Medium"
-        if "High" == val:
+        if val == "High":
             return "High"
-        raise ValueError(f"Unknown value for Coverity displayImpact {val}")
+        msg = f"Unknown value for Coverity displayImpact {val}"
+        raise ValueError(msg)
 
     def convert_severity(self, val):
         if val is None:
             return "Info"
-        if "Unspecified" == val:
+        if val == "Unspecified":
             return "Info"
-        if "Severe" == val:
+        if val == "Severe":
             return "Critical"
-        if "Major" == val:
+        if val == "Major":
             return "High"
-        if "Minor" == val:
+        if val == "Minor":
             return "Medium"
-        if "New Value" == val:
+        if val == "New Value":
             return "Info"
-        if "Various" == val:
+        if val == "Various":
             return "Info"
-        raise ValueError(f"Unknown value for Coverity severity {val}")
+        msg = f"Unknown value for Coverity severity {val}"
+        raise ValueError(msg)

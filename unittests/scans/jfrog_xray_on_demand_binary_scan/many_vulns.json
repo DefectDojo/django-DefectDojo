@@ -1,0 +1,111 @@
+[
+    {
+      "scan_id": "dd8f-4927-5db6-fb188ae8d984",
+      "vulnerabilities": [
+        {
+          "cves": [
+            {
+              "cve": "CVE-2017-8923",
+              "cvss_v2_score": "5.0",
+              "cvss_v2_vector": "CVSS:2.0/AV:N/AC:L/Au:N/C:N/I:N/A:P",
+              "cvss_v3_score": "7.5",
+              "cvss_v3_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            }
+          ],
+          "summary": "Summary of test",
+          "severity": "High",
+          "components": {
+            "gav://org.yaml:snakeyaml:1.16": {
+              "fixed_versions": [
+                "[1.26]"
+              ],
+              "impact_paths": [
+                [
+                  {
+                    "component_id": "gav://co.com.test.com"
+                  },
+                  {
+                    "component_id": "gav://co.com.test.com",
+                    "full_path": "lib/snakeyaml-1.16.jar"
+                  }
+                ]
+              ]
+            }
+          },
+          "issue_id": "XRAY-92904",
+          "references": [
+            "https://test.com.co"
+          ]
+        },
+        {
+          "cves": [
+            {
+              "cve": "CVE-2014-0114",
+              "cvss_v2_score": "7.5",
+              "cvss_v2_vector": "CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P"
+            }
+          ],
+          "summary": "Summary test",
+          "severity": "High",
+          "components": {
+            "gav://test": {
+              "fixed_versions": [
+                "[1.9.4]"
+              ],
+              "impact_paths": [
+                [
+                  {
+                    "component_id": "gav://co.com.test.test:core:1.0.0-test"
+                  },
+                  {
+                    "component_id": "gav://test",
+                    "full_path": "lib/commons-beanutils-1.9.2.jar"
+                  }
+                ]
+              ]
+            }
+          },
+          "issue_id": "XRAY-55616",
+          "references": [
+            "https://test.com.co"
+          ]
+        },
+        {
+          "cves": [
+            {
+              "cvss_v2_score": "7.5",
+              "cvss_v2_vector": "CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P"
+            }
+          ],
+          "summary": "Summary test",
+          "severity": "High",
+          "components": {
+            "test_item": {
+              "fixed_versions": [
+                "[1.2.8.RELEASE]",
+                "[1.3.1.RELEASE]"
+              ],
+              "impact_paths": [
+                [
+                  {
+                    "component_id": "gav://co.com.test.test:core:1.0.0-test"
+                  },
+                  {
+                    "component_id": "gav://test.com.co",
+                    "full_path": "lib/test/libtest"
+                  }
+                ]
+              ]
+            }
+          },
+          "issue_id": "XRAY-79870",
+          "references": [
+            "https://test.com.co"
+          ]
+        }
+      ],
+      "component_id": "gav://co.com.test.test:core:1.0.0-test",
+      "package_type": "Maven",
+      "status": "completed"
+    }
+  ]

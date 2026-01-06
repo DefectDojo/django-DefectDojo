@@ -25,4 +25,12 @@ URL: https://groups.google.com/forum/#!topic/ruby-security-ann/2S9Pwz2i16k
 Title: Path Traversal in Sprockets
 Solution: upgrade to >= 2.12.5, < 3.0.0, >= 3.7.2, < 4.0.0, >= 4.0.0.beta8
 
+Name: nokogiri
+Version: 1.15.2
+GHSA: GHSA-xc9x-jj77-9p9j
+Criticality: Unknown
+URL: https://github.com/sparklemotion/nokogiri/security/advisories/GHSA-xc9x-jj77-9p9j
+Title: Improper Handling of Unexpected Data Type in Nokogiri
+Solution: upgrade to '>= 1.16.2'
+
 Vulnerabilities found!

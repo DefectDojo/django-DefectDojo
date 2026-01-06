@@ -1,0 +1,61 @@
+"Plugin","Plugin Name","Family","Severity","IP Address","Protocol","Port","Exploit?","Repository","MAC Address","DNS Name","NetBIOS Name","Plugin Output","Synopsis","Description","Steps to Remediate","See Also","Risk Factor","STIG Severity","Vulnerability Priority Rating","CVSS V2 Base Score","CVSS V3 Base Score","CVSS V2 Temporal Score","CVSS V3 Temporal Score","CVSS V2 Vector","CVSS V3 Vector","CPE","CVE","BID","Cross References","First Discovered","Last Observed","Vuln Publication Date","Patch Publication Date","Plugin Publication Date","Plugin Modification Date","Exploit Ease","Exploit Frameworks","Check Type","Version","Recast Risk Comment","Accept Risk Comment","Agent ID","Host ID"
+"42873","SSL Medium Strength Cipher Suites Supported (SWEET32)","General","High","1.2.3.4","TCP","443","No","Individual Scan","fa:16:3e:e6:0b:98","","","Plugin Output: 
+  Medium Strength Ciphers (> 64-bit and < 112-bit key, or 3DES)
+
+    Name                          Code             KEX           Auth     Encryption             MAC
+    ----------------------        ----------       ---           ----     ---------------------  ---
+    ECDHE-RSA-DES-CBC3-SHA        0xC0, 0x12       ECDH          RSA      3DES-CBC(168)          SHA1
+    DES-CBC3-SHA                  0x00, 0x0A       RSA           RSA      3DES-CBC(168)          SHA1
+
+The fields above are :
+
+  {Tenable ciphername}
+  {Cipher ID code}
+  Kex={key exchange}
+  Auth={authentication}
+  Encrypt={symmetric encryption method}
+  MAC={message authentication code}
+  {export flag}","The remote service supports the use of medium strength SSL ciphers.","The remote host supports the use of SSL ciphers that offer medium strength encryption. Nessus regards medium strength as any encryption that uses key lengths at least 64 bits and less than 112 bits, or else that uses the 3DES encryption suite.
+
+Note that it is considerably easier to circumvent medium strength encryption if the attacker is on the same physical network.","Reconfigure the affected application if possible to avoid use of medium strength ciphers.","https://www.openssl.org/blog/blog/2016/08/24/sweet32/
+https://sweet32.info","Medium","","5.1","5.0","7.5","","","AV:N/AC:L/Au:N/C:P/I:N/A:N","AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N","","CVE-2016-2183","","","Feb 9, 2024 10:48:42 UTC","Oct 17, 2024 17:24:54 UTC","Aug 24, 2016 12:00:00 UTC","N/A","Nov 23, 2009 12:00:00 UTC","Feb 3, 2021 12:00:00 UTC","","","remote","1.21","","","",""
+"42873","SSL Medium Strength Cipher Suites Supported (SWEET32)","General","High","2.3.4.5","TCP","443","No","Individual Scan","fa:16:3e:e6:0b:98","","","Plugin Output: 
+  Medium Strength Ciphers (> 64-bit and < 112-bit key, or 3DES)
+
+    Name                          Code             KEX           Auth     Encryption             MAC
+    ----------------------        ----------       ---           ----     ---------------------  ---
+    ECDHE-RSA-DES-CBC3-SHA        0xC0, 0x12       ECDH          RSA      3DES-CBC(168)          SHA1
+    DES-CBC3-SHA                  0x00, 0x0A       RSA           RSA      3DES-CBC(168)          SHA1
+
+The fields above are :
+
+  {Tenable ciphername}
+  {Cipher ID code}
+  Kex={key exchange}
+  Auth={authentication}
+  Encrypt={symmetric encryption method}
+  MAC={message authentication code}
+  {export flag}","The remote service supports the use of medium strength SSL ciphers.","The remote host supports the use of SSL ciphers that offer medium strength encryption. Nessus regards medium strength as any encryption that uses key lengths at least 64 bits and less than 112 bits, or else that uses the 3DES encryption suite.
+
+Note that it is considerably easier to circumvent medium strength encryption if the attacker is on the same physical network.","Reconfigure the affected application if possible to avoid use of medium strength ciphers.","https://www.openssl.org/blog/blog/2016/08/24/sweet32/
+https://sweet32.info","Medium","","5.1","5.0","7.5","","","AV:N/AC:L/Au:N/C:P/I:N/A:N","AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N","","CVE-2016-2183","","","Feb 9, 2024 10:48:42 UTC","Oct 17, 2024 17:24:54 UTC","Aug 24, 2016 12:00:00 UTC","N/A","Nov 23, 2009 12:00:00 UTC","Feb 3, 2021 12:00:00 UTC","","","remote","1.21","","","",""
+"42873","SSL Medium Strength Cipher Suites Supported (SWEET32)","General","High","1.2.3.4","TCP","8443","No","Individual Scan","fa:16:3e:e6:0b:98","","","Plugin Output: 
+  Medium Strength Ciphers (> 64-bit and < 112-bit key, or 3DES)
+
+    Name                          Code             KEX           Auth     Encryption             MAC
+    ----------------------        ----------       ---           ----     ---------------------  ---
+    ECDHE-RSA-DES-CBC3-SHA        0xC0, 0x12       ECDH          RSA      3DES-CBC(168)          SHA1
+    DES-CBC3-SHA                  0x00, 0x0A       RSA           RSA      3DES-CBC(168)          SHA1
+
+The fields above are :
+
+  {Tenable ciphername}
+  {Cipher ID code}
+  Kex={key exchange}
+  Auth={authentication}
+  Encrypt={symmetric encryption method}
+  MAC={message authentication code}
+  {export flag}","The remote service supports the use of medium strength SSL ciphers.","The remote host supports the use of SSL ciphers that offer medium strength encryption. Nessus regards medium strength as any encryption that uses key lengths at least 64 bits and less than 112 bits, or else that uses the 3DES encryption suite.
+
+Note that it is considerably easier to circumvent medium strength encryption if the attacker is on the same physical network.","Reconfigure the affected application if possible to avoid use of medium strength ciphers.","https://www.openssl.org/blog/blog/2016/08/24/sweet32/
+https://sweet32.info","Medium","","5.1","5.0","7.5","","","AV:N/AC:L/Au:N/C:P/I:N/A:N","AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N","","CVE-2016-2183","","","Feb 9, 2024 10:48:42 UTC","Oct 17, 2024 17:24:54 UTC","Aug 24, 2016 12:00:00 UTC","N/A","Nov 23, 2009 12:00:00 UTC","Feb 3, 2021 12:00:00 UTC","","","remote","1.21","","","",""
