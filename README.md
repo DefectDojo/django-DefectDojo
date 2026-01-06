@@ -73,7 +73,7 @@ docker compose logs initializer | grep "Admin password:"
 
 ## Supported Installation Options
 
-* Pro - SaaS or self-hosted via K8s or docker compose. [Speak to our team](https://defectdojo.com/contact) or [sign-up for SaaS directly](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1)
+* Pro - SaaS or self-hosted (via K8s or docker compose). [Speak to our team](https://defectdojo.com/contact) or [sign-up for SaaS directly](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1)
 * OS - [docker compose](readme-docs/DOCKER.md)
 
 
