@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'docs/**'
+      - '.github/workflows/*'
 
 jobs:
   deploy:
