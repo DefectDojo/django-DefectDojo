@@ -62,5 +62,5 @@ class GCloudArtifactScanParser:
         if severity.lower().capitalize() in {"Critical", "High", "Medium", "Low", "Info"}:
             return severity.lower().capitalize()
         if severity == "Minimal":
-            return "Medium"
+            return "Low"
         return "Info"
