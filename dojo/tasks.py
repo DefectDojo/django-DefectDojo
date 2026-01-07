@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta
 
 import pghistory
+from celery import Task
 from celery.utils.log import get_task_logger
 from django.apps import apps
 from django.conf import settings
@@ -172,8 +173,15 @@ def _async_dupe_delete_impl():
                     dojo_dispatch_task(calculate_grade, product.id)
 
 
-@app.task(ignore_result=False)
+@app.task(ignore_result=False, base=Task)
 def celery_status():
+    """
+    Simple health check task to verify Celery is running.
+
+    Uses base Task class (not PgHistoryTask) since it doesn't need:
+    - User context tracking
+    - Pghistory context (no database modifications)
+    """
     return True
 
 
