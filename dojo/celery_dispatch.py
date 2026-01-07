@@ -25,14 +25,26 @@ def _inject_async_user(kwargs: Mapping[str, Any] | None) -> dict[str, Any]:
     return result
 
 
+def _inject_pghistory_context(kwargs: Mapping[str, Any] | None) -> dict[str, Any]:
+    """Capture and inject pghistory context if available."""
+    result: dict[str, Any] = dict(kwargs or {})
+    if "_pgh_context" not in result:
+        from dojo.pghistory_utils import get_serializable_pghistory_context  # noqa: PLC0415 circular import
+
+        if pgh_context := get_serializable_pghistory_context():
+            result["_pgh_context"] = pgh_context
+    return result
+
+
 def dojo_create_signature(task_or_sig: _SupportsSi | Signature, *args: Any, **kwargs: Any) -> Signature:
     """
-    Build a Celery signature with DefectDojo user context injected.
+    Build a Celery signature with DefectDojo user context and pghistory context injected.
 
     - If passed a task, returns `task_or_sig.si(*args, **kwargs)`.
     - If passed an existing signature, returns a cloned signature with merged kwargs.
     """
     injected = _inject_async_user(kwargs)
+    injected = _inject_pghistory_context(injected)
     injected.pop("countdown", None)
 
     if isinstance(task_or_sig, Signature):
@@ -47,6 +59,7 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
     Dispatch a task/signature using DefectDojo semantics.
 
     - Inject `async_user` if missing.
+    - Capture and inject pghistory context if available.
     - Respect `sync=True` (foreground execution) and user `block_execution`.
     - Support `countdown=<seconds>` for async dispatch.
 
@@ -59,6 +72,7 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
 
     countdown = cast("int", kwargs.pop("countdown", 0))
     injected = _inject_async_user(kwargs)
+    injected = _inject_pghistory_context(injected)
 
     sig = dojo_create_signature(task_or_sig if isinstance(task_or_sig, Signature) else cast("_SupportsSi", task_or_sig), *args, **injected)
     sig_kwargs = dict(sig.kwargs or {})

@@ -17,7 +17,7 @@ from django.utils.translation import gettext as _
 
 from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
-from dojo.celery import DojoAsyncTask, app
+from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.decorators import we_want_async
 from dojo.labels import get_labels
@@ -867,25 +867,25 @@ class NotificationManager(NotificationManagerHelpers):
                 )
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def send_slack_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
     SlackNotificationManger().send_slack_notification(event, user=user, **kwargs)
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def send_msteams_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
     MSTeamsNotificationManger().send_msteams_notification(event, user=user, **kwargs)
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def send_mail_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
     EmailNotificationManger().send_mail_notification(event, user=user, **kwargs)
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def send_webhooks_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
     WebhookNotificationManger().send_webhooks_notification(event, user=user, **kwargs)

@@ -4,7 +4,7 @@ from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.celery import DojoAsyncTask, app
+from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.models import (
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class EndpointManager:
-    @app.task(base=DojoAsyncTask)
+    @app.task
     def add_endpoints_to_unsaved_finding(
         finding: Finding,  # noqa: N805
         endpoints: list[Endpoint],
@@ -57,7 +57,7 @@ class EndpointManager:
 
         logger.debug(f"IMPORT_SCAN: {len(endpoints)} endpoints imported")
 
-    @app.task(base=DojoAsyncTask)
+    @app.task
     def mitigate_endpoint_status(
         endpoint_status_list: list[Endpoint_Status],  # noqa: N805
         user: Dojo_User,
@@ -82,7 +82,7 @@ class EndpointManager:
                 batch_size=1000,
             )
 
-    @app.task(base=DojoAsyncTask)
+    @app.task
     def reactivate_endpoint_status(
         endpoint_status_list: list[Endpoint_Status],  # noqa: N805
         **kwargs: dict,

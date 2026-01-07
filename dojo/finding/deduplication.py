@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
-from dojo.celery import DojoAsyncTask, app
+from dojo.celery import app
 from dojo.models import Finding, System_Settings
 
 logger = logging.getLogger(__name__)
@@ -44,12 +44,12 @@ def get_finding_models_for_deduplication(finding_ids):
     )
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def do_dedupe_finding_task(new_finding_id, *args, **kwargs):
     return do_dedupe_finding_task_internal(Finding.objects.get(id=new_finding_id), *args, **kwargs)
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def do_dedupe_batch_task(finding_ids, *args, **kwargs):
     """
     Async task to deduplicate a batch of findings. The findings are assumed to be in the same test.

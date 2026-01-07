@@ -12,38 +12,6 @@ logger = logging.getLogger(__name__)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 
 
-class PgHistoryTask(Task):
-
-    """
-    Custom Celery base task that automatically applies pghistory context.
-
-    When a task is dispatched via dojo_async_task, the current pghistory
-    context is captured and passed in kwargs as "_pgh_context". This base
-    class extracts that context and applies it before running the task,
-    ensuring all database events share the same context as the original
-    request.
-    """
-
-    def __call__(self, *args, **kwargs):
-        # Import here to avoid circular imports during Celery startup
-        from dojo.pghistory_utils import get_pghistory_context_manager  # noqa: PLC0415
-
-        # Extract context from kwargs (won't be passed to task function)
-        pgh_context = kwargs.pop("_pgh_context", None)
-
-        with get_pghistory_context_manager(pgh_context):
-            return super().__call__(*args, **kwargs)
-
-
-app = Celery("dojo", task_cls=PgHistoryTask)
-
-# Using a string here means the worker will not have to
-# pickle the object when using Windows.
-app.config_from_object("django.conf:settings", namespace="CELERY")
-
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
-
-
 class DojoAsyncTask(Task):
 
     """
@@ -79,6 +47,41 @@ class DojoAsyncTask(Task):
 
         # Call parent to execute async
         return super().apply_async(args=args, kwargs=kwargs, **options)
+
+
+class PgHistoryTask(DojoAsyncTask):
+
+    """
+    Custom Celery base task that automatically applies pghistory context.
+
+    This class inherits from DojoAsyncTask to provide:
+    - User context injection and task tracking (from DojoAsyncTask)
+    - Automatic pghistory context application (from this class)
+
+    When a task is dispatched via dojo_dispatch_task or dojo_async_task, the current
+    pghistory context is captured and passed in kwargs as "_pgh_context". This base
+    class extracts that context and applies it before running the task, ensuring all
+    database events share the same context as the original request.
+    """
+
+    def __call__(self, *args, **kwargs):
+        # Import here to avoid circular imports during Celery startup
+        from dojo.pghistory_utils import get_pghistory_context_manager  # noqa: PLC0415
+
+        # Extract context from kwargs (won't be passed to task function)
+        pgh_context = kwargs.pop("_pgh_context", None)
+
+        with get_pghistory_context_manager(pgh_context):
+            return super().__call__(*args, **kwargs)
+
+
+app = Celery("dojo", task_cls=PgHistoryTask)
+
+# Using a string here means the worker will not have to
+# pickle the object when using Windows.
+app.config_from_object("django.conf:settings", namespace="CELERY")
+
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 
 @app.task(bind=True)

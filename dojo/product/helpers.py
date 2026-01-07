@@ -1,13 +1,13 @@
 import contextlib
 import logging
 
-from dojo.celery import DojoAsyncTask, app
+from dojo.celery import app
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 
 logger = logging.getLogger(__name__)
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def propagate_tags_on_product(product_id, *args, **kwargs):
     with contextlib.suppress(Product.DoesNotExist):
         product = Product.objects.get(id=product_id)

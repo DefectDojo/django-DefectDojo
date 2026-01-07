@@ -17,7 +17,7 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 from requests.auth import HTTPBasicAuth
 
-from dojo.celery import DojoAsyncTask, app
+from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.forms import JIRAEngagementForm, JIRAProjectForm
 from dojo.models import (
@@ -773,7 +773,7 @@ def push_to_jira(obj, *args, **kwargs):
 
 
 # we need thre separate celery tasks due to the decorators we're using to map to/from ids
-@app.task(base=DojoAsyncTask)
+@app.task
 def push_finding_to_jira(finding_id, *args, **kwargs):
     finding = get_object_or_none(Finding, id=finding_id)
     if not finding:
@@ -785,7 +785,7 @@ def push_finding_to_jira(finding_id, *args, **kwargs):
     return add_jira_issue(finding, *args, **kwargs)
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def push_finding_group_to_jira(finding_group_id, *args, **kwargs):
     finding_group = get_object_or_none(Finding_Group, id=finding_group_id)
     if not finding_group:
@@ -801,7 +801,7 @@ def push_finding_group_to_jira(finding_group_id, *args, **kwargs):
     return add_jira_issue(finding_group, *args, **kwargs)
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def push_engagement_to_jira(engagement_id, *args, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
     if not engagement:
@@ -1373,7 +1373,7 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def close_epic(engagement_id, push_to_jira, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
     if not engagement:
@@ -1421,7 +1421,7 @@ def close_epic(engagement_id, push_to_jira, **kwargs):
     return False
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def update_epic(engagement_id, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
     if not engagement:
@@ -1467,7 +1467,7 @@ def update_epic(engagement_id, **kwargs):
     return False
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def add_epic(engagement_id, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
     if not engagement:
@@ -1578,7 +1578,7 @@ def add_comment(obj, note, *, force_push=False, **kwargs):
     return dojo_dispatch_task(add_comment_internal, jira_issue.id, note.id, force_push=force_push, **kwargs)
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def add_comment_internal(jira_issue_id, note_id, *, force_push=False, **kwargs):
     """Internal Celery task that adds a comment to a JIRA issue."""
     jira_issue = get_object_or_none(JIRA_Issue, id=jira_issue_id)

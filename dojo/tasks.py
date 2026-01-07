@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.auditlog import run_flush_auditlog
-from dojo.celery import DojoAsyncTask, app
+from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.helper import fix_loop_duplicates
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
@@ -237,7 +237,7 @@ def clear_sessions(*args, **kwargs):
     call_command("clearsessions")
 
 
-@app.task(base=DojoAsyncTask)
+@app.task
 def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
     """
     Async task to update watson search indexes for a specific model type.
