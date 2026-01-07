@@ -668,7 +668,7 @@ class BaseImporter(ImporterOptions):
             product = self.test.engagement.product
             system_settings = System_Settings.objects.get()
             if system_settings.enable_product_grade:
-                calculate_grade_signature = utils.calculate_grade_signature(product)
+                calculate_grade_signature = utils.calculate_grade.si(product.id)
                 chord(post_processing_task_signatures)(calculate_grade_signature)
             else:
                 group(post_processing_task_signatures).apply_async()
