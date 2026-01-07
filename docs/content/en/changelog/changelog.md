@@ -10,10 +10,29 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Dec 2025: v2.53
 
+### Dec 29, 2025: v2.53.5
+
+* **(Pro UI)** Added Finding count columns to Engagement table.
+* **(Pro UI)** Enter/Return no longer automatically submits forms.
+
+### Dec 22, 2025: v2.53.4
+
+* **(Pro UI)** Asset Hierarchy now uses separate tabs for Asset selection and for the rendered Asset tree:
+![image](images/asset-hierarchy-2.53.4.png)
+
+### Dec 15, 2025: v2.53.3
+
+*DefectDojo v2.53.2 does not have a corresponding Pro release.*
+
+* **(Connectors)** Support for private CA certificates has been added to Connectors to assist with connectivity.
+
 ### Dec 8, 2025: v2.53.1
 
 * **(Assets/Organizations)** Introduced overhaul to Products/Product Types, added the ability to create and diagram relationships between Assets.  See [Assets/Organizations documentation](/en/working_with_findings/organizing_engagements_tests/pro_assets_organizations/) for details, and information on opting in to the Beta.
 * **(Findings)** Added new KEV fields for ransomware, exploits, and date handling.
+* **(Pro UI)** Added Table Preferences menu, allowing you to store preset lists of columns for each table.
+
+![image](images/pro_tablepreferences.png)
 
 ### Dec 1, 2025: v2.53.0
 
