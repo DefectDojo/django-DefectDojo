@@ -32,18 +32,12 @@ deduplication, remediation, and reporting.
 
 Pro Edition: [pro.demo.defectdojo.com](https://pro.demo.defectdojo.com)
 
-Community Edition: [demo.defectdojo.org](https://demo.defectdojo.org)
+OWASP Community Edition: [demo.defectdojo.org](https://demo.defectdojo.org)
 
 Either demo enviornment can be logged into with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demos are publicly accessible
 and reset every day. Do not put sensitive data in the demo. An easy way to test DefectDojo is to upload some [sample scan reports](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans).
 
-## Quick Start for Compose V2
-
-From July 2023 Compose V1 [stopped receiving updates](https://docs.docker.com/compose/reference/).
-
-Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous
-docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using
-`docker compose` instead of `docker-compose`.
+## Quick Start for Docker Compose
 
 ```sh
 # Clone the project
@@ -65,18 +59,6 @@ docker compose up -d
 docker compose logs initializer | grep "Admin password:"
 ```
 
-## For Docker Compose V1
-
-You can run Compose V1 by calling `docker-compose` (by adding the hyphen (-) between `docker compose`).
-
-Following commands are using original version so you might need to adjust them:
-```sh
-docker/docker-compose-check.sh
-docker/entrypoint-initializer.sh
-docker/setEnv.sh
-```
-
-Navigate to `http://localhost:8080` to see your new instance!
 
 ## Documentation
 
@@ -91,21 +73,21 @@ Navigate to `http://localhost:8080` to see your new instance!
 
 ## Supported Installation Options
 
-* [SaaS](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1) - New UI, addittional features, includes support & supports the project
-* [Docker / Docker Compose](readme-docs/DOCKER.md)
+* Pro - SaaS or self-hosted (via K8s or docker compose). [Speak to our team](https://defectdojo.com/contact) or [sign-up for SaaS directly](https://cloud.defectdojo.com/accounts/onboarding/plg_step_1)
+* OS - [docker compose](readme-docs/DOCKER.md)
 
 
 ## Community, Getting Involved, and Updates
 
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/slack-logo-icon.png" alt="Slack" height="50"/>](https://owasp.org/slack/invite)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/updated-dojo-chop.png" alt="Dojo" height="50"/>](https://community-defectdojo.tightknit.community/)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/slack-logo-icon.png" alt="Slack" height="50"/>](https://join.slack.com/t/defectdojocommunity/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/Linkedin-logo-icon-png.png" alt="LinkedIn" height="50"/>](https://www.linkedin.com/company/defectdojo)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/Twitter_Logo.png" alt="Twitter" height="50"/>](https://twitter.com/defectdojo)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/x_logo.jpg" alt="Twitter" height="50"/>](https://x.com/defectdojo)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/assets/images/YouTube-Emblem.png" alt="Youtube" height="50"/>](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ)
 
-[Join the OWASP Slack Community](https://owasp.org/slack/invite) and participate in the discussion! You can find us in
-our channel there, [#defectdojo](https://owasp.slack.com/channels/defectdojo). Follow DefectDojo on
-[Twitter](https://twitter.com/defectdojo), [LinkedIn](https://www.linkedin.com/company/defectdojo), and
-[YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) for project updates!
+Checkout our new [Community Portal](https://community-defectdojo.tightknit.community/) and join the DefectDojo community on [Slack](https://join.slack.com/t/defectdojocommunity/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA)! 
+
+Follow DefectDojo on [LinkedIn](https://www.linkedin.com/company/defectdojo), [YouTube](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ), and [X](https://twitter.com/defectdojo) for platform updates!
 
 ## Contributing
 
@@ -113,7 +95,7 @@ Please see our [contributing guidelines](readme-docs/CONTRIBUTING.md) for detail
 
 ## Pro Edition
 
-[Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro transcends the do-it-yourself approach of open-source: A new UI, incredibile scalability, API connectors, ServiceNow, GitHub, GitLab, Azure DevOps, automatic data enrichment, prioritization, and more! See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
+[Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro transcends the do-it-yourself approach of open-source: A new UI, risk-based vulnerability management, incredibile scalability, API connectors, ServiceNow, GitHub, GitLab, Azure DevOps, automatic data enrichment, prioritization, and more! See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
 
 Alternatively, for information please email hello@defectdojo.com
 
@@ -128,7 +110,6 @@ Core Moderators can help you with pull requests or feedback on dev ideas:
 * Cody Maffucci ([@Maffooch](https://github.com/maffooch) | [LinkedIn](https://www.linkedin.com/in/cody-maffucci))
 
 Moderators can help you with pull requests or feedback on dev ideas:
-* Charles Neill ([@cneill](https://github.com/cneill) | [@ccneill](https://twitter.com/ccneill))
 * Blake Owens ([@blakeaowens](https://github.com/blakeaowens))
 
 ## Hall of Fame
@@ -148,6 +129,11 @@ Moderators can help you with pull requests or feedback on dev ideas:
   Aaron has been a long time contributor and user of DefectDojo. He did the second major UI overhaul and his
   contributions include automation enhancements, CI/CD engagements, increased metadata at the product level, and many
   more.
+* Jay Paz ([@jjpaz](https://github.com/grendel513)) – Jay was a DefectDojo
+  maintainer for years. He performed Dojo's first UI overhaul, optomized code structure/features, and added numerous enhancements.
+* Charles Neill ([@ccneill](https://github.com/cneill)) – Charles served as a
+    maintainer of DefectDojo for years and wrote some of Dojo's core functionality.
+
 
 ## Security
 
