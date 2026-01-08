@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core import serializers
 from django.utils import timezone
 
+from dojo.finding.deduplication import set_duplicate
 from dojo.importers.default_importer import DefaultImporter
 from dojo.models import (
     Development_Environment,
@@ -878,6 +879,136 @@ class TestDuplicationLogic(DojoTestCase):
 
         # expect duplicate: unique_id match regardless of extra endpoints
         self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
+
+    def test_regression_duplicate_reopen_unique_id(self):
+        """
+        Test the is_duplicate_reopen exception in set_duplicate.
+        When trying to attach a new active finding to a mitigated finding,
+        an exception should be raised.
+
+        Related to: https://github.com/DefectDojo/django-DefectDojo/issues/14010
+        """
+        # Get an existing finding with unique_id (finding 124)
+        finding_124 = Finding.objects.get(id=124)
+        original_unique_id = finding_124.unique_id_from_tool
+
+        # Mitigate the existing finding
+        finding_124.active = False
+        finding_124.is_mitigated = True
+        finding_124.mitigated = timezone.now()
+        finding_124.out_of_scope = False
+        finding_124.false_p = False
+        finding_124.save(dedupe_option=False)
+
+        # Create a new finding with the same unique_id that is active (not mitigated)
+        finding_new, _ = self.copy_and_reset_finding(find_id=124)
+        finding_new.active = True
+        finding_new.is_mitigated = False
+        finding_new.mitigated = None
+        finding_new.unique_id_from_tool = original_unique_id
+        finding_new.save(dedupe_option=False)
+
+        # Try to deduplicate - this should raise an exception
+        with self.assertRaises(Exception) as context:
+            set_duplicate(finding_new, finding_124)
+
+        self.assertIn("Found a regression", str(context.exception))
+
+    def test_duplicate_attached_to_mitigated_finding_unique_id(self):
+        """
+        Test the exception when attaching a finding that is already marked as duplicate
+        to a mitigated finding.
+
+        Related to: https://github.com/DefectDojo/django-DefectDojo/issues/14010
+        """
+        # Get an existing finding with unique_id (finding 124)
+        finding_124 = Finding.objects.get(id=124)
+        original_unique_id = finding_124.unique_id_from_tool
+
+        # Mitigate the existing finding
+        finding_124.active = False
+        finding_124.is_mitigated = True
+        finding_124.mitigated = timezone.now()
+        finding_124.save(dedupe_option=False)
+
+        # Create a new finding that is already marked as duplicate AND also mitigated
+        # This ensures that is_duplicate_reopen doesn't trigger first
+        finding_new, _ = self.copy_and_reset_finding(find_id=124)
+        finding_new.duplicate = True
+        finding_new.active = False
+        finding_new.is_mitigated = True
+        finding_new.mitigated = timezone.now()
+        finding_new.unique_id_from_tool = original_unique_id
+        finding_new.save(dedupe_option=False)
+
+        # Try to deduplicate - this should raise an exception
+        with self.assertRaises(Exception) as context:
+            set_duplicate(finding_new, finding_124)
+
+        self.assertIn("Skip this finding as we do not want to attach a new duplicate to a mitigated finding", str(context.exception))
+
+    def test_multiple_findings_same_unique_id_mixed_states_unique_id(self):
+        """
+        Test deduplication with multiple findings having the same unique_id,
+        where some are mitigated and some are active. The deduplication should
+        skip mitigated ones and use the first active one.
+
+        Related to: https://github.com/DefectDojo/django-DefectDojo/issues/14010
+        """
+        # Get an existing finding with unique_id (finding 124)
+        finding_124 = Finding.objects.get(id=124)
+        original_unique_id = finding_124.unique_id_from_tool
+
+        # Mitigate the original finding so it's not a candidate
+        finding_124.active = False
+        finding_124.is_mitigated = True
+        finding_124.mitigated = timezone.now()
+        finding_124.save()
+
+        # Create multiple findings with the same unique_id
+        # First: active finding (this should become the original)
+        finding_active, _ = self.copy_and_reset_finding(find_id=124)
+        finding_active.active = True
+        finding_active.is_mitigated = False
+        finding_active.mitigated = None
+        finding_active.unique_id_from_tool = original_unique_id
+        finding_active.save(dedupe_option=False)  # Don't deduplicate so it remains active
+
+        # Second: mitigated finding
+        finding_mitigated, _ = self.copy_and_reset_finding(find_id=124)
+        finding_mitigated.active = False
+        finding_mitigated.is_mitigated = True
+        finding_mitigated.mitigated = timezone.now()
+        finding_mitigated.out_of_scope = False
+        finding_mitigated.false_p = False
+        finding_mitigated.unique_id_from_tool = original_unique_id
+        finding_mitigated.save(dedupe_option=False)
+
+        # Ensure mitigated finding has lower ID (will be checked first)
+        if finding_mitigated.id > finding_active.id:
+            # Swap by deleting and recreating in correct order
+            finding_mitigated.delete()
+            finding_mitigated, _ = self.copy_and_reset_finding(find_id=124)
+            finding_mitigated.active = False
+            finding_mitigated.is_mitigated = True
+            finding_mitigated.mitigated = timezone.now()
+            finding_mitigated.out_of_scope = False
+            finding_mitigated.false_p = False
+            finding_mitigated.unique_id_from_tool = original_unique_id
+            finding_mitigated.save(dedupe_option=False)
+
+        # Create a new finding with the same unique_id
+        # It should skip the mitigated finding and deduplicate against the active one
+        finding_new, _ = self.copy_and_reset_finding(find_id=124)
+        finding_new.active = True
+        finding_new.is_mitigated = False
+        finding_new.unique_id_from_tool = original_unique_id
+        finding_new.save()
+
+        # The new finding should be marked as duplicate of the active finding,
+        # not the mitigated one (even though mitigated has lower ID)
+        self.assert_finding(finding_new, duplicate=True, duplicate_finding_id=finding_active.id)
+        self.assertNotEqual(finding_new.duplicate_finding.id, finding_mitigated.id)
 
     # algo unique_id_or_hash_code Veracode scan
 

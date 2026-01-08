@@ -7,6 +7,7 @@ set -e  # needed to handle "exit" correctly
 
 . /secret-file-loader.sh
 . /reach_database.sh
+. /reach_broker.sh
 
 # Allow for bind-mount multiple settings.py overrides
 FILES=$(ls /app/docker/extra_settings/* 2>/dev/null || true)
@@ -22,6 +23,7 @@ if [ "$NUM_FILES" -gt 0 ]; then
 fi
 
 wait_for_database_to_be_reachable
+wait_for_broker_to_be_reachable
 echo
 
 if [ "${DD_CELERY_WORKER_POOL_TYPE}" = "prefork" ]; then

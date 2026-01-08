@@ -268,6 +268,8 @@ class UserContactInfo(models.Model):
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
     block_execution = models.BooleanField(default=False, help_text=_("Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion."))
     force_password_reset = models.BooleanField(default=False, help_text=_("Forces this user to reset their password on next login."))
+    token_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent API token reset for this user."))
+    password_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent password reset for this user."))
 
 
 class Dojo_Group(models.Model):
@@ -472,12 +474,6 @@ class System_Settings(models.Model):
         verbose_name=_("Enable Benchmarks"),
         help_text=_("Enables Benchmarks such as the OWASP ASVS "
                   "(Application Security Verification Standard)"))
-
-    enable_template_match = models.BooleanField(
-        default=False,
-        blank=False,
-        verbose_name=_("Enable Remediation Advice"),
-        help_text=_("Enables global remediation advice and matching on CWE and Title. The text will be replaced for mitigation, impact and references on a finding. Useful for providing consistent impact and remediation advice regardless of the scanner."))
 
     enable_similar_findings = models.BooleanField(
         default=True,
@@ -803,7 +799,12 @@ class FileUpload(models.Model):
     def copy(self):
         copy = copy_model_util(self)
         # Add unique modifier to file name
-        copy.title = f"{self.title} - clone-{str(uuid4())[:8]}"
+        # Truncate title to ensure it doesn't exceed max_length (100) when appending suffix
+        # Suffix " - clone-{8 chars}" is 17 characters, so truncate to 83 chars
+        clone_suffix = f" - clone-{str(uuid4())[:8]}"
+        max_title_length = 100 - len(clone_suffix)
+        truncated_title = self.title[:max_title_length] if len(self.title) > max_title_length else self.title
+        copy.title = f"{truncated_title}{clone_suffix}"
         # Create new unique file name
         current_url = self.file.url
         _, current_full_filename = current_url.rsplit("/", 1)
@@ -2766,6 +2767,8 @@ class Finding(models.Model):
         logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
 
+        is_new_finding = self.pk is None
+
         # if not isinstance(self.date, (datetime, date)):
         #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
 
@@ -2809,11 +2812,7 @@ class Finding(models.Model):
 
         self.set_hash_code(dedupe_option)
 
-        if self.pk is None:
-            # We enter here during the first call from serializers.py
-            from dojo.utils import apply_cwe_to_template  # noqa: PLC0415 circular import
-            # No need to use the returned variable since `self` Is updated in memory
-            apply_cwe_to_template(self)
+        if is_new_finding:
             if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
                 self.static_finding = True
                 self.dynamic_finding = False
@@ -2838,7 +2837,9 @@ class Finding(models.Model):
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
         super().save(*args, **kwargs)
 
-        self.found_by.add(self.test.test_type)
+        # Only add to found_by for newly-created findings (avoid doing this on every update)
+        if is_new_finding:
+            self.found_by.add(self.test.test_type)
 
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
         system_settings = System_Settings.objects.get()
@@ -2942,7 +2943,7 @@ class Finding(models.Model):
 
         # Make sure that we have a cwe if we need one
         if self.cwe == 0 and not self.test.hash_code_allows_null_cwe:
-            deduplicationLogger.warning(
+            deduplicationLogger.debug(
                 "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path)
                 + "'. Fallback to legacy mode for this finding.")
             return self.compute_hash_code_legacy()
@@ -3505,11 +3506,12 @@ class Finding(models.Model):
         # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
         # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
         elif dedupe_option:
+            finding_id = self.id if self.id is not None else "unsaved"
             if self.hash_code is not None:
-                deduplicationLogger.debug("Hash_code already computed for finding %i", self.id)
+                deduplicationLogger.debug("Hash_code already computed for finding: %s", finding_id)
             else:
                 self.hash_code = self.compute_hash_code()
-                deduplicationLogger.debug("Hash_code computed for finding %i: %s", self.id, self.hash_code)
+                deduplicationLogger.debug("Hash_code computed for finding: %s: %s", finding_id, self.hash_code)
 
 
 class FindingAdmin(admin.ModelAdmin):
@@ -3646,6 +3648,9 @@ class Finding_Template(models.Model):
                            verbose_name="Vulnerability Id",
                            help_text="An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources.")
     cvssv3 = models.TextField(help_text=_("Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this finding."), validators=[cvss3_validator], max_length=117, null=True, verbose_name=_("CVSS v3 vector"))
+    cvssv3_score = models.FloatField(null=True, blank=True, help_text=_("CVSSv3 score"))
+    cvssv4 = models.TextField(help_text=_("Common Vulnerability Scoring System version 4 (CVSS4) score associated with this finding."), validators=[cvss4_validator], max_length=255, null=True, verbose_name=_("CVSS4 vector"))
+    cvssv4_score = models.FloatField(null=True, blank=True, help_text=_("CVSSv4 score"))
 
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -3654,8 +3659,25 @@ class Finding_Template(models.Model):
     references = models.TextField(null=True, blank=True, db_column="refs")
     last_used = models.DateTimeField(null=True, editable=False)
     numerical_severity = models.CharField(max_length=4, null=True, blank=True, editable=False)
-    template_match = models.BooleanField(default=False, verbose_name=_("Template Match Enabled"), help_text=_("Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE."))
-    template_match_title = models.BooleanField(default=False, verbose_name=_("Match Template by Title and CWE"), help_text=_("Matches by title text (contains search) and CWE."))
+
+    # Remediation planning fields
+    fix_available = models.BooleanField(null=True, blank=True, help_text=_("Indicates if a fix is available for this vulnerability type"))
+    fix_version = models.CharField(max_length=100, null=True, blank=True, help_text=_("Version where fix is available"))
+    planned_remediation_version = models.CharField(max_length=99, null=True, blank=True, help_text=_("Target version for remediation"))
+    effort_for_fixing = models.CharField(max_length=99, null=True, blank=True, help_text=_("Effort estimate for fixing (e.g., Low/Medium/High)"))
+
+    # Technical details fields
+    steps_to_reproduce = models.TextField(null=True, blank=True, help_text=_("Standard reproduction steps for this vulnerability type"))
+    severity_justification = models.TextField(null=True, blank=True, help_text=_("Explanation of why this severity level is appropriate"))
+    component_name = models.CharField(max_length=500, null=True, blank=True, help_text=_("Affected component name (e.g., library name)"))
+    component_version = models.CharField(max_length=100, null=True, blank=True, help_text=_("Affected component version"))
+
+    # Notes field (single note content, not a list)
+    notes = models.TextField(null=True, blank=True, help_text=_("Note content to add when applying this template"))
+
+    # String-based list fields (newline-separated)
+    vulnerability_ids_text = models.TextField(null=True, blank=True, help_text=_("Vulnerability IDs (one per line)"))
+    endpoints_text = models.TextField(null=True, blank=True, help_text=_("Endpoint URLs (one per line)"))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add."))
 
@@ -3675,16 +3697,20 @@ class Finding_Template(models.Model):
         return [{"title": str(self),
                "url": reverse("view_template", args=(self.id,))}]
 
-    @cached_property
+    @property
     def vulnerability_ids(self):
-        # Get vulnerability ids from database and convert to list of strings
-        vulnerability_ids_model = self.vulnerability_id_template_set.all()
-        vulnerability_ids = [vulnerability_id.vulnerability_id for vulnerability_id in vulnerability_ids_model]
+        """Parse vulnerability IDs from TextField string (newline-separated)."""
+        vulnerability_ids = []
 
-        # Synchronize the cve field with the unsaved_vulnerability_ids
+        # Get from the TextField
+        if self.vulnerability_ids_text:
+            # Parse newline-separated string, remove empty lines
+            vulnerability_ids = [line.strip() for line in self.vulnerability_ids_text.split("\n") if line.strip()]
+
+        # Synchronize the cve field with the vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
         # the cve field is not needed anymore and can be removed.
-        if vulnerability_ids and self.cve:
+        if vulnerability_ids and self.cve and self.cve not in vulnerability_ids:
             # Make sure the first entry of the list is the value of the cve field
             vulnerability_ids.insert(0, self.cve)
         elif not vulnerability_ids and self.cve:
@@ -3694,10 +3720,13 @@ class Finding_Template(models.Model):
         # Remove duplicates
         return list(dict.fromkeys(vulnerability_ids))
 
-
-class Vulnerability_Id_Template(models.Model):
-    finding_template = models.ForeignKey(Finding_Template, editable=False, on_delete=models.CASCADE)
-    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    @property
+    def endpoints(self):
+        """Parse endpoint URLs from TextField string (newline-separated)."""
+        if not self.endpoints_text:
+            return []
+        # Parse newline-separated string, remove empty lines
+        return [line.strip() for line in self.endpoints_text.split("\n") if line.strip()]
 
 
 class Check_List(models.Model):
@@ -4852,7 +4881,6 @@ admin.site.register(Product_API_Scan_Configuration)
 admin.site.register(Development_Environment)
 admin.site.register(Finding_Template)
 admin.site.register(Vulnerability_Id)
-admin.site.register(Vulnerability_Id_Template)
 admin.site.register(BurpRawRequestResponse)
 admin.site.register(Announcement)
 admin.site.register(UserAnnouncement)

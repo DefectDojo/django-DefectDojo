@@ -6,8 +6,6 @@ from importlib.util import find_spec
 from inspect import isclass
 from pathlib import Path
 
-from django.conf import settings
-
 from dojo.models import Test_Type, Tool_Configuration, Tool_Type
 
 PARSERS = {}
@@ -37,12 +35,12 @@ def get_parser(scan_type):
     if scan_type not in PARSERS:
         msg = f"Parser '{scan_type}' does not exist"
         raise ValueError(msg)
-    rg = re.compile(settings.PARSER_EXCLUDE)
-    if not rg.match(scan_type) or not settings.PARSER_EXCLUDE.strip():
-        # update DB dynamically
-        test_type, _ = Test_Type.objects.get_or_create(name=scan_type)
-        if test_type.active:
-            return PARSERS[scan_type]
+
+    # update DB dynamically
+    test_type, _ = Test_Type.objects.get_or_create(name=scan_type)
+    if test_type.active:
+        return PARSERS[scan_type]
+
     msg = f"Parser {scan_type} is not active"
     raise ValueError(msg)
 

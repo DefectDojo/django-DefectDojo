@@ -1,0 +1,14 @@
+{
+    "name": "Test Tool2",
+    "type": "Tool2",
+    "findings": [
+        {
+            "title": "Test Finding 2",
+            "description": "This is a test finding for Tool2",
+            "severity": "Medium",
+            "active": true,
+            "verified": true
+        }
+    ]
+}
+

@@ -21,7 +21,9 @@ metadata:
   name: {{ $fullName }}-celery-worker
   namespace: {{ .Release.Namespace }}
 spec:
+  {{ if (not .Values.celery.worker.autoscaling.enabled) -}}
   replicas: {{ .Values.celery.worker.replicas }}
+  {{- end }}
   {{- with .Values.revisionHistoryLimit }}
   revisionHistoryLimit: {{ . }}
   {{- end }}

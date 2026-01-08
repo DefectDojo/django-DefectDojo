@@ -18,6 +18,12 @@ See our [Pro UI Guide](../ui_pro_vs_os) for more information.
 
 ![image](images/enabling_deduplication_within_an_engagement_2.png)
 
+### Assets/Organizations
+
+DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/en/working_with_findings/organizing_engagements_tests/pro_assets_organizations/) for details.
+
+![image](images/asset_hierarchy_diagram.png)
+
 ### Finding Priority
 
 DefectDojo Pro can pre-triage your Findings by Priority and Risk, allowing your team to identify and fix your most critical issues first.

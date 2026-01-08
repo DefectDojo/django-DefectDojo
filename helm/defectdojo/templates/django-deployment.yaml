@@ -20,7 +20,9 @@ metadata:
   name: {{ $fullName }}-django
   namespace: {{ .Release.Namespace }}
 spec:
+  {{ if (not .Values.django.autoscaling.enabled) -}}
   replicas: {{ .Values.django.replicas }}
+  {{- end }}
   {{- with .Values.django.strategy }}
   strategy:
     {{- toYaml . | nindent 4 }}

@@ -54,7 +54,7 @@ class WizParserByTitle:
             "Container Service",
             "Provider ID",
             "Risks",
-            "Threats"
+            "Threats",
             "Created At",
             "Status Changed At",
             "Updated At",

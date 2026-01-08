@@ -135,7 +135,7 @@ def action_history(request, cid, oid):
             else:
                 product_tab.setEngagement(object_value.engagement)
 
-    # Get audit history from both systems separately
+    # Get audit history from pghistory (and legacy django-auditlog entries if available)
     auditlog_history = []
     pghistory_history = []
 

@@ -113,6 +113,7 @@ class TestTwistlockParser(DojoTestCase):
                 self.assertIsNotNone(finding)
                 self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
                 self.assertEqual("PRISMA-2021-0013", finding.unsaved_vulnerability_ids[0])
+                self.assertEqual("2022-11-16", finding.date)
                 break
 
     def test_parse_file_with_no_cvss(self):
@@ -141,6 +142,7 @@ class TestTwistlockParser(DojoTestCase):
                 self.assertIn("Image ID:", finding.impact)
                 self.assertIn("Distribution:", finding.impact)
                 self.assertIn("Debian GNU/Linux 12", finding.impact)
+                self.assertEqual("2025-07-08", finding.date)
 
     def test_parse_file_with_many_vulns(self):
         testfile = (get_unit_tests_scans_path("twistlock") / "many_vulns.json").open(encoding="utf-8")

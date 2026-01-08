@@ -64,10 +64,3 @@ updates:
     versions:
     - ">= 4.a"
     - "< 5"
-- package-ecosystem: docker
-  directory: "/"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 10
-  target-branch: dev
-  

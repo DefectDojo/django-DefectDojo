@@ -38,6 +38,9 @@ class TestBlackduckBinaryAnalysisParser(DojoTestCase):
                 self.assertIsNotNone(finding.vuln_id_from_tool)
                 self.assertEqual("CVE-2023-45853", finding.vuln_id_from_tool)
                 self.assertIsNotNone(finding.unique_id_from_tool)
+                # Verify vulnerability_id is populated for de-duplication
+                self.assertIsNotNone(finding.unsaved_vulnerability_ids)
+                self.assertEqual(["CVE-2023-45853"], finding.unsaved_vulnerability_ids)
 
     def test_parse_many_vulns(self):
         with (get_unit_tests_scans_path("blackduck_binary_analysis") / "many_vulns.csv").open(encoding="utf-8") as testfile:
@@ -53,3 +56,6 @@ class TestBlackduckBinaryAnalysisParser(DojoTestCase):
                 self.assertIsNotNone(finding.file_path)
                 self.assertIsNotNone(finding.vuln_id_from_tool)
                 self.assertIsNotNone(finding.unique_id_from_tool)
+                # Verify vulnerability_id is populated for de-duplication
+                self.assertIsNotNone(finding.unsaved_vulnerability_ids)
+                self.assertGreater(len(finding.unsaved_vulnerability_ids), 0)

@@ -6,6 +6,9 @@ import logging
 import textwrap
 from datetime import datetime
 
+import dateutil.parser
+from django.utils import timezone
+
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
@@ -235,6 +238,10 @@ def get_item(vulnerability, test, image_metadata=""):
     status = vulnerability.get("status", "There seems to be no fix yet. Please check description field.")
     cvssv3_score = vulnerability.get("cvss")
     riskFactors = vulnerability.get("riskFactors", "No risk factors.")
+    try:
+        date = str(dateutil.parser.parse(vulnerability.get("discoveredDate")).date())
+    except (ValueError, TypeError, dateutil.parser.ParserError):
+        date = timezone.now()
 
     # Build impact field combining severity and image metadata which can change between scans, so we add it to the impact field as the description field is sometimes used for hash code calculation
     impact_parts = [severity]
@@ -264,6 +271,7 @@ def get_item(vulnerability, test, image_metadata=""):
         cvssv3=cvssv3,
         cvssv3_score=cvssv3_score,
         impact=impact_text,
+        date=date,
     )
     finding.unsaved_vulnerability_ids = [vulnerability["id"]] if "id" in vulnerability else None
     finding.description = finding.description.strip()

@@ -8,7 +8,7 @@ from django.test import RequestFactory
 from django.urls import reverse
 
 from dojo.metrics import utils
-from dojo.models import Product_Type, User
+from dojo.models import Engagement, Finding, Product, Product_Type, Test, User
 
 from .dojo_test_case import DojoTestCase
 
@@ -31,12 +31,12 @@ FINDING_7 = {"id": 225, "date": date(2018, 1, 1), "severity": "Low", "active": F
 FINDING_8 = {"id": 240, "date": date(2018, 1, 1), "severity": "High", "active": True, "verified": False, "false_p": False, "duplicate": True, "duplicate_finding_id": 2, "out_of_scope": False, "risk_accepted": False, "under_review": False, "is_mitigated": False, "mitigated": None, "mitigated_by_id": None, "reporter_id": 1, "numerical_severity": "S0"}
 FINDING_9 = {"id": 241, "date": date(2018, 1, 1), "severity": "High", "active": False, "verified": False, "false_p": False, "duplicate": True, "duplicate_finding_id": 2, "out_of_scope": False, "risk_accepted": True, "under_review": False, "is_mitigated": False, "mitigated": None, "mitigated_by_id": None, "reporter_id": 1, "numerical_severity": "S0"}
 FINDING_10 = {"id": 242, "date": date(2018, 1, 1), "severity": "High", "active": False, "verified": False, "false_p": False, "duplicate": True, "duplicate_finding_id": 2, "out_of_scope": False, "risk_accepted": True, "under_review": False, "is_mitigated": False, "mitigated": None, "mitigated_by_id": None, "reporter_id": 1, "numerical_severity": "S0"}
-FINDING_11 = {"id": 243, "date": date(2017, 12, 31), "severity": "High", "active": False, "verified": False, "false_p": False, "duplicate": False, "duplicate_finding_id": None, "out_of_scope": False, "risk_accepted": True, "under_review": False, "is_mitigated": True, "mitigated": None, "mitigated_by_id": None, "reporter_id": 2, "numerical_severity": "S0"}
+FINDING_11 = {"id": 243, "date": date(2017, 12, 31), "severity": "High", "active": False, "verified": False, "false_p": False, "duplicate": False, "duplicate_finding_id": None, "out_of_scope": False, "risk_accepted": True, "under_review": False, "is_mitigated": True, "mitigated": datetime(2018, 1, 2, tzinfo=zoneinfo.ZoneInfo("UTC")), "mitigated_by_id": None, "reporter_id": 2, "numerical_severity": "S0"}
 FINDING_12 = {"id": 244, "date": date(2017, 12, 29), "severity": "Low", "active": True, "verified": True, "false_p": False, "duplicate": False, "duplicate_finding_id": None, "out_of_scope": False, "risk_accepted": False, "under_review": False, "is_mitigated": False, "mitigated": None, "mitigated_by_id": None, "reporter_id": 1, "numerical_severity": "S0"}
 FINDING_13 = {"id": 245, "date": date(2017, 12, 27), "severity": "Low", "active": False, "verified": False, "false_p": False, "duplicate": True, "duplicate_finding_id": 22, "out_of_scope": False, "risk_accepted": False, "under_review": False, "is_mitigated": False, "mitigated": None, "mitigated_by_id": None, "reporter_id": 1, "numerical_severity": "S0"}
 FINDING_14 = {"id": 246, "date": date(2018, 1, 2), "severity": "Low", "active": False, "verified": False, "false_p": False, "duplicate": True, "duplicate_finding_id": 22, "out_of_scope": False, "risk_accepted": False, "under_review": False, "is_mitigated": False, "mitigated": None, "mitigated_by_id": None, "reporter_id": 1, "numerical_severity": "S0"}
 FINDING_15 = {"id": 247, "date": date(2018, 1, 3), "severity": "Low", "active": False, "verified": False, "false_p": False, "duplicate": True, "duplicate_finding_id": None, "out_of_scope": False, "risk_accepted": False, "under_review": False, "is_mitigated": False, "mitigated": None, "mitigated_by_id": None, "reporter_id": 1, "numerical_severity": "S0"}
-FINDING_16 = {"id": 248, "date": date(2017, 12, 27), "severity": "Low", "active": True, "verified": True, "false_p": False, "duplicate": False, "duplicate_finding_id": None, "out_of_scope": False, "risk_accepted": False, "under_review": False, "is_mitigated": True, "mitigated": None, "mitigated_by_id": None, "reporter_id": 1, "numerical_severity": "S0"}
+FINDING_16 = {"id": 248, "date": date(2017, 12, 27), "severity": "Low", "active": True, "verified": True, "false_p": False, "duplicate": False, "duplicate_finding_id": None, "out_of_scope": False, "risk_accepted": False, "under_review": False, "is_mitigated": True, "mitigated": datetime(2017, 12, 28, tzinfo=zoneinfo.ZoneInfo("UTC")), "mitigated_by_id": None, "reporter_id": 1, "numerical_severity": "S0"}
 FINDING_17 = {"id": 249, "date": date(2018, 1, 4), "severity": "Low", "active": False, "verified": False, "false_p": False, "duplicate": True, "duplicate_finding_id": 224, "out_of_scope": False, "risk_accepted": False, "under_review": False, "is_mitigated": False, "mitigated": None, "mitigated_by_id": None, "reporter_id": 1, "numerical_severity": "S0"}
 
 
@@ -162,6 +162,96 @@ class FindingQueriesTest(DojoTestCase):
             self.assertEqual(finding_queries["weeks_between"], 2)
             self.assertIsInstance(finding_queries["start_date"], datetime)
             self.assertIsInstance(finding_queries["end_date"], datetime)
+
+    @patch("django.utils.timezone.now")
+    def test_closed_findings_filtered_by_mitigated_date(self, mock_timezone):
+        """
+        Test that closed findings are filtered by mitigated date, not discovery date.
+
+        This test verifies the fix for issue #9735: findings discovered outside the date
+        range but closed within it should appear in closed metrics.
+        """
+        mock_datetime = datetime(2020, 12, 9, tzinfo=zoneinfo.ZoneInfo("UTC"))
+        mock_timezone.return_value = mock_datetime
+
+        # Get a test product and engagement
+        product = Product.objects.first()
+        if not product:
+            self.skipTest("No product available in test data")
+        engagement = Engagement.objects.filter(product=product).first()
+        if not engagement:
+            self.skipTest("No engagement available in test data")
+        test = Test.objects.filter(engagement=engagement).first()
+        if not test:
+            self.skipTest("No test available in test data")
+
+        # Create a finding discovered BEFORE the date range but closed WITHIN it
+        # Date range: 2017-12-26 to 2018-01-05
+        finding_discovered_before = Finding.objects.create(
+            title="Finding discovered before range, closed within range",
+            description="Test finding",
+            severity="High",
+            date=date(2017, 10, 1),  # Discovered before range
+            test=test,
+            reporter=self.request.user,
+            active=False,
+            is_mitigated=True,
+            mitigated=datetime(2018, 1, 2, tzinfo=zoneinfo.ZoneInfo("UTC")),  # Closed within range
+        )
+
+        # Create a finding discovered WITHIN the date range but closed AFTER it
+        finding_closed_after = Finding.objects.create(
+            title="Finding discovered within range, closed after range",
+            description="Test finding",
+            severity="Medium",
+            date=date(2017, 12, 30),  # Discovered within range
+            test=test,
+            reporter=self.request.user,
+            active=False,
+            is_mitigated=True,
+            mitigated=datetime(2018, 2, 1, tzinfo=zoneinfo.ZoneInfo("UTC")),  # Closed after range
+        )
+
+        # Create a finding discovered and closed WITHIN the date range
+        finding_both_within = Finding.objects.create(
+            title="Finding discovered and closed within range",
+            description="Test finding",
+            severity="Low",
+            date=date(2017, 12, 30),  # Discovered within range
+            test=test,
+            reporter=self.request.user,
+            active=False,
+            is_mitigated=True,
+            mitigated=datetime(2018, 1, 3, tzinfo=zoneinfo.ZoneInfo("UTC")),  # Closed within range
+        )
+
+        try:
+            product_types = []
+            finding_queries = utils.finding_queries(
+                product_types,
+                self.request,
+            )
+
+            closed_findings = finding_queries["closed"]
+            closed_ids = list(closed_findings.values_list("id", flat=True))
+
+            # The finding discovered before but closed within should appear
+            self.assertIn(finding_discovered_before.id, closed_ids,
+                         "Finding discovered before range but closed within range should appear in closed metrics")
+
+            # The finding discovered within but closed after should NOT appear
+            self.assertNotIn(finding_closed_after.id, closed_ids,
+                            "Finding discovered within range but closed after range should NOT appear in closed metrics")
+
+            # The finding discovered and closed within should appear
+            self.assertIn(finding_both_within.id, closed_ids,
+                         "Finding discovered and closed within range should appear in closed metrics")
+
+        finally:
+            # Clean up test findings
+            finding_discovered_before.delete()
+            finding_closed_after.delete()
+            finding_both_within.delete()
 
 
 class EndpointQueriesTest(DojoTestCase):

@@ -37,12 +37,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--log-queries",
             action="store_true",
-            help="Enable database query logging (default: enabled)",
-        )
-        parser.add_argument(
-            "--no-log-queries",
-            action="store_true",
-            help="Disable database query logging",
+            help="Enable database query logging (default: disabled)",
         )
 
     def get_excluded_fields(self, model_name):
@@ -140,31 +135,27 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if not settings.ENABLE_AUDITLOG or settings.AUDITLOG_TYPE != "django-pghistory":
+        if not settings.ENABLE_AUDITLOG:
             self.stdout.write(
                 self.style.WARNING(
-                    "pghistory is not enabled. Set DD_ENABLE_AUDITLOG=True and "
-                    "DD_AUDITLOG_TYPE=django-pghistory",
+                    "pghistory is not enabled. Set DD_ENABLE_AUDITLOG=True",
                 ),
             )
             return
 
         # Enable database query logging based on options
-        # Default to enabled unless explicitly disabled
-        enable_query_logging = not options.get("no_log_queries")
+        # Default to disabled unless explicitly enabled
+        enable_query_logging = options.get("log_queries", False)
 
         if enable_query_logging:
             self.enable_db_logging()
-        else:
-            self.stdout.write(
-                self.style.WARNING("Database query logging disabled"),
-            )
 
         # Models that are tracked by pghistory
         tracked_models = [
             "Dojo_User", "Endpoint", "Engagement", "Finding", "Finding_Group",
             "Product_Type", "Product", "Test", "Risk_Acceptance",
             "Finding_Template", "Cred_User", "Notification_Webhooks",
+            "FindingReviewers",  # M2M through table for Finding.reviewers
         ]
 
         specific_model = options.get("model")
@@ -220,23 +211,23 @@ class Command(BaseCommand):
                     )
                     continue
 
-                # Get IDs of records that already have initial_import events
-                existing_initial_import_ids = set(
-                    EventModel.objects.filter(pgh_label="initial_import").values_list("pgh_obj_id", flat=True),
+                # Get IDs of records that already have initial_backfill events
+                existing_initial_backfill_ids = set(
+                    EventModel.objects.filter(pgh_label="initial_backfill").values_list("pgh_obj_id", flat=True),
                 )
 
-                # Filter to only get records that don't have initial_import events
-                records_needing_backfill = Model.objects.exclude(id__in=existing_initial_import_ids)
+                # Filter to only get records that don't have initial_backfill events
+                records_needing_backfill = Model.objects.exclude(id__in=existing_initial_backfill_ids)
                 backfill_count = records_needing_backfill.count()
-                existing_count = len(existing_initial_import_ids)
+                existing_count = len(existing_initial_backfill_ids)
 
                 # Log the breakdown
-                self.stdout.write(f"  Records with initial_import events: {existing_count:,}")
-                self.stdout.write(f"  Records needing initial_import events: {backfill_count:,}")
+                self.stdout.write(f"  Records with initial_backfill events: {existing_count:,}")
+                self.stdout.write(f"  Records needing initial_backfill events: {backfill_count:,}")
 
                 if backfill_count == 0:
                     self.stdout.write(
-                        self.style.SUCCESS(f"  ✓ All {total_count:,} records already have initial_import events"),
+                        self.style.SUCCESS(f"  ✓ All {total_count:,} records already have initial_backfill events"),
                     )
                     processed = total_count
                     continue
@@ -284,7 +275,7 @@ class Command(BaseCommand):
 
                         # Add pghistory-specific fields
                         event_data.update({
-                            "pgh_label": "initial_import",
+                            "pgh_label": "initial_backfill",
                             "pgh_obj": instance,  # ForeignKey to the original object
                             "pgh_context": None,  # No context for backfilled events
                         })

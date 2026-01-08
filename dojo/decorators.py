@@ -83,9 +83,16 @@ def dojo_async_task(func=None, *, signature=False):
     def decorator(func):
         @wraps(func)
         def __wrapper__(*args, **kwargs):
+            from dojo.pghistory_utils import get_serializable_pghistory_context  # noqa: PLC0415 circular import
             from dojo.utils import get_current_user  # noqa: PLC0415 circular import
+
             user = get_current_user()
             kwargs["async_user"] = user
+
+            # Capture pghistory context to pass to Celery worker
+            # The PgHistoryTask base class will apply this context in the worker
+            if pgh_context := get_serializable_pghistory_context():
+                kwargs["_pgh_context"] = pgh_context
 
             dojo_async_task_counter.incr(
                 func.__name__,

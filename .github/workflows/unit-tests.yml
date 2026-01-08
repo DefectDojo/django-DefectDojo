@@ -25,26 +25,18 @@ jobs:
     strategy:
         matrix:
             platform: ['linux/amd64', 'linux/arm64']
-            auditlog_type: ['django-auditlog', 'django-pghistory']
         fail-fast: false
     needs: build-docker-containers
     uses: ./.github/workflows/rest-framework-tests.yml
     secrets: inherit
     with:
       platform: ${{ matrix.platform}}
-      auditlog_type: ${{ matrix.auditlog_type }}
 
   # only run integration tests for linux/amd64 (default)
   test-user-interface:
     needs: build-docker-containers
     uses: ./.github/workflows/integration-tests.yml
     secrets: inherit
-    strategy:
-      matrix:
-        auditlog_type: ['django-auditlog', 'django-pghistory']
-      fail-fast: false
-    with:
-      auditlog_type: ${{ matrix.auditlog_type }}
 
   # only run k8s tests for linux/amd64 (default)
   test-k8s:

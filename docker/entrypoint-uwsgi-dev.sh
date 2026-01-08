@@ -4,8 +4,10 @@ set -e  # needed to handle "exit" correctly
 
 . /secret-file-loader.sh
 . /reach_database.sh
+. /reach_broker.sh
 
 wait_for_database_to_be_reachable
+wait_for_broker_to_be_reachable
 echo
 
 cd /app || exit

@@ -22,7 +22,7 @@ copyRight = "Copyright (c) 2020-2024 Thulite"
   enable = true
 
 [outputs]
-  home = ["HTML", "RSS", "searchIndex"]
+  home = ["HTML", "RSS", "searchIndex", "SITEMAP"]
   section = ["HTML", "RSS", "SITEMAP"]
 
 [outputFormats.searchIndex]
@@ -41,7 +41,7 @@ copyRight = "Copyright (c) 2020-2024 Thulite"
   rel  = "sitemap"
 
 [sitemap]
-  changefreq = "monthly"
+  changefreq = "weekly"
   filename = "sitemap.xml"
   priority = 0.5
 

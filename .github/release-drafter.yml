@@ -43,6 +43,8 @@ categories:
     label: 'localization'
   - title: '🔧 Improved code quality with linters'
     label: 'lint'
+  - title: '⚙️ Improvemets of GitHub Actions'
+    label: 'gha'
   - title: '🧰 Maintenance'
     collapse-after: 3
     labels:

@@ -1,6 +1,7 @@
 import logging
 from datetime import timedelta
 
+import pghistory
 from celery.utils.log import get_task_logger
 from django.apps import apps
 from django.conf import settings
@@ -99,6 +100,13 @@ def flush_auditlog(*args, **kwargs):
 
 @app.task(bind=True)
 def async_dupe_delete(*args, **kwargs):
+    # Wrap with pghistory context for audit trail
+    with pghistory.context(source="dupe_delete_task"):
+        _async_dupe_delete_impl()
+
+
+def _async_dupe_delete_impl():
+    """Internal implementation of async_dupe_delete within pghistory context."""
     try:
         system_settings = System_Settings.objects.get()
         enabled = system_settings.delete_duplicates
@@ -182,12 +190,19 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
 
 @app.task
 def jira_status_reconciliation_task(*args, **kwargs):
-    return jira_status_reconciliation(*args, **kwargs)
+    # Wrap with pghistory context for audit trail
+    with pghistory.context(
+        source="jira_reconciliation",
+        mode=kwargs.get("mode", "reconcile"),
+    ):
+        return jira_status_reconciliation(*args, **kwargs)
 
 
 @app.task
 def fix_loop_duplicates_task(*args, **kwargs):
-    return fix_loop_duplicates()
+    # Wrap with pghistory context for audit trail
+    with pghistory.context(source="fix_loop_duplicates"):
+        return fix_loop_duplicates()
 
 
 @app.task

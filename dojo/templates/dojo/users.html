@@ -69,6 +69,8 @@
                                     <th class="nowrap">{% trans "Global Role" %}</th>
                                     <th class="nowrap">{% trans "Date Joined" %}</th>
                                     <th class="nowrap">{% trans "Last Login" %}</th>
+                                    <th class="nowrap">{% trans "Token Last Reset" %}</th>
+                                    <th class="nowrap">{% trans "Password Last Reset" %}</th>
                                     {% block users_table_extra_header_rows %}
                                     {% endblock users_table_extra_header_rows %}
                                 </tr>
@@ -127,6 +129,8 @@
                                         <td>{% if u.global_role.role %} {{ u.global_role.role }} {% endif %}</td>
                                         <td>{{ u.date_joined }}</td>
                                         <td>{% if u.last_login %}{{ u.last_login }}{% else %}{% trans "Never" %}{% endif %}</td>
+                                        <td>{% if u.usercontactinfo.token_last_reset %}{{ u.usercontactinfo.token_last_reset }}{% else %}{% trans "Never" %}{% endif %}</td>
+                                        <td>{% if u.usercontactinfo.password_last_reset %}{{ u.usercontactinfo.password_last_reset }}{% else %}{% trans "Never" %}{% endif %}</td>
                                         {% block users_table_extra_data_rows %}
                                         {% endblock users_table_extra_data_rows %}
                                     </tr>

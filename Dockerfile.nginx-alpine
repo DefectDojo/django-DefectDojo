@@ -5,7 +5,7 @@
 # Dockerfile.django-alpine to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.13.7-alpine3.22@sha256:9ba6d8cbebf0fb6546ae71f2a1c14f6ffd2fdab83af7fa5669734ef30ad48844 AS base
+FROM python:3.13.11-alpine3.22@sha256:ab45bd32143151fe060d48218b91df43a289166e72ec7877823b1c972580bed3 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -63,7 +63,7 @@ COPY dojo/ ./dojo/
 # always collect static for debug toolbar as we can't make it dependant on env variables or build arguments without breaking docker layer caching
 RUN env DD_SECRET_KEY='.' DD_DJANGO_DEBUG_TOOLBAR_ENABLED=True python3 manage.py collectstatic --noinput --verbosity=2 && true
 
-FROM nginx:1.29.3-alpine3.22@sha256:b3c656d55d7ad751196f21b7fd2e8d4da9cb430e32f646adcf92441b72f82b14
+FROM nginx:1.29.3-alpine3.22@sha256:b3c656d55d7ad751196f21b7fd2e8d4da9cb430e32f646adcf92441b72f82b14 AS release
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
