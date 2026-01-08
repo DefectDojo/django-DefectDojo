@@ -20,7 +20,7 @@ def get_ia_recommendation(fid, user):
                 "Please try again later or with a different finding.🫣"
             )}
 
-    url = GeneralSettings.get_value("HOST_IA_RECOMMENDATION") 
+    url = GeneralSettings.get_value("HOST_IA_RECOMMENDATION")
     params = {
         "grant_type": "client_credentials",
         "client_id" : settings.CLIENT_ID_IA,
@@ -67,14 +67,14 @@ def get_ia_recommendation(fid, user):
         logger.error(" IA RECOMMENDATIONE: error getting IA RECOMMENDATION: %s", response.text)
         error_response["status"] = "Error"
         return http_response.error(message="Error get Thereads", data=error_response)
-    
+
     thread_id = response.json()["thread_id"]
     url = GeneralSettings.get_value("HOST_IA_RECOMMENDATION_CORE")
     headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
     body = {
         "agent_id": GeneralSettings.get_value("ia_agent_id", "marvin_ia_recommendation_agent"),
         "thread_id": thread_id,
-        "messages": GeneralSettings.get_value("IA_MESSAGE", "Analyze the finding") + " " + fid,
+        "messages": fid,
         "metadata": {
             "user_id": "string"
         }
