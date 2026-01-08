@@ -238,7 +238,7 @@ class BaseListFindings:
     def get_test_id(self):
         if not hasattr(self, "test_id"):
             self.test_id = None
-        return self.test_id    
+        return self.test_id
 
     def filter_findings_by_object(self, findings: QuerySet[Finding]):
         if product_id := self.get_product_id():
@@ -357,7 +357,7 @@ class ListFindings(View, BaseListFindings):
             add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
         return request, context
-    
+
     def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         # Store the product and engagement ids
         self.product_id = product_id
@@ -453,10 +453,10 @@ class ListBlacklistedFindings(ListFindings):
 
 @method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ViewFindingRender(View):
-    
+
     def get_template(self):
         return "dojo/view_finding_render.html"
-    
+
     def get_initial_context(self, request: HttpRequest, finding: Finding, user: Dojo_User):
         notes = finding.notes.all()
         note_type_activation = Note_Type.objects.filter(is_active=True).count()
@@ -1394,7 +1394,7 @@ def defect_finding_review(request, fid):
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
                 jira_helper.push_to_jira(finding.finding_group)
-            
+
             create_notification(
                 event="code_review",
                 subject="🧐 Code Review 🔍",
@@ -3524,7 +3524,7 @@ def generate_token_generative_ia(request, fid):
             "At the moment, you can't generate a recommendation for this finding.\n"
             "Please try again later or with a different finding.🫣"
         )}
-    url = GeneralSettings.get_value("HOST_IA_RECOMMENDATION") 
+    url = GeneralSettings.get_value("HOST_IA_RECOMMENDATION")
     params = {
         "grant_type": "client_credentials",
         "client_id" : settings.CLIENT_ID_IA,
@@ -3545,7 +3545,7 @@ def generate_token_generative_ia(request, fid):
         error_response["status"] = "Error"
         return JsonResponse(error_response, status=200)
 
-    # Create threads 
+    # Create threads
     access_token = response.json()["access_token"]
     url = GeneralSettings.get_value("HOST_IA_RECOMMENDATION_CORE")
     headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
@@ -3568,15 +3568,15 @@ def generate_token_generative_ia(request, fid):
         logger.error(" IA RECOMMENDATIONE: error getting IA RECOMMENDATION: %s", response.text)
         error_response["status"] = "Error"
         return JsonResponse(error_response, status=200)
-    
-    # Create runs 
+
+    # Create runs
     thread_id = response.json()["thread_id"]
     url = GeneralSettings.get_value("HOST_IA_RECOMMENDATION_CORE")
     headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
     body = {
         "agent_id": GeneralSettings.get_value("ia_agent_id", "marvin_ia_recommendation_agent"),
         "thread_id": thread_id,
-        "messages": GeneralSettings.get_value("IA_MESSAGE", "Analyze the finding") + " " + fid,
+        "messages": fid,
         "metadata": {
             "user_id": "string"
         }
@@ -3617,7 +3617,7 @@ def all_findings_v2(request: HttpRequest, product_id) -> HttpResponse:
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
     return render(request, 'dojo/generic_view.html', {
         'name': page_name,
-        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list{base_params}",  
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/findings/list{base_params}",
         'user': user,
     })
 
