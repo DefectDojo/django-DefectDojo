@@ -701,7 +701,7 @@ valkeyParams: ""
 # External database support.
 #
 # @schema type:[string, null]
-# -- To use an external Redis instance, set `redis.enabled` to false and set the address here:
+# -- To use an external Redis instance, set `valkey.enabled` to false and set the address here:
 redisServer: ~
 # -- Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `redisScheme` is `rediss`
 redisParams: ""
