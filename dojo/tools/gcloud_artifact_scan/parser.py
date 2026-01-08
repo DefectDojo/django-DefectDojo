@@ -35,7 +35,6 @@ class GCloudArtifactScanParser:
                 for vuln in tree["package_vulnerability_summary"]["vulnerabilities"][severity]:
                     description = "name: " + str(vuln["name"]) + "\n\n"
                     description += "resourceUri: " + str(vuln["resourceUri"]) + "\n"
-                    description += "fixAvailable: " + str(vuln["vulnerability"]["fixAvailable"]) + "\n"
                     description += "packageIssue: " + str(vuln["vulnerability"]["packageIssue"]) + "\n"
                     description += "CVE: " + str(vuln["vulnerability"]["shortDescription"]) + "\n"
                     reference = ""
@@ -45,13 +44,23 @@ class GCloudArtifactScanParser:
                         title=vuln["noteName"],
                         test=test,
                         description=description,
-                        severity=severity.lower().capitalize(),
+                        severity=self.severity_mapper(severity),
                         references=reference,
                         component_name="affectedCPEUri: " + vuln["vulnerability"]["packageIssue"][0]["affectedCpeUri"] + " affectedPackage: " + vuln["vulnerability"]["packageIssue"][0]["affectedPackage"],
                         component_version=vuln["vulnerability"]["packageIssue"][0]["affectedVersion"]["fullName"],
                         static_finding=True,
                         dynamic_finding=False,
-                        cvssv3_score=vuln["vulnerability"]["cvssScore"],
                     )
+                    if vuln["vulnerability"].get("fixAvailable"):
+                        finding.fix_available = vuln["vulnerability"].get("fixAvailable")
+                    if vuln["vulnerability"].get("cvssScore"):
+                        finding.cvssv3_score = vuln["vulnerability"].get("cvssScore")
                     findings.append(finding)
         return findings
+
+    def severity_mapper(self, severity):
+        if severity.lower().capitalize() in {"Critical", "High", "Medium", "Low", "Info"}:
+            return severity.lower().capitalize()
+        if severity == "Minimal":
+            return "Low"
+        return "Info"
