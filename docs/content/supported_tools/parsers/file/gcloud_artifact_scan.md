@@ -8,6 +8,8 @@ Once a scan is completed, results can be pulled via API/gcloud https://cloud.goo
 ### File Types
 DefectDojo parser accepts Google Cloud Artifact Vulnerability Scan data as a .json file.
 
+[This issue](https://github.com/DefectDojo/django-DefectDojo/issues/8552) describes the way to retrieve the json output. 
+
 ### Sample Scan Data
 Sample reports can be found at https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/gcloud_artifact_scan
 
