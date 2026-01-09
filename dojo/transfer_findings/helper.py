@@ -267,7 +267,8 @@ def add_finding_related(
                     static_finding=origin_finding.static_finding,
                     dynamic_finding=origin_finding.dynamic_finding,
                     risk_status="Risk Active",
-                    tags=origin_tags
+                    tags=origin_tags,
+                    priority=origin_finding.priority,
                 )
                 finding_related.save()
                 transferfinding_finding.finding_related = finding_related

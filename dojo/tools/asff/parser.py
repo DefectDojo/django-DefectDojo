@@ -1,9 +1,11 @@
 import json
+import base64
 
 import dateutil
 from netaddr import IPAddress
+from django.core.files.base import ContentFile
 
-from dojo.models import Endpoint, Finding
+from dojo.models import Endpoint, Finding, FileUpload
 import re
 
 SEVERITY_MAPPING = {
@@ -90,6 +92,18 @@ class AsffParser:
 
             vuln_id_tool = re.match(r"" + settings.DD_CUSTOM_TAG_PARSER.get("asff_regex"), item.get("Title"))
 
+            # remove files from the dictionary
+            unsaved_files = None
+            if "files" in item:
+                unsaved_files = item["files"]
+                del item["files"]
+
+            if unsaved_files:
+                for unsaved_file in unsaved_files:
+                    data = base64.b64decode(unsaved_file.get("data"))
+                    title = unsaved_file.get("title", "<No title>")
+                    FileUpload(title=title, file=ContentFile(data)).clean()
+
             finding = Finding(
                 title=item.get("Title"),
                 description=self.get_description(item),
@@ -103,6 +117,7 @@ class AsffParser:
                 impact=impact,
             )
             finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("asff")]
+            finding.unsaved_files = unsaved_files
 
             if vuln_id_tool:
                 finding.unsaved_vulnerability_ids = [vuln_id_tool.group(0).upper()]

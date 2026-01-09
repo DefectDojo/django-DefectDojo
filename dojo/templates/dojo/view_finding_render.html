@@ -97,7 +97,12 @@
                 <tr>
                     {% block header_head %}
                         <th>ID</th>
+                        {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
+                        <th>Priorization</th>
+                        {% endif %}
+                        {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
                         <th>Severity</th>
+                        {% endif %}
                         {% if system_settings.enable_finding_sla %}
                         <th>SLA</th>
                         {% endif %}
@@ -153,25 +158,31 @@
                 <tr>
                     {% block header_body %}
                         <td title="hash_code: {{ finding.hash_code }}">{{ finding.id }}</td>
+                       {% if "PRIORITIZATION_MODEL_PRIORITY"|general_settings_get_value:"False" %}
+                        <td>
+                             <span class="label severity severity-{{ finding|priority_display_status }}">
+                                <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+                                        data-content="{{ finding.priority }}">
+                                {{ finding|priority_display_status }}
+                            </span>
+                        </td>
+                        {% endif %}
+                         {% if "PRIORITIZATION_MODEL_SEVERITY"|general_settings_get_value:"True" %}
                         <td>
                             <span class="label severity severity-{{ finding.severity }}">
                                 {% if finding.severity %}
-                                    {% if finding.cvssv3 %}
-                                        <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
-                                            data-content="{{ finding.cvssv3 }}">
-                                    {% endif %}
                                     {{ finding.severity_display }}
-                                    {% if finding.cvssv3_score %}
-                                        ({{ finding.cvssv3_score }})
-                                    {% endif %}
-                                    {% if finding.cvssv3 %}
-                                        </i>
+                                    {% if system_settings.enable_cvss4_display and finding.cvssv4_score or system_settings.enable_cvss3_display and finding.cvssv3_score %}
+                                        <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" data-html="true" title="" href="#"
+                                            data-content="{% if system_settings.enable_cvss4_display and finding.cvssv4 %}{{ finding.cvssv4 }} ({{ finding.cvssv4_score }}){% endif %}{% if system_settings.enable_cvss4_display and finding.cvssv4 and system_settings.enable_cvss3_display and finding.cvssv3 %}<br/>{% endif %}{% if system_settings.enable_cvss3_display and finding.cvssv3 %}{{ finding.cvssv3 }} ({{ finding.cvssv3_score }}){% endif %}">
+                                        ({% if system_settings.enable_cvss4_display and finding.cvssv4_score %}{{ finding.cvssv4_score }}{% if system_settings.enable_cvss3_display and finding.cvssv3_score %}, {% endif %}{% endif %}{% if system_settings.enable_cvss3_display and finding.cvssv3_score %}{{ finding.cvssv3_score }}{% endif %})</i>
                                     {% endif %}
                                 {% else %}
                                     Unknown
                                 {% endif %}
                             </span>
                         </td>
+                        {% endif %}
                         {% if system_settings.enable_finding_sla %}
                         <td>
                         {{ finding|finding_sla }}
