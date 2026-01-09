@@ -17,6 +17,7 @@ class TestGCloudArtifactScanParser(DojoTestCase):
         self.assertEqual("Critical", finding.severity)
         finding = findings[2]
         self.assertEqual("projects/goog-vulnz/notes/CVE-2023-29404", finding.title)
+        self.assertEqual("CVE-2023-29404", finding.unsaved_vulnerability_ids[0])
         self.assertEqual("Critical", finding.severity)
 
     def test_parse_file_artifact_analysis_occurrences_sample(self):
@@ -33,3 +34,4 @@ class TestGCloudArtifactScanParser(DojoTestCase):
         finding = findings[2]
         self.assertEqual("projects/goog-vulnz/notes/CVE-2022-37620", finding.title)
         self.assertEqual("High", finding.severity)
+        self.assertEqual("CVE-2022-37620", finding.unsaved_vulnerability_ids[0])
