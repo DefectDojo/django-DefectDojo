@@ -55,6 +55,8 @@ class GCloudArtifactScanParser:
                         finding.fix_available = vuln["vulnerability"].get("fixAvailable")
                     if vuln["vulnerability"].get("cvssScore"):
                         finding.cvssv3_score = vuln["vulnerability"].get("cvssScore")
+                    if vuln["vulnerability"]["shortDescription"]:
+                        finding.unsaved_vulnerability_ids = [vuln["vulnerability"]["shortDescription"]]
                     findings.append(finding)
         return findings
 
