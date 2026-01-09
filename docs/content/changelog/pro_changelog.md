@@ -12,6 +12,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ### Jan 5, 2025: v2.54.0
 
+No significant UX changes.
 
 ## Dec 2025: v2.53
 
