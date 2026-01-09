@@ -56,3 +56,7 @@
 [data-bs-theme="dark"] .logo-darkmode {
   display: inline-block;
 }
+
+html {
+  font-size: 85%; /* scales all rem/em fonts */
+}

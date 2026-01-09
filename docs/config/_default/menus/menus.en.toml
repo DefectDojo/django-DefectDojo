@@ -1,37 +1,42 @@
 [[main]]
-  name = "Get Started"
+  name = "Get started ⏷"
   url = "/get_started/about/about_defectdojo"
   weight = 10
 
 [[main]]
-  name = "Supported Tools"
-  url = "/supported_tools/"
-  weight = 11
-
-[[main]]
-  name = "Vuln Management"
+  name = "Import data ⏷"
   url = "/vuln_management/"
   weight = 12
 
 [[main]]
-  name = "Reporting"
+  name = "Triage Findings ⏷"
+  url = "/vuln_management/"
+  weight = 12
+
+[[main]]
+  name = "Create reports ⏷"
   url = "/reporting/"
   weight = 13
 
 [[main]]
-  name = "Administration"
+  name = "Admin ⏷"
   url = "/admin/"
   weight = 14
 
 [[main]]
-  name = "Issue Tracking"
+  name = "Issue tracking ⏷"
   url = "/integrators/"
   weight = 14
 
 [[main]]
-  name = "Automation"
+  name = "API & CI/CD ⏷"
   url = "/integrators/"
   weight = 14
+
+[[main]]
+  name = "Supported tools ⏷"
+  url = "/supported_tools/"
+  weight = 15
 
 [[social]]
   name = "YouTube"
