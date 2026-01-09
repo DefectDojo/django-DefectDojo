@@ -1,4 +1,3 @@
-
 ---
 title: "Cloudflare Insights"
 toc_hide: true
