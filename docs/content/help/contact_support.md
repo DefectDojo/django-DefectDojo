@@ -1,5 +1,5 @@
 ---
-title: "Get Support"
+title: "Contact Support"
 description: "For Pro users: support@defectdojo.com + other options"
 draft: "false"
 pro-feature: true

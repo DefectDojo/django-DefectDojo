@@ -1,5 +1,5 @@
 ---
-title: "💡 Common Use Cases"
+title: "Common Use Cases"
 description: "Use Cases and examples"
 draft: "false"
 weight: 2
@@ -14,7 +14,6 @@ This article is based on DefectDojo Inc's February 2025 Office Hours: "Tackling 
 DefectDojo is designed to handle any security implementation, no matter your security team size, IT complexity level, or reporting volume. The following stories are intended as jumping-off points for your own needs, but they’re based on real examples from our community and the DefectDojo Pro team.
 
 ### Large Enterprise: RBAC and Engagements
-
 
 ‘BigCorp’ is a large multinational enterprise, with a Chief Information Security Officer (CISO) and a centralized IT security group that includes AppSec.
 

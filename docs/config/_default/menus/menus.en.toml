@@ -5,17 +5,17 @@
 
 [[main]]
   name = "Import data ⏷"
-  url = "/vuln_management/"
+  url = "/import_data/"
   weight = 12
 
 [[main]]
   name = "Triage Findings ⏷"
-  url = "/vuln_management/"
+  url = "/triage_findings/"
   weight = 12
 
 [[main]]
-  name = "Create reports ⏷"
-  url = "/reporting/"
+  name = "Metrics & reports ⏷"
+  url = "/metrics_reports/"
   weight = 13
 
 [[main]]
@@ -25,12 +25,12 @@
 
 [[main]]
   name = "Issue tracking ⏷"
-  url = "/integrators/"
+  url = "/issue_tracking/"
   weight = 14
 
 [[main]]
-  name = "API & CI/CD ⏷"
-  url = "/integrators/"
+  name = "Automation ⏷"
+  url = "/automation/"
   weight = 14
 
 [[main]]

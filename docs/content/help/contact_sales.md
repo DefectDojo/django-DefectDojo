@@ -1,5 +1,5 @@
 ---
-title: "Request a DefectDojo Pro Trial"
+title: "Contact Sales"
 description: "How to request and work with a trial of DefectDojo Cloud"
 draft: "false"
 weight: 6
