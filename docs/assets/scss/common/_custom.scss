@@ -44,3 +44,19 @@
     position: fixed !important;
   }
 }
+
+.logo-darkmode {
+  display: none;
+}
+
+[data-bs-theme="dark"] .logo-lightmode {
+  display: none;
+}
+
+[data-bs-theme="dark"] .logo-darkmode {
+  display: inline-block;
+}
+
+html {
+  font-size: 85%; /* scales all rem/em fonts */
+}

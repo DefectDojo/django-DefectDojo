@@ -1,5 +1,5 @@
 ---
-title: "Running in Production (Open Source)"
+title: "Running in Production"
 description: "For use in Production environments, performance tweaks and backups are recommended."
 draft: false
 weight: 4

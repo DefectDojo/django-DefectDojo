@@ -2,6 +2,7 @@
 title: "Using the Cloud Manager"
 description: "Manage your subscription and account settings"
 weight: 1
+collapsed: true
 ---
 
 Logging into DefectDojo's Cloud Manager allows you to configure your account settings and manage your subscription with DefectDojo Cloud.

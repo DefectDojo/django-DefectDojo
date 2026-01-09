@@ -1,8 +1,8 @@
 ---
-title: "Configuration (Open Source)"
+title: "Configuration"
 description: "DefectDojo is highly configurable."
 draft: false
-weight: 3
+weight: 2
 ---
 
 ## dojo/settings/settings.dist.py
