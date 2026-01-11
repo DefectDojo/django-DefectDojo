@@ -114,7 +114,7 @@ class CloudflareInsightsParser:
                 title=title,
                 severity=mapped_severity,
                 description=description,
-                mitigation=recommended_action or "Not provided!",
+                mitigation=recommended_action,
                 references="Not provided!",
                 static_finding=False,
                 dynamic_finding=True,
