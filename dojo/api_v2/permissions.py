@@ -1,5 +1,4 @@
 import re
-from collections.abc import Iterable
 
 from django.db.models import Model
 from django.shortcuts import get_object_or_404
@@ -32,11 +31,11 @@ from dojo.models import (
 )
 
 
-def check_post_permission(request: Request, post_model: Model, post_pk: str | Iterable[str], post_permission: int) -> bool:
+def check_post_permission(request: Request, post_model: Model, post_pk: str | list[str], post_permission: int) -> bool:
     if request.method == "POST":
         eligible_post_pk = None
         # Support both single PK string and list of PK strings
-        searchable_post_pks = post_pk if isinstance(post_pk, Iterable) else [post_pk]
+        searchable_post_pks = post_pk if isinstance(post_pk, list) else [post_pk]
         # Iterate until we find a matching PK in the request data
         for pk in searchable_post_pks:
             if request.data.get(pk) is not None:
