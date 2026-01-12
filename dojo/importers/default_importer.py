@@ -7,7 +7,6 @@ from django.db.models.query_utils import Q
 from django.urls import reverse
 
 import dojo.jira_link.helper as jira_helper
-from dojo.decorators import we_want_async
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
@@ -255,27 +254,14 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 batch_finding_ids.clear()
                 logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
                              push_to_jira, len(finding_ids_batch), is_final_finding)
-                if we_want_async(async_user=self.user):
-                    signature = finding_helper.post_process_findings_batch_signature(
-                        finding_ids_batch,
-                        dedupe_option=True,
-                        rules_option=True,
-                        product_grading_option=True,
-                        issue_updater_option=True,
-                        push_to_jira=push_to_jira,
-                    )
-                    logger.debug("process_findings: signature created with push_to_jira=%s, signature.kwargs=%s",
-                                 push_to_jira, signature.kwargs)
-                    signature()
-                else:
-                    finding_helper.post_process_findings_batch(
-                        finding_ids_batch,
-                        dedupe_option=True,
-                        rules_option=True,
-                        product_grading_option=True,
-                        issue_updater_option=True,
-                        push_to_jira=push_to_jira,
-                    )
+                finding_helper.post_process_findings_batch(
+                    finding_ids_batch,
+                    dedupe_option=True,
+                    rules_option=True,
+                    product_grading_option=True,
+                    issue_updater_option=True,
+                    push_to_jira=push_to_jira,
+                )
 
             # No chord: tasks are dispatched immediately above per batch
 
