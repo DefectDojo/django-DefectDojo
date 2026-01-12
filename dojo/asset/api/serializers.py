@@ -37,11 +37,13 @@ class AssetSerializer(serializers.ModelSerializer):
     # V3 fields
     asset_meta = ProductMetaSerializer(source="product_meta", read_only=True, many=True)
     organization = RelatedOrganizationField(source="prod_type")
-    asset_numeric_grade = serializers.IntegerField(source="prod_numeric_grade")
-    enable_asset_tag_inheritance = serializers.BooleanField(source="enable_product_tag_inheritance")
+    asset_numeric_grade = serializers.IntegerField(source="prod_numeric_grade", required=False, allow_null=True)
+    enable_asset_tag_inheritance = serializers.BooleanField(source="enable_product_tag_inheritance", required=False, default=False)
     asset_managers = serializers.PrimaryKeyRelatedField(
         source="product_manager",
-        queryset=Dojo_User.objects.exclude(is_active=False))
+        queryset=Dojo_User.objects.exclude(is_active=False),
+        required=False, allow_null=True,
+    )
 
     class Meta:
         model = Product
