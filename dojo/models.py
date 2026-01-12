@@ -441,7 +441,6 @@ class System_Settings(models.Model):
     url_prefix = models.CharField(max_length=300, default="", blank=True, help_text=_("URL prefix if DefectDojo is installed in it's own virtual subdirectory."))
     team_name = models.CharField(max_length=100, default="", blank=True)
     enable_product_grade = models.BooleanField(default=False, verbose_name=_("Enable Product Grading"), help_text=_("Displays a grade letter next to a product to show the overall health."))
-    product_grade = models.CharField(max_length=800, blank=True)
     product_grade_a = models.IntegerField(default=90,
                                           verbose_name=_("Grade A"),
                                           help_text=_("Percentage score for an "
@@ -683,19 +682,6 @@ class System_Settings(models.Model):
                 raise ValidationError({
                     "minimum_password_length": msg,
                 })
-
-
-class SystemSettingsFormAdmin(forms.ModelForm):
-    product_grade = forms.CharField(widget=forms.Textarea)
-
-    class Meta:
-        model = System_Settings
-        fields = ["product_grade"]
-
-
-class System_SettingsAdmin(admin.ModelAdmin):
-    form = SystemSettingsFormAdmin
-    fields = ("product_grade",)
 
 
 def get_current_date():
@@ -2844,7 +2830,7 @@ class Finding(models.Model):
         # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
         system_settings = System_Settings.objects.get()
         if dedupe_option or issue_updater_option or (product_grading_option and system_settings.enable_product_grade) or push_to_jira:
-            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
+            finding_helper.post_process_finding_save(self.id, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
                 issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
         else:
             logger.debug("no options selected that require finding post processing")
@@ -4854,7 +4840,7 @@ admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
 admin.site.register(Cred_Mapping)
-admin.site.register(System_Settings, System_SettingsAdmin)
+admin.site.register(System_Settings)
 admin.site.register(SLA_Configuration)
 admin.site.register(CWE)
 admin.site.register(Regulation)

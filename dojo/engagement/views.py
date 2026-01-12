@@ -390,7 +390,7 @@ def copy_engagement(request, eid):
         form = DoneForm(request.POST)
         if form.is_valid():
             engagement_copy = engagement.copy()
-            calculate_grade(product)
+            calculate_grade(product.id)
             messages.add_message(
                 request,
                 messages.SUCCESS,
