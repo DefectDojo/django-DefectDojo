@@ -1,8 +1,13 @@
+
+import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+
+logger = logging.getLogger(__name__)
 
 
 class ProductAnnouncementManager:
@@ -48,12 +53,16 @@ class ProductAnnouncementManager:
 
     def _add_django_message(self, request: HttpRequest, message: str):
         """Add a message to the UI"""
-        messages.add_message(
-            request=request,
-            level=messages.INFO,
-            message=_(message),
-            extra_tags="alert-info",
-        )
+        try:
+            messages.add_message(
+                request=request,
+                level=messages.INFO,
+                message=_(message),
+                extra_tags="alert-info",
+            )
+        except Exception:
+            # make sure we catch any exceptions that might happen: https://github.com/DefectDojo/django-DefectDojo/issues/14041
+            logger.exception(f"Error adding message to Django: {message}")
 
     def _add_api_response_key(self, message: str, data: dict) -> dict:
         """Update the response data in place"""
