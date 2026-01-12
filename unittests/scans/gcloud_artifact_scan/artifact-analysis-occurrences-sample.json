@@ -1,0 +1,903 @@
+{
+  "discovery_summary": {
+    "discovery": [
+      {
+        "createTime": "2005-05-15T10:02:04.052380Z",
+        "discovery": {
+          "analysisCompleted": {
+            "analysisType": [
+              "GO",
+              "MAVEN",
+              "OS",
+              "COMPOSER",
+              "NUGET",
+              "NPM",
+              "PYPI",
+              "RUBYGEMS",
+              "RUST"
+            ]
+          },
+          "analysisStatus": "FINISHED_SUCCESS",
+          "continuousAnalysis": "ACTIVE",
+          "lastScanTime": "2005-05-15T14:15:20.837212135Z"
+        },
+        "kind": "DISCOVERY",
+        "name": "projects/my-project/locations/region-east2/occurrences/671711b8-59e5-45eb-a39b-1de940e9f2a1",
+        "noteName": "projects/goog-analysis/locations/region-east2/notes/PACKAGE_VULNERABILITY",
+        "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+        "updateTime": "2005-05-15T14:15:20.943784Z"
+      }
+    ]
+  },
+  "image_summary": {
+    "digest": "sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+    "fully_qualified_digest": "region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+    "registry": "region-east2-docker.pkg.dev",
+    "repository": "my-image"
+  },
+  "package_vulnerability_summary": {
+    "vulnerabilities": {
+      "CRITICAL": [
+        {
+          "createTime": "2005-05-15T10:02:42.904882Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/8ab969a2-81cf-4f32-bb01-b77d103c94f6",
+          "noteName": "projects/goog-vulnz/notes/CVE-2023-36665",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:42.904882Z",
+          "vulnerability": {
+            "cvssScore": 9.8,
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_HIGH",
+              "baseScore": 9.8,
+              "confidentialityImpact": "IMPACT_HIGH",
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9,
+              "integrityImpact": "IMPACT_HIGH",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "CRITICAL",
+            "fixAvailable": true,
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "fullName": "7.0.0",
+                  "kind": "NORMAL",
+                  "name": "7.0.0"
+                },
+                "effectiveSeverity": "CRITICAL",
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "8a271324e30f2db078751809a026839101047220c6154378e87121673ec43fbd",
+                      "index": 13
+                    }
+                  }
+                ],
+                "fixAvailable": true,
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "fullName": "7.2.5",
+                  "kind": "NORMAL",
+                  "name": "7.2.5"
+                },
+                "packageType": "NPM"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://github.com/advisories/GHSA-h755-8qp9-cq85"
+              }
+            ],
+            "severity": "CRITICAL",
+            "shortDescription": "CVE-2023-36665"
+          }
+        },
+        {
+          "createTime": "2005-05-15T10:02:42.918992Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/b960d779-36e3-4c42-a0f1-b4e64384a07b",
+          "noteName": "projects/goog-vulnz/notes/CVE-2023-45853",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:42.918992Z",
+          "vulnerability": {
+            "cvssScore": 9.8,
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_HIGH",
+              "baseScore": 9.8,
+              "confidentialityImpact": "IMPACT_HIGH",
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9,
+              "integrityImpact": "IMPACT_HIGH",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "CRITICAL",
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "epoch": 1,
+                  "fullName": "1:1.2.13.dfsg-1",
+                  "kind": "NORMAL",
+                  "name": "1.2.13.dfsg",
+                  "revision": "1"
+                },
+                "effectiveSeverity": "CRITICAL",
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "baseImages": [
+                        {
+                          "repository": "someOS"
+                        },
+                        {
+                          "repository": "amd64/someOS"
+                        },
+                        {
+                          "repository": "library/someOS"
+                        }
+                      ],
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy"
+                    }
+                  }
+                ],
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "kind": "MAXIMUM"
+                },
+                "packageType": "OS"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.someOS.org/tracker/CVE-2023-45853"
+              }
+            ],
+            "severity": "CRITICAL",
+            "shortDescription": "CVE-2023-45853"
+          }
+        }
+      ],
+      "HIGH": [
+        {
+          "createTime": "2005-05-15T10:02:42.956487Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/00527240-4359-4ad1-88c7-98d8b25f190b",
+          "noteName": "projects/goog-vulnz/notes/CVE-2022-37620",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:42.956487Z",
+          "vulnerability": {
+            "cvssScore": 7.5,
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_HIGH",
+              "baseScore": 7.5,
+              "confidentialityImpact": "IMPACT_NONE",
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6,
+              "integrityImpact": "IMPACT_NONE",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "HIGH",
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "fullName": "4.0.0",
+                  "kind": "NORMAL",
+                  "name": "4.0.0"
+                },
+                "effectiveSeverity": "HIGH",
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "8a271324e30f2db078751809a026839101047220c6154378e87121673ec43fbd",
+                      "index": 13
+                    }
+                  }
+                ],
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "kind": "MAXIMUM"
+                },
+                "packageType": "NPM"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://github.com/advisories/GHSA-pfq8-rq6v-vf5m"
+              }
+            ],
+            "severity": "HIGH",
+            "shortDescription": "CVE-2022-37620"
+          }
+        },
+        {
+          "createTime": "2005-05-15T10:02:42.894665Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/0ef3bf77-3bf7-4557-a08e-dc12febf3d8f",
+          "noteName": "projects/goog-vulnz/notes/CVE-2025-64756",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:42.894665Z",
+          "vulnerability": {
+            "cvssScore": 7.5,
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_HIGH",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_HIGH",
+              "baseScore": 7.5,
+              "confidentialityImpact": "IMPACT_HIGH",
+              "exploitabilityScore": 1.6,
+              "impactScore": 5.9,
+              "integrityImpact": "IMPACT_HIGH",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_LOW",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "HIGH",
+            "fixAvailable": true,
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "fullName": "10.4.5",
+                  "kind": "NORMAL",
+                  "name": "10.4.5"
+                },
+                "effectiveSeverity": "HIGH",
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "baseImages": [
+                        {
+                          "repository": "node"
+                        },
+                        {
+                          "repository": "library/node"
+                        }
+                      ],
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "616f6b198b3c0a4d537e28a6e3dc165fcb03c9c30d2aaf884c272332eef50423",
+                      "index": 3
+                    }
+                  }
+                ],
+                "fixAvailable": true,
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "fullName": "10.5.0",
+                  "kind": "NORMAL",
+                  "name": "10.5.0"
+                },
+                "packageType": "NPM"
+              },
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "fullName": "11.0.3",
+                  "kind": "NORMAL",
+                  "name": "11.0.3"
+                },
+                "effectiveSeverity": "HIGH",
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "baseImages": [
+                        {
+                          "repository": "node"
+                        },
+                        {
+                          "repository": "library/node"
+                        }
+                      ],
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "616f6b198b3c0a4d537e28a6e3dc165fcb03c9c30d2aaf884c272332eef50423",
+                      "index": 3
+                    }
+                  }
+                ],
+                "fixAvailable": true,
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "fullName": "11.1.0",
+                  "kind": "NORMAL",
+                  "name": "11.1.0"
+                },
+                "packageType": "NPM"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.someOS.org/tracker/CVE-2025-64756"
+              },
+              {
+                "label": "More Info",
+                "url": "https://github.com/advisories/GHSA-5j98-mcp5-4vw2"
+              }
+            ],
+            "severity": "HIGH",
+            "shortDescription": "CVE-2025-64756"
+          }
+        }
+      ],
+      "LOW": [
+        {
+          "createTime": "2005-05-15T10:02:42.895751Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/4d498bb4-fa47-4c81-916b-c1e9cb88bf49",
+          "noteName": "projects/goog-vulnz/notes/CVE-2025-9820",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:42.895751Z",
+          "vulnerability": {
+            "effectiveSeverity": "LOW",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "fullName": "3.7.9-2+deb12u5",
+                  "kind": "NORMAL",
+                  "name": "3.7.9",
+                  "revision": "2+deb12u5"
+                },
+                "effectiveSeverity": "LOW",
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "baseImages": [
+                        {
+                          "repository": "someOS"
+                        },
+                        {
+                          "repository": "amd64/someOS"
+                        },
+                        {
+                          "repository": "library/someOS"
+                        }
+                      ],
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy"
+                    }
+                  }
+                ],
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "kind": "MAXIMUM"
+                },
+                "packageType": "OS"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.someOS.org/tracker/CVE-2025-9820"
+              }
+            ],
+            "shortDescription": "CVE-2025-9820"
+          }
+        },
+        {
+          "createTime": "2005-05-15T10:02:43.008086Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/75f1086b-456e-4267-92b7-7e687004c1fb",
+          "noteName": "projects/goog-vulnz/notes/CVE-2016-2781",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:43.008086Z",
+          "vulnerability": {
+            "cvssScore": 6.5,
+            "cvssV2": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_LOCAL",
+              "authentication": "AUTHENTICATION_NONE",
+              "availabilityImpact": "IMPACT_NONE",
+              "baseScore": 2.1,
+              "confidentialityImpact": "IMPACT_NONE",
+              "integrityImpact": "IMPACT_PARTIAL"
+            },
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_LOCAL",
+              "availabilityImpact": "IMPACT_NONE",
+              "baseScore": 6.5,
+              "confidentialityImpact": "IMPACT_NONE",
+              "exploitabilityScore": 2.0,
+              "impactScore": 4.0,
+              "integrityImpact": "IMPACT_HIGH",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_LOW",
+              "scope": "SCOPE_CHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "LOW",
+            "longDescription": "NIST vectors: CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:C/C:N/I:H/A:N",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "fullName": "9.1-1",
+                  "kind": "NORMAL",
+                  "name": "9.1",
+                  "revision": "1"
+                },
+                "effectiveSeverity": "LOW",
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "baseImages": [
+                        {
+                          "repository": "someOS"
+                        },
+                        {
+                          "repository": "amd64/someOS"
+                        },
+                        {
+                          "repository": "library/someOS"
+                        }
+                      ],
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy"
+                    }
+                  }
+                ],
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "kind": "MAXIMUM"
+                },
+                "packageType": "OS"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.someOS.org/tracker/CVE-2016-2781"
+              }
+            ],
+            "severity": "MEDIUM",
+            "shortDescription": "CVE-2016-2781"
+          }
+        },
+        {
+          "createTime": "2005-05-15T10:02:42.924778Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/cf7c61c0-322a-47d0-9b90-2bb76c791f22",
+          "noteName": "projects/goog-vulnz/notes/CVE-2024-56433",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:42.924778Z",
+          "vulnerability": {
+            "effectiveSeverity": "LOW",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "epoch": 1,
+                  "fullName": "1:4.13+dfsg1-1+deb12u1",
+                  "kind": "NORMAL",
+                  "name": "4.13+dfsg1",
+                  "revision": "1+deb12u1"
+                },
+                "effectiveSeverity": "LOW",
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "baseImages": [
+                        {
+                          "repository": "someOS"
+                        },
+                        {
+                          "repository": "amd64/someOS"
+                        },
+                        {
+                          "repository": "library/someOS"
+                        }
+                      ],
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy"
+                    }
+                  }
+                ],
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "kind": "MAXIMUM"
+                },
+                "packageType": "OS"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.someOS.org/tracker/CVE-2024-56433"
+              }
+            ],
+            "shortDescription": "CVE-2024-56433"
+          }
+        }
+      ],
+      "MEDIUM": [
+        {
+          "createTime": "2005-05-15T10:02:42.971526Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/c656e94d-e929-4714-963a-f2a49aa842a2",
+          "noteName": "projects/goog-vulnz/notes/CVE-2025-67898",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:42.971526Z",
+          "vulnerability": {
+            "effectiveSeverity": "MEDIUM",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "fullName": "4.18.0",
+                  "kind": "NORMAL",
+                  "name": "4.18.0"
+                },
+                "effectiveSeverity": "MEDIUM",
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "8a271324e30f2db078751809a026839101047220c6154378e87121673ec43fbd",
+                      "index": 13
+                    }
+                  }
+                ],
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "kind": "MAXIMUM"
+                },
+                "packageType": "NPM"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://github.com/advisories/GHSA-45h5-66jx-r2wf"
+              }
+            ],
+            "shortDescription": "CVE-2025-67898"
+          }
+        }
+      ],
+      "MINIMAL": [
+        {
+          "createTime": "2005-05-15T10:02:42.850300Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/0ff600e0-133a-4ca7-8159-f39450534b21",
+          "noteName": "projects/goog-vulnz/notes/CVE-2018-6829",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:42.850300Z",
+          "vulnerability": {
+            "cvssScore": 7.5,
+            "cvssV2": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "authentication": "AUTHENTICATION_NONE",
+              "availabilityImpact": "IMPACT_NONE",
+              "baseScore": 5.0,
+              "confidentialityImpact": "IMPACT_PARTIAL",
+              "integrityImpact": "IMPACT_NONE"
+            },
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_NONE",
+              "baseScore": 7.5,
+              "confidentialityImpact": "IMPACT_HIGH",
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6,
+              "integrityImpact": "IMPACT_NONE",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "MINIMAL",
+            "longDescription": "NIST vectors: CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "fullName": "1.10.1-3",
+                  "kind": "NORMAL",
+                  "name": "1.10.1",
+                  "revision": "3"
+                },
+                "effectiveSeverity": "MINIMAL",
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "baseImages": [
+                        {
+                          "repository": "someOS"
+                        },
+                        {
+                          "repository": "amd64/someOS"
+                        },
+                        {
+                          "repository": "library/someOS"
+                        }
+                      ],
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy"
+                    }
+                  }
+                ],
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "kind": "MAXIMUM"
+                },
+                "packageType": "OS"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.someOS.org/tracker/CVE-2018-6829"
+              }
+            ],
+            "severity": "HIGH",
+            "shortDescription": "CVE-2018-6829"
+          }
+        },
+        {
+          "createTime": "2005-05-15T10:02:42.883991Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/1b959538-c9f3-4a79-aa67-4c9483c04ca0",
+          "noteName": "projects/goog-vulnz/notes/CVE-2023-31439",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:42.883991Z",
+          "vulnerability": {
+            "cvssScore": 5.3,
+            "cvssVersion": "CVSS_VERSION_3",
+            "cvssv3": {
+              "attackComplexity": "ATTACK_COMPLEXITY_LOW",
+              "attackVector": "ATTACK_VECTOR_NETWORK",
+              "availabilityImpact": "IMPACT_NONE",
+              "baseScore": 5.3,
+              "confidentialityImpact": "IMPACT_NONE",
+              "exploitabilityScore": 3.9,
+              "impactScore": 1.4,
+              "integrityImpact": "IMPACT_LOW",
+              "privilegesRequired": "PRIVILEGES_REQUIRED_NONE",
+              "scope": "SCOPE_UNCHANGED",
+              "userInteraction": "USER_INTERACTION_NONE"
+            },
+            "effectiveSeverity": "MINIMAL",
+            "longDescription": "NIST vectors: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "fullName": "252.39-1~deb12u1",
+                  "kind": "NORMAL",
+                  "name": "252.39",
+                  "revision": "1~deb12u1"
+                },
+                "effectiveSeverity": "MINIMAL",
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "baseImages": [
+                        {
+                          "repository": "someOS"
+                        },
+                        {
+                          "repository": "amd64/someOS"
+                        },
+                        {
+                          "repository": "library/someOS"
+                        }
+                      ],
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy"
+                    }
+                  }
+                ],
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "kind": "MAXIMUM"
+                },
+                "packageType": "OS"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.someOS.org/tracker/CVE-2023-31439"
+              },
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.someOS.org/tracker/CVE-2023-31439 | https://nvd.nist.gov/vuln/detail/CVE-2023-31439 | http://people.ubuntu.com/~ubuntu-security/cve/CVE-2023-31439 | https://alas.aws.amazon.com/AL2/ALAS-2024-2636.html | https://packages.cgr.dev/chainguard/osv/CGA-mhjv-hvjp-g2g6.json | https://alas.aws.amazon.com/AL2/ALAS2-2024-2636.html"
+              }
+            ],
+            "severity": "MEDIUM",
+            "shortDescription": "CVE-2023-31439"
+          }
+        }
+      ],
+      "None": [
+        {
+          "createTime": "2005-05-15T10:02:42.886881Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/80cef2d3-e132-44b8-9c3e-a7e612529166",
+          "noteName": "projects/goog-vulnz/notes/CVE-2025-6020",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:42.886881Z",
+          "vulnerability": {
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "fullName": "1.5.2-6+deb12u1",
+                  "kind": "NORMAL",
+                  "name": "1.5.2",
+                  "revision": "6+deb12u1"
+                },
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "baseImages": [
+                        {
+                          "repository": "someOS"
+                        },
+                        {
+                          "repository": "amd64/someOS"
+                        },
+                        {
+                          "repository": "library/someOS"
+                        }
+                      ],
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy"
+                    }
+                  }
+                ],
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "kind": "MAXIMUM"
+                },
+                "packageType": "OS"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.someOS.org/tracker/CVE-2025-6020"
+              }
+            ],
+            "shortDescription": "CVE-2025-6020"
+          }
+        },
+        {
+          "createTime": "2005-05-15T10:02:42.985531Z",
+          "kind": "VULNERABILITY",
+          "name": "projects/my-project/locations/region-east2/occurrences/e6b94e1d-xxxxx-xxxx-xxx-xxxxxxx",
+          "noteName": "projects/goog-vulnz/notes/CVE-2025-68973",
+          "resourceUri": "https://region-east2-docker.pkg.dev/my-project/my-image/staging@sha256:33ceexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+          "updateTime": "2005-05-15T10:02:42.985531Z",
+          "vulnerability": {
+            "packageIssue": [
+              {
+                "affectedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "affectedPackage": "some_package",
+                "affectedVersion": {
+                  "fullName": "2.2.40-1.1+deb12u1",
+                  "kind": "NORMAL",
+                  "name": "2.2.40",
+                  "revision": "1.1+deb12u1"
+                },
+                "fileLocation": [
+                  {
+                    "filePath": "filePath",
+                    "layerDetails": {
+                      "baseImages": [
+                        {
+                          "repository": "someOS"
+                        },
+                        {
+                          "repository": "amd64/someOS"
+                        },
+                        {
+                          "repository": "library/someOS"
+                        }
+                      ],
+                      "chainId": "sha256:dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy",
+                      "command": "command",
+                      "diffId": "dc6a9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtolstoy"
+                    }
+                  }
+                ],
+                "fixedCpeUri": "cpe:/o:someOS:someOS_windows:12",
+                "fixedPackage": "some_package",
+                "fixedVersion": {
+                  "kind": "MAXIMUM"
+                },
+                "packageType": "OS"
+              }
+            ],
+            "relatedUrls": [
+              {
+                "label": "More Info",
+                "url": "https://security-tracker.someOS.org/tracker/CVE-2025-68973"
+              }
+            ],
+            "shortDescription": "CVE-2025-68973"
+          }
+        }
+      ]
+    }
+  }
+}

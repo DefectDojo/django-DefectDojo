@@ -511,7 +511,7 @@ The HELM schema will be generated for you.
 
 # General information about chart values
 
-![Version: 1.9.6](https://img.shields.io/badge/Version-1.9.6-informational?style=flat-square) ![AppVersion: 2.54.0](https://img.shields.io/badge/AppVersion-2.54.0-informational?style=flat-square)
+![Version: 1.9.7](https://img.shields.io/badge/Version-1.9.7-informational?style=flat-square) ![AppVersion: 2.54.1](https://img.shields.io/badge/AppVersion-2.54.1-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -751,7 +751,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | redisParams | string | `""` | Parameters attached to the redis connection string, defaults to "ssl_cert_reqs=optional" if `redisScheme` is `rediss` |
 | redisPort | int | `6379` | Define the protocol to use with the external Redis instance |
 | redisScheme | string | `"redis"` | Define the protocol to use with the external Redis instance |
-| redisServer | string | `nil` | To use an external Redis instance, set `redis.enabled` to false and set the address here: |
+| redisServer | string | `nil` | To use an external Redis instance, set `valkey.enabled` to false and set the address here: |
 | revisionHistoryLimit | int | `10` | Allow overriding of revisionHistoryLimit across all deployments. |
 | secrets.annotations | object | `{}` | Add annotations for secret resources |
 | securityContext | object | `{"containerSecurityContext":{"runAsNonRoot":true},"enabled":true,"podSecurityContext":{"runAsNonRoot":true}}` | Security context settings |
