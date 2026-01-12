@@ -678,13 +678,13 @@ class EngagementViewSet(
         try:
 
             if engagement.has_jira_issue:
-                jira_helper.update_epic(engagement, **request.data)
+                jira_helper.update_epic(engagement.id, **request.data)
                 response = Response(
                     {"info": "Jira Epic update query sent"},
                     status=status.HTTP_200_OK,
                 )
             else:
-                jira_helper.add_epic(engagement, **request.data)
+                jira_helper.add_epic(engagement.id, **request.data)
                 response = Response(
                     {"info": "Jira Epic create query sent"},
                     status=status.HTTP_200_OK,
