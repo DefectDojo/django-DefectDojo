@@ -1,5 +1,7 @@
 import re
+from collections.abc import Iterable
 
+from django.db.models import Model
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import (
@@ -7,6 +9,7 @@ from rest_framework.exceptions import (
     PermissionDenied,
     ValidationError,
 )
+from rest_framework.request import Request
 
 from dojo.authorization.authorization import (
     user_has_configuration_permission,
@@ -29,24 +32,34 @@ from dojo.models import (
 )
 
 
-def check_post_permission(request, post_model, post_pk, post_permission):
+def check_post_permission(request: Request, post_model: Model, post_pk: str | Iterable[str], post_permission: int) -> bool:
     if request.method == "POST":
-        if request.data.get(post_pk) is None:
-            msg = f"Unable to check for permissions: Attribute '{post_pk}' is required"
+        eligible_post_pk = None
+        # Support both single PK string and list of PK strings
+        searchable_post_pks = post_pk if isinstance(post_pk, Iterable) else [post_pk]
+        # Iterate until we find a matching PK in the request data
+        for pk in searchable_post_pks:
+            if request.data.get(pk) is not None:
+                eligible_post_pk = pk
+                break
+        # Raise an error if we never find anything
+        if eligible_post_pk is None:
+            msg = f"Unable to check for permissions: No valid attribute in '{post_pk}' is required"
             raise ParseError(msg)
-        obj = get_object_or_404(post_model, pk=request.data.get(post_pk))
+        # Attempt to get the object
+        obj = get_object_or_404(post_model, pk=request.data.get(eligible_post_pk))
         return user_has_permission(request.user, obj, post_permission)
     return True
 
 
 def check_object_permission(
-    request,
-    obj,
-    get_permission,
-    put_permission,
-    delete_permission,
-    post_permission=None,
-):
+    request: Request,
+    obj: Model,
+    get_permission: int,
+    put_permission: int,
+    delete_permission: int,
+    post_permission: int | None = None,
+) -> bool:
     if request.method == "GET":
         return user_has_permission(request.user, obj, get_permission)
     if request.method in {"PUT", "PATCH"}:
@@ -61,7 +74,7 @@ def check_object_permission(
 class UserHasAppAnalysisPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Technology_Add,
+            request, Product, ["product", "asset"], Permissions.Technology_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -78,7 +91,7 @@ class UserHasCredentialPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.data.get("product") is not None:
             return check_post_permission(
-                request, Cred_Mapping, "product", Permissions.Credential_Add,
+                request, Cred_Mapping, ["product", "asset"], Permissions.Credential_Add,
             )
         if request.data.get("engagement") is not None:
             return check_post_permission(
@@ -93,7 +106,7 @@ class UserHasCredentialPermission(permissions.BasePermission):
                 request, Cred_Mapping, "finding", Permissions.Credential_Add,
             )
         return check_post_permission(
-            request, Cred_Mapping, "product", Permissions.Credential_Add,
+            request, Cred_Mapping, ["product", "asset"], Permissions.Credential_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -231,7 +244,7 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
 class UserHasToolProductSettingsPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Product_Edit,
+            request, Product, ["product", "asset"], Permissions.Product_Edit,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -247,7 +260,7 @@ class UserHasToolProductSettingsPermission(permissions.BasePermission):
 class UserHasEndpointPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Endpoint_Add,
+            request, Product, ["product", "asset"], Permissions.Endpoint_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -287,7 +300,7 @@ class UserHasEngagementPermission(permissions.BasePermission):
             request.path,
         ) or UserHasEngagementPermission.path_engagement.match(request.path):
             return check_post_permission(
-                request, Product, "product", Permissions.Engagement_Add,
+                request, Product, ["product", "asset"], Permissions.Engagement_Add,
             )
         # related object only need object permission
         return True
@@ -326,7 +339,7 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
             request.path,
         ):
             return check_post_permission(
-                request, Product, "product", Permissions.Risk_Acceptance,
+                request, Product, ["product", "asset"], Permissions.Risk_Acceptance,
             )
         # related object only need object permission
         return True
@@ -493,7 +506,7 @@ class UserHasProductPermission(permissions.BasePermission):
         return check_post_permission(
             request,
             Product_Type,
-            "prod_type",
+            ["prod_type", "organization"],
             Permissions.Product_Type_Add_Product,
         )
 
@@ -510,7 +523,7 @@ class UserHasProductPermission(permissions.BasePermission):
 class UserHasProductMemberPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Product_Manage_Members,
+            request, Product, ["product", "asset"], Permissions.Product_Manage_Members,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -526,7 +539,7 @@ class UserHasProductMemberPermission(permissions.BasePermission):
 class UserHasProductGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Product_Group_Add,
+            request, Product, ["product", "asset"], Permissions.Product_Group_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -562,7 +575,7 @@ class UserHasProductTypeMemberPermission(permissions.BasePermission):
         return check_post_permission(
             request,
             Product_Type,
-            "product_type",
+            ["product_type", "organization"],
             Permissions.Product_Type_Manage_Members,
         )
 
@@ -581,7 +594,7 @@ class UserHasProductTypeGroupPermission(permissions.BasePermission):
         return check_post_permission(
             request,
             Product_Type,
-            "product_type",
+            ["product_type", "organization"],
             Permissions.Product_Type_Group_Add,
         )
 
@@ -707,7 +720,7 @@ class UserHasTestImportPermission(permissions.BasePermission):
 class UserHasLanguagePermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Language_Add,
+            request, Product, ["product", "asset"], Permissions.Language_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -725,7 +738,7 @@ class UserHasProductAPIScanConfigurationPermission(permissions.BasePermission):
         return check_post_permission(
             request,
             Product,
-            "product",
+            ["product", "asset"],
             Permissions.Product_API_Scan_Configuration_Add,
         )
 
@@ -881,7 +894,7 @@ class IsSuperUserOrGlobalOwner(permissions.BasePermission):
 class UserHasEngagementPresetPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Product_Edit,
+            request, Product, ["product", "asset"], Permissions.Product_Edit,
         )
 
     def has_object_permission(self, request, view, obj):
