@@ -1,0 +1,2 @@
+severity,issue_class,subject,issue_type,scan_performed_on,status,insight,detection_method,risk,recommended_action
+Moderate,Unproxied 'A' Records,domain.com,Exposed infrastructure,2024-07-06T13:50:15.536086Z,Active,,,,"Configure Cloudflare to proxy the DNS record. By setting up Cloudflare as your hostname's reverse proxy, Cloudflare protects origin servers from DDoS attacks by hiding their IP addresses. You can configure Cloudflare to proxy your hostname in your DNS settings."
