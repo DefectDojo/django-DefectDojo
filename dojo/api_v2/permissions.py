@@ -684,6 +684,7 @@ class UserHasProductTypeGroupPermission(permissions.BasePermission):
             Permissions.Product_Type_Group_Delete,
         )
 
+
 class UserHasOrganizationGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
