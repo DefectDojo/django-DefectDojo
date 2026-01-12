@@ -127,6 +127,7 @@ docker/extra_fixtures/*
 !docker/extra_fixtures/readme.txt
 docker/extra_settings/*
 !docker/extra_settings/README.md
+dojo/settings/pro_settings.py
 
 
 # Helm dependencies
