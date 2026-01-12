@@ -40,7 +40,7 @@ class OrganizationViewSet(
     filterset_class = OrganizationFilterSet
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasProductTypePermission,
+        permissions.UserHasOrganizationPermission,
     )
 
     def get_queryset(self):
@@ -121,7 +121,7 @@ class OrganizationMemberViewSet(
     filterset_class = OrganizationMemberFilterSet
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasProductTypeMemberPermission,
+        permissions.UserHasOrganizationMemberPermission,
     )
 
     def get_queryset(self):
@@ -163,7 +163,7 @@ class OrganizationGroupViewSet(
     filterset_class = OrganizationGroupFilterSet
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasProductTypeGroupPermission,
+        permissions.UserHasOrganizationGroupPermission,
     )
 
     def get_queryset(self):
