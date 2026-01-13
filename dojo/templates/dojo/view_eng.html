@@ -47,6 +47,13 @@
                                             </a>
                                         {% endif %}
                                     </li>
+                                    {% if "ecr" in eng.name|lower %}
+                                        <li role="presentation">
+                                            <a rel="noopener noreferrer" href="#" onclick="syncECRScanCycle({{ eng.id }}); return false;">
+                                            <i class="fa-solid fa-refresh"></i> Sync ECR Scan Cycle
+                                            </a>
+                                        </li>
+                                    {% endif %}
                                 {% endif %}
                                 <!-- <li role="presentation">
                                     <a rel="noopener noreferrer" href="{% url 'engagement_report' eng.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
@@ -1102,6 +1109,35 @@
         });
 
         {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+
+        function syncECRScanCycle(engagementId) {
+            var btn = event.target.closest('a');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sincronizando...';
+            btn.style.opacity = '0.6';
+            btn.style.pointerEvents = 'none';
+
+            fetch(`/engagement/${engagementId}/sync_ecr/?_=${Date.now()}`)
+            .then(response => response.json())
+            .then(data => {
+                btn.innerHTML = '<i class="fa-solid fa-refresh"></i> Sync ECR Scan Cycle';
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                
+                if (data.success) {
+                    alert('Solicitud de sincronizacion enviada exitosamente');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    alert('Error: ' + (data.error || 'Error desconocido'));
+                }
+            })
+            .catch(error => {
+                btn.innerHTML = '<i class="fa-solid fa-refresh"></i> Sync ECR Scan Cycle';
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                alert('Error en la solicitud: ' + error);
+                console.error('Error:', error);
+            });
+        }
 
     </script>
 {% endblock %}

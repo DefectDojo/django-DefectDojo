@@ -14,6 +14,8 @@ urlpatterns = [
         name="view_engagement"),
     re_path(r"^engagement/(?P<eid>\d+)/ics$", views.engagement_ics,
         name="engagement_ics"),
+    re_path(r"^engagement/(?P<eid>\d+)/sync_ecr/$", views.sync_ecr_scan_cycle,
+        name="sync_ecr_scan_cycle"),
     re_path(r"^engagement/(?P<eid>\d+)/edit$", views.edit_engagement,
         name="edit_engagement"),
     re_path(r"^engagement/(?P<eid>\d+)/delete$", views.delete_engagement,

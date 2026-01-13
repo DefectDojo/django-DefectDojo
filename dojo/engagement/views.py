@@ -4,6 +4,7 @@ import mimetypes
 import operator
 import re
 import time
+import requests
 from datetime import datetime
 from functools import partial, reduce
 from pathlib import Path
@@ -19,7 +20,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.db.models import OuterRef, Q, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
@@ -27,6 +28,7 @@ from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
+from django.contrib.auth.decorators import login_required
 from openpyxl import Workbook
 from openpyxl.styles import Font
 
@@ -133,6 +135,7 @@ from dojo.utils import (
     handle_uploaded_threat,
     redirect_to_return_url_or_else,
 )
+from rest_framework.authtoken.models import Token
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -2273,3 +2276,53 @@ def excel_export(request):
     response["Content-Disposition"] = "attachment; filename=engagements.xlsx"
     logger.debug("done with excel export")
     return response
+
+
+@login_required
+def sync_ecr_scan_cycle(request, eid):
+    """
+    AJAX view to sync scan cycle ecr
+    Requires edit engagement authorization
+    """
+    engagement = get_object_or_404(Engagement, id=eid)
+    
+    if user_has_permission_or_403(request.user, engagement, Permissions.Engagement_Edit):
+        return JsonResponse({
+            'success': False, 
+            'error': 'Dont have permissions'
+        }, status=403)
+    
+    try:
+        result = _sync_ecr_scan_cycle_logic(engagement, request)
+        if result:
+            return JsonResponse({
+                'success': True,
+                'message': f'Sync request sent succesfully'
+            })
+        else:
+            raise Exception("Sync request failed")
+    except Exception as e:
+        logger.exception(f"Error on sync request for engagement {eid}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Error on sync request for engagement: {eid} , ex: {str(e)}'
+        }, status=500)
+
+
+def _sync_ecr_scan_cycle_logic(engagement, request):
+    """
+    Send a request to sync scan cycle report
+    for engagement
+    """
+    logger.info(f"Sincronizando ECR para engagement: {engagement.id} - {engagement.name}")
+    
+    base_url = f"{settings.PROVIDER_CORE_ENGINE}engine-backend/extractor/api/v1/syncScanCycle"
+    headers = {}
+    user_token = Token.objects.get(user=request.user)
+    headers["Authorization"] = user_token.key
+    res = requests.post(f"{base_url}?provider=prisma&typeScan=images&repository={engagement.name}", headers=headers)
+
+    if (res.status_code == 200):
+        return True
+    return False
+
