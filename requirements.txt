@@ -16,7 +16,7 @@ django-environ==0.12.0
 django-filter==25.1
 django-imagekit==6.0.0
 django-multiselectfield==1.0.1
-django-polymorphic==4.8.0
+django-polymorphic==4.9.0
 django-crispy-forms==2.5
 django_extensions==4.1
 django-slack==5.19.0
@@ -101,10 +101,10 @@ django-redis==6.0.0
 pandas==2.3.3
 pyarrow==22.0.0
 # Pinning Dependencies
-azure-core==1.37.0
+azure-core==1.38.0
 protobuf==6.33.4
 billiard==4.2.4
-botocore==1.42.24
+botocore==1.42.26
 et_xmlfile==2.0.0
 inflection==0.5.1
 requests-toolbelt==1.0.0
@@ -161,10 +161,10 @@ googleapis-common-protos==1.72.0
 grpcio==1.76.0
 zipp==3.23.0
 prompt_toolkit==3.0.52
-prometheus_client==0.22.1
+prometheus_client==0.24.0
 typing_extensions==4.15.0
 propcache==0.4.1
 py==1.11.0
 soupsieve==2.8.1
 hashids==1.3.1
-pikepdf==10.1.0
+pikepdf==10.2.0
