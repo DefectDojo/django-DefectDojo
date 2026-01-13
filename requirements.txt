@@ -161,7 +161,7 @@ googleapis-common-protos==1.72.0
 grpcio==1.76.0
 zipp==3.23.0
 prompt_toolkit==3.0.52
-prometheus_client==0.22.1
+prometheus_client==0.24.0
 typing_extensions==4.15.0
 propcache==0.4.1
 py==1.11.0
