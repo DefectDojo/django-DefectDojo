@@ -3256,7 +3256,7 @@ class TestTypeTest(BaseClass.AuthenticatedViewTest):
         self.viewname = "test_type"
         self.viewset = TestTypesViewSet
         self.payload = {
-            "name": "Test_1",
+            "active": False,
         }
         self.update_fields = {"name": "Test_2"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
