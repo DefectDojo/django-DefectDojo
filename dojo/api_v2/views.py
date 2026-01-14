@@ -2264,6 +2264,11 @@ class TestTypesViewSet(
     def get_queryset(self):
         return Test_Type.objects.all().order_by("id")
 
+    def get_serializer_class(self):
+        if self.action == "create":
+            return serializers.TestTypeCreateSerializer
+        return serializers.TestTypeSerializer
+
 
 # @extend_schema_view(**schema_with_prefetch())
 # Nested models with prefetch make the response schema too long for Swagger UI
