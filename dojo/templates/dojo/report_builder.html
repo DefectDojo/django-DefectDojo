@@ -166,11 +166,20 @@
                 return;
             }
 
+            const missingFields = [];
+
             $('.in-use-widgets .form-control').not('#finding-list .form-control')
                 .not('#endpoint-list .form-control').not('#wysiwyg-content .form-control')
                 .not('.bs-searchbox .form-control').not('div').each(function () {
-                if ($(this).val() === '')
+                if ($(this).val() === '') {
+                    const $el = $(this);
+                    const $parentForm = $el.closest('form');
+                    const $label = $el.closest('.form-group').find('label');
+                    const fieldLabel = $label.text().trim().replace(/\*$/, '').trim() || $el.attr('name') || $el.attr('id') || 'Unknown field';
+                    const formTitle = $parentForm.closest('.panel-available-widget').find('.panel-heading h5').text().trim() || $parentForm.attr('id') || 'Unknown form';
+                    missingFields.push(`${fieldLabel} (${formTitle})`);
                     valid = false;
+                }
             });
 
             if (valid) {
@@ -198,7 +207,13 @@
                 $('form#custom_report').removeClass('hidden').submit();
             }
             else {
-                alert('Please complete all forms.')
+                let errorMessage = 'Please complete all required fields:\n\n';
+                if (missingFields.length > 0) {
+                    errorMessage += missingFields.join('\n');
+                } else {
+                    errorMessage += 'One or more required fields are empty.';
+                }
+                alert(errorMessage);
             }
 
             event.preventDefault();

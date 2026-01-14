@@ -343,7 +343,7 @@
                                                 <i class="fa-solid fa-triangle-exclamation fa-fw"></i>
                                                 <span>{% trans "Finding Groups" %}</span>
                                                 <span class="glyphicon arrow"></span>
-                                            </a> 
+                                            </a>
                                             <ul class="nav nav-second-level">
                                                 <li>
                                                     <a href="{% url 'open_finding_groups' %}">
@@ -419,6 +419,13 @@
                                                 <span>{% trans "Reports" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
+                                            <ul class="nav nav-second-level">
+                                                <li>
+                                                    <a href="{% url 'report_builder' %}">
+                                                        {% trans "Report Builder" %}
+                                                    </a>
+                                                </li>
+                                            </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
                                         {% endblock %}
