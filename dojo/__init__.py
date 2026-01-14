@@ -5,5 +5,5 @@
 from .celery import app as celery_app  # noqa: F401
 
 __version__ = "2.54.1"
-__url__ = "https://github.com/DefectDojo/django-DefectDojo"
-__docs__ = "https://documentation.defectdojo.com"
+__url__ = "https://github.com/DefectDojo/django-DefectDojo"  # noqa: RUF067
+__docs__ = "https://documentation.defectdojo.com"  # noqa: RUF067
