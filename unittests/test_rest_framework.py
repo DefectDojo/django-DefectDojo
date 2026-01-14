@@ -3450,9 +3450,9 @@ class TestTypeTest(BaseClass.AuthenticatedViewTest):
         self.viewname = "test_type"
         self.viewset = TestTypesViewSet
         self.payload = {
-            "active": False,
+            "name": "Test_1",
         }
-        self.update_fields = {"name": "Test_2"}
+        self.update_fields = {"active": False}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
