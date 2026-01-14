@@ -51,7 +51,7 @@ class OrganizationMemberSerializer(serializers.ModelSerializer):
         if self.instance is not None and not data.get("role").is_owner:
             owners = (
                 Product_Type_Member.objects.filter(
-                    product_type=data.get("organization"), role__is_owner=True,
+                    product_type=data.get("organization", data.get("product_type")), role__is_owner=True,
                 )
                 .exclude(id=self.instance.id)
                 .count()
@@ -115,8 +115,8 @@ class OrganizationGroupSerializer(serializers.ModelSerializer):
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
-    critical_asset = serializers.BooleanField(source="critical_product")
-    key_asset = serializers.BooleanField(source="key_product")
+    critical_asset = serializers.BooleanField(source="critical_product", default=False)
+    key_asset = serializers.BooleanField(source="key_product", default=False)
 
     class Meta:
         model = Product_Type
