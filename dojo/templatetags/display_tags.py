@@ -12,6 +12,7 @@ import bleach
 import dateutil.relativedelta
 import git
 import markdown
+from bleach.css_sanitizer import CSSSanitizer
 from django import template
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -93,6 +94,16 @@ def markdown_render(value):
                                                       "markdown.extensions.tables"])
         return mark_safe(bleach.clean(markdown_text, tags=markdown_tags, attributes=markdown_attrs, css_sanitizer=markdown_styles))
     return None
+
+
+@register.filter
+def bleach_with_a_tags(message):
+    allowed_attributes = bleach.ALLOWED_ATTRIBUTES
+    allowed_attributes["a"] += ["style", "target"]
+    return mark_safe(bleach.clean(
+        message,
+        attributes=allowed_attributes,
+        css_sanitizer=CSSSanitizer(allowed_css_properties=["color", "font-weight"])))
 
 
 def text_shortener(value, length):
