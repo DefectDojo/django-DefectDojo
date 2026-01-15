@@ -1330,7 +1330,7 @@
             "type": "string"
         },
         "redisServer": {
-            "description": "To use an external Redis instance, set `redis.enabled` to false and set the address here:",
+            "description": "To use an external Redis instance, set `valkey.enabled` to false and set the address here:",
             "type": [
                 "string",
                 "null"
