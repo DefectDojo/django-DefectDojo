@@ -373,8 +373,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             unsaved_finding,
                             self.user,
                         )
+                    # Findings that have already exist cannot be moved to into a group
+                    finding_will_be_grouped = False
                 else:
-                    finding = self.process_finding_that_was_not_matched(unsaved_finding)
+                    finding, finding_will_be_grouped = self.process_finding_that_was_not_matched(unsaved_finding)
 
                     # Add newly created finding to candidates for subsequent findings in this batch
                     self.add_new_finding_to_candidates(
@@ -392,7 +394,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         unsaved_finding,
                     )
                     # all data is already saved on the finding, we only need to trigger post processing in batches
-                    push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+                    push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
                     batch_finding_ids.append(finding.id)
 
                     # Post-processing batches (deduplication, rules, etc.) are separate from matching batches.
@@ -827,7 +829,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     def process_finding_that_was_not_matched(
         self,
         unsaved_finding: Finding,
-    ) -> Finding:
+    ) -> tuple[Finding, bool]:
         """Create a new finding from the one parsed from the report"""
         # Set some explicit settings
         unsaved_finding.reporter = self.user
@@ -855,7 +857,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             f"({finding.component_name} - {finding.component_version})",
         )
         # Manage the finding grouping selection
-        self.process_finding_groups(
+        finding_will_be_grouped = self.process_finding_groups(
             unsaved_finding,
             self.group_names_to_findings_dict,
         )
@@ -863,7 +865,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.new_items.append(unsaved_finding)
         # Process any request/response pairs
         self.process_request_response_pairs(unsaved_finding)
-        return unsaved_finding
+        return unsaved_finding, finding_will_be_grouped
 
     def reconcile_vulnerability_ids(
         self,
