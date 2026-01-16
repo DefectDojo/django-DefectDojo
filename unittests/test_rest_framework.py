@@ -3452,10 +3452,19 @@ class TestTypeTest(BaseClass.AuthenticatedViewTest):
         self.payload = {
             "name": "Test_1",
         }
-        self.update_fields = {"name": "Test_2"}
+        self.update_fields = {"active": False}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_name_read_only(self):
+        current_objects = self.client.get(self.url, format="json").data
+        relative_url = self.url + "{}/".format(current_objects["results"][-1]["id"])
+        payload = {"name": "New name"}
+        response = self.client.patch(relative_url, payload, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        # See that the request was politley ignored and that name did not change
+        self.assertEqual(current_objects["results"][-1]["name"], response.data["name"])
 
 
 class ConfigurationPermissionTest(BaseClass.BaseClassTest):
