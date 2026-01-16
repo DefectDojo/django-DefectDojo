@@ -13,15 +13,15 @@
 {{- end }}
 
 <!-- Version selector dropdown -->
-<nav class="docs-version-toggle mb-3">
+<nav class="docs-version-toggle mb-3" style="padding-top: 1rem;">
   <label for="version-select" class="form-label">DefectDojo Version</label>
   <select id="version-select" name="version" class="form-select" aria-label="Select documentation version">
-    <option value="opensource">Open Source</option>
-    <option value="pro">Pro</option>
+    <option value="opensource">DefectDojo Open Source</option>
+    <option value="pro">DefectDojo Pro</option>
   </select>
 </nav>
 
-<div class="version-menu-wrapper">
+<div class="version-menu-wrapper" style="border-top: 1px solid; border-top-color: #6c757d;">
   <div class="version-opensource">
     {{ partial "sidebar/render-section-menu.html" (dict "currentPage" $ "nodes" $nodes "version" "opensource") }}
   </div>
