@@ -13,17 +13,17 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.32.5
     method: GET
     uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
   response:
     body:
-      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100287,"buildDate":"2025-07-24T13:05:26.000+0200","serverTime":"2025-07-25T21:13:54.788+0200","scmInfo":"0139ea21e0f8b5dafbd2e1eb33923e0c468b7f69","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
+      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlCSMHelpSeeker":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100290,"buildDate":"2026-01-16T02:15:38.000+0100","serverTime":"2026-01-16T22:02:19.844+0100","scmInfo":"cd645fa75fdcd33afc8b2e176098a731fd922a37","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
     headers:
       Atl-Request-Id:
-      - 1bdeb244-36e2-4fb2-8ae9-045ab1ca1f83
+      - 0b541351-12ec-41a1-8c54-bbe5eda5b428
       Atl-Traceid:
-      - 1bdeb24436e24fb28ae9045ab1ca1f83
+      - 0b54135112ec41a18c54bbe5eda5b428
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -33,9 +33,9 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 25 Jul 2025 19:13:54 GMT
+      - Fri, 16 Jan 2026 21:02:19 GMT
       Nel:
-      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
       Report-To:
       - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
@@ -43,7 +43,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=317,atl-edge;dur=315,atl-edge-internal;dur=14,atl-edge-upstream;dur=302,atl-edge-pop;desc="aws-ap-southeast-2",cdn-cache-miss,cdn-pop;desc="SYD3-P2",cdn-rid;desc="sO-3ny0CrwROgdw7865Ws0m9lldAUqXwkNmoscZq4AtPN7x8WiXAlw==",cdn-downstream-fbl;dur=320
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=193,atl-edge;dur=170,atl-edge-internal;dur=14,atl-edge-upstream;dur=155,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN52-P3",cdn-rid;desc="5O9GGdp_8Ef4dHBcfgpRLrFm6yGtGzQaYSOo8BT7DX6Rm8QOhJ83Mw==",cdn-downstream-fbl;dur=196
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -53,19 +53,23 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 af9df879c48ca18a8b67eda7edecc4a4.cloudfront.net (CloudFront)
+      - 1.1 66b4cf5fe1131d403a242f2f9f334158.cloudfront.net (CloudFront)
       X-Aaccountid:
-      - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
+      - 5d3878b170e3c90c952f91f6
       X-Amz-Cf-Id:
-      - sO-3ny0CrwROgdw7865Ws0m9lldAUqXwkNmoscZq4AtPN7x8WiXAlw==
+      - 5O9GGdp_8Ef4dHBcfgpRLrFm6yGtGzQaYSOo8BT7DX6Rm8QOhJ83Mw==
       X-Amz-Cf-Pop:
-      - SYD3-P2
+      - DEN52-P3
       X-Arequestid:
-      - 2e8523a64db25643c69b28747789d846
+      - 71931ec37ef961cd90dbbf9cf333e8ba
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
+      X-Ratelimit-Limit:
+      - '350'
+      X-Ratelimit-Remaining:
+      - '349'
       X-Xss-Protection:
       - 1; mode=block
     status:
@@ -85,7 +89,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.32.5
     method: GET
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
   response:
@@ -99,9 +103,9 @@ interactions:
         Issues","key":"issuelinks","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=","hasDefaultValue":false,"operations":["add","copy"]},"assignee":{"required":false,"schema":{"type":"user","system":"assignee"},"name":"Assignee","key":"assignee","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/user/assignable/search?project=NTEST&query=","hasDefaultValue":false,"operations":["set"]}}}]}]}'
     headers:
       Atl-Request-Id:
-      - c6f642f5-6f4b-43bd-8fac-4041e8fdbe3a
+      - c21ca062-1d75-4080-b38f-b7eb79458716
       Atl-Traceid:
-      - c6f642f56f4b43bd8fac4041e8fdbe3a
+      - c21ca0621d754080b38fb7eb79458716
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -111,9 +115,9 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 25 Jul 2025 19:13:56 GMT
+      - Fri, 16 Jan 2026 21:02:20 GMT
       Nel:
-      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
       Report-To:
       - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
@@ -121,7 +125,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=500,atl-edge;dur=498,atl-edge-internal;dur=15,atl-edge-upstream;dur=483,atl-edge-pop;desc="aws-ap-southeast-2",cdn-cache-miss,cdn-pop;desc="SYD62-P3",cdn-rid;desc="X4ig0RuR3wMZto7E6dJqi2_U2L0tmKUOmWhgpCv-bgy0w6kjzU1rAQ==",cdn-downstream-fbl;dur=504
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=342,atl-edge;dur=319,atl-edge-internal;dur=16,atl-edge-upstream;dur=303,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN53-P2",cdn-rid;desc="Tj7uLDnnJBh8rX_rcseg3qLuRttu5wPKSUmW9__CaXX-qwivt9goJw==",cdn-downstream-fbl;dur=345
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -131,22 +135,26 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 19f48f8a678ef4e5c0ca07e0cf91cbc6.cloudfront.net (CloudFront)
+      - 1.1 76f2e1e449c547c66904d58101f10ea6.cloudfront.net (CloudFront)
       Warning:
       - 'The issue create meta endpoint has been deprecated. (Deprecation start date:
         June 03, 2024)'
       X-Aaccountid:
-      - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
+      - 5d3878b170e3c90c952f91f6
       X-Amz-Cf-Id:
-      - X4ig0RuR3wMZto7E6dJqi2_U2L0tmKUOmWhgpCv-bgy0w6kjzU1rAQ==
+      - Tj7uLDnnJBh8rX_rcseg3qLuRttu5wPKSUmW9__CaXX-qwivt9goJw==
       X-Amz-Cf-Pop:
-      - SYD62-P3
+      - DEN53-P2
       X-Arequestid:
-      - 82e8f52b5db83ccbbd0ff4c5cfcd32ae
+      - 269e87a87f40e349f1bca817dcb77542
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
+      X-Ratelimit-Limit:
+      - '350'
+      X-Ratelimit-Remaining:
+      - '349'
       X-Xss-Protection:
       - 1; mode=block
     status:
@@ -156,20 +164,20 @@ interactions:
     body: '{"fields": {"project": {"key": "NTEST"}, "issuetype": {"name": "Task"},
       "summary": "Findings in: negotiator:0.5.3", "description": "\n\n\n\n\n\n\n\nA
       group of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2.
-      Group\n*Group*: [Findings in: negotiator:0.5.3|http://localhost:8080/finding_group/46]
+      Group\n*Group*: [Findings in: negotiator:0.5.3|http://localhost:8080/finding_group/115]
       in [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
-      / [NPM Audit Scan|http://localhost:8080/test/123]\n\nh2. Summary\n*Severity:*
-      High  *Due Date:* Aug. 24, 2025 \n\nFindings matching the Active, Verified and
+      / [NPM Audit Scan|http://localhost:8080/test/128]\n\nh2. Summary\n*Severity:*
+      High  *Due Date:* Feb. 15, 2026 \n\nFindings matching the Active, Verified and
       Severity criteria:\n|| Severity || CVE || CWE || Component || Version || Title
       || Status ||\n|High|[CVE-2019-10321|https://nvd.nist.gov/vuln/detail/CVE-2019-10321]|[300|https://cwe.mitre.org/data/definitions/300.html]|negotiator|0.5.3|[2222Regular
-      Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/351]|Active,
+      Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/365]|Active,
       Verified|\n\nFindings *not* matching the Active, Verified and Severity criteria:\n||
       Severity || CVE || CWE || Component || Version || Title || Status ||\n|Medium|[CVE-2016-10539|https://nvd.nist.gov/vuln/detail/CVE-2016-10539]|[400|https://cwe.mitre.org/data/definitions/400.html]|negotiator|0.5.3|[Regular
-      Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/350]|Active,
+      Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/364]|Active,
       Verified|\n\n\n\n\n\n\n\n\n\n\nh1. Findings\n\nh3. [2222Regular Expression Denial
-      of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/351]\n*Defect
-      Dojo link:* http://localhost:8080/finding/351 (351)\n*Severity:* High\n *Due
-      Date:* Aug. 24, 2025 \n *CWE:* [CWE-300|https://cwe.mitre.org/data/definitions/300.html]
+      of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/365]\n*Defect
+      Dojo link:* http://localhost:8080/finding/365 (365)\n*Severity:* High\n *Due
+      Date:* Feb. 15, 2026 \n *CWE:* [CWE-300|https://cwe.mitre.org/data/definitions/300.html]
       \n*CVE:* [CVE-2019-10321|https://nvd.nist.gov/vuln/detail/CVE-2019-10321]\n\n\n\n\n\n\n*Source
       File*: express&gt;accepts&gt;negotiator\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/107\nAffected
       versions of `negotiator` are vulnerable to regular expression denial of service
@@ -179,9 +187,9 @@ interactions:
       CWE: CWE-300\n Access: public\n\n\n*Mitigation*:\nUpdate to version 0.6.1 or
       later.\n\n\n\n*Impact*:\nNo impact provided\n\n\n\n\n\n*References*:\nhttps://nodesecurity.io/advisories/107\n\n\n\n\n\n*Reporter:*
       [(admin) ()|mailto:]\n\n\n\nh1. Findings\n\nh3. [Regular Expression Denial of
-      Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/350]\n*Defect
-      Dojo link:* http://localhost:8080/finding/350 (350)\n*Severity:* Medium\n *Due
-      Date:* Oct. 23, 2025 \n *CWE:* [CWE-400|https://cwe.mitre.org/data/definitions/400.html]
+      Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/364]\n*Defect
+      Dojo link:* http://localhost:8080/finding/364 (364)\n*Severity:* Medium\n *Due
+      Date:* April 16, 2026 \n *CWE:* [CWE-400|https://cwe.mitre.org/data/definitions/400.html]
       \n*CVE:* [CVE-2016-10539|https://nvd.nist.gov/vuln/detail/CVE-2016-10539]\n\n\n\n\n\n\n*Source
       File*: express&gt;accepts&gt;negotiator\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/106\nAffected
       versions of `negotiator` are vulnerable to regular expression denial of service
@@ -201,21 +209,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3542'
+      - '3544'
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.32.5
     method: POST
     uri: https://defectdojo.atlassian.net/rest/api/2/issue
   response:
     body:
-      string: '{"id":"21316","key":"NTEST-3137","self":"https://defectdojo.atlassian.net/rest/api/2/issue/21316"}'
+      string: '{"id":"24932","key":"NTEST-3217","self":"https://defectdojo.atlassian.net/rest/api/2/issue/24932"}'
     headers:
       Atl-Request-Id:
-      - 92f15711-5ef3-4b08-b22a-ac0c0bffd3a3
+      - bc318f65-317e-4248-8c43-3129dc66f4d8
       Atl-Traceid:
-      - 92f157115ef34b08b22aac0c0bffd3a3
+      - bc318f65317e42488c433129dc66f4d8
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -223,9 +231,9 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 25 Jul 2025 19:13:58 GMT
+      - Fri, 16 Jan 2026 21:02:21 GMT
       Nel:
-      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
       Report-To:
       - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
@@ -233,7 +241,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=886,atl-edge;dur=885,atl-edge-internal;dur=15,atl-edge-upstream;dur=870,atl-edge-pop;desc="aws-ap-southeast-2",cdn-cache-miss,cdn-pop;desc="SYD62-P3",cdn-rid;desc="vLAxJZEomnML-6F6dZDb_HgtE0Ot40wzbWSdUYkg7r8DHU2uFORZfg==",cdn-downstream-fbl;dur=890
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=776,atl-edge;dur=753,atl-edge-internal;dur=18,atl-edge-upstream;dur=734,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN52-P2",cdn-rid;desc="45lnWXjefkp7f0d3bNnKSas4Hej9ua5bZusL7-wV3IdPofb5ZHgtQQ==",cdn-downstream-fbl;dur=780
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -243,19 +251,23 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 8dadf490fcfee4214b49a3509dc76616.cloudfront.net (CloudFront)
+      - 1.1 f0a2a95cb4d25b2414a9c1a7a754943e.cloudfront.net (CloudFront)
       X-Aaccountid:
-      - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
+      - 5d3878b170e3c90c952f91f6
       X-Amz-Cf-Id:
-      - vLAxJZEomnML-6F6dZDb_HgtE0Ot40wzbWSdUYkg7r8DHU2uFORZfg==
+      - 45lnWXjefkp7f0d3bNnKSas4Hej9ua5bZusL7-wV3IdPofb5ZHgtQQ==
       X-Amz-Cf-Pop:
-      - SYD62-P3
+      - DEN52-P2
       X-Arequestid:
-      - bd2060fbb51c55967f962840de466b41
+      - 524860626fc93ce90df169d311b45771
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
+      X-Ratelimit-Limit:
+      - '200'
+      X-Ratelimit-Remaining:
+      - '199'
       X-Xss-Protection:
       - 1; mode=block
     status:
@@ -275,32 +287,32 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.32.5
     method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3137
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3217
   response:
     body:
-      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"21316","self":"https://defectdojo.atlassian.net/rest/api/2/issue/21316","key":"NTEST-3137","fields":{"statuscategorychangedate":"2025-07-25T21:13:57.877+0200","fixVersions":[],"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"24932","self":"https://defectdojo.atlassian.net/rest/api/2/issue/24932","key":"NTEST-3217","fields":{"statuscategorychangedate":"2026-01-16T22:02:21.038+0100","fixVersions":[],"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
         Do"},"resolution":null,"lastViewed":null,"customfield_10060":null,"customfield_10061":null,"customfield_10062":null,"customfield_10063":null,"customfield_10064":null,"customfield_10065":null,"customfield_10066":null,"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/2","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/high_new.svg","name":"High","id":"2"},"labels":[],"timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"issuelinks":[],"assignee":null,"status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10000","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"Backlog","id":"10000","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
-        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"customfield_10053":null,"customfield_10055":null,"customfield_10056":null,"customfield_10057":null,"customfield_10058":null,"customfield_10059":null,"customfield_10049":null,"aggregatetimeestimate":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5","accountId":"712020:292a8b4c-ebd5-44be-bb94-d07c56a14dc5","emailAddress":"valentijn@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","24x24":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","16x16":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","32x32":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png"},"displayName":"Valentijn
-        Scholten","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5","accountId":"712020:292a8b4c-ebd5-44be-bb94-d07c56a14dc5","emailAddress":"valentijn@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","24x24":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","16x16":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","32x32":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png"},"displayName":"Valentijn
-        Scholten","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10046":null,"customfield_10047":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3137/votes","votes":0,"hasVoted":false},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
-        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10031":null,"customfield_10032":null,"customfield_10033":null,"aggregatetimespent":null,"customfield_10035":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3137/watchers","watchCount":1,"isWatching":true},"created":"2025-07-25T21:13:57.601+0200","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"customfield_10016":null,"customfield_10017":null,"customfield_10019":"0|i012jr:","updated":"2025-07-25T21:13:57.679+0200","timeoriginalestimate":null,"description":"\n\n\n\n\n\n\n\nA
+        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"customfield_10053":null,"customfield_10055":null,"customfield_10056":null,"customfield_10057":null,"customfield_10058":null,"customfield_10059":null,"customfield_10049":null,"aggregatetimeestimate":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10046":null,"customfield_10047":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3217/votes","votes":0,"hasVoted":false},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10031":null,"customfield_10032":null,"customfield_10033":null,"aggregatetimespent":null,"customfield_10035":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3217/watchers","watchCount":1,"isWatching":true},"created":"2026-01-16T22:02:20.759+0100","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"customfield_10016":null,"customfield_10017":null,"customfield_10019":"0|i014m7:","updated":"2026-01-16T22:02:20.865+0100","customfield_10090":null,"timeoriginalestimate":null,"description":"\n\n\n\n\n\n\n\nA
         group of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2.
-        Group\n*Group*: [Findings in: negotiator:0.5.3|http://localhost:8080/finding_group/46]
+        Group\n*Group*: [Findings in: negotiator:0.5.3|http://localhost:8080/finding_group/115]
         in [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
-        / [NPM Audit Scan|http://localhost:8080/test/123]\n\nh2. Summary\n*Severity:*
-        High  *Due Date:* Aug. 24, 2025 \n\nFindings matching the Active, Verified
+        / [NPM Audit Scan|http://localhost:8080/test/128]\n\nh2. Summary\n*Severity:*
+        High  *Due Date:* Feb. 15, 2026 \n\nFindings matching the Active, Verified
         and Severity criteria:\n|| Severity || CVE || CWE || Component || Version
         || Title || Status ||\n|High|[CVE-2019-10321|https://nvd.nist.gov/vuln/detail/CVE-2019-10321]|[300|https://cwe.mitre.org/data/definitions/300.html]|negotiator|0.5.3|[2222Regular
-        Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/351]|Active,
+        Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/365]|Active,
         Verified|\n\nFindings *not* matching the Active, Verified and Severity criteria:\n||
         Severity || CVE || CWE || Component || Version || Title || Status ||\n|Medium|[CVE-2016-10539|https://nvd.nist.gov/vuln/detail/CVE-2016-10539]|[400|https://cwe.mitre.org/data/definitions/400.html]|negotiator|0.5.3|[Regular
-        Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/350]|Active,
+        Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/364]|Active,
         Verified|\n\n\n\n\n\n\n\n\n\n\nh1. Findings\n\nh3. [2222Regular Expression
-        Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/351]\n*Defect
-        Dojo link:* http://localhost:8080/finding/351 (351)\n*Severity:* High\n *Due
-        Date:* Aug. 24, 2025 \n *CWE:* [CWE-300|https://cwe.mitre.org/data/definitions/300.html]
+        Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/365]\n*Defect
+        Dojo link:* http://localhost:8080/finding/365 (365)\n*Severity:* High\n *Due
+        Date:* Feb. 15, 2026 \n *CWE:* [CWE-300|https://cwe.mitre.org/data/definitions/300.html]
         \n*CVE:* [CVE-2019-10321|https://nvd.nist.gov/vuln/detail/CVE-2019-10321]\n\n\n\n\n\n\n*Source
         File*: express&gt;accepts&gt;negotiator\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/107\nAffected
         versions of `negotiator` are vulnerable to regular expression denial of service
@@ -310,9 +322,9 @@ interactions:
         CWE: CWE-300\n Access: public\n\n\n*Mitigation*:\nUpdate to version 0.6.1
         or later.\n\n\n\n*Impact*:\nNo impact provided\n\n\n\n\n\n*References*:\nhttps://nodesecurity.io/advisories/107\n\n\n\n\n\n*Reporter:*
         [(admin) ()|mailto:]\n\n\n\nh1. Findings\n\nh3. [Regular Expression Denial
-        of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/350]\n*Defect
-        Dojo link:* http://localhost:8080/finding/350 (350)\n*Severity:* Medium\n
-        *Due Date:* Oct. 23, 2025 \n *CWE:* [CWE-400|https://cwe.mitre.org/data/definitions/400.html]
+        of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/364]\n*Defect
+        Dojo link:* http://localhost:8080/finding/364 (364)\n*Severity:* Medium\n
+        *Due Date:* April 16, 2026 \n *CWE:* [CWE-400|https://cwe.mitre.org/data/definitions/400.html]
         \n*CVE:* [CVE-2016-10539|https://nvd.nist.gov/vuln/detail/CVE-2016-10539]\n\n\n\n\n\n\n*Source
         File*: express&gt;accepts&gt;negotiator\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/106\nAffected
         versions of `negotiator` are vulnerable to regular expression denial of service
@@ -322,12 +334,12 @@ interactions:
         CWE: CWE-400\n Access: public\n\n\n*Mitigation*:\nUpdate to version 0.6.1
         or later.\n\n\n\n*Impact*:\nNo impact provided\n\n\n\n\n\n*References*:\nhttps://nodesecurity.io/advisories/106\n\n\n\n\n\n*Reporter:*
         [(admin) ()|mailto:]\n","customfield_10010":null,"customfield_10014":null,"timetracking":{},"customfield_10015":null,"customfield_10005":null,"customfield_10006":null,"customfield_10007":null,"security":null,"customfield_10008":null,"attachment":[],"customfield_10009":null,"summary":"Findings
-        in: negotiator:0.5.3","customfield_10001":null,"customfield_10002":[],"customfield_10003":null,"customfield_10004":null,"environment":null,"duedate":null,"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/21316/comment","maxResults":0,"total":0,"startAt":0}}}'
+        in: negotiator:0.5.3","customfield_10001":null,"customfield_10002":[],"customfield_10123":null,"customfield_10003":null,"customfield_10004":null,"environment":null,"duedate":null,"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/24932/comment","maxResults":0,"total":0,"startAt":0}}}'
     headers:
       Atl-Request-Id:
-      - 06a9bb22-d047-4f00-b215-eb2ec17c610e
+      - 113d1ee5-8da2-4cd7-8508-89aae7fcf288
       Atl-Traceid:
-      - 06a9bb22d0474f00b215eb2ec17c610e
+      - 113d1ee58da24cd7850889aae7fcf288
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -337,9 +349,9 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 25 Jul 2025 19:13:59 GMT
+      - Fri, 16 Jan 2026 21:02:21 GMT
       Nel:
-      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
       Report-To:
       - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
@@ -347,7 +359,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=969,atl-edge;dur=967,atl-edge-internal;dur=14,atl-edge-upstream;dur=952,atl-edge-pop;desc="aws-ap-southeast-2",cdn-cache-miss,cdn-pop;desc="SYD3-P2",cdn-rid;desc="I2ZgprPgPxReqG6zV0EoRoaFeGPOdWFHVGLuDprZYe6PglizjAbzQw==",cdn-downstream-fbl;dur=973
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=295,atl-edge;dur=271,atl-edge-internal;dur=15,atl-edge-upstream;dur=254,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN52-P2",cdn-rid;desc="U0j11_zcrbbY8PIPS2SCWTOf4hGblvA03qpIb9un73BZrNS6QXhkLA==",cdn-downstream-fbl;dur=299
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -357,19 +369,23 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 e80732d7ef726bed77c3f67a8339cc96.cloudfront.net (CloudFront)
+      - 1.1 44e92eddc431cc09e1e2c5b24edc90f8.cloudfront.net (CloudFront)
       X-Aaccountid:
-      - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
+      - 5d3878b170e3c90c952f91f6
       X-Amz-Cf-Id:
-      - I2ZgprPgPxReqG6zV0EoRoaFeGPOdWFHVGLuDprZYe6PglizjAbzQw==
+      - U0j11_zcrbbY8PIPS2SCWTOf4hGblvA03qpIb9un73BZrNS6QXhkLA==
       X-Amz-Cf-Pop:
-      - SYD3-P2
+      - DEN52-P2
       X-Arequestid:
-      - 0db41b9eb09724200b7e1bd4b0bb48ba
+      - bc516055a8a8485b547f085f197eb2d6
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
+      X-Ratelimit-Limit:
+      - '400'
+      X-Ratelimit-Remaining:
+      - '399'
       X-Xss-Protection:
       - 1; mode=block
     status:
@@ -389,32 +405,32 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.32.5
     method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/21316
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/24932
   response:
     body:
-      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"21316","self":"https://defectdojo.atlassian.net/rest/api/2/issue/21316","key":"NTEST-3137","fields":{"statuscategorychangedate":"2025-07-25T21:13:57.877+0200","fixVersions":[],"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"24932","self":"https://defectdojo.atlassian.net/rest/api/2/issue/24932","key":"NTEST-3217","fields":{"statuscategorychangedate":"2026-01-16T22:02:21.038+0100","fixVersions":[],"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
         Do"},"resolution":null,"lastViewed":null,"customfield_10060":null,"customfield_10061":null,"customfield_10062":null,"customfield_10063":null,"customfield_10064":null,"customfield_10065":null,"customfield_10066":null,"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/2","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/high_new.svg","name":"High","id":"2"},"labels":[],"timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"issuelinks":[],"assignee":null,"status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10000","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"Backlog","id":"10000","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
-        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"customfield_10053":null,"customfield_10055":null,"customfield_10056":null,"customfield_10057":null,"customfield_10058":null,"customfield_10059":null,"customfield_10049":null,"aggregatetimeestimate":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5","accountId":"712020:292a8b4c-ebd5-44be-bb94-d07c56a14dc5","emailAddress":"valentijn@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","24x24":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","16x16":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","32x32":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png"},"displayName":"Valentijn
-        Scholten","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5","accountId":"712020:292a8b4c-ebd5-44be-bb94-d07c56a14dc5","emailAddress":"valentijn@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","24x24":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","16x16":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","32x32":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png"},"displayName":"Valentijn
-        Scholten","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10046":null,"customfield_10047":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3137/votes","votes":0,"hasVoted":false},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
-        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10031":null,"customfield_10032":null,"customfield_10033":null,"aggregatetimespent":null,"customfield_10035":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3137/watchers","watchCount":1,"isWatching":true},"created":"2025-07-25T21:13:57.601+0200","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"customfield_10016":null,"customfield_10017":null,"customfield_10019":"0|i012jr:","updated":"2025-07-25T21:13:57.679+0200","timeoriginalestimate":null,"description":"\n\n\n\n\n\n\n\nA
+        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"customfield_10053":null,"customfield_10055":null,"customfield_10056":null,"customfield_10057":null,"customfield_10058":null,"customfield_10059":null,"customfield_10049":null,"aggregatetimeestimate":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10046":null,"customfield_10047":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3217/votes","votes":0,"hasVoted":false},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10031":null,"customfield_10032":null,"customfield_10033":null,"aggregatetimespent":null,"customfield_10035":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3217/watchers","watchCount":1,"isWatching":true},"created":"2026-01-16T22:02:20.759+0100","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"customfield_10016":null,"customfield_10017":null,"customfield_10019":"0|i014m7:","updated":"2026-01-16T22:02:20.865+0100","customfield_10090":null,"timeoriginalestimate":null,"description":"\n\n\n\n\n\n\n\nA
         group of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2.
-        Group\n*Group*: [Findings in: negotiator:0.5.3|http://localhost:8080/finding_group/46]
+        Group\n*Group*: [Findings in: negotiator:0.5.3|http://localhost:8080/finding_group/115]
         in [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
-        / [NPM Audit Scan|http://localhost:8080/test/123]\n\nh2. Summary\n*Severity:*
-        High  *Due Date:* Aug. 24, 2025 \n\nFindings matching the Active, Verified
+        / [NPM Audit Scan|http://localhost:8080/test/128]\n\nh2. Summary\n*Severity:*
+        High  *Due Date:* Feb. 15, 2026 \n\nFindings matching the Active, Verified
         and Severity criteria:\n|| Severity || CVE || CWE || Component || Version
         || Title || Status ||\n|High|[CVE-2019-10321|https://nvd.nist.gov/vuln/detail/CVE-2019-10321]|[300|https://cwe.mitre.org/data/definitions/300.html]|negotiator|0.5.3|[2222Regular
-        Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/351]|Active,
+        Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/365]|Active,
         Verified|\n\nFindings *not* matching the Active, Verified and Severity criteria:\n||
         Severity || CVE || CWE || Component || Version || Title || Status ||\n|Medium|[CVE-2016-10539|https://nvd.nist.gov/vuln/detail/CVE-2016-10539]|[400|https://cwe.mitre.org/data/definitions/400.html]|negotiator|0.5.3|[Regular
-        Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/350]|Active,
+        Expression Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/364]|Active,
         Verified|\n\n\n\n\n\n\n\n\n\n\nh1. Findings\n\nh3. [2222Regular Expression
-        Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/351]\n*Defect
-        Dojo link:* http://localhost:8080/finding/351 (351)\n*Severity:* High\n *Due
-        Date:* Aug. 24, 2025 \n *CWE:* [CWE-300|https://cwe.mitre.org/data/definitions/300.html]
+        Denial of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/365]\n*Defect
+        Dojo link:* http://localhost:8080/finding/365 (365)\n*Severity:* High\n *Due
+        Date:* Feb. 15, 2026 \n *CWE:* [CWE-300|https://cwe.mitre.org/data/definitions/300.html]
         \n*CVE:* [CVE-2019-10321|https://nvd.nist.gov/vuln/detail/CVE-2019-10321]\n\n\n\n\n\n\n*Source
         File*: express&gt;accepts&gt;negotiator\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/107\nAffected
         versions of `negotiator` are vulnerable to regular expression denial of service
@@ -424,9 +440,9 @@ interactions:
         CWE: CWE-300\n Access: public\n\n\n*Mitigation*:\nUpdate to version 0.6.1
         or later.\n\n\n\n*Impact*:\nNo impact provided\n\n\n\n\n\n*References*:\nhttps://nodesecurity.io/advisories/107\n\n\n\n\n\n*Reporter:*
         [(admin) ()|mailto:]\n\n\n\nh1. Findings\n\nh3. [Regular Expression Denial
-        of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/350]\n*Defect
-        Dojo link:* http://localhost:8080/finding/350 (350)\n*Severity:* Medium\n
-        *Due Date:* Oct. 23, 2025 \n *CWE:* [CWE-400|https://cwe.mitre.org/data/definitions/400.html]
+        of Service - (Negotiator, &lt;= 0.6.0)|http://localhost:8080/finding/364]\n*Defect
+        Dojo link:* http://localhost:8080/finding/364 (364)\n*Severity:* Medium\n
+        *Due Date:* April 16, 2026 \n *CWE:* [CWE-400|https://cwe.mitre.org/data/definitions/400.html]
         \n*CVE:* [CVE-2016-10539|https://nvd.nist.gov/vuln/detail/CVE-2016-10539]\n\n\n\n\n\n\n*Source
         File*: express&gt;accepts&gt;negotiator\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/106\nAffected
         versions of `negotiator` are vulnerable to regular expression denial of service
@@ -436,12 +452,12 @@ interactions:
         CWE: CWE-400\n Access: public\n\n\n*Mitigation*:\nUpdate to version 0.6.1
         or later.\n\n\n\n*Impact*:\nNo impact provided\n\n\n\n\n\n*References*:\nhttps://nodesecurity.io/advisories/106\n\n\n\n\n\n*Reporter:*
         [(admin) ()|mailto:]\n","customfield_10010":null,"customfield_10014":null,"timetracking":{},"customfield_10015":null,"customfield_10005":null,"customfield_10006":null,"customfield_10007":null,"security":null,"customfield_10008":null,"attachment":[],"customfield_10009":null,"summary":"Findings
-        in: negotiator:0.5.3","customfield_10001":null,"customfield_10002":[],"customfield_10003":null,"customfield_10004":null,"environment":null,"duedate":null,"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/21316/comment","maxResults":0,"total":0,"startAt":0}}}'
+        in: negotiator:0.5.3","customfield_10001":null,"customfield_10002":[],"customfield_10123":null,"customfield_10003":null,"customfield_10004":null,"environment":null,"duedate":null,"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/24932/comment","maxResults":0,"total":0,"startAt":0}}}'
     headers:
       Atl-Request-Id:
-      - d17646a0-1d17-4055-9a9c-75c037ee7b03
+      - fe0d98fe-66aa-4502-a057-914fd588ddeb
       Atl-Traceid:
-      - d17646a01d1740559a9c75c037ee7b03
+      - fe0d98fe66aa4502a057914fd588ddeb
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -451,9 +467,9 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 25 Jul 2025 19:14:01 GMT
+      - Fri, 16 Jan 2026 21:02:22 GMT
       Nel:
-      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
       Report-To:
       - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
@@ -461,7 +477,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=444,atl-edge;dur=442,atl-edge-internal;dur=15,atl-edge-upstream;dur=427,atl-edge-pop;desc="aws-ap-southeast-2",cdn-cache-miss,cdn-pop;desc="SYD3-P1",cdn-rid;desc="GRA8jbOORq1fHYD_WBYTzS17U5BITDNv-WdvVXCJ-_1enwu4lc9pZg==",cdn-downstream-fbl;dur=447
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=283,atl-edge;dur=259,atl-edge-internal;dur=16,atl-edge-upstream;dur=243,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN52-P3",cdn-rid;desc="NAejLT5yNbBaZ1TvDNks5LtXox4BkymdcwsAJPUGaZN3psZ21m8qZA==",cdn-downstream-fbl;dur=287
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -471,19 +487,23 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 03b68196a4924b2e14289edfecca0cae.cloudfront.net (CloudFront)
+      - 1.1 56a79b3a2ac1e2942686c2337f96fb72.cloudfront.net (CloudFront)
       X-Aaccountid:
-      - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
+      - 5d3878b170e3c90c952f91f6
       X-Amz-Cf-Id:
-      - GRA8jbOORq1fHYD_WBYTzS17U5BITDNv-WdvVXCJ-_1enwu4lc9pZg==
+      - NAejLT5yNbBaZ1TvDNks5LtXox4BkymdcwsAJPUGaZN3psZ21m8qZA==
       X-Amz-Cf-Pop:
-      - SYD3-P1
+      - DEN52-P3
       X-Arequestid:
-      - adeaa3699ee815bf776c339e01343c24
+      - f25cad3373b02febc185c4797e0ed5f4
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
+      X-Ratelimit-Limit:
+      - '400'
+      X-Ratelimit-Remaining:
+      - '398'
       X-Xss-Protection:
       - 1; mode=block
     status:
@@ -503,17 +523,17 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.32.5
     method: GET
     uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
   response:
     body:
-      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100287,"buildDate":"2025-07-24T13:05:26.000+0200","serverTime":"2025-07-25T21:14:02.346+0200","scmInfo":"0139ea21e0f8b5dafbd2e1eb33923e0c468b7f69","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
+      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlCSMHelpSeeker":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100290,"buildDate":"2026-01-16T02:15:38.000+0100","serverTime":"2026-01-16T22:02:22.495+0100","scmInfo":"cd645fa75fdcd33afc8b2e176098a731fd922a37","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
     headers:
       Atl-Request-Id:
-      - 2c942c7c-27dc-4cb5-b2df-e8ae398acaa7
+      - b494eafe-268a-49cd-9509-6bf5fba01bd2
       Atl-Traceid:
-      - 2c942c7c27dc4cb5b2dfe8ae398acaa7
+      - b494eafe268a49cd95096bf5fba01bd2
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -523,9 +543,9 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 25 Jul 2025 19:14:02 GMT
+      - Fri, 16 Jan 2026 21:02:22 GMT
       Nel:
-      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
       Report-To:
       - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
@@ -533,7 +553,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=313,atl-edge;dur=311,atl-edge-internal;dur=15,atl-edge-upstream;dur=296,atl-edge-pop;desc="aws-ap-southeast-2",cdn-cache-miss,cdn-pop;desc="SYD62-P1",cdn-rid;desc="gwxBdPLr7aFU8ks1P6Lhrj51o0zAOKfk8AG8Ygi-dNHq-_YZYsuncw==",cdn-downstream-fbl;dur=317
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=188,atl-edge;dur=164,atl-edge-internal;dur=13,atl-edge-upstream;dur=151,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN53-P1",cdn-rid;desc="MlDEMLcVV0CQovc6MTGKqG1_V-wDcHsJ6aSPRQhlLaCa28xNJ8l19Q==",cdn-downstream-fbl;dur=192
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -543,19 +563,23 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 332185989ef2da97d1a56bdaee204b78.cloudfront.net (CloudFront)
+      - 1.1 153b67ebb1db442b5cea7f360e7f8cb6.cloudfront.net (CloudFront)
       X-Aaccountid:
-      - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
+      - 5d3878b170e3c90c952f91f6
       X-Amz-Cf-Id:
-      - gwxBdPLr7aFU8ks1P6Lhrj51o0zAOKfk8AG8Ygi-dNHq-_YZYsuncw==
+      - MlDEMLcVV0CQovc6MTGKqG1_V-wDcHsJ6aSPRQhlLaCa28xNJ8l19Q==
       X-Amz-Cf-Pop:
-      - SYD62-P1
+      - DEN53-P1
       X-Arequestid:
-      - 74b24ba0397045d42ee41b6b67b6f315
+      - 7ab49e56db381933c02c9722049aa44e
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
+      X-Ratelimit-Limit:
+      - '350'
+      X-Ratelimit-Remaining:
+      - '349'
       X-Xss-Protection:
       - 1; mode=block
     status:
@@ -575,7 +599,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.32.5
     method: GET
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
   response:
@@ -589,9 +613,9 @@ interactions:
         Issues","key":"issuelinks","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=","hasDefaultValue":false,"operations":["add","copy"]},"assignee":{"required":false,"schema":{"type":"user","system":"assignee"},"name":"Assignee","key":"assignee","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/user/assignable/search?project=NTEST&query=","hasDefaultValue":false,"operations":["set"]}}}]}]}'
     headers:
       Atl-Request-Id:
-      - e2d1b80d-84a1-4bff-903a-10fd5ce7b5ac
+      - 0a4c5f95-e007-4f47-8a13-cadd8fc85890
       Atl-Traceid:
-      - e2d1b80d84a14bff903a10fd5ce7b5ac
+      - 0a4c5f95e0074f478a13cadd8fc85890
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -601,9 +625,9 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 25 Jul 2025 19:14:03 GMT
+      - Fri, 16 Jan 2026 21:02:22 GMT
       Nel:
-      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
       Report-To:
       - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
@@ -611,7 +635,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=541,atl-edge;dur=539,atl-edge-internal;dur=20,atl-edge-upstream;dur=520,atl-edge-pop;desc="aws-ap-southeast-2",cdn-cache-miss,cdn-pop;desc="SYD3-P1",cdn-rid;desc="l5XLdxuszGab_WqHjOz-eRIcea-2H8-3WINI7u0oG3_lOCk827aaFQ==",cdn-downstream-fbl;dur=545
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=342,atl-edge;dur=319,atl-edge-internal;dur=18,atl-edge-upstream;dur=301,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN53-P1",cdn-rid;desc="qRMs_NaY59e-HEsGMgDNeRPX5jhIhA63LhSquyZDb8lPNFGhvAfVEQ==",cdn-downstream-fbl;dur=345
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -621,22 +645,26 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 cf3f6fdeca566994c58f318f9ac55680.cloudfront.net (CloudFront)
+      - 1.1 4665a13a9a7d99c0536b8829f2bef2e8.cloudfront.net (CloudFront)
       Warning:
       - 'The issue create meta endpoint has been deprecated. (Deprecation start date:
         June 03, 2024)'
       X-Aaccountid:
-      - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
+      - 5d3878b170e3c90c952f91f6
       X-Amz-Cf-Id:
-      - l5XLdxuszGab_WqHjOz-eRIcea-2H8-3WINI7u0oG3_lOCk827aaFQ==
+      - qRMs_NaY59e-HEsGMgDNeRPX5jhIhA63LhSquyZDb8lPNFGhvAfVEQ==
       X-Amz-Cf-Pop:
-      - SYD3-P1
+      - DEN53-P1
       X-Arequestid:
-      - 473abb5bf24d2f0fdc4ee88bed30e20a
+      - 485bf071d65169ab30d596742594629b
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
+      X-Ratelimit-Limit:
+      - '350'
+      X-Ratelimit-Remaining:
+      - '349'
       X-Xss-Protection:
       - 1; mode=block
     status:
@@ -646,28 +674,28 @@ interactions:
     body: '{"fields": {"project": {"key": "NTEST"}, "issuetype": {"name": "Task"},
       "summary": "Findings in: pg:5.1.0", "description": "\n\n\n\n\n\n\n\nA group
       of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2. Group\n*Group*:
-      [Findings in: pg:5.1.0|http://localhost:8080/finding_group/47] in [Security
+      [Findings in: pg:5.1.0|http://localhost:8080/finding_group/116] in [Security
       How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
-      / [NPM Audit Scan|http://localhost:8080/test/123]\n\nh2. Summary\n*Severity:*
-      High  *Due Date:* Aug. 24, 2025 \n\nFindings matching the Active, Verified and
+      / [NPM Audit Scan|http://localhost:8080/test/128]\n\nh2. Summary\n*Severity:*
+      High  *Due Date:* Feb. 15, 2026 \n\nFindings matching the Active, Verified and
       Severity criteria:\n|| Severity || CVE || CWE || Component || Version || Title
       || Status ||\n|High|[CVE-2017-16082|https://nvd.nist.gov/vuln/detail/CVE-2017-16082]|[94|https://cwe.mitre.org/data/definitions/94.html]|pg|5.1.0|[Remote
       Code Execution - (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt;
       4.5.7  &gt;= 5.0.0 &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;=
       6.2.0 &lt; 6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0
-      &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/352]|Active,
+      &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/366]|Active,
       Verified|\n\nFindings *not* matching the Active, Verified and Severity criteria:\n||
       Severity || CVE || CWE || Component || Version || Title || Status ||\n|Medium|[CVE-2019-16082|https://nvd.nist.gov/vuln/detail/CVE-2019-16082]|[94|https://cwe.mitre.org/data/definitions/94.html]|pg|5.1.0|[2222Remote
       Code Execution - (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt;
       4.5.7  &gt;= 5.0.0 &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;=
       6.2.0 &lt; 6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0
-      &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/354]|Active,
+      &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/368]|Active,
       Verified|\n\n\n\n\n\n\n\n\n\n\nh1. Findings\n\nh3. [Remote Code Execution -
       (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt; 4.5.7  &gt;= 5.0.0
       &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;= 6.2.0 &lt;
       6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0 &lt; 7.0.2  &gt;=
-      7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/352]\n*Defect Dojo link:* http://localhost:8080/finding/352
-      (352)\n*Severity:* High\n *Due Date:* Aug. 24, 2025 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
+      7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/366]\n*Defect Dojo link:* http://localhost:8080/finding/366
+      (366)\n*Severity:* High\n *Due Date:* Feb. 15, 2026 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
       \n*CVE:* [CVE-2017-16082|https://nvd.nist.gov/vuln/detail/CVE-2017-16082]\n\n\n\n\n\n\n*Source
       File*: pg-promise&gt;pg\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/521\nAffected
       versions of `pg` contain a remote code execution vulnerability that occurs when
@@ -697,8 +725,8 @@ interactions:
       (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt; 4.5.7  &gt;= 5.0.0
       &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;= 6.2.0 &lt;
       6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0 &lt; 7.0.2  &gt;=
-      7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/354]\n*Defect Dojo link:* http://localhost:8080/finding/354
-      (354)\n*Severity:* Medium\n *Due Date:* Oct. 23, 2025 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
+      7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/368]\n*Defect Dojo link:* http://localhost:8080/finding/368
+      (368)\n*Severity:* Medium\n *Due Date:* April 16, 2026 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
       \n*CVE:* [CVE-2019-16082|https://nvd.nist.gov/vuln/detail/CVE-2019-16082]\n\n\n\n\n\n\n*Source
       File*: pg-promise&gt;pg\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/522\nAffected
       versions of `pg` contain a remote code execution vulnerability that occurs when
@@ -735,21 +763,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '7012'
+      - '7014'
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.32.5
     method: POST
     uri: https://defectdojo.atlassian.net/rest/api/2/issue
   response:
     body:
-      string: '{"id":"21317","key":"NTEST-3138","self":"https://defectdojo.atlassian.net/rest/api/2/issue/21317"}'
+      string: '{"id":"24933","key":"NTEST-3218","self":"https://defectdojo.atlassian.net/rest/api/2/issue/24933"}'
     headers:
       Atl-Request-Id:
-      - 053b0069-2d31-48b4-a415-3bd6922c07d6
+      - f5427c50-e0d6-46a2-8766-1840676d01d1
       Atl-Traceid:
-      - 053b00692d3148b4a4153bd6922c07d6
+      - f5427c50e0d646a287661840676d01d1
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -757,9 +785,9 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 25 Jul 2025 19:14:05 GMT
+      - Fri, 16 Jan 2026 21:02:23 GMT
       Nel:
-      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
       Report-To:
       - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
@@ -767,7 +795,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=960,atl-edge;dur=957,atl-edge-internal;dur=14,atl-edge-upstream;dur=943,atl-edge-pop;desc="aws-ap-southeast-2",cdn-cache-miss,cdn-pop;desc="SYD3-P2",cdn-rid;desc="imEKnKJRZoRR91LslONQrJMSYRJFaK88HCkrbPeJiw7Xc6AmvVKrtA==",cdn-downstream-fbl;dur=963
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=908,atl-edge;dur=883,atl-edge-internal;dur=15,atl-edge-upstream;dur=868,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN52-P2",cdn-rid;desc="cu2JxVKZA75vkPKqwvlDFrjyYXBrA5ZDcNZbL-QpvuQ_xBObI5UmuA==",cdn-downstream-fbl;dur=914
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -777,19 +805,23 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 9478009849c2f6b9551c4c5c23842910.cloudfront.net (CloudFront)
+      - 1.1 badefad2d1fb92bb4620df1ce11d8c92.cloudfront.net (CloudFront)
       X-Aaccountid:
-      - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
+      - 5d3878b170e3c90c952f91f6
       X-Amz-Cf-Id:
-      - imEKnKJRZoRR91LslONQrJMSYRJFaK88HCkrbPeJiw7Xc6AmvVKrtA==
+      - cu2JxVKZA75vkPKqwvlDFrjyYXBrA5ZDcNZbL-QpvuQ_xBObI5UmuA==
       X-Amz-Cf-Pop:
-      - SYD3-P2
+      - DEN52-P2
       X-Arequestid:
-      - b8e606d4036be496cc11ade75902923d
+      - 5068f463eabbe8fb1abc61cddf6eda6a
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
+      X-Ratelimit-Limit:
+      - '200'
+      X-Ratelimit-Remaining:
+      - '199'
       X-Xss-Protection:
       - 1; mode=block
     status:
@@ -809,41 +841,41 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.32.5
     method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3138
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3218
   response:
     body:
-      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"21317","self":"https://defectdojo.atlassian.net/rest/api/2/issue/21317","key":"NTEST-3138","fields":{"statuscategorychangedate":"2025-07-25T21:14:05.551+0200","fixVersions":[],"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"24933","self":"https://defectdojo.atlassian.net/rest/api/2/issue/24933","key":"NTEST-3218","fields":{"statuscategorychangedate":"2026-01-16T22:02:23.823+0100","fixVersions":[],"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
         Do"},"resolution":null,"lastViewed":null,"customfield_10060":null,"customfield_10061":null,"customfield_10062":null,"customfield_10063":null,"customfield_10064":null,"customfield_10065":null,"customfield_10066":null,"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/2","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/high_new.svg","name":"High","id":"2"},"labels":[],"timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"issuelinks":[],"assignee":null,"status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10000","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"Backlog","id":"10000","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
-        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"customfield_10053":null,"customfield_10055":null,"customfield_10056":null,"customfield_10057":null,"customfield_10058":null,"customfield_10059":null,"customfield_10049":null,"aggregatetimeestimate":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5","accountId":"712020:292a8b4c-ebd5-44be-bb94-d07c56a14dc5","emailAddress":"valentijn@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","24x24":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","16x16":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","32x32":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png"},"displayName":"Valentijn
-        Scholten","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5","accountId":"712020:292a8b4c-ebd5-44be-bb94-d07c56a14dc5","emailAddress":"valentijn@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","24x24":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","16x16":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","32x32":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png"},"displayName":"Valentijn
-        Scholten","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10046":null,"customfield_10047":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3138/votes","votes":0,"hasVoted":false},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
-        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10031":null,"customfield_10032":null,"customfield_10033":null,"aggregatetimespent":null,"customfield_10035":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3138/watchers","watchCount":1,"isWatching":true},"created":"2025-07-25T21:14:05.264+0200","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"customfield_10016":null,"customfield_10017":null,"customfield_10019":"0|i012jz:","updated":"2025-07-25T21:14:05.357+0200","timeoriginalestimate":null,"description":"\n\n\n\n\n\n\n\nA
+        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"customfield_10053":null,"customfield_10055":null,"customfield_10056":null,"customfield_10057":null,"customfield_10058":null,"customfield_10059":null,"customfield_10049":null,"aggregatetimeestimate":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10046":null,"customfield_10047":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3218/votes","votes":0,"hasVoted":false},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10031":null,"customfield_10032":null,"customfield_10033":null,"aggregatetimespent":null,"customfield_10035":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3218/watchers","watchCount":1,"isWatching":true},"created":"2026-01-16T22:02:23.518+0100","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"customfield_10016":null,"customfield_10017":null,"customfield_10019":"0|i014mf:","updated":"2026-01-16T22:02:23.641+0100","customfield_10090":null,"timeoriginalestimate":null,"description":"\n\n\n\n\n\n\n\nA
         group of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2.
-        Group\n*Group*: [Findings in: pg:5.1.0|http://localhost:8080/finding_group/47]
+        Group\n*Group*: [Findings in: pg:5.1.0|http://localhost:8080/finding_group/116]
         in [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
-        / [NPM Audit Scan|http://localhost:8080/test/123]\n\nh2. Summary\n*Severity:*
-        High  *Due Date:* Aug. 24, 2025 \n\nFindings matching the Active, Verified
+        / [NPM Audit Scan|http://localhost:8080/test/128]\n\nh2. Summary\n*Severity:*
+        High  *Due Date:* Feb. 15, 2026 \n\nFindings matching the Active, Verified
         and Severity criteria:\n|| Severity || CVE || CWE || Component || Version
         || Title || Status ||\n|High|[CVE-2017-16082|https://nvd.nist.gov/vuln/detail/CVE-2017-16082]|[94|https://cwe.mitre.org/data/definitions/94.html]|pg|5.1.0|[Remote
         Code Execution - (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt;
         4.5.7  &gt;= 5.0.0 &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;=
         6.2.0 &lt; 6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0
-        &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/352]|Active,
+        &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/366]|Active,
         Verified|\n\nFindings *not* matching the Active, Verified and Severity criteria:\n||
         Severity || CVE || CWE || Component || Version || Title || Status ||\n|Medium|[CVE-2019-16082|https://nvd.nist.gov/vuln/detail/CVE-2019-16082]|[94|https://cwe.mitre.org/data/definitions/94.html]|pg|5.1.0|[2222Remote
         Code Execution - (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt;
         4.5.7  &gt;= 5.0.0 &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;=
         6.2.0 &lt; 6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0
-        &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/354]|Active,
+        &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/368]|Active,
         Verified|\n\n\n\n\n\n\n\n\n\n\nh1. Findings\n\nh3. [Remote Code Execution
         - (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt; 4.5.7  &gt;=
         5.0.0 &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;= 6.2.0
         &lt; 6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0 &lt;
-        7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/352]\n*Defect
-        Dojo link:* http://localhost:8080/finding/352 (352)\n*Severity:* High\n *Due
-        Date:* Aug. 24, 2025 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
+        7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/366]\n*Defect
+        Dojo link:* http://localhost:8080/finding/366 (366)\n*Severity:* High\n *Due
+        Date:* Feb. 15, 2026 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
         \n*CVE:* [CVE-2017-16082|https://nvd.nist.gov/vuln/detail/CVE-2017-16082]\n\n\n\n\n\n\n*Source
         File*: pg-promise&gt;pg\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/521\nAffected
         versions of `pg` contain a remote code execution vulnerability that occurs
@@ -873,9 +905,9 @@ interactions:
         - (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt; 4.5.7  &gt;=
         5.0.0 &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;= 6.2.0
         &lt; 6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0 &lt;
-        7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/354]\n*Defect
-        Dojo link:* http://localhost:8080/finding/354 (354)\n*Severity:* Medium\n
-        *Due Date:* Oct. 23, 2025 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
+        7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/368]\n*Defect
+        Dojo link:* http://localhost:8080/finding/368 (368)\n*Severity:* Medium\n
+        *Due Date:* April 16, 2026 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
         \n*CVE:* [CVE-2019-16082|https://nvd.nist.gov/vuln/detail/CVE-2019-16082]\n\n\n\n\n\n\n*Source
         File*: pg-promise&gt;pg\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/522\nAffected
         versions of `pg` contain a remote code execution vulnerability that occurs
@@ -902,12 +934,12 @@ interactions:
         also patched. )\n* Version 7.x.x: Update to version 7.1.2 or later. ( Note
         that version 7.0.2 is also patched. )\n\n\n\n*Impact*:\nNo impact provided\n\n\n\n\n\n*References*:\nhttps://nodesecurity.io/advisories/522\n\n\n\n\n\n*Reporter:*
         [(admin) ()|mailto:]\n","customfield_10010":null,"customfield_10014":null,"timetracking":{},"customfield_10015":null,"customfield_10005":null,"customfield_10006":null,"customfield_10007":null,"security":null,"customfield_10008":null,"attachment":[],"customfield_10009":null,"summary":"Findings
-        in: pg:5.1.0","customfield_10001":null,"customfield_10002":[],"customfield_10003":null,"customfield_10004":null,"environment":null,"duedate":null,"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/21317/comment","maxResults":0,"total":0,"startAt":0}}}'
+        in: pg:5.1.0","customfield_10001":null,"customfield_10002":[],"customfield_10123":null,"customfield_10003":null,"customfield_10004":null,"environment":null,"duedate":null,"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/24933/comment","maxResults":0,"total":0,"startAt":0}}}'
     headers:
       Atl-Request-Id:
-      - 64b09ff0-c55f-4215-a5d0-f6ef9a7fbb26
+      - c3ee500d-a273-4a0e-98ed-93b4cd8177bf
       Atl-Traceid:
-      - 64b09ff0c55f4215a5d0f6ef9a7fbb26
+      - c3ee500da2734a0e98ed93b4cd8177bf
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -917,9 +949,9 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 25 Jul 2025 19:14:07 GMT
+      - Fri, 16 Jan 2026 21:02:24 GMT
       Nel:
-      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
       Report-To:
       - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
@@ -927,7 +959,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=401,atl-edge;dur=399,atl-edge-internal;dur=14,atl-edge-upstream;dur=384,atl-edge-pop;desc="aws-ap-southeast-2",cdn-cache-miss,cdn-pop;desc="SYD62-P1",cdn-rid;desc="IMbPmev_LhJztPyDYNr9j3Gkl6TlKpAFj1QAiqMU9JOg4WOSr9f-kQ==",cdn-downstream-fbl;dur=405
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=342,atl-edge;dur=319,atl-edge-internal;dur=33,atl-edge-upstream;dur=285,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN53-P1",cdn-rid;desc="Lyf5-BF0Nux-uR8IA8XDXQFYMqt6Gqn3JtD3kwoseLcvQpRGs6QWbA==",cdn-downstream-fbl;dur=345
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -937,19 +969,23 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 adb4605fb7528573053aec50d6f562c8.cloudfront.net (CloudFront)
+      - 1.1 cb4937748c19bcccb40a5a5875f01552.cloudfront.net (CloudFront)
       X-Aaccountid:
-      - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
+      - 5d3878b170e3c90c952f91f6
       X-Amz-Cf-Id:
-      - IMbPmev_LhJztPyDYNr9j3Gkl6TlKpAFj1QAiqMU9JOg4WOSr9f-kQ==
+      - Lyf5-BF0Nux-uR8IA8XDXQFYMqt6Gqn3JtD3kwoseLcvQpRGs6QWbA==
       X-Amz-Cf-Pop:
-      - SYD62-P1
+      - DEN53-P1
       X-Arequestid:
-      - 0a101c8caf8bfa9dcc77056327dbcf81
+      - 11edfad47fbc083440e639f63cd91108
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
+      X-Ratelimit-Limit:
+      - '400'
+      X-Ratelimit-Remaining:
+      - '399'
       X-Xss-Protection:
       - 1; mode=block
     status:
@@ -969,41 +1005,41 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.32.5
     method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/21317
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/24933
   response:
     body:
-      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"21317","self":"https://defectdojo.atlassian.net/rest/api/2/issue/21317","key":"NTEST-3138","fields":{"statuscategorychangedate":"2025-07-25T21:14:05.551+0200","fixVersions":[],"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10010.requestTypePractice","id":"24933","self":"https://defectdojo.atlassian.net/rest/api/2/issue/24933","key":"NTEST-3218","fields":{"statuscategorychangedate":"2026-01-16T22:02:23.823+0100","fixVersions":[],"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
         Do"},"resolution":null,"lastViewed":null,"customfield_10060":null,"customfield_10061":null,"customfield_10062":null,"customfield_10063":null,"customfield_10064":null,"customfield_10065":null,"customfield_10066":null,"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/2","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/high_new.svg","name":"High","id":"2"},"labels":[],"timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"issuelinks":[],"assignee":null,"status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10000","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"Backlog","id":"10000","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
-        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"customfield_10053":null,"customfield_10055":null,"customfield_10056":null,"customfield_10057":null,"customfield_10058":null,"customfield_10059":null,"customfield_10049":null,"aggregatetimeestimate":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5","accountId":"712020:292a8b4c-ebd5-44be-bb94-d07c56a14dc5","emailAddress":"valentijn@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","24x24":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","16x16":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","32x32":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png"},"displayName":"Valentijn
-        Scholten","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5","accountId":"712020:292a8b4c-ebd5-44be-bb94-d07c56a14dc5","emailAddress":"valentijn@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","24x24":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","16x16":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png","32x32":"https://secure.gravatar.com/avatar/d05de848fe8cc7816c52a5e34e327bad?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVS-3.png"},"displayName":"Valentijn
-        Scholten","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10046":null,"customfield_10047":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3138/votes","votes":0,"hasVoted":false},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
-        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10031":null,"customfield_10032":null,"customfield_10033":null,"aggregatetimespent":null,"customfield_10035":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3138/watchers","watchCount":1,"isWatching":true},"created":"2025-07-25T21:14:05.264+0200","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"customfield_10016":null,"customfield_10017":null,"customfield_10019":"0|i012jz:","updated":"2025-07-25T21:14:05.357+0200","timeoriginalestimate":null,"description":"\n\n\n\n\n\n\n\nA
+        Do"}},"components":[],"customfield_10050":null,"customfield_10051":null,"customfield_10053":null,"customfield_10055":null,"customfield_10056":null,"customfield_10057":null,"customfield_10058":null,"customfield_10059":null,"customfield_10049":null,"aggregatetimeestimate":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"customfield_10040":null,"customfield_10041":null,"customfield_10042":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"customfield_10043":null,"aggregateprogress":{"progress":0,"total":0},"customfield_10044":null,"customfield_10045":null,"customfield_10046":null,"customfield_10047":null,"customfield_10048":null,"customfield_10038":null,"customfield_10039":null,"progress":{"progress":0,"total":0},"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3218/votes","votes":0,"hasVoted":false},"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10002","id":"10002","description":"A
+        small, distinct piece of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"hierarchyLevel":0},"timespent":null,"customfield_10030":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10000","id":"10000","key":"NTEST","name":"Unittests","projectTypeKey":"software","simplified":false,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10407?size=medium"}},"customfield_10031":null,"customfield_10032":null,"customfield_10033":null,"aggregatetimespent":null,"customfield_10035":null,"customfield_10036":null,"customfield_10037":null,"customfield_10027":null,"customfield_10028":null,"customfield_10029":null,"resolutiondate":null,"workratio":-1,"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-3218/watchers","watchCount":1,"isWatching":true},"created":"2026-01-16T22:02:23.518+0100","customfield_10020":null,"customfield_10021":null,"customfield_10022":null,"customfield_10023":null,"customfield_10016":null,"customfield_10017":null,"customfield_10019":"0|i014mf:","updated":"2026-01-16T22:02:23.641+0100","customfield_10090":null,"timeoriginalestimate":null,"description":"\n\n\n\n\n\n\n\nA
         group of Findings has been pushed to JIRA to be investigated and fixed:\n\nh2.
-        Group\n*Group*: [Findings in: pg:5.1.0|http://localhost:8080/finding_group/47]
+        Group\n*Group*: [Findings in: pg:5.1.0|http://localhost:8080/finding_group/116]
         in [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
-        / [NPM Audit Scan|http://localhost:8080/test/123]\n\nh2. Summary\n*Severity:*
-        High  *Due Date:* Aug. 24, 2025 \n\nFindings matching the Active, Verified
+        / [NPM Audit Scan|http://localhost:8080/test/128]\n\nh2. Summary\n*Severity:*
+        High  *Due Date:* Feb. 15, 2026 \n\nFindings matching the Active, Verified
         and Severity criteria:\n|| Severity || CVE || CWE || Component || Version
         || Title || Status ||\n|High|[CVE-2017-16082|https://nvd.nist.gov/vuln/detail/CVE-2017-16082]|[94|https://cwe.mitre.org/data/definitions/94.html]|pg|5.1.0|[Remote
         Code Execution - (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt;
         4.5.7  &gt;= 5.0.0 &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;=
         6.2.0 &lt; 6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0
-        &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/352]|Active,
+        &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/366]|Active,
         Verified|\n\nFindings *not* matching the Active, Verified and Severity criteria:\n||
         Severity || CVE || CWE || Component || Version || Title || Status ||\n|Medium|[CVE-2019-16082|https://nvd.nist.gov/vuln/detail/CVE-2019-16082]|[94|https://cwe.mitre.org/data/definitions/94.html]|pg|5.1.0|[2222Remote
         Code Execution - (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt;
         4.5.7  &gt;= 5.0.0 &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;=
         6.2.0 &lt; 6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0
-        &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/354]|Active,
+        &lt; 7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/368]|Active,
         Verified|\n\n\n\n\n\n\n\n\n\n\nh1. Findings\n\nh3. [Remote Code Execution
         - (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt; 4.5.7  &gt;=
         5.0.0 &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;= 6.2.0
         &lt; 6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0 &lt;
-        7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/352]\n*Defect
-        Dojo link:* http://localhost:8080/finding/352 (352)\n*Severity:* High\n *Due
-        Date:* Aug. 24, 2025 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
+        7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/366]\n*Defect
+        Dojo link:* http://localhost:8080/finding/366 (366)\n*Severity:* High\n *Due
+        Date:* Feb. 15, 2026 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
         \n*CVE:* [CVE-2017-16082|https://nvd.nist.gov/vuln/detail/CVE-2017-16082]\n\n\n\n\n\n\n*Source
         File*: pg-promise&gt;pg\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/521\nAffected
         versions of `pg` contain a remote code execution vulnerability that occurs
@@ -1033,9 +1069,9 @@ interactions:
         - (Pg, &lt; 2.11.2  &gt;= 3.0.0 &lt; 3.6.4   &gt;= 4.0.0 &lt; 4.5.7  &gt;=
         5.0.0 &lt; 5.2.1  &gt;= 6.0.0 &lt; 6.0.5  &gt;= 6.1.0 &lt; 6.1.6  &gt;= 6.2.0
         &lt; 6.2.5  &gt;= 6.3.0 &lt; 6.3.3  &gt;= 6.4.0 &lt; 6.4.2  &gt;= 7.0.0 &lt;
-        7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/354]\n*Defect
-        Dojo link:* http://localhost:8080/finding/354 (354)\n*Severity:* Medium\n
-        *Due Date:* Oct. 23, 2025 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
+        7.0.2  &gt;= 7.1.0 &lt; 7.1.2)|http://localhost:8080/finding/368]\n*Defect
+        Dojo link:* http://localhost:8080/finding/368 (368)\n*Severity:* Medium\n
+        *Due Date:* April 16, 2026 \n *CWE:* [CWE-94|https://cwe.mitre.org/data/definitions/94.html]
         \n*CVE:* [CVE-2019-16082|https://nvd.nist.gov/vuln/detail/CVE-2019-16082]\n\n\n\n\n\n\n*Source
         File*: pg-promise&gt;pg\n\n\n\n\n*Description*:\nhttps://nodesecurity.io/advisories/522\nAffected
         versions of `pg` contain a remote code execution vulnerability that occurs
@@ -1062,12 +1098,12 @@ interactions:
         also patched. )\n* Version 7.x.x: Update to version 7.1.2 or later. ( Note
         that version 7.0.2 is also patched. )\n\n\n\n*Impact*:\nNo impact provided\n\n\n\n\n\n*References*:\nhttps://nodesecurity.io/advisories/522\n\n\n\n\n\n*Reporter:*
         [(admin) ()|mailto:]\n","customfield_10010":null,"customfield_10014":null,"timetracking":{},"customfield_10015":null,"customfield_10005":null,"customfield_10006":null,"customfield_10007":null,"security":null,"customfield_10008":null,"attachment":[],"customfield_10009":null,"summary":"Findings
-        in: pg:5.1.0","customfield_10001":null,"customfield_10002":[],"customfield_10003":null,"customfield_10004":null,"environment":null,"duedate":null,"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/21317/comment","maxResults":0,"total":0,"startAt":0}}}'
+        in: pg:5.1.0","customfield_10001":null,"customfield_10002":[],"customfield_10123":null,"customfield_10003":null,"customfield_10004":null,"environment":null,"duedate":null,"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/24933/comment","maxResults":0,"total":0,"startAt":0}}}'
     headers:
       Atl-Request-Id:
-      - 59f0d42e-6b6b-426e-9be3-c0ea5dbd885b
+      - 9bf3fa82-74f2-4377-be76-37cc03b51193
       Atl-Traceid:
-      - 59f0d42e6b6b426e9be3c0ea5dbd885b
+      - 9bf3fa8274f24377be7637cc03b51193
       Cache-Control:
       - no-cache, no-store, no-transform
       Connection:
@@ -1077,9 +1113,9 @@ interactions:
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-      - Fri, 25 Jul 2025 19:14:08 GMT
+      - Fri, 16 Jan 2026 21:02:24 GMT
       Nel:
-      - '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to":
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
         "endpoint-1"}'
       Report-To:
       - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
@@ -1087,7 +1123,7 @@ interactions:
       Server:
       - AtlassianEdge
       Server-Timing:
-      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=414,atl-edge;dur=412,atl-edge-internal;dur=14,atl-edge-upstream;dur=398,atl-edge-pop;desc="aws-ap-southeast-2",cdn-cache-miss,cdn-pop;desc="SYD3-P1",cdn-rid;desc="FDp3HTw2vho-3mbSVwGK28dF4lasfTQ6c7CirERCkLH9ANsim6aJCw==",cdn-downstream-fbl;dur=417
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=333,atl-edge;dur=309,atl-edge-internal;dur=19,atl-edge-upstream;dur=291,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN53-P1",cdn-rid;desc="CLSN3Bi90l3ZxSkyRhzgVa0SB4Pj_WZCt5B0A9V3HQF1wTqsBWKrnA==",cdn-downstream-fbl;dur=336
       Strict-Transport-Security:
       - max-age=63072000; includeSubDomains; preload
       Timing-Allow-Origin:
@@ -1097,19 +1133,23 @@ interactions:
       Vary:
       - Accept-Encoding
       Via:
-      - 1.1 901fdc9beff7ff35478f18c7b70da04e.cloudfront.net (CloudFront)
+      - 1.1 5ca5d4f769888ca013d817040942ebf2.cloudfront.net (CloudFront)
       X-Aaccountid:
-      - 712020%3A292a8b4c-ebd5-44be-bb94-d07c56a14dc5
+      - 5d3878b170e3c90c952f91f6
       X-Amz-Cf-Id:
-      - FDp3HTw2vho-3mbSVwGK28dF4lasfTQ6c7CirERCkLH9ANsim6aJCw==
+      - CLSN3Bi90l3ZxSkyRhzgVa0SB4Pj_WZCt5B0A9V3HQF1wTqsBWKrnA==
       X-Amz-Cf-Pop:
-      - SYD3-P1
+      - DEN53-P1
       X-Arequestid:
-      - 2357ad9acc692b2c7929a4348a57c613
+      - 9df2068a87606566bfa3dcfa92257b41
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
       - nosniff
+      X-Ratelimit-Limit:
+      - '400'
+      X-Ratelimit-Remaining:
+      - '398'
       X-Xss-Protection:
       - 1; mode=block
     status:
@@ -1118,14 +1158,14 @@ interactions:
 - request:
     body: '{"description": "Event test_added has occurred.", "title": "Test created
       for Security How-to: 1st Quarter Engagement: NPM Audit Scan", "user": null,
-      "url_ui": "http://localhost:8080/test/123", "url_api": "http://localhost:8080/api/v2/tests/123/",
+      "url_ui": "http://localhost:8080/test/128", "url_api": "http://localhost:8080/api/v2/tests/128/",
       "product_type": {"name": "ebooks", "id": 2, "url_ui": "http://localhost:8080/product/type/2",
       "url_api": "http://localhost:8080/api/v2/product_types/2/"}, "product": {"name":
       "Security How-to", "id": 2, "url_ui": "http://localhost:8080/product/2", "url_api":
       "http://localhost:8080/api/v2/products/2/"}, "engagement": {"name": "1st Quarter
       Engagement", "id": 1, "url_ui": "http://localhost:8080/engagement/1", "url_api":
       "http://localhost:8080/api/v2/engagements/1/"}, "test": {"title": null, "id":
-      123, "url_ui": "http://localhost:8080/test/123", "url_api": "http://localhost:8080/api/v2/tests/123/"}}'
+      128, "url_ui": "http://localhost:8080/test/128", "url_api": "http://localhost:8080/api/v2/tests/128/"}}'
     headers:
       Accept:
       - application/json
@@ -1140,7 +1180,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - DefectDojo-2.48.4
+      - DefectDojo-2.54.1
       X-DefectDojo-Event:
       - test_added
       X-DefectDojo-Instance:
@@ -1154,22 +1194,22 @@ interactions:
         [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
         \   ],\n    \"Content-Length\": [\n      \"849\"\n    ],\n    \"Content-Type\":
         [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
-        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.48.4\"\n    ],\n    \"X-Defectdojo-Event\":
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.54.1\"\n    ],\n    \"X-Defectdojo-Event\":
         [\n      \"test_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n      \"http://localhost:8080\"\n
-        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"10.250.1.7\",\n  \"url\":
+        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"172.19.0.7\",\n  \"url\":
         \"http://webhook.endpoint:8080/post\",\n  \"data\": \"{\\\"description\\\":
         \\\"Event test_added has occurred.\\\", \\\"title\\\": \\\"Test created for
         Security How-to: 1st Quarter Engagement: NPM Audit Scan\\\", \\\"user\\\":
-        null, \\\"url_ui\\\": \\\"http://localhost:8080/test/123\\\", \\\"url_api\\\":
-        \\\"http://localhost:8080/api/v2/tests/123/\\\", \\\"product_type\\\": {\\\"name\\\":
+        null, \\\"url_ui\\\": \\\"http://localhost:8080/test/128\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/tests/128/\\\", \\\"product_type\\\": {\\\"name\\\":
         \\\"ebooks\\\", \\\"id\\\": 2, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/2\\\",
         \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/2/\\\"}, \\\"product\\\":
         {\\\"name\\\": \\\"Security How-to\\\", \\\"id\\\": 2, \\\"url_ui\\\": \\\"http://localhost:8080/product/2\\\",
         \\\"url_api\\\": \\\"http://localhost:8080/api/v2/products/2/\\\"}, \\\"engagement\\\":
         {\\\"name\\\": \\\"1st Quarter Engagement\\\", \\\"id\\\": 1, \\\"url_ui\\\":
         \\\"http://localhost:8080/engagement/1\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/engagements/1/\\\"},
-        \\\"test\\\": {\\\"title\\\": null, \\\"id\\\": 123, \\\"url_ui\\\": \\\"http://localhost:8080/test/123\\\",
-        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/123/\\\"}}\",\n  \"files\":
+        \\\"test\\\": {\\\"title\\\": null, \\\"id\\\": 128, \\\"url_ui\\\": \\\"http://localhost:8080/test/128\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/128/\\\"}}\",\n  \"files\":
         {},\n  \"form\": {},\n  \"json\": {\n    \"description\": \"Event test_added
         has occurred.\",\n    \"engagement\": {\n      \"id\": 1,\n      \"name\":
         \"1st Quarter Engagement\",\n      \"url_api\": \"http://localhost:8080/api/v2/engagements/1/\",\n
@@ -1179,11 +1219,11 @@ interactions:
         \   },\n    \"product_type\": {\n      \"id\": 2,\n      \"name\": \"ebooks\",\n
         \     \"url_api\": \"http://localhost:8080/api/v2/product_types/2/\",\n      \"url_ui\":
         \"http://localhost:8080/product/type/2\"\n    },\n    \"test\": {\n      \"id\":
-        123,\n      \"title\": null,\n      \"url_api\": \"http://localhost:8080/api/v2/tests/123/\",\n
-        \     \"url_ui\": \"http://localhost:8080/test/123\"\n    },\n    \"title\":
+        128,\n      \"title\": null,\n      \"url_api\": \"http://localhost:8080/api/v2/tests/128/\",\n
+        \     \"url_ui\": \"http://localhost:8080/test/128\"\n    },\n    \"title\":
         \"Test created for Security How-to: 1st Quarter Engagement: NPM Audit Scan\",\n
-        \   \"url_api\": \"http://localhost:8080/api/v2/tests/123/\",\n    \"url_ui\":
-        \"http://localhost:8080/test/123\",\n    \"user\": null\n  }\n}\n"
+        \   \"url_api\": \"http://localhost:8080/api/v2/tests/128/\",\n    \"url_ui\":
+        \"http://localhost:8080/test/128\",\n    \"user\": null\n  }\n}\n"
     headers:
       Access-Control-Allow-Credentials:
       - 'true'
@@ -1192,7 +1232,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Fri, 25 Jul 2025 19:14:08 GMT
+      - Fri, 16 Jan 2026 21:02:24 GMT
       Transfer-Encoding:
       - chunked
     status:
@@ -1201,32 +1241,32 @@ interactions:
 - request:
     body: '{"description": "Event scan_added has occurred.", "title": "Created/Updated
       5 findings for Security How-to: 1st Quarter Engagement: NPM Audit Scan", "user":
-      null, "url_ui": "http://localhost:8080/test/123", "url_api": "http://localhost:8080/api/v2/tests/123/",
+      null, "url_ui": "http://localhost:8080/test/128", "url_api": "http://localhost:8080/api/v2/tests/128/",
       "product_type": {"name": "ebooks", "id": 2, "url_ui": "http://localhost:8080/product/type/2",
       "url_api": "http://localhost:8080/api/v2/product_types/2/"}, "product": {"name":
       "Security How-to", "id": 2, "url_ui": "http://localhost:8080/product/2", "url_api":
       "http://localhost:8080/api/v2/products/2/"}, "engagement": {"name": "1st Quarter
       Engagement", "id": 1, "url_ui": "http://localhost:8080/engagement/1", "url_api":
       "http://localhost:8080/api/v2/engagements/1/"}, "test": {"title": null, "id":
-      123, "url_ui": "http://localhost:8080/test/123", "url_api": "http://localhost:8080/api/v2/tests/123/"},
-      "finding_count": 5, "findings": {"new": [{"id": 351, "title": "2222Regular Expression
-      Denial of Service - (Negotiator, <= 0.6.0)", "severity": "High", "url_ui": "http://localhost:8080/finding/351",
-      "url_api": "http://localhost:8080/api/v2/findings/351/"}, {"id": 352, "title":
+      128, "url_ui": "http://localhost:8080/test/128", "url_api": "http://localhost:8080/api/v2/tests/128/"},
+      "finding_count": 5, "findings": {"new": [{"id": 365, "title": "2222Regular Expression
+      Denial of Service - (Negotiator, <= 0.6.0)", "severity": "High", "url_ui": "http://localhost:8080/finding/365",
+      "url_api": "http://localhost:8080/api/v2/findings/365/"}, {"id": 366, "title":
       "Remote Code Execution - (Pg, < 2.11.2 || >= 3.0.0 < 3.6.4 ||  >= 4.0.0 < 4.5.7
       || >= 5.0.0 < 5.2.1 || >= 6.0.0 < 6.0.5 || >= 6.1.0 < 6.1.6 || >= 6.2.0 < 6.2.5
       || >= 6.3.0 < 6.3.3 || >= 6.4.0 < 6.4.2 || >= 7.0.0 < 7.0.2 || >= 7.1.0 < 7.1.2)",
-      "severity": "High", "url_ui": "http://localhost:8080/finding/352", "url_api":
-      "http://localhost:8080/api/v2/findings/352/"}, {"id": 350, "title": "Regular
+      "severity": "High", "url_ui": "http://localhost:8080/finding/366", "url_api":
+      "http://localhost:8080/api/v2/findings/366/"}, {"id": 364, "title": "Regular
       Expression Denial of Service - (Negotiator, <= 0.6.0)", "severity": "Medium",
-      "url_ui": "http://localhost:8080/finding/350", "url_api": "http://localhost:8080/api/v2/findings/350/"},
-      {"id": 353, "title": "Regular Expression Denial of Service - (Fresh, < 0.5.2)",
-      "severity": "Medium", "url_ui": "http://localhost:8080/finding/353", "url_api":
-      "http://localhost:8080/api/v2/findings/353/"}, {"id": 354, "title": "2222Remote
+      "url_ui": "http://localhost:8080/finding/364", "url_api": "http://localhost:8080/api/v2/findings/364/"},
+      {"id": 367, "title": "Regular Expression Denial of Service - (Fresh, < 0.5.2)",
+      "severity": "Medium", "url_ui": "http://localhost:8080/finding/367", "url_api":
+      "http://localhost:8080/api/v2/findings/367/"}, {"id": 368, "title": "2222Remote
       Code Execution - (Pg, < 2.11.2 || >= 3.0.0 < 3.6.4 ||  >= 4.0.0 < 4.5.7 || >=
       5.0.0 < 5.2.1 || >= 6.0.0 < 6.0.5 || >= 6.1.0 < 6.1.6 || >= 6.2.0 < 6.2.5 ||
       >= 6.3.0 < 6.3.3 || >= 6.4.0 < 6.4.2 || >= 7.0.0 < 7.0.2 || >= 7.1.0 < 7.1.2)",
-      "severity": "Medium", "url_ui": "http://localhost:8080/finding/354", "url_api":
-      "http://localhost:8080/api/v2/findings/354/"}], "reactivated": [], "mitigated":
+      "severity": "Medium", "url_ui": "http://localhost:8080/finding/368", "url_api":
+      "http://localhost:8080/api/v2/findings/368/"}], "reactivated": [], "mitigated":
       [], "untouched": []}}'
     headers:
       Accept:
@@ -1242,7 +1282,7 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - DefectDojo-2.48.4
+      - DefectDojo-2.54.1
       X-DefectDojo-Event:
       - scan_added
       X-DefectDojo-Instance:
@@ -1256,82 +1296,82 @@ interactions:
         [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
         \   ],\n    \"Content-Length\": [\n      \"2378\"\n    ],\n    \"Content-Type\":
         [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
-        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.48.4\"\n    ],\n    \"X-Defectdojo-Event\":
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.54.1\"\n    ],\n    \"X-Defectdojo-Event\":
         [\n      \"scan_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n      \"http://localhost:8080\"\n
-        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"10.250.1.7\",\n  \"url\":
+        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"172.19.0.7\",\n  \"url\":
         \"http://webhook.endpoint:8080/post\",\n  \"data\": \"{\\\"description\\\":
         \\\"Event scan_added has occurred.\\\", \\\"title\\\": \\\"Created/Updated
         5 findings for Security How-to: 1st Quarter Engagement: NPM Audit Scan\\\",
-        \\\"user\\\": null, \\\"url_ui\\\": \\\"http://localhost:8080/test/123\\\",
-        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/123/\\\", \\\"product_type\\\":
+        \\\"user\\\": null, \\\"url_ui\\\": \\\"http://localhost:8080/test/128\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/128/\\\", \\\"product_type\\\":
         {\\\"name\\\": \\\"ebooks\\\", \\\"id\\\": 2, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/2\\\",
         \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/2/\\\"}, \\\"product\\\":
         {\\\"name\\\": \\\"Security How-to\\\", \\\"id\\\": 2, \\\"url_ui\\\": \\\"http://localhost:8080/product/2\\\",
         \\\"url_api\\\": \\\"http://localhost:8080/api/v2/products/2/\\\"}, \\\"engagement\\\":
         {\\\"name\\\": \\\"1st Quarter Engagement\\\", \\\"id\\\": 1, \\\"url_ui\\\":
         \\\"http://localhost:8080/engagement/1\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/engagements/1/\\\"},
-        \\\"test\\\": {\\\"title\\\": null, \\\"id\\\": 123, \\\"url_ui\\\": \\\"http://localhost:8080/test/123\\\",
-        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/123/\\\"}, \\\"finding_count\\\":
-        5, \\\"findings\\\": {\\\"new\\\": [{\\\"id\\\": 351, \\\"title\\\": \\\"2222Regular
+        \\\"test\\\": {\\\"title\\\": null, \\\"id\\\": 128, \\\"url_ui\\\": \\\"http://localhost:8080/test/128\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/128/\\\"}, \\\"finding_count\\\":
+        5, \\\"findings\\\": {\\\"new\\\": [{\\\"id\\\": 365, \\\"title\\\": \\\"2222Regular
         Expression Denial of Service - (Negotiator, <= 0.6.0)\\\", \\\"severity\\\":
-        \\\"High\\\", \\\"url_ui\\\": \\\"http://localhost:8080/finding/351\\\", \\\"url_api\\\":
-        \\\"http://localhost:8080/api/v2/findings/351/\\\"}, {\\\"id\\\": 352, \\\"title\\\":
+        \\\"High\\\", \\\"url_ui\\\": \\\"http://localhost:8080/finding/365\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/findings/365/\\\"}, {\\\"id\\\": 366, \\\"title\\\":
         \\\"Remote Code Execution - (Pg, < 2.11.2 || >= 3.0.0 < 3.6.4 ||  >= 4.0.0
         < 4.5.7 || >= 5.0.0 < 5.2.1 || >= 6.0.0 < 6.0.5 || >= 6.1.0 < 6.1.6 || >=
         6.2.0 < 6.2.5 || >= 6.3.0 < 6.3.3 || >= 6.4.0 < 6.4.2 || >= 7.0.0 < 7.0.2
         || >= 7.1.0 < 7.1.2)\\\", \\\"severity\\\": \\\"High\\\", \\\"url_ui\\\":
-        \\\"http://localhost:8080/finding/352\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/352/\\\"},
-        {\\\"id\\\": 350, \\\"title\\\": \\\"Regular Expression Denial of Service
+        \\\"http://localhost:8080/finding/366\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/366/\\\"},
+        {\\\"id\\\": 364, \\\"title\\\": \\\"Regular Expression Denial of Service
         - (Negotiator, <= 0.6.0)\\\", \\\"severity\\\": \\\"Medium\\\", \\\"url_ui\\\":
-        \\\"http://localhost:8080/finding/350\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/350/\\\"},
-        {\\\"id\\\": 353, \\\"title\\\": \\\"Regular Expression Denial of Service
+        \\\"http://localhost:8080/finding/364\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/364/\\\"},
+        {\\\"id\\\": 367, \\\"title\\\": \\\"Regular Expression Denial of Service
         - (Fresh, < 0.5.2)\\\", \\\"severity\\\": \\\"Medium\\\", \\\"url_ui\\\":
-        \\\"http://localhost:8080/finding/353\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/353/\\\"},
-        {\\\"id\\\": 354, \\\"title\\\": \\\"2222Remote Code Execution - (Pg, < 2.11.2
+        \\\"http://localhost:8080/finding/367\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/367/\\\"},
+        {\\\"id\\\": 368, \\\"title\\\": \\\"2222Remote Code Execution - (Pg, < 2.11.2
         || >= 3.0.0 < 3.6.4 ||  >= 4.0.0 < 4.5.7 || >= 5.0.0 < 5.2.1 || >= 6.0.0 <
         6.0.5 || >= 6.1.0 < 6.1.6 || >= 6.2.0 < 6.2.5 || >= 6.3.0 < 6.3.3 || >= 6.4.0
         < 6.4.2 || >= 7.0.0 < 7.0.2 || >= 7.1.0 < 7.1.2)\\\", \\\"severity\\\": \\\"Medium\\\",
-        \\\"url_ui\\\": \\\"http://localhost:8080/finding/354\\\", \\\"url_api\\\":
-        \\\"http://localhost:8080/api/v2/findings/354/\\\"}], \\\"reactivated\\\":
+        \\\"url_ui\\\": \\\"http://localhost:8080/finding/368\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/findings/368/\\\"}], \\\"reactivated\\\":
         [], \\\"mitigated\\\": [], \\\"untouched\\\": []}}\",\n  \"files\": {},\n
         \ \"form\": {},\n  \"json\": {\n    \"description\": \"Event scan_added has
         occurred.\",\n    \"engagement\": {\n      \"id\": 1,\n      \"name\": \"1st
         Quarter Engagement\",\n      \"url_api\": \"http://localhost:8080/api/v2/engagements/1/\",\n
         \     \"url_ui\": \"http://localhost:8080/engagement/1\"\n    },\n    \"finding_count\":
         5,\n    \"findings\": {\n      \"mitigated\": [],\n      \"new\": [\n        {\n
-        \         \"id\": 351,\n          \"severity\": \"High\",\n          \"title\":
+        \         \"id\": 365,\n          \"severity\": \"High\",\n          \"title\":
         \"2222Regular Expression Denial of Service - (Negotiator, <= 0.6.0)\",\n          \"url_api\":
-        \"http://localhost:8080/api/v2/findings/351/\",\n          \"url_ui\": \"http://localhost:8080/finding/351\"\n
-        \       },\n        {\n          \"id\": 352,\n          \"severity\": \"High\",\n
+        \"http://localhost:8080/api/v2/findings/365/\",\n          \"url_ui\": \"http://localhost:8080/finding/365\"\n
+        \       },\n        {\n          \"id\": 366,\n          \"severity\": \"High\",\n
         \         \"title\": \"Remote Code Execution - (Pg, < 2.11.2 || >= 3.0.0 <
         3.6.4 ||  >= 4.0.0 < 4.5.7 || >= 5.0.0 < 5.2.1 || >= 6.0.0 < 6.0.5 || >= 6.1.0
         < 6.1.6 || >= 6.2.0 < 6.2.5 || >= 6.3.0 < 6.3.3 || >= 6.4.0 < 6.4.2 || >=
-        7.0.0 < 7.0.2 || >= 7.1.0 < 7.1.2)\",\n          \"url_api\": \"http://localhost:8080/api/v2/findings/352/\",\n
-        \         \"url_ui\": \"http://localhost:8080/finding/352\"\n        },\n
-        \       {\n          \"id\": 350,\n          \"severity\": \"Medium\",\n          \"title\":
+        7.0.0 < 7.0.2 || >= 7.1.0 < 7.1.2)\",\n          \"url_api\": \"http://localhost:8080/api/v2/findings/366/\",\n
+        \         \"url_ui\": \"http://localhost:8080/finding/366\"\n        },\n
+        \       {\n          \"id\": 364,\n          \"severity\": \"Medium\",\n          \"title\":
         \"Regular Expression Denial of Service - (Negotiator, <= 0.6.0)\",\n          \"url_api\":
-        \"http://localhost:8080/api/v2/findings/350/\",\n          \"url_ui\": \"http://localhost:8080/finding/350\"\n
-        \       },\n        {\n          \"id\": 353,\n          \"severity\": \"Medium\",\n
+        \"http://localhost:8080/api/v2/findings/364/\",\n          \"url_ui\": \"http://localhost:8080/finding/364\"\n
+        \       },\n        {\n          \"id\": 367,\n          \"severity\": \"Medium\",\n
         \         \"title\": \"Regular Expression Denial of Service - (Fresh, < 0.5.2)\",\n
-        \         \"url_api\": \"http://localhost:8080/api/v2/findings/353/\",\n          \"url_ui\":
-        \"http://localhost:8080/finding/353\"\n        },\n        {\n          \"id\":
-        354,\n          \"severity\": \"Medium\",\n          \"title\": \"2222Remote
+        \         \"url_api\": \"http://localhost:8080/api/v2/findings/367/\",\n          \"url_ui\":
+        \"http://localhost:8080/finding/367\"\n        },\n        {\n          \"id\":
+        368,\n          \"severity\": \"Medium\",\n          \"title\": \"2222Remote
         Code Execution - (Pg, < 2.11.2 || >= 3.0.0 < 3.6.4 ||  >= 4.0.0 < 4.5.7 ||
         >= 5.0.0 < 5.2.1 || >= 6.0.0 < 6.0.5 || >= 6.1.0 < 6.1.6 || >= 6.2.0 < 6.2.5
         || >= 6.3.0 < 6.3.3 || >= 6.4.0 < 6.4.2 || >= 7.0.0 < 7.0.2 || >= 7.1.0 <
-        7.1.2)\",\n          \"url_api\": \"http://localhost:8080/api/v2/findings/354/\",\n
-        \         \"url_ui\": \"http://localhost:8080/finding/354\"\n        }\n      ],\n
+        7.1.2)\",\n          \"url_api\": \"http://localhost:8080/api/v2/findings/368/\",\n
+        \         \"url_ui\": \"http://localhost:8080/finding/368\"\n        }\n      ],\n
         \     \"reactivated\": [],\n      \"untouched\": []\n    },\n    \"product\":
         {\n      \"id\": 2,\n      \"name\": \"Security How-to\",\n      \"url_api\":
         \"http://localhost:8080/api/v2/products/2/\",\n      \"url_ui\": \"http://localhost:8080/product/2\"\n
         \   },\n    \"product_type\": {\n      \"id\": 2,\n      \"name\": \"ebooks\",\n
         \     \"url_api\": \"http://localhost:8080/api/v2/product_types/2/\",\n      \"url_ui\":
         \"http://localhost:8080/product/type/2\"\n    },\n    \"test\": {\n      \"id\":
-        123,\n      \"title\": null,\n      \"url_api\": \"http://localhost:8080/api/v2/tests/123/\",\n
-        \     \"url_ui\": \"http://localhost:8080/test/123\"\n    },\n    \"title\":
+        128,\n      \"title\": null,\n      \"url_api\": \"http://localhost:8080/api/v2/tests/128/\",\n
+        \     \"url_ui\": \"http://localhost:8080/test/128\"\n    },\n    \"title\":
         \"Created/Updated 5 findings for Security How-to: 1st Quarter Engagement:
-        NPM Audit Scan\",\n    \"url_api\": \"http://localhost:8080/api/v2/tests/123/\",\n
-        \   \"url_ui\": \"http://localhost:8080/test/123\",\n    \"user\": null\n
+        NPM Audit Scan\",\n    \"url_api\": \"http://localhost:8080/api/v2/tests/128/\",\n
+        \   \"url_ui\": \"http://localhost:8080/test/128\",\n    \"user\": null\n
         \ }\n}\n"
     headers:
       Access-Control-Allow-Credentials:
@@ -1341,7 +1381,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Fri, 25 Jul 2025 19:14:08 GMT
+      - Fri, 16 Jan 2026 21:02:24 GMT
       Transfer-Encoding:
       - chunked
     status:
