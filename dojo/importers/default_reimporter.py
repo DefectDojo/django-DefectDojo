@@ -359,6 +359,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         unsaved_finding,
                         existing_finding,
                     )
+                    # Findings that have already exist cannot be moved to into a group
+                    finding_will_be_grouped = False
                     # Determine if we should skip the rest of the loop
                     if force_continue:
                         continue
@@ -373,8 +375,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             unsaved_finding,
                             self.user,
                         )
-                    # Findings that have already exist cannot be moved to into a group
-                    finding_will_be_grouped = False
                 else:
                     finding, finding_will_be_grouped = self.process_finding_that_was_not_matched(unsaved_finding)
 
