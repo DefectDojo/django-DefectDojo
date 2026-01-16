@@ -1,10 +1,11 @@
 # Standard library imports
 import logging
+from typing import Literal, get_args
 
 # Third party imports
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseRedirect
+from django.http import Http404, HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -12,40 +13,55 @@ from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
+from dojo.cred.queries import get_authorized_cred_mappings
+from dojo.engagement.queries import get_authorized_engagements
+from dojo.finding.queries import get_authorized_findings
 
 # Local application/library imports
 from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
 from dojo.models import Cred_User, Engagement, Finding, Note_Type, NoteHistory, Notes, Test
+from dojo.test.queries import get_authorized_tests
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_PAGES = Literal["engagement", "test", "finding", "cred"]
 
-def delete_note(request, note_id, page, objid):
+
+def _get_page_details(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES | None, objid: int) -> tuple[Notes, Engagement | Test | Finding | Cred_User, int, str]:
     note = get_object_or_404(Notes, id=note_id)
-    reverse_url = None
-    object_id = None
-
+    # Quick check to make sure we have a valid page
+    if page is None or page not in get_args(SUPPORTED_PAGES):
+        raise PermissionDenied
+    # Get the real object based on page type
     if page == "engagement":
-        obj = get_object_or_404(Engagement, id=objid)
-        object_id = obj.id
+        obj = get_authorized_engagements(Permissions.Engagement_View).filter(id=objid).first()
         reverse_url = "view_engagement"
     elif page == "test":
-        obj = get_object_or_404(Test, id=objid)
-        object_id = obj.id
+        obj = get_authorized_tests(Permissions.Test_View).filter(id=objid).first()
         reverse_url = "view_test"
     elif page == "finding":
-        obj = get_object_or_404(Finding, id=objid)
-        object_id = obj.id
+        obj = get_authorized_findings(Permissions.Finding_View).filter(id=objid).first()
         reverse_url = "view_finding"
     elif page == "cred":
-        obj = get_object_or_404(Cred_User, id=objid)
-        object_id = obj.id
+        obj = get_authorized_cred_mappings(Permissions.Cred_View).filter(id=objid).first()
         reverse_url = "view_cred_details"
+    else:
+        # If we get here, something is wrong, so let's just raise PermissionDenied
+        raise PermissionDenied
+    # Ensure we have an object back, and if not, raise the 404 like before
+    if obj is None:
+        raise Http404
+    # Next check if the note supplied is even attached to the object
+    if obj.notes.filter(id=note.id).exists() is False:
+        raise PermissionDenied
 
+    return note, obj, obj.id, reverse_url
+
+
+def delete_note(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid: int) -> HttpResponseRedirect:
+    note, obj, object_id, reverse_url = _get_page_details(request, note_id, page, objid)
     form = DeleteNoteForm(request.POST, instance=note)
 
-    if page is None:
-        raise PermissionDenied
     if str(request.user) != note.author.username:
         user_has_permission_or_403(request.user, obj, Permissions.Note_Delete)
 
@@ -64,26 +80,8 @@ def delete_note(request, note_id, page, objid):
     return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
 
 
-def edit_note(request, note_id, page, objid):
-    note = get_object_or_404(Notes, id=note_id)
-    reverse_url = None
-    object_id = None
-
-    if page is None:
-        raise PermissionDenied
-
-    if page == "engagement":
-        obj = get_object_or_404(Engagement, id=objid)
-        object_id = obj.id
-        reverse_url = "view_engagement"
-    elif page == "test":
-        obj = get_object_or_404(Test, id=objid)
-        object_id = obj.id
-        reverse_url = "view_test"
-    elif page == "finding":
-        obj = get_object_or_404(Finding, id=objid)
-        object_id = obj.id
-        reverse_url = "view_finding"
+def edit_note(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid: int) -> HttpResponseRedirect:
+    note, obj, object_id, reverse_url = _get_page_details(request, note_id, page, objid)
 
     if str(request.user) != note.author.username:
         user_has_permission_or_403(request.user, obj, Permissions.Note_Edit)
@@ -141,26 +139,9 @@ def edit_note(request, note_id, page, objid):
         })
 
 
-def note_history(request, note_id, page, objid):
-    note = get_object_or_404(Notes, id=note_id)
-    reverse_url = None
-    object_id = None
+def note_history(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid: int) -> HttpResponseRedirect:
+    note, obj, object_id, reverse_url = _get_page_details(request, note_id, page, objid)
 
-    if page == "engagement":
-        obj = get_object_or_404(Engagement, id=objid)
-        object_id = obj.id
-        reverse_url = "view_engagement"
-    elif page == "test":
-        obj = get_object_or_404(Test, id=objid)
-        object_id = obj.id
-        reverse_url = "view_test"
-    elif page == "finding":
-        obj = get_object_or_404(Finding, id=objid)
-        object_id = obj.id
-        reverse_url = "view_finding"
-
-    if page is None:
-        raise PermissionDenied
     if str(request.user) != note.author.username:
         user_has_permission_or_403(request.user, obj, Permissions.Note_View_History)
 
