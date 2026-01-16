@@ -3,6 +3,7 @@ title: "Installation"
 description: "DefectDojo supports various installation options."
 draft: false
 weight: 1
+audience: opensource
 ---
 
 ## **Recommended Options**

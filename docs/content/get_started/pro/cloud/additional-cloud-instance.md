@@ -2,6 +2,7 @@
 title: "Set up an additional Cloud instance"
 description: "Add a test, dev, or other DefectDojo instance to your account"
 weight: 3
+audience: pro
 ---
 
 The process for adding a second Cloud instance is more or less the same as adding your first instance. This guide assumes you've already set up your initial DefectDojo server, and have an agreement with our Sales team to add another instance.
