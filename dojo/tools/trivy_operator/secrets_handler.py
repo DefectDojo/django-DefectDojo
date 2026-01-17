@@ -56,6 +56,6 @@ class TrivySecretsHandler:
                 fix_available=True,
             )
             if resource_namespace:
-                finding.tags = resource_namespace
+                finding.unsaved_tags = [resource_namespace]
             findings.append(finding)
         return findings
