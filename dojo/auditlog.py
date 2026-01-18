@@ -166,6 +166,7 @@ def process_events_for_display(events):
                     event.object_url = None
         except Exception:
             # Fallback if anything fails
+            logger.debug("Error processing event: %s", event, exc_info=True)
             event.object_str = f"{getattr(event, 'pgh_obj_model', 'Unknown')} #{getattr(event, 'pgh_obj_id', '?')}"
             event.object_url = None
 
