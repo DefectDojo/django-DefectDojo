@@ -177,8 +177,21 @@ def dojo_current_hash():
             # It's a branch reference like "ref: refs/heads/main"
             ref_path = head_content[5:]  # Remove "ref: " prefix
             ref_file = git_dir / ref_path
+
+            # Try reading from loose ref file first
             if ref_file.exists():
                 return ref_file.read_text().strip()[:8]
+
+            # Fallback: check packed-refs (after git gc, refs are packed)
+            packed_refs = git_dir / "packed-refs"
+            if packed_refs.exists():
+                for line in packed_refs.read_text().splitlines():
+                    if line.startswith("#") or not line.strip():
+                        continue
+                    parts = line.split()
+                    if len(parts) >= 2 and parts[1] == ref_path:
+                        return parts[0][:8]
+
             return "release mode"
         # It's a direct SHA (detached HEAD)
         return head_content[:8]
