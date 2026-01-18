@@ -22,13 +22,11 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import LogEntryFilter, PgHistoryFilter
 from dojo.forms import ManageFileFormSet
 from dojo.models import (
-    App_Analysis,
     Endpoint,
     Engagement,
     FileUpload,
     Finding,
     Finding_Template,
-    Objects_Product,
     Product,
     Test,
 )
