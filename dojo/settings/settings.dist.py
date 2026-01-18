@@ -98,8 +98,6 @@ env = environ.FileAwareEnv(
     DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 10),
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     DD_FOOTER_VERSION=(str, ""),
-    # Show git commit hash in footer (dev/test only, disabled by default to avoid git operations in production)
-    DD_SHOW_COMMIT_HASH=(bool, False),
     # models should be passed to celery by ID, default is False (for now)
     DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
     DD_DATABASE_HOST=(str, "postgres"),
@@ -836,9 +834,6 @@ TEAM_NAME = env("DD_TEAM_NAME")
 
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
-
-# Show git commit hash in footer (disabled by default to avoid git operations in production)
-SHOW_COMMIT_HASH = env("DD_SHOW_COMMIT_HASH")
 
 # ------------------------------------------------------------------------------
 # ADMIN
