@@ -70,6 +70,7 @@ def process_events_for_display(events):
     """Process events to add object_str and object_url."""
     # Import here to avoid circular imports
     from dojo.models import (  # noqa: PLC0415
+        Dojo_User,
         Endpoint,
         Engagement,
         Finding,
@@ -79,8 +80,9 @@ def process_events_for_display(events):
     )
 
     ids_by_model = defaultdict(set)
+    user_ids = set()
 
-    # Through models - just need to know parent model name
+    # Through models
     through_models = {
         "FindingTags", "FindingInheritedTags", "FindingReviewers",
         "ProductTags", "EngagementTags", "EngagementInheritedTags",
@@ -88,13 +90,18 @@ def process_events_for_display(events):
         "FindingTemplateTags", "AppAnalysisTags", "ObjectsProductTags",
     }
 
-    # First pass: collect IDs for regular models only
+    # First pass: collect IDs
     for event in events:
         if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
             continue
         model_name = event.pgh_obj_model.split(".")[-1]
+        pgh_data = getattr(event, "pgh_data", None) or {}
         obj_id = getattr(event, "pgh_obj_id", None)
-        if model_name not in through_models and obj_id:
+
+        if model_name == "FindingReviewers":
+            if user_id := pgh_data.get("dojo_user_id"):
+                user_ids.add(int(user_id))
+        elif model_name not in through_models and obj_id:
             ids_by_model[model_name].add(int(obj_id))
 
     # Batch fetch model instances
@@ -114,6 +121,11 @@ def process_events_for_display(events):
                 obj.id: obj for obj in model_class.objects.filter(id__in=obj_ids)
             }
 
+    # Batch fetch users for FindingReviewers
+    users_cache = {}
+    if user_ids:
+        users_cache = {u.id: u for u in Dojo_User.objects.filter(id__in=user_ids)}
+
     # Second pass: annotate events
     for event in events:
         if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
@@ -126,8 +138,16 @@ def process_events_for_display(events):
         obj_id = getattr(event, "pgh_obj_id", None)
         obj_id_int = int(obj_id) if obj_id else None
 
-        if model_name in through_models:
-            # Through models - just show the model name and ID
+        if model_name == "FindingReviewers":
+            user_id = pgh_data.get("dojo_user_id")
+            user = users_cache.get(int(user_id)) if user_id else None
+            if user:
+                event.object_str = f"Reviewer: {user.get_full_name() or user.username}"
+            else:
+                event.object_str = f"FindingReviewers #{obj_id}"
+            event.object_url = None
+        elif model_name in through_models:
+            # Other through models - just show the model name and ID
             event.object_str = f"{model_name} #{obj_id}"
             event.object_url = None
         else:
