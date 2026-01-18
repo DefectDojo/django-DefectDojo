@@ -143,6 +143,16 @@ def dojo_version():
 
 @register.simple_tag
 def dojo_current_hash():
+    """
+    Display git commit hash in footer (dev/test environments only).
+
+    Set DD_SHOW_COMMIT_HASH=True to enable.
+    Disabled by default to avoid unnecessary git operations in production.
+    See: https://github.com/DefectDojo/django-DefectDojo/issues/13899
+    """
+    if not settings.SHOW_COMMIT_HASH:
+        return "release mode"
+
     try:
         repo = git.Repo(search_parent_directories=True)
         sha = repo.head.object.hexsha
