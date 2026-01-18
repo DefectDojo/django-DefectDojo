@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 # Django's app registry to be ready (AppRegistryNotReady error)
 # The function is called from DojoAppConfig.ready() which guarantees the registry is ready
 
+# Populated by register_django_pghistory_models() - maps proxy_name -> (parent_model, field_name)
+TAG_MODEL_MAPPING = {}
+
 
 def _reconstruct_object_str(model_name: str, pgh_data: dict, obj_id: int) -> str:
     """Reconstruct object string representation from pgh_data snapshot."""
@@ -69,26 +72,11 @@ def _reconstruct_object_str(model_name: str, pgh_data: dict, obj_id: int) -> str
 def process_events_for_display(events):
     """Process events to add object_str and object_url."""
     # Import here to avoid circular imports
-    from dojo.models import (  # noqa: PLC0415
-        Dojo_User,
-        Endpoint,
-        Engagement,
-        Finding,
-        Finding_Template,
-        Product,
-        Test,
-    )
+    from dojo.models import Dojo_User  # noqa: PLC0415
 
     ids_by_model = defaultdict(set)
     user_ids = set()
-
-    # Through models
-    through_models = {
-        "FindingTags", "FindingInheritedTags", "FindingReviewers",
-        "ProductTags", "EngagementTags", "EngagementInheritedTags",
-        "TestTags", "TestInheritedTags", "EndpointTags", "EndpointInheritedTags",
-        "FindingTemplateTags", "AppAnalysisTags", "ObjectsProductTags",
-    }
+    tag_ids_by_model = defaultdict(set)
 
     # First pass: collect IDs
     for event in events:
@@ -101,30 +89,39 @@ def process_events_for_display(events):
         if model_name == "FindingReviewers":
             if user_id := pgh_data.get("dojo_user_id"):
                 user_ids.add(int(user_id))
-        elif model_name not in through_models and obj_id:
+        elif model_name in TAG_MODEL_MAPPING:
+            # Find tag ID from pgh_data (key starts with "tagulous_" and ends with "_id")
+            for key, value in pgh_data.items():
+                if key.startswith("tagulous_") and key.endswith("_id") and value:
+                    tag_ids_by_model[model_name].add(int(value))
+                    break
+        elif obj_id:
             ids_by_model[model_name].add(int(obj_id))
 
     # Batch fetch model instances
     instances_cache = {}
-    model_class_map = {
-        "Finding": Finding,
-        "Product": Product,
-        "Engagement": Engagement,
-        "Test": Test,
-        "Endpoint": Endpoint,
-        "Finding_Template": Finding_Template,
-    }
     for model_name, obj_ids in ids_by_model.items():
-        if obj_ids and model_name in model_class_map:
-            model_class = model_class_map[model_name]
-            instances_cache[model_name] = {
-                obj.id: obj for obj in model_class.objects.filter(id__in=obj_ids)
-            }
+        if obj_ids:
+            try:
+                model_class = apps.get_model("dojo", model_name)
+                instances_cache[model_name] = {
+                    obj.id: obj for obj in model_class.objects.filter(id__in=obj_ids)
+                }
+            except LookupError:
+                pass
 
     # Batch fetch users for FindingReviewers
     users_cache = {}
     if user_ids:
         users_cache = {u.id: u for u in Dojo_User.objects.filter(id__in=user_ids)}
+
+    # Batch fetch tags per model type
+    tags_cache = {}
+    for model_name, tag_ids in tag_ids_by_model.items():
+        if tag_ids and model_name in TAG_MODEL_MAPPING:
+            parent_model, field_name = TAG_MODEL_MAPPING[model_name]
+            tag_model = parent_model._meta.get_field(field_name).remote_field.model
+            tags_cache[model_name] = {t.id: t.name for t in tag_model.objects.filter(id__in=tag_ids)}
 
     # Second pass: annotate events
     for event in events:
@@ -146,9 +143,17 @@ def process_events_for_display(events):
             else:
                 event.object_str = f"FindingReviewers #{obj_id}"
             event.object_url = None
-        elif model_name in through_models:
-            # Other through models - just show the model name and ID
-            event.object_str = f"{model_name} #{obj_id}"
+        elif model_name in TAG_MODEL_MAPPING:
+            # Find tag name from cache
+            tag_name = None
+            for key, value in pgh_data.items():
+                if key.startswith("tagulous_") and key.endswith("_id") and value:
+                    tag_name = tags_cache.get(model_name, {}).get(int(value))
+                    break
+            if tag_name:
+                event.object_str = f"Tag: {tag_name}"
+            else:
+                event.object_str = f"{model_name} #{obj_id}"
             event.object_url = None
         else:
             instance = instances_cache.get(model_name, {}).get(obj_id_int)
@@ -535,6 +540,9 @@ def register_django_pghistory_models():
     ]
 
     for parent_model, field_name, proxy_name in tag_through_models:
+        # Populate the mapping for use in process_events_for_display
+        TAG_MODEL_MAPPING[proxy_name] = (parent_model, field_name)
+
         through_model = parent_model._meta.get_field(field_name).remote_field.through
 
         # Create proxy class dynamically
