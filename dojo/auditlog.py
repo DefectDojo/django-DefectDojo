@@ -145,6 +145,7 @@ def register_django_pghistory_models():
     """
     # Import models inside function to avoid AppRegistryNotReady errors
     from dojo.models import (  # noqa: PLC0415
+        App_Analysis,
         Cred_User,
         Dojo_User,
         Endpoint,
@@ -153,6 +154,7 @@ def register_django_pghistory_models():
         Finding_Group,
         Finding_Template,
         Notification_Webhooks,
+        Objects_Product,
         Product,
         Product_Type,
         Risk_Acceptance,
@@ -376,6 +378,51 @@ def register_django_pghistory_models():
         },
     )(FindingReviewers)
 
+    # Track tag through models for all TagField relationships
+    # Must use proxy pattern like FindingReviewers because tagulous auto-generates
+    # through models that cannot be imported at module level
+    tag_through_models = [
+        # (Parent model, field name, proxy class name)
+        (Finding, "tags", "FindingTags"),
+        (Finding, "inherited_tags", "FindingInheritedTags"),
+        (Product, "tags", "ProductTags"),
+        (Engagement, "tags", "EngagementTags"),
+        (Engagement, "inherited_tags", "EngagementInheritedTags"),
+        (Test, "tags", "TestTags"),
+        (Test, "inherited_tags", "TestInheritedTags"),
+        (Endpoint, "tags", "EndpointTags"),
+        (Endpoint, "inherited_tags", "EndpointInheritedTags"),
+        (Finding_Template, "tags", "FindingTemplateTags"),
+        (App_Analysis, "tags", "AppAnalysisTags"),
+        (Objects_Product, "tags", "ObjectsProductTags"),
+    ]
+
+    for parent_model, field_name, proxy_name in tag_through_models:
+        through_model = parent_model._meta.get_field(field_name).remote_field.through
+
+        # Create proxy class dynamically
+        proxy_class = type(proxy_name, (through_model,), {
+            "__module__": __name__,
+            "Meta": type("Meta", (), {"proxy": True}),
+        })
+
+        # Derive event table name from through table name
+        db_table = through_model._meta.db_table + "event"
+
+        pghistory.track(
+            pghistory.InsertEvent(),
+            pghistory.DeleteEvent(),
+            pghistory.ManualEvent(label="initial_backfill"),
+            meta={
+                "db_table": db_table,
+                "indexes": [
+                    models.Index(fields=["pgh_created_at"]),
+                    models.Index(fields=["pgh_label"]),
+                    models.Index(fields=["pgh_context_id"]),
+                ],
+            },
+        )(proxy_class)
+
     # Only log during actual application startup, not during shell commands
     if "shell" not in sys.argv:
         logger.info("Successfully registered models with django-pghistory")
@@ -488,6 +535,43 @@ def get_table_names(model_name):
         # M2M through table: Django creates dojo_finding_reviewers for Finding.reviewers
         table_name = "dojo_finding_reviewers"
         event_table_name = "dojo_finding_reviewersevent"
+    # Tag through tables (tagulous auto-generated)
+    elif model_name == "FindingTags":
+        table_name = "dojo_finding_tags"
+        event_table_name = "dojo_finding_tagsevent"
+    elif model_name == "FindingInheritedTags":
+        table_name = "dojo_finding_inherited_tags"
+        event_table_name = "dojo_finding_inherited_tagsevent"
+    elif model_name == "ProductTags":
+        table_name = "dojo_product_tags"
+        event_table_name = "dojo_product_tagsevent"
+    elif model_name == "EngagementTags":
+        table_name = "dojo_engagement_tags"
+        event_table_name = "dojo_engagement_tagsevent"
+    elif model_name == "EngagementInheritedTags":
+        table_name = "dojo_engagement_inherited_tags"
+        event_table_name = "dojo_engagement_inherited_tagsevent"
+    elif model_name == "TestTags":
+        table_name = "dojo_test_tags"
+        event_table_name = "dojo_test_tagsevent"
+    elif model_name == "TestInheritedTags":
+        table_name = "dojo_test_inherited_tags"
+        event_table_name = "dojo_test_inherited_tagsevent"
+    elif model_name == "EndpointTags":
+        table_name = "dojo_endpoint_tags"
+        event_table_name = "dojo_endpoint_tagsevent"
+    elif model_name == "EndpointInheritedTags":
+        table_name = "dojo_endpoint_inherited_tags"
+        event_table_name = "dojo_endpoint_inherited_tagsevent"
+    elif model_name == "FindingTemplateTags":
+        table_name = "dojo_finding_template_tags"
+        event_table_name = "dojo_finding_template_tagsevent"
+    elif model_name == "AppAnalysisTags":
+        table_name = "dojo_app_analysis_tags"
+        event_table_name = "dojo_app_analysis_tagsevent"
+    elif model_name == "ObjectsProductTags":
+        table_name = "dojo_objects_product_tags"
+        event_table_name = "dojo_objects_product_tagsevent"
     else:
         table_name = f"dojo_{model_name.lower()}"
         event_table_name = f"dojo_{model_name.lower()}event"
@@ -791,4 +875,17 @@ def get_tracked_models():
         "Product_Type", "Product", "Test", "Risk_Acceptance",
         "Finding_Template", "Cred_User", "Notification_Webhooks",
         "FindingReviewers",  # M2M through table for Finding.reviewers
+        # Tag through tables (tagulous auto-generated)
+        "FindingTags",
+        "FindingInheritedTags",
+        "ProductTags",
+        "EngagementTags",
+        "EngagementInheritedTags",
+        "TestTags",
+        "TestInheritedTags",
+        "EndpointTags",
+        "EndpointInheritedTags",
+        "FindingTemplateTags",
+        "AppAnalysisTags",
+        "ObjectsProductTags",
     ]

@@ -21,7 +21,18 @@ from dojo.authorization.authorization import (
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import LogEntryFilter, PgHistoryFilter
 from dojo.forms import ManageFileFormSet
-from dojo.models import Endpoint, Engagement, FileUpload, Finding, Product, Test
+from dojo.models import (
+    App_Analysis,
+    Dojo_User,
+    Endpoint,
+    Engagement,
+    FileUpload,
+    Finding,
+    Finding_Template,
+    Objects_Product,
+    Product,
+    Test,
+)
 from dojo.pghistory_models import DojoEvents
 from dojo.product_announcements import ErrorPageProductAnnouncement
 from dojo.utils import Product_Tab, generate_file_response, get_page_items
@@ -36,25 +47,207 @@ def get_object_str(event):
             return "N/A"
 
         app_label, model_name = event.pgh_obj_model.split(".")
-        model_class = apps.get_model(app_label, model_name)
 
-        if hasattr(event, "pgh_data") and event.pgh_data:
-            # Create a temporary instance with the event data
-            temp_instance = model_class(**event.pgh_data)
-            return str(temp_instance)
-        if hasattr(event, "pgh_obj_id") and event.pgh_obj_id:
-            return f"Object ID: {event.pgh_obj_id}"
-        return "N/A"  # noqa: TRY300 it complains that it wants an else, but if I add an else, it complains that the elise is unnecessary
+        # Handle through model events specially - look up related objects
+        pgh_data = getattr(event, "pgh_data", None) or {}
+
+        if model_name == "FindingTags" and pgh_data:
+            return _get_tag_event_str(Finding, "tags", pgh_data, "tagulous_finding_tags_id")
+        if model_name == "FindingInheritedTags" and pgh_data:
+            return _get_tag_event_str(Finding, "inherited_tags", pgh_data, "tagulous_finding_inherited_tags_id")
+        if model_name == "ProductTags" and pgh_data:
+            return _get_tag_event_str(Product, "tags", pgh_data, "tagulous_product_tags_id")
+        if model_name == "EngagementTags" and pgh_data:
+            return _get_tag_event_str(Engagement, "tags", pgh_data, "tagulous_engagement_tags_id")
+        if model_name == "EngagementInheritedTags" and pgh_data:
+            return _get_tag_event_str(Engagement, "inherited_tags", pgh_data, "tagulous_engagement_inherited_tags_id")
+        if model_name == "TestTags" and pgh_data:
+            return _get_tag_event_str(Test, "tags", pgh_data, "tagulous_test_tags_id")
+        if model_name == "TestInheritedTags" and pgh_data:
+            return _get_tag_event_str(Test, "inherited_tags", pgh_data, "tagulous_test_inherited_tags_id")
+        if model_name == "EndpointTags" and pgh_data:
+            return _get_tag_event_str(Endpoint, "tags", pgh_data, "tagulous_endpoint_tags_id")
+        if model_name == "EndpointInheritedTags" and pgh_data:
+            return _get_tag_event_str(Endpoint, "inherited_tags", pgh_data, "tagulous_endpoint_inherited_tags_id")
+        if model_name == "FindingTemplateTags" and pgh_data:
+            return _get_finding_template_tag_str(pgh_data)
+        if model_name == "AppAnalysisTags" and pgh_data:
+            return _get_app_analysis_tag_str(pgh_data)
+        if model_name == "ObjectsProductTags" and pgh_data:
+            return _get_objects_product_tag_str(pgh_data)
+        if model_name == "FindingReviewers" and pgh_data:
+            return _get_reviewer_event_str(pgh_data)
+
+        # Regular models - try to load from database first for accurate __str__
+        model_class = apps.get_model(app_label, model_name)
+        obj_id = getattr(event, "pgh_obj_id", None)
+        if obj_id:
+            try:
+                instance = model_class.objects.get(pk=obj_id)
+                return str(instance)
+            except model_class.DoesNotExist:
+                pass
+
+        # Fallback: try to extract useful info from pgh_data
+        if pgh_data:
+            # Try common field names that would give a meaningful string
+            for field in ["title", "name", "username", "cve"]:
+                if pgh_data.get(field):
+                    return str(pgh_data[field])
+
+        if obj_id:
+            return f"{model_name} #{obj_id}"
+        return "N/A"  # noqa: TRY300 it complains that it wants an else, but if I add an else, it complains that the else is unnecessary
 
     except (ValueError, LookupError, TypeError, AttributeError):
         # Fallback to name from data if available
-        if hasattr(event, "pgh_data") and event.pgh_data and "name" in event.pgh_data:
-            return event.pgh_data["name"]
+        pgh_data = getattr(event, "pgh_data", None) or {}
+        for field in ["title", "name", "username", "cve"]:
+            if pgh_data.get(field):
+                return str(pgh_data[field])
 
         if hasattr(event, "pgh_obj_id") and event.pgh_obj_id:
-            return f"Object ID: {event.pgh_obj_id}"
+            return f"Object #{event.pgh_obj_id}"
 
         return "N/A"
+
+
+def _get_tag_event_str(parent_model, field_name, pgh_data, tag_fk_name):
+    """Get a descriptive string for tag through model events."""
+    tag_id = pgh_data.get(tag_fk_name)
+    if not tag_id:
+        return f"Tag on {parent_model.__name__}"
+
+    # Get the tag model via the parent model's field
+    tag_model = parent_model._meta.get_field(field_name).remote_field.model
+    try:
+        tag = tag_model.objects.get(pk=tag_id)
+    except tag_model.DoesNotExist:
+        # Tag was deleted - show ID
+        return f"Tag (deleted, ID {tag_id}) on {parent_model.__name__}"
+    else:
+        return f"Tag '{tag.name}' on {parent_model.__name__}"
+
+
+def _get_finding_template_tag_str(pgh_data):
+    """Get a descriptive string for Finding Template tag events."""
+    tag_id = pgh_data.get("tagulous_finding_template_tags_id")
+    if not tag_id:
+        return "Tag on Finding Template"
+    tag_model = Finding_Template._meta.get_field("tags").remote_field.model
+    try:
+        tag = tag_model.objects.get(pk=tag_id)
+    except tag_model.DoesNotExist:
+        return f"Tag (deleted, ID {tag_id}) on Finding Template"
+    else:
+        return f"Tag '{tag.name}' on Finding Template"
+
+
+def _get_app_analysis_tag_str(pgh_data):
+    """Get a descriptive string for App Analysis tag events."""
+    tag_id = pgh_data.get("tagulous_app_analysis_tags_id")
+    if not tag_id:
+        return "Tag on App Analysis"
+    tag_model = App_Analysis._meta.get_field("tags").remote_field.model
+    try:
+        tag = tag_model.objects.get(pk=tag_id)
+    except tag_model.DoesNotExist:
+        return f"Tag (deleted, ID {tag_id}) on App Analysis"
+    else:
+        return f"Tag '{tag.name}' on App Analysis"
+
+
+def _get_objects_product_tag_str(pgh_data):
+    """Get a descriptive string for Objects Product tag events."""
+    tag_id = pgh_data.get("tagulous_objects_product_tags_id")
+    if not tag_id:
+        return "Tag on Objects Product"
+    tag_model = Objects_Product._meta.get_field("tags").remote_field.model
+    try:
+        tag = tag_model.objects.get(pk=tag_id)
+    except tag_model.DoesNotExist:
+        return f"Tag (deleted, ID {tag_id}) on Objects Product"
+    else:
+        return f"Tag '{tag.name}' on Objects Product"
+
+
+def _get_reviewer_event_str(pgh_data):
+    """Get a descriptive string for reviewer through model events."""
+    user_id = pgh_data.get("dojo_user_id")
+    finding_id = pgh_data.get("finding_id")
+
+    if user_id:
+        try:
+            user = Dojo_User.objects.get(id=user_id)
+            user_str = user.get_full_name() or user.username
+        except Dojo_User.DoesNotExist:
+            user_str = f"User ID {user_id}"
+        return f"Reviewer '{user_str}' on Finding #{finding_id}"
+
+    return f"Reviewer on Finding #{finding_id}"
+
+
+def get_object_url(event):
+    """Get the URL to the object from pghistory event data."""
+    try:
+        if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
+            return None
+
+        app_label, model_name = event.pgh_obj_model.split(".")
+        pgh_data = getattr(event, "pgh_data", None) or {}
+        obj_id = getattr(event, "pgh_obj_id", None)
+
+        # For through models, link to the parent object instead
+        if model_name in {"FindingTags", "FindingInheritedTags", "FindingReviewers"}:
+            finding_id = pgh_data.get("finding_id")
+            if finding_id:
+                return f"/finding/{finding_id}"
+            return None
+        if model_name == "ProductTags":
+            product_id = pgh_data.get("product_id")
+            if product_id:
+                return f"/product/{product_id}"
+            return None
+        if model_name in {"EngagementTags", "EngagementInheritedTags"}:
+            engagement_id = pgh_data.get("engagement_id")
+            if engagement_id:
+                return f"/engagement/{engagement_id}"
+            return None
+        if model_name in {"TestTags", "TestInheritedTags"}:
+            test_id = pgh_data.get("test_id")
+            if test_id:
+                return f"/test/{test_id}"
+            return None
+        if model_name in {"EndpointTags", "EndpointInheritedTags"}:
+            endpoint_id = pgh_data.get("endpoint_id")
+            if endpoint_id:
+                return f"/endpoint/{endpoint_id}"
+            return None
+        if model_name == "FindingTemplateTags":
+            finding_template_id = pgh_data.get("finding_template_id")
+            if finding_template_id:
+                return f"/template/{finding_template_id}/edit"
+            return None
+        if model_name in {"AppAnalysisTags", "ObjectsProductTags"}:
+            # These don't have direct view pages
+            return None
+
+        # For regular models, try to get the URL via get_absolute_url
+        if not obj_id:
+            return None
+
+        model_class = apps.get_model(app_label, model_name)
+        try:
+            instance = model_class.objects.get(pk=obj_id)
+        except model_class.DoesNotExist:
+            return None
+        else:
+            if hasattr(instance, "get_absolute_url"):
+                return instance.get_absolute_url()
+            return None
+
+    except (ValueError, LookupError, TypeError, AttributeError):
+        return None
 
 
 def custom_error_view(request, exception=None):
@@ -147,9 +340,10 @@ def action_history(request, cid, oid):
     auditlog_history = auditlog_queryset
 
     # Use custom DojoEvents proxy model - provides proper diff calculation and context fields
-    # Filter by the specific object using tracks() method
+    # Filter by the specific object using references() method
+    # references() returns events where any FK points to the object (including through models like tags/reviewers)
     # Note: Events is a CTE that doesn't support select_related, but includes context data
-    pghistory_history = DojoEvents.objects.tracks(obj).order_by("-pgh_created_at")
+    pghistory_history = DojoEvents.objects.references(obj).order_by("-pgh_created_at")
 
     # Add object string representation based on the original models __str__ method
     # this value was available in the old auditlogs, so we mimic that here
@@ -159,10 +353,11 @@ def action_history(request, cid, oid):
     pghistory_filter = PgHistoryFilter(request.GET, queryset=pghistory_history)
     filtered_pghistory = pghistory_filter.qs
 
-    # Process filtered events to add object string representation
+    # Process filtered events to add object string representation and URL
     processed_events = []
     for event in filtered_pghistory:
         event.object_str = get_object_str(event)
+        event.object_url = get_object_url(event)
         processed_events.append(event)
 
     # Paginate the processed events
