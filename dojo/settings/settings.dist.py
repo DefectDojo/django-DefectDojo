@@ -732,7 +732,6 @@ LOGIN_EXEMPT_URLS = (
     rf"^{URL_PREFIX}password_reset/",
     rf"^{URL_PREFIX}forgot_username",
     rf"^{URL_PREFIX}reset/",
-    rf"^{URL_PREFIX}__debug__/",  # Memory debugging endpoints (dev only)
 )
 
 AUTH_PASSWORD_VALIDATORS = [
