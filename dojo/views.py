@@ -1,5 +1,4 @@
 import logging
-from collections import defaultdict
 from contextlib import suppress
 from pathlib import Path
 
@@ -13,6 +12,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
+from dojo.auditlog import process_events_for_display
 from dojo.authorization.authorization import (
     user_has_configuration_permission_or_403,
     user_has_permission,
@@ -26,7 +26,6 @@ from dojo.models import (
     Engagement,
     FileUpload,
     Finding,
-    Finding_Template,
     Product,
     Test,
 )
@@ -35,112 +34,6 @@ from dojo.product_announcements import ErrorPageProductAnnouncement
 from dojo.utils import Product_Tab, generate_file_response, get_page_items
 
 logger = logging.getLogger(__name__)
-
-
-def _reconstruct_object_str(model_name: str, pgh_data: dict, obj_id: int) -> str:
-    """Reconstruct object string representation from pgh_data snapshot."""
-    if not pgh_data:
-        return f"{model_name} #{obj_id}" if obj_id else "N/A"
-
-    model_lower = model_name.lower()
-
-    # Model-specific reconstruction based on __str__ implementations
-    if model_lower in {"finding", "finding_template"}:
-        if pgh_data.get("title"):
-            return str(pgh_data["title"])
-    elif model_lower == "engagement":
-        name = pgh_data.get("name", "")
-        if name:
-            return f"Engagement {obj_id}: {name}"
-    elif model_lower == "dojo_user":
-        first = pgh_data.get("first_name", "")
-        last = pgh_data.get("last_name", "")
-        if first or last:
-            return f"{first} {last}".strip()
-        if pgh_data.get("username"):
-            return pgh_data["username"]
-    elif model_lower in {"product", "product_type", "finding_group", "test_type"}:
-        if pgh_data.get("name"):
-            return str(pgh_data["name"])
-    elif model_lower == "test":
-        if pgh_data.get("title"):
-            return pgh_data["title"]
-    elif model_lower == "endpoint":
-        if pgh_data.get("host"):
-            return pgh_data["host"]
-
-    # Fallback: try common fields
-    for field in ["title", "name", "username", "label", "host"]:
-        if pgh_data.get(field):
-            return str(pgh_data[field])
-
-    return f"{model_name} #{obj_id}" if obj_id else "N/A"
-
-
-def process_events_for_display(events):
-    """Process events to add object_str and object_url."""
-    ids_by_model = defaultdict(set)
-
-    # Through models - just need to know parent model name
-    through_models = {
-        "FindingTags", "FindingInheritedTags", "FindingReviewers",
-        "ProductTags", "EngagementTags", "EngagementInheritedTags",
-        "TestTags", "TestInheritedTags", "EndpointTags", "EndpointInheritedTags",
-        "FindingTemplateTags", "AppAnalysisTags", "ObjectsProductTags",
-    }
-
-    # First pass: collect IDs for regular models only
-    for event in events:
-        if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
-            continue
-        model_name = event.pgh_obj_model.split(".")[-1]
-        obj_id = getattr(event, "pgh_obj_id", None)
-        if model_name not in through_models and obj_id:
-            ids_by_model[model_name].add(int(obj_id))
-
-    # Batch fetch model instances
-    instances_cache = {}
-    model_class_map = {
-        "Finding": Finding,
-        "Product": Product,
-        "Engagement": Engagement,
-        "Test": Test,
-        "Endpoint": Endpoint,
-        "Finding_Template": Finding_Template,
-    }
-    for model_name, obj_ids in ids_by_model.items():
-        if obj_ids and model_name in model_class_map:
-            model_class = model_class_map[model_name]
-            instances_cache[model_name] = {
-                obj.id: obj for obj in model_class.objects.filter(id__in=obj_ids)
-            }
-
-    # Second pass: annotate events
-    for event in events:
-        if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
-            event.object_str = "N/A"
-            event.object_url = None
-            continue
-
-        model_name = event.pgh_obj_model.split(".")[-1]
-        pgh_data = getattr(event, "pgh_data", None) or {}
-        obj_id = getattr(event, "pgh_obj_id", None)
-        obj_id_int = int(obj_id) if obj_id else None
-
-        if model_name in through_models:
-            # Through models - just show the model name and ID
-            event.object_str = f"{model_name} #{obj_id}"
-            event.object_url = None
-        else:
-            instance = instances_cache.get(model_name, {}).get(obj_id_int)
-            if instance:
-                event.object_str = str(instance)
-                event.object_url = instance.get_absolute_url() if hasattr(instance, "get_absolute_url") else None
-            else:
-                event.object_str = _reconstruct_object_str(model_name, pgh_data, obj_id)
-                event.object_url = None
-
-    return events
 
 
 def custom_error_view(request, exception=None):
