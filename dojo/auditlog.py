@@ -125,44 +125,49 @@ def process_events_for_display(events):
 
     # Second pass: annotate events
     for event in events:
-        if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
-            event.object_str = "N/A"
-            event.object_url = None
-            continue
-
-        model_name = event.pgh_obj_model.split(".")[-1]
-        pgh_data = getattr(event, "pgh_data", None) or {}
-        obj_id = getattr(event, "pgh_obj_id", None)
-        obj_id_int = int(obj_id) if obj_id else None
-
-        if model_name == "FindingReviewers":
-            user_id = pgh_data.get("dojo_user_id")
-            user = users_cache.get(int(user_id)) if user_id else None
-            if user:
-                event.object_str = f"Reviewer: {user.get_full_name() or user.username}"
-            else:
-                event.object_str = f"FindingReviewers #{obj_id}"
-            event.object_url = None
-        elif model_name in TAG_MODEL_MAPPING:
-            # Find tag name from cache
-            tag_name = None
-            for key, value in pgh_data.items():
-                if key.startswith("tagulous_") and key.endswith("_id") and value:
-                    tag_name = tags_cache.get(model_name, {}).get(int(value))
-                    break
-            if tag_name:
-                event.object_str = f"Tag: {tag_name}"
-            else:
-                event.object_str = f"{model_name} #{obj_id}"
-            event.object_url = None
-        else:
-            instance = instances_cache.get(model_name, {}).get(obj_id_int)
-            if instance:
-                event.object_str = str(instance)
-                event.object_url = instance.get_absolute_url() if hasattr(instance, "get_absolute_url") else None
-            else:
-                event.object_str = _reconstruct_object_str(model_name, pgh_data, obj_id)
+        try:
+            if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
+                event.object_str = "N/A"
                 event.object_url = None
+                continue
+
+            model_name = event.pgh_obj_model.split(".")[-1]
+            pgh_data = getattr(event, "pgh_data", None) or {}
+            obj_id = getattr(event, "pgh_obj_id", None)
+            obj_id_int = int(obj_id) if obj_id else None
+
+            if model_name == "FindingReviewers":
+                user_id = pgh_data.get("dojo_user_id")
+                user = users_cache.get(int(user_id)) if user_id else None
+                if user:
+                    event.object_str = f"Reviewer: {user.get_full_name() or user.username}"
+                else:
+                    event.object_str = f"FindingReviewers #{obj_id}"
+                event.object_url = None
+            elif model_name in TAG_MODEL_MAPPING:
+                # Find tag name from cache
+                tag_name = None
+                for key, value in pgh_data.items():
+                    if key.startswith("tagulous_") and key.endswith("_id") and value:
+                        tag_name = tags_cache.get(model_name, {}).get(int(value))
+                        break
+                if tag_name:
+                    event.object_str = f"Tag: {tag_name}"
+                else:
+                    event.object_str = f"{model_name} #{obj_id}"
+                event.object_url = None
+            else:
+                instance = instances_cache.get(model_name, {}).get(obj_id_int)
+                if instance:
+                    event.object_str = str(instance)
+                    event.object_url = instance.get_absolute_url() if hasattr(instance, "get_absolute_url") else None
+                else:
+                    event.object_str = _reconstruct_object_str(model_name, pgh_data, obj_id)
+                    event.object_url = None
+        except Exception:
+            # Fallback if anything fails
+            event.object_str = f"{getattr(event, 'pgh_obj_model', 'Unknown')} #{getattr(event, 'pgh_obj_id', '?')}"
+            event.object_url = None
 
     return events
 
