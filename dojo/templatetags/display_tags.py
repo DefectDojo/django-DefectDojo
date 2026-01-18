@@ -98,8 +98,11 @@ def markdown_render(value):
 
 @register.filter
 def bleach_with_a_tags(message):
-    allowed_attributes = bleach.ALLOWED_ATTRIBUTES
-    allowed_attributes["a"] += ["style", "target"]
+    # Create a copy of ALLOWED_ATTRIBUTES to avoid mutating the global
+    allowed_attributes = {
+        **bleach.ALLOWED_ATTRIBUTES,
+        "a": [*bleach.ALLOWED_ATTRIBUTES.get("a", []), "style", "target"],
+    }
     return mark_safe(bleach.clean(
         message,
         attributes=allowed_attributes,
