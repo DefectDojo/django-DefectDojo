@@ -385,10 +385,10 @@ pdfkit@^0.17.2:
     linebreak "^1.1.0"
     png-js "^1.0.0"
 
-pdfmake@^0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.2.tgz#91096e3894afd88c23c12f8a3238e1f3a425e4f0"
-  integrity sha512-9I0wBLSpVd9viay0Wkpp0sBoawNOZQd4NKXe+hT8wV/cMH84/hw2FCOItb0/Po5HyEZjipibZsAGutkCULVM9A==
+pdfmake@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.3.tgz#2705e8fabff4bf52a4a7b7ae9d93caee1b200cb7"
+  integrity sha512-jSnF8rVLkbLLX37bnXWRFhEDO48quE7OIg7lgWBa6ihAbpCxASaBLWFOXNxSDeLBNt92304SBwpYcPkJnIArlA==
   dependencies:
     linebreak "^1.1.0"
     pdfkit "^0.17.2"
