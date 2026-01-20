@@ -8,12 +8,13 @@ from dojo.filters import (
     CharFieldInFilter,
     DateRangeFilter,
     DojoFilter,
+    MultipleChoiceFilter,
     NumberInFilter,
     ProductSLAFilter,
-    custom_filter,
 )
 from dojo.labels import get_labels
 from dojo.models import (
+    Product,
     Product_API_Scan_Configuration,
     Product_Group,
     Product_Member,
@@ -38,18 +39,18 @@ class ApiAssetFilter(DojoFilter):
     name = CharFilter(lookup_expr="icontains")
     name_exact = CharFilter(field_name="name", lookup_expr="iexact")
     description = CharFilter(lookup_expr="icontains")
-    business_criticality = CharFilter(method=custom_filter, field_name="business_criticality")
-    platform = CharFilter(method=custom_filter, field_name="platform")
-    lifecycle = CharFilter(method=custom_filter, field_name="lifecycle")
-    origin = CharFilter(method=custom_filter, field_name="origin")
+    business_criticality = MultipleChoiceFilter(choices=Product.BUSINESS_CRITICALITY_CHOICES)
+    platform = MultipleChoiceFilter(choices=Product.PLATFORM_CHOICES)
+    lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES)
+    origin = MultipleChoiceFilter(choices=Product.ORIGIN_CHOICES)
     # NumberInFilter
     id = NumberInFilter(field_name="id", lookup_expr="in")
     asset_manager = NumberInFilter(field_name="product_manager", lookup_expr="in")
     technical_contact = NumberInFilter(field_name="technical_contact", lookup_expr="in")
     team_manager = NumberInFilter(field_name="team_manager", lookup_expr="in")
-    prod_type = NumberInFilter(field_name="prod_type", lookup_expr="in")
+    organization = NumberInFilter(field_name="prod_type", lookup_expr="in")
     tid = NumberInFilter(field_name="tid", lookup_expr="in")
-    prod_numeric_grade = NumberInFilter(field_name="prod_numeric_grade", lookup_expr="in")
+    asset_numeric_grade = NumberInFilter(field_name="prod_numeric_grade", lookup_expr="in")
     user_records = NumberInFilter(field_name="user_records", lookup_expr="in")
     regulations = NumberInFilter(field_name="regulations", lookup_expr="in")
 
@@ -80,7 +81,7 @@ class ApiAssetFilter(DojoFilter):
             ("tid", "tid"),
             ("name", "name"),
             ("created", "created"),
-            ("prod_numeric_grade", "prod_numeric_grade"),
+            ("prod_numeric_grade", "asset_numeric_grade"),
             ("business_criticality", "business_criticality"),
             ("platform", "platform"),
             ("lifecycle", "lifecycle"),
@@ -97,8 +98,8 @@ class ApiAssetFilter(DojoFilter):
             ("team_manager", "team_manager"),
             ("team_manager__first_name", "team_manager__first_name"),
             ("team_manager__last_name", "team_manager__last_name"),
-            ("prod_type", "prod_type"),
-            ("prod_type__name", "prod_type__name"),
+            ("prod_type", "organization"),
+            ("prod_type__name", "organization__name"),
             ("updated", "updated"),
             ("user_records", "user_records"),
         ),

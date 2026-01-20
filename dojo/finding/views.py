@@ -2175,7 +2175,7 @@ def templates(request):
 @user_has_global_permission(Permissions.Finding_Edit)
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize("json", Finding_Template.objects.all())
-    return HttpResponse(leads_as_json, content_type="json")
+    return HttpResponse(leads_as_json, content_type="application/json")
 
 
 def ensure_template_tags_in_finding_model(template):
@@ -2444,7 +2444,7 @@ def download_finding_pic(request, token):
         response = StreamingHttpResponse(FileIterWrapper(image))
         response["Content-Disposition"] = "inline"
         mimetype, _encoding = mimetypes.guess_type(file_name)
-        response["Content-Type"] = mimetype
+        response["Content-Type"] = mimetype or "application/octet-stream"
         return response
 
 

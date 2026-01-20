@@ -324,6 +324,17 @@ class Test_TypeForm(forms.ModelForm):
         model = Test_Type
         exclude = ["dynamically_generated"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            self.fields["name"].widget.attrs["readonly"] = True
+
+    def clean_name(self):
+        if self.instance.pk:
+            return self.instance.name
+        return self.cleaned_data["name"]
+
 
 class Development_EnvironmentForm(forms.ModelForm):
     class Meta:

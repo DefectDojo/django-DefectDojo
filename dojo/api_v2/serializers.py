@@ -1472,8 +1472,15 @@ class TestCreateSerializer(serializers.ModelSerializer):
         exclude = ("inherited_tags",)
 
 
+class TestTypeCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Test_Type
+        exclude = ("dynamically_generated",)
+
+
 class TestTypeSerializer(serializers.ModelSerializer):
-    tags = TagListSerializerField(required=False)
+    name = serializers.ReadOnlyField()
 
     class Meta:
         model = Test_Type
