@@ -212,7 +212,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             if self.service is not None:
                 unsaved_finding.service = self.service
 
-            # Force parsers to use unsaved_tags (stored in below after saving)
+            # Parsers shouldn't use the tags field, and use unsaved_tags instead.
+            # Merge any tags set by parser into unsaved_tags
+            tags_from_parser = unsaved_finding.tags if isinstance(unsaved_finding.tags, list) else []
+            unsaved_tags_from_parser = unsaved_finding.unsaved_tags if isinstance(unsaved_finding.unsaved_tags, list) else []
+            merged_tags = unsaved_tags_from_parser + tags_from_parser
+            if merged_tags:
+                unsaved_finding.unsaved_tags = merged_tags
             unsaved_finding.tags = None
             finding = self.process_cve(unsaved_finding)
             # Calculate hash_code before saving based on unsaved_endpoints and unsaved_vulnerability_ids
