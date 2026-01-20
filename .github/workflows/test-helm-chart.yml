@@ -155,7 +155,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Generate values schema json
-        uses: losisin/helm-values-schema-json-action@f3517c55537e26953c8a11be7549ea908990130d # v2.3.2
+        uses: losisin/helm-values-schema-json-action@b0c5e688b224ce7c36fcf005184f1105850d8f3b # v2.4.1
         with:
           fail-on-diff: true
           working-directory: "helm/defectdojo"
