@@ -751,7 +751,7 @@ class RiskAcceptanceViewSet(
         # send file
         response = FileResponse(
             file_handle,
-            content_type=f"{mimetypes.guess_type(str(file_path))}",
+            content_type=mimetypes.guess_type(str(file_path))[0] or "application/octet-stream",
             status=status.HTTP_200_OK,
         )
         response["Content-Length"] = file_object.size
@@ -2262,6 +2262,11 @@ class TestTypesViewSet(
 
     def get_queryset(self):
         return Test_Type.objects.all().order_by("id")
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return serializers.TestTypeCreateSerializer
+        return serializers.TestTypeSerializer
 
 
 # @extend_schema_view(**schema_with_prefetch())

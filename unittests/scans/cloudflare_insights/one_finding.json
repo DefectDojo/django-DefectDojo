@@ -1,0 +1,17 @@
+[
+  {
+    "id": "123-security_txt_not_enabled",
+    "issue_class": "security_txt_not_enabled",
+    "issue_type": "configuration_suggestion",
+    "payload": {
+      "zone_tag": "12"
+    },
+    "severity": "Low",
+    "subject": "domain.com",
+    "timestamp": "2024-12-01T05:43:45.712676Z",
+    "dismissed": false,
+    "since": "2024-10-03T07:46:55.613682Z",
+    "resolve_link": "",
+    "resolve_text": ""
+  }
+]

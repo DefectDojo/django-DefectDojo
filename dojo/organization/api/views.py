@@ -17,6 +17,7 @@ from dojo.models import (
 )
 from dojo.organization.api import serializers
 from dojo.organization.api.filters import (
+    OrganizationFilterSet,
     OrganizationGroupFilterSet,
     OrganizationMemberFilterSet,
 )
@@ -36,17 +37,10 @@ class OrganizationViewSet(
     serializer_class = serializers.OrganizationSerializer
     queryset = Product_Type.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "name",
-        "critical_product",
-        "key_product",
-        "created",
-        "updated",
-    ]
+    filterset_class = OrganizationFilterSet
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasProductTypePermission,
+        permissions.UserHasOrganizationPermission,
     )
 
     def get_queryset(self):
@@ -60,6 +54,9 @@ class OrganizationViewSet(
         product_type_data = serializer.data
         product_type_data.pop("authorization_groups")
         product_type_data.pop("members")
+        # Manage custom fields separately with default fields of false
+        product_type_data["critical_product"] = product_type_data.pop("critical_asset", False)
+        product_type_data["key_product"] = product_type_data.pop("key_asset", False)
         member = Product_Type_Member()
         member.user = self.request.user
         member.product_type = Product_Type(**product_type_data)
@@ -124,7 +121,7 @@ class OrganizationMemberViewSet(
     filterset_class = OrganizationMemberFilterSet
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasProductTypeMemberPermission,
+        permissions.UserHasOrganizationMemberPermission,
     )
 
     def get_queryset(self):
@@ -166,7 +163,7 @@ class OrganizationGroupViewSet(
     filterset_class = OrganizationGroupFilterSet
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasProductTypeGroupPermission,
+        permissions.UserHasOrganizationGroupPermission,
     )
 
     def get_queryset(self):

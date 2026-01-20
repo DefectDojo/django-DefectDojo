@@ -767,11 +767,13 @@ class BaseImporter(ImporterOptions):
         self,
         finding: Finding,
         group_names_to_findings_dict: dict,
-    ) -> None:
+    ) -> bool:
         """
         Determines how to handle an incoming finding with respect to grouping
         if finding groups are enabled, use the supplied grouping mechanism to
-        store a reference of how the finding should be grouped
+        store a reference of how the finding should be grouped.
+
+        Returns True if the finding was added to a group, False otherwise.
         """
         if self.findings_groups_enabled and self.group_by:
             # If finding groups are enabled, group all findings by group name
@@ -781,6 +783,8 @@ class BaseImporter(ImporterOptions):
                     group_names_to_findings_dict[name].append(finding)
                 else:
                     group_names_to_findings_dict[name] = [finding]
+                return True
+        return False
 
     def process_request_response_pairs(
         self,

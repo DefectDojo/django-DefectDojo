@@ -281,3 +281,9 @@ class TestNucleiParser(DojoTestCase):
                     "65e95106ab3c53cd42f384804a4a9087f43616f863e90c34818086862df253ec",
                 ),
             )
+
+    def test_parse_issue_14071(self):
+        with (get_unit_tests_scans_path("nuclei") / "issue_14071.json").open(encoding="utf-8") as testfile:
+            parser = NucleiParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(27, len(findings))
