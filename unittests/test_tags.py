@@ -1,5 +1,10 @@
 import logging
 import random
+from pathlib import Path
+
+from django.contrib.auth.models import User
+from django.test import Client
+from django.urls import reverse
 
 from dojo.models import Finding, Product, Test
 from dojo.product.helpers import propagate_tags_on_product_sync
@@ -244,7 +249,38 @@ class TagTests(DojoAPITestCase):
             # logger.debug('looking for tag %s in tag list %s', tag, response['tags'])
             self.assertIn(tag, response["tags"])
 
+    def test_import_multipart_tags(self):
+        """API-specific test for multipart form data tag handling."""
+        with (self.zap_sample5_filename).open(encoding="utf-8") as testfile:
+            data = {
+                "engagement": [1],
+                "file": [testfile],
+                "scan_type": ["ZAP Scan"],
+                "tags": ["bug,security", "urgent"],  # Attempting to mimic the two "tag" fields (-F 'tags=tag1' -F 'tags=tag2')
+            }
+            response = self.import_scan(data, 201)
+            # Make sure the serializer returns the correct tags
+            success_tags = ["bug", "security", "urgent"]
+            self.assertEqual(response["tags"], success_tags)
+            # Check that the test has the same issue
+            test_id = response["test"]
+            response = self.get_test_api(test_id)
+            self.assertEqual(len(success_tags), len(response.get("tags")))
+            for tag in success_tags:
+                self.assertIn(tag, response["tags"])
+
+
+class TagImportMixin:
+
+    """Mixin containing import/reimport tag tests that can be run via API or UI."""
+
+    def setUp(self):
+        self.zap_sample5_filename = get_unit_tests_scans_path("zap") / "5_zap_sample_one.xml"
+        self.generic_sample_with_tags_filename = get_unit_tests_scans_path("generic") / "generic_report1.json"
+        self.generic_sample_with_more_tags_filename = get_unit_tests_scans_path("generic") / "generic_report1_more_tags.json"
+
     def test_import_and_reimport_with_tags(self):
+        """Test that tags passed as import parameter are applied to the test."""
         tags = ["tag1", "tag2"]
         import0 = self.import_scan_with_params(self.zap_sample5_filename, tags=tags)
         test_id = import0["test"]
@@ -267,26 +303,8 @@ class TagTests(DojoAPITestCase):
         for tag in tags:
             self.assertIn(tag, response["tags"])
 
-    def test_import_multipart_tags(self):
-        with (self.zap_sample5_filename).open(encoding="utf-8") as testfile:
-            data = {
-                "engagement": [1],
-                "file": [testfile],
-                "scan_type": ["ZAP Scan"],
-                "tags": ["bug,security", "urgent"],  # Attempting to mimic the two "tag" fields (-F 'tags=tag1' -F 'tags=tag2')
-            }
-            response = self.import_scan(data, 201)
-            # Make sure the serializer returns the correct tags
-            success_tags = ["bug", "security", "urgent"]
-            self.assertEqual(response["tags"], success_tags)
-            # Check that the test has the same issue
-            test_id = response["test"]
-            response = self.get_test_api(test_id)
-            self.assertEqual(len(success_tags), len(response.get("tags")))
-            for tag in success_tags:
-                self.assertIn(tag, response["tags"])
-
     def test_import_report_with_tags(self):
+        """Test that parser-generated tags on findings are preserved during import/reimport."""
         def assert_tags_in_findings(findings: list[dict], expected_finding_count: int, desired_tags: list[str]) -> None:
             self.assertEqual(expected_finding_count, len(findings))
             for finding in findings:
@@ -309,12 +327,140 @@ class TagTests(DojoAPITestCase):
         assert_tags_in_findings(findings, 2, ["security", "network", "hardened"])
 
 
+class TagImportTestAPI(DojoAPITestCase, TagImportMixin):
+
+    """Test tag handling during import/reimport via API."""
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+        self.login_as_admin()
+        TagImportMixin.setUp(self)
+
+
+class TagImportTestUI(DojoAPITestCase, TagImportMixin):
+
+    """Test tag handling during import/reimport via UI."""
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+        self.login_as_admin()
+        self.client_ui = Client()
+        self.client_ui.force_login(self.get_test_admin())
+        TagImportMixin.setUp(self)
+
+    def import_scan_with_params(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *,
+                                active=True, verified=False, tags=None, close_old_findings=False, **kwargs):
+        """Override to use UI import instead of API."""
+        with Path(filename).open(encoding="utf-8") as testfile:
+            payload = {
+                "minimum_severity": minimum_severity,
+                "active": "force_to_true" if active else "force_to_false",
+                "verified": "force_to_true" if verified else "force_to_false",
+                "scan_type": scan_type,
+                "file": testfile,
+                "environment": 1,
+                "close_old_findings": close_old_findings,
+            }
+            if tags is not None:
+                # Tagulous form field expects comma-separated string
+                payload["tags"] = ",".join(tags) if isinstance(tags, list) else tags
+
+            response = self.client_ui.post(reverse("import_scan_results", args=(engagement,)), payload)
+            self.assertEqual(302, response.status_code, response.content[:1000])
+            test_id = int(response.url.split("/")[-1])
+            return {"test": test_id}
+
+    def reimport_scan_with_params(self, test_id, filename, scan_type="ZAP Scan", minimum_severity="Low", *,
+                                  active=True, verified=False, tags=None, close_old_findings=True, **kwargs):
+        """Override to use UI reimport instead of API."""
+        with Path(filename).open(encoding="utf-8") as testfile:
+            payload = {
+                "minimum_severity": minimum_severity,
+                "active": "force_to_true" if active else "force_to_false",
+                "verified": "force_to_true" if verified else "force_to_false",
+                "scan_type": scan_type,
+                "file": testfile,
+                "close_old_findings": close_old_findings,
+            }
+            if tags is not None:
+                # Tagulous form field expects comma-separated string
+                payload["tags"] = ",".join(tags) if isinstance(tags, list) else tags
+
+            response = self.client_ui.post(reverse("re_import_scan_results", args=(test_id,)), payload)
+            self.assertEqual(302, response.status_code, response.content[:1000])
+            new_test_id = int(response.url.split("/")[-1])
+            return {"test": new_test_id}
+
+
 class InheritedTagsTests(DojoAPITestCase):
+
+    """Non-import tests for inherited tags functionality."""
+
     fixtures = ["dojo_testdata.json"]
 
     def setUp(self, *args, **kwargs):
         super().setUp()
         self.login_as_admin()
+        self.system_settings(enable_product_tag_inheritance=True)
+        self.product = self.create_product("Inherited Tags Test", tags=["inherit", "these", "tags"])
+        self.scans_path = get_unit_tests_scans_path("zap")
+        self.zap_sample5_filename = self.scans_path / "5_zap_sample_one.xml"
+
+    def _convert_instance_tags_to_list(self, instance) -> list:
+        return [tag.name for tag in instance.tags.all()]
+
+    def test_new_engagement_then_add_tag_to_engagement_then_remove_tag_to_engagement(self):
+        # Create the engagement
+        engagement = self.create_engagement("Inherited Tags Engagement", self.product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan")
+        # Check to see if tags match the product
+        product_tags = self._convert_instance_tags_to_list(self.product)
+        self.assertEqual(product_tags, self._convert_instance_tags_to_list(engagement))
+        self.assertEqual(product_tags, self._convert_instance_tags_to_list(test))
+        # Add a tag on the engagement)
+        engagement_tags_before_addition = self._convert_instance_tags_to_list(engagement)
+        engagement.tags.add("engagement_only_tag")
+        # Check to see that the update was successful
+        self.assertEqual(["engagement_only_tag", *engagement_tags_before_addition], self._convert_instance_tags_to_list(engagement))
+        # Check to see that tests were not impacted
+        self.assertEqual(product_tags, self._convert_instance_tags_to_list(test))
+        # remove a tag on the engagement
+        engagement_tags_before_removal = self._convert_instance_tags_to_list(engagement)
+        engagement.tags.remove("engagement_only_tag")
+        # Check to see that the update was successful
+        engagement_tags_before_removal.remove("engagement_only_tag")
+        self.assertEqual(engagement_tags_before_removal, self._convert_instance_tags_to_list(engagement))
+        # Check to see that tests were not impacted
+        self.assertEqual(product_tags, self._convert_instance_tags_to_list(test))
+
+    def test_new_engagement_then_remove_inherited_tag(self):
+        # Create the engagement
+        engagement = self.create_engagement("Inherited Tags Engagement", self.product)
+        # Check to see if tags match the product
+        product_tags = self._convert_instance_tags_to_list(self.product)
+        self.assertEqual(product_tags, self._convert_instance_tags_to_list(engagement))
+        # Remove an inherited tag
+        engagement_tags_before_removal = self._convert_instance_tags_to_list(engagement)
+        engagement.tags.remove("inherit")
+        # Check to see that the inherited tag could not be removed
+        self.assertEqual(engagement_tags_before_removal, self._convert_instance_tags_to_list(engagement))
+
+
+class InheritedTagsImportMixin:
+
+    """Mixin containing inherited tags import/reimport tests that can be run via API or UI."""
+
+    def setUp(self):
         self.system_settings(enable_product_tag_inheritance=True)
         self.product = self.create_product("Inherited Tags Test", tags=["inherit", "these", "tags"])
         self.scans_path = get_unit_tests_scans_path("zap")
@@ -372,42 +518,6 @@ class InheritedTagsTests(DojoAPITestCase):
         product_tags_plus_reimport_tag.insert(1, "reimport_tag")
         self.assertEqual(product_tags_plus_reimport_tag, self._convert_instance_tags_to_list(objects.get("test")))
 
-    def test_new_engagement_then_add_tag_to_engagement_then_remove_tag_to_engagement(self):
-        # Create the engagement
-        engagement = self.create_engagement("Inherited Tags Engagement", self.product)
-        test = self.create_test(engagement=engagement, scan_type="ZAP Scan")
-        # Check to see if tags match the product
-        product_tags = self._convert_instance_tags_to_list(self.product)
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(engagement))
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(test))
-        # Add a tag on the engagement)
-        engagement_tags_before_addition = self._convert_instance_tags_to_list(engagement)
-        engagement.tags.add("engagement_only_tag")
-        # Check to see that the update was successful
-        self.assertEqual(["engagement_only_tag", *engagement_tags_before_addition], self._convert_instance_tags_to_list(engagement))
-        # Check to see that tests were not impacted
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(test))
-        # remove a tag on the engagement
-        engagement_tags_before_removal = self._convert_instance_tags_to_list(engagement)
-        engagement.tags.remove("engagement_only_tag")
-        # Check to see that the update was successful
-        engagement_tags_before_removal.remove("engagement_only_tag")
-        self.assertEqual(engagement_tags_before_removal, self._convert_instance_tags_to_list(engagement))
-        # Check to see that tests were not impacted
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(test))
-
-    def test_new_engagement_then_remove_inherited_tag(self):
-        # Create the engagement
-        engagement = self.create_engagement("Inherited Tags Engagement", self.product)
-        # Check to see if tags match the product
-        product_tags = self._convert_instance_tags_to_list(self.product)
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(engagement))
-        # Remove an inherited tag
-        engagement_tags_before_removal = self._convert_instance_tags_to_list(engagement)
-        engagement.tags.remove("inherit")
-        # Check to see that the inherited tag could not be removed
-        self.assertEqual(engagement_tags_before_removal, self._convert_instance_tags_to_list(engagement))
-
     def test_remove_tag_from_product_then_add_tag_to_product(self):
         # Import some findings to create all objects
         objects = self._import_and_return_objects()
@@ -439,3 +549,78 @@ class InheritedTagsTests(DojoAPITestCase):
         self.assertEqual(product_tags_post_addition, self._convert_instance_tags_to_list(objects.get("endpoint")))
         self.assertEqual(product_tags_post_addition, self._convert_instance_tags_to_list(objects.get("test")))
         self.assertEqual(product_tags_post_addition, self._convert_instance_tags_to_list(objects.get("finding")))
+
+
+class InheritedTagsImportTestAPI(DojoAPITestCase, InheritedTagsImportMixin):
+
+    """Test inherited tags during import/reimport via API."""
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+        self.login_as_admin()
+        InheritedTagsImportMixin.setUp(self)
+
+
+class InheritedTagsImportTestUI(DojoAPITestCase, InheritedTagsImportMixin):
+
+    """Test inherited tags during import/reimport via UI."""
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+        self.login_as_admin()
+        self.client_ui = Client()
+        self.client_ui.force_login(self.get_test_admin())
+        InheritedTagsImportMixin.setUp(self)
+
+    def import_scan_with_params(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *,
+                                active=True, verified=False, tags=None, close_old_findings=False, **kwargs):
+        """Override to use UI import instead of API."""
+        with Path(filename).open(encoding="utf-8") as testfile:
+            payload = {
+                "minimum_severity": minimum_severity,
+                "active": "force_to_true" if active else "force_to_false",
+                "verified": "force_to_true" if verified else "force_to_false",
+                "scan_type": scan_type,
+                "file": testfile,
+                "environment": 1,
+                "close_old_findings": close_old_findings,
+            }
+            if tags is not None:
+                # Tagulous form field expects comma-separated string
+                payload["tags"] = ",".join(tags) if isinstance(tags, list) else tags
+
+            response = self.client_ui.post(reverse("import_scan_results", args=(engagement,)), payload)
+            self.assertEqual(302, response.status_code, response.content[:1000])
+            test_id = int(response.url.split("/")[-1])
+            return {"test": test_id}
+
+    def reimport_scan_with_params(self, test_id, filename, scan_type="ZAP Scan", minimum_severity="Low", *,
+                                  active=True, verified=False, tags=None, close_old_findings=True, **kwargs):
+        """Override to use UI reimport instead of API."""
+        with Path(filename).open(encoding="utf-8") as testfile:
+            payload = {
+                "minimum_severity": minimum_severity,
+                "active": "force_to_true" if active else "force_to_false",
+                "verified": "force_to_true" if verified else "force_to_false",
+                "scan_type": scan_type,
+                "file": testfile,
+                "close_old_findings": close_old_findings,
+            }
+            if tags is not None:
+                # Tagulous form field expects comma-separated string
+                payload["tags"] = ",".join(tags) if isinstance(tags, list) else tags
+
+            response = self.client_ui.post(reverse("re_import_scan_results", args=(test_id,)), payload)
+            self.assertEqual(302, response.status_code, response.content[:1000])
+            new_test_id = int(response.url.split("/")[-1])
+            return {"test": new_test_id}

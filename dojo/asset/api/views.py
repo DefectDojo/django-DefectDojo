@@ -43,7 +43,7 @@ class AssetAPIScanConfigurationViewSet(
     filterset_class = AssetAPIScanConfigurationFilterSet
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasProductAPIScanConfigurationPermission,
+        permissions.UserHasAssetAPIScanConfigurationPermission,
     )
 
     def get_queryset(self):
@@ -68,7 +68,7 @@ class AssetViewSet(
     filterset_class = ApiAssetFilter
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasProductPermission,
+        permissions.UserHasAssetPermission,
     )
 
     def get_queryset(self):
@@ -138,7 +138,7 @@ class AssetMemberViewSet(
     filterset_class = AssetMemberFilterSet
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasProductMemberPermission,
+        permissions.UserHasAssetMemberPermission,
     )
 
     def get_queryset(self):
@@ -166,7 +166,7 @@ class AssetGroupViewSet(
     filterset_class = AssetGroupFilterSet
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasProductGroupPermission,
+        permissions.UserHasAssetGroupPermission,
     )
 
     def get_queryset(self):

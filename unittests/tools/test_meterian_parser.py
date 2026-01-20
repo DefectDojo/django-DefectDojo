@@ -67,7 +67,7 @@ class TestMeterianParser(DojoTestCase):
             self.assertIn("https://github.com/knowledgecode/date-and-time/security/advisories/GHSA-r92x-f52r-x54g", finding.references, "found " + finding.references)
             self.assertIn("https://github.com/knowledgecode/date-and-time/commit/9e4b501eacddccc8b1f559fb414f48472ee17c2a", finding.references, "found " + finding.references)
             self.assertIn("Manifest file", finding.file_path)
-            self.assertEqual(["nodejs"], finding.tags)
+            self.assertEqual(["nodejs"], finding.unsaved_tags)
 
     def test_meterianParser_finding_has_no_remediation(self):
         with (get_unit_tests_scans_path("meterian") / "report_one_vuln_no_remediation.json").open(encoding="utf-8") as testfile:
@@ -90,5 +90,5 @@ class TestMeterianParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
 
             self.assertEqual(2, len(findings))
-            self.assertIn("nodejs", findings[0].tags)
-            self.assertIn("ruby", findings[1].tags)
+            self.assertIn("nodejs", findings[0].unsaved_tags)
+            self.assertIn("ruby", findings[1].unsaved_tags)
