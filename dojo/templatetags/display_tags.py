@@ -10,7 +10,6 @@ from pathlib import Path
 
 import bleach
 import dateutil.relativedelta
-import git
 import markdown
 from bleach.css_sanitizer import CSSSanitizer
 from django import template
@@ -98,8 +97,11 @@ def markdown_render(value):
 
 @register.filter
 def bleach_with_a_tags(message):
-    allowed_attributes = bleach.ALLOWED_ATTRIBUTES
-    allowed_attributes["a"] += ["style", "target"]
+    # Create a copy of ALLOWED_ATTRIBUTES to avoid mutating the global
+    allowed_attributes = {
+        **bleach.ALLOWED_ATTRIBUTES,
+        "a": [*bleach.ALLOWED_ATTRIBUTES.get("a", []), "style", "target"],
+    }
     return mark_safe(bleach.clean(
         message,
         attributes=allowed_attributes,
@@ -143,11 +145,57 @@ def dojo_version():
 
 @register.simple_tag
 def dojo_current_hash():
+    """
+    Display git commit hash in footer if .git directory exists.
+
+    This uses direct file reading (no GitPython, no subprocesses) for
+    negligible performance cost (~0.1ms, 57x faster than GitPython).
+    Production images exclude .git via .dockerignore, so they show "release mode".
+    See: https://github.com/DefectDojo/django-DefectDojo/issues/13899
+    """
     try:
-        repo = git.Repo(search_parent_directories=True)
-        sha = repo.head.object.hexsha
-        return sha[:8]
-    except:
+        # Find .git directory (walk up from current file)
+        current_dir = Path(__file__).resolve().parent
+        git_dir = None
+        for parent in [current_dir, *current_dir.parents]:
+            candidate = parent / ".git"
+            if candidate.exists():
+                git_dir = candidate
+                break
+
+        if not git_dir:
+            return "release mode"
+
+        # Read .git/HEAD to get current commit
+        head_file = git_dir / "HEAD"
+        if not head_file.exists():
+            return "release mode"
+
+        head_content = head_file.read_text().strip()
+
+        if head_content.startswith("ref: "):
+            # It's a branch reference like "ref: refs/heads/main"
+            ref_path = head_content[5:]  # Remove "ref: " prefix
+            ref_file = git_dir / ref_path
+
+            # Try reading from loose ref file first
+            if ref_file.exists():
+                return ref_file.read_text().strip()[:8]
+
+            # Fallback: check packed-refs (after git gc, refs are packed)
+            packed_refs = git_dir / "packed-refs"
+            if packed_refs.exists():
+                for line in packed_refs.read_text().splitlines():
+                    if line.startswith("#") or not line.strip():
+                        continue
+                    parts = line.split()
+                    if len(parts) >= 2 and parts[1] == ref_path:
+                        return parts[0][:8]
+
+            return "release mode"
+        # It's a direct SHA (detached HEAD)
+        return head_content[:8]
+    except Exception:
         return "release mode"
 
 
