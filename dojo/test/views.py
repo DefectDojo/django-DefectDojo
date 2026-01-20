@@ -343,7 +343,7 @@ def copy_test(request, tid):
             engagement = form.cleaned_data.get("engagement")
             product = test.engagement.product
             test_copy = test.copy(engagement=engagement)
-            calculate_grade(product)
+            calculate_grade(product.id)
             messages.add_message(
                 request,
                 messages.SUCCESS,

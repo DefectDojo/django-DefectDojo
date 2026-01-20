@@ -81,7 +81,7 @@ jobs:
           yq -i '.annotations."artifacthub.io/changes" = ""' helm/defectdojo/Chart.yaml
 
       - name: Run helm-docs
-        uses: losisin/helm-docs-github-action@a57fae5676e4c55a228ea654a1bcaec8dd3cf5b5 # v1.6.2
+        uses: losisin/helm-docs-github-action@6f957579ac122ecc167bf515fe84e828686c9a15 # v1.7.1
         with:
           chart-search-root: "helm/defectdojo"
 
@@ -157,7 +157,7 @@ jobs:
           yq -i '.annotations."artifacthub.io/changes" = ""' helm/defectdojo/Chart.yaml
 
       - name: Run helm-docs
-        uses: losisin/helm-docs-github-action@a57fae5676e4c55a228ea654a1bcaec8dd3cf5b5 # v1.6.2
+        uses: losisin/helm-docs-github-action@6f957579ac122ecc167bf515fe84e828686c9a15 # v1.7.1
         with:
           chart-search-root: "helm/defectdojo"
 
