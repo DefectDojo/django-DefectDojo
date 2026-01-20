@@ -751,7 +751,7 @@ class RiskAcceptanceViewSet(
         # send file
         response = FileResponse(
             file_handle,
-            content_type=f"{mimetypes.guess_type(str(file_path))}",
+            content_type=mimetypes.guess_type(str(file_path))[0] or "application/octet-stream",
             status=status.HTTP_200_OK,
         )
         response["Content-Length"] = file_object.size
