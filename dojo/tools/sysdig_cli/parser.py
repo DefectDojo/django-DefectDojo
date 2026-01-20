@@ -138,7 +138,7 @@ class SysdigCLIParser:
             tags = []
             if row.vulnerability_id:
                 tags.append(clean_tags("VulnId:" + row.vulnerability_id))
-            finding.tags = tags
+            finding.unsaved_tags = tags
             finding.dynamic_finding = False
             finding.static_finding = True
             finding.description += "\n\n###Vulnerability Details"

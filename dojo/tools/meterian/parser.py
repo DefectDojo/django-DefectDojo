@@ -69,8 +69,8 @@ class MeterianParser:
                     dynamic_finding=False,
                     file_path="Manifest file",
                     unique_id_from_tool=advisory["id"],
-                    tags=[language],
                 )
+                finding.unsaved_tags = [language]
 
                 if "cve" in advisory:
                     if advisory["cve"] != "N/A":
