@@ -1,6 +1,6 @@
 ---
-title: "Add new Findings to a Test via Reimport"
-description: ""
+title: "Import vs Reimport"
+description: "Learn how to import data manually, through the API, or via a connector"
 weight: 2
 ---
 

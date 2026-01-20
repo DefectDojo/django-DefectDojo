@@ -1,6 +1,6 @@
 ---
-title: "DefectDojo Pro"
-description: ""
+title: "Specialized Import"
+description: "Seamlessly connect DefectDojo to your security tools suite"
 summary: ""
 date: 2023-09-07T16:06:50+02:00
 lastmod: 2023-09-07T16:06:50+02:00
@@ -12,6 +12,6 @@ seo:
   description: "" # custom description (recommended)
   canonical: "" # custom canonical URL (optional)
   robots: "" # custom robot tags (optional)
-pro-feature: true
+audience: pro
 exclude_search: true
 ---

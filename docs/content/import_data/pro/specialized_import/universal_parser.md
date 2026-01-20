@@ -3,7 +3,7 @@ title: "🌐 Universal Parser (Pro)"
 description: ""
 draft: "false"
 weight: 1
-pro-feature: true
+audience: pro
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Universal Parser is only available in DefectDojo Pro.</span>

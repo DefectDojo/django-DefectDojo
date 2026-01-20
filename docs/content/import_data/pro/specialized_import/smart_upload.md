@@ -1,7 +1,8 @@
 ---
-title: "Smart Upload for infrastructure scans (Pro)"
+title: "Infrastructure scans / Smart Upload"
 description: "Automatically route incoming Findings to the correct Product"
 weight: 3
+audience: pro
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Smart Upload is only available in DefectDojo Pro.</span>
