@@ -323,10 +323,10 @@ class TrivyParser:
                     static_finding=True,
                     dynamic_finding=False,
                     fix_available=fix_available,
-                    tags=[vul_type, target_class],
                     service=service_name,
                     **status_fields,
                 )
+                finding.unsaved_tags = [vul_type, target_class]
 
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]
@@ -379,9 +379,9 @@ class TrivyParser:
                     fix_available=True,
                     static_finding=True,
                     dynamic_finding=False,
-                    tags=[target_type, target_class],
                     service=service_name,
                 )
+                finding.unsaved_tags = [target_type, target_class]
                 items.append(finding)
 
             secrets = target_data.get("Secrets", [])
@@ -410,9 +410,9 @@ class TrivyParser:
                     static_finding=True,
                     dynamic_finding=False,
                     fix_available=True,
-                    tags=[target_class],
                     service=service_name,
                 )
+                finding.unsaved_tags = [target_class]
                 items.append(finding)
 
             licenses = target_data.get("Licenses", [])
@@ -444,9 +444,9 @@ class TrivyParser:
                     static_finding=True,
                     dynamic_finding=False,
                     fix_available=True,
-                    tags=[target_class],
                     service=service_name,
                 )
+                finding.unsaved_tags = [target_class]
                 items.append(finding)
 
         return items

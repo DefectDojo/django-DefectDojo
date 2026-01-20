@@ -212,7 +212,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             if self.service is not None:
                 unsaved_finding.service = self.service
 
-            # Force parsers to use unsaved_tags (stored in below after saving)
+            # Parsers shouldn't use the tags field, and use unsaved_tags instead.
+            # Merge any tags set by parser into unsaved_tags
+            tags_from_parser = unsaved_finding.tags if isinstance(unsaved_finding.tags, list) else []
+            unsaved_tags_from_parser = unsaved_finding.unsaved_tags if isinstance(unsaved_finding.unsaved_tags, list) else []
+            merged_tags = unsaved_tags_from_parser + tags_from_parser
+            if merged_tags:
+                unsaved_finding.unsaved_tags = merged_tags
             unsaved_finding.tags = None
             finding = self.process_cve(unsaved_finding)
             # Calculate hash_code before saving based on unsaved_endpoints and unsaved_vulnerability_ids
@@ -222,7 +228,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             unsaved_finding.save_no_options()
 
             # Determine how the finding should be grouped
-            self.process_finding_groups(
+            finding_will_be_grouped = self.process_finding_groups(
                 finding,
                 group_names_to_findings_dict,
             )
@@ -245,7 +251,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # all data is already saved on the finding, we only need to trigger post processing in batches
             logger.debug("process_findings: self.push_to_jira=%s, self.findings_groups_enabled=%s, self.group_by=%s",
                          self.push_to_jira, self.findings_groups_enabled, self.group_by)
-            push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+            push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
             logger.debug("process_findings: computed push_to_jira=%s", push_to_jira)
             batch_finding_ids.append(finding.id)
 

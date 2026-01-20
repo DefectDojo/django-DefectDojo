@@ -1,5 +1,6 @@
 import re
 
+from django.db.models import Model
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import (
@@ -7,6 +8,7 @@ from rest_framework.exceptions import (
     PermissionDenied,
     ValidationError,
 )
+from rest_framework.request import Request
 
 from dojo.authorization.authorization import (
     user_has_configuration_permission,
@@ -29,7 +31,7 @@ from dojo.models import (
 )
 
 
-def check_post_permission(request, post_model, post_pk, post_permission):
+def check_post_permission(request: Request, post_model: Model, post_pk: str | list[str], post_permission: int) -> bool:
     if request.method == "POST":
         if request.data.get(post_pk) is None:
             msg = f"Unable to check for permissions: Attribute '{post_pk}' is required"
@@ -40,13 +42,13 @@ def check_post_permission(request, post_model, post_pk, post_permission):
 
 
 def check_object_permission(
-    request,
-    obj,
-    get_permission,
-    put_permission,
-    delete_permission,
-    post_permission=None,
-):
+    request: Request,
+    obj: Model,
+    get_permission: int,
+    put_permission: int,
+    delete_permission: int,
+    post_permission: int | None = None,
+) -> bool:
     if request.method == "GET":
         return user_has_permission(request.user, obj, get_permission)
     if request.method in {"PUT", "PATCH"}:
@@ -507,10 +509,45 @@ class UserHasProductPermission(permissions.BasePermission):
         )
 
 
+class UserHasAssetPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(
+            request,
+            Product_Type,
+            "organization",
+            Permissions.Product_Type_Add_Product,
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(
+            request,
+            obj,
+            Permissions.Product_View,
+            Permissions.Product_Edit,
+            Permissions.Product_Delete,
+        )
+
+
 class UserHasProductMemberPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
             request, Product, "product", Permissions.Product_Manage_Members,
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(
+            request,
+            obj,
+            Permissions.Product_View,
+            Permissions.Product_Manage_Members,
+            Permissions.Product_Member_Delete,
+        )
+
+
+class UserHasAssetMemberPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(
+            request, Product, "asset", Permissions.Product_Manage_Members,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -539,7 +576,41 @@ class UserHasProductGroupPermission(permissions.BasePermission):
         )
 
 
+class UserHasAssetGroupPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(
+            request, Product, "asset", Permissions.Product_Group_Add,
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(
+            request,
+            obj,
+            Permissions.Product_Group_View,
+            Permissions.Product_Group_Edit,
+            Permissions.Product_Group_Delete,
+        )
+
+
 class UserHasProductTypePermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == "POST":
+            return user_has_global_permission(
+                request.user, Permissions.Product_Type_Add,
+            )
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(
+            request,
+            obj,
+            Permissions.Product_Type_View,
+            Permissions.Product_Type_Edit,
+            Permissions.Product_Type_Delete,
+        )
+
+
+class UserHasOrganizationPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "POST":
             return user_has_global_permission(
@@ -576,12 +647,50 @@ class UserHasProductTypeMemberPermission(permissions.BasePermission):
         )
 
 
+class UserHasOrganizationMemberPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(
+            request,
+            Product_Type,
+            "organization",
+            Permissions.Product_Type_Manage_Members,
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(
+            request,
+            obj,
+            Permissions.Product_Type_View,
+            Permissions.Product_Type_Manage_Members,
+            Permissions.Product_Type_Member_Delete,
+        )
+
+
 class UserHasProductTypeGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
             request,
             Product_Type,
             "product_type",
+            Permissions.Product_Type_Group_Add,
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(
+            request,
+            obj,
+            Permissions.Product_Type_Group_View,
+            Permissions.Product_Type_Group_Edit,
+            Permissions.Product_Type_Group_Delete,
+        )
+
+
+class UserHasOrganizationGroupPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(
+            request,
+            Product_Type,
+            "organization",
             Permissions.Product_Type_Group_Add,
         )
 
@@ -726,6 +835,25 @@ class UserHasProductAPIScanConfigurationPermission(permissions.BasePermission):
             request,
             Product,
             "product",
+            Permissions.Product_API_Scan_Configuration_Add,
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(
+            request,
+            obj,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_API_Scan_Configuration_Edit,
+            Permissions.Product_API_Scan_Configuration_Delete,
+        )
+
+
+class UserHasAssetAPIScanConfigurationPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(
+            request,
+            Product,
+            "asset",
             Permissions.Product_API_Scan_Configuration_Add,
         )
 

@@ -2404,7 +2404,7 @@ def generate_file_response_from_file_path(
     response = FileResponse(
         path.open("rb"),
         filename=full_file_name,
-        content_type=f"{mimetypes.guess_type(file_path)}",
+        content_type=mimetypes.guess_type(file_path)[0] or "application/octet-stream",
     )
     # Add some important headers
     response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'
