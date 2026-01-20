@@ -585,7 +585,7 @@ add_core(ptr, offset, val);
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
             item = findings[0]
-            self.assertEqual(["Scan"], item.tags)
+            self.assertEqual(["Scan"], item.unsaved_tags)
 
     def test_severity_in_properties(self):
         with (get_unit_tests_scans_path("sarif") / "issue_10191.json").open(encoding="utf-8") as testfile:

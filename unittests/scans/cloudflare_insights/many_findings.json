@@ -1,0 +1,47 @@
+[
+  {
+    "id": "asdf-security_txt_not_enabled",
+    "issue_class": "security_txt_not_enabled",
+    "issue_type": "configuration_suggestion",
+    "payload": {
+      "zone_tag": "asdffwe"
+    },
+    "severity": "Low",
+    "subject": "test.de",
+    "timestamp": "2024-12-01T05:43:45.712676Z",
+    "dismissed": false,
+    "since": "2024-10-03T07:46:55.613682Z",
+    "resolve_link": "",
+    "resolve_text": ""
+  },
+  {
+    "id": "fwefwef-security_txt_not_enabled",
+    "issue_class": "security_txt_not_enabled",
+    "issue_type": "configuration_suggestion",
+    "payload": {
+      "zone_tag": "klklkl"
+    },
+    "severity": "Low",
+    "subject": "nannana.com",
+    "timestamp": "2024-12-01T05:43:44.175313Z",
+    "dismissed": false,
+    "since": "2024-10-03T08:48:44.581718Z",
+    "resolve_link": "",
+    "resolve_text": ""
+  },
+  {
+    "id": "yxcv-security_txt_not_enabled",
+    "issue_class": "security_txt_not_enabled",
+    "issue_type": "configuration_suggestion",
+    "payload": {
+      "zone_tag": "yxcv"
+    },
+    "severity": "Low",
+    "subject": "asdf.de",
+    "timestamp": "2024-12-01T05:43:44.252529Z",
+    "dismissed": false,
+    "since": "2024-10-03T08:48:43.923198Z",
+    "resolve_link": "",
+    "resolve_text": ""
+  }
+]
