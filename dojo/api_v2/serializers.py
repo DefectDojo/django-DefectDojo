@@ -1555,6 +1555,12 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         instance = super().create(validated_data)
         user = getattr(self.context.get("request", None), "user", None)
         ra_helper.add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())
+
+        # Add risk acceptance to engagement
+        if instance.accepted_findings.exists():
+            engagement = instance.accepted_findings.first().test.engagement
+            engagement.risk_acceptance.add(instance)
+
         return instance
 
     def update(self, instance, validated_data):
@@ -1616,10 +1622,26 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
             raise PermissionDenied(msg)
         if self.context["request"].method == "POST":
             validate_findings_have_same_engagement(finding_objects)
+
+            # Validate product allows full risk acceptance BEFORE creating instance
+            if finding_objects.exists():
+                engagement = finding_objects.first().test.engagement
+                if not engagement.product.enable_full_risk_acceptance:
+                    msg = "Full risk acceptance is not enabled for this product"
+                    raise PermissionDenied(msg)
         elif self.context["request"].method in {"PATCH", "PUT"}:
-            existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
+            # Use the reverse relation instead of filtering
+            existing_findings = self.instance.accepted_findings.all()
             existing_and_new_findings = existing_findings | finding_objects
             validate_findings_have_same_engagement(existing_and_new_findings)
+
+            # Explicit check to prevent engagement switching
+            risk_acceptance_engagement = self.instance.engagement
+            if risk_acceptance_engagement and finding_objects.exists():
+                new_findings_engagement = finding_objects.first().test.engagement
+                if risk_acceptance_engagement.id != new_findings_engagement.id:
+                    msg = f"Risk Acceptance belongs to engagement {risk_acceptance_engagement.id}. Cannot add findings from engagement {new_findings_engagement.id}"
+                    raise ValidationError(msg)
         return data
 
     class Meta:
