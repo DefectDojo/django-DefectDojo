@@ -1124,7 +1124,7 @@
                 btn.style.pointerEvents = 'auto';
                 
                 if (data.success) {
-                    alert('Solicitud de sincronizacion enviada exitosamente');
+                    alert('Sync request sent succesfully');
                     setTimeout(() => location.reload(), 1500);
                 } else {
                     alert('Error: ' + (data.error || 'Error desconocido'));
@@ -1134,7 +1134,7 @@
                 btn.innerHTML = '<i class="fa-solid fa-refresh"></i> Sync ECR Scan Cycle';
                 btn.style.opacity = '1';
                 btn.style.pointerEvents = 'auto';
-                alert('Error en la solicitud: ' + error);
+                alert('Error on request: ' + error);
                 console.error('Error:', error);
             });
         }

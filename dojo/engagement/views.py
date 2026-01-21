@@ -2314,7 +2314,7 @@ def _sync_ecr_scan_cycle_logic(engagement, request):
     Send a request to sync scan cycle report
     for engagement
     """
-    logger.info(f"Sincronizando ECR para engagement: {engagement.id} - {engagement.name}")
+    logger.info(f"Syncing ECR for engagement: {engagement.id} - {engagement.name}")
     
     base_url = f"{settings.PROVIDER_CORE_ENGINE}engine-backend/extractor/api/v1/syncScanCycle"
     headers = {}
