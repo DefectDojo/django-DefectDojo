@@ -47,6 +47,20 @@ class Command(BaseCommand):
             "Finding_Template",
             "Cred_User",
             "Notification_Webhooks",
+            "FindingReviewers",  # M2M through table for Finding.reviewers
+            # Tag through tables (tagulous auto-generated)
+            "FindingTags",
+            "FindingInheritedTags",
+            "ProductTags",
+            "EngagementTags",
+            "EngagementInheritedTags",
+            "TestTags",
+            "TestInheritedTags",
+            "EndpointTags",
+            "EndpointInheritedTags",
+            "FindingTemplateTags",
+            "AppAnalysisTags",
+            "ObjectsProductTags",
         ]
 
         if specific_models:
