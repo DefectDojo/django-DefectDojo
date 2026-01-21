@@ -19,8 +19,6 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 * **(AI Tools)** added Risk Scores to schema for MCP processing.
 
-No significant UX changes.
-
 ### Jan 5, 2025: v2.54.0
 
 No significant UX changes.
