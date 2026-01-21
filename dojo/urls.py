@@ -79,7 +79,7 @@ from dojo.api_v2.views import (
     FindingExclusionViewSet,
 )
 from dojo.api_v2.ia_recommendation.views import IArecommendationApiView
-from dojo.api_v2.pentesting.views import ScopeViewSet
+from dojo.api_v2.pentesting.views import ScopeViewSet, InputSecretViewSet, InputFileViewSet
 from dojo.api_v2.general_settings.views import GeneralSettingsViewSet
 from dojo.api_v2.manager_cache.views import ManagerCacheApiView
 from dojo.api_v2.alerts.views import AlertViewSet
@@ -209,6 +209,8 @@ v2_api.register(r"transfer_finding_findings", TransferFindingFindingsViewSet, ba
 v2_api.register(r"finding_exclusions", FindingExclusionViewSet, basename="finding_exclusions")
 v2_api.register(r"general_settings", GeneralSettingsViewSet, basename="general_settings")
 v2_api.register(r"pentesting", ScopeViewSet, basename="scope")
+v2_api.register(r"input_secret", InputSecretViewSet, basename="input_secret")
+v2_api.register(r"input_file", InputFileViewSet, basename="input_file")
 v2_api.register(r"alerts", AlertViewSet, basename="alerts")
 ur = []
 ur += dev_env_urls
