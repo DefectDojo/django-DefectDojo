@@ -65,6 +65,64 @@ This will result in a new file in the `dojo/db_migrations` folder that can be co
 When making downstream database model changes in your fork of Defect Dojo please be aware of the risks of getting out of sync with our upstream migrations.
 It requiers proper knowledge of [Django Migrations](https://docs.djangoproject.com/en/5.0/topics/migrations/) to reconcile the migrations before you can upgrade to a newer version of Defect Dojo.
 
+### Linear Migration History
+
+DefectDojo uses [django-linear-migrations](https://github.com/adamchainz/django-linear-migrations) to maintain a linear migration history and avoid merge migration conflicts.
+
+**What this means for you:**
+- When you run `makemigrations`, a `max_migration.txt` file is automatically updated in `dojo/db_migrations/`
+- This file tracks the latest migration and must be committed along with your migration file
+- If you're working on a feature branch and migrations are added to `dev` branch, you may encounter a merge conflict in `max_migration.txt`
+
+**Resolving migration conflicts:**
+
+If you encounter a conflict in `dojo/db_migrations/max_migration.txt` during a rebase or merge, follow these steps:
+
+1. **Abort the current rebase/merge** (you can't switch branches while in conflict):
+   ```bash
+   git rebase --abort
+   # OR if you were merging: git merge --abort
+   ```
+
+2. **Reverse your migration** from your local database (you're still on your feature branch):
+   ```bash
+   # First, check the conflicting migration number (look at your latest migration file)
+   # Then migrate back to the last migration before yours
+   docker compose exec uwsgi bash -c "python manage.py migrate dojo XXXX_last_migration_before_yours"
+   ```
+
+3. **Fetch the latest changes and retry the rebase**:
+   ```bash
+   git fetch origin
+   git rebase origin/dev
+   # Git will show a conflict in max_migration.txt
+   ```
+
+4. **Use the `rebase_migration` command** to automatically fix the conflict:
+   ```bash
+   docker compose exec uwsgi bash -c "python manage.py rebase_migration dojo"
+   ```
+   This command will:
+   - Rename your migration to follow the latest migration from `dev`
+   - Update its dependencies
+   - Update `max_migration.txt`
+
+5. **Continue the rebase**:
+   ```bash
+   git add dojo/db_migrations
+   git rebase --continue
+   ```
+
+6. **Apply the rebased migration** to your local database:
+   ```bash
+   docker compose exec uwsgi bash -c "python manage.py migrate dojo"
+   ```
+
+**Tips:**
+- If your feature branch has multiple commits modifying the same migration, squash them first before rebasing
+- To find the "last migration before yours", look at your migration file's dependencies
+- It's also possible to skip steps 1-3 and then in step 6 do `python manage.py migrate dojo XXXX_last_migration_before_yours` and `python manage.py migrate dojo --fake` to skip your migrations if they have already been applied during earlier development.
+
 ## Submitting Pull Requests
 
 The following are things to consider before submitting a pull request to
