@@ -60,6 +60,7 @@ class ImportReimportMixin:
         self.zap_sample1_filename = get_unit_tests_scans_path("zap") / "1_zap_sample_0_and_new_absent.xml"
         self.zap_sample2_filename = get_unit_tests_scans_path("zap") / "2_zap_sample_0_and_new_endpoint.xml"
         self.zap_sample3_filename = get_unit_tests_scans_path("zap") / "3_zap_sampl_0_and_different_severities.xml"
+        self.zap_sample_without_zap3_filename = get_unit_tests_scans_path("zap") / "0_zap_sample_without_zap3.xml"
 
         self.anchore_file_name = get_unit_tests_scans_path("anchore_engine") / "one_vuln_many_files.json"
         self.scan_type_anchore = "Anchore Engine Scan"
@@ -1572,6 +1573,110 @@ class ImportReimportMixin:
                 self.assertFalse(finding["out_of_scope"])
                 self.assertFalse(finding["risk_accepted"])
                 self.assertFalse(finding["is_mitigated"])
+
+    def test_reimport_closes_risk_accepted_when_vulnerability_fixed(self):
+        """Test that risk-accepted findings are closed when vulnerability no longer in scan"""
+        logger.debug("importing zap0, risk accepting zap3, reimporting without zap3, expecting zap3 to be closed")
+
+        # Import Zap0 with 4 findings (Zap1, Zap2, Zap3, Zap5)
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        test_id = import0["test"]
+
+        # Enable simple risk acceptance
+        test_api_response = self.get_test_api(test_id)
+        product_api_response = self.get_engagement_api(test_api_response["engagement"])
+        product_id = product_api_response["product"]
+        self.patch_product_api(product_id, {"enable_simple_risk_acceptance": True})
+
+        # Get all findings and risk accept Zap3
+        findings = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(4, findings)
+
+        zap3_id = None
+        for finding in findings["results"]:
+            if "Zap3" in finding["title"]:
+                # Risk accept via API (sets active=False, risk_accepted=True)
+                self.patch_finding_api(finding["id"], {
+                    "risk_accepted": True,
+                    "active": False,
+                })
+                zap3_id = finding["id"]
+                break
+
+        self.assertIsNotNone(zap3_id, "Zap3 finding should exist")
+
+        # Verify risk acceptance was applied
+        finding = self.get_finding_api(zap3_id)
+        self.assertTrue(finding["risk_accepted"])
+        self.assertFalse(finding["active"])
+        self.assertFalse(finding["is_mitigated"])
+
+        # Reimport scan WITHOUT Zap3 (vulnerability is fixed)
+        # This should close the risk-accepted finding and remove risk acceptance
+        # Zap1, Zap2, and Zap5 are still in the scan, so they are untouched
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, closed=1, untouched=3):
+            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample_without_zap3_filename)
+
+        self.assertEqual(reimport0["test"], test_id)
+
+        # Verify Zap3 is now mitigated and risk acceptance removed
+        finding = self.get_finding_api(zap3_id)
+        self.assertTrue(finding["is_mitigated"], "Finding should be mitigated when vulnerability is fixed")
+        self.assertFalse(finding["active"], "Finding should remain inactive")
+        self.assertFalse(finding["risk_accepted"], "Risk acceptance should be removed when vulnerability is fixed")
+
+        # Verify note was added explaining the closure
+        self.assertIsNotNone(finding.get("notes"))
+
+    def test_reimport_keeps_risk_accepted_when_still_in_scan(self):
+        """Test that risk-accepted findings remain risk-accepted when still in scan (Scenario A)"""
+        logger.debug("importing zap0, risk accepting zap3, reimporting same scan, expecting zap3 to remain risk-accepted")
+
+        # Import Zap0 with 4 findings (Zap1, Zap2, Zap3, Zap5)
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        test_id = import0["test"]
+
+        # Enable simple risk acceptance
+        test_api_response = self.get_test_api(test_id)
+        product_api_response = self.get_engagement_api(test_api_response["engagement"])
+        product_id = product_api_response["product"]
+        self.patch_product_api(product_id, {"enable_simple_risk_acceptance": True})
+
+        # Get all findings and risk accept Zap3
+        findings = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(4, findings)
+
+        zap3_id = None
+        for finding in findings["results"]:
+            if "Zap3" in finding["title"]:
+                # Risk accept via API (sets active=False, risk_accepted=True)
+                self.patch_finding_api(finding["id"], {
+                    "risk_accepted": True,
+                    "active": False,
+                })
+                zap3_id = finding["id"]
+                break
+
+        self.assertIsNotNone(zap3_id, "Zap3 finding should exist")
+
+        # Verify risk acceptance was applied
+        finding = self.get_finding_api(zap3_id)
+        self.assertTrue(finding["risk_accepted"])
+        self.assertFalse(finding["active"])
+        self.assertFalse(finding["is_mitigated"])
+
+        # Reimport SAME scan (Zap3 is still present in scan)
+        # The risk-accepted finding should remain risk-accepted (NOT closed)
+        with assertTestImportModelsCreated(self, reimports=1, untouched=4):
+            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+
+        self.assertEqual(reimport0["test"], test_id)
+
+        # Verify Zap3 is still risk-accepted (NOT closed)
+        finding = self.get_finding_api(zap3_id)
+        self.assertTrue(finding["risk_accepted"], "Finding should remain risk-accepted when still in scan")
+        self.assertFalse(finding["active"], "Finding should remain inactive")
+        self.assertFalse(finding["is_mitigated"], "Finding should NOT be mitigated when still risk-accepted and present in scan")
 
     # import gitlab_dep_scan_components_filename with 6 findings
     # findings 1, 2 and 3 have the same component_name (golang.org/x/crypto) and the same CVE (CVE-2020-29652), but different component_version
