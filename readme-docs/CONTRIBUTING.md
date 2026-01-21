@@ -76,52 +76,7 @@ DefectDojo uses [django-linear-migrations](https://github.com/adamchainz/django-
 
 **Resolving migration conflicts:**
 
-If you encounter a conflict in `dojo/db_migrations/max_migration.txt` during a rebase or merge, follow these steps:
-
-1. **Abort the current rebase/merge** (you can't switch branches while in conflict):
-   ```bash
-   git rebase --abort
-   # OR if you were merging: git merge --abort
-   ```
-
-2. **Reverse your migration** from your local database (you're still on your feature branch):
-   ```bash
-   # First, check the conflicting migration number (look at your latest migration file)
-   # Then migrate back to the last migration before yours
-   docker compose exec uwsgi bash -c "python manage.py migrate dojo XXXX_last_migration_before_yours"
-   ```
-
-3. **Fetch the latest changes and retry the rebase**:
-   ```bash
-   git fetch origin
-   git rebase origin/dev
-   # Git will show a conflict in max_migration.txt
-   ```
-
-4. **Use the `rebase_migration` command** to automatically fix the conflict:
-   ```bash
-   docker compose exec uwsgi bash -c "python manage.py rebase_migration dojo"
-   ```
-   This command will:
-   - Rename your migration to follow the latest migration from `dev`
-   - Update its dependencies
-   - Update `max_migration.txt`
-
-5. **Continue the rebase**:
-   ```bash
-   git add dojo/db_migrations
-   git rebase --continue
-   ```
-
-6. **Apply the rebased migration** to your local database:
-   ```bash
-   docker compose exec uwsgi bash -c "python manage.py migrate dojo"
-   ```
-
-**Tips:**
-- If your feature branch has multiple commits modifying the same migration, squash them first before rebasing
-- To find the "last migration before yours", look at your migration file's dependencies
-- It's also possible to skip steps 1-3 and then in step 6 do `python manage.py migrate dojo XXXX_last_migration_before_yours` and `python manage.py migrate dojo --fake` to skip your migrations if they have already been applied during earlier development.
+If you encounter a conflict in `dojo/db_migrations/max_migration.txt` during a rebase or merge, rename the migrations and update max_migrations.txt to contain the name of the latest migration of your branch. You can also try to use the `python manage.py rebase_migration dojo` inside the `uwsgi` container, but that requires some hassling with selective container startup and branch switching.
 
 ## Submitting Pull Requests
 
