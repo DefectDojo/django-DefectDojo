@@ -1557,6 +1557,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         ra_helper.add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())
 
         # Add risk acceptance to engagement
+        # This is fine as Pro has its own model + relationshop to track links with engagements.
         if instance.accepted_findings.exists():
             engagement = instance.accepted_findings.first().test.engagement
             engagement.risk_acceptance.add(instance)
@@ -1580,6 +1581,13 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         # Remove the ones that were not present in the payload
         for finding in findings_to_remove:
             ra_helper.remove_finding_from_risk_acceptance(user, instance, finding)
+
+        # Handle orphaned risk acceptances: link to engagement if it now has findings
+        # This is fine as Pro has its own model + relationshop to track links with engagements.
+        if instance.accepted_findings.exists() and not instance.engagement:
+            engagement = instance.accepted_findings.first().test.engagement
+            engagement.risk_acceptance.add(instance)
+
         return instance
 
     @extend_schema_field(serializers.CharField())
