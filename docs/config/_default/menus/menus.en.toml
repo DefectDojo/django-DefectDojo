@@ -10,33 +10,38 @@
 
 [[main]]
   name = "Triage Findings ⏷"
-  url = "/triage_findings/"
+  url = "/triage_findings/findings/intro_to_findings/"
   weight = 12
 
 [[main]]
-  name = "Metrics & reports ⏷"
-  url = "/metrics_reports/"
+  name = "Model your assets ⏷"
+  url = "/asset_modelling/hierarchy/pro__assets_organizations/"
   weight = 13
 
 [[main]]
-  name = "Admin ⏷"
-  url = "/admin/"
+  name = "Metrics & reports ⏷"
+  url = "/metrics_reports/dashboards/introduction_dashboard/"
   weight = 14
+
+[[main]]
+  name = "Admin ⏷"
+  url = "/admin/admin_intro/intro/"
+  weight = 16
 
 [[main]]
   name = "Issue tracking ⏷"
-  url = "/issue_tracking/"
-  weight = 14
+  url = "/issue_tracking/intro/intro/"
+  weight = 15
 
 [[main]]
   name = "Automation ⏷"
-  url = "/automation/"
-  weight = 14
+  url = "/automation/api/api-v2-docs/"
+  weight = 15
 
 [[main]]
   name = "Supported tools ⏷"
   url = "/supported_tools/"
-  weight = 15
+  weight = 16
 
 [[social]]
   name = "YouTube"

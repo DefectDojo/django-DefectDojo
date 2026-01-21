@@ -2,6 +2,7 @@
 title: "Set a User's permissions"
 description: "How to grant Roles & Permissions to a user, as well as superuser status"
 weight: 2
+audience: opensource
 ---
 
 ## Introduction to Permission Types
@@ -42,7 +43,7 @@ By default, the first account created on a new DefectDojo instance will have Sup
 
 4. From the Edit User page:   
 ​  
-For Superuser Status, check off the ☑️Superuser Status box, located in the user's Default Information.  
+For Superuser Status, check off the ☑️ Superuser Status box, located in the user's Default Information.  
 ​  
 To assign a Global Role, select one from the dropdown Global Role menu at the bottom of the page.  
 ​

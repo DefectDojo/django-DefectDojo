@@ -54,6 +54,7 @@ mainSections = ["docs"]
     "metrics_reports",
     "admin",
     "automation",
+    "asset_modelling",
     "issue_tracking"] # ["docs"] (default) or list of sections (e.g. ["docs", "guides"])
 
   toTopButton = false # false (default) or true
