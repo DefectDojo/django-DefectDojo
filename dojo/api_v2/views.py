@@ -503,7 +503,7 @@ class EngagementViewSet(
         request=serializers.AddNewNoteOptionSerializer,
         responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
     )
-    @action(detail=True, methods=["get", "post"])
+    @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission])
     def notes(self, request, pk=None):
         engagement = self.get_object()
         if request.method == "POST":
@@ -567,7 +567,7 @@ class EngagementViewSet(
         responses={status.HTTP_201_CREATED: serializers.FileSerializer},
     )
     @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,),
+        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=[IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission],
     )
     def files(self, request, pk=None):
         engagement = self.get_object()
@@ -603,7 +603,7 @@ class EngagementViewSet(
             status.HTTP_201_CREATED: serializers.EngagementCheckListSerializer,
         },
     )
-    @action(detail=True, methods=["get", "post"])
+    @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission])
     def complete_checklist(self, request, pk=None):
         engagement = self.get_object()
         check_lists = Check_List.objects.filter(engagement=engagement)
@@ -650,6 +650,7 @@ class EngagementViewSet(
         detail=True,
         methods=["get"],
         url_path=r"files/download/(?P<file_id>\d+)",
+        permission_classes=[IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission],
     )
     def download_file(self, request, file_id, pk=None):
         engagement = self.get_object()

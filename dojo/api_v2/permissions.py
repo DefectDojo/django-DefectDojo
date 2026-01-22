@@ -278,40 +278,55 @@ class UserHasEndpointStatusPermission(permissions.BasePermission):
         )
 
 
-class UserHasEngagementPermission(permissions.BasePermission):
-    # Permission checks for related objects (like notes or metadata) can be moved
-    # into a seperate class, when the legacy authorization will be removed.
-    path_engagement_post = re.compile(r"^/api/v2/engagements/$")
-    path_engagement = re.compile(r"^/api/v2/engagements/\d+/$")
+class BaseRelatedObjectPermission(permissions.BasePermission):
+
+    """
+    An "abstract" base class for related object permissions (like notes, metadata, etc.)
+    that only need object permissions, not general permissions. This class will serve as
+    the base class for other more aptly named permission classes.
+    """
+
+    permission_map = {
+        "get_permission": None,
+        "put_permission": None,
+        "delete_permission": None,
+        "post_permission": None,
+    }
 
     def has_permission(self, request, view):
-        if UserHasEngagementPermission.path_engagement_post.match(
-            request.path,
-        ) or UserHasEngagementPermission.path_engagement.match(request.path):
-            return check_post_permission(
-                request, Product, "product", Permissions.Engagement_Add,
-            )
         # related object only need object permission
         return True
 
     def has_object_permission(self, request, view, obj):
-        if UserHasEngagementPermission.path_engagement_post.match(
-            request.path,
-        ) or UserHasEngagementPermission.path_engagement.match(request.path):
-            return check_object_permission(
-                request,
-                obj,
-                Permissions.Engagement_View,
-                Permissions.Engagement_Edit,
-                Permissions.Engagement_Delete,
+        return check_object_permission(
+            request,
+            obj,
+            **self.permission_map,
+        )
+
+
+class UserHasEngagementRelatedObjectPermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Engagement_View,
+        "put_permission": Permissions.Engagement_Edit,
+        "delete_permission": Permissions.Engagement_Edit,
+        "post_permission": Permissions.Engagement_Edit,
+    }
+
+
+class UserHasEngagementPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(
+                request, Product, "product", Permissions.Engagement_Add,
             )
+
+    def has_object_permission(self, request, view, obj):
         return check_object_permission(
             request,
             obj,
             Permissions.Engagement_View,
             Permissions.Engagement_Edit,
-            Permissions.Engagement_Edit,
-            Permissions.Engagement_Edit,
+            Permissions.Engagement_Delete,
         )
 
 
