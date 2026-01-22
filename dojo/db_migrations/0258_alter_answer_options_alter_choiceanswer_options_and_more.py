@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0255_remove_system_settings_product_grade'),
+        ('dojo', '0257_pghistory_tags_backfill'),
     ]
 
     operations = [
