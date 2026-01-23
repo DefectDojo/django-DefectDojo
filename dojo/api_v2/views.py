@@ -2039,7 +2039,7 @@ class DevelopmentEnvironmentViewSet(
     serializer_class = serializers.DevelopmentEnvironmentSerializer
     queryset = Development_Environment.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, permissions.UserHasDevelopmentEnvironmentPermission)
 
     def get_queryset(self):
         return Development_Environment.objects.all().order_by("id")
@@ -2392,7 +2392,7 @@ class RegulationsViewSet(
     queryset = Regulation.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "name", "description"]
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, permissions.UserHasRegulationPermission)
 
     def get_queryset(self):
         return Regulation.objects.all().order_by("id")
@@ -3133,7 +3133,7 @@ class SLAConfigurationViewset(
     serializer_class = serializers.SLAConfigurationSerializer
     queryset = SLA_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, permissions.UserHasSLAPermission)
 
     def get_queryset(self):
         return SLA_Configuration.objects.all().order_by("id")
@@ -3147,7 +3147,7 @@ class QuestionnaireQuestionViewSet(
     queryset = Question.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
-        permissions.BaseRelatedObjectPermission,
+        permissions.UserHasEngagementRelatedObjectPermission,
         DjangoModelPermissions,
     )
 
@@ -3163,7 +3163,7 @@ class QuestionnaireAnswerViewSet(
     queryset = Answer.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
-        permissions.BaseRelatedObjectPermission,
+        permissions.UserHasEngagementRelatedObjectPermission,
         DjangoModelPermissions,
     )
 
@@ -3178,7 +3178,7 @@ class QuestionnaireGeneralSurveyViewSet(
     queryset = General_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
-        permissions.BaseRelatedObjectPermission,
+        permissions.UserHasEngagementRelatedObjectPermission,
         DjangoModelPermissions,
     )
 
@@ -3193,7 +3193,7 @@ class QuestionnaireEngagementSurveyViewSet(
     queryset = Engagement_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
-        permissions.BaseRelatedObjectPermission,
+        permissions.UserHasEngagementRelatedObjectPermission,
         DjangoModelPermissions,
     )
 
@@ -3234,7 +3234,7 @@ class QuestionnaireAnsweredSurveyViewSet(
     queryset = Answered_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
-        permissions.BaseRelatedObjectPermission,
+        permissions.UserHasEngagementRelatedObjectPermission,
         DjangoModelPermissions,
     )
 
