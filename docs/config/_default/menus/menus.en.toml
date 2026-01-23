@@ -5,7 +5,7 @@
 
 [[main]]
   name = "Import data ⏷"
-  url = "/import_data/"
+  url = "/import_data/import_intro/comparison/"
   weight = 12
 
 [[main]]

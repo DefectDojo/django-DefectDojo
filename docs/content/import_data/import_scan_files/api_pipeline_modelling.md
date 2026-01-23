@@ -1,5 +1,5 @@
 ---
-title: "Create an automated import pipeline via API"
+title: "Import from API"
 description: ""
 ---
 
@@ -9,14 +9,6 @@ DefectDojo’s API allows for robust pipeline solutions, which automatically ing
 * A CI/CD pipeline which scans new code as it is deployed, and imports the results to DefectDojo as a triggered action
 
 These pipelines can be created by directly calling our API **/reimport** endpoint with an attached scan file in a way that closely resembles our **Import Scan Form**. 
-
-#### Universal Importer: out of the box automation
-
-DefectDojo Inc. maintains a **Universal Importer** which can be set up with existing CI/CD pipelines, triggered via GitHub actions, or run in any other automated context.
-
-This external tool is a useful way to build a pipeline directly from the command line: a much faster solution than writing your own code.
-
-See our guide to [external tools](../../external_tools) to learn more.  External tools are available for **DefectDojo Pro** users only.
 
 ## DefectDojo’s API
 
