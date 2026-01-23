@@ -109,7 +109,7 @@ et_xmlfile==2.0.0
 inflection==0.5.1
 requests-toolbelt==1.0.0
 smmap==5.0.2
-wcwidth==0.3.0
+wcwidth==0.3.1
 kombu==5.6.2
 six==1.17.0
 attrs==25.4.0
