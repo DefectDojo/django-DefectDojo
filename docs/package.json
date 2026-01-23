@@ -23,7 +23,7 @@
     "@thulite/images": "3.3.3",
     "@thulite/inline-svg": "1.2.1",
     "@thulite/seo": "2.4.2",
-    "thulite": "2.6.3"
+    "thulite": "2.6.4"
   },
   "devDependencies": {
     "prettier": "3.8.0",
