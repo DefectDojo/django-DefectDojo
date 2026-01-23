@@ -476,7 +476,7 @@ def update_finding_prioritization_per_cve(
                 Q(vuln_id_from_tool=vulnerability_id) & ~Q(vuln_id_from_tool=None)
             )
     else:
-        priority_cve_severity_filter = Q(severity=severity)
+        priority_cve_severity_filter = (Q(severity=severity) & Q(cve=None))
 
     findings = (
         Finding.objects.filter(priority_cve_severity_filter, test__scan_type=scan_type)
