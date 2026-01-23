@@ -359,6 +359,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         unsaved_finding,
                         existing_finding,
                     )
+                    # Findings that have already exist cannot be moved to into a group
+                    finding_will_be_grouped = False
                     # Determine if we should skip the rest of the loop
                     if force_continue:
                         continue
@@ -374,7 +376,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             self.user,
                         )
                 else:
-                    finding = self.process_finding_that_was_not_matched(unsaved_finding)
+                    finding, finding_will_be_grouped = self.process_finding_that_was_not_matched(unsaved_finding)
 
                     # Add newly created finding to candidates for subsequent findings in this batch
                     self.add_new_finding_to_candidates(
@@ -392,7 +394,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         unsaved_finding,
                     )
                     # all data is already saved on the finding, we only need to trigger post processing in batches
-                    push_to_jira = self.push_to_jira and (not self.findings_groups_enabled or not self.group_by)
+                    push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
                     batch_finding_ids.append(finding.id)
 
                     # Post-processing batches (deduplication, rules, etc.) are separate from matching batches.
@@ -818,7 +820,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     def process_finding_that_was_not_matched(
         self,
         unsaved_finding: Finding,
-    ) -> Finding:
+    ) -> tuple[Finding, bool]:
         """Create a new finding from the one parsed from the report"""
         # Set some explicit settings
         unsaved_finding.reporter = self.user
@@ -846,7 +848,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             f"({finding.component_name} - {finding.component_version})",
         )
         # Manage the finding grouping selection
-        self.process_finding_groups(
+        finding_will_be_grouped = self.process_finding_groups(
             unsaved_finding,
             self.group_names_to_findings_dict,
         )
@@ -854,7 +856,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.new_items.append(unsaved_finding)
         # Process any request/response pairs
         self.process_request_response_pairs(unsaved_finding)
-        return unsaved_finding
+        return unsaved_finding, finding_will_be_grouped
 
     def reconcile_vulnerability_ids(
         self,
@@ -903,7 +905,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding_from_report.unsaved_endpoints)
         if len(self.endpoints_to_add) > 0:
             self.endpoint_manager.chunk_endpoints_and_disperse(finding, self.endpoints_to_add)
-        # Parsers must use unsaved_tags to store tags, so we can clean them
+        # Parsers shouldn't use the tags field, and use unsaved_tags instead.
+        # Merge any tags set by parser into unsaved_tags
+        tags_from_parser = finding_from_report.tags if isinstance(finding_from_report.tags, list) else []
+        unsaved_tags_from_parser = finding_from_report.unsaved_tags if isinstance(finding_from_report.unsaved_tags, list) else []
+        merged_tags = unsaved_tags_from_parser + tags_from_parser
+        if merged_tags:
+            finding_from_report.unsaved_tags = merged_tags
         if finding_from_report.unsaved_tags:
             cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
             if isinstance(cleaned_tags, list):

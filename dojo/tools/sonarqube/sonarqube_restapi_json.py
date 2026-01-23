@@ -55,10 +55,10 @@ class SonarQubeRESTAPIJSON:
                         severity=self.severitytranslator(issue.get("severity")),
                         static_finding=True,
                         dynamic_finding=False,
-                        tags=["bug"],
                         line=line,
                         date=date,
                     )
+                    item.unsaved_tags = ["bug"]
                 elif issue.get("type") == "VULNERABILITY":
                     key = issue.get("key")
                     rule = issue.get("rule")
@@ -129,10 +129,10 @@ class SonarQubeRESTAPIJSON:
                         cwe=cwe,
                         cvssv3_score=cvss,
                         file_path=component,
-                        tags=["vulnerability"],
                         line=line,
                         date=date,
                     )
+                    item.unsaved_tags = ["vulnerability"]
                     vulnids = []
                     if "Reference: CVE" in message:
                         cve_pattern = r"Reference: CVE-\d{4}-\d{4,7}"
@@ -200,10 +200,10 @@ class SonarQubeRESTAPIJSON:
                         static_finding=True,
                         dynamic_finding=False,
                         file_path=component,
-                        tags=["code_smell"],
                         line=line,
                         date=date,
                     )
+                    item.unsaved_tags = ["code_smell"]
                 items.append(item)
         if json_content.get("hotspots"):
             for hotspot in json_content.get("hotspots"):
@@ -249,10 +249,10 @@ class SonarQubeRESTAPIJSON:
                     static_finding=True,
                     dynamic_finding=False,
                     file_path=component,
-                    tags=["hotspot"],
                     line=line,
                     date=date,
                 )
+                item.unsaved_tags = ["hotspot"]
                 items.append(item)
         return items
 

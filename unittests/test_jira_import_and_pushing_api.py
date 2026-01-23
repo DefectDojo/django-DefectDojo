@@ -185,6 +185,15 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
 
+    def test_import_with_group_by_with_push_all_but_no_groups_created(self):
+        self.set_jira_push_all_issues(self.get_engagement(1))
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, group_by="component_name+component_version", verified=True)
+        test_id = import0["test"]
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
     def test_import_no_push_to_jira_reimport_no_push_to_jira(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, verified=True)
         test_id = import0["test"]

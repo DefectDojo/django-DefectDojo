@@ -129,7 +129,7 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual("3.6.13-2ubuntu1.10", finding.mitigation)
             self.assertEqual(5.9, finding.cvssv3_score)
             self.assertEqual("ubuntu:20.04 (ubuntu 20.04)", finding.file_path)
-            self.assertEqual("lbc, os-pkgs, ubuntu", str(finding.tags))
+            self.assertEqual(["lbc", "ubuntu", "os-pkgs"], finding.unsaved_tags)
 
     def test_cis_benchmark(self):
         with sample_path("cis_benchmark.json").open(encoding="utf-8") as test_file:
