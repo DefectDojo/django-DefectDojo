@@ -106,6 +106,10 @@ class BaseDjangoModelPermission(permissions.BasePermission):
     }
 
     def _evaluate_permissions(self, request: Request, permissions: dict[str, str]) -> bool:
+        # Short circuit if the request method is not in the expected methods
+        if request.method not in permissions:
+            return True
+        # Evaluate the permissions as usual
         for method, permission in permissions.items():
             if request.method == method:
                 return user_has_configuration_permission(
@@ -117,9 +121,6 @@ class BaseDjangoModelPermission(permissions.BasePermission):
     def has_permission(self, request: Request, view):
         # First restrict the mapping got GET/POST only
         expected_request_method_permission_map = {k: v for k, v in self.request_method_permission_map.items() if k in {"GET", "POST"}}
-        # Short circuit if the request method is not in the expected methods
-        if request.method not in expected_request_method_permission_map:
-            return True
         # Evaluate the permissions
         return self._evaluate_permissions(request, expected_request_method_permission_map)
 
