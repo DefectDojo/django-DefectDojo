@@ -737,7 +737,7 @@ class RiskAcceptanceViewSet(
         },
     )
     @action(detail=True, methods=["get"])
-    def download_proof(self, request, pk=None):
+    def download_proof(self, request, pk=None, permission_classes=(IsAuthenticated, permissions.UserHasRiskAcceptanceRelatedObjectPermission)):
         risk_acceptance = self.get_object()
         # Get the file object
         file_object = risk_acceptance.path
@@ -938,7 +938,7 @@ class FindingViewSet(
         request=serializers.FindingCloseSerializer,
         responses={status.HTTP_200_OK: serializers.FindingCloseSerializer},
     )
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def close(self, request, pk=None):
         finding = self.get_object()
 
@@ -979,7 +979,7 @@ class FindingViewSet(
         request=serializers.TagSerializer,
         responses={status.HTTP_201_CREATED: serializers.TagSerializer},
     )
-    @action(detail=True, methods=["get", "post"])
+    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def tags(self, request, pk=None):
         finding = self.get_object()
 
@@ -1020,7 +1020,7 @@ class FindingViewSet(
             status.HTTP_201_CREATED: serializers.BurpRawRequestResponseSerializer,
         },
     )
-    @action(detail=True, methods=["get", "post"])
+    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def request_response(self, request, pk=None):
         finding = self.get_object()
 
@@ -1070,7 +1070,7 @@ class FindingViewSet(
         request=serializers.AddNewNoteOptionSerializer,
         responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
     )
-    @action(detail=True, methods=["get", "post"])
+    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def notes(self, request, pk=None):
         finding = self.get_object()
         if request.method == "POST":
@@ -1138,7 +1138,7 @@ class FindingViewSet(
         responses={status.HTTP_201_CREATED: serializers.FileSerializer},
     )
     @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,),
+        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
     )
     def files(self, request, pk=None):
         finding = self.get_object()
@@ -1176,7 +1176,7 @@ class FindingViewSet(
     @action(
         detail=True,
         methods=["get"],
-        url_path=r"files/download/(?P<file_id>\d+)",
+        url_path=r"files/download/(?P<file_id>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
     )
     def download_file(self, request, file_id, pk=None):
         finding = self.get_object()
@@ -1197,7 +1197,7 @@ class FindingViewSet(
         request=serializers.FindingNoteSerializer,
         responses={status.HTTP_204_NO_CONTENT: ""},
     )
-    @action(detail=True, methods=["patch"])
+    @action(detail=True, methods=["patch"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def remove_note(self, request, pk=None):
         """Remove Note From Finding Note"""
         finding = self.get_object()
@@ -1236,7 +1236,7 @@ class FindingViewSet(
         request=serializers.TagSerializer,
         responses={status.HTTP_204_NO_CONTENT: ""},
     )
-    @action(detail=True, methods=["put", "patch"])
+    @action(detail=True, methods=["put", "patch"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def remove_tags(self, request, pk=None):
         """Remove Tag(s) from finding list of tags"""
         finding = self.get_object()
@@ -1286,6 +1286,7 @@ class FindingViewSet(
         url_path=r"duplicate",
         filter_backends=[],
         pagination_class=None,
+        permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
     )
     def get_duplicate_cluster(self, request, pk):
         finding = self.get_object()
@@ -1299,7 +1300,7 @@ class FindingViewSet(
         request=OpenApiTypes.NONE,
         responses={status.HTTP_204_NO_CONTENT: ""},
     )
-    @action(detail=True, methods=["post"], url_path=r"duplicate/reset")
+    @action(detail=True, methods=["post"], url_path=r"duplicate/reset", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def reset_finding_duplicate_status(self, request, pk):
         checked_duplicate_id = reset_finding_duplicate_status_internal(
             request.user, pk,
@@ -1318,7 +1319,7 @@ class FindingViewSet(
         responses={status.HTTP_204_NO_CONTENT: ""},
     )
     @action(
-        detail=True, methods=["post"], url_path=r"original/(?P<new_fid>\d+)",
+        detail=True, methods=["post"], url_path=r"original/(?P<new_fid>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
     )
     def set_finding_as_original(self, request, pk, new_fid):
         success = set_finding_as_original_internal(request.user, pk, new_fid)
@@ -1494,6 +1495,7 @@ class FindingViewSet(
         methods=["post", "put", "delete", "get"],
         filter_backends=[],
         pagination_class=None,
+        permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
     )
     def metadata(self, request, pk=None):
         finding = self.get_object()
@@ -2129,7 +2131,7 @@ class TestsViewSet(
         request=serializers.AddNewNoteOptionSerializer,
         responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
     )
-    @action(detail=True, methods=["get", "post"])
+    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission))
     def notes(self, request, pk=None):
         test = self.get_object()
         if request.method == "POST":
@@ -2191,7 +2193,7 @@ class TestsViewSet(
         responses={status.HTTP_201_CREATED: serializers.FileSerializer},
     )
     @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,),
+        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission),
     )
     def files(self, request, pk=None):
         test = self.get_object()
@@ -2230,6 +2232,7 @@ class TestsViewSet(
         detail=True,
         methods=["get"],
         url_path=r"files/download/(?P<file_id>\d+)",
+        permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission),
     )
     def download_file(self, request, file_id, pk=None):
         test = self.get_object()
@@ -2743,7 +2746,7 @@ class BurpRawRequestResponseViewSet(
     filterset_fields = ["finding"]
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasFindingPermission,
+        permissions.UserHasFindingRelatedObjectPermission,
     )
 
     def get_queryset(self):
@@ -3144,7 +3147,7 @@ class QuestionnaireQuestionViewSet(
     queryset = Question.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
-        permissions.UserHasEngagementPermission,
+        permissions.BaseRelatedObjectPermission,
         DjangoModelPermissions,
     )
 
@@ -3160,7 +3163,7 @@ class QuestionnaireAnswerViewSet(
     queryset = Answer.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
-        permissions.UserHasEngagementPermission,
+        permissions.BaseRelatedObjectPermission,
         DjangoModelPermissions,
     )
 
@@ -3175,7 +3178,7 @@ class QuestionnaireGeneralSurveyViewSet(
     queryset = General_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
-        permissions.UserHasEngagementPermission,
+        permissions.BaseRelatedObjectPermission,
         DjangoModelPermissions,
     )
 
@@ -3190,7 +3193,7 @@ class QuestionnaireEngagementSurveyViewSet(
     queryset = Engagement_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
-        permissions.UserHasEngagementPermission,
+        permissions.BaseRelatedObjectPermission,
         DjangoModelPermissions,
     )
 
@@ -3231,7 +3234,7 @@ class QuestionnaireAnsweredSurveyViewSet(
     queryset = Answered_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
-        permissions.UserHasEngagementPermission,
+        permissions.BaseRelatedObjectPermission,
         DjangoModelPermissions,
     )
 

@@ -1,4 +1,3 @@
-import re
 
 from django.db.models import Model
 from django.shortcuts import get_object_or_404
@@ -305,15 +304,6 @@ class BaseRelatedObjectPermission(permissions.BasePermission):
         )
 
 
-class UserHasEngagementRelatedObjectPermission(BaseRelatedObjectPermission):
-    permission_map = {
-        "get_permission": Permissions.Engagement_View,
-        "put_permission": Permissions.Engagement_Edit,
-        "delete_permission": Permissions.Engagement_Edit,
-        "post_permission": Permissions.Engagement_Edit,
-    }
-
-
 class UserHasEngagementPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
@@ -330,94 +320,65 @@ class UserHasEngagementPermission(permissions.BasePermission):
         )
 
 
-class UserHasRiskAcceptancePermission(permissions.BasePermission):
-    # Permission checks for related objects (like notes or metadata) can be moved
-    # into a seperate class, when the legacy authorization will be removed.
-    path_risk_acceptance_post = re.compile(r"^/api/v2/risk_acceptances/$")
-    path_risk_acceptance = re.compile(r"^/api/v2/risk_acceptances/\d+/$")
+class UserHasEngagementRelatedObjectPermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Engagement_View,
+        "put_permission": Permissions.Engagement_Edit,
+        "delete_permission": Permissions.Engagement_Edit,
+        "post_permission": Permissions.Engagement_Edit,
+    }
 
+
+class UserHasRiskAcceptancePermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
-            request.path,
-        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(
-            request.path,
-        ):
-            return check_post_permission(
-                request, Product, "product", Permissions.Risk_Acceptance,
-            )
-        # related object only need object permission
+        # The previous implementation only checked for the object permission if the path was
+        # /api/v2/risk_acceptances/, but the path has always been /api/v2/risk_acceptance/ (notice the missing "s")
+        # So there really has not been a notion of a post permission check for risk acceptances.
+        # It would be best to leave as is to not break any existing implementations.
         return True
 
     def has_object_permission(self, request, view, obj):
-        if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
-            request.path,
-        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(
-            request.path,
-        ):
-            return check_object_permission(
-                request,
-                obj,
-                Permissions.Risk_Acceptance,
-                Permissions.Risk_Acceptance,
-                Permissions.Risk_Acceptance,
-            )
         return check_object_permission(
             request,
             obj,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance,
-            Permissions.Risk_Acceptance,
         )
 
 
-class UserHasFindingPermission(permissions.BasePermission):
-    # Permission checks for related objects (like notes or metadata) can be moved
-    # into a seperate class, when the legacy authorization will be removed.
-    path_finding_post = re.compile(r"^/api/v2/findings/$")
-    path_finding = re.compile(r"^/api/v2/findings/\d+/$")
-    path_stub_finding_post = re.compile(r"^/api/v2/stub_findings/$")
-    path_stub_finding = re.compile(r"^/api/v2/stub_findings/\d+/$")
+class UserHasRiskAcceptanceRelatedObjectPermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Risk_Acceptance,
+        "put_permission": Permissions.Risk_Acceptance,
+        "delete_permission": Permissions.Risk_Acceptance,
+        "post_permission": Permissions.Risk_Acceptance,
+    }
 
+
+class UserHasFindingPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if (
-            UserHasFindingPermission.path_finding_post.match(request.path)
-            or UserHasFindingPermission.path_finding.match(request.path)
-            or UserHasFindingPermission.path_stub_finding_post.match(
-                request.path,
-            )
-            or UserHasFindingPermission.path_stub_finding.match(request.path)
-        ):
-            return check_post_permission(
-                request, Test, "test", Permissions.Finding_Add,
-            )
-        # related object only need object permission
-        return True
+        return check_post_permission(
+            request, Test, "test", Permissions.Finding_Add,
+        )
 
     def has_object_permission(self, request, view, obj):
-        if (
-            UserHasFindingPermission.path_finding_post.match(request.path)
-            or UserHasFindingPermission.path_finding.match(request.path)
-            or UserHasFindingPermission.path_stub_finding_post.match(
-                request.path,
-            )
-            or UserHasFindingPermission.path_stub_finding.match(request.path)
-        ):
-            return check_object_permission(
-                request,
-                obj,
-                Permissions.Finding_View,
-                Permissions.Finding_Edit,
-                Permissions.Finding_Delete,
-            )
         return check_object_permission(
             request,
             obj,
             Permissions.Finding_View,
             Permissions.Finding_Edit,
-            Permissions.Finding_Edit,
-            Permissions.Finding_Edit,
+            Permissions.Finding_Delete,
         )
+
+
+class UserHasFindingRelatedObjectPermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Finding_View,
+        "put_permission": Permissions.Finding_Edit,
+        "delete_permission": Permissions.Finding_Edit,
+        "post_permission": Permissions.Finding_Edit,
+    }
 
 
 class UserHasImportPermission(permissions.BasePermission):
@@ -776,40 +737,28 @@ class UserHasReimportPermission(permissions.BasePermission):
 
 
 class UserHasTestPermission(permissions.BasePermission):
-    # Permission checks for related objects (like notes or metadata) can be moved
-    # into a seperate class, when the legacy authorization will be removed.
-    path_tests_post = re.compile(r"^/api/v2/tests/$")
-    path_tests = re.compile(r"^/api/v2/tests/\d+/$")
-
     def has_permission(self, request, view):
-        if UserHasTestPermission.path_tests_post.match(
-            request.path,
-        ) or UserHasTestPermission.path_tests.match(request.path):
-            return check_post_permission(
-                request, Engagement, "engagement", Permissions.Test_Add,
-            )
-        # related object only need object permission
-        return True
+        return check_post_permission(
+            request, Engagement, "engagement", Permissions.Test_Add,
+        )
 
     def has_object_permission(self, request, view, obj):
-        if UserHasTestPermission.path_tests_post.match(
-            request.path,
-        ) or UserHasTestPermission.path_tests.match(request.path):
-            return check_object_permission(
-                request,
-                obj,
-                Permissions.Test_View,
-                Permissions.Test_Edit,
-                Permissions.Test_Delete,
-            )
         return check_object_permission(
             request,
             obj,
             Permissions.Test_View,
             Permissions.Test_Edit,
-            Permissions.Test_Edit,
-            Permissions.Test_Edit,
+            Permissions.Test_Delete,
         )
+
+
+class UserHasTestRelatedObjectPermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Test_View,
+        "put_permission": Permissions.Test_Edit,
+        "delete_permission": Permissions.Test_Edit,
+        "post_permission": Permissions.Test_Edit,
+    }
 
 
 class UserHasTestImportPermission(permissions.BasePermission):
