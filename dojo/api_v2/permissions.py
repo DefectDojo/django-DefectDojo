@@ -19,6 +19,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.models import (
     Cred_Mapping,
+    Development_Environment,
     Dojo_Group,
     Endpoint,
     Engagement,
@@ -26,6 +27,8 @@ from dojo.models import (
     Finding_Group,
     Product,
     Product_Type,
+    Regulation,
+    SLA_Configuration,
     Test,
 )
 
@@ -57,6 +60,71 @@ def check_object_permission(
     if request.method == "POST":
         return user_has_permission(request.user, obj, post_permission)
     return False
+
+
+class BaseRelatedObjectPermission(permissions.BasePermission):
+
+    """
+    An "abstract" base class for related object permissions (like notes, metadata, etc.)
+    that only need object permissions, not general permissions. This class will serve as
+    the base class for other more aptly named permission classes.
+    """
+
+    permission_map: dict[str, int] = {
+        "get_permission": None,
+        "put_permission": None,
+        "delete_permission": None,
+        "post_permission": None,
+    }
+
+    def has_permission(self, request: Request, view):
+        # related object only need object permission
+        return True
+
+    def has_object_permission(self, request: Request, view, obj):
+        return check_object_permission(
+            request,
+            obj,
+            **self.permission_map,
+        )
+
+
+class BaseDjangoModelPermission(permissions.BasePermission):
+
+    """
+    An "abstract" base class for Django model permissions.
+    This class will serve as the base class for other more aptly named permission classes.
+    """
+
+    django_model: Model = None
+    request_method_permission_map: dict[str, str] = {
+        "GET": "view",
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+    def _evaluate_permissions(self, request: Request, permissions: dict[str, str]) -> bool:
+        for method, permission in permissions.items():
+            if request.method == method:
+                return user_has_configuration_permission(
+                    request.user,
+                    f"{self.django_model._meta.app_label}.{permission}_{self.django_model._meta.model_name}",
+                )
+        return False
+
+    def has_permission(self, request: Request, view):
+        # First restrict the mapping got GET/POST only
+        expected_request_method_permission_map = {k: v for k, v in self.request_method_permission_map.items() if k in {"GET", "POST"}}
+        # Short circuit if the request method is not in the expected methods
+        if request.method not in expected_request_method_permission_map:
+            return True
+        # Evaluate the permissions
+        return self._evaluate_permissions(request, expected_request_method_permission_map)
+
+    def has_object_permission(self, request: Request, view, obj):
+        return self._evaluate_permissions(request, self.request_method_permission_map)
 
 
 class UserHasAppAnalysisPermission(permissions.BasePermission):
@@ -274,33 +342,6 @@ class UserHasEndpointStatusPermission(permissions.BasePermission):
             Permissions.Endpoint_View,
             Permissions.Endpoint_Edit,
             Permissions.Endpoint_Edit,
-        )
-
-
-class BaseRelatedObjectPermission(permissions.BasePermission):
-
-    """
-    An "abstract" base class for related object permissions (like notes, metadata, etc.)
-    that only need object permissions, not general permissions. This class will serve as
-    the base class for other more aptly named permission classes.
-    """
-
-    permission_map = {
-        "get_permission": None,
-        "put_permission": None,
-        "delete_permission": None,
-        "post_permission": None,
-    }
-
-    def has_permission(self, request, view):
-        # related object only need object permission
-        return True
-
-    def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj,
-            **self.permission_map,
         )
 
 
@@ -985,6 +1026,36 @@ class UserHasEngagementPresetPermission(permissions.BasePermission):
             Permissions.Product_Edit,
             Permissions.Product_Edit,
         )
+
+
+class UserHasSLAPermission(BaseDjangoModelPermission):
+    django_model = SLA_Configuration
+
+
+class UserHasDevelopmentEnvironmentPermission(BaseDjangoModelPermission):
+    django_model = Development_Environment
+    # https://github.com/DefectDojo/django-DefectDojo/blob/963d4a35bfd8f5138330f0d70595a755fa4999b0/dojo/user/utils.py#L93
+    # It looks like view permission was explicitly not supported, so I assume
+    # reading these endpoints are not necessarily restricted (unless you're auth'd of course)
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasRegulationPermission(BaseDjangoModelPermission):
+    django_model = Regulation
+    # https://github.com/DefectDojo/django-DefectDojo/blob/963d4a35bfd8f5138330f0d70595a755fa4999b0/dojo/user/utils.py#L104
+    # It looks like view permission was explicitly not supported, so I assume
+    # reading these endpoints are not necessarily restricted (unless you're auth'd of course)
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
 
 
 def raise_no_auto_create_import_validation_error(
