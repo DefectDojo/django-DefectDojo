@@ -12,9 +12,8 @@ from django.urls import reverse
 from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
-from dojo.celery_dispatch import dojo_dispatch_task
 import dojo.risk_acceptance.helper as ra_helper
-from dojo import utils
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
