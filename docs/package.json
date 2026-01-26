@@ -16,18 +16,18 @@
     "preview": "vite preview --outDir public"
   },
   "dependencies": {
-    "@docsearch/css": "4.4.0",
-    "@docsearch/js": "4.4.0",
+    "@docsearch/css": "4.5.3",
+    "@docsearch/js": "4.5.3",
     "@tabler/icons": "3.36.1",
     "@thulite/doks-core": "1.8.3",
     "@thulite/images": "3.3.3",
     "@thulite/inline-svg": "1.2.1",
     "@thulite/seo": "2.4.2",
-    "thulite": "2.6.3"
+    "thulite": "2.6.4"
   },
   "devDependencies": {
-    "prettier": "3.7.4",
-    "vite": "7.3.0"
+    "prettier": "3.8.1",
+    "vite": "7.3.1"
   },
   "engines": {
     "node": ">=20.11.0"
