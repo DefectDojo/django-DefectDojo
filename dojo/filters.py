@@ -2023,9 +2023,6 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
             del self.form.fields["test__engagement__product__name_contains"]
             del self.form.fields["test__engagement__product__prod_type__name"]
             del self.form.fields["test__engagement__product__prod_type__name_contains"]
-        else:
-            del self.form.fields["test__name"]
-            del self.form.fields["test__name_contains"]
 
 
 class FindingFilter(FindingFilterHelper, FindingTagFilter):
