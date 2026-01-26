@@ -2061,6 +2061,14 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
 
     MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE]
 
+# Linear migrations for development
+# Helps avoid merge migration conflicts by tracking the latest migration
+if DEBUG:
+    INSTALLED_APPS = (
+        "django_linear_migrations",  # Must be before dojo to override makemigrations
+        *INSTALLED_APPS,
+    )
+
     def show_toolbar(request):
         return True
 
