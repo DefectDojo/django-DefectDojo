@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
+import dojo.risk_acceptance.helper as ra_helper
 from dojo import utils
 from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
@@ -767,11 +768,13 @@ class BaseImporter(ImporterOptions):
         self,
         finding: Finding,
         group_names_to_findings_dict: dict,
-    ) -> None:
+    ) -> bool:
         """
         Determines how to handle an incoming finding with respect to grouping
         if finding groups are enabled, use the supplied grouping mechanism to
-        store a reference of how the finding should be grouped
+        store a reference of how the finding should be grouped.
+
+        Returns True if the finding was added to a group, False otherwise.
         """
         if self.findings_groups_enabled and self.group_by:
             # If finding groups are enabled, group all findings by group name
@@ -781,6 +784,8 @@ class BaseImporter(ImporterOptions):
                     group_names_to_findings_dict[name].append(finding)
                 else:
                     group_names_to_findings_dict[name] = [finding]
+                return True
+        return False
 
     def process_request_response_pairs(
         self,
@@ -921,6 +926,9 @@ class BaseImporter(ImporterOptions):
             author=self.user,
             entry=note_message,
         )
+        # Remove risk acceptance if present (vulnerability is now fixed)
+        # risk_unaccept will check if finding.risk_accepted is True before proceeding
+        ra_helper.risk_unaccept(self.user, finding, perform_save=False, post_comments=False)
         # Mitigate the endpoint statuses
         self.endpoint_manager.mitigate_endpoint_status(finding.status_finding.all(), self.user, kwuser=self.user, sync=True)
         # to avoid pushing a finding group multiple times, we push those outside of the loop

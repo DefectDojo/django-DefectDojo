@@ -3,7 +3,7 @@ title: "Cloudflare Insights"
 toc_hide: true
 ---
 
-Import Cloudflare Insights findings using the **CSV export** provided by Cloudflare.
+Import Cloudflare Insights findings using the **CSV export** or via api the **JSON output** provided by Cloudflare.
 
 ### Sample Scan Data
 Sample Cloudflare Insights files can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/cloudflare_insights).

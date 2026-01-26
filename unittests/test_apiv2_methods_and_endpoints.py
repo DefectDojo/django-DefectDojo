@@ -49,15 +49,18 @@ class ApiEndpointMethods(DojoTestCase):
             "configuration_permissions", "questionnaire_questions",
             "questionnaire_answers", "questionnaire_answered_questionnaires",
             "questionnaire_engagement_questionnaires", "questionnaire_general_questionnaires",
-            "dojo_group_members", "product_members", "product_groups", "product_type_groups",
-            "product_type_members", "asset_members", "asset_groups", "organization_groups",
-            "organization_members",
             # pghistory Event models (should not be exposed via API)
             "dojo_userevents", "endpointevents", "engagementevents", "findingevents",
             "finding_groupevents", "product_typeevents", "productevents", "testevents",
             "risk_acceptanceevents", "finding_templateevents", "cred_userevents",
             "notification_webhooksevents",
         }
+        patch_exempt_list = {
+            "dojo_group_members", "product_members", "product_groups", "product_type_groups",
+            "product_type_members", "asset_members", "asset_groups", "organization_groups",
+            "organization_members",
+        }
+
         for reg, _, _ in sorted(self.registry):
             if reg in exempt_list:
                 continue
@@ -67,7 +70,15 @@ class ApiEndpointMethods(DojoTestCase):
                     f"Endpoint: {reg}, Method: {method}",
                 )
 
-            for method in ["get", "put", "patch", "delete"]:
+            for method in ["get", "put", "delete"]:
+                self.assertIsNotNone(
+                    self.schema["paths"][f"{BASE_API_URL}/{reg}" + "/{id}/"].get(method),
+                    f"Endpoint: {reg}, Method: {method}",
+                )
+
+            for method in ["patch"]:
+                if reg in patch_exempt_list:
+                    continue
                 self.assertIsNotNone(
                     self.schema["paths"][f"{BASE_API_URL}/{reg}" + "/{id}/"].get(method),
                     f"Endpoint: {reg}, Method: {method}",

@@ -1,4 +1,5 @@
 from django.core.exceptions import PermissionDenied
+from django.db.models import Model, QuerySet
 
 from dojo.authorization.roles_permissions import (
     Permissions,
@@ -11,6 +12,7 @@ from dojo.models import (
     Cred_Mapping,
     Dojo_Group,
     Dojo_Group_Member,
+    Dojo_User,
     Endpoint,
     Engagement,
     Finding,
@@ -30,7 +32,7 @@ from dojo.models import (
 from dojo.request_cache import cache_for_request
 
 
-def user_has_configuration_permission(user, permission):
+def user_has_configuration_permission(user: Dojo_User, permission: str):
     if not user:
         return False
 
@@ -40,7 +42,7 @@ def user_has_configuration_permission(user, permission):
     return user.has_perm(permission)
 
 
-def user_is_superuser_or_global_owner(user):
+def user_is_superuser_or_global_owner(user: Dojo_User) -> bool:
     """
     Returns True if the user is a superuser or has a global role (directly or
     via group membership) whose Role.is_owner is True.
@@ -69,7 +71,7 @@ def user_is_superuser_or_global_owner(user):
     return False
 
 
-def user_has_permission(user, obj, permission):
+def user_has_permission(user: Dojo_User, obj: Model, permission: int) -> bool:
     if user.is_anonymous:
         return False
 
@@ -229,7 +231,7 @@ def user_has_permission(user, obj, permission):
     raise NoAuthorizationImplementedError(msg)
 
 
-def user_has_global_permission(user, permission):
+def user_has_global_permission(user: Dojo_User, permission: int) -> bool:
     if not user:
         return False
 
@@ -263,22 +265,22 @@ def user_has_global_permission(user, permission):
     return False
 
 
-def user_has_configuration_permission_or_403(user, permission):
+def user_has_configuration_permission_or_403(user: Dojo_User, permission: str) -> None:
     if not user_has_configuration_permission(user, permission):
         raise PermissionDenied
 
 
-def user_has_permission_or_403(user, obj, permission):
+def user_has_permission_or_403(user: Dojo_User, obj: Model, permission: int) -> None:
     if not user_has_permission(user, obj, permission):
         raise PermissionDenied
 
 
-def user_has_global_permission_or_403(user, permission):
+def user_has_global_permission_or_403(user: Dojo_User, permission: int) -> None:
     if not user_has_global_permission(user, permission):
         raise PermissionDenied
 
 
-def get_roles_for_permission(permission):
+def get_roles_for_permission(permission: int) -> set[int]:
     if not Permissions.has_value(permission):
         msg = f"Permission {permission} does not exist"
         raise PermissionDoesNotExistError(msg)
@@ -291,7 +293,7 @@ def get_roles_for_permission(permission):
     return roles_for_permissions
 
 
-def role_has_permission(role, permission):
+def role_has_permission(role: int, permission: int) -> bool:
     if role is None:
         return False
     if not Roles.has_value(role):
@@ -304,7 +306,7 @@ def role_has_permission(role, permission):
     return permission in permissions
 
 
-def role_has_global_permission(role, permission):
+def role_has_global_permission(role: int, permission: int) -> bool:
     if role is None:
         return False
     if not Roles.has_value(role):
@@ -332,12 +334,12 @@ class RoleDoesNotExistError(Exception):
         self.message = message
 
 
-def get_product_member(user, product):
+def get_product_member(user: Dojo_User, product: Product) -> Product_Member | None:
     return get_product_member_dict(user).get(product.id)
 
 
 @cache_for_request
-def get_product_member_dict(user):
+def get_product_member_dict(user: Dojo_User) -> dict[int, Product_Member]:
     pm_dict = {}
     for product_member in (
         Product_Member.objects.select_related("product")
@@ -348,12 +350,12 @@ def get_product_member_dict(user):
     return pm_dict
 
 
-def get_product_type_member(user, product_type):
+def get_product_type_member(user: Dojo_User, product_type: Product_Type) -> Product_Type_Member | None:
     return get_product_type_member_dict(user).get(product_type.id)
 
 
 @cache_for_request
-def get_product_type_member_dict(user):
+def get_product_type_member_dict(user: Dojo_User) -> dict[int, Product_Type_Member]:
     ptm_dict = {}
     for product_type_member in (
         Product_Type_Member.objects.select_related("product_type")
@@ -364,12 +366,12 @@ def get_product_type_member_dict(user):
     return ptm_dict
 
 
-def get_product_groups(user, product):
+def get_product_groups(user: Dojo_User, product: Product) -> list[Product_Group]:
     return get_product_groups_dict(user).get(product.id, [])
 
 
 @cache_for_request
-def get_product_groups_dict(user):
+def get_product_groups_dict(user: Dojo_User) -> dict[int, list[Product_Group]]:
     pg_dict = {}
     for product_group in (
         Product_Group.objects.select_related("product")
@@ -382,12 +384,12 @@ def get_product_groups_dict(user):
     return pg_dict
 
 
-def get_product_type_groups(user, product_type):
+def get_product_type_groups(user: Dojo_User, product_type: Product_Type) -> list[Product_Type_Group]:
     return get_product_type_groups_dict(user).get(product_type.id, [])
 
 
 @cache_for_request
-def get_product_type_groups_dict(user):
+def get_product_type_groups_dict(user: Dojo_User) -> dict[int, list[Product_Type_Group]]:
     pgt_dict = {}
     for product_type_group in (
         Product_Type_Group.objects.select_related("product_type")
@@ -404,16 +406,16 @@ def get_product_type_groups_dict(user):
 
 
 @cache_for_request
-def get_groups(user):
+def get_groups(user: Dojo_User) -> QuerySet[Dojo_Group]:
     return Dojo_Group.objects.select_related("global_role").filter(users=user)
 
 
-def get_group_member(user, group):
+def get_group_member(user: Dojo_User, group: Dojo_Group) -> dict[int, Dojo_Group_Member]:
     return get_group_members_dict(user).get(group.id)
 
 
 @cache_for_request
-def get_group_members_dict(user):
+def get_group_members_dict(user: Dojo_User) -> dict[int, Dojo_Group_Member]:
     gu_dict = {}
     for group_member in (
         Dojo_Group_Member.objects.select_related("group")

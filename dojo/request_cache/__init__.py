@@ -5,7 +5,7 @@ from crum import get_current_request
 # the code has been copied to DefectDojo, to be able to fix issues ourselves.
 
 
-def get_request_cache():
+def get_request_cache():  # noqa: RUF067
     """
     Return the current requests cache
     :return:
@@ -13,10 +13,10 @@ def get_request_cache():
     return getattr(get_current_request(), "cache", None)
 
 
-cache_args_kwargs_marker = object()  # marker for separating args from kwargs (needs to be global)
+cache_args_kwargs_marker = object()  # noqa: RUF067 marker for separating args from kwargs (needs to be global)
 
 
-def cache_calculate_key(*args, **kwargs):
+def cache_calculate_key(*args, **kwargs):  # noqa: RUF067
     """
     Calculate the cache key of a function call with args and kwargs
     Taken from lru_cache
@@ -31,7 +31,7 @@ def cache_calculate_key(*args, **kwargs):
     return str(key)
 
 
-def cache_for_request(fn):
+def cache_for_request(fn):  # noqa: RUF067
     """
     Decorator that allows to cache a function call with parameters and its result only for the current request
     The result is stored in the memory of the current process

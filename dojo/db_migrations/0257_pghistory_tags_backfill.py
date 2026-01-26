@@ -1,21 +1,34 @@
-# Generated manually for pghistory initial backfill
+# Generated manually for pghistory tag models initial backfill
 
 import logging
 
 from django.conf import settings
 from django.db import migrations
 
-from dojo.auditlog import (
-    get_tracked_models,
-    process_model_backfill,
-)
+from dojo.auditlog import process_model_backfill
 
 logger = logging.getLogger(__name__)
 
+# Tag through models to backfill
+TAG_MODELS = [
+    "FindingTags",
+    "FindingInheritedTags",
+    "ProductTags",
+    "EngagementTags",
+    "EngagementInheritedTags",
+    "TestTags",
+    "TestInheritedTags",
+    "EndpointTags",
+    "EndpointInheritedTags",
+    "FindingTemplateTags",
+    "AppAnalysisTags",
+    "ObjectsProductTags",
+]
 
-def backfill_pghistory_tables(apps, schema_editor):
+
+def backfill_pghistory_tag_tables(apps, schema_editor):
     """
-    Backfill pghistory tables with initial snapshots of existing records.
+    Backfill pghistory tag tables with initial snapshots of existing records.
 
     This migration is fail-safe: if it fails for some reason, it will continue
     where it left off on the next run, as it only processes records that don't
@@ -23,7 +36,7 @@ def backfill_pghistory_tables(apps, schema_editor):
     """
     # Skip if auditlog is not enabled
     if not settings.ENABLE_AUDITLOG:
-        logger.info("pghistory is not enabled. Skipping backfill.")
+        logger.info("pghistory is not enabled. Skipping tag backfill.")
         return
 
     # Check if we can use COPY (PostgreSQL only)
@@ -48,13 +61,10 @@ def backfill_pghistory_tables(apps, schema_editor):
         else:
             logger.info(msg)
 
-    # Get all tracked models
-    tracked_models = get_tracked_models()
-
-    logger.info(f"Starting pghistory backfill for {len(tracked_models)} model(s)...")
+    logger.info(f"Starting pghistory backfill for {len(TAG_MODELS)} tag model(s)...")
 
     total_processed = 0
-    for model_name in tracked_models:
+    for model_name in TAG_MODELS:
         logger.info(f"Processing {model_name}...")
         try:
             processed, _ = process_model_backfill(
@@ -65,23 +75,22 @@ def backfill_pghistory_tables(apps, schema_editor):
             )
             total_processed += processed
         except Exception as e:
-            logger.error(f"Failed to backfill {model_name}: {e}", exc_info=True)
+            logger.exception(f"Failed to backfill {model_name}: {e}")
             # Continue with other models even if one fails
             continue
 
-    logger.info(f"Pghistory backfill complete: Processed {total_processed:,} records")
+    logger.info(f"Pghistory tag backfill complete: Processed {total_processed:,} records")
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0249_findingreviewers_findingreviewersevent_and_more"),
+        ("dojo", "0256_pghistory_for_tags_models"),
     ]
 
     operations = [
         migrations.RunPython(
-            backfill_pghistory_tables,
+            backfill_pghistory_tag_tables,
             reverse_code=migrations.RunPython.noop,
         ),
     ]
-
