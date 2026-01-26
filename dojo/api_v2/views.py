@@ -736,8 +736,8 @@ class RiskAcceptanceViewSet(
             status.HTTP_200_OK: serializers.RiskAcceptanceProofSerializer,
         },
     )
-    @action(detail=True, methods=["get"])
-    def download_proof(self, request, pk=None, permission_classes=(IsAuthenticated, permissions.UserHasRiskAcceptanceRelatedObjectPermission)):
+    @action(detail=True, methods=["get"], permission_classes=(IsAuthenticated, permissions.UserHasRiskAcceptanceRelatedObjectPermission))
+    def download_proof(self, request, pk=None):
         risk_acceptance = self.get_object()
         # Get the file object
         file_object = risk_acceptance.path
