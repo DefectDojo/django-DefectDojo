@@ -2872,6 +2872,14 @@
     }
   },
   {
+    "pk": 4,
+    "model": "dojo.global_role",
+    "fields": {
+      "user": 4,
+      "role": 2
+    }
+  },
+  {
     "model": "dojo.language_type",
     "pk": 1,
     "fields": {
