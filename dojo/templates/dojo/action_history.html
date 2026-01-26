@@ -38,7 +38,13 @@
                                 <tr>
                                     <td>{{ h.pgh_created_at }}</td>
                                     <td>{{ h.pgh_label }}</td>
-                                    <td>{{ h.object_str|default:"N/A" }}</td>
+                                    <td>
+                                        {% if h.object_url %}
+                                            <a href="{{ h.object_url }}">{{ h.object_str|default:"N/A" }}</a>
+                                        {% else %}
+                                            {{ h.object_str|default:"N/A" }}
+                                        {% endif %}
+                                    </td>
                                     <td>{{ h.user|default:"N/A" }}</td>
                                     <td>
                                         {% if h.url and h.url != "N/A" %}
@@ -68,7 +74,13 @@
                                             <span class="text-muted">None</span>
                                         {% endif %}
                                     </td>
-                                    <td>{{ h.pgh_obj_id|default:"N/A" }}</td>
+                                    <td>
+                                        {% if h.object_url and h.pgh_obj_id %}
+                                            <a href="{{ h.object_url }}">{{ h.pgh_obj_id }}</a>
+                                        {% else %}
+                                            {{ h.pgh_obj_id|default:"N/A" }}
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         {% if h.pgh_label == "initial_backfill" %}
                                             <span class="badge badge-info">Initial Backfill</span>
