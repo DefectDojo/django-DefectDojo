@@ -328,9 +328,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 new_unique_ids_from_tool.append(unique_id_from_tool)
         # Get the initial filtered list of old findings to be closed without
         # considering the scope of the product or engagement
+        # Include both active findings and risk-accepted findings (which have active=False)
+        # Risk-accepted findings should be closed if the vulnerability is actually fixed
         old_findings = Finding.objects.filter(
+            Q(active=True) | Q(risk_accepted=True),
             test__test_type=self.test.test_type,
-            active=True,
         ).exclude(test=self.test)
         # Filter further based on the deduplication algorithm set on the test
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
