@@ -1520,7 +1520,7 @@ class AdHocFindingView(View):
             return request, True
 
         if context["gform"].is_valid():
-            add_external_issue(finding, "github")
+            add_external_issue(finding.id, "github")
 
             return request, True
         add_field_errors_to_response(context["gform"])

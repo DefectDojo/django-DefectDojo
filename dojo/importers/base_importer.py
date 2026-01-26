@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
+import dojo.risk_acceptance.helper as ra_helper
 from dojo import utils
 from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
@@ -668,7 +669,7 @@ class BaseImporter(ImporterOptions):
             product = self.test.engagement.product
             system_settings = System_Settings.objects.get()
             if system_settings.enable_product_grade:
-                calculate_grade_signature = utils.calculate_grade_signature(product)
+                calculate_grade_signature = utils.calculate_grade.si(product.id)
                 chord(post_processing_task_signatures)(calculate_grade_signature)
             else:
                 group(post_processing_task_signatures).apply_async()
@@ -925,6 +926,9 @@ class BaseImporter(ImporterOptions):
             author=self.user,
             entry=note_message,
         )
+        # Remove risk acceptance if present (vulnerability is now fixed)
+        # risk_unaccept will check if finding.risk_accepted is True before proceeding
+        ra_helper.risk_unaccept(self.user, finding, perform_save=False, post_comments=False)
         # Mitigate the endpoint statuses
         self.endpoint_manager.mitigate_endpoint_status(finding.status_finding.all(), self.user, kwuser=self.user, sync=True)
         # to avoid pushing a finding group multiple times, we push those outside of the loop
