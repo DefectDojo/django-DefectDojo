@@ -378,37 +378,28 @@ class BaseClass:
         def __init__(self, *args, **kwargs):
             DojoAPITestCase.__init__(self, *args, **kwargs)
 
-        def setUp(self):
-            testuser = User.objects.get(username="admin")
+        def _get_client(self, user_criteria: dict) -> None:
+            testuser = User.objects.get(**user_criteria)
             token = Token.objects.get(user=testuser)
             self.client = APIClient()
             self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+
+        def setUp(self):
+            self._get_client({"username": "admin"})
             self.url = reverse(self.viewname + "-list")
             self.schema = get_open_api3_json_schema()
 
         def setUp_not_authorized(self):
-            testuser = User.objects.get(id=self.NOT_AUTHORIZED_USER_ID)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+            self._get_client({"id": self.NOT_AUTHORIZED_USER_ID})
 
         def setUp_global_reader(self):
-            testuser = User.objects.get(id=self.GLOBAL_READER_USER_ID)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+            self._get_client({"id": self.GLOBAL_READER_USER_ID})
 
         def setUp_global_writer(self):
-            testuser = User.objects.get(id=self.GLOBAL_WRITER_USER_ID)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+            self._get_client({"id": self.GLOBAL_WRITER_USER_ID})
 
         def setUp_global_owner(self):
-            testuser = User.objects.get(id=self.GLOBAL_OWNER_USER_ID)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+            self._get_client({"id": self.GLOBAL_OWNER_USER_ID})
 
         def check_schema(self, schema, obj):
             schema_checker = SchemaChecker(self.schema["components"])
