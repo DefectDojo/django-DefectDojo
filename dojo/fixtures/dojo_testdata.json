@@ -113,6 +113,24 @@
     }
   },
   {
+    "pk": 7,
+    "model": "auth.user",
+    "fields": {
+      "username": "globalWriter",
+      "first_name": "Global",
+      "last_name": "Writer",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": null,
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
+      "email": "global_writer@email.com",
+      "date_joined": "2018-04-13T07:59:51.527Z"
+    }
+  },
+  {
     "pk": "2dqr18yqu9mzb87abk0okid75w2clakl",
     "model": "sessions.session",
     "fields": {
@@ -2805,6 +2823,14 @@
     }
   },
   {
+    "pk": "184770c4c3256aba904297610fbb4da3fa15ba36",
+    "model": "authtoken.token",
+    "fields": {
+      "user": 7,
+      "created": "2018-04-16T06:54:35.933Z"
+    }
+  },
+  {
     "pk": "1",
     "model": "dojo.dojo_group",
     "fields": {
@@ -2875,7 +2901,7 @@
     "pk": 4,
     "model": "dojo.global_role",
     "fields": {
-      "user": 4,
+      "user": 7,
       "role": 2
     }
   },
