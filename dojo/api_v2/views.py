@@ -762,6 +762,79 @@ class RiskAcceptanceViewSet(
 
         return response
 
+    @extend_schema(
+        methods=["GET"],
+        responses={
+            status.HTTP_200_OK: serializers.RiskAcceptanceToNotesSerializer,
+        },
+    )
+    @extend_schema(
+        methods=["POST"],
+        request=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
+    )
+    @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated, permissions.UserHasRiskAcceptanceRelatedObjectPermission])
+    def notes(self, request, pk=None):
+        risk_acceptance = self.get_object()
+        if request.method == "POST":
+            new_note = serializers.AddNewNoteOptionSerializer(
+                data=request.data,
+            )
+            if new_note.is_valid():
+                entry = new_note.validated_data["entry"]
+                private = new_note.validated_data.get("private", False)
+                note_type = new_note.validated_data.get("note_type", None)
+            else:
+                return Response(
+                    new_note.errors, status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            notes = risk_acceptance.notes.filter(note_type=note_type).first()
+            if notes and note_type and note_type.is_single:
+                return Response("Only one instance of this note_type allowed on a risk acceptance.", status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+            note = Notes(
+                entry=entry,
+                author=author,
+                private=private,
+                note_type=note_type,
+            )
+            note.save()
+            risk_acceptance.notes.add(note)
+            # Attempt to get a link to the risk acceptance
+            if hasattr(risk_acceptance, "engagement") and risk_acceptance.engagement is not None:
+                risk_acceptance_url = request.build_absolute_uri(
+                    reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)),
+                )
+            # Attempt to intuit the engagement from the findings
+            elif (finding := risk_acceptance.accepted_findings.first()) is not None:
+                risk_acceptance_url = request.build_absolute_uri(
+                    reverse("view_risk_acceptance", args=(finding.test.engagement.id, risk_acceptance.id)),
+                )
+            else:
+                # Not much we can do here...
+                risk_acceptance_url = "/"
+            # Determine if we need to send any notifications for user mentioned
+            process_tag_notifications(
+                request=request,
+                note=note,
+                parent_url=risk_acceptance_url,
+                parent_title=f"Risk Acceptance: {risk_acceptance.name}",
+            )
+
+            serialized_note = serializers.NoteSerializer(
+                {"author": author, "entry": entry, "private": private},
+            )
+            return Response(
+                serialized_note.data, status=status.HTTP_201_CREATED,
+            )
+        notes = risk_acceptance.notes.all()
+        serialized_notes = serializers.RiskAcceptanceToNotesSerializer(
+            {"risk_acceptance_id": risk_acceptance, "notes": notes},
+        )
+        return Response(serialized_notes.data, status=status.HTTP_200_OK)
+
 
 # These are technologies in the UI and the API!
 # Authorization: object-based
