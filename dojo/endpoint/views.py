@@ -18,7 +18,7 @@ from django.utils import timezone
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.endpoint.queries import get_authorized_endpoints
+from dojo.endpoint.queries import get_authorized_endpoints_for_queryset
 from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
 from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
 from dojo.forms import AddEndpointForm, DeleteEndpointForm, DojoMetaDataForm, EditEndpointForm, ImportEndpointMetaForm
@@ -52,7 +52,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
         endpoints = Endpoint.objects.all()
 
     endpoints = endpoints.prefetch_related("product", "product__tags", "tags").distinct()
-    endpoints = get_authorized_endpoints(Permissions.Endpoint_View, endpoints, request.user)
+    endpoints = get_authorized_endpoints_for_queryset(Permissions.Endpoint_View, endpoints, request.user)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
     if host_view:
@@ -365,7 +365,7 @@ def endpoint_bulk_update_all(request, pid=None):
                 product = get_object_or_404(Product, id=pid)
                 user_has_permission_or_403(request.user, product, Permissions.Endpoint_Delete)
 
-            endpoints = get_authorized_endpoints(Permissions.Endpoint_Delete, endpoints, request.user)
+            endpoints = get_authorized_endpoints_for_queryset(Permissions.Endpoint_Delete, endpoints, request.user)
 
             skipped_endpoint_count = total_endpoint_count - endpoints.count()
             deleted_endpoint_count = endpoints.count()
@@ -389,7 +389,7 @@ def endpoint_bulk_update_all(request, pid=None):
                 product = get_object_or_404(Product, id=pid)
                 user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
-            endpoints = get_authorized_endpoints(Permissions.Endpoint_Edit, endpoints, request.user)
+            endpoints = get_authorized_endpoints_for_queryset(Permissions.Endpoint_Edit, endpoints, request.user)
 
             skipped_endpoint_count = total_endpoint_count - endpoints.count()
             updated_endpoint_count = endpoints.count()
