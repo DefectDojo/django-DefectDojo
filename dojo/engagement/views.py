@@ -2191,6 +2191,7 @@ def get_foreign_keys():
         "report_type", "requester", "source_code_management_server"]
 
 
+@dojo_ratelimit_view()
 def csv_export(request):
     logger.debug("starting csv export")
     engagements = get_engagements(request)
@@ -2226,7 +2227,7 @@ def csv_export(request):
     logger.debug("done with csv export")
     return response
 
-
+@dojo_ratelimit_view()
 def excel_export(request):
     logger.debug("starting excel export")
     engagements = get_engagements(request)
