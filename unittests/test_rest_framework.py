@@ -372,7 +372,7 @@ class BaseClass:
     class RESTEndpointTest(DojoAPITestCase):
         NOT_AUTHORIZED_USER_ID = 3
         GLOBAL_READER_USER_ID = 5
-        GLOBAL_WRITER_USER_ID = 4
+        GLOBAL_WRITER_USER_ID = 7
         GLOBAL_OWNER_USER_ID = 6
 
         def __init__(self, *args, **kwargs):
