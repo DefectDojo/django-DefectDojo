@@ -835,6 +835,7 @@ class RiskAcceptanceViewSet(
         )
         return Response(serialized_notes.data, status=status.HTTP_200_OK)
 
+
 # These are technologies in the UI and the API!
 # Authorization: object-based
 @extend_schema_view(**schema_with_prefetch())
