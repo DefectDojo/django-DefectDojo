@@ -20,6 +20,7 @@ import bleach
 import crum
 import cvss
 import vobject
+from amqp.exceptions import ChannelError
 from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -42,6 +43,7 @@ from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
+from kombu import Connection
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
@@ -1320,6 +1322,18 @@ def get_celery_worker_status():
         return res.get(timeout=5)
     except:
         return False
+
+
+def get_celery_queue_length():
+    try:
+        with Connection(settings.CELERY_BROKER_URL) as conn, conn.SimpleQueue("celery") as queue:
+            return queue.qsize()
+    except ChannelError as e:
+        if "NOT_FOUND" in str(e):
+            return 0
+        return None
+    except:
+        return None
 
 
 # Used to display the counts and enabled tabs in the product view
