@@ -93,19 +93,19 @@ def get_authorized_location_finding_reference(permission, queryset=None, user=No
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef("location__product__prod_type_id"),
+        product_type=OuterRef("location__products__product__prod_type_id"),
         user=user,
         role__in=roles)
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef("location__product_id"),
+        product=OuterRef("location__products__product_id"),
         user=user,
         role__in=roles)
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("location__product__prod_type_id"),
+        product_type=OuterRef("location__products__product__prod_type_id"),
         group__users=user,
         role__in=roles)
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef("location__product_id"),
+        product=OuterRef("location__products__product_id"),
         group__users=user,
         role__in=roles)
     location_finding_reference = location_finding_reference.annotate(
@@ -136,19 +136,19 @@ def get_authorized_location_product_reference(permission, queryset=None, user=No
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef("location__product__prod_type_id"),
+        product_type=OuterRef("location__products__product__prod_type_id"),
         user=user,
         role__in=roles)
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef("location__product_id"),
+        product=OuterRef("location__products__product_id"),
         user=user,
         role__in=roles)
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("location__product__prod_type_id"),
+        product_type=OuterRef("location__products__product__prod_type_id"),
         group__users=user,
         role__in=roles)
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef("location__product_id"),
+        product=OuterRef("location__products__product_id"),
         group__users=user,
         role__in=roles)
     location_product_reference = location_product_reference.annotate(
