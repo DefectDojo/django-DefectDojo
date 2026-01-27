@@ -12,4 +12,4 @@ django-test-migrations==1.5.0
 parameterized==0.9.0
 
 # Development file watching (hot reload)
-watchdog==6.0.0
+watchdog[watchmedo]==6.0.0
