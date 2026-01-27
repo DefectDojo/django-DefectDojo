@@ -3735,7 +3735,7 @@ class AnnouncementTest(BaseClass.BaseClassTest):
         }
         self.update_fields = {"style": "warning"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 7
+        self.deleted_objects = 8
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create(self):
