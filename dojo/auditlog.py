@@ -774,7 +774,16 @@ def process_model_backfill(
     """
     if progress_callback is None:
         def progress_callback(msg, style=None):
-            logger.info(msg)
+            if style == "ERROR":
+                logger.error(msg)
+            elif style == "WARNING":
+                logger.warning(msg)
+            elif style == "SUCCESS":
+                logger.info(msg)
+            elif style == "DEBUG":
+                logger.debug(msg)
+            else:
+                logger.info(msg)
 
     try:
         table_name, event_table_name = get_table_names(model_name)
@@ -790,7 +799,7 @@ def process_model_backfill(
             progress_callback(
                 f"  Event table {event_table_name} not found. "
                 f"Is {model_name} tracked by pghistory?",
-                "ERROR",
+                "DEBUG",
             )
             return 0, 0.0
 
