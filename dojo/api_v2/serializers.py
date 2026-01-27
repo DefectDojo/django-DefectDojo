@@ -1607,6 +1607,13 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class RiskAcceptanceToNotesSerializer(serializers.Serializer):
+    risk_acceptance_id = serializers.PrimaryKeyRelatedField(
+        queryset=Risk_Acceptance.objects.all(), many=False, allow_null=True,
+    )
+    notes = NoteSerializer(many=True)
+
+
 class FindingMetaSerializer(serializers.ModelSerializer):
     class Meta:
         model = DojoMeta
