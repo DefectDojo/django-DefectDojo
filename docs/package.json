@@ -20,8 +20,8 @@
     "@docsearch/js": "4.5.3",
     "@tabler/icons": "3.36.1",
     "@thulite/doks-core": "1.8.3",
-    "@thulite/images": "3.3.3",
-    "@thulite/inline-svg": "1.2.1",
+    "@thulite/images": "3.3.4",
+    "@thulite/inline-svg": "1.2.2",
     "@thulite/seo": "2.4.2",
     "thulite": "2.6.4"
   },

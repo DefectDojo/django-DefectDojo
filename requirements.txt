@@ -17,6 +17,7 @@ django-crispy-forms==2.5
 django_extensions==4.1
 django-slack==5.19.0
 django-watson==1.6.3
+django-permissions-policy==4.28.0
 django-prometheus==2.4.1
 Django==5.2.9
 django-single-session==0.2.0
@@ -68,4 +69,4 @@ fontawesomefree==6.6.0
 PyYAML==6.0.3
 pyopenssl==25.3.0
 parameterized==0.9.0
-setuptools==80.10.1
+setuptools==80.10.2

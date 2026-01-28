@@ -49,7 +49,7 @@ from dojo.filters import (
     TestImportFilter,
     TestImportFindingActionFilter,
 )
-from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
+from dojo.finding.queries import get_authorized_findings, get_authorized_findings_for_queryset, prefetch_for_findings
 from dojo.forms import (
     ApplyFindingTemplateForm,
     ClearFindingReviewForm,
@@ -2641,7 +2641,7 @@ def _bulk_delete_findings(request, pid, form, finding_to_update, finds, total_fi
                 request.user, product, Permissions.Finding_Delete,
             )
 
-        finds = get_authorized_findings(
+        finds = get_authorized_findings_for_queryset(
             Permissions.Finding_Delete, finds,
         ).distinct()
 
@@ -3047,7 +3047,7 @@ def finding_bulk_update_all(request, pid=None):
                 )
 
             # make sure users are not editing stuff they are not authorized for
-            finds = get_authorized_findings(
+            finds = get_authorized_findings_for_queryset(
                 Permissions.Finding_Edit, finds,
             ).distinct()
 
