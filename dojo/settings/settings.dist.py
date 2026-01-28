@@ -1268,7 +1268,6 @@ CELERY_BEAT_SCHEDULE = {
     "dedupe-delete": {
         "task": "dojo.tasks.async_dupe_delete",
         "schedule": timedelta(minutes=1),
-        "args": [timedelta(minutes=1)],
     },
     "flush_auditlog": {
         "task": "dojo.tasks.flush_auditlog",
