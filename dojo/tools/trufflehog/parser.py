@@ -130,8 +130,7 @@ class TruffleHogParser:
             raw = json_data.get("Raw", "")
             rawV2 = json_data.get("RawV2", "")
 
-            title_prefix = "Verified " if verified else ""
-            titleText = f"{title_prefix} Hard Coded {detector_name} secret in: {file}"
+            titleText = f"Hard Coded {detector_name} secret in: {file}"
 
             mitigation = "Secrets and passwords should be stored in a secure vault and/or secure storage."
             if link:
