@@ -167,12 +167,6 @@ class Location(BaseModel):
                 location=self,
                 finding=finding,
             ).delete()
-            # If there are no findings left associated with this location, remove the association with the product too
-            if not LocationFindingReference.objects.filter(
-                location=self,
-                finding__test__engagement__product=finding.test.engagement.product,
-            ).exists():
-                self.disassociate_from_product(finding.test.engagement.product)
 
     def disassociate_from_product(
         self,
