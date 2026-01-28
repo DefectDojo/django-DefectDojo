@@ -1,4 +1,5 @@
 import base64
+import contextlib
 import copy
 import hashlib
 import logging
@@ -1702,7 +1703,8 @@ class Endpoint_Status(models.Model):
         ]
 
     def __str__(self):
-        return f"'{self.finding}' on '{self.endpoint}'"
+        with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+            return f"'{self.finding}' on '{self.endpoint}'"
 
     def copy(self, finding=None):
         copy = copy_model_util(self)
@@ -1764,7 +1766,7 @@ class Endpoint(models.Model):
         ]
 
     def __init__(self, *args, **kwargs):
-        if settings.V3_FEATURE_LOCATIONS:
+        if settings.V3_FEATURE_LOCATIONS and not getattr(self, "_allow_v3_init", False):
             msg = "Endpoint model is deprecated when V3_FEATURE_LOCATIONS is enabled"
             raise NotImplementedError(msg)
         super().__init__(*args, **kwargs)
@@ -1839,6 +1841,21 @@ class Endpoint(models.Model):
 
     def get_absolute_url(self):
         return reverse("view_endpoint", args=[str(self.id)])
+
+    @classmethod
+    @contextlib.contextmanager
+    def allow_endpoint_init(cls):
+        # When migrating to Locations, Endpoints are not deleted (hooray backup!). Disallowing the initialization of
+        # Endpoints is a good way to catch where they might still be used (oops!). However, there are some circumstances
+        # -- object deletes -- where Django itself attempts to instantiate an Endpoint object. This, we need to allow:
+        # if a user wants to delete an object, including whatever Endpoints are attached to it, they should be able to.
+        # This context manager allows code to initialize Endpoints at our discretion.
+        old = getattr(cls, "_allow_v3_init", None)
+        cls._allow_v3_init = True
+        try:
+            yield
+        finally:
+            cls._allow_v3_init = old
 
     def clean(self):
         errors = []
@@ -2874,7 +2891,6 @@ class Finding(BaseModel):
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
-        old_status_findings = list(self.status_finding.all())
         old_reviewers = list(self.reviewers.all())
         old_found_by = list(self.found_by.all())
         old_tags = list(self.tags.all())
@@ -2889,9 +2905,16 @@ class Finding(BaseModel):
         # Copy the files
         for files in old_files:
             copy.files.add(files.copy())
-        # Copy the endpoint_status
-        for endpoint_status in old_status_findings:
-            endpoint_status.copy(finding=copy)  # adding or setting is not necessary, link is created by Endpoint_Status.copy()
+        if settings.V3_FEATURE_LOCATIONS:
+            old_location_refs = self.locations.all()
+            for location_ref in old_location_refs:
+                location_ref.copy(copy)
+        else:
+            # TODO: Delete this after the move to Locations
+            # Copy the endpoint_status
+            old_status_findings = list(self.status_finding.all())
+            for endpoint_status in old_status_findings:
+                endpoint_status.copy(finding=copy)  # adding or setting is not necessary, link is created by Endpoint_Status.copy()
         # Assign any reviewers
         copy.reviewers.set(old_reviewers)
         # Assign any found_by

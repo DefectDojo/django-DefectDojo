@@ -1,3 +1,3 @@
-path = "location"
-finding_path = "location_findings"
-product_path = "location_products"
+path = "location"  # noqa: RUF067
+finding_path = "location_findings"  # noqa: RUF067
+product_path = "location_products"  # noqa: RUF067
