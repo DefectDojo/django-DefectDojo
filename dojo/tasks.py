@@ -30,7 +30,7 @@ def log_generic_alert(source, title, description):
                         icon="bullseye", source=source)
 
 
-@app.task(bind=True)
+@app.task(bind=True, priority=3)
 def add_alerts(self, runinterval):
     now = timezone.now()
 
@@ -76,7 +76,7 @@ def add_alerts(self, runinterval):
             calculate_grade(product.id)
 
 
-@app.task(bind=True)
+@app.task(bind=True, priority=4)
 def cleanup_alerts(*args, **kwargs):
     try:
         max_alerts_per_user = settings.MAX_ALERTS_PER_USER
@@ -94,12 +94,12 @@ def cleanup_alerts(*args, **kwargs):
         logger.info("total number of alerts deleted: %s", total_deleted_count)
 
 
-@app.task(bind=True)
+@app.task(bind=True, priority=4)
 def flush_auditlog(*args, **kwargs):
     run_flush_auditlog()
 
 
-@app.task(bind=True)
+@app.task(bind=True, priority=4)
 def async_dupe_delete(*args, **kwargs):
     # Wrap with pghistory context for audit trail
     with pghistory.context(source="dupe_delete_task"):
@@ -173,7 +173,7 @@ def _async_dupe_delete_impl():
                     calculate_grade(product.id)
 
 
-@app.task(ignore_result=False)
+@app.task(ignore_result=False, priority=0)
 def celery_status():
     return True
 
@@ -237,13 +237,13 @@ def evaluate_pro_proposition(*args, **kwargs):
     announcement.save()
 
 
-@app.task
+@app.task(priority=4)
 def clear_sessions(*args, **kwargs):
     call_command("clearsessions")
 
 
 @dojo_async_task
-@app.task
+@app.task(priority=4)
 def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
     """
     Async task to update watson search indexes for a specific model type.

@@ -200,7 +200,7 @@ class SlackNotificationManger(NotificationManagerHelpers):
     """Manger for slack notifications and their helpers."""
 
     @dojo_async_task
-    @app.task
+    @app.task(priority=3)
     def send_slack_notification(
         self,
         event: str,
@@ -318,7 +318,7 @@ class MSTeamsNotificationManger(NotificationManagerHelpers):
     """Manger for Microsoft Teams notifications and their helpers."""
 
     @dojo_async_task
-    @app.task
+    @app.task(priority=3)
     def send_msteams_notification(
         self,
         event: str,
@@ -369,7 +369,7 @@ class EmailNotificationManger(NotificationManagerHelpers):
     """Manger for email notifications and their helpers."""
 
     @dojo_async_task
-    @app.task
+    @app.task(priority=3)
     def send_mail_notification(
         self,
         event: str,
@@ -421,7 +421,7 @@ class WebhookNotificationManger(NotificationManagerHelpers):
     ERROR_TEMPORARY = "temporary"
 
     @dojo_async_task
-    @app.task
+    @app.task(priority=3)
     def send_webhooks_notification(
         self,
         event: str,
@@ -559,7 +559,7 @@ class WebhookNotificationManger(NotificationManagerHelpers):
         # in "send_webhooks_notification", we are doing deeper analysis, why it failed
         # for now, "raise_for_status" should be enough
 
-    @app.task(ignore_result=True)
+    @app.task(ignore_result=True, priority=1)
     def _webhook_reactivation(self, endpoint_id: int, **_kwargs: dict):
         endpoint = Notification_Webhooks.objects.get(pk=endpoint_id)
         # User already changed status of endpoint
@@ -875,7 +875,7 @@ class NotificationManager(NotificationManagerHelpers):
                 )
 
 
-@app.task(ignore_result=True)
+@app.task(ignore_result=True, priority=1)
 def webhook_status_cleanup(*_args: list, **_kwargs: dict):
     # If some endpoint was affected by some outage (5xx, 429, Timeout) but it was clean during last 24 hours,
     # we consider this endpoint as healthy so need to reset it
