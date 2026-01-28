@@ -817,6 +817,25 @@ if env("DD_SECURE_HSTS_INCLUDE_SUBDOMAINS"):
 SESSION_EXPIRE_AT_BROWSER_CLOSE = env("DD_SESSION_EXPIRE_AT_BROWSER_CLOSE")
 SESSION_EXPIRE_WARNING = env("DD_SESSION_EXPIRE_WARNING")
 SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
+# Permission-Policy header settings
+# See docs at https://pypi.org/project/django-permissions-policy/
+PERMISSIONS_POLICY = {
+    "accelerometer": [],
+    "ambient-light-sensor": [],
+    "autoplay": [],
+    "camera": [],
+    "display-capture": [],
+    "encrypted-media": [],
+    "fullscreen": [],
+    "geolocation": [],
+    "gyroscope": [],
+    "interest-cohort": [],
+    "magnetometer": [],
+    "microphone": [],
+    "midi": [],
+    "payment": [],
+    "usb": [],
+}
 
 # ------------------------------------------------------------------------------
 # DEFECTDOJO SPECIFIC
@@ -966,6 +985,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "django_permissions_policy.PermissionsPolicyMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -1240,43 +1260,72 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.tasks.add_alerts",
         "schedule": timedelta(hours=1),
         "args": [timedelta(hours=1)],
+        "options": {
+            "expires": int(60 * 60 * 1 * 1.2),  # If a task is not executed within 72 minutes, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "cleanup-alerts": {
         "task": "dojo.tasks.cleanup_alerts",
         "schedule": timedelta(hours=8),
+        "options": {
+            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "dedupe-delete": {
         "task": "dojo.tasks.async_dupe_delete",
         "schedule": timedelta(minutes=1),
-        "args": [timedelta(minutes=1)],
+        "options": {
+            "expires": int(60 * 1 * 1.2),  # If a task is not executed within 72 seconds, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "flush_auditlog": {
         "task": "dojo.tasks.flush_auditlog",
         "schedule": timedelta(hours=8),
+        "options": {
+            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "update-findings-from-source-issues": {
         "task": "dojo.tools.tool_issue_updater.update_findings_from_source_issues",
         "schedule": timedelta(hours=3),
+        "options": {
+            "expires": int(60 * 60 * 3 * 1.2),  # If a task is not executed within 9 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "compute-sla-age-and-notify": {
         "task": "dojo.tasks.async_sla_compute_and_notify_task",
         "schedule": crontab(hour=7, minute=30),
+        "options": {
+            "expires": int(60 * 60 * 24 * 1.2),  # If a task is not executed within 28.8 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "risk_acceptance_expiration_handler": {
         "task": "dojo.risk_acceptance.helper.expiration_handler",
-        "schedule": crontab(minute=0, hour="*/3"),  # every 3 hours
+        "schedule": crontab(minute=0, hour="*/3"),  # every 72 minutes
+        "options": {
+            "expires": int(60 * 60 * 3 * 1.2),  # If a task is not executed within 9 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
+        "options": {
+            "expires": int(60 * 1 * 1.2),  # If a task is not executed within 72 seconds, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "trigger_evaluate_pro_proposition": {
         "task": "dojo.tasks.evaluate_pro_proposition",
         "schedule": timedelta(hours=8),
+        "options": {
+            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "clear_sessions": {
         "task": "dojo.tasks.clear_sessions",
         "schedule": crontab(hour=0, minute=0, day_of_week=0),
+        "options": {
+            "expires": int(60 * 60 * 24 * 7 * 1.2),  # If a task is not executed within 8.4 days, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',

@@ -92,7 +92,7 @@ Specify at least 1 USER command in Dockerfile with non-root user as argument
             references = """https://avd.aquasec.com/misconfig/ds002
 https://docs.docker.com/develop/develop-images/dockerfile_best-practices/"""
             self.assertEqual(references, finding.references)
-            self.assertEqual(["config", "dockerfile"], finding.tags)
+            self.assertEqual(["dockerfile", "config"], finding.unsaved_tags)
             finding = findings[3]
             self.assertEqual("Secret detected in Dockerfile - GitHub Personal Access Token", finding.title)
             self.assertEqual("Critical", finding.severity)
@@ -103,7 +103,7 @@ https://docs.docker.com/develop/develop-images/dockerfile_best-practices/"""
             self.assertEqual(description, finding.description)
             self.assertEqual("Dockerfile", finding.file_path)
             self.assertEqual(24, finding.line)
-            self.assertEqual(["secret"], finding.tags)
+            self.assertEqual(["secret"], finding.unsaved_tags)
 
     def test_kubernetes(self):
         with sample_path("kubernetes.json").open(encoding="utf-8") as test_file:
@@ -124,7 +124,7 @@ APT had several integer overflows and underflows while parsing .deb packages, ak
             self.assertEqual("1.8.2.2", finding.mitigation)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2020-27350", finding.unsaved_vulnerability_ids[0])
-            self.assertEqual(["debian", "os-pkgs"], finding.tags)
+            self.assertEqual(["debian", "os-pkgs"], finding.unsaved_tags)
             self.assertEqual("apt", finding.component_name)
             self.assertEqual("1.8.2.1", finding.component_version)
             self.assertEqual("default / Deployment / redis-follower", finding.service)
@@ -143,7 +143,7 @@ APT had several integer overflows and underflows while parsing .deb packages, ak
             self.assertEqual("1.8.2.2", finding.mitigation)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2020-27350", finding.unsaved_vulnerability_ids[0])
-            self.assertEqual(["debian", "os-pkgs"], finding.tags)
+            self.assertEqual(["debian", "os-pkgs"], finding.unsaved_tags)
             self.assertEqual("apt", finding.component_name)
             self.assertEqual("1.8.2.1", finding.component_version)
             self.assertEqual("default / Deployment / redis-leader", finding.service)
@@ -170,8 +170,8 @@ Number  Content
             re_finding_description = re.sub(r"\s+", " ", finding.description)
             self.assertEqual(re_description.strip(), re_finding_description.strip())
             self.assertEqual("Set 'set containers[].securityContext.allowPrivilegeEscalation' to 'false'.", finding.mitigation)
-            self.assertIsNone(finding.unsaved_vulnerability_ids)
-            self.assertEqual(["config", "kubernetes"], finding.tags)
+            self.assertEqual(finding.unsaved_vulnerability_ids, ["KSV001"])
+            self.assertEqual(["kubernetes", "config"], finding.unsaved_tags)
             self.assertIsNone(finding.component_name)
             self.assertIsNone(finding.component_version)
             self.assertEqual("default / Deployment / redis-follower", finding.service)
@@ -337,3 +337,11 @@ Number  Content
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", finding.cvssv3)
                 self.assertEqual(7.5, finding.cvssv3_score)
+
+    def test_misconfig_fields(self):
+        # this tests issue #14136. The unittest file is just a copy of cvss_severity_source.json with edited severities
+        with sample_path("issue_14136.json").open(encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 1)
+            self.assertEqual("Low", findings[0].severity)

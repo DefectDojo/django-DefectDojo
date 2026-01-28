@@ -215,7 +215,7 @@ class TestNotificationTriggers(DojoTestCase):
         with self.subTest("product_type_added"):
             with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 prod_type = Product_Type.objects.create(name="notif prod type")
-            self.assertEqual(mock.call_count, last_count + 4)
+            self.assertEqual(mock.call_count, last_count + 5)
             self.assertEqual(mock.call_args_list[-1].args[0], "product_type_added")
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], f"/product/type/{prod_type.id}")
 
@@ -236,7 +236,7 @@ class TestNotificationTriggers(DojoTestCase):
             with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 prod_type = Product_Type.objects.first()
                 prod, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name")
-            self.assertEqual(mock.call_count, last_count + 5)
+            self.assertEqual(mock.call_count, last_count + 6)
             self.assertEqual(mock.call_args_list[-1].args[0], "product_added")
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], f"/product/{prod.id}")
 
@@ -257,7 +257,7 @@ class TestNotificationTriggers(DojoTestCase):
             with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 prod = Product.objects.first()
                 eng = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
-            self.assertEqual(mock.call_count, last_count + 5)
+            self.assertEqual(mock.call_count, last_count + 6)
             self.assertEqual(mock.call_args_list[-1].args[0], "engagement_added")
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], f"/engagement/{eng.id}")
 
@@ -266,7 +266,7 @@ class TestNotificationTriggers(DojoTestCase):
             with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 eng.status = "Completed"
                 eng.save()
-            self.assertEqual(mock.call_count, last_count + 5)
+            self.assertEqual(mock.call_count, last_count + 6)
             self.assertEqual(mock.call_args_list[-1].args[0], "engagement_closed")
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], f"/engagement/{eng.id}/finding/all")
 
@@ -275,7 +275,7 @@ class TestNotificationTriggers(DojoTestCase):
             with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 eng.status = "In Progress"
                 eng.save()
-            self.assertEqual(mock.call_count, last_count + 5)
+            self.assertEqual(mock.call_count, last_count + 6)
             self.assertEqual(mock.call_args_list[-1].args[0], "engagement_reopened")
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], f"/engagement/{eng.id}")
 
@@ -376,7 +376,7 @@ class TestNotificationTriggers(DojoTestCase):
         with self.subTest("test_deleted itself"):
             with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 fg2.delete()
-            self.assertEqual(mock.call_count, last_count + 5)
+            self.assertEqual(mock.call_count, last_count + 6)
             self.assertEqual(mock.call_args_list[-1].args[0], "finding_group_deleted")
             self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The finding group "fg test" was deleted by admin')
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], f"/test/{test2.id}")

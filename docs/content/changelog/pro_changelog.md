@@ -10,6 +10,15 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Jan 2025: v2.54
 
+### Jan 20, 2025: v2.54.2
+
+* **(Pro UI)** corrected a bug where unordered lists would display as ordered lists in editor forms.
+* **(Smart Upload)** introduced severity filtering to the Smart Importer to skip findings below a specified severity level. Added detailed logging throughout the findings processing to improve traceability and debugging.
+
+### Jan 12, 2025: v2.54.1
+
+* **(AI Tools)** added Risk Scores to schema for MCP processing.
+
 ### Jan 5, 2025: v2.54.0
 
 No significant UX changes.

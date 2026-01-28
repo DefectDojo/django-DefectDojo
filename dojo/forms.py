@@ -324,6 +324,17 @@ class Test_TypeForm(forms.ModelForm):
         model = Test_Type
         exclude = ["dynamically_generated"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            self.fields["name"].widget.attrs["readonly"] = True
+
+    def clean_name(self):
+        if self.instance.pk:
+            return self.instance.name
+        return self.cleaned_data["name"]
+
 
 class Development_EnvironmentForm(forms.ModelForm):
     class Meta:
@@ -880,7 +891,7 @@ class EditRiskAcceptanceForm(forms.ModelForm):
     recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect, label="Security Recommendation")
     decision = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect)
 
-    path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
+    path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ", ".join(settings.FILE_IMPORT_TYPES)}))
     expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={"class": "datepicker"}))
 
     class Meta:
@@ -893,10 +904,20 @@ class EditRiskAcceptanceForm(forms.ModelForm):
         self.fields["expiration_date_warned"].disabled = True
         self.fields["expiration_date_handled"].disabled = True
 
+    def clean_path(self):
+        if (data := self.cleaned_data.get("path")) is not None:
+            ext = Path(data.name).suffix  # [0] returns path+filename
+            valid_extensions = settings.FILE_UPLOAD_TYPES
+            if ext.lower() not in valid_extensions:
+                if accepted_extensions := f"{', '.join(valid_extensions)}":
+                    msg = f"Unsupported extension. Supported extensions are as follows: {accepted_extensions}"
+                else:
+                    msg = "File uploads are prohibited due to the list of acceptable file extensions being empty"
+                raise ValidationError(msg)
+        return data
+
 
 class RiskAcceptanceForm(EditRiskAcceptanceForm):
-    # path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
-    # expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={"size": 10}),

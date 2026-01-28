@@ -7,7 +7,7 @@ from typing import Any
 
 from .cve_info_node import CveInfoNode
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)  # noqa: RUF067
 
 """
 # rl-json report
@@ -169,7 +169,7 @@ we need the full chain in order to preserve the full path of detection.
 """
 
 
-class RlJsonInfo:
+class RlJsonInfo:  # noqa: RUF067
 
     SCAN_TOOL_NAME: str = "ReversingLabs SpectraAssure"
 
