@@ -46,6 +46,26 @@ logger = logging.getLogger(__name__)
 labels = get_labels()
 
 
+def get_manager_class_instance():
+    default_manager = NotificationManager
+    notification_manager_class = default_manager
+    if isinstance(
+        (
+            notification_manager := getattr(
+                settings,
+                "NOTIFICATION_MANAGER",
+                default_manager,
+            )
+        ),
+        str,
+    ):
+        with suppress(ModuleNotFoundError):
+            module_name, _separator, class_name = notification_manager.rpartition(".")
+            module = importlib.import_module(module_name)
+            notification_manager_class = getattr(module, class_name)
+    return notification_manager_class()
+
+
 def create_notification(
     event: str | None = None,
     title: str | None = None,
@@ -63,23 +83,7 @@ def create_notification(
     **kwargs: dict,
 ) -> None:
     """Create an instance of a NotificationManager and dispatch the notification."""
-    default_manager = NotificationManager
-    notification_manager_class = default_manager
-    if isinstance(
-        (
-            notification_manager := getattr(
-                settings,
-                "NOTIFICATION_MANAGER",
-                default_manager,
-            )
-        ),
-        str,
-    ):
-        with suppress(ModuleNotFoundError):
-            module_name, _separator, class_name = notification_manager.rpartition(".")
-            module = importlib.import_module(module_name)
-            notification_manager_class = getattr(module, class_name)
-    notification_manager_class().create_notification(
+    get_manager_class_instance().create_notification(
         event=event,
         title=title,
         finding=finding,
@@ -870,30 +874,30 @@ class NotificationManager(NotificationManagerHelpers):
 @app.task
 def send_slack_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
-    SlackNotificationManger().send_slack_notification(event, user=user, **kwargs)
+    get_manager_class_instance()._get_manager_instance("slack").send_slack_notification(event, user=user, **kwargs)
 
 
 @app.task
 def send_msteams_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
-    MSTeamsNotificationManger().send_msteams_notification(event, user=user, **kwargs)
+    get_manager_class_instance()._get_manager_instance("msteams").send_msteams_notification(event, user=user, **kwargs)
 
 
 @app.task
 def send_mail_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
-    EmailNotificationManger().send_mail_notification(event, user=user, **kwargs)
+    get_manager_class_instance()._get_manager_instance("mail").send_mail_notification(event, user=user, **kwargs)
 
 
 @app.task
 def send_webhooks_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
-    WebhookNotificationManger().send_webhooks_notification(event, user=user, **kwargs)
+    get_manager_class_instance()._get_manager_instance("webhooks").send_webhooks_notification(event, user=user, **kwargs)
 
 
 @app.task(ignore_result=True)
 def webhook_reactivation(endpoint_id: int, **_kwargs: dict) -> None:
-    WebhookNotificationManger()._webhook_reactivation(endpoint_id=endpoint_id)
+    get_manager_class_instance()._get_manager_instance("webhooks")._webhook_reactivation(endpoint_id=endpoint_id)
 
 
 @app.task(ignore_result=True)

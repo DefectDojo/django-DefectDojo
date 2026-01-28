@@ -87,4 +87,9 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
     sig_kwargs.pop("sync", None)
     sig = sig.clone(kwargs=sig_kwargs)
     eager = sig.apply()
-    return eager.get(propagate=True)
+    try:
+        return eager.get(propagate=True)
+    except RuntimeError:
+        # Since we are intentionally running synchronously, we can propagate exceptions directly, and enable sync subtasks
+        # If the requests desires this. Celery docs explain that this is a rare use case, but we support it _just in case_
+        return eager.get(propagate=True, disable_sync_subtasks=False)
