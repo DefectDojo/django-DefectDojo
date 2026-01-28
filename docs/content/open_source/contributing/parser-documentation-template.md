@@ -6,7 +6,7 @@ weight: 1
 
 This template is designed to document a new or existing parser. Please feel free to improve with any additional information that might help your fellow security professionals.
 
-* Copy this .md file and add it to `/docs/content/en/connecting_your_tools/parsers/file` in the GitHub repository.
+* Copy this .md file and add it to `/docs/content/supported_tools/file` in the GitHub repository.
 * Update the title to match the name of your new or existing parser.
 * Fill out all sections listed below. Please remove any instructions or examples found within each section or examples.
 

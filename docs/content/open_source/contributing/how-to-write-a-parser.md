@@ -37,7 +37,7 @@ $ docker compose build --build-arg uid=1000
 |`unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
 |`unittests/tools/test_<parser_name>_parser.py` | Unit tests of the parser.
 |`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
-|`docs/content/en/connecting_your_tools/parsers/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained
+|`docs/content/supported_tools/<file/api>/<parser_file>.md` | Documentation, what kind of file format is required and how it should be obtained
 
 
 ## Factory contract
@@ -252,7 +252,7 @@ Do not do something like this:
 
 ## Deduplication algorithm
 
-By default a new parser uses the 'legacy' deduplication algorithm documented at https://docs.defectdojo.com/en/open_source/archived_docs/usage/features/#deduplication
+By default a new parser uses the 'legacy' deduplication algorithm documented at https://docs.defectdojo.com/open_source/archived_docs/usage/features/#deduplication
 
 Please use a pre-defined deduplication algorithm where applicable. When using the `unique_id_from_tool` or `vuln_id_from_tool` fields in the hash code configuration, it's important that these are uqniue for the finding and constant over time across subsequent scans. If this is not the case, the values can still be useful to set on the finding model without using them for deduplication.
 The values must be coming from the report directly and must not be something that is calculated by the parser internally.
@@ -383,4 +383,4 @@ Please add a new .md file in [`docs/content/en/connecting_your_tools/parsers`] w
 * A link to the relevant unit tests folder so that users can quickly navigate there from Documentation.
 * A link to the scanner itself - (e.g. GitHub or vendor link)
 
-Here is an example of a completed Parser documentation page: [https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/connecting_your_tools/parsers/file/acunetix.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/connecting_your_tools/parsers/file/acunetix.md)
+Here is an example of a completed Parser documentation page: [https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/supported_tools/file/acunetix.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/supported_tools/file/acunetix.md)

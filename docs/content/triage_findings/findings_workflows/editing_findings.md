@@ -1,7 +1,7 @@
 ---
 title: "Editing Findings"
 description: "Change a Finding’s Status, or add more metadata as you resolve an issue"
-weight: 1
+weight: 2
 ---
 
 If you want to add notes or update the language on a Finding to be more relevant to the current situation, you can do so through the Edit Finding form.

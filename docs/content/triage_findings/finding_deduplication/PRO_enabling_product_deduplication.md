@@ -27,8 +27,6 @@ Deduplication can be implemented at either a Product level or at a more narrow E
 
 Applying **Delete Deduplicate Findings** will begin a deletion process immediately. DefectDojo will look at each Finding with Duplicates recorded, and will delete old duplicate Findings until the Maximum Duplicate number has been reached.
 
-For more information on how DefectDojo determines what to delete, see our guide to **[Deleting Deduplicate Findings](../delete_deduplicates/).**
-
 ## Deduplication for Engagements
 
 Rather than Deduplicating across an entire Product, you can set a deduplication scope to be within a single Engagement exclusively.

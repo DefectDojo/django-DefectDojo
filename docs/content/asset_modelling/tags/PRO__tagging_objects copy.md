@@ -4,12 +4,13 @@ description: "Use Tags to create a new slice of your data model"
 draft: false
 weight: 2
 exclude_search: false
+audience: pro
 ---
 
 Tags are ideal for grouping objects in a manner that can be filtered out into smaller, more digestible chunks.  They can be used to denote status, or to create custom sets of Product Type, Products, Engagements or Findings across the data model.
 
 In DefectDojo, tags are a first class citizen and are recognized as the facilitators
-of organization within each level of the [data model](../product_hierarchy).
+of organization within each level of the data model.
 
 Here is an example with a Product with two tags and four findings each with a single tag:
 
@@ -47,8 +48,6 @@ Tags can be managed in the following ways:
   When many Findings are selected from a table, you can use the Bulk Edit menu to change the associated Tags for many Findings simultaneously.  Note that this will replace all Finding-level Tags with the Tags specified; existing Finding Tags will be overwritten.
 
   ![bulk editing findings](images/Bulk_Editing_Findings.png)
-
-  For more information, see our guide to [Bulk Editing Findings](/en/working_with_findings/findings_workflows/editing_findings/#bulk-edit-findings).
 
 
 ## Tag Management (Classic UI / OpenSource)
@@ -100,7 +99,7 @@ Tags can be managed in the following ways:
 
 **Pro UI note: though Tag inheritance can be configured using the Pro UI, inherited Tags currently can only be accessed and filtered for through the Classic UI or the API.**
 
-When Tag Inheritance is enabled, tags applied to a given Product will automatically be applied to all objects under Products in the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/Product_hierarchy).
+When Tag Inheritance is enabled, tags applied to a given Product will automatically be applied to all objects under Products in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/).
 
 ### Configuration
 

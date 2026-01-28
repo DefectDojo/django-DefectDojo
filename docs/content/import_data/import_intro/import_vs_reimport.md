@@ -83,4 +83,4 @@ This header indicates the actions taken by an Import/Reimport.
 
 Note that the /reimport API endpoint can both **extend an existing Test** (apply the method in this article) **or create a new Test** with new data \- an initial call to `/import`, or setting up a Test in advance is not required.
 
-To learn more about creating an automated CI/CD pipeline using DefectDojo, see our guide [here](../api_pipeline_modelling).
+To learn more about creating an automated CI/CD pipeline using DefectDojo, see our guide [here](/automation/api/api-v2-docs/).

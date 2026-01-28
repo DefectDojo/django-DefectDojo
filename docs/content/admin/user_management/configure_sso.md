@@ -16,7 +16,7 @@ Users can connect to DefectDojo with a Username and Password, but if you prefer,
 
 All of these methods can only be configured by a Superuser in DefectDojo.  DefectDojo Pro users can quickly set up SSO through their system settings, while Open Source users will need to configure these settings on the back-end by setting an environment variable within Docker.  This article covers both methods of configuration.
 
-**NOTE: DefectDojo Pro users will all need to add the IP addresses of SAML or SSO services to their Firewall whitelist.  See [Firewall Rules](/en/cloud_management/using-cloud-manager/#changing-your-firewall-settings) for more information.**
+**NOTE: DefectDojo Pro users will all need to add the IP addresses of SAML or SSO services to their Firewall whitelist.  See [Firewall Rules](/get_started/pro/cloud/using-cloud-manager/#changing-your-firewall-settings) for more information.**
 
 ## Disable username / password use
 You may wish to disable traditional username/password login on your instance.
@@ -70,7 +70,7 @@ Both <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span>
 
 ### Open-Source
 
-Open-Source users will need to map these variables in the local_settings.py file. (see [Configuration](/en/open_source/installation/configuration/)).
+Open-Source users will need to map these variables in the local_settings.py file. (see [Configuration](/get_started/open_source/configuration/)).
 
 1. Fill out the variables as follows:
     {{< highlight python >}}
@@ -143,7 +143,7 @@ When a user is removed from a given group in Azure AD, they will also be removed
 
 ### Open-Source
 
-Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/get_started/open_source/configuration)).
 
 1.  Set the following environment variables
 
@@ -215,7 +215,7 @@ Both <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span>
 
 ### Open-Source
 
-Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/get_started/open_source/configuration)).
 
 1.  Set the following environment variables
     {{< highlight python >}}
@@ -261,7 +261,7 @@ Follow along below.
 
 ### Open-Source
 
-Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/get_started/open_source/configuration)).
 
 1.  Set the following environment variables
     {{< highlight python >}}
@@ -323,7 +323,7 @@ In order to use Google Authentication, a Google Authentication Server will need 
 
 ### Open-Source
 
-Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/get_started/open_source/configuration)).
 
 1.  Set the following environment variables
 
@@ -407,7 +407,7 @@ This guide assumes you already have a KeyCloak Realm set up.  If not, you will n
 ### Open-Source
 
 
-Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/get_started/open_source/configuration)).
 
 1.  Set the following environment variables
 
@@ -495,7 +495,7 @@ Both <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span>
 
 ### Open-Source
 
-Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+Open-Source users will need to set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/get_started/open_source/configuration)).
 
 1.  Set the following environment variables
 
@@ -621,7 +621,7 @@ The left side of the ‘=’ sign represents the attribute you want to map from 
 ### Open-Source SAML
 
 1.  Navigate to your SAML IdP and find your metadata.
-2.  Set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/en/open_source/installation/configuration)).
+2.  Set these variables as an environment variable, or without the `DD_` prefix in the `local_settings.py` file. (see [Configuration](/get_started/open_source/configuration)).
 
     {{< highlight python >}}
     DD_SAML2_ENABLED=(bool, **True**),

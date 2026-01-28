@@ -7,7 +7,7 @@ audience: opensource
 
 Each Product in DefectDojo can have its own Service Level Agreement (SLA) configuration, which represents the days your organization has to remediate or otherwise manage a Finding.
 
-SLA can be set based on either **[Finding Severity](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/#findings)** or **[Finding Risk](/en/working_with_findings/finding_priority/)** (in DefectDojo Pro).
+SLA can be set based on either **[Finding Severity](/asset_modelling/hierarchy/product_hierarchy/#findings)** or **[Finding Risk](/asset_modelling/hierarchy/pro__priority_sla/)** (in DefectDojo Pro).
 
 ![image](images/sla_multiple.png)
 
@@ -18,9 +18,9 @@ SLAs apply a countdown of days to a Finding based on the day that the Finding wa
 You can use SLAs as a way to represent your organizations remediation policies.  You can also use them as a way to prioritize the longest-active, most critical Findings in your DefectDojo instance.  
 
 * You can sort or filter Finding tables by SLA days.
-* SLA violations can be configured to trigger [Notifications](/en/customize_dojo/notifications/about_notifications/) to DefectDojo users assigned to the related Product.
-* In **DefectDojo Pro**, SLA performance is also tracked on the [Executive Insights and Remediation](/en/customize_dojo/dashboards/pro_dashboards/) Metrics Dashboards.
-* SLA compliance can also be used to create custom [Dashboard Tiles](/en/customize_dojo/dashboards/about_custom_dashboard_tiles/#sla-violation-tile) in **DefectDojo Pro**.
+* SLA violations can be configured to trigger [Notifications](/admin/notifications/about_notifications/) to DefectDojo users assigned to the related Product.
+* In **DefectDojo Pro**, SLA performance is also tracked on the [Executive Insights and Remediation](/metrics_reports/pro_metrics/pro__overview/) Metrics Dashboards.
+* SLA compliance can also be used to create custom [Dashboard Tiles](/metrics_reports/dashboards/about_custom_dashboard_tiles/#sla-violation-tile) in **DefectDojo Pro**.
 
 ### Mitigated Within SLA status
 
@@ -42,7 +42,7 @@ In DefectDojo Pro, one or more SLA Configurations are managed under the **Config
 
 ![image](images/pro_sla_risk.png)
 
-SLA Configurations can only be edited by Superusers or by a user with the corresponding [Configuration Permission](/en/customize_dojo/user_management/user_permission_chart/#configuration-permission-chart).
+SLA Configurations can only be edited by Superusers or by a user with the corresponding [Configuration Permission](/admin/user_management/user_permission_chart/#configuration-permission-chart).
 
 ### Configuring SLA
 
@@ -72,6 +72,6 @@ Once a new SLA has been selected for a Product, all of the associated Findings' 
 
 ## Notes on SLAs
 
-* SLAs can be optionally restarted once a [Risk Accepted](/en/working_with_findings/findings_workflows/risk_acceptances/) Finding reactivates.  This is set when creating the Risk Acceptance by setting the **Restart SLA Expired** field.
+* SLAs can be optionally restarted once a [Risk Accepted](/triage_findings/findings_workflows/risk_acceptances/) Finding reactivates.  This is set when creating the Risk Acceptance by setting the **Restart SLA Expired** field.
 * Reimporting a Finding does not restart the SLA - SLAs are always calculated from when a Finding was first detected unless **Restart SLA on Finding Reactivation** is enabled.
 * Risk Acceptance expiry or reactivation of a Closed Finding are the only ways to reset or recalculate an SLA for a Finding once it is created (without changing the Product's SLA configuration).

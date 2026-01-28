@@ -11,7 +11,7 @@ Dashboard Tiles are customizable sets of filters for your DefectDojo instance, w
 Tiles can:
 
 * Act as shortcuts for particular sets of Findings, Products, or other objects
-* Visualize relevant metrics related a Product, Engagement or other components of the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/)
+* Visualize relevant metrics related a Product, Engagement or other components of the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/)
 * Provide alerts on particular activity, track SLA Violations, failing imports or new Critical Findings
 
 Tile Filters set a narrower focus for any tile you want to create. Each Tile has a different set of relevant filters which can be selected.
@@ -315,7 +315,7 @@ This Tile compares the Product Grade of all Products on your instance, so that y
 This tile uses a comparison operator (\<, \=, \<\=, \>\=) to track Products which equal, exceed or fail to meet the Product Grade which you want to monitor.
 
 ![image](images/About_Custom_Dashboard_Tiles_11.png)
-For more information on how Product Grades are calculated, see our article on [Product Health Grading](/en/working_with_findings/organizing_engagements_tests/product_health_grade/).
+For more information on how Product Grades are calculated, see our article on [Product Health Grading](/asset_modelling/hierarchy/product_health_grade/).
 
 #### Example: Track Failing Products
 

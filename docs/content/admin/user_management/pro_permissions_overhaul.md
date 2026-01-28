@@ -29,7 +29,7 @@ Part of your Role\-Based Access Control (RBAC) configuration may require you to 
 
 By default, the first account created on a new DefectDojo instance will have Superuser permissions. That user will be able to edit permissions for all subsequent DefectDojo users. Only an existing Superuser can add another superuser, or add a Global Role to a user.
 
-Permissions in <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> have been simplified, to make it easier to assign object access.  This feature can be accessed through the [Pro UI](/en/about_defectdojo/ui_pro_vs_os/).
+Permissions in <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> have been simplified, to make it easier to assign object access.  This feature can be accessed through the [Pro UI](/get_started/about/ui_pro_vs_os/).
 
 ### Opening the Permissions window 
 

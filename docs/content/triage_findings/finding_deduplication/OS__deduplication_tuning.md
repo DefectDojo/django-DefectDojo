@@ -7,7 +7,7 @@ audience: opensource
 
 The Open Source edition of DefectDojo uses settings files and environment variables tune deduplication.
 
-See also: [Configuration](/en/open_source/installation/configuration) for details on environment variables and `local_settings.py` overrides.
+See also: [Open Source Configuration](/get_started/open_source/configuration/) for details on environment variables and `local_settings.py` overrides.
 
 ## What you can configure
 
@@ -139,10 +139,3 @@ To help troubleshooting deduplication use the following tools:
 ![Unique ID from Tool and Hash Code on the View Finding page](images/hash_code_id_field.png)
 
 ![Unique ID from Tool and Hash Code on the Finding List Status Column](images/hash_code_status_column.png)
-
-## Related documentation
-
-- [Deduplication Algorithms](deduplication_algorithms): conceptual overview and endpoint behavior.
-- [Avoiding duplicates via reimport](avoiding_duplicates_via_reimport).
-
-

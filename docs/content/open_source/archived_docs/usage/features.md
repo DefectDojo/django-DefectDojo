@@ -123,7 +123,7 @@ but at different levels in the data model:
 
 ### Tag Inheritance
 
-When enabled, tags applied to a given product will automatically be applied to all objects under Products in the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy).
+When enabled, tags applied to a given product will automatically be applied to all objects under Products in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/).
 
 #### Configuration
 

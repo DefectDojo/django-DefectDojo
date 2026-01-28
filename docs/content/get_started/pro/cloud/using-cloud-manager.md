@@ -45,7 +45,7 @@ The Resources page contains a Contact Us form, which you can use to get in touch
 ## Tools
 <https://cloud.defectdojo.com/external_tools/defectdojo-cli>
 
-The Tools page is one of the places where you can download external Pro tools, such as Universal Importer or DefectDojo CLI.  These tools are external add-ons which can be used to quickly build a command-line import pipeline in your network. For more information about these tools, see the [External Tools](../../connecting_your_tools/external_tools/) documentation.
+The Tools page is one of the places where you can download external Pro tools, such as Universal Importer or DefectDojo CLI.  These tools are external add-ons which can be used to quickly build a command-line import pipeline in your network. For more information about these tools, see the [External Tools](/import_data/pro/specialized_import/external_tools/) documentation.
 
 ![image](images/using_the_cloud_manager_6.png)
 

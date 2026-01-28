@@ -7,10 +7,10 @@ audience: pro
 DefectDojo Pro's Integrations let you push your Findings and Finding Groups to ticket tracking systems to easily integrate security remediation with your teams existing development workflow.
 
 Supported Integrations:
-- [Azure Devops](/en/share_your_findings/integrations_toolreference/#azure-devops-boards)
-- [GitHub](/en/share_your_findings/integrations_toolreference/#github)
-- [GitLab Boards](/en/share_your_findings/integrations_toolreference/#gitlab)
-- [ServiceNow](/en/share_your_findings/integrations_toolreference/#servicenow)
+- [Azure Devops](/issue_tracking/pro_integration/integrations/#azure-devops-boards)
+- [GitHub](/issue_tracking/pro_integration/integrations/#github)
+- [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
+- [ServiceNow](/issue_tracking/pro_integration/integrations/#servicenow)
 
 ## Opening the Integrations page
 
@@ -65,9 +65,9 @@ Project Integrations will have varying requirements for how DefectDojo will need
 
 For the complete list of requirements, please open the vendor specific pages below:
 
-- [Azure Devops](/en/share_your_findings/integrations_toolreference/#azure-devops-boards)
-- [GitHub](/en/share_your_findings/integrations_toolreference/#github)
-- [GitLab Boards](/en/share_your_findings/integrations_toolreference/#gitlab)
+- [Azure Devops](/issue_tracking/pro_integration/integrations/#azure-devops-boards)
+- [GitHub](/issue_tracking/pro_integration/integrations/#github)
+- [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
 - ServiceNow (Coming Soon)
 
 ## Error Handling and Debugging

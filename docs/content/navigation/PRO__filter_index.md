@@ -2,11 +2,12 @@
 title: "Filter Index"
 description: "Reference for all filters in DefectDojo"
 weight: 5
+
 ---
 
 **Note: Currently this article only covers Finding Filters available in the DefectDojo Pro UI, but this article will be expanded in the future to govern more object types, along with Open-Source filters.** 
 
-Here is a list of filters that can be applied in the DefectDojo Pro UI to sort lists of Findings.  DefectDojo Filters can be used to assist with navigating through lists of Objects, creating custom [Dashboard Tiles](/en/customize_dojo/dashboards/about_custom_dashboard_tiles/), or creating automation via [Rules Engine](/en/customize_dojo/rules_engine/).
+Here is a list of filters that can be applied in the DefectDojo Pro UI to sort lists of Findings.  DefectDojo Filters can be used to assist with navigating through lists of Objects, creating custom [Dashboard Tiles](/metrics_reports/dashboards/about_custom_dashboard_tiles/), or creating automation via [Rules Engine](/automation/rules_engine/about).
 
 ## Findings
 These fields are specific to DefectDojo Findings and are used to organize a Finding.  Each of these filters is a separate column in the All Findings table.
@@ -37,7 +38,7 @@ These Filters are assigned at the time of issue creation, and cannot be directly
 ##### Can be modified
 These fields are set when an issue is created, but can be modified as an issue progresses.
 
-* [Status](/en/working_with_findings/findings_workflows/finding_status_definitions/)
+* [Status](/triage_findings/findings_workflows/finding_status_definitions/)
 * Last Status Update (Timestamp)
 * Mitigated (True or False)
 
@@ -47,7 +48,7 @@ These DefectDojo functions can be used to further organize your Findings or trac
 * Finding Tags
 * Reviewers (Assigned User)
 * Has Notes (True/False)
-* Group (refers to the [Finding Group](/en/working_with_findings/findings_workflows/editing_findings/#finding-group-actions), if one exists)
+* Group (refers to the [Finding Group](/triage_findings/findings_workflows/editing_findings/#finding-group-actions), if one exists)
 * Risk Acceptance (select one or more existing Risk Acceptances from the list)
 
 ### Tool-Specific Metadata

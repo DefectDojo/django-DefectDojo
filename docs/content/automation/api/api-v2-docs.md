@@ -188,7 +188,7 @@ Some of the api wrappers contain quite a bit of logic to ease scanning and impor
 ## Import
 Importing via the API is performed via the [import-scan](https://demo.defectdojo.org/api/v2/doc/) endpoint.
 
-As described in the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy), Test gets created inside an Engagement, inside a Product, inside a Product Type.
+As described in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/), Test gets created inside an Engagement, inside a Product, inside a Product Type.
 
 An import can be performed by specifying the names of these entities in the API request:
 
@@ -207,7 +207,7 @@ An import can be performed by specifying the names of these entities in the API 
 }
 ```
 
-When `auto_create_context` is `True`, the product, engagement, and environment will be created if needed. Make sure your user has sufficient [permissions](/en/customize_dojo/user_management/about_perms_and_roles/) to do this.
+When `auto_create_context` is `True`, the product, engagement, and environment will be created if needed. Make sure your user has sufficient [permissions](/admin/user_management/about_perms_and_roles/) to do this.
 
 A classic way of importing a scan is by specifying the ID of the engagement instead:
 
@@ -243,7 +243,7 @@ A reimport can be performed by specifying the names of these entities in the API
 }
 ```
 
-When `auto_create_context` is `True`, the Product Type, Product and Engagement will be created if they do not already exist. Make sure your user has sufficient [permissions](/en/customize_dojo/user_management/about_perms_and_roles/) to create a Product/Product Type.
+When `auto_create_context` is `True`, the Product Type, Product and Engagement will be created if they do not already exist. Make sure your user has sufficient [permissions](/admin/user_management/about_perms_and_roles/) to create a Product/Product Type.
 
 When `do_not_reactivate` is `True`, the importing/reimporting will ignore uploaded active findings and not reactivate previously closed findings, while still creating new findings if there are new ones. You will get a note on the finding to explain that it was not reactivated for that reason.
 

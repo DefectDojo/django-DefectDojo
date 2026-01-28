@@ -3,7 +3,6 @@ title: "🎨 Pro UI Changes"
 description: "Working with different UIs in DefectDojo"
 draft: "false"
 weight: 5
-pro-feature: true
 audience: pro
 ---
 
@@ -13,7 +12,7 @@ The Pro UI brings the following enhancements to DefectDojo:
 
 - Modern and sleek design using Vue.js.
 - Optimized data delivery and load times, especially for large datasets.
-- Access to new Pro features, including [API Connectors](/en/connecting_your_tools/connectors/about_connectors/), [Universal Importer](/en/connecting_your_tools/external_tools/), and [Pro Metrics](https://docs.defectdojo.com/en/customize_dojo/dashboards/pro_dashboards/) views.
+- Access to new Pro features, including [API Connectors](/import_data/pro/connectors/about_connectors/), [Universal Importer](/import_data/pro/specialized_import/external_tools/), and [Pro Metrics](https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__overview/) views.
 - Improved UI workflows: better filtering, dashboards, and navigation.
 
 ## Switching To The Pro UI
@@ -28,17 +27,17 @@ To access the Pro UI, open your User Options menu from the top-right hand corner
 
 1. The **Sidebar** has been reorganized into four parent categories: Dashboards, Import, Manage, and Settings.
 
-2. The Homepage, [AI-powered native API connection capabilities](/en/ai/mcp_server_pro/), Pro Metrics, and the Calendar view are all accessible under Dashboards.
+2. The Homepage, [AI-powered native API connection capabilities](/metrics_reports/ai/mcp_server_pro/), Pro Metrics, and the Calendar view are all accessible under Dashboards.
 
-4. Import methods can be found in the Import section: set up [API Connectors](/en/connecting_your_tools/connectors/about_connectors/), use the [Import Scan](/en/connecting_your_tools/import_scan_files/import_scan_ui/) form to Add Findings, use [Smart Upload](/en/connecting_your_tools/import_scan_files/smart_upload/) to handle infrastructure scanning tools, or use our external tools—[Universal Importer and DefectDojo CLI](/en/connecting_your_tools/external_tools/)—to streamline both the import and reimport processes of Findings and associated objects.
+4. Import methods can be found in the Import section: set up [API Connectors](/import_data/pro/connectors/about_connectors/), use the [Add Findings](/import_data/import_scan_files/pro__import_scan_ui/) form to Add Findings, use [Smart Upload](/import_data/pro/specialized_import/smart_upload/) to handle infrastructure scanning tools, or use our external tools—[Universal Importer and DefectDojo CLI](/import_data/pro/specialized_import/external_tools/)—to streamline both the import and reimport processes of Findings and associated objects.
 
-5. The **Manage** section allows you to view different objects in the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/), with views for Product Types, Products, Engagements, Tests, Findings, Risk Acceptances, Endpoints, and Components.  There are additional sections for generating reports (Report Builder), using surveys (Surveys), as well as a [Rules Engine](/en/customize_dojo/rules_engine/). 
+5. The **Manage** section allows you to view different objects in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/), with views for Product Types, Products, Engagements, Tests, Findings, Risk Acceptances, Endpoints, and Components.  There are additional sections for generating reports (Report Builder), using surveys (Surveys), as well as a [Rules Engine](/automation/rules_engine/about/). 
 
 5. The **Settings** section allows you to configure your DefectDojo instance, including your Integrations, License, Cloud Settings, Users, Feature Configuration and admin-level Enterprise Settings.
 
 6. The **Pro Settings** section contains the System Settings, Banner Settings, Notification Settings, Jira Instances, Deduplication Settings, and Authentication Settings, including SAML, OIDC, OAuth, Login, and MFA forms.
 
-7. The Pro UI also has a **new table format**, used in the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/) to help with navigation.  Each column can be clicked on to apply a relevant filter, and columns can be reordered to present data however you like.
+7. The Pro UI also has a **new table format**, used in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/) to help with navigation.  Each column can be clicked on to apply a relevant filter, and columns can be reordered to present data however you like.
 
 8. The table also has a **"Toggle Columns"** menu which can add or remove columns from the table.
 

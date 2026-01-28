@@ -11,7 +11,7 @@ Webhooks are HTTP requests coming from the DefectDojo instance towards a user-de
 It is not unusual that in some cases a webhook can not be delivered. It is usually connected to network issues, server misconfiguration, or running upgrades on the server. DefectDojo needs to react to these outages. It might temporarily or permanently disable related endpoints. The following graph shows how it might change the status of the webhook definition based on HTTP responses (or manual user interaction).
 
 <!-- Replaced the kroki rendering with a screenshot to avoid failures in GHA -->
-<!-- The transition state diagram is located here: docs/content/en/open_source/notification_webhooks/transition-state -->
+<!-- The transition state diagram is located here: docs/content/open_source/notification_webhooks/transition-state -->
 <!-- Github Issue here: https://github.com/DefectDojo/django-DefectDojo/issues/13457 -->
 ![image](images/webhook-state-transition-flow.png)
 

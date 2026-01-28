@@ -37,14 +37,14 @@ Each of these report categories can be handled by a separate Engagement, with a 
 ![image](images/example_product_hierarchy_bigcorp.png)
 
 - If a Product has a CI/CD pipeline, all of the results from that pipeline can be continually imported into a single open-ended Engagement. Each tool used will create a separate Test within the CI/CD Engagement, which can be continuously updated with new data.  
-(See our guide to [Reimport](/en/connecting_your_tools/import_scan_files/using_reimport/))
+(See our guide to [Reimport](/import_data/import_intro/import_vs_reimport/))
 - Each Pen Test effort can have a separate Engagement created to contain all of the results: e.g. "Q1 Pen Test 2024," "Q2 Pen Test 2024," etc.
 - BigCorp will likely want to run their own mock PCI audit so that they're prepared for the real thing. The results of those audits can also be stored as a separate Engagement.
 
 #### RBAC Model
 
 - Each BISO has Reader access assigned for each business unit (Product Type) that they're in charge of.
-- Each Product Owner has Writer access for the Product that they're in charge of.  Within their Product, Product Owners can interact with DefectDojo by keeping notes, setting up [CI/CD pipelines](/en/connecting_your_tools/import_scan_files/api_pipeline_modelling/), creating Risk Acceptances and using other features.
+- Each Product Owner has Writer access for the Product that they're in charge of.  Within their Product, Product Owners can interact with DefectDojo by keeping notes, setting up [CI/CD pipelines](/import_data/import_scan_files/api_pipeline_modelling/), creating Risk Acceptances and using other features.
 - Developers at BigCorp have no access to DefectDojo at all, and they don't need it. The Product Owner can push Jira tickets directly from DefectDojo which contain all of the relevant vulnerability information.  The developers are already using Jira, so they don't have to track remediation any differently than a different development task.
 
 ### Embedded Systems: Version-Controlled Reporting
@@ -99,13 +99,13 @@ Key Concerns for Kate's Cloud Service:
 
 #### Tagging Shared Services
 
-Because Kate's model contains many shared services that can impact other Products, the team [Tags](/en/working_with_findings/organizing_engagements_tests/tagging_objects/) their Products to indicate which cloud offerings rely on those services.  This allows any issues with shared services to be filtered across Products and reported to the relevant teams.  Each of these shared services are in a single Product Type that separates them from the main cloud offerings.
+Because Kate's model contains many shared services that can impact other Products, the team [Tags](/asset_modelling/tags/tagging_objects/) their Products to indicate which cloud offerings rely on those services.  This allows any issues with shared services to be filtered across Products and reported to the relevant teams.  Each of these shared services are in a single Product Type that separates them from the main cloud offerings.
 
 ![image](images/example_product_hierarchy_microservices.png)
 
 Because the company is rapidly growing and tech leads are changing frequently, Kate can use Tags to track which tech lead is currently responsible for each cloud product, avoiding the need for constant manual updates to their DefectDojo system. These tech lead associations are tracked by a service that’s external to DefectDojo and can govern the import pipelines or call the DefectDojo API.
 
-For more information on Tagging, see our guide to [Tags](/en/working_with_findings/organizing_engagements_tests/tagging_objects/).
+For more information on Tagging, see our guide to [Tags](/asset_modelling/tags/tagging_objects/).
 
 #### RBAC Model
 
@@ -139,7 +139,7 @@ To assist with onboarding new applications, SaaSy software has a standard approa
 
 Each of these Products is further subdivided into Engagements, one for the main branch and one for each branch of development.  Tests within these Engagements are used to categorize the testing efforts.  Development branches have separate Tests which store the results of CI/CD and SCA scans.  The Main branch has those as well, but also adds Tests which store Manual Code Review and Threat Model reports.
 
-All of these Tests are open-ended and can be updated on a regular basis using Reimport.  [Deduplication](/en/working_with_findings/finding_deduplication/about_deduplication/) is only handled at the Engagement level, which prevents Findings in one Code branch from closing Findings in another.
+All of these Tests are open-ended and can be updated on a regular basis using Reimport.  [Deduplication](/triage_findings/finding_deduplication/about_deduplication/) is only handled at the Engagement level, which prevents Findings in one Code branch from closing Findings in another.
 
 By applying this model consistently, SaaSy has a model that they can apply to any new software acquisition, and the AppSec team can quickly begin monitoring the data to ensure compliance.
 

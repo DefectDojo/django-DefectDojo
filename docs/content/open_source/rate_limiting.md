@@ -13,7 +13,7 @@ For further information, please visit the package documentation [Django Ratelimi
 
 #### Enable Rate Limiting
 
-To enable and configure rate limiting, edit the settings (see [Configuration](../../open_source/installation/configuration) and edit/replace the following information:
+To enable and configure rate limiting, edit the settings (see [Configuration](../../get_started/open_source/configuration) and edit/replace the following information:
 
 {{< highlight python >}}
 DD_RATE_LIMITER_ENABLED=(bool, True),

@@ -58,8 +58,8 @@ For teams managing a smaller volume of Findings, DefectDojo Open-Source is a gre
 There are a few supported ways to install DefectDojo’s Open-Source edition ([available on Github](https://github.com/DefectDojo/django-DefectDojo)):
 
 [Docker Compose](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) is the easiest method to install the core program and services required to run DefectDojo.
-Our [Architecture](https://docs.defectdojo.com/en/open_source/installation/architecture/) guide gives you an overview of each service and component used by DefectDojo.
-[Running In Production](https://docs.defectdojo.com/en/open_source/installation/running-in-production/) lists system requirements, performance tweaks and maintenance processes for running DefectDojo on a production server (with Docker Compose).
+Our [Architecture](https://docs.defectdojo.com/open_source/installation/architecture/) guide gives you an overview of each service and component used by DefectDojo.
+[Running In Production](https://docs.defectdojo.com/open_source/installation/running-in-production/) lists system requirements, performance tweaks and maintenance processes for running DefectDojo on a production server (with Docker Compose).
 
 Kubernetes is not fully supported at the Open-Source level, but this guide can be referenced and used as a starting point to integrate DefectDojo into Kubernetes architecture.
 
@@ -71,12 +71,12 @@ If you run into trouble with an Open-Source install, we highly recommend asking 
 
 DefectDojo Inc. hosts a Pro edition of this software for commercial purposes.  Along with a sleek, modern UI, DefectDojo Pro includes:
 
-* [Connectors](/en/connecting_your_tools/connectors/about_connectors/): out-of-the-box API integrations with enterprise-level scanners (such as Checkmarx One, BurpSuite, Semgrep and more)
-* **Configurable Import Methods**: [Universal Parser](/supported_tools/parsers/universal_parser/), [Smart Upload](/en/connecting_your_tools/import_scan_files/smart_upload/)
-* **[CLI Tools](/en/connecting_your_tools/external_tools/)** for rapid integration with your systems
-* **[Additional Project Tracking Integrations](/en/share_your_findings/integrations/)**: ServiceNow, Azure DevOps, GitHub and GitLab
-* **[Improved Metrics](/en/customize_dojo/dashboards/pro_dashboards/)** for executive reporting and high-level analysis
-* **[Priority And Risk](/en/working_with_findings/finding_priority/)** to identify the Findings of highest urgency, system-wide
+* [Connectors](/import_data/pro/connectors/about_connectors/): out-of-the-box API integrations with enterprise-level scanners (such as Checkmarx One, BurpSuite, Semgrep and more)
+* **Configurable Import Methods**: [Universal Parser](/supported_tools/parsers/universal_parser/), [Smart Upload](/import_data/pro/specialized_import/smart_upload/)
+* **[CLI Tools](/import_data/pro/specialized_import/external_tools/)** for rapid integration with your systems
+* **[Additional Project Tracking Integrations](/issue_tracking/intro/intro/)**: ServiceNow, Azure DevOps, GitHub and GitLab
+* **[Improved Metrics](/metrics_reports/pro_metrics/pro__overview/)** for executive reporting and high-level analysis
+* **[Priority And Risk](/asset_modelling/hierarchy/pro__priority_sla/)** to identify the Findings of highest urgency, system-wide
 * **Premium Support** and implementation guidance for your organization
 
 The Pro edition is available as a cloud-hosted SaaS offering, and is also available for installation on-premises.
@@ -105,8 +105,7 @@ A running example of DefectDojo Pro is available at
 
 Whether you’re a Pro or an Open-Source user, we have many resources to help you get started with DefectDojo.
 
-* Our [New User Checklist](/en/about_defectdojo/new_user_checklist/) covers the fundamentals of setting up your DefectDojo environment and establishing your import, triage and reporting workflows.
-* Review our supported [security tool integrations](/en/connecting_your_tools/parsers/) to help fit DefectDojo in your DevSecOps program.
+* Review our supported [security tool integrations](/supported_tools/) to help fit DefectDojo in your DevSecOps program.
 * Our team maintains a [YouTube Channel](https://www.youtube.com/@defectdojo) which hosts tutorials, archived Office Hours events, and other content. 
 
 ## Connect With Us
