@@ -1,1 +1,1 @@
-path = "url"
+path = "url"  # noqa: RUF067

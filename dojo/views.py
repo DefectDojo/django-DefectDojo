@@ -21,7 +21,6 @@ from dojo.authorization.authorization import (
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import LogEntryFilter, PgHistoryFilter
 from dojo.forms import ManageFileFormSet
-
 from dojo.location.models import Location
 from dojo.models import (
     Endpoint,

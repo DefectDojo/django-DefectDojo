@@ -12,6 +12,8 @@ from django.db.models import (
     ForeignKey,
     Index,
     OneToOneField,
+    Q,
+    QuerySet,
     UniqueConstraint,
 )
 from django.utils.translation import gettext_lazy as _
@@ -28,7 +30,7 @@ from dojo.location.manager import (
     LocationQueryset,
 )
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
-from dojo.models import Dojo_User, Finding, Product
+from dojo.models import Dojo_User, Finding, Product, _manage_inherited_tags, copy_model_util
 from dojo.settings import settings
 
 if TYPE_CHECKING:
@@ -63,6 +65,11 @@ class Location(BaseModel):
         force_lowercase=True,
         related_name="location_tags",
         help_text=_("A tag that can be used to differentiate a Location"),
+    )
+    inherited_tags = TagField(
+        blank=True,
+        force_lowercase=True,
+        help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"),
     )
 
     objects = LocationManager().from_queryset(LocationQueryset)()
@@ -151,6 +158,26 @@ class Location(BaseModel):
                 defaults={"status": status},
             )[0]
 
+    def disassociate_from_finding(
+        self,
+        finding: Finding,
+    ) -> None:
+        with transaction.atomic():
+            LocationFindingReference.objects.filter(
+                location=self,
+                finding=finding,
+            ).delete()
+
+    def disassociate_from_product(
+        self,
+        product: Product,
+    ) -> None:
+        with transaction.atomic():
+            LocationProductReference.objects.filter(
+                location=self,
+                product=product,
+            ).delete()
+
     @property
     def active_annotated_findings(self):
         """
@@ -161,6 +188,26 @@ class Location(BaseModel):
         if hasattr(self, "_active_annotated_findings"):
             return [ref.finding for ref in self._active_annotated_findings]
         return []
+
+    def all_related_products(self) -> QuerySet[Product]:
+        return Product.objects.filter(
+            Q(locations__location=self)
+            | Q(engagement__test__finding__locations__location=self),
+        ).distinct()
+
+    def products_to_inherit_tags_from(self) -> list[Product]:
+        from dojo.utils import get_system_setting  # noqa: PLC0415
+        system_wide_inherit = get_system_setting("enable_product_tag_inheritance")
+        return [
+            product for product
+            in self.all_related_products()
+            if product.enable_product_tag_inheritance or system_wide_inherit
+        ]
+
+    def inherit_tags(self, potentially_existing_tags):
+        # get a copy of the tags to be inherited
+        incoming_inherited_tags = [tag.name for product in self.products_to_inherit_tags_from() for tag in product.tags.all()]
+        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
     class Meta:
         verbose_name = "Locations - Location"
@@ -244,6 +291,19 @@ class LocationFindingReference(BaseModel):
     def __str__(self) -> str:
         """Return the string representation of a LocationProductReference."""
         return f"{self.location} - Finding: {self.finding} ({self.status})"
+
+    def copy(self, finding) -> Self:
+        copy = copy_model_util(self)
+        copy.finding = finding
+        copy.location = self.location
+        copy.save()
+        return copy
+
+    def set_status(self, status: FindingLocationStatus, auditor: Dojo_User, audit_time: datetime) -> None:
+        self.status = status
+        self.auditor = auditor
+        self.audit_time = audit_time
+        self.save()
 
     class Meta:
         verbose_name = "Locations - FindingReference"

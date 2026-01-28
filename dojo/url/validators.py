@@ -44,7 +44,7 @@ def validate_host_or_ip(value: str) -> None:
 
 
 def validate_user_info(value: str) -> False:
-    """Validate a the user info according to the spec."""
+    """Validate the user info according to the spec."""
     if not re.compile(
         # https://tools.ietf.org/html/rfc3986#section-3.2.1
         r"^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$",
