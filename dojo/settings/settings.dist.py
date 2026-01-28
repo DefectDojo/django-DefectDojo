@@ -358,6 +358,8 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+    # Dictates if v3 functionality will be enabled
+    DD_V3_FEATURE_LOCATIONS=(bool, False),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
 )
@@ -851,6 +853,10 @@ TEAM_NAME = env("DD_TEAM_NAME")
 
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
+
+# V3 Feature Flags
+V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
+
 
 # ------------------------------------------------------------------------------
 # ADMIN

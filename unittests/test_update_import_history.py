@@ -36,6 +36,7 @@ class UpdateImportHistoryTests(TransactionTestCase):
         self.sla = SLA_Configuration.objects.create(name="UpdateImportHistory SLA")
         self.prod = Product.objects.create(
             name="UpdateImportHistory P",
+            description="test",
             prod_type=self.prod_type,
             sla_configuration=self.sla,
         )

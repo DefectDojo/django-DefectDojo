@@ -287,7 +287,7 @@ class FortifyFPRParser:
         """Convert the the float representation of severity and confidence to a string severity."""
         if not rule.impact:
             logger.debug("No rule impact found, setting severity to Informational")
-            return "Informational"
+            return "Info"
 
         try:
             impact = float(rule.impact)
@@ -312,7 +312,7 @@ class FortifyFPRParser:
         except ValueError:
             logger.info("Impossible to compute severity due to number format error", exc_info=True)
 
-        return "Informational"
+        return "Info"
 
     def format_impact(self, related_data, vuln_data) -> str:
         """Format the impact of the vulnerability based on the threaded comments."""

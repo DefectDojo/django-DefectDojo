@@ -4,8 +4,10 @@ import datetime
 import re
 
 from defusedxml.ElementTree import parse
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class PingCastleParser:
@@ -33,7 +35,7 @@ class PingCastleParser:
         dupes = {}
         report_date = self._parse_datetime(root.findtext("GenerationDate"))
         domain_fqdn = root.findtext("DomainFQDN") or ""
-        dc_infos, dc_endpoints = self._collect_domain_controllers(root)
+        dc_infos, dc_locations = self._collect_domain_controllers(root)
         findings = []
         for rr in root.findall("RiskRules/HealthcheckRiskRule"):
             points = self._safe_int(rr.findtext("Points"))
@@ -76,11 +78,18 @@ class PingCastleParser:
             cves = list(self.CVE_REGEX.findall(rationale or ""))
             if cves:
                 finding.unsaved_vulnerability_ids = cves
-            finding.unsaved_endpoints = []
-            if self._is_dc_specific_risk(risk_id, model, rationale):
-                finding.unsaved_endpoints.extend(dc_endpoints)
+
+            if settings.V3_FEATURE_LOCATIONS:
+                if self._is_dc_specific_risk(risk_id, model, rationale):
+                    finding.unsaved_locations.extend(dc_locations)
+                elif domain_fqdn:
+                    finding.unsaved_locations.append(URL(host=domain_fqdn))
+            # TODO: Delete this after the move to Locations
+            elif self._is_dc_specific_risk(risk_id, model, rationale):
+                finding.unsaved_endpoints.extend(dc_locations)
             elif domain_fqdn:
                 finding.unsaved_endpoints.append(Endpoint(host=domain_fqdn))
+
             if risk_id == "A-DC-Coerce":
                 self._enrich_coerce_with_rpc_interfaces(finding, dc_infos)
             if risk_id == "A-DC-Spooler":
@@ -91,7 +100,11 @@ class PingCastleParser:
             if dupe_key in dupes:
                 existing = dupes[dupe_key]
                 existing.description += "\n\n-----\n\n" + finding.description
-                existing.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                if settings.V3_FEATURE_LOCATIONS:
+                    existing.unsaved_locations.extend(finding.unsaved_locations)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    existing.unsaved_endpoints.extend(finding.unsaved_endpoints)
             else:
                 dupes[dupe_key] = finding
         findings.extend(list(dupes.values()))
@@ -129,7 +142,7 @@ class PingCastleParser:
 
     def _collect_domain_controllers(self, root):
         dc_infos = []
-        endpoints = []
+        locations = []
         for dc in root.findall("DomainControllers/HealthcheckDomainController"):
             name = dc.findtext("DCName") or ""
             os = dc.findtext("OperatingSystem") or ""
@@ -151,10 +164,16 @@ class PingCastleParser:
                     "function": rpc.attrib.get("Function", ""),
                 })
             dc_infos.append(dc_info)
-            if name:
-                endpoints.append(Endpoint(host=name))
-            endpoints.extend(Endpoint(host=ip) for ip in ips)
-        return dc_infos, endpoints
+            if settings.V3_FEATURE_LOCATIONS:
+                if name:
+                    locations.append(URL(host=name))
+                locations.extend(URL(host=ip) for ip in ips)
+            else:
+                # TODO: Delete this after the move to Locations
+                if name:
+                    locations.append(Endpoint(host=name))
+                locations.extend(Endpoint(host=ip) for ip in ips)
+        return dc_infos, locations
 
     def _enrich_coerce_with_rpc_interfaces(self, finding, dc_infos):
         added_any = False

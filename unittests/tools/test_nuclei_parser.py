@@ -27,18 +27,15 @@ class TestNucleiParser(DojoTestCase):
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
-            self.assertEqual("example.com", finding.unsaved_endpoints[0].host)
+            self.validate_locations(findings)
+            finding = findings[-1]
+            self.assertEqual("example.com", self.get_unsaved_locations(finding)[0].host)
 
     def test_parse_many_findings(self):
         with (get_unit_tests_scans_path("nuclei") / "many_findings.json").open(encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(16, len(findings))
 
             with self.subTest(i=0):
@@ -50,8 +47,8 @@ class TestNucleiParser(DojoTestCase):
                 self.assertIn("network", finding.unsaved_tags)
                 self.assertIn("openssh", finding.unsaved_tags)
                 self.assertIsNotNone(finding.references)
-                self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
-                self.assertEqual(22, finding.unsaved_endpoints[0].port)
+                self.assertEqual("nuclei-example.com", self.get_unsaved_locations(finding)[0].host)
+                self.assertEqual(22, self.get_unsaved_locations(finding)[0].port)
                 self.assertEqual("openssh5.3-detect", finding.vuln_id_from_tool)
 
             with self.subTest(i=1):
@@ -62,9 +59,9 @@ class TestNucleiParser(DojoTestCase):
                 self.assertIsNotNone(finding.description)
                 self.assertIsNone(finding.unsaved_tags)
                 self.assertIsNone(finding.references)
-                self.assertEqual(None, finding.unsaved_endpoints[0].path)
-                self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
-                self.assertEqual(443, finding.unsaved_endpoints[0].port)
+                self.assertFalse(self.get_unsaved_locations(finding)[0].path)
+                self.assertEqual("nuclei-example.com", self.get_unsaved_locations(finding)[0].host)
+                self.assertEqual(443, self.get_unsaved_locations(finding)[0].port)
                 self.assertEqual("nginx-version", finding.vuln_id_from_tool)
 
             with self.subTest(i=2):
@@ -75,9 +72,9 @@ class TestNucleiParser(DojoTestCase):
                 self.assertIsNotNone(finding.description)
                 self.assertIsNotNone(finding.references)
                 self.assertIn("phpmyadmin", finding.unsaved_tags)
-                self.assertEqual("phpmyadmin/setup/index.php", finding.unsaved_endpoints[0].path)
-                self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
-                self.assertEqual(443, finding.unsaved_endpoints[0].port)
+                self.assertEqual("phpmyadmin/setup/index.php", self.get_unsaved_locations(finding)[0].path)
+                self.assertEqual("nuclei-example.com", self.get_unsaved_locations(finding)[0].host)
+                self.assertEqual(443, self.get_unsaved_locations(finding)[0].port)
                 self.assertEqual("phpmyadmin-setup", finding.vuln_id_from_tool)
 
             with self.subTest(i=3):
@@ -88,9 +85,9 @@ class TestNucleiParser(DojoTestCase):
                 self.assertIsNotNone(finding.description)
                 self.assertIsNone(finding.references)
                 self.assertIsNone(finding.unsaved_tags)
-                self.assertEqual("WebGoat", finding.unsaved_endpoints[0].path)
-                self.assertEqual("127.0.0.1", finding.unsaved_endpoints[0].host)
-                self.assertEqual(8080, finding.unsaved_endpoints[0].port)
+                self.assertEqual("WebGoat", self.get_unsaved_locations(finding)[0].path)
+                self.assertEqual("127.0.0.1", self.get_unsaved_locations(finding)[0].host)
+                self.assertEqual(8080, self.get_unsaved_locations(finding)[0].port)
                 self.assertEqual("tech-detect", finding.vuln_id_from_tool)
 
             with self.subTest(i=4):
@@ -101,12 +98,12 @@ class TestNucleiParser(DojoTestCase):
                 self.assertIsNotNone(finding.description)
                 self.assertIsNone(finding.references)
                 self.assertIsNone(finding.unsaved_tags)
-                self.assertEqual("WebGoat", finding.unsaved_endpoints[0].path)
-                self.assertEqual("127.0.0.1", finding.unsaved_endpoints[0].host)
-                self.assertEqual(8080, finding.unsaved_endpoints[0].port)
-                self.assertEqual("WebWolf", finding.unsaved_endpoints[1].path)
-                self.assertEqual("127.0.0.1", finding.unsaved_endpoints[1].host)
-                self.assertEqual(9090, finding.unsaved_endpoints[1].port)
+                self.assertEqual("WebGoat", self.get_unsaved_locations(finding)[0].path)
+                self.assertEqual("127.0.0.1", self.get_unsaved_locations(finding)[0].host)
+                self.assertEqual(8080, self.get_unsaved_locations(finding)[0].port)
+                self.assertEqual("WebWolf", self.get_unsaved_locations(finding)[1].path)
+                self.assertEqual("127.0.0.1", self.get_unsaved_locations(finding)[1].host)
+                self.assertEqual(9090, self.get_unsaved_locations(finding)[1].port)
                 self.assertEqual("tech-detect", finding.vuln_id_from_tool)
 
             with self.subTest(i=12):
@@ -117,9 +114,9 @@ class TestNucleiParser(DojoTestCase):
                 self.assertIsNotNone(finding.description)
                 self.assertIsNone(finding.references)
                 self.assertIsNone(finding.unsaved_tags)
-                self.assertEqual(None, finding.unsaved_endpoints[0].path)
-                self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
-                self.assertEqual(443, finding.unsaved_endpoints[0].port)
+                self.assertFalse(self.get_unsaved_locations(finding)[0].path)
+                self.assertEqual("nuclei-example.com", self.get_unsaved_locations(finding)[0].host)
+                self.assertEqual(443, self.get_unsaved_locations(finding)[0].port)
                 self.assertEqual("waf-detect", finding.vuln_id_from_tool)
 
             with self.subTest(i=14):
@@ -130,9 +127,9 @@ class TestNucleiParser(DojoTestCase):
                 self.assertIsNotNone(finding.description)
                 self.assertIsNone(finding.references)
                 self.assertIn("panel", finding.unsaved_tags)
-                self.assertEqual("phpmyadmin/", finding.unsaved_endpoints[0].path)
-                self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
-                self.assertEqual(443, finding.unsaved_endpoints[0].port)
+                self.assertEqual("phpmyadmin/", self.get_unsaved_locations(finding)[0].path)
+                self.assertEqual("nuclei-example.com", self.get_unsaved_locations(finding)[0].host)
+                self.assertEqual(443, self.get_unsaved_locations(finding)[0].port)
                 self.assertEqual("phpmyadmin-panel", finding.vuln_id_from_tool)
 
             with self.subTest(i=15):
@@ -146,18 +143,16 @@ class TestNucleiParser(DojoTestCase):
                 self.assertIn("mysql", finding.unsaved_tags)
                 self.assertIn("bruteforce", finding.unsaved_tags)
                 self.assertIn("db", finding.unsaved_tags)
-                self.assertEqual(None, finding.unsaved_endpoints[0].path)
-                self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
-                self.assertEqual(3306, finding.unsaved_endpoints[0].port)
+                self.assertFalse(self.get_unsaved_locations(finding)[0].path)
+                self.assertEqual("nuclei-example.com", self.get_unsaved_locations(finding)[0].host)
+                self.assertEqual(3306, self.get_unsaved_locations(finding)[0].port)
                 self.assertEqual("mysql-native-password-bruteforce", finding.vuln_id_from_tool)
 
     def test_parse_many_findings_new(self):
         with (get_unit_tests_scans_path("nuclei") / "many_findings_new.json").open(encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             self.assertEqual(2, len(findings))
             with self.subTest(i=0):
@@ -170,8 +165,8 @@ class TestNucleiParser(DojoTestCase):
                 self.assertIn("openssh", finding.unsaved_tags)
                 self.assertIn("cve", finding.unsaved_tags)
                 self.assertIsNotNone(finding.references)
-                self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
-                self.assertEqual(22, finding.unsaved_endpoints[0].port)
+                self.assertEqual("nuclei-example.com", self.get_unsaved_locations(finding)[0].host)
+                self.assertEqual(22, self.get_unsaved_locations(finding)[0].port)
                 self.assertEqual("CVE-2018-15473", finding.vuln_id_from_tool)
                 vulnerability_ids = finding.unsaved_vulnerability_ids
                 self.assertEqual(1, len(vulnerability_ids))
@@ -196,9 +191,7 @@ class TestNucleiParser(DojoTestCase):
         with (get_unit_tests_scans_path("nuclei") / "many_findings_third.json").open(encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             self.assertEqual(2, len(findings))
             with self.subTest(i=0):
@@ -210,8 +203,8 @@ class TestNucleiParser(DojoTestCase):
                 self.assertIsNotNone(finding.unsaved_response)
                 self.assertIsNotNone(finding.steps_to_reproduce)
                 self.assertEqual(3, len(finding.unsaved_tags))
-                self.assertEqual("example.com", finding.unsaved_endpoints[0].host)
-                self.assertEqual(443, finding.unsaved_endpoints[0].port)
+                self.assertEqual("example.com", self.get_unsaved_locations(finding)[0].host)
+                self.assertEqual(443, self.get_unsaved_locations(finding)[0].port)
                 self.assertEqual("http-missing-security-headers", finding.vuln_id_from_tool)
                 self.assertEqual("x-content-type-options", finding.component_name)
                 self.assertEqual(finding.date,
@@ -230,9 +223,7 @@ class TestNucleiParser(DojoTestCase):
         with (get_unit_tests_scans_path("nuclei") / "multiple_v3.json").open(encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(5, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -243,10 +234,9 @@ class TestNucleiParser(DojoTestCase):
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
-            self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
+            self.validate_locations(findings)
+            finding = findings[-1]
+            self.assertEqual("nuclei-example.com", self.get_unsaved_locations(finding)[0].host)
             self.assertEqual(0, finding.cwe)
 
     def test_parse_same_template_multiple_matches(self):
@@ -254,10 +244,9 @@ class TestNucleiParser(DojoTestCase):
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
-            self.assertEqual("turquoise-estrellita-69.tiiny.site", finding.unsaved_endpoints[0].host)
+            self.validate_locations(findings)
+            finding = findings[-1]
+            self.assertEqual("turquoise-estrellita-69.tiiny.site", self.get_unsaved_locations(finding)[0].host)
 
             # required to compute hash code, same as in test_endpoint_model - move to some test utils module?
             user, _ = get_user_model().objects.get_or_create(username="importer")

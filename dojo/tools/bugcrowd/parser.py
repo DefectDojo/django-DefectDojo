@@ -3,8 +3,10 @@ import hashlib
 import io
 
 from dateutil import parser
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class BugCrowdParser:
@@ -129,8 +131,11 @@ class BugCrowdParser:
                 finding.date = parser.parse(row.get("submitted_at"))
 
             if url:
-                finding.unsaved_endpoints = []
-                finding.unsaved_endpoints.append(self.get_endpoint(url))
+                if settings.V3_FEATURE_LOCATIONS:
+                    finding.unsaved_locations = [self.get_location(url)]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints = [self.get_location(url)]
 
             if finding is not None:
                 if finding.title is None:
@@ -247,7 +252,10 @@ class BugCrowdParser:
             pass
         return severity
 
-    def get_endpoint(self, url):
+    def get_location(self, url):
         stripped_url = url.strip()
         # is the host full uri?
-        return Endpoint.from_uri(stripped_url) if "://" in stripped_url else Endpoint.from_uri("//" + stripped_url)
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return Endpoint.from_uri(stripped_url) if "://" in stripped_url else Endpoint.from_uri("//" + stripped_url)
+        return URL.from_value(stripped_url) if "://" in stripped_url else URL.from_value("//" + stripped_url)

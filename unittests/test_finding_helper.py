@@ -11,8 +11,7 @@ from rest_framework.test import APIClient
 
 from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
 from dojo.models import Finding, Finding_Template, Test, Vulnerability_Id
-
-from .dojo_test_case import DojoAPITestCase, DojoTestCase
+from unittests.dojo_test_case import DojoAPITestCase, DojoTestCase, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +20,7 @@ logger = logging.getLogger(__name__)
 frozen_datetime = timezone.now()
 
 
+@versioned_fixtures
 class TestUpdateFindingStatusSignal(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -245,6 +245,7 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         self.assertEqual("REF-1", finding_template.cve)
 
 
+@versioned_fixtures
 class TestFindingVulnerabilityIdsAPI(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 

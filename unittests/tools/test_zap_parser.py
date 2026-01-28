@@ -1,9 +1,11 @@
-from dojo.models import Finding, Test
+
+from dojo.models import Test
 from dojo.tools.zap.parser import ZapParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestZapParser(DojoTestCase):
+
     def test_parse_no_findings(self):
         with (get_unit_tests_scans_path("zap") / "empty_2.9.0.xml").open(encoding="utf-8") as testfile:
             parser = ZapParser()
@@ -17,10 +19,7 @@ class TestZapParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)
             self.assertEqual(7, len(findings))
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
     def test_parse_some_findings_0(self):
         with (get_unit_tests_scans_path("zap") / "0_zap_sample.xml").open(encoding="utf-8") as testfile:
@@ -28,10 +27,7 @@ class TestZapParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)
             self.assertEqual(4, len(findings))
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
     def test_parse_some_findings_1(self):
         with (get_unit_tests_scans_path("zap") / "1_zap_sample_0_and_new_absent.xml").open(encoding="utf-8") as testfile:
@@ -39,10 +35,7 @@ class TestZapParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)
             self.assertEqual(4, len(findings))
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
     def test_parse_some_findings_2(self):
         with (get_unit_tests_scans_path("zap") / "2_zap_sample_0_and_new_endpoint.xml").open(encoding="utf-8") as testfile:
@@ -50,10 +43,7 @@ class TestZapParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)
             self.assertEqual(4, len(findings))
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
     def test_parse_some_findings_3(self):
         with (get_unit_tests_scans_path("zap") / "3_zap_sampl_0_and_different_severities.xml").open(encoding="utf-8") as testfile:
@@ -61,10 +51,7 @@ class TestZapParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)
             self.assertEqual(4, len(findings))
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
     def test_parse_some_findings_5(self):
         with (get_unit_tests_scans_path("zap") / "5_zap_sample_one.xml").open(encoding="utf-8") as testfile:
@@ -72,10 +59,7 @@ class TestZapParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)
             self.assertEqual(2, len(findings))
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
     def test_parse_issue4360(self):
         """
@@ -87,30 +71,26 @@ class TestZapParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)
             self.assertEqual(19, len(findings))
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("X-Frame-Options Header Not Set", finding.title)
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("10020", finding.vuln_id_from_tool)
-                self.assertEqual(11, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual("172.17.0.2", endpoint.host)
-                self.assertEqual(80, endpoint.port)
-                endpoint = finding.unsaved_endpoints[1]
-                self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("172.17.0.2", endpoint.host)
-                self.assertEqual("vulnerabilities/sqli_blind/", endpoint.path)
+                self.assertEqual(11, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual("172.17.0.2", location.host)
+                self.assertEqual(80, location.port)
+                location = self.get_unsaved_locations(finding)[1]
+                self.assertEqual("http", location.protocol)
+                self.assertEqual("172.17.0.2", location.host)
+                self.assertEqual("vulnerabilities/sqli_blind/", location.path)
             with self.subTest(i=18):
                 finding = findings[18]
                 self.assertEqual("Private IP Disclosure", finding.title)
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("2", finding.vuln_id_from_tool)
-                self.assertEqual(3, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
+                self.assertEqual(3, len(self.get_unsaved_locations(finding)))
 
     def test_parse_issue4697(self):
         """
@@ -120,107 +100,91 @@ class TestZapParser(DojoTestCase):
         with (get_unit_tests_scans_path("zap") / "zap-results-first-scan.xml").open(encoding="utf-8") as testfile:
             parser = ZapParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
             self.assertIsInstance(findings, list)
             self.assertEqual(15, len(findings))
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("User Controllable HTML Element Attribute (Potential XSS)", finding.title)
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual("10031", finding.vuln_id_from_tool)
-                self.assertEqual(11, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("bodgeit.securecodebox-demo.svc", endpoint.host)
-                self.assertEqual(8080, endpoint.port)
-                endpoint = finding.unsaved_endpoints[1]
-                self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("bodgeit.securecodebox-demo.svc", endpoint.host)
-                self.assertEqual("bodgeit/product.jsp", endpoint.path)
+                self.assertEqual(11, len(self.get_unsaved_locations(finding)))
+
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual("http", location.protocol)
+                self.assertEqual("bodgeit.securecodebox-demo.svc", location.host)
+                self.assertEqual(8080, location.port)
+
+                location = self.get_unsaved_locations(finding)[1]
+                self.assertEqual("http", location.protocol)
+                self.assertEqual("bodgeit.securecodebox-demo.svc", location.host)
+                self.assertEqual("bodgeit/product.jsp", location.path)
             with self.subTest(i=14):
                 finding = findings[14]
                 self.assertEqual("PII Disclosure", finding.title)
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("10062", finding.vuln_id_from_tool)
                 self.assertEqual(359, finding.cwe)
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("bodgeit.securecodebox-demo.svc", endpoint.host)
-                self.assertEqual("bodgeit/contact.jsp", endpoint.path)
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual("http", location.protocol)
+                self.assertEqual("bodgeit.securecodebox-demo.svc", location.host)
+                self.assertEqual("bodgeit/contact.jsp", location.path)
 
     def test_parse_juicy(self):
         """Generated with OWASP Juicy shop"""
         with (get_unit_tests_scans_path("zap") / "juicy2.xml").open(encoding="utf-8") as testfile:
             parser = ZapParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
             self.assertIsInstance(findings, list)
             self.assertEqual(6, len(findings))
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Incomplete or No Cache-control Header Set", finding.title)
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("10015", finding.vuln_id_from_tool)
-                self.assertEqual(20, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual("https", endpoint.protocol)
-                self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
-                self.assertEqual(443, endpoint.port)
-                endpoint = finding.unsaved_endpoints[1]
-                self.assertEqual("https", endpoint.protocol)
-                self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
-                self.assertEqual("assets/public/polyfills-es2018.js", endpoint.path)
+                self.assertEqual(20, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual("https", location.protocol)
+                self.assertEqual("juice-shop.herokuapp.com", location.host)
+                self.assertEqual(443, location.port)
+                location = self.get_unsaved_locations(finding)[1]
+                self.assertEqual("https", location.protocol)
+                self.assertEqual("juice-shop.herokuapp.com", location.host)
+                self.assertEqual("assets/public/polyfills-es2018.js", location.path)
             with self.subTest(i=5):
                 finding = findings[5]
                 self.assertEqual("CSP: Wildcard Directive", finding.title)
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("10055", finding.vuln_id_from_tool)
                 self.assertEqual(693, finding.cwe)
-                self.assertEqual(2, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual("https", endpoint.protocol)
-                self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
-                self.assertEqual("assets", endpoint.path)
+                self.assertEqual(2, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual("https", location.protocol)
+                self.assertEqual("juice-shop.herokuapp.com", location.host)
+                self.assertEqual("assets", location.path)
 
     def test_parse_xml_plus_format(self):
         with (get_unit_tests_scans_path("zap") / "zap-xml-plus-format.xml").open(encoding="utf-8") as testfile:
             parser = ZapParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
             self.assertIsInstance(findings, list)
             self.assertEqual(1, len(findings))
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Insecure HTTP Method - PUT", finding.title)
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("90028", finding.vuln_id_from_tool)
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("localhost", endpoint.host)
-                self.assertEqual(8080, endpoint.port)
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual("http", location.protocol)
+                self.assertEqual("localhost", location.host)
+                self.assertEqual(8080, location.port)
                 # Check request and response pair
                 request_pair = finding.unsaved_req_resp[0]
                 request = request_pair["req"]
@@ -232,26 +196,20 @@ class TestZapParser(DojoTestCase):
         with (get_unit_tests_scans_path("zap") / "zap_2.16.1_with_req_resp.xml").open(encoding="utf-8") as testfile:
             parser = ZapParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
             self.assertIsInstance(findings, list)
             self.assertEqual(4, len(findings))
-            for finding in findings:
-                self.assertIn(finding.severity, Finding.SEVERITIES)
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Authentication Request Identified", finding.title)
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual("10111", finding.vuln_id_from_tool)
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual("https", endpoint.protocol)
-                self.assertEqual("example-domain.com", endpoint.host)
-                self.assertEqual(443, endpoint.port)
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual("https", location.protocol)
+                self.assertEqual("example-domain.com", location.host)
+                self.assertEqual(443, location.port)
                 # Check request and response pair
                 self.assertEqual(1, len(finding.unsaved_req_resp))
                 request_pair = finding.unsaved_req_resp[0]
@@ -303,11 +261,11 @@ class TestZapParser(DojoTestCase):
                 self.assertEqual("Cookie Poisoning", finding.title)
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual("10029", finding.vuln_id_from_tool)
-                self.assertEqual(5, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual("https", endpoint.protocol)
-                self.assertEqual("example-domain.com", endpoint.host)
-                self.assertEqual(443, endpoint.port)
+                self.assertEqual(5, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual("https", location.protocol)
+                self.assertEqual("example-domain.com", location.host)
+                self.assertEqual(443, location.port)
                 # Check request and response pair
                 self.assertEqual(5, len(finding.unsaved_req_resp))
                 request_pair = finding.unsaved_req_resp[0]
@@ -356,11 +314,11 @@ class TestZapParser(DojoTestCase):
                 self.assertEqual("Information Disclosure - Sensitive Information in URL", finding.title)
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual("10024", finding.vuln_id_from_tool)
-                self.assertEqual(3, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual("https", endpoint.protocol)
-                self.assertEqual("example-domain.com", endpoint.host)
-                self.assertEqual(443, endpoint.port)
+                self.assertEqual(3, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual("https", location.protocol)
+                self.assertEqual("example-domain.com", location.host)
+                self.assertEqual(443, location.port)
                 # Check request and response pair
                 self.assertEqual(3, len(finding.unsaved_req_resp))
                 request_pair = finding.unsaved_req_resp[0]
@@ -410,11 +368,11 @@ class TestZapParser(DojoTestCase):
                 self.assertEqual("Re-examine Cache-control Directives", finding.title)
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual("10015", finding.vuln_id_from_tool)
-                self.assertEqual(4, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual("https", endpoint.protocol)
-                self.assertEqual("example-domain.com", endpoint.host)
-                self.assertEqual(443, endpoint.port)
+                self.assertEqual(4, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual("https", location.protocol)
+                self.assertEqual("example-domain.com", location.host)
+                self.assertEqual(443, location.port)
                 # Check request and response pair
                 self.assertEqual(4, len(finding.unsaved_req_resp))
                 request_pair = finding.unsaved_req_resp[0]

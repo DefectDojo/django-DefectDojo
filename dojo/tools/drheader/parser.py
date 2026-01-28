@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class DrHeaderParser:
@@ -32,7 +35,11 @@ class DrHeaderParser:
                     severity=severity,
                     static_finding=False)
         if url is not None:
-            find.unsaved_endpoints = [Endpoint.from_uri(url)]
+            if settings.V3_FEATURE_LOCATIONS:
+                find.unsaved_locations = [URL.from_value(url)]
+            else:
+                # TODO: Delete this after the move to Locations
+                find.unsaved_endpoints = [Endpoint.from_uri(url)]
         return find
 
     def get_findings(self, filename, test):

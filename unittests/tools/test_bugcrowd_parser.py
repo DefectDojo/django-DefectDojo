@@ -11,18 +11,14 @@ class TestBugCrowdParser(DojoTestCase):
         with (get_unit_tests_scans_path("bugcrowd") / "BugCrowd-zero.csv").open(encoding="utf-8") as testfile:
             parser = BugCrowdParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
         with (get_unit_tests_scans_path("bugcrowd") / "BugCrowd-one.csv").open(encoding="utf-8") as testfile:
             parser = BugCrowdParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             self.assertEqual(findings[0].date, datetime(2020, 3, 1, 6, 15, 6, tzinfo=UTC))
 
@@ -30,7 +26,5 @@ class TestBugCrowdParser(DojoTestCase):
         with (get_unit_tests_scans_path("bugcrowd") / "BugCrowd-many.csv").open(encoding="utf-8") as testfile:
             parser = BugCrowdParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(5, len(findings))

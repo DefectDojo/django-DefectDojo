@@ -3,12 +3,13 @@ import logging
 
 from vcr import VCR
 
-from .dojo_test_case import DojoVCRTestCase, get_unit_tests_path
-from .test_jira_config_engagement import JIRAConfigEngagementBase
+from unittests.dojo_test_case import DojoVCRTestCase, get_unit_tests_path, versioned_fixtures
+from unittests.test_jira_config_engagement import JIRAConfigEngagementBase
 
 logger = logging.getLogger(__name__)
 
 
+@versioned_fixtures
 class JIRAConfigEngagementEpicTest(DojoVCRTestCase, JIRAConfigEngagementBase):
     fixtures = ["dojo_testdata.json"]
 

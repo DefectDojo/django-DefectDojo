@@ -9,6 +9,7 @@ from dojo.tools.openvas.parser_v2.common import (
     OpenVASFindingAuxData,
     cleanup_openvas_text,
     deduplicate,
+    get_location,
     is_valid_severity,
     postprocess_finding,
     setup_finding,
@@ -108,20 +109,20 @@ class CSVParserV2:
 
     def _handle_hostname(self, column_value: str):
         # strip due to https://github.com/greenbone/gvmd/issues/2378
-        self.finding.unsaved_endpoints[0].host = column_value.strip()
+        get_location(self.finding).host = column_value.strip()
 
     def _handle_ip(self, column_value: str):
         # fallback to ip if hostname is not aviable
-        if not self.finding.unsaved_endpoints[0].host:
+        if not get_location(self.finding).host:
             # strip due to https://github.com/greenbone/gvmd/issues/2378
-            self.finding.unsaved_endpoints[0].host = column_value.strip()
+            get_location(self.finding).host = column_value.strip()
 
     def _handle_port(self, column_value: str):
         if column_value.isdigit():
-            self.finding.unsaved_endpoints[0].port = int(column_value)
+            get_location(self.finding).port = int(column_value)
 
     def _handle_port_protocol(self, column_value: str):
-        self.finding.unsaved_endpoints[0].protocol = column_value
+        get_location(self.finding).protocol = column_value
 
     def _handle_severity(self, column_value: str):
         if is_valid_severity(column_value):

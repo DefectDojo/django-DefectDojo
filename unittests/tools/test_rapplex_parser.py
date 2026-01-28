@@ -16,6 +16,7 @@ class TestRapplexParser(DojoTestCase):
         with (get_unit_tests_scans_path("rapplex") / "rapplex_one_vul.json").open(encoding="utf-8") as testfile:
             parser = RapplexParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("Critical", finding.severity)
@@ -28,10 +29,11 @@ class TestRapplexParser(DojoTestCase):
         with (get_unit_tests_scans_path("rapplex") / "rapplex_many_vul.json").open(encoding="utf-8") as testfile:
             parser = RapplexParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             self.assertEqual(8, len(findings))
             finding = findings[0]
             self.assertEqual("Application Disclosure", finding.title)
-            self.assertEqual("Information", finding.severity)
+            self.assertEqual("Info", finding.severity)
             self.assertEqual("200", finding.cwe)
             self.assertIsNotNone(finding.description)
             self.assertIsNotNone(finding.references)

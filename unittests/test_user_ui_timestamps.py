@@ -9,8 +9,10 @@ from django.utils.http import urlsafe_base64_encode
 
 from dojo.models import Dojo_User, User, UserContactInfo
 from dojo.user.authentication import reset_token_for_user
+from unittests.dojo_test_case import versioned_fixtures
 
 
+@versioned_fixtures
 class TestUserUITimestamps(TestCase):
     fixtures = ["dojo_testdata.json"]
 

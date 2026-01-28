@@ -1,4 +1,5 @@
 import django.apps
+from django.conf import settings
 
 from dojo.api_v2 import serializers
 from dojo.models import (
@@ -27,11 +28,11 @@ from dojo.models import (
     UserAnnouncement,
 )
 from dojo.urls import v2_api
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
+from unittests.test_rest_framework import BASE_API_URL, get_open_api3_json_schema
 
-from .dojo_test_case import DojoTestCase
-from .test_rest_framework import BASE_API_URL, get_open_api3_json_schema
 
-
+@versioned_fixtures
 class ApiEndpointMethods(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -53,13 +54,17 @@ class ApiEndpointMethods(DojoTestCase):
             "dojo_userevents", "endpointevents", "engagementevents", "findingevents",
             "finding_groupevents", "product_typeevents", "productevents", "testevents",
             "risk_acceptanceevents", "finding_templateevents", "cred_userevents",
-            "notification_webhooksevents",
+            "notification_webhooksevents", "location",
         }
         patch_exempt_list = {
             "dojo_group_members", "product_members", "product_groups", "product_type_groups",
             "product_type_members", "asset_members", "asset_groups", "organization_groups",
             "organization_members",
         }
+
+        if settings.V3_FEATURE_LOCATIONS:
+            # These are read-only in v3
+            exempt_list.update({"endpoint_status", "endpoints"})
 
         for reg, _, _ in sorted(self.registry):
             if reg in exempt_list:
@@ -92,6 +97,7 @@ class ApiEndpointMethods(DojoTestCase):
             )
 
 
+@versioned_fixtures
 class ApiEndpoints(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 

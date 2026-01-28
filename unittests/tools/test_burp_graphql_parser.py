@@ -10,9 +10,7 @@ class TestBurpGraphQLParser(DojoTestCase):
         with (get_unit_tests_scans_path("burp_graphql") / "one_finding.json").open(encoding="utf-8") as test_file:
             parser = BurpGraphQLParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             self.assertEqual(1, len(findings))
             self.assertEqual("Finding", findings[0].title)
@@ -22,10 +20,10 @@ class TestBurpGraphQLParser(DojoTestCase):
             self.assertIn("issue description 1", findings[0].impact)
             self.assertIn("issue remediation 1", findings[0].mitigation)
             self.assertEqual("High", findings[0].severity)
-            self.assertEqual(1, len(findings[0].unsaved_endpoints))
-            self.assertEqual("www.test.com", findings[0].unsaved_endpoints[0].host)
-            self.assertEqual("path", findings[0].unsaved_endpoints[0].path)
-            self.assertEqual("https", findings[0].unsaved_endpoints[0].protocol)
+            self.assertEqual(1, len(self.get_unsaved_locations(findings[0])))
+            self.assertEqual("www.test.com", self.get_unsaved_locations(findings[0])[0].host)
+            self.assertEqual("path", self.get_unsaved_locations(findings[0])[0].path)
+            self.assertEqual("https", self.get_unsaved_locations(findings[0])[0].protocol)
             self.assertEqual(1, len(findings[0].unsaved_req_resp))
             self.assertEqual("request data 1/request data 2/request data 3/", findings[0].unsaved_req_resp[0]["req"])
             self.assertIn("ref 1", findings[0].references)
@@ -35,14 +33,12 @@ class TestBurpGraphQLParser(DojoTestCase):
         with (get_unit_tests_scans_path("burp_graphql") / "two_findings.json").open(encoding="utf-8") as test_file:
             parser = BurpGraphQLParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             self.assertEqual(2, len(findings))
             self.assertEqual("Finding 1", findings[0].title)
             self.assertEqual("Finding 2", findings[1].title)
-            self.assertEqual(2, len(findings[1].unsaved_endpoints))
+            self.assertEqual(2, len(self.get_unsaved_locations(findings[1])))
             self.assertEqual(4, len(findings[1].unsaved_req_resp))
             self.assertIn("description 2", findings[1].description)
             self.assertIn("description 3", findings[1].description)
@@ -64,15 +60,14 @@ class TestBurpGraphQLParser(DojoTestCase):
         with (get_unit_tests_scans_path("burp_graphql") / "null_request_segments.json").open(encoding="utf-8") as test_file:
             parser = BurpGraphQLParser()
             findings = parser.get_findings(test_file, Test())
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
 
     def test_burp_null_data(self):
         with (get_unit_tests_scans_path("burp_graphql") / "null_data.json").open(encoding="utf-8") as test_file:
             parser = BurpGraphQLParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             self.assertEqual(1, len(findings))
             self.assertEqual("Finding", findings[0].title)

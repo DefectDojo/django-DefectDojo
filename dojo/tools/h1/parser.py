@@ -124,7 +124,6 @@ class HackerOneVulnerabilityDisclosureProgram:
                     cvssv3=cvssv3_vector,
                     cvssv3_score=cvssv3_score,
                 )
-                finding.unsaved_endpoints = []
 
                 # Add vulnerability IDs if they are present
                 if (cve_ids := content["attributes"].get("cve_ids")) is not None and len(cve_ids) > 0:

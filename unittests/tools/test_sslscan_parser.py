@@ -1,3 +1,4 @@
+
 from dojo.models import Test
 from dojo.tools.sslscan.parser import SslscanParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -15,16 +16,12 @@ class TestSslscanParser(DojoTestCase):
         with (get_unit_tests_scans_path("sslscan") / "sslscan_one_vuln.xml").open(encoding="utf-8") as testfile:
             parser = SslscanParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         with (get_unit_tests_scans_path("sslscan") / "sslscan_many_vuln.xml").open(encoding="utf-8") as testfile:
             parser = SslscanParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             self.assertEqual(2, len(findings))
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()

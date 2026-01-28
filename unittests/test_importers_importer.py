@@ -56,6 +56,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             product_type, _created = Product_Type.objects.get_or_create(name="test")
             product, _created = Product.objects.get_or_create(
                 name="TestDojoDefaultImporter",
+                description="test product",
                 prod_type=product_type,
             )
             engagement, _created = Engagement.objects.get_or_create(
@@ -97,6 +98,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             product_type, _ = Product_Type.objects.get_or_create(name="test2")
             product, _ = Product.objects.get_or_create(
                 name="TestDojoDefaultImporter2",
+                description="test product",
                 prod_type=product_type,
             )
             engagement, _ = Engagement.objects.get_or_create(
@@ -132,6 +134,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             product_type, _ = Product_Type.objects.get_or_create(name="test2")
             product, _ = Product.objects.get_or_create(
                 name="TestDojoDefaultImporter2",
+                description="test product",
                 prod_type=product_type,
             )
             engagement, _ = Engagement.objects.get_or_create(
@@ -168,6 +171,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             product_type, _ = Product_Type.objects.get_or_create(name="test_generic")
             product, _ = Product.objects.get_or_create(
                 name="TestGenericImporter",
+                description="test product",
                 prod_type=product_type,
             )
             engagement, _ = Engagement.objects.get_or_create(
@@ -207,6 +211,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             product_type, _ = Product_Type.objects.get_or_create(name="test_generic_reimport")
             product, _ = Product.objects.get_or_create(
                 name="TestGenericReimport",
+                description="test product",
                 prod_type=product_type,
             )
             engagement, _ = Engagement.objects.get_or_create(
@@ -267,6 +272,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             product_type, _ = Product_Type.objects.get_or_create(name="test_generic_mismatch")
             product, _ = Product.objects.get_or_create(
                 name="TestGenericMismatch",
+                description="test product",
                 prod_type=product_type,
             )
             engagement, _ = Engagement.objects.get_or_create(
@@ -336,6 +342,7 @@ class TestDojoDefaultImporter(DojoTestCase):
             product_type, _ = Product_Type.objects.get_or_create(name="test_generic_type_equals_scan_type")
             product, _ = Product.objects.get_or_create(
                 name="TestGenericTypeEqualsScanType",
+                description="test product",
                 prod_type=product_type,
             )
             engagement, _ = Engagement.objects.get_or_create(

@@ -1,3 +1,4 @@
+
 from dojo.models import Engagement, Product, Test
 from dojo.tools.openvas.parser import OpenVASParser, OpenVASParserV2
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -9,37 +10,34 @@ def openvas_open(file):
     return (get_unit_tests_scans_path("openvas") / file).open(encoding="utf-8")
 
 
-def setup_openvas_v2_test(f):
-    """Setup helper for general openvas_v2 test setup"""
-    test = Test()
-    test.engagement = Engagement()
-    test.engagement.product = Product()
-    parser = OpenVASParserV2()
-    findings = parser.get_findings(f, test)
-    for finding in findings:
-        for endpoint in finding.unsaved_endpoints:
-            endpoint.clean()
-    return findings
-
-
 class TestOpenVASParserV2(DojoTestCase):
+    def setup_openvas_v2_test(self, f):
+        """Setup helper for general openvas_v2 test setup"""
+        test = Test()
+        test.engagement = Engagement()
+        test.engagement.product = Product()
+        parser = OpenVASParserV2()
+        findings = parser.get_findings(f, test)
+        self.validate_locations(findings)
+        return findings
+
     # test empty cases
     def test_openvas_csv_no_vuln(self):
         """Ensure that an empty report does not throw and error and reports 0 findings"""
         with openvas_open("no_vuln.csv") as f:
-            findings = setup_openvas_v2_test(f)
+            findings = self.setup_openvas_v2_test(f)
             self.assertEqual(0, len(findings))
 
     def test_openvas_xml_no_vuln(self):
         """Ensure that an empty report does not throw and error and reports 0 findings"""
         with openvas_open("no_vuln.xml") as f:
-            findings = setup_openvas_v2_test(f)
+            findings = self.setup_openvas_v2_test(f)
             self.assertEqual(0, len(findings))
 
     def test_openvas_parser_csv_detail(self):
         """Ensure finding contains report data as expected"""
         with openvas_open("report_detail_v2.csv") as f:
-            findings = setup_openvas_v2_test(f)
+            findings = self.setup_openvas_v2_test(f)
 
         # ensure single finding
         self.assertEqual(len(findings), 1)
@@ -57,17 +55,17 @@ class TestOpenVASParserV2(DojoTestCase):
         self.assertEqual(finding.unsaved_vulnerability_ids[1], "CVE-2025-48823")
         self.assertEqual(93, len(finding.unsaved_vulnerability_ids))
 
-        # endpoint tests
-        self.assertEqual(1, len(finding.unsaved_endpoints))
-        self.assertEqual("server99", finding.unsaved_endpoints[0].host)
+        # location tests
+        self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+        self.assertEqual("server99", self.get_unsaved_locations(finding)[0].host)
         # this is example data normaly tested finding does not include this
-        self.assertEqual(42, finding.unsaved_endpoints[0].port)
-        self.assertEqual("tcp", finding.unsaved_endpoints[0].protocol)
+        self.assertEqual(42, self.get_unsaved_locations(finding)[0].port)
+        self.assertEqual("tcp", self.get_unsaved_locations(finding)[0].protocol)
 
     def test_openvas_parser_xml_detail(self):
         """Ensure finding contains report data as expected"""
         with openvas_open("report_detail_v2.xml") as f:
-            findings = setup_openvas_v2_test(f)
+            findings = self.setup_openvas_v2_test(f)
 
         # ensure single finding
         self.assertEqual(len(findings), 1)
@@ -77,9 +75,9 @@ class TestOpenVASParserV2(DojoTestCase):
     def test_openvas_parser_csv_xml_parity(self):
         """Ensure xml and csv parser parse data that is the same between report in the same way"""
         with openvas_open("report_detail_v2.csv") as f:
-            findings_csv = setup_openvas_v2_test(f)
+            findings_csv = self.setup_openvas_v2_test(f)
         with openvas_open("report_detail_v2.xml") as f:
-            findings_xml = setup_openvas_v2_test(f)
+            findings_xml = self.setup_openvas_v2_test(f)
 
         f_xml = findings_xml[0]
         f_csv = findings_csv[0]
@@ -96,15 +94,17 @@ class TestOpenVASParserV2(DojoTestCase):
         self.assertEqual(len(f_xml.unsaved_vulnerability_ids), len(f_csv.unsaved_vulnerability_ids))
         self.assertEqual(f_xml.unsaved_vulnerability_ids, f_csv.unsaved_vulnerability_ids)
 
-        # ensure same endpoint parsing behaviour
-        self.assertEqual(f_xml.unsaved_endpoints[0].host, f_csv.unsaved_endpoints[0].host)
-        self.assertEqual(f_xml.unsaved_endpoints[0].protocol, f_csv.unsaved_endpoints[0].protocol)
-        self.assertEqual(f_xml.unsaved_endpoints[0].port, f_csv.unsaved_endpoints[0].port)
+        # ensure same location parsing behaviour
+        xml_location = self.get_unsaved_locations(f_xml)[0]
+        csv_location = self.get_unsaved_locations(f_csv)[0]
+        self.assertEqual(xml_location.host, csv_location.host)
+        self.assertEqual(xml_location.protocol, csv_location.protocol)
+        self.assertEqual(xml_location.port, csv_location.port)
 
     def test_openvas_csv_report_combined_findings(self):
         """Ensure findings combinding behaviour"""
         with openvas_open("report_combine_v2.csv") as f:
-            findings = setup_openvas_v2_test(f)
+            findings = self.setup_openvas_v2_test(f)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual(2, finding.nb_occurences)
@@ -112,13 +112,13 @@ class TestOpenVASParserV2(DojoTestCase):
     def test_openvas_csv_many_findings(self):
         """Ensure findings combinding behaviour"""
         with openvas_open("many_vuln.csv") as f:
-            findings = setup_openvas_v2_test(f)
+            findings = self.setup_openvas_v2_test(f)
             self.assertEqual(4, len(findings))
 
     def test_openvas_xml_many_findings(self):
         """Ensure findings combinding behaviour"""
         with openvas_open("many_vuln.xml") as f:
-            findings = setup_openvas_v2_test(f)
+            findings = self.setup_openvas_v2_test(f)
             self.assertEqual(44, len(findings))
 
 
@@ -131,19 +131,17 @@ class TestOpenVASParser(DojoTestCase):
             test.engagement.product = Product()
             parser = OpenVASParser()
             findings = parser.get_findings(f, test)
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             # finding
             self.assertEqual("SSH Weak Encryption Algorithms Supported", findings[0].title)
             self.assertEqual("Medium", findings[0].severity)
-            # endpoints
-            self.assertEqual(1, len(findings[0].unsaved_endpoints))
-            # endpoint
-            self.assertEqual("10.0.0.8", findings[0].unsaved_endpoints[0].host)
-            self.assertEqual("tcp", findings[0].unsaved_endpoints[0].protocol)
-            self.assertEqual(22, findings[0].unsaved_endpoints[0].port)
+            # locations
+            self.assertEqual(1, len(self.get_unsaved_locations(findings[0])))
+            # locations
+            self.assertEqual("10.0.0.8", self.get_unsaved_locations(findings[0])[0].host)
+            self.assertEqual("tcp", self.get_unsaved_locations(findings[0])[0].protocol)
+            self.assertEqual(22, self.get_unsaved_locations(findings[0])[0].port)
 
     def test_openvas_csv_many_vuln(self):
         with (get_unit_tests_scans_path("openvas") / "many_vuln.csv").open(encoding="utf-8") as f:
@@ -152,21 +150,19 @@ class TestOpenVASParser(DojoTestCase):
             test.engagement.product = Product()
             parser = OpenVASParser()
             findings = parser.get_findings(f, test)
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(4, len(findings))
             # finding
             finding = findings[3]
             self.assertEqual("HTTP Brute Force Logins With Default Credentials Reporting", finding.title)
             self.assertEqual("High", finding.severity)
-            # endpoints
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            # endpoint
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual("LOGSRV", endpoint.host)
-            self.assertEqual("tcp", endpoint.protocol)
-            self.assertEqual(9200, endpoint.port)
+            # locations
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            # location
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("LOGSRV", location.host)
+            self.assertEqual("tcp", location.protocol)
+            self.assertEqual(9200, location.port)
             finding = findings[2]
             self.assertEqual(finding.unsaved_vulnerability_ids[0], "CVE-2011-3389")
 
@@ -177,9 +173,7 @@ class TestOpenVASParser(DojoTestCase):
             test.engagement.product = Product()
             parser = OpenVASParser()
             findings = parser.get_findings(f, test)
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(43, len(findings))
             finding = findings[4]
             self.assertEqual("CVE-2014-0117", finding.title)
@@ -194,9 +188,7 @@ class TestOpenVASParser(DojoTestCase):
             test.engagement.product = Product()
             parser = OpenVASParser()
             findings = parser.get_findings(f, test)
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(13, len(findings))
             finding = findings[2]
             self.assertEqual("Apache HTTP Server Detection Consolidation", finding.title)
@@ -219,9 +211,7 @@ class TestOpenVASParser(DojoTestCase):
             test.engagement.product = Product()
             parser = OpenVASParser()
             findings = parser.get_findings(f, test)
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -239,8 +229,6 @@ class TestOpenVASParser(DojoTestCase):
             parser = OpenVASParser()
             findings = parser.get_findings(f, test)
             self.assertEqual(44, len(findings))
-            self.assertEqual(44, len([endpoint for finding in findings for endpoint in finding.unsaved_endpoints]))
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
-            self.assertEqual("tcp://192.168.1.1001:512", str(findings[0].unsaved_endpoints[0]))
+            self.assertEqual(44, len([location for finding in findings for location in self.get_unsaved_locations(finding)]))
+            self.validate_locations(findings)
+            self.assertEqual("tcp://192.168.1.1001:512", str(self.get_unsaved_locations(findings[0])[0]))

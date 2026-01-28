@@ -7,6 +7,7 @@ for various user permission scenarios.
 """
 from unittest.mock import patch
 
+from django.conf import settings
 from django.utils import timezone
 
 from dojo.authorization.roles_permissions import Permissions
@@ -20,6 +21,12 @@ from dojo.finding.queries import (
 )
 from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.group.queries import get_authorized_groups
+from dojo.location.models import LocationFindingReference, LocationProductReference
+from dojo.location.queries import (
+    get_authorized_location_finding_reference,
+    get_authorized_location_product_reference,
+    get_authorized_locations,
+)
 from dojo.models import (
     Dojo_Group,
     Dojo_Group_Member,
@@ -45,8 +52,9 @@ from dojo.models import (
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.test.queries import get_authorized_tests
+from dojo.url.models import URL
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3
 
 
 class AuthorizationQueriesTestBase(DojoTestCase):
@@ -106,10 +114,12 @@ class AuthorizationQueriesTestBase(DojoTestCase):
         # Create products
         cls.product_1, _ = Product.objects.get_or_create(
             name="Auth Test Product 1",
+            description="Test",
             defaults={"prod_type": cls.product_type_1},
         )
         cls.product_2, _ = Product.objects.get_or_create(
             name="Auth Test Product 2",
+            description="Test",
             defaults={"prod_type": cls.product_type_2},
         )
 
@@ -248,25 +258,51 @@ class AuthorizationQueriesTestBase(DojoTestCase):
             vulnerability_id="CVE-2024-0002",
         )
 
-        # Create endpoints
-        cls.endpoint_1, _ = Endpoint.objects.get_or_create(
-            product=cls.product_1,
-            host="auth-test-1.example.com",
-        )
-        cls.endpoint_2, _ = Endpoint.objects.get_or_create(
-            product=cls.product_2,
-            host="auth-test-2.example.com",
-        )
+        if settings.V3_FEATURE_LOCATIONS:
+            # Create locations
+            cls.url_1, _ = URL.objects.get_or_create(
+                host="auth-test-1.example.com",
+            )
+            cls.location_finding_ref_1, _ = LocationFindingReference.objects.get_or_create(
+                location=cls.url_1.location,
+                finding=cls.finding_1,
+            )
+            cls.location_product_ref_1, _ = LocationProductReference.objects.get_or_create(
+                location=cls.url_1.location,
+                product=cls.product_1,
+            )
+            cls.url_2, _ = URL.objects.get_or_create(
+                host="auth-test-2.example.com",
+            )
+            cls.location_finding_ref_2, _ = LocationFindingReference.objects.get_or_create(
+                location=cls.url_2.location,
+                finding=cls.finding_2,
+            )
+            cls.location_product_ref_2, _ = LocationProductReference.objects.get_or_create(
+                location=cls.url_2.location,
+                product=cls.product_2,
+            )
+        else:
+            # TODO: Delete this after the move to Locations
+            # Create endpoints
+            cls.endpoint_1, _ = Endpoint.objects.get_or_create(
+                product=cls.product_1,
+                host="auth-test-1.example.com",
+            )
+            cls.endpoint_2, _ = Endpoint.objects.get_or_create(
+                product=cls.product_2,
+                host="auth-test-2.example.com",
+            )
 
-        # Create endpoint statuses
-        cls.endpoint_status_1, _ = Endpoint_Status.objects.get_or_create(
-            endpoint=cls.endpoint_1,
-            finding=cls.finding_1,
-        )
-        cls.endpoint_status_2, _ = Endpoint_Status.objects.get_or_create(
-            endpoint=cls.endpoint_2,
-            finding=cls.finding_2,
-        )
+            # Create endpoint statuses
+            cls.endpoint_status_1, _ = Endpoint_Status.objects.get_or_create(
+                endpoint=cls.endpoint_1,
+                finding=cls.finding_1,
+            )
+            cls.endpoint_status_2, _ = Endpoint_Status.objects.get_or_create(
+                endpoint=cls.endpoint_2,
+                finding=cls.finding_2,
+            )
 
 
 class TestGetAuthorizedFindings(AuthorizationQueriesTestBase):
@@ -547,48 +583,124 @@ class TestGetAuthorizedTests(AuthorizationQueriesTestBase):
         self.assertNotIn(self.test_2, tests)
 
 
+@skip_unless_v3
+class TestGetAuthorizedLocations(AuthorizationQueriesTestBase):
+
+    """Tests for get_authorized_locations()"""
+
+    def test_superuser_gets_all_locations(self):
+        """Superuser should get all locations"""
+        locations = get_authorized_locations(Permissions.Location_View, user=self.superuser)
+        self.assertIn(self.url_1.location, locations)
+        self.assertIn(self.url_2.location, locations)
+
+    def test_user_no_permissions_gets_empty(self):
+        """User with no permissions should not get test locations"""
+        locations = get_authorized_locations(Permissions.Location_View, user=self.user_no_perms)
+        self.assertNotIn(self.url_1.location, locations)
+        self.assertNotIn(self.url_2.location, locations)
+
+    def test_user_product_member_gets_product_locations(self):
+        """User with product membership should get only that product's endpoints"""
+        locations = get_authorized_locations(Permissions.Location_View, user=self.user_product_member)
+        self.assertIn(self.url_1.location, locations)
+        self.assertNotIn(self.url_2.location, locations)
+
+
+@skip_unless_v3
+class TestGetAuthorizedLocationFindingReferences(AuthorizationQueriesTestBase):
+
+    """Tests for get_authorized_location_finding_reference()"""
+
+    def test_superuser_gets_all_location_finding_references(self):
+        """Superuser should get all location finding references"""
+        finding_refs = get_authorized_location_finding_reference(Permissions.Location_View, user=self.superuser)
+        self.assertIn(self.location_finding_ref_1, finding_refs)
+        self.assertIn(self.location_finding_ref_2, finding_refs)
+
+    def test_user_no_permissions_gets_empty(self):
+        """User with no permissions should get no location finding references"""
+        finding_refs = get_authorized_location_finding_reference(Permissions.Location_View, user=self.user_no_perms)
+        self.assertNotIn(self.location_finding_ref_1, finding_refs)
+        self.assertNotIn(self.location_finding_ref_2, finding_refs)
+
+    def test_user_product_member_gets_product_location_finding_references(self):
+        """User with product membership should get only that product's finding references"""
+        finding_refs = get_authorized_location_finding_reference(Permissions.Location_View, user=self.user_product_member)
+        self.assertIn(self.location_finding_ref_1, finding_refs)
+        self.assertNotIn(self.location_finding_ref_2, finding_refs)
+
+
+@skip_unless_v3
+class TestGetAuthorizedLocationProductReferences(AuthorizationQueriesTestBase):
+
+    """Tests for get_authorized_location_product_reference()"""
+
+    def test_superuser_gets_all_location_finding_references(self):
+        """Superuser should get all location product references"""
+        product_refs = get_authorized_location_product_reference(Permissions.Location_View, user=self.superuser)
+        self.assertIn(self.location_product_ref_1, product_refs)
+        self.assertIn(self.location_product_ref_2, product_refs)
+
+    def test_user_no_permissions_gets_empty(self):
+        """User with no permissions should get no location finding references"""
+        product_refs = get_authorized_location_product_reference(Permissions.Location_View, user=self.user_no_perms)
+        self.assertNotIn(self.location_product_ref_1, product_refs)
+        self.assertNotIn(self.location_product_ref_2, product_refs)
+
+    def test_user_product_member_gets_product_location_product_references(self):
+        """User with product membership should get only that product's location product references"""
+        product_refs = get_authorized_location_product_reference(Permissions.Location_View, user=self.user_product_member)
+        self.assertIn(self.location_product_ref_1, product_refs)
+        self.assertNotIn(self.location_product_ref_2, product_refs)
+
+
+# TODO: Delete this after the move to Locations
+@skip_unless_v2
 class TestGetAuthorizedEndpoints(AuthorizationQueriesTestBase):
 
     """Tests for get_authorized_endpoints()"""
 
     def test_superuser_gets_all_endpoints(self):
         """Superuser should get all endpoints"""
-        endpoints = get_authorized_endpoints(Permissions.Endpoint_View, user=self.superuser)
+        endpoints = get_authorized_endpoints(Permissions.Location_View, user=self.superuser)
         self.assertIn(self.endpoint_1, endpoints)
         self.assertIn(self.endpoint_2, endpoints)
 
     def test_user_no_permissions_gets_empty(self):
         """User with no permissions should not get test endpoints"""
-        endpoints = get_authorized_endpoints(Permissions.Endpoint_View, user=self.user_no_perms)
+        endpoints = get_authorized_endpoints(Permissions.Location_View, user=self.user_no_perms)
         self.assertNotIn(self.endpoint_1, endpoints)
         self.assertNotIn(self.endpoint_2, endpoints)
 
     def test_user_product_member_gets_product_endpoints(self):
         """User with product membership should get only that product's endpoints"""
-        endpoints = get_authorized_endpoints(Permissions.Endpoint_View, user=self.user_product_member)
+        endpoints = get_authorized_endpoints(Permissions.Location_View, user=self.user_product_member)
         self.assertIn(self.endpoint_1, endpoints)
         self.assertNotIn(self.endpoint_2, endpoints)
 
 
+# TODO: Delete this after the move to Locations
+@skip_unless_v2
 class TestGetAuthorizedEndpointStatus(AuthorizationQueriesTestBase):
 
     """Tests for get_authorized_endpoint_status()"""
 
     def test_superuser_gets_all_endpoint_statuses(self):
         """Superuser should get all endpoint statuses"""
-        endpoint_statuses = get_authorized_endpoint_status(Permissions.Endpoint_View, user=self.superuser)
+        endpoint_statuses = get_authorized_endpoint_status(Permissions.Location_View, user=self.superuser)
         self.assertIn(self.endpoint_status_1, endpoint_statuses)
         self.assertIn(self.endpoint_status_2, endpoint_statuses)
 
     def test_user_no_permissions_gets_empty(self):
         """User with no permissions should not get test endpoint statuses"""
-        endpoint_statuses = get_authorized_endpoint_status(Permissions.Endpoint_View, user=self.user_no_perms)
+        endpoint_statuses = get_authorized_endpoint_status(Permissions.Location_View, user=self.user_no_perms)
         self.assertNotIn(self.endpoint_status_1, endpoint_statuses)
         self.assertNotIn(self.endpoint_status_2, endpoint_statuses)
 
     def test_user_product_member_gets_product_endpoint_statuses(self):
         """User with product membership should get only that product's endpoint statuses"""
-        endpoint_statuses = get_authorized_endpoint_status(Permissions.Endpoint_View, user=self.user_product_member)
+        endpoint_statuses = get_authorized_endpoint_status(Permissions.Location_View, user=self.user_product_member)
         self.assertIn(self.endpoint_status_1, endpoint_statuses)
         self.assertNotIn(self.endpoint_status_2, endpoint_statuses)
 

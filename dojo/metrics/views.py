@@ -100,6 +100,7 @@ def metrics(request, mtype):
     if view == "Finding":
         page_name = str(labels.ORG_METRICS_BY_FINDINGS_LABEL)
         filters = finding_queries(prod_type, request)
+    # TODO: Delete this after the move to Locations
     elif view == "Endpoint":
         page_name = str(labels.ORG_METRICS_BY_ENDPOINTS_LABEL)
         filters = endpoint_queries(prod_type, request)
