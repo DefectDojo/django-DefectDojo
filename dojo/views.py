@@ -15,6 +15,7 @@ from django.urls import reverse
 
 from dojo.authorization.authorization import (
     user_has_configuration_permission_or_403,
+    user_has_global_permission,
     user_has_permission,
     user_has_permission_or_403,
 )
@@ -115,10 +116,17 @@ def action_history(request, cid, oid):
     elif ct.model == "risk_acceptance":
         engagements = Engagement.objects.filter(risk_acceptance=obj)
         authorized = False
-        for engagement in engagements:
-            if user_has_permission(request.user, engagement, Permissions.Engagement_View):
-                authorized = True
-                break
+        fetched_engagements = list(engagements)
+        # Check the case that there are no engagements associated with the risk acceptance
+        if len(fetched_engagements) == 0:
+            # Determine if the user has risk acceptance view permission globally
+            authorized = user_has_global_permission(request.user, Permissions.Risk_Acceptance)
+        else:
+            # Iterate through engagements to see if the user has view permission on any of them
+            for engagement in fetched_engagements:
+                if user_has_permission(request.user, engagement, Permissions.Engagement_View):
+                    authorized = True
+                    break
         if not authorized:
             raise PermissionDenied
     elif ct.model == "user":
@@ -135,7 +143,7 @@ def action_history(request, cid, oid):
             else:
                 product_tab.setEngagement(object_value.engagement)
 
-    # Get audit history from both systems separately
+    # Get audit history from pghistory (and legacy django-auditlog entries if available)
     auditlog_history = []
     pghistory_history = []
 

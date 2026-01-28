@@ -18,16 +18,16 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@75d2e84710de30f6ff7268e08f310b60ef14033f # v3.0.0
         with:
-          hugo-version: '0.152.2' # renovate: datasource=github-releases depName=gohugoio/hugo
+          hugo-version: '0.153.4' # renovate: datasource=github-releases depName=gohugoio/hugo
           extended: true
 
       - name: Setup Node
-        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
-          node-version: '24.11.1' # TODO: Renovate helper might not be needed here - needs to be fully tested
+          node-version: '24.12.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
 
       - name: Cache dependencies
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -35,7 +35,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           submodules: recursive
           fetch-depth: 0
@@ -46,13 +46,12 @@ jobs:
 
       - name: Install dependencies
         run: cd docs && npm ci
-      
+
       - name: Build production website
         env:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: cd docs && hugo --minify --gc --config config/production/hugo.toml
-
       - name: Deploy
         uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
         if: github.repository == 'DefectDojo/django-DefectDojo' # Deploy docs only in core repo, not in forks - it would just fail in fork

@@ -93,7 +93,7 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests
 from dojo.user.queries import get_authorized_users
-from dojo.utils import get_system_setting, is_finding_groups_enabled, truncate_timezone_aware
+from dojo.utils import get_system_setting, get_visible_scan_types, is_finding_groups_enabled, truncate_timezone_aware
 
 logger = logging.getLogger(__name__)
 
@@ -1889,6 +1889,8 @@ class FindingFilterHelper(FilterSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if "test__test_type" in self.form.fields:
+            self.form.fields["test__test_type"].queryset = get_visible_scan_types()
 
     def set_date_fields(self, *args: list, **kwargs: dict):
         date_input_widget = forms.DateInput(attrs={"class": "datepicker", "placeholder": "YYYY-MM-DD"}, format="%Y-%m-%d")
@@ -2023,9 +2025,6 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
             del self.form.fields["test__engagement__product__name_contains"]
             del self.form.fields["test__engagement__product__prod_type__name"]
             del self.form.fields["test__engagement__product__prod_type__name_contains"]
-        else:
-            del self.form.fields["test__name"]
-            del self.form.fields["test__name_contains"]
 
 
 class FindingFilter(FindingFilterHelper, FindingTagFilter):
@@ -3604,7 +3603,7 @@ class PgHistoryFilter(DojoFilter):
             ("insert", "Insert"),
             ("update", "Update"),
             ("delete", "Delete"),
-            ("initial_import", "Initial Import"),
+            ("initial_backfill", "Initial Backfill"),
         ],
     )
 

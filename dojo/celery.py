@@ -2,7 +2,7 @@ import logging
 import os
 from logging.config import dictConfig
 
-from celery import Celery
+from celery import Celery, Task
 from celery.signals import setup_logging
 from django.conf import settings
 
@@ -11,7 +11,31 @@ logger = logging.getLogger(__name__)
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 
-app = Celery("dojo")
+
+class PgHistoryTask(Task):
+
+    """
+    Custom Celery base task that automatically applies pghistory context.
+
+    When a task is dispatched via dojo_async_task, the current pghistory
+    context is captured and passed in kwargs as "_pgh_context". This base
+    class extracts that context and applies it before running the task,
+    ensuring all database events share the same context as the original
+    request.
+    """
+
+    def __call__(self, *args, **kwargs):
+        # Import here to avoid circular imports during Celery startup
+        from dojo.pghistory_utils import get_pghistory_context_manager  # noqa: PLC0415
+
+        # Extract context from kwargs (won't be passed to task function)
+        pgh_context = kwargs.pop("_pgh_context", None)
+
+        with get_pghistory_context_manager(pgh_context):
+            return super().__call__(*args, **kwargs)
+
+
+app = Celery("dojo", task_cls=PgHistoryTask)
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.

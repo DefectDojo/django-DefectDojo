@@ -14,6 +14,7 @@ from unittest.mock import ANY, MagicMock, PropertyMock, call, patch
 
 from django.conf import settings
 from django.contrib.auth.models import Permission
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import tag as test_tag
 from django.test.utils import override_settings
 from django.urls import reverse
@@ -21,6 +22,7 @@ from django.utils import timezone
 from drf_spectacular.drainage import GENERATOR_STATS
 from drf_spectacular.settings import spectacular_settings
 from drf_spectacular.validation import validate_schema
+from parameterized import parameterized
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.mixins import (
@@ -86,6 +88,12 @@ from dojo.api_v2.views import (
     UserContactInfoViewSet,
     UsersViewSet,
 )
+from dojo.asset.api.views import (
+    AssetAPIScanConfigurationViewSet,
+    AssetGroupViewSet,
+    AssetMemberViewSet,
+    AssetViewSet,
+)
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import (
     Announcement,
@@ -139,6 +147,11 @@ from dojo.models import (
     Tool_Type,
     User,
     UserContactInfo,
+)
+from dojo.organization.api.views import (
+    OrganizationGroupViewSet,
+    OrganizationMemberViewSet,
+    OrganizationViewSet,
 )
 
 from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
@@ -357,34 +370,36 @@ class TestType(Enum):
 
 class BaseClass:
     class RESTEndpointTest(DojoAPITestCase):
+        NOT_AUTHORIZED_USER_ID = 3
+        GLOBAL_READER_USER_ID = 5
+        GLOBAL_WRITER_USER_ID = 7
+        GLOBAL_OWNER_USER_ID = 6
+
         def __init__(self, *args, **kwargs):
             DojoAPITestCase.__init__(self, *args, **kwargs)
 
-        def setUp(self):
-            testuser = User.objects.get(username="admin")
+        def _get_client(self, user_criteria: dict) -> None:
+            testuser = User.objects.get(**user_criteria)
             token = Token.objects.get(user=testuser)
             self.client = APIClient()
             self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+
+        def setUp(self):
+            self._get_client({"username": "admin"})
             self.url = reverse(self.viewname + "-list")
             self.schema = get_open_api3_json_schema()
 
         def setUp_not_authorized(self):
-            testuser = User.objects.get(id=3)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+            self._get_client({"id": self.NOT_AUTHORIZED_USER_ID})
 
         def setUp_global_reader(self):
-            testuser = User.objects.get(id=5)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+            self._get_client({"id": self.GLOBAL_READER_USER_ID})
+
+        def setUp_global_writer(self):
+            self._get_client({"id": self.GLOBAL_WRITER_USER_ID})
 
         def setUp_global_owner(self):
-            testuser = User.objects.get(id=6)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+            self._get_client({"id": self.GLOBAL_OWNER_USER_ID})
 
         def check_schema(self, schema, obj):
             schema_checker = SchemaChecker(self.schema["components"])
@@ -1168,6 +1183,42 @@ class EngagementTest(BaseClass.BaseClassTest):
         self.deleted_objects = 23
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    @parameterized.expand(
+        [
+            ("files", {"title": "test", "file": b"empty"}),
+            ("notes", {"entry": "string"}),
+        ],
+    )
+    def test_related_objects(self, related_object_path, payload):
+        """
+        Tests that BaseRelatedObjectPermission enforces the permissions not associated
+        with the base object. For example, even though a request to add a note to an
+        engagement is a POST, we do not need engagement add permissions, but rather
+        engagement edit permissions since that is what is defined in the
+        UserHasEngagementRelatedObjectPermission class
+        """
+        self.setUp_global_reader()
+        # Get an engagement
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        engagement_id = response.data["results"][0]["id"]
+        # Attempt to add a related object
+        relative_url = f"{self.url}{engagement_id}/{related_object_path}/"
+        response = self.client.post(relative_url, payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        # Now switch to a user with edit permissions (but not create)
+        self.setUp_global_writer()
+        # Retry adding the related object
+        if related_object_path == "files":
+            # Convert bytes to a mock uploaded file
+            payload["file"] = SimpleUploadedFile(
+                name="test_file.txt",
+                content=payload["file"],  # the b"empty"
+                content_type="text/plain",
+            )
+        response = self.client.post(relative_url, payload)
+        self.assertEqual(201, response.status_code, response.content[:1000])
+
 
 class RiskAcceptanceTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
@@ -1905,6 +1956,29 @@ class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product_API_Scan_Configuration
+        self.endpoint_path = "asset_api_scan_configurations"
+        self.viewname = "asset_api_scan_configuration"
+        self.viewset = AssetAPIScanConfigurationViewSet
+        self.payload = {
+            "asset": 2,
+            "service_key_1": "dojo_sonar_key",
+            "tool_configuration": 3,
+        }
+        self.update_fields = {"tool_configuration": 2}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Product_API_Scan_Configuration
+        self.permission_create = Permissions.Product_API_Scan_Configuration_Add
+        self.permission_update = Permissions.Product_API_Scan_Configuration_Edit
+        self.permission_delete = Permissions.Product_API_Scan_Configuration_Delete
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
 class ProductTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1923,6 +1997,33 @@ class ProductTest(BaseClass.BaseClassTest):
             "tags": ["mytag", "yourtag"],
         }
         self.update_fields = {"prod_type": 2}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Product
+        self.permission_create = Permissions.Product_Type_Add_Product
+        self.permission_update = Permissions.Product_Edit
+        self.permission_delete = Permissions.Product_Delete
+        self.deleted_objects = 25
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class AssetTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product
+        self.endpoint_path = "assets"
+        self.viewname = "asset"
+        self.viewset = AssetViewSet
+        self.payload = {
+            "product_manager": 2,
+            "technical_contact": 3,
+            "team_manager": 2,
+            "organization": 1,
+            "name": "Test Product",
+            "description": "test product",
+            "tags": ["mytag", "yourtag"],
+        }
+        self.update_fields = {"organization": 2}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
         self.permission_create = Permissions.Product_Type_Add_Product
@@ -2873,6 +2974,47 @@ class ProductTypeTest(BaseClass.BaseClassTest):
         self.assertEqual(201, response.status_code, response.content[:1000])
 
 
+class OrganizationTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product_Type
+        self.endpoint_path = "organizations"
+        self.viewname = "organization"
+        self.viewset = OrganizationViewSet
+        self.payload = {
+            "name": "Test Organization",
+            "description": "Test",
+            "key_product": True,
+            "critical_product": False,
+        }
+        self.update_fields = {"description": "changed"}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Product_Type
+        self.permission_update = Permissions.Product_Type_Edit
+        self.permission_delete = Permissions.Product_Type_Delete
+        self.deleted_objects = 25
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create_object_not_authorized(self):
+        self.setUp_not_authorized()
+
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_create_not_authorized_reader(self):
+        self.setUp_global_reader()
+
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_create_authorized_owner(self):
+        self.setUp_global_owner()
+
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(201, response.status_code, response.content[:1000])
+
+
 class DojoGroupsTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3016,6 +3158,29 @@ class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+class OrganizationMemberTest(BaseClass.MemberEndpointTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product_Type_Member
+        self.endpoint_path = "organization_members"
+        self.viewname = "organization_member"
+        self.viewset = OrganizationMemberViewSet
+        self.payload = {
+            "organization": 1,
+            "user": 3,
+            "role": 2,
+        }
+        self.update_fields = {"role": 3}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Product_Type_Member
+        self.permission_create = Permissions.Product_Type_Manage_Members
+        self.permission_update = Permissions.Product_Type_Manage_Members
+        self.permission_delete = Permissions.Product_Type_Member_Delete
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
 class ProductMemberTest(BaseClass.MemberEndpointTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3026,6 +3191,29 @@ class ProductMemberTest(BaseClass.MemberEndpointTest):
         self.viewset = ProductMemberViewSet
         self.payload = {
             "product": 3,
+            "user": 2,
+            "role": 2,
+        }
+        self.update_fields = {"role": 3}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Product_Member
+        self.permission_create = Permissions.Product_Manage_Members
+        self.permission_update = Permissions.Product_Manage_Members
+        self.permission_delete = Permissions.Product_Member_Delete
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class AssetMemberTest(BaseClass.MemberEndpointTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product_Member
+        self.endpoint_path = "asset_members"
+        self.viewname = "asset_member"
+        self.viewset = AssetMemberViewSet
+        self.payload = {
+            "asset": 3,
             "user": 2,
             "role": 2,
         }
@@ -3062,6 +3250,29 @@ class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+class OrganiazationGroupTest(BaseClass.MemberEndpointTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product_Type_Group
+        self.endpoint_path = "organization_groups"
+        self.viewname = "organization_group"
+        self.viewset = OrganizationGroupViewSet
+        self.payload = {
+            "organization": 1,
+            "group": 2,
+            "role": 2,
+        }
+        self.update_fields = {"role": 3}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Product_Type_Group
+        self.permission_create = Permissions.Product_Type_Group_Add
+        self.permission_update = Permissions.Product_Type_Group_Edit
+        self.permission_delete = Permissions.Product_Type_Group_Delete
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
 class ProductGroupTest(BaseClass.MemberEndpointTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3072,6 +3283,29 @@ class ProductGroupTest(BaseClass.MemberEndpointTest):
         self.viewset = ProductGroupViewSet
         self.payload = {
             "product": 1,
+            "group": 2,
+            "role": 2,
+        }
+        self.update_fields = {"role": 3}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Product_Group
+        self.permission_create = Permissions.Product_Group_Add
+        self.permission_update = Permissions.Product_Group_Edit
+        self.permission_delete = Permissions.Product_Group_Delete
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class AssetGroupTest(BaseClass.MemberEndpointTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product_Group
+        self.endpoint_path = "asset_groups"
+        self.viewname = "asset_group"
+        self.viewset = AssetGroupViewSet
+        self.payload = {
+            "asset": 1,
             "group": 2,
             "role": 2,
         }
@@ -3246,6 +3480,66 @@ class DevelopmentEnvironmentTest(BaseClass.AuthenticatedViewTest):
         response = self.client.delete(relative_url)
         self.assertEqual(409, response.status_code, response.content[:1000])
 
+    def test_list_method_requires_no_authorization(self):
+        """
+        Tests the use case of not supplying GET permissions for the BaseDjangoModelPermission
+        class used in the UserHasDevelopmentEnvironmentPermission class.
+        """
+        self.setUp_not_authorized()
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+    @parameterized.expand(
+        [
+            (
+                "add_development_environment",
+                "post",
+                201,
+                {
+                    "name": "Test_1",
+                },
+            ),
+            (
+                "change_development_environment",
+                "put",
+                200,
+                {"name": "Test_2"},
+            ),
+            (
+                "change_development_environment",
+                "put",
+                200,
+                {"name": "Test_3"},
+            ),
+            (
+                "delete_development_environment",
+                "delete",
+                409,  # Deletion is blocked because of existing references, but it is better than 403 for this test
+                None,
+            ),
+        ],
+    )
+    def test_user_needs_configuration_permission(self, codename, method, expected_status, payload):
+        """
+        Tests that BaseDjangoModelPermission enforces the django configuration permissions
+        through the class used in the UserHasDevelopmentEnvironmentPermission class.
+        """
+        # Ensure we get a 403 first
+        self.setUp_not_authorized()
+        response = self.client.post(self.url, payload, format="json")
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        # Now Get the same user as self.client is using, add the permission, and try again
+        testuser = User.objects.get(id=self.NOT_AUTHORIZED_USER_ID)
+        permission = Permission.objects.get(codename=codename)
+        testuser.user_permissions.add(permission)
+        if method in {"put", "patch", "delete"}:
+            current_objects = self.client.get(self.url, format="json").data
+            relative_url = self.url + "{}/".format(current_objects["results"][-1]["id"])
+        else:
+            relative_url = self.url
+        response = getattr(self.client, method)(relative_url, payload, format="json")
+        self.assertEqual(expected_status, response.status_code, response.content[:1000])
+
 
 class TestTypeTest(BaseClass.AuthenticatedViewTest):
     fixtures = ["dojo_testdata.json"]
@@ -3258,10 +3552,19 @@ class TestTypeTest(BaseClass.AuthenticatedViewTest):
         self.payload = {
             "name": "Test_1",
         }
-        self.update_fields = {"name": "Test_2"}
+        self.update_fields = {"active": False}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_name_read_only(self):
+        current_objects = self.client.get(self.url, format="json").data
+        relative_url = self.url + "{}/".format(current_objects["results"][-1]["id"])
+        payload = {"name": "New name"}
+        response = self.client.patch(relative_url, payload, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        # See that the request was politley ignored and that name did not change
+        self.assertEqual(current_objects["results"][-1]["name"], response.data["name"])
 
 
 class ConfigurationPermissionTest(BaseClass.BaseClassTest):
@@ -3432,7 +3735,7 @@ class AnnouncementTest(BaseClass.BaseClassTest):
         }
         self.update_fields = {"style": "warning"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 7
+        self.deleted_objects = 8
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create(self):

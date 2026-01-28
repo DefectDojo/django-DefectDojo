@@ -8,12 +8,46 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/en/open_source/upgrading/upgrading_guide/).
 
+## Jan 2025: v2.54
+
+### Jan 20, 2025: v2.54.2
+
+* **(Pro UI)** corrected a bug where unordered lists would display as ordered lists in editor forms.
+* **(Smart Upload)** introduced severity filtering to the Smart Importer to skip findings below a specified severity level. Added detailed logging throughout the findings processing to improve traceability and debugging.
+
+### Jan 12, 2025: v2.54.1
+
+* **(AI Tools)** added Risk Scores to schema for MCP processing.
+
+### Jan 5, 2025: v2.54.0
+
+No significant UX changes.
+
 ## Dec 2025: v2.53
+
+### Dec 29, 2025: v2.53.5
+
+* **(Pro UI)** Added Finding count columns to Engagement table.
+* **(Pro UI)** Enter/Return no longer automatically submits forms.
+
+### Dec 22, 2025: v2.53.4
+
+* **(Pro UI)** Asset Hierarchy now uses separate tabs for Asset selection and for the rendered Asset tree:
+![image](images/asset-hierarchy-2.53.4.png)
+
+### Dec 15, 2025: v2.53.3
+
+*DefectDojo v2.53.2 does not have a corresponding Pro release.*
+
+* **(Connectors)** Support for private CA certificates has been added to Connectors to assist with connectivity.
 
 ### Dec 8, 2025: v2.53.1
 
 * **(Assets/Organizations)** Introduced overhaul to Products/Product Types, added the ability to create and diagram relationships between Assets.  See [Assets/Organizations documentation](/en/working_with_findings/organizing_engagements_tests/pro_assets_organizations/) for details, and information on opting in to the Beta.
 * **(Findings)** Added new KEV fields for ransomware, exploits, and date handling.
+* **(Pro UI)** Added Table Preferences menu, allowing you to store preset lists of columns for each table.
+
+![image](images/pro_tablepreferences.png)
 
 ### Dec 1, 2025: v2.53.0
 
@@ -45,7 +79,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Oct 2025: v2.51
 
-### Oct 27, 2025: v2.51.3
+#### Oct 27, 2025: v2.51.3
 
 * **(Tools)** Added Nuclei scan support for Smart Upload.
 * **(Priority)** Added Prioritization Engine to allow for configurable Priority and Risk calculations for individual Findings under a given Product.
@@ -54,12 +88,12 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 
 
-### Oct 20, 2025: v2.51.2
+#### Oct 20, 2025: v2.51.2
 
 * **(Connectors)** Added Anchore Enterprise Connector.
 
 
-### Oct 14, 2025: v2.51.1
+#### Oct 14, 2025: v2.51.1
 
 * **(Pro UI)** Added Finding Quick Report feature.  Quick report allows users to quickly render an HTML report with the currently displayed Findings on a Finding table.
 
@@ -76,7 +110,7 @@ Click the calculator button to render a score based on the vector string.
 * **(Pro UI)** File names (for attached artifacts) can now be edited directly in the UI.
 * **(Pro UI)** Redirect user to Home after a successful Support Inquiry submission.  
 
-### Oct 6, 2025: v2.51.0
+#### Oct 6, 2025: v2.51.0
 
 No significant Pro changes are present in this release.
 

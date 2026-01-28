@@ -70,8 +70,8 @@
                                     </td>
                                     <td>{{ h.pgh_obj_id|default:"N/A" }}</td>
                                     <td>
-                                        {% if h.pgh_label == "initial_import" %}
-                                            <span class="badge badge-info">Initial Import</span>
+                                        {% if h.pgh_label == "initial_backfill" %}
+                                            <span class="badge badge-info">Initial Backfill</span>
                                         {% elif h.pgh_diff %}
                                             <div>
                                                 {% for field, values in h.pgh_diff.items %}

@@ -40,7 +40,7 @@ class CheckmarxParser:
         - component_version: Set to value within the "name" returned from the Checkmarx Scanner.
         """
         return [
-            "title"
+            "title",
             "cwe",
             "active",
             "verified",

@@ -12,6 +12,7 @@ import time
 from calendar import monthrange
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
+from functools import cached_property
 from math import pi, sqrt
 from pathlib import Path
 
@@ -19,7 +20,7 @@ import bleach
 import crum
 import cvss
 import vobject
-from asteval import Interpreter
+from amqp.exceptions import ChannelError
 from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -42,6 +43,7 @@ from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
+from kombu import Connection
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
@@ -71,6 +73,7 @@ from dojo.models import (
     Product,
     System_Settings,
     Test,
+    Test_Type,
     User,
 )
 from dojo.notifications.helper import create_notification
@@ -84,6 +87,11 @@ labels = get_labels()
 """
 Helper functions for DefectDojo
 """
+
+
+def get_visible_scan_types():
+    """Returns a QuerySet of active Test_Type objects."""
+    return Test_Type.objects.filter(active=True)
 
 
 def do_false_positive_history(finding, *args, **kwargs):
@@ -1217,6 +1225,26 @@ def get_setting(setting):
     return getattr(settings, setting)
 
 
+def grade_product(crit, high, med, low):
+    health = 100
+    if crit > 0:
+        health = 40
+        health -= ((crit - 1) * 5)
+    if high > 0:
+        if health == 100:
+            health = 60
+        health -= ((high - 1) * 3)
+    if med > 0:
+        if health == 100:
+            health = 80
+        health -= ((med - 1) * 2)
+    if low > 0:
+        if health == 100:
+            health = 95
+        health -= low
+    return max(health, 5)
+
+
 @dojo_model_to_id
 @dojo_async_task(signature=True)
 @app.task
@@ -1269,17 +1297,14 @@ def calculate_grade_internal(product, *args, **kwargs):
                 medium = severity_count["numerical_severity__count"]
             elif severity_count["severity"] == "Low":
                 low = severity_count["numerical_severity__count"]
-        aeval = Interpreter()
-        aeval(system_settings.product_grade)
-        grade_product = f"grade_product({critical}, {high}, {medium}, {low})"
-        prod_numeric_grade = aeval(grade_product)
-        if prod_numeric_grade != product.prod_numeric_grade:
-            logger.debug("Updating product %s grade from %s to %s", product.id, product.prod_numeric_grade, prod_numeric_grade)
-            product.prod_numeric_grade = prod_numeric_grade
+        grade = grade_product(critical, high, medium, low)
+        if grade != product.prod_numeric_grade:
+            logger.debug("Updating product %s grade from %s to %s", product.id, product.prod_numeric_grade, grade)
+            product.prod_numeric_grade = grade
             super(Product, product).save()
         else:
             # Use %s to safely handle None grades without formatter errors
-            logger.debug("Product %s grade %s is up to date", product.id, prod_numeric_grade)
+            logger.debug("Product %s grade %s is up to date", product.id, product.prod_numeric_grade)
 
 
 def perform_product_grading(product):
@@ -1299,53 +1324,90 @@ def get_celery_worker_status():
         return False
 
 
+def get_celery_queue_length():
+    try:
+        with Connection(settings.CELERY_BROKER_URL) as conn, conn.SimpleQueue("celery") as queue:
+            return queue.qsize()
+    except ChannelError as e:
+        if "NOT_FOUND" in str(e):
+            return 0
+        return None
+    except:
+        return None
+
+
 # Used to display the counts and enabled tabs in the product view
+# Uses @cached_property for lazy loading to avoid expensive queries on every page load
+# See: https://github.com/DefectDojo/django-DefectDojo/issues/10313
 class Product_Tab:
     def __init__(self, product, title=None, tab=None):
-        self.product = product
-        self.title = title
-        self.tab = tab
-        self.engagement_count = Engagement.objects.filter(
-            product=self.product, active=True).count()
-        self.open_findings_count = Finding.objects.filter(test__engagement__product=self.product,
-                                                          false_p=False,
-                                                          duplicate=False,
-                                                          out_of_scope=False,
-                                                          active=True,
-                                                          mitigated__isnull=True).count()
-        active_endpoints = Endpoint.objects.filter(
-            product=self.product,
+        self._product = product
+        self._title = title
+        self._tab = tab
+        self._engagement = None
+
+    @cached_property
+    def engagement_count(self):
+        return Engagement.objects.filter(
+            product=self._product, active=True).count()
+
+    @cached_property
+    def open_findings_count(self):
+        return Finding.objects.filter(
+            test__engagement__product=self._product,
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            active=True,
+            mitigated__isnull=True).count()
+
+    @cached_property
+    def _active_endpoints(self):
+        return Endpoint.objects.filter(
+            product=self._product,
             status_endpoint__mitigated=False,
             status_endpoint__false_positive=False,
             status_endpoint__out_of_scope=False,
             status_endpoint__risk_accepted=False,
         )
-        self.endpoints_count = active_endpoints.distinct().count()
-        self.endpoint_hosts_count = active_endpoints.values("host").distinct().count()
-        self.benchmark_type = Benchmark_Type.objects.filter(
+
+    @cached_property
+    def endpoints_count(self):
+        return self._active_endpoints.distinct().count()
+
+    @cached_property
+    def endpoint_hosts_count(self):
+        return self._active_endpoints.values("host").distinct().count()
+
+    @cached_property
+    def benchmark_type(self):
+        return Benchmark_Type.objects.filter(
             enabled=True).order_by("name")
-        self.engagement = None
 
     def setTab(self, tab):
-        self.tab = tab
+        self._tab = tab
 
     def setEngagement(self, engagement):
-        self.engagement = engagement
+        self._engagement = engagement
 
+    @property
     def engagement(self):
-        return self.engagement
+        return self._engagement
 
+    @property
     def tab(self):
-        return self.tab
+        return self._tab
 
     def setTitle(self, title):
-        self.title = title
+        self._title = title
 
+    @property
     def title(self):
-        return self.title
+        return self._title
 
+    @property
     def product(self):
-        return self.product
+        return self._product
 
     def engagements(self):
         return self.engagement_count
@@ -1358,9 +1420,6 @@ class Product_Tab:
 
     def endpoint_hosts(self):
         return self.endpoint_hosts_count
-
-    def benchmark_type(self):
-        return self.benchmark_type
 
 
 # Used to display the counts and enabled tabs in the product view
@@ -1396,27 +1455,6 @@ def add_language(product, language, files=1, code=1):
                 lang.save()
         except Language_Type.DoesNotExist:
             pass
-
-
-# Apply finding template data by matching CWE + Title or CWE
-def apply_cwe_to_template(finding, *, override=False):
-    if System_Settings.objects.get().enable_template_match or override:
-        # Attempt to match on CWE and Title First
-        template = Finding_Template.objects.filter(
-            cwe=finding.cwe, title__icontains=finding.title, template_match=True).first()
-
-        # If none then match on CWE
-        template = Finding_Template.objects.filter(
-            cwe=finding.cwe, template_match=True).first()
-
-        if template:
-            finding.mitigation = template.mitigation
-            finding.impact = template.impact
-            finding.references = template.references
-            template.last_used = timezone.now()
-            template.save()
-
-    return finding
 
 
 def truncate_with_dots(the_string, max_length_including_dots):
@@ -2380,7 +2418,7 @@ def generate_file_response_from_file_path(
     response = FileResponse(
         path.open("rb"),
         filename=full_file_name,
-        content_type=f"{mimetypes.guess_type(file_path)}",
+        content_type=mimetypes.guess_type(file_path)[0] or "application/octet-stream",
     )
     # Add some important headers
     response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'

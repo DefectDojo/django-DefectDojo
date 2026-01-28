@@ -96,7 +96,8 @@ class NmapParser:
                         )
                     description += service_info
                 script_id = None
-                if script := port_element.find("script"):
+                script = port_element.find("script")
+                if script is not None:
                     if script_id := script.attrib.get("id"):
                         description += f"**Script ID:** {script_id}\n"
                     if script_output := script.attrib.get("output"):

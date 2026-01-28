@@ -91,7 +91,8 @@ class DojoAppConfig(AppConfig):
         # Configure audit system after all models are loaded
         # This must be done in ready() to avoid "Models aren't loaded yet" errors
         # Note: pghistory models are registered here (no database access), but trigger
-        # enabling is handled via management command to avoid database access warnings
+        # enabling is handled in the entrpoint script to avoid database access warnings
+        # during startup
         register_django_pghistory_models()
         configure_audit_system()
 

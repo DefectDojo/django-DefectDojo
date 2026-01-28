@@ -323,10 +323,10 @@ class TrivyParser:
                     static_finding=True,
                     dynamic_finding=False,
                     fix_available=fix_available,
-                    tags=[vul_type, target_class],
                     service=service_name,
                     **status_fields,
                 )
+                finding.unsaved_tags = [vul_type, target_class]
 
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]
@@ -335,53 +335,54 @@ class TrivyParser:
 
             misconfigurations = target_data.get("Misconfigurations", [])
             for misconfiguration in misconfigurations:
+                misc_id = misconfiguration.get("ID", None)
+                misc_avdid = misconfiguration.get("AVDID", misc_id)
+                misc_title = misconfiguration.get("Title", "Unknown Misconfiguration")
                 misc_type = misconfiguration.get("Type")
-                misc_id = misconfiguration.get("ID")
-                misc_title = misconfiguration.get("Title")
-                misc_description = misconfiguration.get("Description")
-                misc_message = misconfiguration.get("Message")
+                misc_description = misconfiguration.get("Description", "")
+                misc_message = misconfiguration.get("Message", "")
                 misc_resolution = misconfiguration.get("Resolution")
-                misc_severity = misconfiguration.get("Severity")
+                misc_severity = misconfiguration.get("Severity", "Low")
                 misc_primary_url = misconfiguration.get("PrimaryURL")
                 misc_references = misconfiguration.get("References", [])
-                misc_causemetadata = misconfiguration.get("CauseMetadata", {})
-                misc_cause_code = misc_causemetadata.get("Code", {})
-                misc_cause_lines = misc_cause_code.get("Lines", [])
-                string_lines_table = self.get_lines_as_string_table(misc_cause_lines)
+                causemeta = misconfiguration.get("CauseMetadata", {})
+                cause_code = causemeta.get("Code", {})
+                cause_lines = cause_code.get("Lines", [])
+                string_lines_table = self.get_lines_as_string_table(cause_lines)
                 if string_lines_table:
-                    misc_message += ("\n" + string_lines_table)
-
-                title = f"{misc_id} - {misc_title}"
+                    misc_message += "\n" + string_lines_table
                 description = MISC_DESCRIPTION_TEMPLATE.format(
                     target=target_target,
                     type=misc_type,
                     description=misc_description,
                     message=misc_message,
                 )
-                severity = TRIVY_SEVERITIES[misc_severity]
-                references = None
+                refs = []
                 if misc_primary_url:
-                    references = f"{misc_primary_url}\n"
-                if misc_primary_url in misc_references:
-                    misc_references.remove(misc_primary_url)
-                if references:
-                    references += "\n".join(misc_references)
-                else:
-                    references = "\n".join(misc_references)
-
+                    refs.append(misc_primary_url)
+                refs.extend(r for r in misc_references if r != misc_primary_url)
+                references = "\n".join(refs) if refs else None
+                severity = TRIVY_SEVERITIES.get(misc_severity, "Info")
+                file_path = target_target
                 finding = Finding(
                     test=test,
-                    title=title,
+                    title=f"{misc_id} - {misc_title}",
                     severity=severity,
-                    references=references,
                     description=description,
                     mitigation=misc_resolution,
+                    references=references,
+                    url=misc_primary_url,
+                    file_path=file_path,
+                    impact=misc_description,
                     fix_available=True,
                     static_finding=True,
                     dynamic_finding=False,
-                    tags=[target_type, target_class],
                     service=service_name,
                 )
+                if misc_avdid:
+                    finding.unsaved_vulnerability_ids = []
+                    finding.unsaved_vulnerability_ids.append(misc_avdid)
+                finding.unsaved_tags = [target_type, target_class]
                 items.append(finding)
 
             secrets = target_data.get("Secrets", [])
@@ -410,9 +411,9 @@ class TrivyParser:
                     static_finding=True,
                     dynamic_finding=False,
                     fix_available=True,
-                    tags=[target_class],
                     service=service_name,
                 )
+                finding.unsaved_tags = [target_class]
                 items.append(finding)
 
             licenses = target_data.get("Licenses", [])
@@ -444,9 +445,9 @@ class TrivyParser:
                     static_finding=True,
                     dynamic_finding=False,
                     fix_available=True,
-                    tags=[target_class],
                     service=service_name,
                 )
+                finding.unsaved_tags = [target_class]
                 items.append(finding)
 
         return items

@@ -87,7 +87,7 @@ class DependencyCheckParser:
     def get_filename_and_path_from_dependency(
         self, dependency, related_dependency, namespace,
     ):
-        if not related_dependency:
+        if related_dependency is None:
             return dependency.findtext(
                 f"{namespace}fileName",
             ), dependency.findtext(f"{namespace}filePath")
@@ -105,10 +105,10 @@ class DependencyCheckParser:
         self, dependency, related_dependency, namespace,
     ):
         identifiers_node = dependency.find(namespace + "identifiers")
-        if identifiers_node:
+        if identifiers_node is not None:
             # analyzing identifier from the more generic to
             package_node = identifiers_node.find(".//" + namespace + "package")
-            if package_node:
+            if package_node is not None:
                 pck_id = package_node.findtext(f"{namespace}id")
                 purl = PackageURL.from_string(pck_id)
                 purl_parts = purl.to_dict()
@@ -166,7 +166,7 @@ class DependencyCheckParser:
             maven_node = identifiers_node.find(
                 ".//" + namespace + 'identifier[@type="maven"]',
             )
-            if maven_node:
+            if maven_node is not None:
                 maven_parts = maven_node.findtext(f"{namespace}name").split(
                     ":",
                 )
@@ -181,7 +181,7 @@ class DependencyCheckParser:
         evidence_collected_node = dependency.find(
             namespace + "evidenceCollected",
         )
-        if evidence_collected_node:
+        if evidence_collected_node is not None:
             # <evidenceCollected>
             # <evidence type="product" confidence="HIGH">
             #     <source>file</source>
@@ -199,12 +199,12 @@ class DependencyCheckParser:
             product_node = evidence_collected_node.find(
                 ".//" + namespace + 'evidence[@type="product"]',
             )
-            if product_node:
+            if product_node is not None:
                 component_name = product_node.findtext(f"{namespace}value")
                 version_node = evidence_collected_node.find(
                     ".//" + namespace + 'evidence[@type="version"]',
                 )
-                if version_node:
+                if version_node is not None:
                     component_version = version_node.findtext(
                         f"{namespace}value",
                     )
@@ -280,7 +280,7 @@ class DependencyCheckParser:
         mitigated = None
         is_Mitigated = False
         name = vulnerability.findtext(f"{namespace}name")
-        if vulnerability.find(f"{namespace}cwes"):
+        if vulnerability.find(f"{namespace}cwes") is not None:
             cwe_field = vulnerability.find(f"{namespace}cwes").findtext(
                 f"{namespace}cwe",
             )
@@ -425,14 +425,14 @@ class DependencyCheckParser:
 
         dependencies = scan.find(namespace + "dependencies")
         scan_date = None
-        if scan.find(f"{namespace}projectInfo"):
+        if scan.find(f"{namespace}projectInfo") is not None:
             projectInfo_node = scan.find(f"{namespace}projectInfo")
             if projectInfo_node.findtext(f"{namespace}reportDate"):
                 scan_date = dateutil.parser.parse(
                     projectInfo_node.findtext(f"{namespace}reportDate"),
                 )
 
-        if dependencies:
+        if dependencies is not None:
             for dependency in dependencies.findall(namespace + "dependency"):
                 vulnerabilities = dependency.find(
                     namespace + "vulnerabilities",
@@ -441,7 +441,7 @@ class DependencyCheckParser:
                     for vulnerability in vulnerabilities.findall(
                         namespace + "vulnerability",
                     ):
-                        if vulnerability:
+                        if vulnerability is not None:
                             finding = self.get_finding_from_vulnerability(
                                 dependency,
                                 None,
@@ -456,7 +456,7 @@ class DependencyCheckParser:
                             relatedDependencies = dependency.find(
                                 namespace + "relatedDependencies",
                             )
-                            if relatedDependencies:
+                            if relatedDependencies is not None:
                                 for (
                                     relatedDependency
                                 ) in relatedDependencies.findall(
@@ -479,7 +479,7 @@ class DependencyCheckParser:
                     for suppressedVulnerability in vulnerabilities.findall(
                         namespace + "suppressedVulnerability",
                     ):
-                        if suppressedVulnerability:
+                        if suppressedVulnerability is not None:
                             finding = self.get_finding_from_vulnerability(
                                 dependency,
                                 None,

@@ -1,7 +1,7 @@
 # from unittest import skip
 import logging
 import zoneinfo
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -102,11 +102,20 @@ class ImportReimportMixin:
         self.anchore_grype_file_name = get_unit_tests_scans_path("anchore_grype") / "check_all_fields.json"
         self.anchore_grype_file_name_fix_not_available = get_unit_tests_scans_path("anchore_grype") / "fix_not_available.json"
         self.anchore_grype_file_name_fix_available = get_unit_tests_scans_path("anchore_grype") / "fix_available.json"
+        self.anchore_grype_file_name_with_ids_fabricated = get_unit_tests_scans_path("anchore_grype") / "check_all_fields_with_ids_fabricated.json"
+        self.anchore_grype_file_name_no_ids_fabricated = get_unit_tests_scans_path("anchore_grype") / "check_all_fields_no_ids_fabricated.json"
+        self.anchore_grype_file_name_different_ids_fabricated = get_unit_tests_scans_path("anchore_grype") / "check_all_fields_different_ids_fabricated.json"
         self.anchore_grype_scan_type = "Anchore Grype"
 
         self.checkmarx_one_open_and_false_positive = get_unit_tests_scans_path("checkmarx_one") / "one-open-one-false-positive.json"
         self.checkmarx_one_two_false_positive = get_unit_tests_scans_path("checkmarx_one") / "two-false-positive.json"
+        self.checkmarx_one_same_unique_id_3 = get_unit_tests_scans_path("checkmarx_one") / "many_findings_same_unique_id_3.json"
+        self.checkmarx_one_same_unique_id_4 = get_unit_tests_scans_path("checkmarx_one") / "many_findings_same_unique_id_4.json"
+        self.checkmarx_one_format_two = get_unit_tests_scans_path("checkmarx_one") / "checkmarx_one_format_two.json"
         self.scan_type_checkmarx_one = "Checkmarx One Scan"
+
+        self.bandit_large_file = get_unit_tests_scans_path("bandit") / "many_vulns.json"
+        self.scan_type_bandit = "Bandit Scan"
 
     # import zap scan, testing:
     # - import
@@ -720,6 +729,284 @@ class ImportReimportMixin:
 
         # 1 added note for the migitated finding
         self.assertEqual(notes_count_before + 1, self.db_notes_count())
+
+    def test_deduplication_continues_to_next_candidate_when_regression_detected_unique_id(self):
+        """
+        Test that deduplication continues to try the next candidate match when
+        the first candidate triggers a regression exception (mitigated finding).
+
+        Real-world scenario:
+        1. Import scan → finding A (active)
+        2. Mitigate finding A
+        3. Reimport/import again → tries to deduplicate against A (mitigated),
+           exception is raised, finding B is created as new active (not duplicate)
+        4. Import again → should find both A (mitigated) and B (active) as candidates,
+           and deduplicate against B (active), not A (mitigated)
+
+        Related to: https://github.com/DefectDojo/django-DefectDojo/issues/14010
+        """
+        logger.debug("testing deduplication with mitigated finding - should continue to next candidate")
+
+        product = Product.objects.get(id=1)
+
+        # Step 1: Import scan into engagement 1 → finding A (active)
+        eng1 = Engagement.objects.create(
+            name="Engagement 1",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,  # Product-level deduplication
+        )
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import1 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng1.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        # Get finding A
+        test1_id = import1["test"]
+        findings1 = self.get_test_findings_api(test1_id)
+        self.assert_finding_count_json(1, findings1)
+        finding1_id = findings1["results"][0]["id"]
+        finding1 = Finding.objects.get(id=finding1_id)
+        self.assertTrue(finding1.active, "Finding 1 should be active")
+
+        # Step 2: Mitigate finding A
+        finding1.active = False
+        finding1.is_mitigated = True
+        finding1.mitigated = timezone.now()
+        finding1.out_of_scope = False
+        finding1.false_p = False
+        finding1.save(dedupe_option=False)
+
+        # Step 3: Import again into engagement 2 → tries to deduplicate against A (mitigated),
+        # exception is raised, finding B is created as new active (not duplicate)
+        eng2 = Engagement.objects.create(
+            name="Engagement 2",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,  # Product-level deduplication
+        )
+
+        # The exception will be caught and logged, but finding B will be created as new
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import2 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng2.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        # Get finding B (should be active, not a duplicate because exception was raised)
+        test2_id = import2["test"]
+        findings2 = self.get_test_findings_api(test2_id)
+        self.assert_finding_count_json(1, findings2)
+        finding2_id = findings2["results"][0]["id"]
+        finding2 = Finding.objects.get(id=finding2_id)
+        self.assertTrue(finding2.active, "Finding 2 should be active")
+        self.assertFalse(finding2.duplicate, "Finding 2 should NOT be a duplicate (exception was raised)")
+
+        # Step 4: Import again into engagement 3 → should find both A (mitigated) and B (active)
+        # as candidates, and deduplicate against B (active), not A (mitigated)
+        eng3 = Engagement.objects.create(
+            name="Engagement 3",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,  # Product-level deduplication
+        )
+
+        # The finding is created first, then deduplicated, so created=1 is expected
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import3 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng3.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        # Get finding from engagement 3
+        test3_id = import3["test"]
+        findings3 = self.get_test_findings_api(test3_id)
+        self.assert_finding_count_json(1, findings3)
+        finding3_id = findings3["results"][0]["id"]
+        finding3 = Finding.objects.get(id=finding3_id)
+
+        # Verify that finding3 is a duplicate of finding2 (active), not finding1 (mitigated)
+        self.assertTrue(finding3.duplicate, "Finding 3 should be a duplicate")
+        self.assertIsNotNone(finding3.duplicate_finding, "Finding 3 should have a duplicate_finding")
+        self.assertEqual(
+            finding3.duplicate_finding.id,
+            finding2.id,
+            "Finding 3 should be duplicate of finding 2 (active), not finding 1 (mitigated)",
+        )
+        self.assertNotEqual(
+            finding3.duplicate_finding.id,
+            finding1.id,
+            "Finding 3 should NOT be duplicate of finding 1 (mitigated)",
+        )
+
+    def test_deduplication_multiple_candidates_mixed_states_unique_id(self):
+        """
+        Test deduplication with multiple findings having the same unique_id,
+        where some are mitigated and some are active. The deduplication should
+        skip mitigated ones and use the first active one.
+
+        Real-world scenario:
+        1. Import scan → finding A (active)
+        2. Mitigate finding A
+        3. Import again → exception, finding B created as new active
+        4. Import again → exception, finding C created as new active
+        5. Mitigate finding B
+        6. Import again → should find A (mitigated), B (mitigated), C (active) as candidates,
+           and deduplicate against C (active), not A or B (mitigated)
+
+        Related to: https://github.com/DefectDojo/django-DefectDojo/issues/14010
+        """
+        logger.debug("testing deduplication with multiple candidates in mixed states")
+
+        product = Product.objects.get(id=1)
+
+        # Step 1: Import scan into engagement 1 → finding A (active)
+        eng1 = Engagement.objects.create(
+            name="Engagement 1",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,
+        )
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import1 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng1.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        test1_id = import1["test"]
+        findings1 = self.get_test_findings_api(test1_id)
+        finding1_id = findings1["results"][0]["id"]
+        finding1 = Finding.objects.get(id=finding1_id)
+
+        # Step 2: Mitigate finding A
+        finding1.active = False
+        finding1.is_mitigated = True
+        finding1.mitigated = timezone.now()
+        finding1.out_of_scope = False
+        finding1.false_p = False
+        finding1.save(dedupe_option=False)
+
+        # Step 3: Import again into engagement 2 → exception, finding B created as new active
+        eng2 = Engagement.objects.create(
+            name="Engagement 2",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,
+        )
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import2 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng2.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        test2_id = import2["test"]
+        findings2 = self.get_test_findings_api(test2_id)
+        finding2_id = findings2["results"][0]["id"]
+        finding2 = Finding.objects.get(id=finding2_id)
+        self.assertTrue(finding2.active, "Finding 2 should be active")
+        self.assertFalse(finding2.duplicate, "Finding 2 should NOT be a duplicate")
+
+        # Step 4: Import again into engagement 3 → should skip finding1 (mitigated, exception),
+        # then deduplicate against finding2 (active), so finding C becomes a duplicate
+        eng3 = Engagement.objects.create(
+            name="Engagement 3",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,
+        )
+
+        # The finding is created first, then deduplicated, so created=1 is expected
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import3 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng3.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        test3_id = import3["test"]
+        findings3 = self.get_test_findings_api(test3_id)
+        finding3_id = findings3["results"][0]["id"]
+        finding3 = Finding.objects.get(id=finding3_id)
+        # Finding 3 should be a duplicate of finding 2 (active), not finding 1 (mitigated)
+        self.assertTrue(finding3.duplicate, "Finding 3 should be a duplicate")
+        self.assertEqual(finding3.duplicate_finding.id, finding2.id, "Finding 3 should be duplicate of finding 2 (active)")
+
+        # Step 5: Mitigate finding B
+        finding2.active = False
+        finding2.is_mitigated = True
+        finding2.mitigated = timezone.now()
+        finding2.out_of_scope = False
+        finding2.false_p = False
+        finding2.save(dedupe_option=False)
+
+        # Step 6: Import again into engagement 4 → should find A (mitigated, exception), B (mitigated, exception),
+        # C (duplicate, skipped), so finding D is created as new active
+        eng4 = Engagement.objects.create(
+            name="Engagement 4",
+            product=product,
+            target_start=date.today(),
+            target_end=date.today(),
+            deduplication_on_engagement=False,
+        )
+
+        # The finding is created first, then deduplicated, so created=1 is expected
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import4 = self.import_scan_with_params(
+                self.checkmarx_one_format_two,
+                scan_type=self.scan_type_checkmarx_one,
+                engagement=eng4.id,
+                verified=True,
+                force_active=True,
+                force_verified=True,
+            )
+
+        test4_id = import4["test"]
+        findings4 = self.get_test_findings_api(test4_id)
+        finding4_id = findings4["results"][0]["id"]
+        finding4 = Finding.objects.get(id=finding4_id)
+
+        # Since finding3 is a duplicate (excluded from candidates), and finding1 and finding2 are mitigated (exceptions),
+        # finding4 should be created as new active (not a duplicate)
+        self.assertTrue(finding4.active, "Finding 4 should be active")
+        self.assertFalse(finding4.duplicate, "Finding 4 should NOT be a duplicate (all candidates raised exceptions or are duplicates)")
+
+        # Finding4 is not a duplicate because:
+        # - finding1 and finding2 are mitigated (exceptions raised)
+        # - finding3 is a duplicate (excluded from candidates)
+        # So finding4 is created as new active finding
 
     # import 0 and then reimport 1 with zap4 as extra finding, zap1 closed.
     # - active findings count should be 4
@@ -1693,6 +1980,78 @@ class ImportReimportMixin:
         self.assertEqual("GHSA-v6rh-hp5x-86rv", findings[3].vulnerability_ids[0])
         self.assertEqual("CVE-2021-44420", findings[3].vulnerability_ids[1])
 
+    def test_import_reimport_clear_vulnerability_ids(self):
+        """Test that vulnerability IDs are cleared when reimporting with no IDs"""
+        # Import scan with vulnerability IDs
+        import0 = self.import_scan_with_params(self.anchore_grype_file_name_with_ids_fabricated, scan_type=self.anchore_grype_scan_type)
+
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        findings = Finding.objects.filter(test=test)
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.cve)
+        self.assertEqual(2, len(finding.vulnerability_ids))
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.vulnerability_ids[0])
+        self.assertEqual("CVE-2021-44420", finding.vulnerability_ids[1])
+
+        # Reimport with no vulnerability IDs - should clear existing IDs
+        test_type = Test_Type.objects.get(name=self.anchore_grype_scan_type)
+        reimport_test = Test(
+            engagement=test.engagement,
+            test_type=test_type,
+            scan_type=self.anchore_grype_scan_type,
+            target_start=datetime.now(timezone.get_current_timezone()),
+            target_end=datetime.now(timezone.get_current_timezone()),
+        )
+        reimport_test.save()
+
+        self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name_no_ids_fabricated, scan_type=self.anchore_grype_scan_type)
+        findings = Finding.objects.filter(test=reimport_test)
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        # After clearing, only the primary vuln_id should remain (GHSA-v6rh-hp5x-86rv)
+        # because the parser always includes the primary vulnerability.id
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.cve)
+        self.assertEqual(1, len(finding.vulnerability_ids))
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.vulnerability_ids[0])
+
+    def test_import_reimport_change_vulnerability_ids(self):
+        """Test that vulnerability IDs are updated when reimporting with different IDs"""
+        # Import scan with initial vulnerability IDs
+        import0 = self.import_scan_with_params(self.anchore_grype_file_name_with_ids_fabricated, scan_type=self.anchore_grype_scan_type)
+
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        findings = Finding.objects.filter(test=test)
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.cve)
+        self.assertEqual(2, len(finding.vulnerability_ids))
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.vulnerability_ids[0])
+        self.assertEqual("CVE-2021-44420", finding.vulnerability_ids[1])
+
+        # Reimport with different vulnerability IDs - should update existing IDs
+        test_type = Test_Type.objects.get(name=self.anchore_grype_scan_type)
+        reimport_test = Test(
+            engagement=test.engagement,
+            test_type=test_type,
+            scan_type=self.anchore_grype_scan_type,
+            target_start=datetime.now(timezone.get_current_timezone()),
+            target_end=datetime.now(timezone.get_current_timezone()),
+        )
+        reimport_test.save()
+
+        self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name_different_ids_fabricated, scan_type=self.anchore_grype_scan_type)
+        findings = Finding.objects.filter(test=reimport_test)
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.cve)
+        self.assertEqual(3, len(finding.vulnerability_ids))
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.vulnerability_ids[0])
+        self.assertEqual("CVE-2021-1234", finding.vulnerability_ids[1])
+        self.assertEqual("CVE-2021-5678", finding.vulnerability_ids[2])
+
     def test_import_reimport_fix_available(self):
         import0 = self.import_scan_with_params(self.anchore_grype_file_name_fix_not_available, scan_type=self.anchore_grype_scan_type)
         test_id = import0["test"]
@@ -2032,6 +2391,348 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # Get the date
         date = findings["results"][0]["date"]
         self.assertEqual(date, "2006-12-26")
+
+    @override_settings(
+        IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=200,
+        IMPORT_REIMPORT_MATCH_BATCH_SIZE=200,
+    )
+    def test_batch_reimport_large_bandit_file(self):
+        """
+        Test that batch reimport produces identical results to non-batch mode (which we simulate via large max batch size setting).
+
+        Step 1: Import scan (baseline), assess active count, duplicate count
+        Step 2: Reimport scan (same test), assess active count, duplicate count
+        Step 3: Import scan in NEW engagement with batch_size=50, assess active and duplicate equal to step 1
+        Step 4: Reimport scan in same new engagement (batch_size=50), assess active and duplicate equal to step 2
+        """
+        # Step 1: Baseline import (default batch size)
+        # Create engagement first and set deduplication_on_engagement before import
+        product_type1, _ = Product_Type.objects.get_or_create(name="PT Bandit Baseline")
+        product1, _ = Product.objects.get_or_create(name="P Bandit Baseline", prod_type=product_type1)
+        engagement1 = Engagement.objects.create(
+            name="E Bandit Baseline",
+            product=product1,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        engagement1.deduplication_on_engagement = True
+        engagement1.save()
+        engagement1_id = engagement1.id
+
+        import1 = self.import_scan_with_params(
+            self.bandit_large_file,
+            scan_type=self.scan_type_bandit,
+            engagement=engagement1_id,
+            product_type_name=None,
+            product_name=None,
+            engagement_name=None,
+            auto_create_context=False,
+        )
+        test1_id = import1["test"]
+
+        # Assess step 1: active count, duplicate count
+        step1_active = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            active=True,
+            duplicate=False,
+        ).count()
+        step1_duplicate = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            duplicate=True,
+        ).count()
+
+        # Assert step 1 specific counts
+        # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        with self.subTest(step=1, metric="active"):
+            self.assertEqual(step1_active, 213, "Step 1 active count")
+        with self.subTest(step=1, metric="duplicate"):
+            self.assertEqual(step1_duplicate, 1, "Step 1 duplicate count")
+
+        # Step 2: Reimport scan (same test)
+        self.reimport_scan_with_params(
+            test1_id,
+            self.bandit_large_file,
+            scan_type=self.scan_type_bandit,
+        )
+
+        # Assess step 2: active count, duplicate count
+        step2_active = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            active=True,
+            duplicate=False,
+        ).count()
+        step2_duplicate = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            duplicate=True,
+        ).count()
+
+        # Assert step 2 specific counts
+        # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        with self.subTest(step=2, metric="active"):
+            self.assertEqual(step2_active, 213, "Step 2 active count")
+        with self.subTest(step=2, metric="duplicate"):
+            self.assertEqual(step2_duplicate, 1, "Step 2 duplicate count")
+
+        # Step 3: Import scan in NEW engagement with batch_size=50
+        with override_settings(
+            IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=50,
+            IMPORT_REIMPORT_MATCH_BATCH_SIZE=50,
+        ):
+            # Create engagement first and set deduplication_on_engagement before import
+            product_type2, _ = Product_Type.objects.get_or_create(name="PT Bandit Batch")
+            product2, _ = Product.objects.get_or_create(name="P Bandit Batch", prod_type=product_type2)
+            engagement2 = Engagement.objects.create(
+                name="E Bandit Batch",
+                product=product2,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            engagement2.deduplication_on_engagement = True
+            engagement2.save()
+            engagement2_id = engagement2.id
+
+            import2 = self.import_scan_with_params(
+                self.bandit_large_file,
+                scan_type=self.scan_type_bandit,
+                engagement=engagement2_id,
+                product_type_name=None,
+                product_name=None,
+                engagement_name=None,
+                auto_create_context=False,
+            )
+            test2_id = import2["test"]
+
+            # Assess step 3: active and duplicate should equal step 1
+            step3_active = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                active=True,
+                duplicate=False,
+            ).count()
+            step3_duplicate = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                duplicate=True,
+            ).count()
+
+            # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+            # This allows us to see all count mismatches in a single test run, making it easier to fix
+            # all incorrect expected values at once rather than fixing them one at a time.
+            with self.subTest(step=3, metric="active"):
+                self.assertEqual(
+                    step3_active,
+                    step1_active,
+                    "Step 3 active count should equal step 1 (baseline import)",
+                )
+            with self.subTest(step=3, metric="duplicate"):
+                self.assertEqual(
+                    step3_duplicate,
+                    step1_duplicate,
+                    "Step 3 duplicate count should equal step 1 (baseline import)",
+                )
+
+            # Step 4: Reimport scan in same new engagement (batch_size=50)
+            self.reimport_scan_with_params(
+                test2_id,
+                self.bandit_large_file,
+                scan_type=self.scan_type_bandit,
+            )
+
+            # Assess step 4: active and duplicate should equal step 2
+            step4_active = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                active=True,
+                duplicate=False,
+            ).count()
+            step4_duplicate = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                duplicate=True,
+            ).count()
+
+            # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+            # This allows us to see all count mismatches in a single test run, making it easier to fix
+            # all incorrect expected values at once rather than fixing them one at a time.
+            with self.subTest(step=4, metric="active"):
+                self.assertEqual(
+                    step4_active,
+                    step2_active,
+                    "Step 4 active count should equal step 2 (baseline reimport)",
+                )
+            with self.subTest(step=4, metric="duplicate"):
+                self.assertEqual(
+                    step4_duplicate,
+                    step2_duplicate,
+                    "Step 4 duplicate count should equal step 2 (baseline reimport)",
+                )
+
+    def test_batch_deduplication_large_bandit_file(self):
+        """
+        Test that batch deduplication produces identical results to non-batch mode (which we simulate via large max batch size setting).
+
+        Step 1: Import scan (baseline), assess active count, duplicate count
+        Step 2: Import scan again (same engagement), assess active count, duplicate count
+        Step 3: Import scan in NEW engagement with batch_size=50, assess active and duplicate equal to step 1
+        Step 4: Import scan again in same new engagement (batch_size=50), assess active and duplicate equal to step 2
+        """
+        # Step 1: Baseline import (default batch size)
+        # Create engagement first and set deduplication_on_engagement before import
+        product_type1, _ = Product_Type.objects.get_or_create(name="PT Bandit Baseline Dedupe")
+        product1, _ = Product.objects.get_or_create(name="P Bandit Baseline Dedupe", prod_type=product_type1)
+        engagement1 = Engagement.objects.create(
+            name="E Bandit Baseline Dedupe",
+            product=product1,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        engagement1.deduplication_on_engagement = True
+        engagement1.save()
+        engagement1_id = engagement1.id
+
+        self.import_scan_with_params(
+            self.bandit_large_file,
+            scan_type=self.scan_type_bandit,
+            engagement=engagement1_id,
+            product_type_name=None,
+            product_name=None,
+            engagement_name=None,
+            auto_create_context=False,
+        )
+
+        # Assess step 1: active count, duplicate count
+        step1_active = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            active=True,
+            duplicate=False,
+        ).count()
+        step1_duplicate = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            duplicate=True,
+        ).count()
+
+        # Assert step 1 specific counts
+        self.assertEqual(step1_active, 213, "Step 1 active count")
+        self.assertEqual(step1_duplicate, 1, "Step 1 duplicate count")
+
+        # Step 2: Import scan again (same engagement)
+        self.import_scan_with_params(
+            self.bandit_large_file,
+            scan_type=self.scan_type_bandit,
+            engagement=engagement1_id,
+            product_type_name=None,
+            product_name=None,
+            engagement_name=None,
+            auto_create_context=False,
+        )
+
+        # Assess step 2: active count, duplicate count
+        step2_active = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            active=True,
+            duplicate=False,
+        ).count()
+        step2_duplicate = Finding.objects.filter(
+            test__engagement_id=engagement1_id,
+            duplicate=True,
+        ).count()
+
+        # Assert step 2 specific counts
+        self.assertEqual(step2_active, 213, "Step 2 active count")
+        self.assertEqual(step2_duplicate, 215, "Step 2 duplicate count")
+
+        # Step 3: Import scan in NEW engagement with batch_size=50
+        with override_settings(
+            IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=50,
+            IMPORT_REIMPORT_MATCH_BATCH_SIZE=50,
+        ):
+            # Create engagement first and set deduplication_on_engagement before import
+            product_type2, _ = Product_Type.objects.get_or_create(name="PT Bandit Batch Dedupe")
+            product2, _ = Product.objects.get_or_create(name="P Bandit Batch Dedupe", prod_type=product_type2)
+            engagement2 = Engagement.objects.create(
+                name="E Bandit Batch Dedupe",
+                product=product2,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            engagement2.deduplication_on_engagement = True
+            engagement2.save()
+            engagement2_id = engagement2.id
+
+            self.import_scan_with_params(
+                self.bandit_large_file,
+                scan_type=self.scan_type_bandit,
+                engagement=engagement2_id,
+                product_type_name=None,
+                product_name=None,
+                engagement_name=None,
+                auto_create_context=False,
+            )
+
+            # Assess step 3: active and duplicate should equal step 1
+            step3_active = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                active=True,
+                duplicate=False,
+            ).count()
+            step3_duplicate = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                duplicate=True,
+            ).count()
+
+            # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+            # This allows us to see all count mismatches in a single test run, making it easier to fix
+            # all incorrect expected values at once rather than fixing them one at a time.
+            with self.subTest(step=3, metric="active"):
+                self.assertEqual(
+                    step3_active,
+                    step1_active,
+                    "Step 3 active count should equal step 1 (baseline import)",
+                )
+            with self.subTest(step=3, metric="duplicate"):
+                self.assertEqual(
+                    step3_duplicate,
+                    step1_duplicate,
+                    "Step 3 duplicate count should equal step 1 (baseline import)",
+                )
+
+            # Step 4: Import scan again in same new engagement (batch_size=50)
+            self.import_scan_with_params(
+                self.bandit_large_file,
+                scan_type=self.scan_type_bandit,
+                engagement=engagement2_id,
+                product_type_name=None,
+                product_name=None,
+                engagement_name=None,
+                auto_create_context=False,
+            )
+
+            # Assess step 4: active and duplicate should equal step 2
+            step4_active = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                active=True,
+                duplicate=False,
+            ).count()
+            step4_duplicate = Finding.objects.filter(
+                test__engagement_id=engagement2_id,
+                duplicate=True,
+            ).count()
+
+            # Each assertion is wrapped in its own subTest so that if one fails, the others still run.
+            # This allows us to see all count mismatches in a single test run, making it easier to fix
+            # all incorrect expected values at once rather than fixing them one at a time.
+            with self.subTest(step=4, metric="active"):
+                self.assertEqual(
+                    step4_active,
+                    step2_active,
+                    "Step 4 active count should equal step 2 (baseline second import)",
+                )
+            with self.subTest(step=4, metric="duplicate"):
+                self.assertEqual(
+                    step4_duplicate,
+                    step2_duplicate,
+                    "Step 4 duplicate count should equal step 2 (baseline second import)",
+                )
 
     @override_settings(
         IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=50,

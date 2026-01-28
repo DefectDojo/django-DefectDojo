@@ -98,7 +98,7 @@ def get_item(vuln):
     else:
         title = unique_id_from_tool
 
-    return Finding(
+    finding = Finding(
         title=title,
         description=description,
         severity=severity,
@@ -113,10 +113,9 @@ def get_item(vuln):
         sast_source_line=sast_source_line,
         static_finding=True,
         dynamic_finding=False,
-        tags=[
-            vuln["analyzer_name"],
-        ],
     )
+    finding.unsaved_tags = [vuln["analyzer_name"]]
+    return finding
 
 
 def get_mapped_severity(severity):

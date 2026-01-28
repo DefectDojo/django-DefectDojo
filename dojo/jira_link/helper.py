@@ -602,7 +602,7 @@ def log_jira_alert(error, obj):
     create_notification(
         event="jira_update",
         title="Error pushing to JIRA " + "(" + truncate_with_dots(prod_name(obj), 25) + ")",
-        description=to_str_typed(obj) + ", " + error,
+        description=error + "\n" + to_str_typed(obj),
         url=obj.get_absolute_url(),
         icon="bullseye",
         source="Push to JIRA",
@@ -614,7 +614,7 @@ def log_jira_cannot_be_pushed_reason(error, obj):
     create_notification(
         event="jira_update",
         title="Error pushing to JIRA " + "(" + truncate_with_dots(prod_name(obj), 25) + ")",
-        description=obj.__class__.__name__ + ": " + error,
+        description=error + "\n" + obj.__class__.__name__,
         url=obj.get_absolute_url(),
         icon="bullseye",
         source="Push to JIRA",

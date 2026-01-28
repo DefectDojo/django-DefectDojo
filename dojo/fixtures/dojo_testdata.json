@@ -113,6 +113,24 @@
     }
   },
   {
+    "pk": 7,
+    "model": "auth.user",
+    "fields": {
+      "username": "globalWriter",
+      "first_name": "Global",
+      "last_name": "Writer",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": null,
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
+      "email": "global_writer@email.com",
+      "date_joined": "2018-04-13T07:59:51.527Z"
+    }
+  },
+  {
     "pk": "2dqr18yqu9mzb87abk0okid75w2clakl",
     "model": "sessions.session",
     "fields": {
@@ -242,7 +260,6 @@
       "mail_notifications_to": "",
       "enable_jira": false,
       "enable_product_grade": true,
-      "product_grade": "def grade_product(crit, high, med, low):\r\n    health=100\r\n    if crit > 0:\r\n        health = 40\r\n        health = health - ((crit - 1) * 5)\r\n    if high > 0:\r\n        if health == 100:\r\n            health = 60\r\n        health = health - ((high - 1) * 3)\r\n    if med > 0:\r\n        if health == 100:\r\n            health = 80\r\n        health = health - ((med - 1) * 2)\r\n    if low > 0:\r\n        if health == 100:\r\n            health = 95\r\n        health = health - low\r\n\r\n    if health < 5:\r\n        health = 5\r\n\r\n    return health",
       "product_grade_a": 90,
       "product_grade_b": 80,
       "product_grade_c": 70,
@@ -2806,6 +2823,14 @@
     }
   },
   {
+    "pk": "184770c4c3256aba904297610fbb4da3fa15ba37",
+    "model": "authtoken.token",
+    "fields": {
+      "user": 7,
+      "created": "2018-04-16T06:54:35.933Z"
+    }
+  },
+  {
     "pk": "1",
     "model": "dojo.dojo_group",
     "fields": {
@@ -2870,6 +2895,14 @@
     "fields": {
       "user": 5,
       "role": 5
+    }
+  },
+  {
+    "pk": 4,
+    "model": "dojo.global_role",
+    "fields": {
+      "user": 7,
+      "role": 2
     }
   },
   {

@@ -31,7 +31,7 @@ env = environ.FileAwareEnv(
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
     DD_DJANGO_DEBUG_TOOLBAR_ENABLED=(bool, False),
-    # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
+    # django-jsonfield-backport raises a warning that can be ignored,
     # see https://github.com/laymonage/django-jsonfield-backport
     # debug_toolbar.E001 is raised when running tests in dev mode via run-unittests.sh
     DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001"]),
@@ -277,7 +277,6 @@ env = environ.FileAwareEnv(
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
     # AWS Scout2 Scan Parser is deprecated (see https://github.com/DefectDojo/django-DefectDojo/pull/5268)
-    DD_PARSER_EXCLUDE=(str, ""),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -286,6 +285,8 @@ env = environ.FileAwareEnv(
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
+    # Batch size for reimport candidate matching (finding existing findings)
+    DD_IMPORT_REIMPORT_MATCH_BATCH_SIZE=(int, 1000),
     # Batch size for import/reimport deduplication processing
     DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=(int, 1000),
     # Delete Auditlogs older than x month; -1 to keep all logs
@@ -343,12 +344,9 @@ env = environ.FileAwareEnv(
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ""),
     # Dictates whether cloud banner is created or not
     DD_CREATE_CLOUD_BANNER=(bool, True),
-    # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Procuts, ...)
-    # If you run big import you may want to disable this because the way django-auditlog currently works, there's
-    # a big performance hit. Especially during (re-)imports.
+    # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Products, ...)
+    # If you run big import you may want to disable this because there's a performance hit during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
-    # Audit logging system: "django-auditlog" (default) or "django-pghistory"
-    DD_AUDITLOG_TYPE=(str, "django-auditlog"),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
@@ -717,6 +715,7 @@ SEARCH_MAX_RESULTS = env("DD_SEARCH_MAX_RESULTS")
 SIMILAR_FINDINGS_MAX_RESULTS = env("DD_SIMILAR_FINDINGS_MAX_RESULTS")
 MAX_REQRESP_FROM_API = env("DD_MAX_REQRESP_FROM_API")
 MAX_AUTOCOMPLETE_WORDS = env("DD_MAX_AUTOCOMPLETE_WORDS")
+ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
 
 LOGIN_EXEMPT_URLS = (
     rf"^{URL_PREFIX}static/",
@@ -818,6 +817,25 @@ if env("DD_SECURE_HSTS_INCLUDE_SUBDOMAINS"):
 SESSION_EXPIRE_AT_BROWSER_CLOSE = env("DD_SESSION_EXPIRE_AT_BROWSER_CLOSE")
 SESSION_EXPIRE_WARNING = env("DD_SESSION_EXPIRE_WARNING")
 SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
+# Permission-Policy header settings
+# See docs at https://pypi.org/project/django-permissions-policy/
+PERMISSIONS_POLICY = {
+    "accelerometer": [],
+    "ambient-light-sensor": [],
+    "autoplay": [],
+    "camera": [],
+    "display-capture": [],
+    "encrypted-media": [],
+    "fullscreen": [],
+    "geolocation": [],
+    "gyroscope": [],
+    "interest-cohort": [],
+    "magnetometer": [],
+    "microphone": [],
+    "midi": [],
+    "payment": [],
+    "usb": [],
+}
 
 # ------------------------------------------------------------------------------
 # DEFECTDOJO SPECIFIC
@@ -967,6 +985,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "django_permissions_policy.PermissionsPolicyMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -974,13 +993,21 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.AdditionalHeaderMiddleware",
     "dojo.middleware.CustomSocialAuthExceptionMiddleware",
     "crum.CurrentRequestUserMiddleware",
-    "dojo.middleware.AuditlogMiddleware",
     "dojo.middleware.AsyncSearchContextMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
     "dojo.middleware.LongRunningRequestAlertMiddleware",
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
+
+if ENABLE_AUDITLOG:
+    middleware_list = list(MIDDLEWARE)
+    crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
+
+    # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
+    middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
+
+    MIDDLEWARE = middleware_list
 
 # WhiteNoise allows your web app to serve its own static files,
 # making it a self-contained unit that can be deployed anywhere without relying on nginx
@@ -1233,43 +1260,72 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.tasks.add_alerts",
         "schedule": timedelta(hours=1),
         "args": [timedelta(hours=1)],
+        "options": {
+            "expires": int(60 * 60 * 1 * 1.2),  # If a task is not executed within 72 minutes, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "cleanup-alerts": {
         "task": "dojo.tasks.cleanup_alerts",
         "schedule": timedelta(hours=8),
+        "options": {
+            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "dedupe-delete": {
         "task": "dojo.tasks.async_dupe_delete",
         "schedule": timedelta(minutes=1),
-        "args": [timedelta(minutes=1)],
+        "options": {
+            "expires": int(60 * 1 * 1.2),  # If a task is not executed within 72 seconds, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "flush_auditlog": {
         "task": "dojo.tasks.flush_auditlog",
         "schedule": timedelta(hours=8),
+        "options": {
+            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "update-findings-from-source-issues": {
         "task": "dojo.tools.tool_issue_updater.update_findings_from_source_issues",
         "schedule": timedelta(hours=3),
+        "options": {
+            "expires": int(60 * 60 * 3 * 1.2),  # If a task is not executed within 9 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "compute-sla-age-and-notify": {
         "task": "dojo.tasks.async_sla_compute_and_notify_task",
         "schedule": crontab(hour=7, minute=30),
+        "options": {
+            "expires": int(60 * 60 * 24 * 1.2),  # If a task is not executed within 28.8 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "risk_acceptance_expiration_handler": {
         "task": "dojo.risk_acceptance.helper.expiration_handler",
-        "schedule": crontab(minute=0, hour="*/3"),  # every 3 hours
+        "schedule": crontab(minute=0, hour="*/3"),  # every 72 minutes
+        "options": {
+            "expires": int(60 * 60 * 3 * 1.2),  # If a task is not executed within 9 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
+        "options": {
+            "expires": int(60 * 1 * 1.2),  # If a task is not executed within 72 seconds, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "trigger_evaluate_pro_proposition": {
         "task": "dojo.tasks.evaluate_pro_proposition",
         "schedule": timedelta(hours=8),
+        "options": {
+            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "clear_sessions": {
         "task": "dojo.tasks.clear_sessions",
         "schedule": crontab(hour=0, minute=0, day_of_week=0),
+        "options": {
+            "expires": int(60 * 60 * 24 * 7 * 1.2),  # If a task is not executed within 8.4 days, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
@@ -1713,6 +1769,7 @@ DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 
 TRACK_IMPORT_HISTORY = env("DD_TRACK_IMPORT_HISTORY")
+IMPORT_REIMPORT_MATCH_BATCH_SIZE = env("DD_IMPORT_REIMPORT_MATCH_BATCH_SIZE")
 IMPORT_REIMPORT_DEDUPE_BATCH_SIZE = env("DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE")
 
 # ------------------------------------------------------------------------------
@@ -1855,9 +1912,6 @@ QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 # If using this, lines for Qualys WAS deduplication functions must be un-commented
 QUALYS_WAS_UNIQUE_ID = False
 
-# exclusion list for parsers
-PARSER_EXCLUDE = env("DD_PARSER_EXCLUDE")
-
 SERIALIZATION_MODULES = {
     "xml": "tagulous.serializers.xml_serializer",
     "json": "tagulous.serializers.json",
@@ -1998,10 +2052,6 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # Auditlog
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
-ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
-AUDITLOG_TYPE = env("DD_AUDITLOG_TYPE")
-AUDITLOG_TWO_STEP_MIGRATION = False
-AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
 AUDITLOG_FLUSH_BATCH_SIZE = env("DD_AUDITLOG_FLUSH_BATCH_SIZE")
 AUDITLOG_FLUSH_MAX_BATCHES = env("DD_AUDITLOG_FLUSH_MAX_BATCHES")
 
@@ -2092,19 +2142,6 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
 #########################################################################################################
 # Auditlog configuration                                                                                #
 #########################################################################################################
-
-if ENABLE_AUDITLOG:
-    middleware_list = list(MIDDLEWARE)
-    crum_index = middleware_list.index("crum.CurrentRequestUserMiddleware")
-
-    if AUDITLOG_TYPE == "django-auditlog":
-        # Insert AuditlogMiddleware before CurrentRequestUserMiddleware
-        middleware_list.insert(crum_index, "dojo.middleware.AuditlogMiddleware")
-    elif AUDITLOG_TYPE == "django-pghistory":
-        # Insert pghistory HistoryMiddleware before CurrentRequestUserMiddleware
-        middleware_list.insert(crum_index, "dojo.middleware.PgHistoryMiddleware")
-
-    MIDDLEWARE = middleware_list
 
 PGHISTORY_FOREIGN_KEY_FIELD = pghistory.ForeignKey(db_index=False)
 PGHISTORY_CONTEXT_FIELD = pghistory.ContextForeignKey(db_index=True)

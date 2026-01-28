@@ -5,6 +5,7 @@ import logging
 import re
 
 # Third party imports
+import pghistory
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied
@@ -85,85 +86,98 @@ def webhook(request, secret=None):
     if request.content_type != "application/json":
         return webhook_responser_handler("debug", "only application/json supported")
     # Time to process the request
+    # Parse the JSON first to get webhook event type for context
     try:
         parsed = json.loads(request.body.decode("utf-8"))
-        # Check if the events supplied are supported
-        if parsed.get("webhookEvent") not in {"comment_created", "jira:issue_updated"}:
-            return webhook_responser_handler("info", f"Unrecognized JIRA webhook event received: {parsed.get('webhookEvent')}")
-
-        if parsed.get("webhookEvent") == "jira:issue_updated":
-            # xml examples at the end of file
-            jid = parsed["issue"]["id"]
-            # This may raise a 404, but it will be handled in the exception response
-            try:
-                jissue = JIRA_Issue.objects.get(jira_id=jid)
-            except JIRA_Instance.DoesNotExist:
-                return webhook_responser_handler("info", f"JIRA issue {jid} is not linked to a DefectDojo Finding")
-            findings = None
-            # Determine what type of object we will be working with
-            if jissue.finding:
-                logger.debug(f"Received issue update for {jissue.jira_key} for finding {jissue.finding.id}")
-                findings = [jissue.finding]
-            elif jissue.finding_group:
-                logger.debug(f"Received issue update for {jissue.jira_key} for finding group {jissue.finding_group}")
-                findings = jissue.finding_group.findings.all()
-            elif jissue.engagement:
-                return webhook_responser_handler("debug", "Update for engagement ignored")
-            else:
-                return webhook_responser_handler("info", f"Received issue update for {jissue.jira_key} for unknown object")
-            # Process the assignee if present
-            assignee = parsed["issue"]["fields"].get("assignee")
-            assignee_name = "Jira User"
-            if assignee is not None:
-                # First look for the 'name' field. If not present, try 'displayName'. Else put None
-                assignee_name = assignee.get("name", assignee.get("displayName"))
-
-            #         "resolution":{
-            #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
-            #             "id":"11",
-            #             "description":"Cancelled by the customer.",
-            #             "name":"Cancelled"
-            #         },
-
-            # or
-            #         "resolution": null
-
-            # or
-            #         "resolution": "None"
-
-            resolution = parsed["issue"]["fields"]["resolution"]
-            resolution = resolution if resolution and resolution != "None" else None
-            resolution_id = resolution["id"] if resolution else None
-            resolution_name = resolution["name"] if resolution else None
-            jira_now = parse_datetime(parsed["issue"]["fields"]["updated"])
-
-            if findings:
-                for finding in findings:
-                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue, finding_group=jissue.finding_group)
-            # Check for any comment that could have come along with the resolution
-            if (error_response := check_for_and_create_comment(parsed)) is not None:
-                return error_response
-
-        if parsed.get("webhookEvent") == "comment_created":
-            if (error_response := check_for_and_create_comment(parsed)) is not None:
-                return error_response
-
     except Exception as e:
-        # Check if the issue is originally a 404
-        if isinstance(e, Http404):
-            return webhook_responser_handler("debug", str(e))
-        # Try to get a little more information on the exact exception
+        return webhook_responser_handler("debug", f"Failed to parse JSON: {e}")
+
+    # Check if the events supplied are supported
+    if parsed.get("webhookEvent") not in {"comment_created", "jira:issue_updated"}:
+        return webhook_responser_handler("info", f"Unrecognized JIRA webhook event received: {parsed.get('webhookEvent')}")
+
+    # Wrap processing with pghistory context for audit trail
+    # JIRA webhooks don't have a user session, so we create a new context
+    with pghistory.context(
+        source="jira_webhook",
+        jira_event=parsed.get("webhookEvent"),
+    ):
         try:
-            message = (
-                f"Original Exception: {e}\n"
-                f"jira webhook body parsed:\n{json.dumps(parsed, indent=4)}"
-            )
-        except Exception:
-            message = (
-                f"Original Exception: {e}\n"
-                f"jira webhook body :\n{request.body.decode('utf-8')}"
-            )
-        return webhook_responser_handler("debug", message)
+            if parsed.get("webhookEvent") == "jira:issue_updated":
+                # xml examples at the end of file
+                jid = parsed["issue"]["id"]
+                # This may raise a 404, but it will be handled in the exception response
+                try:
+                    jissue = JIRA_Issue.objects.get(jira_id=jid)
+                except JIRA_Instance.DoesNotExist:
+                    return webhook_responser_handler("info", f"JIRA issue {jid} is not linked to a DefectDojo Finding")
+                # Add jira_key to context now that we have it
+                pghistory.context(jira_key=jissue.jira_key)
+                findings = None
+                # Determine what type of object we will be working with
+                if jissue.finding:
+                    logger.debug(f"Received issue update for {jissue.jira_key} for finding {jissue.finding.id}")
+                    findings = [jissue.finding]
+                elif jissue.finding_group:
+                    logger.debug(f"Received issue update for {jissue.jira_key} for finding group {jissue.finding_group}")
+                    findings = jissue.finding_group.findings.all()
+                elif jissue.engagement:
+                    return webhook_responser_handler("debug", "Update for engagement ignored")
+                else:
+                    return webhook_responser_handler("info", f"Received issue update for {jissue.jira_key} for unknown object")
+                # Process the assignee if present
+                assignee = parsed["issue"]["fields"].get("assignee")
+                assignee_name = "Jira User"
+                if assignee is not None:
+                    # First look for the 'name' field. If not present, try 'displayName'. Else put None
+                    assignee_name = assignee.get("name", assignee.get("displayName"))
+
+                #         "resolution":{
+                #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
+                #             "id":"11",
+                #             "description":"Cancelled by the customer.",
+                #             "name":"Cancelled"
+                #         },
+
+                # or
+                #         "resolution": null
+
+                # or
+                #         "resolution": "None"
+
+                resolution = parsed["issue"]["fields"]["resolution"]
+                resolution = resolution if resolution and resolution != "None" else None
+                resolution_id = resolution["id"] if resolution else None
+                resolution_name = resolution["name"] if resolution else None
+                jira_now = parse_datetime(parsed["issue"]["fields"]["updated"])
+
+                if findings:
+                    for finding in findings:
+                        jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue, finding_group=jissue.finding_group)
+                # Check for any comment that could have come along with the resolution
+                if (error_response := check_for_and_create_comment(parsed)) is not None:
+                    return error_response
+
+            if parsed.get("webhookEvent") == "comment_created":
+                if (error_response := check_for_and_create_comment(parsed)) is not None:
+                    return error_response
+
+        except Exception as e:
+            # Check if the issue is originally a 404
+            if isinstance(e, Http404):
+                return webhook_responser_handler("debug", str(e))
+            # Try to get a little more information on the exact exception
+            try:
+                message = (
+                    f"Original Exception: {e}\n"
+                    f"jira webhook body parsed:\n{json.dumps(parsed, indent=4)}"
+                )
+            except Exception:
+                message = (
+                    f"Original Exception: {e}\n"
+                    f"jira webhook body :\n{request.body.decode('utf-8')}"
+                )
+            return webhook_responser_handler("debug", message)
 
     return webhook_responser_handler("No logging here", "Success!")
 

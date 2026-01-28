@@ -343,7 +343,7 @@
                                                 <i class="fa-solid fa-triangle-exclamation fa-fw"></i>
                                                 <span>{% trans "Finding Groups" %}</span>
                                                 <span class="glyphicon arrow"></span>
-                                            </a> 
+                                            </a>
                                             <ul class="nav nav-second-level">
                                                 <li>
                                                     <a href="{% url 'open_finding_groups' %}">
@@ -419,6 +419,13 @@
                                                 <span>{% trans "Reports" %}</span>
                                                 <span class="glyphicon arrow"></span>
                                             </a>
+                                            <ul class="nav nav-second-level">
+                                                <li>
+                                                    <a href="{% url 'report_builder' %}">
+                                                        {% trans "Report Builder" %}
+                                                    </a>
+                                                </li>
+                                            </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
                                         {% endblock %}
@@ -649,14 +656,13 @@
             <!-- Page Content -->
             <div id="page-wrapper">
                 {% if request.user.is_authenticated and announcement %}
-                    {% load announcement_banner_tags %}
                     <div role="alert" class="announcement-banner alert alert-{{ announcement.style }} {% if announcement.dismissable %}alert-dismissible{% endif %} show">
                     {% if announcement.dismissable %}
                         <a href="{% url 'dismiss_announcement' %}" class="close" aria-label="Close">
                             <span aria-hidden="true">×</span>
                         </a>
                     {% endif %}
-                    {{ announcement.message|bleach_announcement_message }}
+                    {{ announcement.message|bleach_with_a_tags }}
                     </div>
                 {% endif %}
                 <div class="container-fluid">
