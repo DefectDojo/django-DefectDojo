@@ -144,8 +144,6 @@ class TruffleHogParser:
             description += f"**Reason:** {detector_name}\n"
             description += f"**Path:** {file}\n"
             description += f"**Contents:** {redacted_info}\n"
-            if verified:
-                description += f"**Verified:** {verified}\n"
 
             if structured_data:
                 description += f"**Structured Data:**\n{self.walk_dict(structured_data)}\n"
