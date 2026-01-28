@@ -194,6 +194,7 @@ class TruffleHogParser:
                     url="N/A",
                     dynamic_finding=False,
                     static_finding=True,
+                    verified=verified,
                     nb_occurences=1,
                 )
                 dupes[dupe_key] = finding
