@@ -43,6 +43,8 @@ def backfill_pghistory_tables(apps, schema_editor):
             logger.warning(msg)
         elif style == "SUCCESS":
             logger.info(msg)
+        elif style == "DEBUG":
+            logger.debug(msg)
         else:
             logger.info(msg)
 

@@ -65,6 +65,19 @@ This will result in a new file in the `dojo/db_migrations` folder that can be co
 When making downstream database model changes in your fork of Defect Dojo please be aware of the risks of getting out of sync with our upstream migrations.
 It requiers proper knowledge of [Django Migrations](https://docs.djangoproject.com/en/5.0/topics/migrations/) to reconcile the migrations before you can upgrade to a newer version of Defect Dojo.
 
+### Linear Migration History
+
+DefectDojo uses [django-linear-migrations](https://github.com/adamchainz/django-linear-migrations) to maintain a linear migration history and avoid merge migration conflicts.
+
+**What this means for you:**
+- When you run `makemigrations`, a `max_migration.txt` file is automatically updated in `dojo/db_migrations/`
+- This file tracks the latest migration and must be committed along with your migration file
+- If you're working on a feature branch and migrations are added to `dev` branch, you may encounter a merge conflict in `max_migration.txt`
+
+**Resolving migration conflicts:**
+
+If you encounter a conflict in `dojo/db_migrations/max_migration.txt` during a rebase or merge, rename the migrations and update max_migrations.txt to contain the name of the latest migration of your branch. You can also try to use the `python manage.py rebase_migration dojo` inside the `uwsgi` container, but that requires some hassling with selective container startup and branch switching.
+
 ## Submitting Pull Requests
 
 The following are things to consider before submitting a pull request to

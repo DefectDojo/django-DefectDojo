@@ -1,11 +1,14 @@
 from crum import get_current_user
-from django.db.models import Exists, OuterRef
+from django.db.models import Subquery
 
 from dojo.authorization.authorization import get_roles_for_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Dojo_Group, Dojo_Group_Member, Product_Group, Product_Type_Group, Role
+from dojo.request_cache import cache_for_request
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_groups(permission):
     user = get_current_user()
 
@@ -16,11 +19,16 @@ def get_authorized_groups(permission):
         return Dojo_Group.objects.all().order_by("name")
 
     roles = get_roles_for_permission(permission)
-    authorized_roles = Dojo_Group_Member.objects.filter(group=OuterRef("pk"),
-        user=user,
-        role__in=roles)
-    groups = Dojo_Group.objects.annotate(user=Exists(authorized_roles)).order_by("name")
-    return groups.filter(user=True)
+
+    # Get authorized group IDs via subquery
+    authorized_roles = Dojo_Group_Member.objects.filter(
+        user=user, role__in=roles,
+    ).values("group_id")
+
+    # Filter using IN with Subquery - no annotations needed
+    return Dojo_Group.objects.filter(
+        pk__in=Subquery(authorized_roles),
+    ).order_by("name")
 
 
 def get_authorized_group_members(permission):

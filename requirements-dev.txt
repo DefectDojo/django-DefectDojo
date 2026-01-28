@@ -13,3 +13,7 @@ parameterized==0.9.0
 
 # Development file watching (hot reload)
 watchdog==6.0.0
+
+# Migration management - allows for easy rebasing via manage.py rebase_migration
+django-linear-migrations==2.19.0
+

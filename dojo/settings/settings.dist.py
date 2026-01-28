@@ -818,6 +818,25 @@ if env("DD_SECURE_HSTS_INCLUDE_SUBDOMAINS"):
 SESSION_EXPIRE_AT_BROWSER_CLOSE = env("DD_SESSION_EXPIRE_AT_BROWSER_CLOSE")
 SESSION_EXPIRE_WARNING = env("DD_SESSION_EXPIRE_WARNING")
 SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
+# Permission-Policy header settings
+# See docs at https://pypi.org/project/django-permissions-policy/
+PERMISSIONS_POLICY = {
+    "accelerometer": [],
+    "ambient-light-sensor": [],
+    "autoplay": [],
+    "camera": [],
+    "display-capture": [],
+    "encrypted-media": [],
+    "fullscreen": [],
+    "geolocation": [],
+    "gyroscope": [],
+    "interest-cohort": [],
+    "magnetometer": [],
+    "microphone": [],
+    "midi": [],
+    "payment": [],
+    "usb": [],
+}
 
 # ------------------------------------------------------------------------------
 # DEFECTDOJO SPECIFIC
@@ -971,6 +990,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "django_permissions_policy.PermissionsPolicyMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -2066,6 +2086,14 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
     )
 
     MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE]
+
+# Linear migrations for development
+# Helps avoid merge migration conflicts by tracking the latest migration
+if DEBUG:
+    INSTALLED_APPS = (
+        "django_linear_migrations",  # Must be before dojo to override makemigrations
+        *INSTALLED_APPS,
+    )
 
     def show_toolbar(request):
         return True

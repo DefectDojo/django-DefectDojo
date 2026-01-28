@@ -170,7 +170,7 @@ Number  Content
             re_finding_description = re.sub(r"\s+", " ", finding.description)
             self.assertEqual(re_description.strip(), re_finding_description.strip())
             self.assertEqual("Set 'set containers[].securityContext.allowPrivilegeEscalation' to 'false'.", finding.mitigation)
-            self.assertIsNone(finding.unsaved_vulnerability_ids)
+            self.assertEqual(finding.unsaved_vulnerability_ids, ["KSV001"])
             self.assertEqual(["kubernetes", "config"], finding.unsaved_tags)
             self.assertIsNone(finding.component_name)
             self.assertIsNone(finding.component_version)
@@ -337,3 +337,11 @@ Number  Content
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", finding.cvssv3)
                 self.assertEqual(7.5, finding.cvssv3_score)
+
+    def test_misconfig_fields(self):
+        # this tests issue #14136. The unittest file is just a copy of cvss_severity_source.json with edited severities
+        with sample_path("issue_14136.json").open(encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 1)
+            self.assertEqual("Low", findings[0].severity)
