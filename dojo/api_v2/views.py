@@ -1099,7 +1099,7 @@ class FindingViewSet(
                 note_type=note_type,
             )
             note.save()
-            finding.last_reviewed = new_note.date
+            finding.last_reviewed = note.date
             finding.last_reviewed_by = author
             finding.save(update_fields=["last_reviewed", "last_reviewed_by"])
             finding.notes.add(note)
