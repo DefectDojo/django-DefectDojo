@@ -19,7 +19,9 @@ from django.contrib import messages
 
 from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from dojo.authorization.authorization import user_has_permission_or_403
+from django.utils.decorators import method_decorator
 from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.decorators import dojo_ratelimit_view
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import (
     EndpointFilter,
@@ -670,6 +672,7 @@ def prefetch_related_endpoints_for_report(endpoints):
                                       "tags",
                                      )
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class QuickReportView(View):
     def add_findings_data(self):
         return self.findings
@@ -760,6 +763,7 @@ def get_attributes():
     return ["sla_age", "sla_deadline", "sla_days_remaining", "priority_classification", "long_term_acceptance"]
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class CSVExportView(View):
     def add_findings_data(self):
         return self.findings
@@ -850,6 +854,7 @@ class CSVExportView(View):
         return response
 
 
+@method_decorator(dojo_ratelimit_view(), name='dispatch')
 class ExcelExportView(View):
 
     def add_findings_data(self):
