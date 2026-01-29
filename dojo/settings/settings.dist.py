@@ -1266,7 +1266,7 @@ if not CELERY_BROKER_URL.startswith("sqla+sqlite"):  # Priority queues are not s
         # 2 - regular tasks
         # 3 - notifications and jira
         # 4 - garbidge collectors
-        CELERY_BROKER_TRANSPORT_OPTIONS["priority_steps"] = list(range(4))
+        CELERY_BROKER_TRANSPORT_OPTIONS["priority_steps"] = list(range(5))
     CELERY_TASK_DEFAULT_PRIORITY = 2
 
     if "sep" not in CELERY_BROKER_TRANSPORT_OPTIONS:
