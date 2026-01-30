@@ -208,7 +208,6 @@ class CyberwatchGaleaxParser:
             mitigated_date = timezone.now()
             mitigation = f"Fixed At: {mitigated_date}"
             if settings.V3_FEATURE_LOCATIONS:
-                # TODO: Implement Locations
                 locations = [URL(host=e) for e in c_data["no_product_locations"]]
             else:
                 # TODO: Delete this after the move to Locations

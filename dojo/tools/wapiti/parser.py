@@ -101,7 +101,6 @@ class WapitiParser:
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
                     if settings.V3_FEATURE_LOCATIONS:
-                        # TODO: Implement Locations
                         find.unsaved_locations.extend(finding.unsaved_locations)
                     else:
                         # TODO: Delete this after the move to Locations
