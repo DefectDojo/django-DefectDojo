@@ -14,7 +14,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0257_pghistory_tags_backfill'),
+        ('dojo', '0258_alter_answer_options_alter_choiceanswer_options_and_more'),
         ('pghistory', '0007_auto_20250421_0444'),
     ]
 
