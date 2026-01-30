@@ -285,7 +285,7 @@ def check_for_and_create_comment(parsed_json):
             finding.notes.add(new_note)
             finding.jira_issue.jira_change = timezone.now()
             finding.jira_issue.save()
-            finding.last_reviewed = note.date
+            finding.last_reviewed = new_note.date
             finding.last_reviewed_by = author
             finding.save(update_fields=["last_reviewed", "last_reviewed_by"])
     return None
