@@ -287,7 +287,9 @@ def check_for_and_create_comment(parsed_json):
             finding.jira_issue.save()
             finding.last_reviewed = new_note.date
             finding.last_reviewed_by = author
-            finding.save(update_fields=["last_reviewed", "last_reviewed_by"])
+            # Only update the timestamp fields, not other fields like 'active' to avoid
+            # race conditions with concurrent webhook events (e.g. issue_updated)
+            finding.save(update_fields=["last_reviewed", "last_reviewed_by", "updated"])
     return None
 
 
