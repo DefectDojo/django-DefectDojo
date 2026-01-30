@@ -285,7 +285,9 @@ def check_for_and_create_comment(parsed_json):
             finding.notes.add(new_note)
             finding.jira_issue.jira_change = timezone.now()
             finding.jira_issue.save()
-            finding.save()
+            # Only update the timestamp, not other fields like 'active' to avoid
+            # race conditions with concurrent webhook events (e.g. issue_updated)
+            finding.save(update_fields=["updated"])
     return None
 
 
