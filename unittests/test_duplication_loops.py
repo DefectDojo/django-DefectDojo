@@ -6,12 +6,14 @@ from django.test.utils import override_settings
 from dojo.finding.deduplication import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Engagement, Finding, Product, User, copy_model_util
+from dojo.tasks import async_dupe_delete
 
 from .dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
 
 
+# tests here
 class TestDuplicationLoops(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -372,6 +374,26 @@ class TestDuplicationLoops(DojoTestCase):
         self.assertEqual(self.finding_a.duplicate_finding, None)
         self.assertEqual(self.finding_c.duplicate_finding_set().count(), 2)
         self.assertEqual(self.finding_b.duplicate_finding_set().count(), 2)
+
+    # Test that Delete Duplicate Findings & Maximum Duplicate is correctly deleting olding finding first based off of finding date value
+    @override_settings(DELETE_DUPLICATE_FINDINGS=True)
+    @override_settings(MAXIMUM_DUPLICATES=1)
+    def test_delete_duplicate_order(self):
+        self.finding_b.date = "2023-01-01"
+        self.finding_c.date = "2024-01-01"
+        set_duplicate(self.finding_b, self.finding_a)
+        set_duplicate(self.finding_c, self.finding_a)
+
+        async_dupe_delete()
+
+        # Finding b should be deleted because it is the older finding
+
+        # I think this is how you would access it from the database
+        Finding.objects.get(id=self.finding_b.id)
+        # Why am I still able to access finding b. It should be deleted???
+
+        self.assertEqual(self.finding_a.duplicate_finding_set().count(), 2)
+        self.assertEqual(self.finding_a.duplicate_finding_set().first().id, self.finding_b.id)
 
     def test_delete_all_engagements(self):
         # make sure there is no exception when deleting all engagements
