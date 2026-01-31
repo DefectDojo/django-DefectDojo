@@ -271,7 +271,12 @@
                                         {{ test_import.version|default_if_none:"" }}
                                     </td>
                                     <td>
-                                        {{ test_import.import_settings.endpoint|default_if_none:"" }}
+                                        {% if V3_FEATURE_LOCATIONS %}
+                                            {{ test_import.import_settings.locations|default_if_none:"" }}
+                                        {% else %}
+                                            {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
+                                            {{ test_import.import_settings.endpoint|default_if_none:"" }}
+                                        {% endif %}
                                     </td>
                                     <td>
                                         {% regroup test_import.test_import_finding_action_set.all by get_action_display as finding_action_list %}
