@@ -1101,7 +1101,7 @@ class FindingViewSet(
             note.save()
             finding.last_reviewed = note.date
             finding.last_reviewed_by = author
-            finding.save(update_fields=["last_reviewed", "last_reviewed_by"])
+            finding.save(update_fields=["last_reviewed", "last_reviewed_by", "updated"])
             finding.notes.add(note)
             # Determine if we need to send any notifications for user mentioned
             process_tag_notifications(
