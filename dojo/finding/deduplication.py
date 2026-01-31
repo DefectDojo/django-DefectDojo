@@ -220,7 +220,7 @@ def are_location_urls_equal(url1, url2, fields):
         if (field == "port" and url1.port != url2.port) or (field == "path" and url1.path != url2.path) or (
                 field == "query" and url1.query != url2.query) or (
                 field == "fragment" and url1.fragment != url2.fragment) or (
-                field == "userinfo" and url1.userinfo != url2.userinfo) or (field == "user" and url1.user != url2.user):
+                field == "userinfo" and url1.user_info != url2.user_info):
             return False
     return True
 
