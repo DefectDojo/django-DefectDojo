@@ -740,7 +740,10 @@ def jira_priority(obj):
 
 def jira_environment(obj):
     if isinstance(obj, Finding):
-        return "\n".join([str(endpoint) for endpoint in obj.endpoints.all()])
+        if not settings.V3_FEATURE_LOCATIONS:
+            # TODO: Delete this after the move to Locations
+            return "\n".join([str(endpoint) for endpoint in obj.endpoints.all()])
+        return "\n".join([str(location_ref.location) for location_ref in obj.locations.all()])
     if isinstance(obj, Finding_Group):
         envs = [
             jira_environment(finding)
@@ -1917,7 +1920,12 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
             finding.mitigated = jira_now
             finding.is_mitigated = True
             finding.mitigated_by, _created = User.objects.get_or_create(username="JIRA")
-            finding.endpoints.clear()
+            if settings.V3_FEATURE_LOCATIONS:
+                for location_ref in finding.locations.all():
+                    location_ref.location.disassociate_from_finding(finding)
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.endpoints.clear()
             finding.false_p = False
             ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
             status_changed = True
