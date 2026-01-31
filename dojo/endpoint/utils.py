@@ -334,7 +334,7 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
         elif object_class == Location:
             endpoints = Location.objects.filter(url__host=host, products__product=product)
             if not endpoints.exists() and create_endpoints:
-                url = URL.objects.create(host=host)
+                url = URL.get_or_create_from_values(host=host)
                 url.location.associate_with_product(product)
                 endpoints = [url.location]
         meta = [(key, row.get(key)) for key in keys]

@@ -6,7 +6,8 @@ from urllib.parse import unquote_plus, urlsplit
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db.models import BooleanField, CharField, Index, PositiveIntegerField
+from django.db.models import BooleanField, CharField, Index, PositiveIntegerField, UniqueConstraint
+from django.db.models.functions import Lower
 
 # Ignoring the N811 error as this is an external library and we cannot change its name
 # We are already using "URL" in our own code so we need to alias this import
@@ -59,6 +60,10 @@ class HyperlinkParser:
                 # Nothing can be done!
                 error_message = f"No host provided in URL: {parsed_url}"
                 raise ValidationError(error_message)
+
+        if parsed_url.port is not None and (parsed_url.port < 1 or parsed_url.port > 65535):
+            error_message = f"Invalid port: {parsed_url.port}"
+            raise ValidationError(error_message)
 
         return ParsedUrl(
             raw=value,
@@ -162,6 +167,19 @@ class URL(AbstractLocation):
         verbose_name = "Locations - URL"
         verbose_name_plural = "Locations - URLs"
         indexes = (Index(fields=["host"]),)
+        constraints = [
+            UniqueConstraint(
+                Lower("protocol"),
+                "user_info",
+                Lower("host"),
+                "port",
+                "path",
+                "query",
+                "fragment",
+                "host_validation_failure",
+                name="url_unique",
+            ),
+        ]
 
     def manual_str(self):
         value = ""
@@ -206,10 +224,19 @@ class URL(AbstractLocation):
     def get_location_value(self) -> str:
         return str(self)
 
+    def normalize_url_parts(self):
+        self.clean_protocol()
+        self.clean_user_info()
+        self.clean_host()
+        self.clean_port()
+        self.clean_path()
+        self.clean_query()
+        self.clean_fragment()
+        self.clean_host_validation_failure()
+
     def pre_save_logic(self) -> None:
         """Allow for some pre save operations by other classes."""
-        # Set default port based on protocol if not provided
-        self.clean_port()
+        self.normalize_url_parts()
         super().pre_save_logic()
 
     @staticmethod
@@ -220,11 +247,25 @@ class URL(AbstractLocation):
     def clean(self, *args: list, **kwargs: dict) -> None:
         """Validate the input supplied."""
         super().clean(*args, **kwargs)
-        # Ensure the full value is correctly parsable. If not, an exception will be raised
-        self.clean_port()
-        self.clean_path()
-        self.clean_query()
-        self.clean_fragment()
+        self.normalize_url_parts()
+
+    def clean_protocol(self) -> None:
+        if not self.protocol:
+            self.protocol = ""
+        else:
+            self.protocol = self.protocol.lower()
+
+    def clean_user_info(self):
+        if not self.user_info:
+            self.user_info = ""
+        else:
+            self.user_info = self.remove_null_bytes(self.user_info.strip())
+
+    def clean_host(self) -> None:
+        if not self.host:
+            self.host = ""
+        else:
+            self.host = self.host.lower()
 
     def clean_port(self) -> None:
         if self.port is None:
@@ -249,15 +290,54 @@ class URL(AbstractLocation):
         else:
             self.query = self.remove_null_bytes(self.query.strip().removeprefix("?"))
 
+    def clean_host_validation_failure(self):
+        self.host_validation_failure = bool(self.host_validation_failure)
+
     def remove_null_bytes(self, value: str) -> str:
         return value.replace("\x00", "%00")
 
     @staticmethod
+    def get_or_create_from_object(url: URL) -> URL:
+        url.normalize_url_parts()
+        url, _ = URL.objects.get_or_create(
+            protocol=url.protocol,
+            user_info=url.user_info,
+            host=url.host,
+            port=url.port,
+            path=url.path,
+            query=url.query,
+            fragment=url.fragment,
+            host_validation_failure=url.host_validation_failure,
+        )
+        return url
+
+    @staticmethod
+    def get_or_create_from_values(
+        protocol=None,
+        user_info=None,
+        host=None,
+        port=None,
+        path=None,
+        query=None,
+        fragment=None,
+        host_validation_failure=None,
+    ) -> URL:
+        return URL.get_or_create_from_object(URL(
+            protocol=protocol,
+            user_info=user_info,
+            host=host,
+            port=port,
+            path=path,
+            query=query,
+            fragment=fragment,
+            host_validation_failure=host_validation_failure,
+        ))
+
+    @staticmethod
     def create_location_from_value(value: str) -> URL:
         """Parse a string URL and return the resulting *persisted* URL Model."""
-        url = URL.from_value(value)
-        url.save()
-        return url
+        unsaved_url = URL.from_value(value)
+        return URL.get_or_create_from_object(unsaved_url)
 
     @staticmethod
     def from_value(value: str) -> URL:
@@ -280,5 +360,5 @@ class URL(AbstractLocation):
             query=query,
             fragment=fragment,
         )
-        url.full_clean()
+        url.normalize_url_parts()
         return url

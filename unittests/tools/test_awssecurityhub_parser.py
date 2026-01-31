@@ -73,7 +73,7 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual("CVE-2022-3643", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("- Update kernel-4.14.301\n\t- yum update kernel\n", finding.mitigation)
             location = self.get_unsaved_locations(finding)[0]
-            self.assertEqual("AwsEc2Instance_arn_aws_ec2_us-east-1_XXXXXXXXXXXX_i-11111111111111111", location.host)
+            self.assertEqual("AwsEc2Instance_arn_aws_ec2_us-east-1_XXXXXXXXXXXX_i-11111111111111111".lower(), location.host.lower())
 
     def test_inspector_ec2_with_no_vulnerabilities(self):
         with sample_path("inspector_ec2_cve_no_vulnerabilities.json").open(encoding="utf-8") as test_file:
@@ -98,7 +98,7 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertSetEqual({"CVE-2023-34256", "GHSA-p98r-538v-jgw5"}, set(finding.unsaved_vulnerability_ids))
             self.assertEqual("https://github.com/bottlerocket-os/bottlerocket/security/advisories/GHSA-p98r-538v-jgw5", finding.references)
             location = self.get_unsaved_locations(finding)[0]
-            self.assertEqual("AwsEc2Instance_arn_aws_ec2_eu-central-1_012345678912_instance_i-07c11cc535d830123", location.host)
+            self.assertEqual("AwsEc2Instance_arn_aws_ec2_eu-central-1_012345678912_instance_i-07c11cc535d830123".lower(), location.host.lower())
 
     def test_inspector_ecr(self):
         with sample_path("inspector_ecr.json").open(encoding="utf-8") as test_file:
@@ -116,7 +116,7 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertIn("Repository: repo-os", finding.impact)
             self.assertEqual(0.0014, finding.epss_score)
             location = self.get_unsaved_locations(finding)[0]
-            self.assertEqual("AwsEcrContainerImage_arn_aws_ecr_eu-central-1_123456789012_repository_repo-os_sha256_af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74", location.host)
+            self.assertEqual("AwsEcrContainerImage_arn_aws_ecr_eu-central-1_123456789012_repository_repo-os_sha256_af965ef68c78374a5f987fce98c0ddfa45801df2395bf012c50b863e65978d74".lower(), location.host.lower())
 
     def test_guardduty(self):
         with sample_path("guardduty.json").open(encoding="utf-8") as test_file:
@@ -133,7 +133,7 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual("User AssumedRole : 123123123 is anomalously invoking APIs commonly used in Discovery tactics. - Resource: 123123123", finding.title)
             self.assertEqual("TTPs/Discovery/IAMUser-AnomalousBehavior\n[https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html)", finding.mitigation)
             location = self.get_unsaved_locations(findings[0])[0]
-            self.assertEqual("AwsEc2Instance_arn_aws_ec2_us-east-1_123456789012_instance_i-1234567890", location.host)
+            self.assertEqual("AwsEc2Instance_arn_aws_ec2_us-east-1_123456789012_instance_i-1234567890".lower(), location.host.lower())
             self.assertEqual("This is a GuardDuty Finding\nAPIs commonly used in Discovery tactics were invoked by user AssumedRole : 123123123, under anomalous circumstances. Such activity is not typically seen from this user.\n**AWS Finding ARN:** arn:aws:guardduty:us-east-1:123456789012:detector/123456789/finding/2123123123123\n**SourceURL:** [https://us-east-1.console.aws.amazon.com/guardduty/home?region=us-east-1#/findings?macros=current&fId=2123123123123](https://us-east-1.console.aws.amazon.com/guardduty/home?region=us-east-1#/findings?macros=current&fId=2123123123123)\n**AwsAccountId:** 123456789012\n**Region:** us-east-1\n**Generator ID:** arn:aws:guardduty:us-east-1:123456789012:detector/123456789\n", finding.description)
 
     def test_issue_10956(self):

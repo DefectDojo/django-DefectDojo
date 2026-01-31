@@ -305,8 +305,7 @@ class TestDuplicationLogic(DojoTestCase):
             for e_def in endpoint_defs:
                 e_def.pop("product", None)
                 e_def.pop("finding", None)
-                url = URL(**e_def)
-                url.save()
+                url = URL.get_or_create_from_values(**e_def)
                 url.location.associate_with_finding(finding)
         else:
             # TODO: Delete this after the move to Locations

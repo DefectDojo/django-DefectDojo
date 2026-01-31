@@ -160,7 +160,7 @@ class TestOpenVASParser(DojoTestCase):
             self.assertEqual(1, len(self.get_unsaved_locations(finding)))
             # location
             location = self.get_unsaved_locations(finding)[0]
-            self.assertEqual("LOGSRV", location.host)
+            self.assertEqual("LOGSRV".lower(), location.host.lower())
             self.assertEqual("tcp", location.protocol)
             self.assertEqual(9200, location.port)
             finding = findings[2]

@@ -941,17 +941,7 @@ def copy_template_fields_to_finding(
             for endpoint_url in endpoint_urls:
                 try:
                     if settings.V3_FEATURE_LOCATIONS:
-                        unsaved_url = URL.from_value(endpoint_url)
-                        saved_url, _ = URL.objects.get_or_create(
-                            protocol=unsaved_url.protocol,
-                            user_info=unsaved_url.user_info,
-                            host=unsaved_url.host,
-                            port=unsaved_url.port,
-                            path=unsaved_url.path,
-                            query=unsaved_url.query,
-                            fragment=unsaved_url.fragment,
-                            host_validation_failure=unsaved_url.host_validation_failure,
-                        )
+                        saved_url = URL.create_location_from_value(endpoint_url)
                         saved_url.location.associate_with_finding(finding)
                     else:
                         # TODO: Delete this after the move to Locations

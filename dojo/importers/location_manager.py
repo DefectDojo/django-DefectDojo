@@ -24,23 +24,9 @@ EndpointOrURL = TypeVar("EndpointOrURL", Endpoint, URL)
 
 # test_notifications.py: Implement Locations
 class LocationManager:
-
-    def get_or_create_url(self, unsaved_url: URL) -> URL:
-        saved_url, _ = URL.objects.get_or_create(
-            protocol=unsaved_url.protocol,
-            user_info=unsaved_url.user_info,
-            host=unsaved_url.host,
-            port=unsaved_url.port,
-            path=unsaved_url.path,
-            query=unsaved_url.query,
-            fragment=unsaved_url.fragment,
-            host_validation_failure=unsaved_url.host_validation_failure,
-        )
-        return saved_url
-
     def get_or_create_location(self, unsaved_location: AbstractLocation) -> AbstractLocation | None:
         if isinstance(unsaved_location, URL):
-            return self.get_or_create_url(unsaved_location)
+            return URL.get_or_create_from_object(unsaved_location)
         logger.debug(f"IMPORT_SCAN: Unsupported location type: {type(unsaved_location)}")
         return None
 

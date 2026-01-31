@@ -98,7 +98,7 @@ class TestMSDefenderParser(DojoTestCase):
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
-        self.assertEqual("Max_Mustermann_iPadAir_17zoll__2ndgeneration_", self.get_unsaved_locations(finding)[0].host)
+        self.assertEqual("Max_Mustermann_iPadAir_17zoll__2ndgeneration_".lower(), self.get_unsaved_locations(finding)[0].host.lower())
 
     def test_parser_defender_error_handling(self):
         """https://github.com/DefectDojo/django-DefectDojo/issues/11896 handle missing values properly, i.e. defenderAvStatus"""

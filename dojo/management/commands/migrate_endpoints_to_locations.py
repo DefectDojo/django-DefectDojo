@@ -36,9 +36,9 @@ class Command(BaseCommand):
         # Create the raw URL object first
         # This should create the location object as well
         url = URL.objects.get_or_create(
-            protocol=endpoint.protocol or "",
+            protocol=(endpoint.protocol or "").lower(),
             user_info=endpoint.userinfo or "",
-            host=endpoint.host,
+            host=(endpoint.host or "").lower(),
             port=endpoint.port,
             path=endpoint.path or "",
             query=endpoint.query or "",

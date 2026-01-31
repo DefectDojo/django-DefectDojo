@@ -85,7 +85,7 @@ def url_get_or_create(**kwargs):
     matches = list(qs.order_by("id")[:2])
     if not matches:
         # Most common case: nothing exists yet
-        return URL.objects.create(**kwargs), True
+        return URL.get_or_create_from_values(**kwargs), True
     if len(matches) == 1:
         # Common case: exactly one existing URL
         return matches[0], False
