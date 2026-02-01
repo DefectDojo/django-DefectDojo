@@ -79,7 +79,7 @@ class StackHawkParser:
                 + "\n"
             )
             if settings.V3_FEATURE_LOCATIONS:
-                location = URL(host=host, path=path["path"])
+                location = URL.from_value(host + path["path"])
             else:
                 # TODO: Delete this after the move to Locations
                 location = Endpoint.from_uri(host + path["path"])

@@ -1,7 +1,6 @@
 import datetime
 import logging
 
-from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
@@ -9,7 +8,6 @@ from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.models import DojoMeta, Endpoint, Endpoint_Status
 from dojo.url.models import URL
-from dojo.url.validators import validate_host_or_ip
 
 logger = logging.getLogger(__name__)
 
@@ -27,24 +25,17 @@ class Command(BaseCommand):
     help = "Usage: manage.py migrate_endpoints_to_locations"
 
     def _endpoint_to_url(self, endpoint: Endpoint) -> Location:
-        # First determine if we will have a problem with the endpoint
-        try:
-            validate_host_or_ip(endpoint.host)
-            host_validation_failure = False
-        except ValidationError:
-            host_validation_failure = True
         # Create the raw URL object first
         # This should create the location object as well
-        url = URL.objects.get_or_create(
-            protocol=(endpoint.protocol or "").lower(),
-            user_info=endpoint.userinfo or "",
-            host=(endpoint.host or "").lower(),
+        url = URL.get_or_create_from_values(
+            protocol=endpoint.protocol,
+            user_info=endpoint.userinfo,
+            host=endpoint.host,
             port=endpoint.port,
-            path=endpoint.path or "",
-            query=endpoint.query or "",
-            fragment=endpoint.fragment or "",
-            host_validation_failure=host_validation_failure,
-        )[0]
+            path=endpoint.path,
+            query=endpoint.query,
+            fragment=endpoint.fragment,
+        )
         # Add the endpoint tags to the location tags
         if endpoint.tags:
             [url.location.tags.add(tag) for tag in set(endpoint.tags.values_list("name", flat=True))]

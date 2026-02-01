@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 from contextlib import suppress
 from dataclasses import dataclass
 from urllib.parse import unquote_plus, urlsplit
 
+import idna
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinLengthValidator, MinValueValidator
 from django.db import IntegrityError, transaction
@@ -85,17 +87,32 @@ class HyperlinkParser:
     def unparse(self, url: URL) -> str:
         # path/query are stored as flat text; parse them with Hyperlink
         parsed_path_and_query = HyperlinkURL.from_text(f"{url.path}?{url.query}").normalize()
-        return HyperlinkURL(
+
+        # Hyperlink assumes the host field is a domain name, and explodes when encoding an IP or something that's not
+        # quite a valid hostname but Dojo allows anyway. Check if it's one of such explosion-causing cases to determine
+        # whether we should be sneaky and substitute in the hostname manually after the fact.
+        unparse_host = True
+        try:
+            idna.encode(url.host, uts46=True)
+        except idna.IDNAError:
+            unparse_host = False
+
+        normalized = HyperlinkURL(
             scheme=url.protocol,
             userinfo=url.user_info,
-            host=url.host,
+            host=url.host if unparse_host else "",
             port=url.port,
             path=parsed_path_and_query.path,
             rooted=False,
             query=parsed_path_and_query.query,
             fragment=url.fragment,
         # path not normalized if empty, in line with the way Endpoints worked
-        ).normalize(path=bool(url.path)).to_uri().to_text().removeprefix("//")
+        ).normalize(path=bool(url.path)).to_uri()
+
+        if not unparse_host:
+            normalized = normalized.replace(host=url.host)
+
+        return normalized.to_text().removeprefix("//")
 
 
 class URL(AbstractLocation):
@@ -227,22 +244,6 @@ class URL(AbstractLocation):
     def get_location_value(self) -> str:
         return str(self)[:2048]
 
-    def normalize_url_parts(self):
-        self.clean_protocol()
-        self.clean_user_info()
-        self.clean_host()
-        self.clean_port()
-        self.clean_path()
-        self.clean_query()
-        self.clean_fragment()
-        self.clean_host_validation_failure()
-        self.set_db_hash()
-
-    def pre_save_logic(self) -> None:
-        """Allow for some pre save operations by other classes."""
-        self.normalize_url_parts()
-        super().pre_save_logic()
-
     @staticmethod
     def _parse_string_value(value: str) -> ParsedUrl:
         """Internal method to parse the string representation of the model"""
@@ -250,7 +251,14 @@ class URL(AbstractLocation):
 
     def clean(self, *args: list, **kwargs: dict) -> None:
         """Validate the input supplied."""
-        self.normalize_url_parts()
+        self.clean_protocol()
+        self.clean_user_info()
+        self.clean_host()
+        self.clean_port()
+        self.clean_path()
+        self.clean_query()
+        self.clean_fragment()
+        self.set_db_hash()
         super().clean(*args, **kwargs)
 
     def clean_protocol(self) -> None:
@@ -263,13 +271,24 @@ class URL(AbstractLocation):
         if not self.user_info:
             self.user_info = ""
         else:
-            self.user_info = self.remove_null_bytes(self.user_info.strip())
+            self.user_info = self.replace_null_bytes(self.user_info.strip())
 
     def clean_host(self) -> None:
+        self.host_validation_failure = False
         if not self.host:
             self.host = ""
         else:
-            self.host = self.host.lower()
+            try:
+                # Check if it's a valid IP address first
+                self.host = ipaddress.ip_address(self.host).compressed
+            except ValueError:
+                try:
+                    # Attempt to depunify the hostname
+                    self.host = idna.encode(self.host, uts46=True).decode("ascii")
+                except idna.IDNAError:
+                    # Some issue with the hostname exists. We'll store it, but are DEFINITELY making a note of this.
+                    self.host = self.replace_null_bytes(self.host.lower())
+                    self.host_validation_failure = True
 
     def clean_port(self) -> None:
         if not bool(self.port):
@@ -286,32 +305,29 @@ class URL(AbstractLocation):
         if not self.path:
             self.path = ""
         else:
-            self.path = self.remove_null_bytes(self.path.strip().removeprefix("/"))
+            self.path = self.replace_null_bytes(self.path.strip().removeprefix("/"))
 
     def clean_fragment(self) -> None:
         if not self.fragment:
             self.fragment = ""
         else:
-            self.fragment = self.remove_null_bytes(self.fragment.strip().removeprefix("#"))
+            self.fragment = self.replace_null_bytes(self.fragment.strip().removeprefix("#"))
 
     def clean_query(self) -> None:
         if not self.query:
             self.query = ""
         else:
-            self.query = self.remove_null_bytes(self.query.strip().removeprefix("?"))
-
-    def clean_host_validation_failure(self):
-        self.host_validation_failure = bool(self.host_validation_failure)
+            self.query = self.replace_null_bytes(self.query.strip().removeprefix("?"))
 
     def set_db_hash(self):
         self.hash = hashlib.blake2b(str(self).encode(), digest_size=32).hexdigest()
 
-    def remove_null_bytes(self, value: str) -> str:
+    def replace_null_bytes(self, value: str) -> str:
         return value.replace("\x00", "%00")
 
     @staticmethod
     def get_or_create_from_object(url: URL) -> URL:
-        url.normalize_url_parts()
+        url.clean()
         with transaction.atomic():
             try:
                 return URL.objects.get_or_create(
@@ -339,9 +355,8 @@ class URL(AbstractLocation):
         path=None,
         query=None,
         fragment=None,
-        host_validation_failure=None,
     ) -> URL:
-        return URL.get_or_create_from_object(URL(
+        url = URL(
             protocol=protocol,
             user_info=user_info,
             host=host,
@@ -349,8 +364,8 @@ class URL(AbstractLocation):
             path=path,
             query=query,
             fragment=fragment,
-            host_validation_failure=host_validation_failure,
-        ))
+        )
+        return URL.get_or_create_from_object(url)
 
     @staticmethod
     def create_location_from_value(value: str) -> URL:
@@ -365,9 +380,9 @@ class URL(AbstractLocation):
 
         parsed_url = URL._parse_string_value(value)
 
-        path = parsed_url.path.lstrip("/")[:2048]
-        query = parsed_url.query[:2048]
-        fragment = parsed_url.fragment[:2048]
+        path = parsed_url.path.removeprefix("/")[:2048]
+        query = parsed_url.query.removeprefix("?")[:2048]
+        fragment = parsed_url.fragment.removeprefix("#")[:2048]
 
         # Create the initial object, assuming no exceptions are thrown
         url = URL(
@@ -379,5 +394,5 @@ class URL(AbstractLocation):
             query=query,
             fragment=fragment,
         )
-        url.normalize_url_parts()
+        url.clean()
         return url
