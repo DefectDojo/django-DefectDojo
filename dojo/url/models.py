@@ -1,13 +1,19 @@
 from __future__ import annotations
 
+import hashlib
 from contextlib import suppress
 from dataclasses import dataclass
 from urllib.parse import unquote_plus, urlsplit
 
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db.models import BooleanField, CharField, Index, PositiveIntegerField, UniqueConstraint
-from django.db.models.functions import Lower
+from django.core.validators import MaxValueValidator, MinLengthValidator, MinValueValidator
+from django.db import IntegrityError, transaction
+from django.db.models import (
+    BooleanField,
+    CharField,
+    Index,
+    PositiveIntegerField,
+)
 
 # Ignoring the N811 error as this is an external library and we cannot change its name
 # We are already using "URL" in our own code so we need to alias this import
@@ -94,8 +100,6 @@ class HyperlinkParser:
 
 class URL(AbstractLocation):
 
-    """Meta class for the URL model."""
-
     LOCATION_TYPE = "url"
     URL_PARSING_CLASS = HyperlinkParser
 
@@ -158,28 +162,27 @@ class URL(AbstractLocation):
     host_validation_failure = BooleanField(
         default=False,
         blank=False,
-        help_text="Dictates whether the endpoint was found to have host validation issues during creation")
+        help_text="Dictates whether the endpoint was found to have host validation issues during creation",
+    )
+    hash = CharField(
+        null=False,
+        blank=False,
+        max_length=64,
+        editable=False,
+        unique=True,
+        validators=[MinLengthValidator(64)],
+        help_text="The hash of the URL for uniqueness",
+    )
 
     objects = URLManager().from_queryset(URLQueryset)()
 
     class Meta:
 
+        """Metaclass for the URL model."""
+
         verbose_name = "Locations - URL"
         verbose_name_plural = "Locations - URLs"
-        indexes = (Index(fields=["host"]),)
-        constraints = [
-            UniqueConstraint(
-                Lower("protocol"),
-                "user_info",
-                Lower("host"),
-                "port",
-                "path",
-                "query",
-                "fragment",
-                "host_validation_failure",
-                name="url_unique",
-            ),
-        ]
+        indexes = (Index(fields=["host", "hash"]),)
 
     def manual_str(self):
         value = ""
@@ -222,7 +225,7 @@ class URL(AbstractLocation):
         return cls.LOCATION_TYPE
 
     def get_location_value(self) -> str:
-        return str(self)
+        return str(self)[:2048]
 
     def normalize_url_parts(self):
         self.clean_protocol()
@@ -233,6 +236,7 @@ class URL(AbstractLocation):
         self.clean_query()
         self.clean_fragment()
         self.clean_host_validation_failure()
+        self.set_db_hash()
 
     def pre_save_logic(self) -> None:
         """Allow for some pre save operations by other classes."""
@@ -246,8 +250,8 @@ class URL(AbstractLocation):
 
     def clean(self, *args: list, **kwargs: dict) -> None:
         """Validate the input supplied."""
-        super().clean(*args, **kwargs)
         self.normalize_url_parts()
+        super().clean(*args, **kwargs)
 
     def clean_protocol(self) -> None:
         if not self.protocol:
@@ -268,9 +272,15 @@ class URL(AbstractLocation):
             self.host = self.host.lower()
 
     def clean_port(self) -> None:
-        if self.port is None:
+        if not bool(self.port):
             # Set default port based on protocol if not provided
             self.port = DEFAULT_PORTS.get(self.protocol, None)
+        elif isinstance(self.port, str):
+            try:
+                self.port = int(self.port)
+            except ValueError:
+                error_message = f"Invalid port: {self.port}"
+                raise ValidationError(error_message)
 
     def clean_path(self):
         if not self.path:
@@ -293,23 +303,32 @@ class URL(AbstractLocation):
     def clean_host_validation_failure(self):
         self.host_validation_failure = bool(self.host_validation_failure)
 
+    def set_db_hash(self):
+        self.hash = hashlib.blake2b(str(self).encode(), digest_size=32).hexdigest()
+
     def remove_null_bytes(self, value: str) -> str:
         return value.replace("\x00", "%00")
 
     @staticmethod
     def get_or_create_from_object(url: URL) -> URL:
         url.normalize_url_parts()
-        url, _ = URL.objects.get_or_create(
-            protocol=url.protocol,
-            user_info=url.user_info,
-            host=url.host,
-            port=url.port,
-            path=url.path,
-            query=url.query,
-            fragment=url.fragment,
-            host_validation_failure=url.host_validation_failure,
-        )
-        return url
+        with transaction.atomic():
+            try:
+                return URL.objects.get_or_create(
+                    hash=url.hash,
+                    defaults={
+                        "protocol": url.protocol,
+                        "user_info": url.user_info,
+                        "host": url.host,
+                        "port": url.port,
+                        "path": url.path,
+                        "query": url.query,
+                        "fragment": url.fragment,
+                        "host_validation_failure": url.host_validation_failure,
+                    },
+                )[0]
+            except IntegrityError:
+                return URL.objects.get(hash=url.hash)
 
     @staticmethod
     def get_or_create_from_values(

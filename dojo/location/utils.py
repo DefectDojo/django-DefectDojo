@@ -13,16 +13,7 @@ logger = logging.getLogger(__name__)
 def save_location(unsaved_location: AbstractLocation) -> AbstractLocation:
     # Only support URLs at this time
     if isinstance(unsaved_location, URL):
-        return URL.objects.get_or_create(
-            protocol=unsaved_location.protocol,
-            user_info=unsaved_location.user_info,
-            host=unsaved_location.host,
-            port=unsaved_location.port,
-            path=unsaved_location.path,
-            query=unsaved_location.query,
-            fragment=unsaved_location.fragment,
-            host_validation_failure=unsaved_location.host_validation_failure,
-        )[0]
+        return URL.get_or_create_from_object(unsaved_location)
     error_message = f"Unsupported location type {type(unsaved_location)}"
     raise ValidationError(error_message)
 

@@ -446,7 +446,7 @@ class TestFindingModel(DojoTestCase, TestFindingModelMixin):
             target_end=now(),
         )
         self.finding = Finding.objects.create(title="Close Finding Test", active=True, test=self.test)
-        self.url = URL.objects.create(host="test.local")
+        self.url = URL.get_or_create_from_values(host="test.local")
         self.url.location.associate_with_finding(self.finding)
 
 

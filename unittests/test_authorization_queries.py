@@ -260,7 +260,7 @@ class AuthorizationQueriesTestBase(DojoTestCase):
 
         if settings.V3_FEATURE_LOCATIONS:
             # Create locations
-            cls.url_1, _ = URL.objects.get_or_create(
+            cls.url_1 = URL.get_or_create_from_values(
                 host="auth-test-1.example.com",
             )
             cls.location_finding_ref_1, _ = LocationFindingReference.objects.get_or_create(
@@ -271,7 +271,7 @@ class AuthorizationQueriesTestBase(DojoTestCase):
                 location=cls.url_1.location,
                 product=cls.product_1,
             )
-            cls.url_2, _ = URL.objects.get_or_create(
+            cls.url_2 = URL.get_or_create_from_values(
                 host="auth-test-2.example.com",
             )
             cls.location_finding_ref_2, _ = LocationFindingReference.objects.get_or_create(

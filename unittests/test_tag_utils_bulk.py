@@ -26,7 +26,7 @@ class BulkTagUtilsTest(TestCase):
         # TODO: Delete this after the move to Locations
         if not settings.V3_FEATURE_LOCATIONS:
             return Endpoint.objects.create(product=product, host=hostname)
-        url = URL.objects.create(host=hostname)
+        url = URL.get_or_create_from_values(host=hostname)
         url.location.associate_with_product(product)
         return url.location
 

@@ -317,9 +317,9 @@ class TestNotificationTriggers(DojoTestCase):
 
         prod_type = Product_Type.objects.first()
         prod1, _ = Product.objects.get_or_create(prod_type=prod_type, description="test", name="prod name 1")
-        URL.objects.get_or_create(host="host1")
+        URL.get_or_create_from_values(host="host1")
         Product.objects.get_or_create(prod_type=prod_type, description="test", name="prod name 2")
-        url2, _ = URL.objects.get_or_create(host="host2")
+        url2 = URL.get_or_create_from_values(host="host2")
 
         with self.subTest("url_deleted by product"):  # in case of product removal, we are not notifying about removal
             with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):

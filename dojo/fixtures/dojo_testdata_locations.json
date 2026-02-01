@@ -805,7 +805,8 @@
       "host": "127.0.0.1",
       "query": "",
       "path": "endpoint/420/edit/",
-      "port": 80
+      "port": 80,
+      "hash": "f28d3752e452cde3e00a3aaf885fe153037ae69d9726e6a0936ee7da3225c1ad"
     }
   },
   {
@@ -818,7 +819,8 @@
       "host": "localhost",
       "query": "",
       "path": "",
-      "port": 21
+      "port": 21,
+      "hash": "025d6b16f8cfba2d8e15e85deb81963a84d5dd3c700614f8e8fda87378cf58aa"
     }
   },
   {
@@ -831,7 +833,8 @@
       "host": "127.0.0.1",
       "query": "",
       "path": "",
-      "port": 22
+      "port": 22,
+      "hash": "03009c0636425af566fb6b737db82852812fe2969107ef299530a248f78c4761"
     }
   },
   {
@@ -844,7 +847,8 @@
       "host": "foo.bar",
       "query": "",
       "path": "",
-      "port": 21
+      "port": 21,
+      "hash": "3c82808602507ea78a48dc605d86476f5cc609f99d446d1a9c9539d5c7c10166"
     }
   },
   {
@@ -857,7 +861,8 @@
       "host": "foo.bar",
       "query": "",
       "path": "",
-      "port": 80
+      "port": 80,
+      "hash": "c1f60206ce7dac6202baec6f6251006e499113356869f605d0168f13e1d593ac"
     }
   },
   {
@@ -870,7 +875,8 @@
       "host": "bar.foo",
       "query": "",
       "path": "",
-      "port": 80
+      "port": 80,
+      "hash": "99e0dbdf63598bfa7c3310a6785638117134c44ac59a38785e9e81fece0878da"
     }
   },
   {
@@ -883,7 +889,8 @@
       "host": "bar.foo",
       "query": "",
       "path": "",
-      "port": 443
+      "port": 443,
+      "hash": "26259e2d4e77789a856808509ba2d9a50838bdc76d71f596a1bb346bbcb30332"
     }
   },
   {
@@ -896,7 +903,8 @@
       "host": "bar.foo",
       "query": "",
       "path": "f6",
-      "port": 443
+      "port": 443,
+      "hash": "4e5614106ea6ca9c15c3328731036b06ab32c45fb2ed013601350748e2d3ed85"
     }
   },
   {
