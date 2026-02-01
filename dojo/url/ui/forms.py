@@ -32,7 +32,7 @@ class URLForm(forms.ModelForm):
         return self.cleaned_data.get("tags")
 
     def save(self, commit: bool = True) -> URL:  # noqa: FBT001, FBT002
-        url = super().save(commit=commit)
+        url = URL.get_or_create_from_object(self.instance)
         if commit:
             url.location.tags.set(self.cleaned_data["tags"])
         return url
