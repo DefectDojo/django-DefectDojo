@@ -1985,6 +1985,8 @@ class FindingFilterHelper(FilterSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if "test__test_type" in self.form.fields:
+            self.form.fields["test__test_type"].queryset = get_visible_scan_types()
 
     def set_date_fields(self, *args: list, **kwargs: dict):
         date_input_widget = forms.DateInput(attrs={"class": "datepicker", "placeholder": "YYYY-MM-DD"}, format="%Y-%m-%d")
@@ -2119,9 +2121,6 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
             del self.form.fields["test__engagement__product__name_contains"]
             del self.form.fields["test__engagement__product__prod_type__name"]
             del self.form.fields["test__engagement__product__prod_type__name_contains"]
-        else:
-            del self.form.fields["test__name"]
-            del self.form.fields["test__name_contains"]
 
 
 class FindingFilter(FindingFilterHelper, FindingTagFilter):
@@ -2170,9 +2169,6 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         self.set_date_fields(*args, **kwargs)
         # Don't show the product filter on the product finding view
         self.set_related_object_fields(*args, **kwargs)
-
-        if "test__test_type" in self.form.fields:
-            self.form.fields["test__test_type"].queryset = get_visible_scan_types()
 
     def set_related_object_fields(self, *args: list, **kwargs: dict):
         finding_group_query = Finding_Group.objects.all()
