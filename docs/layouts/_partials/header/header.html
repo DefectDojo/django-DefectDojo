@@ -147,9 +147,17 @@
               {{ $resource := resources.GetRemote $url }}
 
               {{ if $resource }}
-              {{ $release := $resource | transform.Unmarshal }}
-
-              {{ $release.name }} |
+                  {{ $release := $resource | transform.Unmarshal | default dict }}
+                  {{ if $release.name }}
+                      {{ $release.name | htmlEscape }} |
+                  {{ else }}
+                      {{ printf "⚠️ Could not parse release name (not valid JSON or missing field)\n" | warnf }}
+                      {{ printf "Media Type: %s\n" $resource.MediaType | warnf }}
+                      {{ $contentPreview := substr $resource.Content 0 500 }}
+                      {{ printf "Content Preview (first 500 chars):\n%s\n" $contentPreview | warnf }}
+                  {{ end }}
+              {{ else }}
+                  {{ printf "❌ Release Notes Fetch failed from: %s\n" $url | warnf }}
               {{ end }}
               <a href="/changelog/pro_changelog/">
                 <button type="button" class="btn btn-link nav-link p-2 d-none d-lg-block" aria-label="Release Notes">
