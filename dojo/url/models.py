@@ -347,6 +347,24 @@ class URL(AbstractLocation):
                 return URL.objects.get(hash=url.hash)
 
     @staticmethod
+    def update_or_create_from_object(url: URL) -> URL:
+        url.clean()
+        with transaction.atomic():
+            return URL.objects.update_or_create(
+                id=url.id,
+                defaults={
+                    "protocol": url.protocol,
+                    "user_info": url.user_info,
+                    "host": url.host,
+                    "port": url.port,
+                    "path": url.path,
+                    "query": url.query,
+                    "fragment": url.fragment,
+                    "host_validation_failure": url.host_validation_failure,
+                },
+            )[0]
+
+    @staticmethod
     def get_or_create_from_values(
         protocol=None,
         user_info=None,

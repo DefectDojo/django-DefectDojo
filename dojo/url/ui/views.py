@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS
 from django.http import HttpRequest, HttpResponseRedirect
@@ -293,15 +293,24 @@ def edit_endpoint(request, location_id):
         # Handle form submission for editing an endpoint
         form = URLForm(request.POST, instance=location.url)
         if form.is_valid():
-            url = form.save()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Endpoint updated successfully.",
-                extra_tags="alert-success",
-            )
+            try:
+                form.save()
+            except ValidationError:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    "That URL already exists.",
+                    extra_tags="alert-danger",
+                )
+            else:
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    "Endpoint updated successfully.",
+                    extra_tags="alert-success",
+                )
             # Redirect to the endpoint view after successful update
-            return HttpResponseRedirect(reverse("view_endpoint", args=(url.id,)))
+            return HttpResponseRedirect(reverse("view_endpoint", args=(location.id,)))
 
     return render(
         request,
