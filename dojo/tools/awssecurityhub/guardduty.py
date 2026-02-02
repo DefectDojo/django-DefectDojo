@@ -1,13 +1,31 @@
 import datetime
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
+
+SEVERITY_MAP = {
+    "INFORMATIONAL": "Info",
+    "LOW": "Low",
+    "MEDIUM": "Medium",
+    "HIGH": "High",
+    "CRITICAL": "Critical",
+}
+
+
+def get_severity(finding):
+    return SEVERITY_MAP.get(
+        finding.get("Severity", {}).get("Label", "INFORMATIONAL"),
+        "Info",
+    )
 
 
 class GuardDuty:
     def get_item(self, finding: dict, test):
         finding_id = finding.get("Id", "")
         title = finding.get("Title", "")
-        severity = finding.get("Severity", {}).get("Label", "INFORMATIONAL").title()
+        severity = get_severity(finding)
         mitigation = ""
         impact = []
         references = []
@@ -39,11 +57,16 @@ class GuardDuty:
         description += f"**Region:** {finding.get('Region', '')}\n"
         description += f"**Generator ID:** {finding.get('GeneratorId', '')}\n"
         title_suffix = ""
-        hosts = []
+        locations = []
         for resource in finding.get("Resources", []):
             component_name = resource.get("Type")
             if component_name in {"AwsEcrContainerImage", "AwsEc2Instance"}:
-                hosts.append(Endpoint(host=f"{component_name}_{resource.get('Id')}".replace(":", "_").replace("/", "_")))
+                host_value = f"{component_name}_{resource.get('Id')}".replace(":", "_").replace("/", "_")
+                if settings.V3_FEATURE_LOCATIONS:
+                    locations.append(URL(host=host_value))
+                else:
+                    # TODO: Delete this after the move to Locations
+                    locations.append(Endpoint(host=host_value))
             if component_name == "AwsEcrContainerImage":
                 details = resource.get("Details", {}).get("AwsEcrContainerImage")
                 arn = resource.get("Id")
@@ -81,8 +104,11 @@ class GuardDuty:
             dynamic_finding=False,
             component_name=component_name,
         )
-        result.unsaved_endpoints = []
-        result.unsaved_endpoints.extend(hosts)
+        if settings.V3_FEATURE_LOCATIONS:
+            result.unsaved_locations = locations
+        else:
+            # TODO: Delete this after the move to Locations
+            result.unsaved_endpoints = locations
         if epss_score is not None:
             result.epss_score = epss_score
         # Add the unsaved vulnerability ids

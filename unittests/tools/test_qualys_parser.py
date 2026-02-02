@@ -39,9 +39,7 @@ class TestQualysParser(DojoTestCase):
         ) as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(301, len(findings))
 
             finding = findings[0]
@@ -49,15 +47,15 @@ class TestQualysParser(DojoTestCase):
                 finding.title, "QID-6 | DNS Host Name",
             )
             self.assertEqual(
-                finding.severity, "Informational",
+                finding.severity, "Info",
             )
             self.assertEqual(
-                finding.unsaved_endpoints[0].host, "demo13.s02.sjc01.qualys.com",
+                self.get_unsaved_locations(finding)[0].host, "demo13.s02.sjc01.qualys.com",
             )
             for finding in findings:
-                if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+                if self.get_unsaved_locations(finding)[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                     finding_cvssv3_score = finding
-                if finding.unsaved_endpoints[0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+                if self.get_unsaved_locations(finding)[0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                     finding_cvssv3_vector = finding
             self.assertEqual(
                 # CVSS_FINAL is defined without a cvssv3 vector
@@ -86,6 +84,7 @@ class TestQualysParser(DojoTestCase):
         ) as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             self.assertEqual(0, len(findings))
 
     @override_settings(USE_FIRST_SEEN=True)
@@ -103,9 +102,7 @@ class TestQualysParser(DojoTestCase):
         ) as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(3, len(findings))
 
             finding = findings[0]
@@ -116,11 +113,11 @@ class TestQualysParser(DojoTestCase):
                 finding.severity, "Critical",
             )
             self.assertEqual(
-                finding.unsaved_endpoints[0].host, "ip-10-98-57-180.eu-west-1.compute.internal",
+                self.get_unsaved_locations(finding)[0].host, "ip-10-98-57-180.eu-west-1.compute.internal",
             )
 
             for finding in findings:
-                if finding.unsaved_endpoints[0].host == "ip-10-98-57-180.eu-west-1.compute.internal" and finding.title == "QID-105971 | EOL/Obsolete Software: Microsoft ASP.NET 1.0 Detected":
+                if self.get_unsaved_locations(finding)[0].host == "ip-10-98-57-180.eu-west-1.compute.internal" and finding.title == "QID-105971 | EOL/Obsolete Software: Microsoft ASP.NET 1.0 Detected":
 
                     self.assertEqual(
                         finding.severity, "Critical",
@@ -140,6 +137,7 @@ class TestQualysParser(DojoTestCase):
         ) as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
 
     def test_parse_file_with_cvss_values_and_scores(self):
@@ -148,8 +146,9 @@ class TestQualysParser(DojoTestCase):
         ) as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             for finding in findings:
-                if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+                if self.get_unsaved_locations(finding)[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                     finding_cvssv3_score = finding
                     self.assertEqual(
                         finding.unsaved_vulnerability_ids,
@@ -163,7 +162,7 @@ class TestQualysParser(DojoTestCase):
                             "CVE-2018-8936",
                         ],
                     )
-                if finding.unsaved_endpoints[0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+                if self.get_unsaved_locations(finding)[0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                     finding_no_cvssv3_at_detection = finding
                     self.assertEqual(
                         finding.unsaved_vulnerability_ids,
@@ -177,7 +176,7 @@ class TestQualysParser(DojoTestCase):
                             "CVE-2018-8936",
                         ],
                     )
-                if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == 'QID-121695 | NTP "monlist"  Feature Denial of Service Vulnerability':
+                if self.get_unsaved_locations(finding)[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == 'QID-121695 | NTP "monlist"  Feature Denial of Service Vulnerability':
                     finding_no_cvssv3 = finding
                     self.assertEqual(
                         finding.unsaved_vulnerability_ids,
@@ -210,11 +209,12 @@ class TestQualysParser(DojoTestCase):
         with (get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml").open(encoding="utf-8") as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             counts = {}
             for finding in findings:
                 counts[finding.severity] = counts.get(finding.severity, 0) + 1
             expected_counts = {
-                "Informational": 177,
+                "Info": 177,
                 "Low": 65,
                 "Medium": 46,
                 "High": 6,
@@ -228,6 +228,7 @@ class TestQualysParser(DojoTestCase):
         with (get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml").open(encoding="utf-8") as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             counts = {}
             for finding in findings:
                 counts[finding.severity] = counts.get(finding.severity, 0) + 1

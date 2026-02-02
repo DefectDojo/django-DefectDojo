@@ -1,8 +1,10 @@
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class HCLAppScanParser:
@@ -26,6 +28,18 @@ class HCLAppScanParser:
             output = " " + xml_input.text
         return output
 
+    SEVERITIES = {
+        "Informational": "Info",
+        "Low": "Low",
+        "Medium": "Medium",
+        "High": "High",
+        "Critical": "Critical",
+    }
+
+    def get_severity(self, severity_output):
+        severity_output = (severity_output or "").strip(" ").capitalize()
+        return self.SEVERITIES.get(severity_output, "Info")
+
     def get_findings(self, file, test):
         findings = []
         tree = ElementTree.parse(file)
@@ -43,7 +57,7 @@ class HCLAppScanParser:
                     match item.tag:
                         case "severity":
                             output = self.xmltreehelper(item)
-                            severity = "Info" if output is None else output.strip(" ").capitalize()
+                            severity = self.get_severity(output)
                         case "cwe":
                             cwe = int(self.xmltreehelper(item))
                         case "remediation":
@@ -111,9 +125,11 @@ class HCLAppScanParser:
                 )
                 findings.append(prepared_finding)
                 try:
-                    prepared_finding.unsaved_endpoints = []
-                    endpoint = Endpoint(host=host, port=port)
-                    prepared_finding.unsaved_endpoints.append(endpoint)
+                    if settings.V3_FEATURE_LOCATIONS:
+                        prepared_finding.unsaved_locations = [URL(host=host, port=port)]
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        prepared_finding.unsaved_endpoints = [Endpoint(host=host, port=port)]
                 except UnboundLocalError:
                     pass
             return findings

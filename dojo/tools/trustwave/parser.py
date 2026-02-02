@@ -2,7 +2,10 @@ import csv
 import hashlib
 import io
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class TrustwaveParser:
@@ -40,11 +43,13 @@ class TrustwaveParser:
             host = row.get("Domain")
             if host is None or not host:
                 host = row.get("IP")
-            finding.unsaved_endpoints = [Endpoint(host=host)]
-            if row.get("Port") is not None and row.get("Port"):
-                finding.unsaved_endpoints[0].port = int(row["Port"])
-            if row.get("Protocol") is not None and row.get("Protocol"):
-                finding.unsaved_endpoints[0].protocol = row["Protocol"]
+            port = int(row.get("Port", "") or "0") or ""
+            protocol = row.get("Protocol", "")
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [URL(host=host, port=port, protocol=protocol)]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint(host=host, port=port, protocol=protocol)]
             finding.title = row["Vulnerability Name"]
             finding.description = row["Description"]
             finding.references = row.get("Evidence")

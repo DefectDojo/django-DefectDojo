@@ -7,7 +7,6 @@ from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
-from dojo.decorators import we_want_async
 from dojo.finding.deduplication import (
     find_candidates_for_deduplication_hash,
     find_candidates_for_deduplication_uid_or_hash,
@@ -16,6 +15,7 @@ from dojo.finding.deduplication import (
 )
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
+from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     Development_Environment,
     Finding,
@@ -260,7 +260,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         """
         Saves findings in memory that were parsed from the scan report into the database.
-        This process involves first saving associated objects such as endpoints, files,
+        This process involves first saving associated objects such as endpoints/locations, files,
         vulnerability IDs, and request response pairs. Once all that has been completed,
         the finding may be appended to a new or existing group based upon user selection
         at import time
@@ -329,8 +329,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 # Set the service supplied at import time
                 if self.service is not None:
                     unsaved_finding.service = self.service
-                # Clean any endpoints that are on the finding
-                self.endpoint_manager.clean_unsaved_endpoints(unsaved_finding.unsaved_endpoints)
+                if settings.V3_FEATURE_LOCATIONS:
+                    # Clean any locations that are on the finding
+                    self.location_manager.clean_unsaved_locations(unsaved_finding.unsaved_locations)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    # Clean any endpoints that are on the finding
+                    self.endpoint_manager.clean_unsaved_endpoints(unsaved_finding.unsaved_endpoints)
                 # Calculate the hash code to be used to identify duplicates
                 unsaved_finding.hash_code = self.calculate_unsaved_finding_hash_code(unsaved_finding)
                 deduplicationLogger.debug(f"unsaved finding's hash_code: {unsaved_finding.hash_code}")
@@ -366,15 +371,27 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         continue
                     # Update endpoints on the existing finding with those on the new finding
                     if finding.dynamic_finding:
-                        logger.debug(
-                            "Re-import found an existing dynamic finding for this new "
-                            "finding. Checking the status of endpoints",
-                        )
-                        self.endpoint_manager.update_endpoint_status(
-                            existing_finding,
-                            unsaved_finding,
-                            self.user,
-                        )
+                        if settings.V3_FEATURE_LOCATIONS:
+                            logger.debug(
+                                "Re-import found an existing dynamic finding for this new "
+                                "finding. Checking the status of locations",
+                            )
+                            self.location_manager.update_location_status(
+                                existing_finding,
+                                unsaved_finding,
+                                self.user,
+                            )
+                        else:
+                            # TODO: Delete this after the move to Locations
+                            logger.debug(
+                                "Re-import found an existing dynamic finding for this new "
+                                "finding. Checking the status of endpoints",
+                            )
+                            self.endpoint_manager.update_endpoint_status(
+                                existing_finding,
+                                unsaved_finding,
+                                self.user,
+                            )
                 else:
                     finding, finding_will_be_grouped = self.process_finding_that_was_not_matched(unsaved_finding)
 
@@ -415,24 +432,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
-                        if we_want_async(async_user=self.user):
-                            finding_helper.post_process_findings_batch_signature(
-                                finding_ids_batch,
-                                dedupe_option=True,
-                                rules_option=True,
-                                product_grading_option=True,
-                                issue_updater_option=True,
-                                push_to_jira=push_to_jira,
-                            )()
-                        else:
-                            finding_helper.post_process_findings_batch(
-                                finding_ids_batch,
-                                dedupe_option=True,
-                                rules_option=True,
-                                product_grading_option=True,
-                                issue_updater_option=True,
-                                push_to_jira=push_to_jira,
-                            )
+                        finding_helper.post_process_findings_batch(
+                            finding_ids_batch,
+                            dedupe_option=True,
+                            rules_option=True,
+                            product_grading_option=True,
+                            issue_updater_option=True,
+                            push_to_jira=push_to_jira,
+                        )
 
         # No chord: tasks are dispatched immediately above per batch
 
@@ -645,7 +652,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # If the finding is risk accepted and inactive in Defectdojo we do not sync the status from the scanner
         # We also need to add the finding to 'unchanged_items' as otherwise it will get mitigated by the reimporter
         # (Risk accepted findings are not set to mitigated by Defectdojo)
-        # We however do not exit the loop as we do want to update the endpoints (in case some endpoints were fixed)
+        # We however do not exit the loop as we do want to update the endpoints/locations (in case some
+        # endpoints/locations were fixed)
         if existing_finding.risk_accepted and not existing_finding.active:
             self.unchanged_items.append(existing_finding)
             return existing_finding, False
@@ -740,17 +748,24 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if existing_finding.get_sla_configuration().restart_sla_on_reactivation:
             # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
             existing_finding.sla_start_date = self.now
-        # don't dedupe before endpoints are added, postprocessing will be done on next save (in calling method)
+        # don't dedupe before endpoints/locations are added, postprocessing will be done on next save (in calling method)
         existing_finding.save_no_options()
 
         note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
         note.save()
-        endpoint_statuses = existing_finding.status_finding.exclude(
-            Q(false_positive=True)
-            | Q(out_of_scope=True)
-            | Q(risk_accepted=True),
-        )
-        self.endpoint_manager.chunk_endpoints_and_reactivate(endpoint_statuses)
+        if settings.V3_FEATURE_LOCATIONS:
+            # Reactivate mitigated locations
+            mitigated_locations = existing_finding.locations.filter(status=FindingLocationStatus.Mitigated)
+            self.location_manager.chunk_locations_and_reactivate(mitigated_locations)
+        else:
+            # TODO: Delete this after the move to Locations
+            # Reactivate mitigated endpoints that are not false positives, out of scope, or risk accepted
+            endpoint_statuses = existing_finding.status_finding.exclude(
+                Q(false_positive=True)
+                | Q(out_of_scope=True)
+                | Q(risk_accepted=True),
+            )
+            self.endpoint_manager.chunk_endpoints_and_reactivate(endpoint_statuses)
         existing_finding.notes.add(note)
         self.reactivated_items.append(existing_finding)
         # The new finding is active while the existing on is mitigated. The existing finding needs to
@@ -846,7 +861,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             unsaved_finding.date = self.scan_date.date()
         unsaved_finding = self.process_cve(unsaved_finding)
         # Hash code is already calculated earlier as it's the primary matching criteria for reimport
-        # Save it. Don't dedupe before endpoints are added.
+        # Save it. Don't dedupe before endpoints/locations are added.
         unsaved_finding.save_no_options()
         finding = unsaved_finding
         # Force parsers to use unsaved_tags (stored in finding_post_processing function below)
@@ -911,9 +926,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         Save all associated objects to the finding after it has been saved
         for the purpose of foreign key restrictions
         """
-        self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding_from_report.unsaved_endpoints)
-        if len(self.endpoints_to_add) > 0:
-            self.endpoint_manager.chunk_endpoints_and_disperse(finding, self.endpoints_to_add)
+        if settings.V3_FEATURE_LOCATIONS:
+            self.location_manager.chunk_locations_and_disperse(finding, finding_from_report.unsaved_locations)
+            if len(self.endpoints_to_add) > 0:
+                self.location_manager.chunk_locations_and_disperse(finding, self.endpoints_to_add)
+        else:
+            # TODO: Delete this after the move to Locations
+            self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding_from_report.unsaved_endpoints)
+            if len(self.endpoints_to_add) > 0:
+                self.endpoint_manager.chunk_endpoints_and_disperse(finding, self.endpoints_to_add)
         # Parsers shouldn't use the tags field, and use unsaved_tags instead.
         # Merge any tags set by parser into unsaved_tags
         tags_from_parser = finding_from_report.tags if isinstance(finding_from_report.tags, list) else []

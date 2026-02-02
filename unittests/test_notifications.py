@@ -38,12 +38,13 @@ from dojo.notifications.helper import (
     create_notification,
     webhook_status_cleanup,
 )
-
-from .dojo_test_case import DojoTestCase
+from dojo.url.models import URL
+from unittests.dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 
 
+@versioned_fixtures
 class TestNotifications(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -202,6 +203,7 @@ class TestNotifications(DojoTestCase):
             self.assertEqual(mock_manager.send_alert_notification.call_count, last_count + 1)
 
 
+@versioned_fixtures
 class TestNotificationTriggers(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -235,7 +237,7 @@ class TestNotificationTriggers(DojoTestCase):
         with self.subTest("product_added"):
             with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
                 prod_type = Product_Type.objects.first()
-                prod, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name")
+                prod, _ = Product.objects.get_or_create(prod_type=prod_type, description="test", name="prod name")
             self.assertEqual(mock.call_count, last_count + 6)
             self.assertEqual(mock.call_args_list[-1].args[0], "product_added")
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], f"/product/{prod.id}")
@@ -289,9 +291,9 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_count, last_count)
 
         prod_type = Product_Type.objects.first()
-        prod1, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name 1")
+        prod1, _ = Product.objects.get_or_create(prod_type=prod_type, description="test", name="prod name 1")
         _ = Engagement.objects.create(product=prod1, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username="admin"))
-        prod2, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name 2")
+        prod2, _ = Product.objects.get_or_create(prod_type=prod_type, description="test", name="prod name 2")
         eng2 = Engagement.objects.create(product=prod2, name="Testing engagement", target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username="admin"))
 
         with self.subTest("engagement_deleted by product"):  # in case of product removal, we are not notifying about removal
@@ -309,12 +311,39 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The engagement "Testing engagement" was deleted by admin')
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], f"/product/{prod2.id}")
 
+    @skip_unless_v3
+    @patch("dojo.notifications.helper.NotificationManager._process_notifications")
+    def test_urls(self, mock):
+
+        prod_type = Product_Type.objects.first()
+        prod1, _ = Product.objects.get_or_create(prod_type=prod_type, description="test", name="prod name 1")
+        URL.get_or_create_from_values(host="host1")
+        Product.objects.get_or_create(prod_type=prod_type, description="test", name="prod name 2")
+        url2 = URL.get_or_create_from_values(host="host2")
+
+        with self.subTest("url_deleted by product"):  # in case of product removal, we are not notifying about removal
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
+                prod1.delete()
+            for call in mock.call_args_list:
+                self.assertNotEqual(call.args[0], "url_deleted")
+
+        last_count = mock.call_count
+        with self.subTest("url_deleted itself"):
+            with set_actor(self.notification_tester), pghistory.context(user=self.notification_tester.id):
+                url2.delete()
+            self.assertEqual(mock.call_count, last_count + 2)
+            self.assertEqual(mock.call_args_list[-1].args[0], "url_deleted")
+            self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The URL "host2" was deleted by admin')
+            self.assertEqual(mock.call_args_list[-1].kwargs["url"], "/endpoint")
+
+    # TODO: Delete this after the move to Locations
+    @skip_unless_v2
     @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     def test_endpoints(self, mock):
         prod_type = Product_Type.objects.first()
-        prod1, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name 1")
+        prod1, _ = Product.objects.get_or_create(prod_type=prod_type, description="test", name="prod name 1")
         Endpoint.objects.get_or_create(product=prod1, host="host1")
-        prod2, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name 2")
+        prod2, _ = Product.objects.get_or_create(prod_type=prod_type, description="test", name="prod name 2")
         endpoint2, _ = Endpoint.objects.get_or_create(product=prod2, host="host2")
 
         with self.subTest("endpoint_deleted by product"):  # in case of product removal, we are not notifying about removal
@@ -335,7 +364,7 @@ class TestNotificationTriggers(DojoTestCase):
     @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     def test_tests(self, mock):
         prod_type = Product_Type.objects.first()
-        prod, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name")
+        prod, _ = Product.objects.get_or_create(prod_type=prod_type, description="test", name="prod name")
         eng1 = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username="admin"))
         Test.objects.create(engagement=eng1, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
         eng2 = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username="admin"))
@@ -359,7 +388,7 @@ class TestNotificationTriggers(DojoTestCase):
     @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     def test_finding_groups(self, mock):
         prod_type = Product_Type.objects.first()
-        prod, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name")
+        prod, _ = Product.objects.get_or_create(prod_type=prod_type, description="test", name="prod name")
         eng, _ = Engagement.objects.get_or_create(product=prod, target_start=timezone.now(), target_end=timezone.now(), lead=User.objects.get(username="admin"))
         test1, _ = Test.objects.get_or_create(engagement=eng, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
         Finding_Group.objects.get_or_create(test=test1, creator=User.objects.get(username="admin"))
@@ -398,6 +427,7 @@ class TestNotificationTriggers(DojoTestCase):
         self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The product type "notif prod type" was deleted')
 
 
+@versioned_fixtures
 class TestNotificationTriggersApi(APITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -522,6 +552,7 @@ class TestNotificationTriggersApi(APITestCase):
         self.assertEqual(call_args[1]["finding"], created_finding)
 
 
+@versioned_fixtures
 class TestNotificationWebhooks(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -837,7 +868,7 @@ class TestNotificationWebhooks(DojoTestCase):
             })
 
         with self.subTest("product_added"):
-            prod = Product.objects.create(name="notif prod", prod_type=prod_type)
+            prod = Product.objects.create(name="notif prod", description="test", prod_type=prod_type)
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "product_added")
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {

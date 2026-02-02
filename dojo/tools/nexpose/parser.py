@@ -7,6 +7,7 @@ from django.conf import settings
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class NexposeParser:
@@ -286,8 +287,13 @@ class NexposeParser:
 
                 find = self.findings(dupe_key, dupes, vuln)
 
-                endpoint = Endpoint(host=host["name"])
-                find.unsaved_endpoints.append(endpoint)
+                if settings.V3_FEATURE_LOCATIONS:
+                    location = URL(host=host["name"])
+                    find.unsaved_locations.append(location)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    endpoint = Endpoint(host=host["name"])
+                    find.unsaved_endpoints.append(endpoint)
                 find.unsaved_tags = vuln.get("tags", [])
 
             # manage findings by service
@@ -297,19 +303,35 @@ class NexposeParser:
 
                     find = self.findings(dupe_key, dupes, vuln)
 
-                    endpoint = Endpoint(
-                        host=host["name"],
-                        port=service["port"],
-                        protocol=service["name"]
-                        if service["name"] in SCHEME_PORT_MAP
-                        else service["protocol"],
-                        fragment=service["protocol"].lower()
-                        if service["name"] == "dns"
-                        else None,
-                        # A little dirty hack but in case of DNS it is
-                        # important to know if vulnerability is on TCP or UDP
-                    )
-                    find.unsaved_endpoints.append(endpoint)
+                    if settings.V3_FEATURE_LOCATIONS:
+                        location = URL(
+                            host=host["name"],
+                            port=service["port"],
+                            protocol=service["name"]
+                            if service["name"] in SCHEME_PORT_MAP
+                            else service["protocol"],
+                            fragment=service["protocol"].lower()
+                            if service["name"] == "dns"
+                            else None,
+                            # A little dirty hack but in case of DNS it is
+                            # important to know if vulnerability is on TCP or UDP
+                        )
+                        find.unsaved_locations.append(location)
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        endpoint = Endpoint(
+                            host=host["name"],
+                            port=service["port"],
+                            protocol=service["name"]
+                            if service["name"] in SCHEME_PORT_MAP
+                            else service["protocol"],
+                            fragment=service["protocol"].lower()
+                            if service["name"] == "dns"
+                            else None,
+                            # A little dirty hack but in case of DNS it is
+                            # important to know if vulnerability is on TCP or UDP
+                        )
+                        find.unsaved_endpoints.append(endpoint)
                     find.unsaved_tags = vuln.get("tags", [])
 
         return list(dupes.values())
@@ -363,6 +385,5 @@ class NexposeParser:
             # update CVE
             if "CVE" in vuln.get("refs", {}):
                 find.unsaved_vulnerability_ids = [vuln["refs"]["CVE"]]
-            find.unsaved_endpoints = []
             dupes[dupe_key] = find
         return find

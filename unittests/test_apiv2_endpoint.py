@@ -1,8 +1,12 @@
+
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
+from unittests.dojo_test_case import skip_unless_v2
 
+
+@skip_unless_v2
 class EndpointTest(APITestCase):
 
     """Test the Endpoint APIv2 endpoint."""

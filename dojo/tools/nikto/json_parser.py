@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class NiktoJSONParser:
@@ -36,19 +39,32 @@ class NiktoJSONParser:
                 )
                 finding.description += "\n*This finding is marked as medium as there is a link to OSVDB*"
                 finding.severity = "Medium"
-            # build the endpoint
-            endpoint = Endpoint(
-                host=host,
-                port=port,
-                path=vulnerability.get("url"),
-            )
-            finding.unsaved_endpoints = [endpoint]
+            # build the endpoint/location
+            if settings.V3_FEATURE_LOCATIONS:
+                location = URL(
+                    host=host,
+                    port=port,
+                    path=vulnerability.get("url"),
+                )
+                finding.unsaved_locations = [location]
+            else:
+                # TODO: Delete this after the move to Locations
+                endpoint = Endpoint(
+                    host=host,
+                    port=port,
+                    path=vulnerability.get("url"),
+                )
+                finding.unsaved_endpoints = [endpoint]
             # internal de-duplication
             dupe_key = finding.severity + finding.title
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 find.description += "\n-----\n" + finding.description
-                find.unsaved_endpoints.append(endpoint)
+                if settings.V3_FEATURE_LOCATIONS:
+                    find.unsaved_locations.append(location)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    find.unsaved_endpoints.append(endpoint)
                 find.unique_id_from_tool = (
                     None  # as it is an aggregated finding we erase ids
                 )

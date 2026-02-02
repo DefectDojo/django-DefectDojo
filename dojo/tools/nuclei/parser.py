@@ -4,8 +4,10 @@ import logging
 
 from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +59,6 @@ class NucleiParser:
             if item_type is None:
                 item_type = ""
             matched = item.get("matched", item.get("matched-at", ""))
-            endpoint = Endpoint.from_uri(matched) if "://" in matched else Endpoint.from_uri("//" + matched)
 
             finding = Finding(
                 title=f"{name}",
@@ -83,7 +84,14 @@ class NucleiParser:
                 else:
                     finding.references = info.get("reference")
 
-            finding.unsaved_endpoints.append(endpoint)
+            if matched:
+                if settings.V3_FEATURE_LOCATIONS:
+                    location = URL.from_value(matched) if "://" in matched else URL.from_value("//" + matched)
+                    finding.unsaved_locations = [location]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    location = Endpoint.from_uri(matched) if "://" in matched else Endpoint.from_uri("//" + matched)
+                    finding.unsaved_endpoints = [location]
 
             classification = info.get("classification")
             if classification:
@@ -142,7 +150,7 @@ class NucleiParser:
             )
 
             dupe_key = hashlib.sha256(
-                (template_id + item_type + matcher + str(endpoint.host)).encode(
+                (template_id + item_type + matcher + str(location.host)).encode(
                     "utf-8",
                 ),
             ).hexdigest()
@@ -150,9 +158,14 @@ class NucleiParser:
             if dupe_key in dupes:
                 logger.debug("dupe_key %s exists.", dupe_key)
                 finding = dupes[dupe_key]
-                if endpoint not in finding.unsaved_endpoints:
-                    finding.unsaved_endpoints.append(endpoint)
-                    logger.debug("Appended endpoint %s", endpoint)
+                if settings.V3_FEATURE_LOCATIONS:
+                    if location not in finding.unsaved_locations:
+                        finding.unsaved_locations.append(location)
+                        logger.debug("Appended location %s", location)
+                # TODO: Delete this after the move to Locations
+                elif location not in finding.unsaved_endpoints:
+                    finding.unsaved_endpoints.append(location)
+                    logger.debug("Appended endpoint %s", location)
                 finding.nb_occurences += 1
             else:
                 dupes[dupe_key] = finding

@@ -1,7 +1,10 @@
 import json
 from datetime import datetime
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class CycognitoParser:
@@ -164,7 +167,11 @@ class CycognitoParser:
                 finding.unsaved_vulnerability_ids = []
                 for cve_id in cve_ids:
                     finding.unsaved_vulnerability_ids.append(cve_id)
-            finding.unsaved_endpoints = []
-            finding.unsaved_endpoints.append(Endpoint(host=affected_asset.replace("ip/", "").replace("webapp/", "").replace("cert/", "").replace("domain/", "")))
+            if host := affected_asset.replace("ip/", "").replace("webapp/", "").replace("cert/", "").replace("domain/", ""):
+                if settings.V3_FEATURE_LOCATIONS:
+                    finding.unsaved_locations.append(URL(host=host))
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints.append(Endpoint(host=host))
             findings.append(finding)
         return findings

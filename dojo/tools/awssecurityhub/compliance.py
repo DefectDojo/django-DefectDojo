@@ -2,12 +2,27 @@ import datetime
 
 from dojo.models import Finding
 
+SEVERITY_MAP = {
+    "INFORMATIONAL": "Info",
+    "LOW": "Low",
+    "MEDIUM": "Medium",
+    "HIGH": "High",
+    "CRITICAL": "Critical",
+}
+
+
+def get_severity(finding):
+    return SEVERITY_MAP.get(
+        finding.get("Severity", {}).get("Label", "INFORMATIONAL"),
+        "Info",
+    )
+
 
 class Compliance:
     def get_item(self, finding: dict, test):
         finding_id = finding.get("Id", "")
         title = finding.get("Title", "")
-        severity = finding.get("Severity", {}).get("Label", "INFORMATIONAL").title()
+        severity = get_severity(finding)
         resource_arns = [arn for resource in finding.get("Resources", [])
                                 if (arn := resource.get("Id"))]
         mitigation = ""

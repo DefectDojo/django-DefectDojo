@@ -1,3 +1,4 @@
+
 from dojo.models import Test
 from dojo.tools.gitlab_dast.parser import GitlabDastParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -15,12 +16,9 @@ class TestGitlabDastParser(DojoTestCase):
             parser = GitlabDastParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+            self.validate_locations(findings)
+
             finding = findings[0]
-
-            # endpoint validation
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
-
             self.assertEqual(
                 "5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool,
             )
@@ -43,12 +41,9 @@ class TestGitlabDastParser(DojoTestCase):
             parser = GitlabDastParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+            self.validate_locations(findings)
+
             finding = findings[0]
-
-            # endpoint validation
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
-
             self.assertEqual(
                 "5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool,
             )
@@ -70,13 +65,8 @@ class TestGitlabDastParser(DojoTestCase):
         with (get_unit_tests_scans_path("gitlab_dast") / "gitlab_dast_many_vul_v14.json").open(encoding="utf-8") as testfile:
             parser = GitlabDastParser()
             findings = parser.get_findings(testfile, Test())
-
             self.assertEqual(10, len(findings))
-
-            # endpoint validation
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             # the first one is done above
             finding = findings[1]
@@ -97,24 +87,19 @@ class TestGitlabDastParser(DojoTestCase):
             self.assertEqual(16, finding.cwe)
             self.assertIn("http://www.w3.org/TR/CSP/", finding.references)
             self.assertEqual("Medium", finding.severity)
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual(str(endpoint), "http://api-server/v1/tree/10")
-            self.assertEqual(endpoint.host, "api-server")  # host port path
-            self.assertEqual(endpoint.port, 80)
-            self.assertEqual(endpoint.path, "v1/tree/10")
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual(str(location), "http://api-server/v1/tree/10")
+            self.assertEqual(location.host, "api-server")  # host port path
+            self.assertEqual(location.port, 80)
+            self.assertEqual(location.path, "v1/tree/10")
             self.assertIn("Ensure that your web server,", finding.mitigation)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings_v15(self):
         with (get_unit_tests_scans_path("gitlab_dast") / "gitlab_dast_many_vul_v15.json").open(encoding="utf-8") as testfile:
             parser = GitlabDastParser()
             findings = parser.get_findings(testfile, Test())
-
             self.assertEqual(10, len(findings))
-
-            # endpoint validation
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             # the first one is done above
             finding = findings[1]
@@ -135,11 +120,11 @@ class TestGitlabDastParser(DojoTestCase):
             self.assertEqual(16, finding.cwe)
             self.assertIn("http://www.w3.org/TR/CSP/", finding.references)
             self.assertEqual("Medium", finding.severity)
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual(str(endpoint), "http://api-server/v1/tree/10")
-            self.assertEqual(endpoint.host, "api-server")  # host port path
-            self.assertEqual(endpoint.port, 80)
-            self.assertEqual(endpoint.path, "v1/tree/10")
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual(str(location), "http://api-server/v1/tree/10")
+            self.assertEqual(location.host, "api-server")  # host port path
+            self.assertEqual(location.port, 80)
+            self.assertEqual(location.path, "v1/tree/10")
             self.assertIn("Ensure that your web server,", finding.mitigation)
 
     def test_parse_file_issue_12050(self):
@@ -147,6 +132,7 @@ class TestGitlabDastParser(DojoTestCase):
             parser = GitlabDastParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+            self.validate_locations(findings)
             # check req/resp
             finding = findings[0]
             self.assertEqual(1, len(finding.unsaved_req_resp))

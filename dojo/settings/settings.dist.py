@@ -89,7 +89,6 @@ env = environ.FileAwareEnv(
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
-    DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
@@ -359,6 +358,8 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+    # Dictates if v3 functionality will be enabled
+    DD_V3_FEATURE_LOCATIONS=(bool, False),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
 )
@@ -853,6 +854,10 @@ TEAM_NAME = env("DD_TEAM_NAME")
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
 
+# V3 Feature Flags
+V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
+
+
 # ------------------------------------------------------------------------------
 # ADMIN
 # ------------------------------------------------------------------------------
@@ -1242,7 +1247,6 @@ CELERY_RESULT_EXPIRES = env("DD_CELERY_RESULT_EXPIRES")
 CELERY_BEAT_SCHEDULE_FILENAME = env("DD_CELERY_BEAT_SCHEDULE_FILENAME")
 CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
-CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
 CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
@@ -1560,7 +1564,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
 }
 
 # List of fields that are known to be usable in hash_code computation)
-# 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
+# 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners). If `V3_FEATURE_LOCATIONS` is True, Dojo uses locations (URLs) instead.
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
 HASHCODE_ALLOWED_FIELDS = ["title", "cwe", "vulnerability_ids", "line", "file_path", "payload", "component_name", "component_version", "description", "endpoints", "unique_id_from_tool", "severity", "vuln_id_from_tool", "mitigation"]
 
@@ -2111,6 +2115,14 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
     )
 
     MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE]
+
+# Linear migrations for development
+# Helps avoid merge migration conflicts by tracking the latest migration
+if DEBUG:
+    INSTALLED_APPS = (
+        "django_linear_migrations",  # Must be before dojo to override makemigrations
+        *INSTALLED_APPS,
+    )
 
     def show_toolbar(request):
         return True

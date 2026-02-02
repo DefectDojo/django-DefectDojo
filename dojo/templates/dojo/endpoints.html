@@ -12,7 +12,7 @@
                         {{ name }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Add" %}
+                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Location_Add" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true" aria-label="Endpoint actions">
                                 <span class="fa-solid fa-screwdriver-wrench"></span>
@@ -46,12 +46,12 @@
                         <form action="{% url 'endpoints_bulk_all' %}" method="post" id="bulk_change_form">
                     {% endif %}
                         {% csrf_token %}
-                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
+                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Location_Edit" %}
 						<button class="btn btn-sm btn-primary" type="submit" id="remedy_endpoint" title="Mitigate Endpoints">
                 Bulk Mitigate
             </button>
                         {% endif %}
-                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Delete" %}
+                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Location_Delete" %}
 						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Endpoint" aria-label="Delete endpoint">
 								<a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
 								<i class="fa-solid fa-trash"></i>
@@ -69,7 +69,7 @@
                     <table id="endpoints"
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
-                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
+                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Location_Edit" %}
                             <th class="centered" title="Select all visible endpoints." aria-label="Select all visible endpoints." id="bulk_edit" scope="col">
                                 <form class="inline-form centered" action="#">
                                     <input aria-label="Select all visible endpoints checkbox" type="checkbox" title="Select All" name="select_all" id="select_all"></input>
@@ -93,7 +93,7 @@
 
                         {% for e in endpoints %}
                             <tr>
-                                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
+                                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Location_Edit" %}
                                 <td class="centered">
                                     <form action="#">
                                         <input type="checkbox" title= "Select_{{ e.id }}" name="select_{{ e.id }}"

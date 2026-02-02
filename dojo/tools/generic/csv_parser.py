@@ -4,8 +4,10 @@ import io
 
 from cvss import parser as cvss_parser
 from dateutil.parser import parse
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class GenericCSVParser:
@@ -102,12 +104,18 @@ class GenericCSVParser:
                 finding.fix_available = bool(row["fix_available"])
 
             # manage endpoints
-            if "Url" in row:
-                finding.unsaved_endpoints = [
-                    Endpoint.from_uri(row["Url"])
-                    if "://" in row["Url"]
-                    else Endpoint.from_uri("//" + row["Url"]),
-                ]
+            if row.get("Url"):
+                if settings.V3_FEATURE_LOCATIONS:
+                    finding.unsaved_locations = [
+                        URL.from_value(row["Url"]) if "://" in row["Url"] else URL.from_value("//" + row["Url"]),
+                    ]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints = [
+                        Endpoint.from_uri(row["Url"])
+                        if "://" in row["Url"]
+                        else Endpoint.from_uri("//" + row["Url"]),
+                    ]
 
             # manage internal de-duplication
             key = hashlib.sha256(
@@ -115,7 +123,11 @@ class GenericCSVParser:
             ).hexdigest()
             if key in dupes:
                 find = dupes[key]
-                find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                if settings.V3_FEATURE_LOCATIONS:
+                    find.unsaved_locations.extend(finding.unsaved_locations)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                 if find.unsaved_vulnerability_ids:
                     find.unsaved_vulnerability_ids.extend(
                         finding.unsaved_vulnerability_ids,

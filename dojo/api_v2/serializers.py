@@ -39,6 +39,7 @@ from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
     DEFAULT_NOTIFICATION,
     IMPORT_ACTIONS,
@@ -411,7 +412,13 @@ class MetaSerializer(serializers.ModelSerializer):
         allow_null=True,
     )
     endpoint = serializers.PrimaryKeyRelatedField(
-        queryset=Endpoint.objects.all(),
+        queryset=Location.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+    )
+    location = serializers.PrimaryKeyRelatedField(
+        queryset=Location.objects.all(),
         required=False,
         default=None,
         allow_null=True,
@@ -424,8 +431,21 @@ class MetaSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
+        if settings.V3_FEATURE_LOCATIONS and "endpoint" in data:
+            data["location"] = data.pop("endpoint")
         DojoMeta(**data).clean()
         return data
+
+    # TODO: Delete this after the move to Locations
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.fields["endpoint"] = serializers.PrimaryKeyRelatedField(
+                queryset=Endpoint.objects.all(),
+                required=False,
+                default=None,
+                allow_null=True,
+            )
 
     class Meta:
         model = DojoMeta
@@ -1734,6 +1754,12 @@ class FindingSerializer(serializers.ModelSerializer):
     reporter = serializers.PrimaryKeyRelatedField(
         required=False, queryset=User.objects.all(),
     )
+    endpoints = serializers.PrimaryKeyRelatedField(
+        source="locations",
+        many=True,
+        required=False,
+        queryset=LocationFindingReference.objects.all(),
+    )
 
     class Meta:
         model = Finding
@@ -1741,6 +1767,14 @@ class FindingSerializer(serializers.ModelSerializer):
             "cve",
             "inherited_tags",
         )
+
+    # TODO: Delete this after the move to Locations
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.fields["endpoints"] = serializers.PrimaryKeyRelatedField(
+                many=True, required=False, queryset=Endpoint.objects.all(),
+            )
 
     @extend_schema_field(serializers.DateTimeField())
     def get_jira_creation(self, obj):
@@ -1809,9 +1843,20 @@ class FindingSerializer(serializers.ModelSerializer):
         # In the event the user does not supply the found_by field at all, we do not modify it
         elif isinstance(found_by, list) and len(found_by) == 0:
             instance.found_by.clear()
+
+        locations = None
+        if settings.V3_FEATURE_LOCATIONS:
+            locations = validated_data.pop("locations", None)
+
         instance = super().update(
             instance, validated_data,
         )
+
+        if settings.V3_FEATURE_LOCATIONS and locations is not None:
+            for location_ref in instance.locations.all():
+                location_ref.location.disassociate_from_finding(instance)
+            for location_ref in locations:
+                location_ref.location.associate_with_finding(instance)
 
         if push_to_jira:
             jira_helper.push_to_jira(instance)
@@ -2209,13 +2254,11 @@ class CommonImportScanSerializer(serializers.Serializer):
     verified = serializers.BooleanField(
         help_text="Force findings to be verified/not verified or default to the original tool (None)", required=False,
     )
-
-    # TODO: why do we allow only existing endpoints?
     endpoint_to_add = serializers.PrimaryKeyRelatedField(
-        queryset=Endpoint.objects.all(),
+        queryset=Location.objects.all(),
         required=False,
         default=None,
-        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
+        help_text="Enter the ID of a Location that is associated with the target Product. New Findings will be added to that Location.",
     )
     file = serializers.FileField(
         allow_empty_file=True,
@@ -2299,9 +2342,21 @@ class CommonImportScanSerializer(serializers.Serializer):
         required=False,
     )
     apply_tags_to_endpoints = serializers.BooleanField(
-        help_text="If set to True, the tags will be applied to the endpoints",
+        help_text="If set to True, the tags will be applied to the locations",
         required=False,
     )
+
+    # TODO: Delete this after the move to Locations
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not settings.V3_FEATURE_LOCATIONS:
+            # TODO: why do we allow only existing endpoints?
+            self.fields["endpoint_to_add"] = serializers.PrimaryKeyRelatedField(
+                queryset=Endpoint.objects.all(),
+                required=False,
+                default=None,
+                help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
+            )
 
     def get_importer(
         self,
@@ -2404,11 +2459,16 @@ class CommonImportScanSerializer(serializers.Serializer):
             context["verified"] = data.get("verified")
         else:
             context["verified"] = None
-        # Change the way that endpoints are sent to the importer
         if endpoints_to_add := data.get("endpoint_to_add"):
-            context["endpoints_to_add"] = [endpoints_to_add]
+            if settings.V3_FEATURE_LOCATIONS:
+                # Note: The serializer resolves Location references, but we must pass along to the importer
+                # AbstractLocation objects, hence the .url access.
+                context["endpoints_to_add"] = [endpoints_to_add.url]
+            else:
+                # TODO: Delete this after the move to Locations
+                context["endpoints_to_add"] = [endpoints_to_add]
         else:
-            context["endpoint_to_add"] = None
+            context["endpoints_to_add"] = None
         # Convert the tags to a list if needed. At this point, the
         # TaggitListSerializer has already removed commas supplied
         # by the user, so this operation will consistently return
@@ -2703,16 +2763,27 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
-
         try:
-            endpoint_meta_import(
-                file,
-                product,
-                create_endpoints,
-                create_tags,
-                create_dojo_meta,
-                origin="API",
-            )
+            if settings.V3_FEATURE_LOCATIONS:
+                endpoint_meta_import(
+                    file,
+                    product,
+                    create_endpoints,
+                    create_tags,
+                    create_dojo_meta,
+                    origin="API",
+                    object_class=Location,
+                )
+            else:
+                # TODO: Delete this after the move to Locations
+                endpoint_meta_import(
+                    file,
+                    product,
+                    create_endpoints,
+                    create_tags,
+                    create_dojo_meta,
+                    origin="API",
+                )
         except SyntaxError as se:
             raise Exception(se)
         except ValueError as ve:

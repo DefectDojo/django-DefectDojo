@@ -28,21 +28,19 @@ class TestGenericParser(DojoTestCase):
         with (get_unit_tests_scans_path("generic") / "generic_report1.csv").open(encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, self.test)
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
-            self.assertEqual(5, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual("vulnerable.endpoint.com", endpoint.host)
-            self.assertEqual(443, endpoint.port)
-            self.assertEqual("resource1/asdf", endpoint.path)
-            endpoint = finding.unsaved_endpoints[1]
-            self.assertEqual("vulnerable.endpoint.com", endpoint.host)
-            self.assertEqual(443, endpoint.port)
-            self.assertEqual("resource2/qwerty", endpoint.path)
-            self.assertEqual("https", endpoint.protocol)
+            self.assertEqual(5, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("vulnerable.endpoint.com", location.host)
+            self.assertEqual(443, location.port)
+            self.assertEqual("resource1/asdf", location.path)
+            location = self.get_unsaved_locations(finding)[1]
+            self.assertEqual("vulnerable.endpoint.com", location.host)
+            self.assertEqual(443, location.port)
+            self.assertEqual("resource2/qwerty", location.path)
+            self.assertEqual("https", location.protocol)
 
     def test_parse_no_csv_content_no_findings(self):
         findings = ""
@@ -70,6 +68,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
         self.assertEqual(1, len(findings))
+        self.validate_locations(findings)
 
     def test_parse_csv_with_multiple_vulnerabilities_results_in_multiple_findings(
             self):
@@ -87,6 +86,7 @@ Code Line: strSQL=""SELECT * FROM users WHERE user_id="" + request_user_id",None
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
         self.assertEqual(2, len(findings))
+        self.validate_locations(findings)
 
     def test_parse_csv_with_duplicates_results_in_single_findings(self):
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
@@ -103,6 +103,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
         self.assertEqual(1, len(findings))
+        self.validate_locations(findings)
 
     def test_parsed_finding_has_date(self):
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
@@ -115,6 +116,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
         self.assertEqual(datetime.date(2015, 11, 7), findings[0].date)
+        self.validate_locations(findings)
 
     def test_parsed_finding_has_title(self):
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
@@ -126,6 +128,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
+        self.validate_locations(findings)
         self.assertEqual("Potential XSS Vulnerability",
                          findings[0].title)
 
@@ -139,6 +142,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE,CVE-2021-26919
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
+        self.validate_locations(findings)
         self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
         self.assertEqual("CVE-2021-26919", findings[0].unsaved_vulnerability_ids[0])
 
@@ -152,6 +156,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
+        self.validate_locations(findings)
         self.assertEqual(79, findings[0].cwe)
 
     def test_parsed_finding_has_url(self):
@@ -167,18 +172,17 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         findings = parser.get_findings(file, self.test)
         for finding in findings:
             finding.clean()
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(1, len(findings))
         finding = findings[0]
-        self.assertEqual(1, len(finding.unsaved_endpoints))
-        endpoint = finding.unsaved_endpoints[0]
-        self.assertEqual("localhost", endpoint.host)
-        self.assertEqual(80, endpoint.port)
-        self.assertEqual("http", endpoint.protocol)
-        self.assertEqual("default.aspx", endpoint.path)
-        self.assertIsNone(endpoint.query)
-        self.assertIsNone(endpoint.fragment)
+        self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+        location = self.get_unsaved_locations(finding)[0]
+        self.assertEqual("localhost", location.host)
+        self.assertEqual(80, location.port)
+        self.assertEqual("http", location.protocol)
+        self.assertEqual("default.aspx", location.path)
+        self.assertFalse(location.query)
+        self.assertFalse(location.fragment)
         self.assertEqual(True, finding.active)
         self.assertEqual(False, finding.verified)
 
@@ -192,9 +196,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual("High", findings[0].severity)
 
     def test_parsed_finding_with_invalid_severity_has_info_severity(self):
@@ -207,9 +209,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual("Info", findings[0].severity)
 
     def test_parsed_finding_has_description(self):
@@ -222,9 +222,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(
             "FileName: default.aspx.cs\nDescription: Potential XSS Vulnerability\nLine:18\nCode Line: Response.Write(output);",
             findings[0].description)
@@ -239,9 +237,7 @@ Code Line: Response.Write(output);","None Currently Available",,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual("None Currently Available",
                          findings[0].mitigation)
 
@@ -255,9 +251,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual("Impact is currently unknown",
                          findings[0].impact)
 
@@ -271,9 +265,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual("Finding has references.", findings[0].references)
 
     def test_parsed_finding_has_positive_active_status(self):
@@ -286,9 +278,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(True, findings[0].active)
 
     def test_parsed_finding_has_negative_active_status(self):
@@ -301,9 +291,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(False, findings[0].active)
 
     def test_parsed_finding_has_positive_verified_status(self):
@@ -316,9 +304,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(True, findings[0].verified)
 
     def test_parsed_finding_has_negative_verified_status(self):
@@ -331,9 +317,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(False, findings[0].verified)
 
     def test_parsed_finding_has_positive_false_positive_status(self):
@@ -346,9 +330,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(True, findings[0].false_p)
 
     def test_parsed_finding_has_negative_false_positive_status(self):
@@ -361,9 +343,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(False, findings[0].false_p)
 
     def test_parsed_finding_is_duplicate_has_positive_value(self):
@@ -376,9 +356,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(True, findings[0].duplicate)
 
     def test_parsed_finding_is_duplicate_has_negative_value(self):
@@ -391,9 +369,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(False, findings[0].duplicate)
 
     def test_missing_columns_is_fine(self):
@@ -416,14 +392,10 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
 
         parser1 = GenericParser()
         findings1 = parser1.get_findings(file1, self.test)
-        for finding in findings1:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings1)
         parser2 = GenericParser()
         findings2 = parser2.get_findings(file2, self.test)
-        for finding in findings2:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings2)
 
         finding1 = findings1[0]
         finding2 = findings2[0]
@@ -437,9 +409,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         with (get_unit_tests_scans_path("generic") / "generic_report1.json").open(encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(2, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -469,9 +439,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         with (get_unit_tests_scans_path("generic") / "generic_report2.json").open(encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(2, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -492,6 +460,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         with (get_unit_tests_scans_path("generic") / "generic_report3.json").open(encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
+            self.validate_locations(findings)
             self.assertEqual(4, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -503,28 +472,28 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertEqual(261, finding.cwe)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
                 self.assertEqual("Some mitigation", finding.mitigation)
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                endpoint.clean()
-                self.assertEqual("exemple.com", endpoint.host)
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                location.clean()
+                self.assertEqual("exemple.com", location.host)
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEqual("test title with endpoints as strings", finding.title)
                 self.assertIn(finding.severity, Finding.SEVERITIES)
                 self.assertEqual("Some mitigation", finding.mitigation)
-                self.assertEqual(2, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                endpoint.clean()
-                self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("urlfiltering.paloaltonetworks.com", endpoint.host)
-                self.assertEqual(80, endpoint.port)
-                self.assertEqual("test-command-and-control", endpoint.path)
-                endpoint = finding.unsaved_endpoints[1]
-                endpoint.clean()
-                self.assertEqual("https", endpoint.protocol)
-                self.assertEqual("urlfiltering.paloaltonetworks.com", endpoint.host)
-                self.assertEqual(2345, endpoint.port)
-                self.assertEqual("test-pest", endpoint.path)
+                self.assertEqual(2, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                location.clean()
+                self.assertEqual("http", location.protocol)
+                self.assertEqual("urlfiltering.paloaltonetworks.com", location.host)
+                self.assertEqual(80, location.port)
+                self.assertEqual("test-command-and-control", location.path)
+                location = self.get_unsaved_locations(finding)[1]
+                location.clean()
+                self.assertEqual("https", location.protocol)
+                self.assertEqual("urlfiltering.paloaltonetworks.com", location.host)
+                self.assertEqual(2345, location.port)
+                self.assertEqual("test-pest", location.path)
             with self.subTest(i=2):
                 finding = findings[2]
                 self.assertEqual("test title mitigated", finding.title)
@@ -545,28 +514,29 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         with (get_unit_tests_scans_path("generic") / "generic_report4.json").open(encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             finding.clean()
-            self.assertEqual(4, len(finding.unsaved_endpoints))
+            self.assertEqual(4, len(self.get_unsaved_locations(finding)))
 
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("www.example.com", endpoint.host)
+            location = self.get_unsaved_locations(finding)[0]
+            location.clean()
+            self.assertEqual("www.example.com", location.host)
 
-            endpoint = finding.unsaved_endpoints[1]
-            endpoint.clean()
-            self.assertEqual("localhost", endpoint.host)
+            location = self.get_unsaved_locations(finding)[1]
+            location.clean()
+            self.assertEqual("localhost", location.host)
 
-            endpoint = finding.unsaved_endpoints[2]
-            endpoint.clean()
-            self.assertEqual("127.0.0.1", endpoint.host)
-            self.assertEqual(80, endpoint.port)
+            location = self.get_unsaved_locations(finding)[2]
+            location.clean()
+            self.assertEqual("127.0.0.1", location.host)
+            self.assertEqual(80, location.port)
 
-            endpoint = finding.unsaved_endpoints[3]
-            endpoint.clean()
-            self.assertEqual("foo.bar", endpoint.host)
-            self.assertEqual("path", endpoint.path)
+            location = self.get_unsaved_locations(finding)[3]
+            location.clean()
+            self.assertEqual("foo.bar", location.host)
+            self.assertEqual("path", location.path)
 
             self.assertEqual(2, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("GHSA-5mrr-rgp6-x4gr", finding.unsaved_vulnerability_ids[0])
@@ -576,6 +546,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         with (get_unit_tests_scans_path("generic") / "generic_report3.csv").open(encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
+            self.validate_locations(findings)
             self.assertEqual(2, len(findings))
 
             finding = findings[0]
@@ -596,48 +567,50 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         with (get_unit_tests_scans_path("generic") / "generic_report4.csv").open(encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
+            self.validate_locations(findings)
             self.assertEqual(4, len(findings))
 
             finding = findings[0]
             finding.clean()
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("www.example.com", endpoint.host)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            location.clean()
+            self.assertEqual("www.example.com", location.host)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2015-9235", finding.unsaved_vulnerability_ids[0])
 
             finding = findings[1]
             finding.clean()
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("localhost", endpoint.host)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            location.clean()
+            self.assertEqual("localhost", location.host)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("GHSA-5mrr-rgp6-x4gr", finding.unsaved_vulnerability_ids[0])
 
             finding = findings[2]
             finding.clean()
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("127.0.0.1", endpoint.host)
-            self.assertEqual(80, endpoint.port)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            location.clean()
+            self.assertEqual("127.0.0.1", location.host)
+            self.assertEqual(80, location.port)
             self.assertIsNone(finding.unsaved_vulnerability_ids)
 
             finding = findings[3]
             finding.clean()
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("foo.bar", endpoint.host)
-            self.assertEqual("path", endpoint.path)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            location.clean()
+            self.assertEqual("foo.bar", location.host)
+            self.assertEqual("path", location.path)
             self.assertIsNone(finding.unsaved_vulnerability_ids)
 
     def test_parse_json_with_image(self):
         with (get_unit_tests_scans_path("generic") / "test_with_image.json").open(encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
 
             finding = findings[0]
@@ -658,9 +631,6 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertEqual(test.type, "Tool 1")
             self.assertEqual(test.version, None)
             findings = test.findings
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
             self.assertEqual(1, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -695,6 +665,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         with (get_unit_tests_scans_path("generic") / "generic_csv_with_epss.csv").open(encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, self.test)
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual(.00042, finding.epss_score)

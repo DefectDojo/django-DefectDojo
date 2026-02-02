@@ -20,6 +20,7 @@ class TestCycognitoParser(DojoTestCase):
         findings = self.setup(
             (get_unit_tests_scans_path("cycognito") / "one_vuln.json").open(encoding="utf-8"))
         self.assertEqual(1, len(findings))
+        self.validate_locations(findings)
         finding = findings[0]
         self.assertEqual(finding.title, "Diffie-Hellman Ephemeral Key Exchange DoS Vulnerability (SSH, D(HE)ater)")
         self.assertEqual(finding.references, "https://dheatattack.gitlab.io/")
@@ -28,6 +29,7 @@ class TestCycognitoParser(DojoTestCase):
         findings = self.setup(
             (get_unit_tests_scans_path("cycognito") / "many_vuln.json").open(encoding="utf-8"))
         self.assertEqual(3, len(findings))
+        self.validate_locations(findings)
         finding = findings[1]
         self.assertEqual(finding.title, "Diffie-Hellman Ephemeral Key Exchange DoS Vulnerability (SSL/TLS, D(HE)ater)")
         self.assertEqual(finding.date, "2025-05-16")

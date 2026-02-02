@@ -1,11 +1,13 @@
 import inspect
 import sys
 
+from django.conf import settings
 from rest_framework.serializers import ModelSerializer
 
-from dojo.models import FileUpload
-
-from . import utils
+from dojo.api_v2.prefetch import utils
+from dojo.location.api.serializers import LocationFindingReferenceSerializer, LocationSerializer
+from dojo.location.models import Location, LocationFindingReference
+from dojo.models import FileUpload, Finding
 
 # Reduce the scope of search for serializers.
 SERIALIZER_DEFS_MODULE = "dojo.api_v2.serializers"
@@ -64,6 +66,10 @@ class _Prefetcher:
             rest_framework.serializers.ModelSerializer: The serializer if one has been found or None
 
         """
+        # Check overrides first
+        if serializer := self.serializer_overrides(field_type):
+            return serializer
+
         # If the type is represented in the map then return the serializer
         if field_type in self._serializers:
             return self._serializers[field_type]
@@ -74,6 +80,52 @@ class _Prefetcher:
         # in our serializers.
         parent_class = field_type.__mro__[1]
         return self._find_serializer(parent_class)
+
+    def get_field_value_override(self, model_instance, field_name):
+        """
+        Allows us to override the default field value lookup functionality, e.g. for when we are migrating to new models
+        while keeping the old names for API compatibility.
+
+        :param model_instance: the model instance
+        :param field_name: the name of the field we're getting a value for
+        :return: a tuple of (the value of the field, whether the field is 'many'), or None if no override exists
+        """
+        if settings.V3_FEATURE_LOCATIONS:
+            if isinstance(model_instance, Finding) and field_name == "endpoints":
+                return model_instance.locations, True
+        return None
+
+    def get_field_value(self, model_instance, field_name):
+        """
+        Returns the value of the given field from the model instance and whether the serializer used should treat the
+        value as many.
+
+        :param model_instance: the model instance
+        :param field_name: the name of the field we're getting a value for
+        :return: a tuple of (the value of the field, whether the field is 'many')
+        """
+        # Check overrides first
+        if field_data := self.get_field_value_override(model_instance, field_name):
+            return field_data
+
+        # Get the concrete field type
+        field_meta = getattr(type(model_instance), field_name, None)
+        # Check if the field represents a many-to-many relationship as we need to instantiate the serializer accordingly
+        many = utils._is_many_to_many_relation(field_meta)
+        # Get the field from the instance
+        return getattr(model_instance, field_name, None), many
+
+    def serializer_overrides(self, field_type):
+        """
+        Overrides for model serializers, e.g. for serializers not found in SERIALIZER_DEFS_MODULE
+
+        :param field_type: the model field type
+        :return: a serializer for the given model field type, or None if no override exists
+        """
+        return {
+            Location: LocationSerializer,
+            LocationFindingReference: LocationFindingReferenceSerializer,
+        }.get(field_type)
 
     def _prefetch(self, entry, fields_to_fetch):
         """
@@ -86,7 +138,7 @@ class _Prefetcher:
         """
         for field_to_fetch in fields_to_fetch:
             # Get the field from the instance
-            field_value = getattr(entry, field_to_fetch, None)
+            field_value, many = self.get_field_value(entry, field_to_fetch)
             if field_value is None:
                 continue
 
@@ -96,11 +148,6 @@ class _Prefetcher:
             if extra_serializer is None:
                 continue
 
-            # Get the concrete field type
-            field_meta = getattr(type(entry), field_to_fetch, None)
-            # Check if the field represents a many-to-many relationship as we need to instantiate
-            # the serializer accordingly
-            many = utils._is_many_to_many_relation(field_meta)
             field_data = extra_serializer(many=many).to_representation(
                 field_value,
             )

@@ -1,3 +1,4 @@
+
 from dojo.models import Test
 from dojo.tools.auditjs.parser import AuditJSParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -15,9 +16,7 @@ class TestAuditJSParser(DojoTestCase):
         with (get_unit_tests_scans_path("auditjs") / "auditjs_one_vul.json").open(encoding="utf-8") as testfile:
             parser = AuditJSParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             self.assertEqual("mysql", findings[0].component_name)
             self.assertEqual("2.0.0", findings[0].component_version)
@@ -36,9 +35,7 @@ class TestAuditJSParser(DojoTestCase):
             parser = AuditJSParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             # Notice that there are 15 vulnerabilities but 1 duplicate in this report
             self.assertEqual(14, len(findings))
 
@@ -110,6 +107,7 @@ class TestAuditJSParser(DojoTestCase):
         with (get_unit_tests_scans_path("auditjs") / "auditjs_with_package_namespace.json").open(encoding="utf-8") as testfile:
             parser = AuditJSParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
 
             self.assertEqual(1, len(findings))
             self.assertEqual("%40next/env", findings[0].component_name)

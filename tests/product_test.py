@@ -315,15 +315,36 @@ class ProductTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoints").click()
         # 'click' the Add New Endpoint option
         driver.find_element(By.LINK_TEXT, "Add New Endpoint").click()
-        # Keep a good practice of clearing field before entering value
-        # Endpoints
-        driver.find_element(By.ID, "id_endpoint").clear()
-        driver.find_element(By.ID, "id_endpoint").send_keys("strange.prod.dev\n123.45.6.30")
-        # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        # V2 Endpoints
+        if self.is_element_by_id_present("id_endpoint"):
+            # TODO: Delete this after the move to Locations
+            # Keep a good practice of clearing field before entering value
+            # Endpoints
+            driver.find_element(By.ID, "id_endpoint").clear()
+            driver.find_element(By.ID, "id_endpoint").send_keys("strange.prod.dev\n123.45.6.30")
+            # submit
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        # V3 Locations -- the freeform text box is gone, need to add each individually
+        else:
+            # Keep a good practice of clearing field before entering value
+            # Endpoints
+            driver.find_element(By.ID, "id_host").clear()
+            driver.find_element(By.ID, "id_host").send_keys("strange.prod.dev")
+            # submit
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            # Assert ot the query to determine status of failure
+            self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
+            # it was so fun let's do it again!
+            driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoints").click()
+            # 'click' the Add New Endpoint option
+            driver.find_element(By.LINK_TEXT, "Add New Endpoint").click()
+            # Keep a good practice of clearing field before entering value
+            driver.find_element(By.ID, "id_host").clear()
+            driver.find_element(By.ID, "id_host").send_keys("123.45.6.30")
+            # submit
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Query the site to determine if the finding has been added
-
-        # Assert ot the query to dtermine status of failure
+        # Assert ot the query to determine status of failure
         self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
 
     @on_exception_html_source_logger
@@ -341,18 +362,18 @@ class ProductTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Add Custom Fields").click()
         # Keep a good practice of clearing field before entering value
         # Custom Name
-        driver.find_element(By.ID, "id_name").clear()
-        driver.find_element(By.ID, "id_name").send_keys("Security Level")
+        driver.find_element(By.ID, "id_form-0-name").clear()
+        driver.find_element(By.ID, "id_form-0-name").send_keys("Security Level")
         # Custom Value
-        driver.find_element(By.ID, "id_value").clear()
-        driver.find_element(By.ID, "id_value").send_keys("Loose")
+        driver.find_element(By.ID, "id_form-0-value").clear()
+        driver.find_element(By.ID, "id_form-0-value").send_keys("Loose")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        driver.find_element(By.CSS_SELECTOR, "button.btn-success").click()
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
         # Also confirm success even if variable is returned as already exists for test sake
-        self.assertTrue(self.is_success_message_present(text="Metadata added successfully")
+        self.assertTrue(self.is_success_message_present(text="Metadata updated successfully.")
             or self.is_success_message_present(text="A metadata entry with the same name exists already for this object."))
 
     @on_exception_html_source_logger
@@ -373,11 +394,11 @@ class ProductTest(BaseTestCase):
         driver.find_element(By.XPATH, "//input[@value='Loose']").clear()
         driver.find_element(By.XPATH, "//input[@value='Loose']").send_keys("Strong")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        driver.find_element(By.CSS_SELECTOR, "button.btn-success").click()
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine success or failure
-        self.assertTrue(self.is_success_message_present(text="Metadata edited successfully")
+        self.assertTrue(self.is_success_message_present(text="Metadata updated successfully.")
             or self.is_success_message_present(text="A metadata entry with the same name exists already for this object."))
 
     @on_exception_html_source_logger

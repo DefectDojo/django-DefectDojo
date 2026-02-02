@@ -38,6 +38,8 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
 from dojo.labels import get_labels
+from dojo.location.models import Location
+from dojo.location.utils import validate_locations_to_add
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
     SEVERITY_CHOICES,
@@ -521,10 +523,10 @@ class DisableOrEnableNoteTypeForm(NoteTypeForm):
 
 
 class DojoMetaDataForm(forms.ModelForm):
-    value = forms.CharField(widget=forms.Textarea(attrs={}),
-                            required=True)
-
     def full_clean(self):
+        # inject all fk_map values
+        for field, value in self.fk_map.items():
+            setattr(self.instance, field, value)
         super().full_clean()
         try:
             self.instance.validate_unique()
@@ -532,9 +534,21 @@ class DojoMetaDataForm(forms.ModelForm):
             msg = "A metadata entry with the same name exists already for this object."
             self.add_error("name", msg)
 
+    def __init__(self, *args, **kwargs):
+        self.fk_map = kwargs.pop("fk_map", {})
+        super().__init__(*args, **kwargs)
+
     class Meta:
         model = DojoMeta
         fields = "__all__"
+
+
+DojoMetaFormSet = modelformset_factory(
+    DojoMeta,
+    form=DojoMetaDataForm,
+    extra=1,
+    can_delete=True,
+)
 
 
 class ImportScanForm(forms.Form):
@@ -561,11 +575,11 @@ class ImportScanForm(forms.Form):
     scan_type = forms.ChoiceField(required=True, choices=get_choices_sorted)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by("name"))
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label="Systems / Endpoints")
+    endpoints = forms.ModelMultipleChoiceField(Location.objects, required=False, label="Systems / Endpoints")
     endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
-                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
-                                         "Each must be valid.",
-                               widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
+                                       help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                                 "Each must be valid.",
+                                       widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
     version = forms.CharField(max_length=100, required=False, help_text="Version that was scanned.")
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
@@ -627,6 +641,9 @@ class ImportScanForm(forms.Form):
             self.fields["environment"].initial = environment
         if endpoints:
             self.fields["endpoints"].queryset = endpoints
+        elif not settings.V3_FEATURE_LOCATIONS:
+            # TODO: Delete this after the move to Locations
+            self.fields["endpoints"].queryset = Endpoint.objects
         if api_scan_configuration:
             self.fields["api_scan_configuration"].queryset = api_scan_configuration
         # couldn't find a cleaner way to add empty default
@@ -654,7 +671,12 @@ class ImportScanForm(forms.Form):
                 msg = f"API scan configuration must be of tool type {tool_type}"
                 raise forms.ValidationError(msg)
 
-        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints_to_add_list, errors = validate_locations_to_add(cleaned_data["endpoints_to_add"])
+        else:
+            # TODO: Delete this after the move to Locations
+            endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
+
         if errors:
             raise forms.ValidationError(errors)
         self.endpoints_to_add_list = endpoints_to_add_list
@@ -696,7 +718,7 @@ class ReImportScanForm(forms.Form):
 
     help_do_not_reactivate = "Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs."
     do_not_reactivate = forms.BooleanField(help_text=help_do_not_reactivate, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label="Systems / Endpoints")
+    endpoints = forms.ModelMultipleChoiceField(Location.objects, required=False, label="Systems / Endpoints")
     tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(
@@ -745,6 +767,9 @@ class ReImportScanForm(forms.Form):
             self.fields["tags"].initial = test.tags.all()
         if endpoints:
             self.fields["endpoints"].queryset = endpoints
+        elif not settings.V3_FEATURE_LOCATIONS:
+            # TODO: Delete this after the move to Locations
+            self.fields["endpoints"].queryset = Endpoint.objects
         if api_scan_configuration:
             self.initial["api_scan_configuration"] = api_scan_configuration
         if api_scan_configuration_queryset:
@@ -1216,7 +1241,7 @@ class AddFindingForm(forms.ModelForm):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects.none(), required=False, label="Systems / Endpoints")
+    endpoints = forms.ModelMultipleChoiceField(Location.objects.none(), required=False, label="Systems / Endpoints")
     endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
                                help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
                                          "Each must be valid.",
@@ -1245,8 +1270,13 @@ class AddFindingForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        if product:
+        if settings.V3_FEATURE_LOCATIONS and product:
+            self.fields["endpoints"].queryset = Location.objects.filter(products__product=product)
+        # TODO: Delete this after the move to Locations
+        elif product:
             self.fields["endpoints"].queryset = Endpoint.objects.filter(product=product)
+        else:
+            self.fields["endpoints"].queryset = Endpoint.objects.none()
 
         if req_resp:
             self.fields["request"].initial = req_resp[0]
@@ -1269,7 +1299,12 @@ class AddFindingForm(forms.ModelForm):
             msg = "Active findings cannot be risk accepted."
             raise forms.ValidationError(msg)
 
-        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints_to_add_list, errors = validate_locations_to_add(cleaned_data["endpoints_to_add"])
+        else:
+            # TODO: Delete this after the move to Locations
+            endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
+
         if errors:
             raise forms.ValidationError(errors)
         self.endpoints_to_add_list = endpoints_to_add_list
@@ -1313,11 +1348,12 @@ class AdHocFindingForm(forms.ModelForm):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(queryset=Endpoint.objects.none(), required=False, label="Systems / Endpoints")
+    endpoints = forms.ModelMultipleChoiceField(queryset=Location.objects.all(), required=False,
+                                               label="Systems / Endpoints")
     endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
-                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
-                                         "Each must be valid.",
-                               widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
+                                       help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                                 "Each must be valid.",
+                                       widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
     references = forms.CharField(widget=forms.Textarea, required=False)
     publish_date = forms.DateField(widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}), required=False)
     planned_remediation_date = forms.DateField(widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}), required=False)
@@ -1342,8 +1378,13 @@ class AdHocFindingForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        if product:
+        if settings.V3_FEATURE_LOCATIONS and product:
+            self.fields["endpoints"].queryset = Location.objects.filter(products__product=product)
+        # TODO: Delete this after the move to Locations
+        elif product:
             self.fields["endpoints"].queryset = Endpoint.objects.filter(product=product)
+        else:
+            self.fields["endpoints"].queryset = Endpoint.objects.none()
 
         if req_resp:
             self.fields["request"].initial = req_resp[0]
@@ -1363,10 +1404,16 @@ class AdHocFindingForm(forms.ModelForm):
             msg = "False positive findings cannot be verified."
             raise forms.ValidationError(msg)
 
-        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints_to_add_list, errors = validate_locations_to_add(cleaned_data["endpoints_to_add"])
+        else:
+            # TODO: Delete this after the move to Locations
+            endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
+
+        self.endpoints_to_add_list = endpoints_to_add_list
+
         if errors:
             raise forms.ValidationError(errors)
-        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -1406,7 +1453,7 @@ class PromoteFindingForm(forms.ModelForm):
             "invalid_choice": "Select valid choice: Critical,High,Medium,Low"})
     mitigation = forms.CharField(widget=forms.Textarea, required=False)
     impact = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects.none(), required=False, label="Systems / Endpoints")
+    endpoints = forms.ModelMultipleChoiceField(Location.objects.none(), required=False, label="Systems / Endpoints")
     endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
                                help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
                                          "Each must be valid.",
@@ -1426,8 +1473,13 @@ class PromoteFindingForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        if product:
+        if settings.V3_FEATURE_LOCATIONS and product:
+            self.fields["endpoints"].queryset = Location.objects.filter(products__product=product)
+        # TODO: Delete this after the move to Locations
+        elif product:
             self.fields["endpoints"].queryset = Endpoint.objects.filter(product=product)
+        else:
+            self.fields["endpoints"].queryset = Endpoint.objects.none()
 
         self.endpoints_to_add_list = []
 
@@ -1437,7 +1489,12 @@ class PromoteFindingForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints_to_add_list, errors = validate_locations_to_add(cleaned_data["endpoints_to_add"])
+        else:
+            # TODO: Delete this after the move to Locations
+            endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
+
         if errors:
             raise forms.ValidationError(errors)
         self.endpoints_to_add_list = endpoints_to_add_list
@@ -1483,7 +1540,7 @@ class FindingForm(forms.ModelForm):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(queryset=Endpoint.objects.none(), required=False, label="Systems / Endpoints")
+    endpoints = forms.ModelMultipleChoiceField(queryset=Location.objects.none(), required=False, label="Systems / Endpoints")
     endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
                                help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
                                          "Each must be valid.",
@@ -1518,7 +1575,14 @@ class FindingForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        self.fields["endpoints"].queryset = Endpoint.objects.filter(product=self.instance.test.engagement.product)
+        if settings.V3_FEATURE_LOCATIONS:
+            self.fields["endpoints"].queryset = Location.objects.filter(products__product=self.instance.test.engagement.product)
+            if self.instance and self.instance.pk:
+                self.fields["endpoints"].initial = Location.objects.filter(findings__finding=self.instance)
+        else:
+            # TODO: Delete this after the move to Locations
+            self.fields["endpoints"].queryset = Endpoint.objects.filter(product=self.instance.test.engagement.product)
+
         self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
@@ -1576,10 +1640,16 @@ class FindingForm(forms.ModelForm):
             msg = "Active findings cannot be risk accepted."
             raise forms.ValidationError(msg)
 
-        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints_to_add_list, errors = validate_locations_to_add(cleaned_data["endpoints_to_add"])
+        else:
+            # TODO: Delete this after the move to Locations
+            endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
+
+        self.endpoints_to_add_list = endpoints_to_add_list
+
         if errors:
             raise forms.ValidationError(errors)
-        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -1601,7 +1671,8 @@ class FindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
-                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "sonarqube_issue", "endpoint_status")
+                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "sonarqube_issue",
+                   "endpoints", "endpoint_status")
 
 
 class StubFindingForm(forms.ModelForm):
@@ -1946,7 +2017,7 @@ class AddEndpointForm(forms.Form):
             product = kwargs.pop("product")
         super().__init__(*args, **kwargs)
         self.fields["product"] = forms.ModelChoiceField(
-            queryset=get_authorized_products(Permissions.Endpoint_Add),
+            queryset=get_authorized_products(Permissions.Location_Add),
             label=labels.ASSET_LABEL,
             help_text=labels.ASSET_ENDPOINT_HELP)
         if product is not None:

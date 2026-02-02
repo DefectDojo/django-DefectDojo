@@ -1,5 +1,5 @@
 from crum import get_current_user
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Q, Subquery
 
 from dojo.authorization.authorization import (
     get_roles_for_permission,
@@ -10,8 +10,11 @@ from dojo.authorization.authorization import (
 from dojo.authorization.roles_permissions import Permissions
 from dojo.group.queries import get_authorized_groups
 from dojo.models import Global_Role, Product_Type, Product_Type_Group, Product_Type_Member
+from dojo.request_cache import cache_for_request
 
 
+# Cached: all parameters are hashable, no dynamic queryset filtering
+@cache_for_request
 def get_authorized_product_types(permission):
     user = get_current_user()
 
@@ -25,17 +28,21 @@ def get_authorized_product_types(permission):
         return Product_Type.objects.all().order_by("name")
 
     roles = get_roles_for_permission(permission)
-    authorized_roles = Product_Type_Member.objects.filter(product_type=OuterRef("pk"),
-        user=user,
-        role__in=roles)
+
+    # Get authorized product_type IDs via subqueries
+    authorized_roles = Product_Type_Member.objects.filter(
+        user=user, role__in=roles,
+    ).values("product_type_id")
+
     authorized_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("pk"),
-        group__users=user,
-        role__in=roles)
-    product_types = Product_Type.objects.annotate(
-        member=Exists(authorized_roles),
-        authorized_group=Exists(authorized_groups)).order_by("name")
-    return product_types.filter(Q(member=True) | Q(authorized_group=True))
+        group__users=user, role__in=roles,
+    ).values("product_type_id")
+
+    # Filter using IN with Subquery - no annotations needed
+    return Product_Type.objects.filter(
+        Q(pk__in=Subquery(authorized_roles))
+        | Q(pk__in=Subquery(authorized_groups)),
+    ).order_by("name")
 
 
 def get_authorized_members_for_product_type(product_type, permission):

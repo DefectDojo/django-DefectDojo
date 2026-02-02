@@ -61,10 +61,10 @@ class Permissions(IntEnum):
     Finding_Edit = 1406
     Finding_Delete = 1407
 
-    Endpoint_View = 1502
-    Endpoint_Add = 1503
-    Endpoint_Edit = 1506
-    Endpoint_Delete = 1507
+    Location_View = 1502
+    Location_Add = 1503
+    Location_Edit = 1506
+    Location_Delete = 1507
 
     Benchmark_Edit = 1606
     Benchmark_Delete = 1607
@@ -186,11 +186,11 @@ class Permissions(IntEnum):
         }
 
     @classmethod
-    def get_endpoint_permissions(cls):
+    def get_location_permissions(cls):
         return {
-            Permissions.Endpoint_View,
-            Permissions.Endpoint_Edit,
-            Permissions.Endpoint_Delete,
+            Permissions.Location_View,
+            Permissions.Location_Edit,
+            Permissions.Location_Delete,
         }
 
     @classmethod
@@ -287,7 +287,7 @@ def get_roles_with_permissions():
             Permissions.Test_View,
             Permissions.Finding_View,
             Permissions.Finding_Group_View,
-            Permissions.Endpoint_View,
+            Permissions.Location_View,
             Permissions.Component_View,
             Permissions.Note_Add,
             Permissions.Product_Group_View,
@@ -309,7 +309,7 @@ def get_roles_with_permissions():
             Permissions.Test_Edit,
             Permissions.Finding_View,
             Permissions.Finding_Group_View,
-            Permissions.Endpoint_View,
+            Permissions.Location_View,
             Permissions.Component_View,
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
@@ -335,9 +335,9 @@ def get_roles_with_permissions():
             Permissions.Finding_Group_Add,
             Permissions.Finding_Group_Edit,
             Permissions.Finding_Group_Delete,
-            Permissions.Endpoint_View,
-            Permissions.Endpoint_Add,
-            Permissions.Endpoint_Edit,
+            Permissions.Location_View,
+            Permissions.Location_Add,
+            Permissions.Location_Edit,
             Permissions.Benchmark_Edit,
             Permissions.Component_View,
             Permissions.Note_View_History,
@@ -388,10 +388,10 @@ def get_roles_with_permissions():
             Permissions.Finding_Group_Add,
             Permissions.Finding_Group_Edit,
             Permissions.Finding_Group_Delete,
-            Permissions.Endpoint_View,
-            Permissions.Endpoint_Add,
-            Permissions.Endpoint_Edit,
-            Permissions.Endpoint_Delete,
+            Permissions.Location_View,
+            Permissions.Location_Add,
+            Permissions.Location_Edit,
+            Permissions.Location_Delete,
             Permissions.Benchmark_Edit,
             Permissions.Benchmark_Delete,
             Permissions.Component_View,
@@ -465,10 +465,10 @@ def get_roles_with_permissions():
             Permissions.Finding_Group_Add,
             Permissions.Finding_Group_Edit,
             Permissions.Finding_Group_Delete,
-            Permissions.Endpoint_View,
-            Permissions.Endpoint_Add,
-            Permissions.Endpoint_Edit,
-            Permissions.Endpoint_Delete,
+            Permissions.Location_View,
+            Permissions.Location_Add,
+            Permissions.Location_Edit,
+            Permissions.Location_Delete,
             Permissions.Benchmark_Edit,
             Permissions.Benchmark_Delete,
             Permissions.Component_View,

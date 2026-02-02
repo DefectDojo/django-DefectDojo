@@ -2,7 +2,10 @@ import base64
 import json
 import logging
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -75,13 +78,14 @@ class BurpApiParser:
                 # manage confidence
                 if convert_confidence(issue) is not None:
                     finding.scanner_confidence = convert_confidence(issue)
-                # manage endpoints
+                # manage endpoints/locations
                 if "origin" in issue and "path" in issue:
-                    finding.unsaved_endpoints = [
-                        Endpoint.from_uri(
-                            issue.get("origin") + issue.get("path"),
-                        ),
-                    ]
+                    url = issue.get("origin") + issue.get("path")
+                    if settings.V3_FEATURE_LOCATIONS:
+                        finding.unsaved_locations = [URL.from_value(url)]
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        finding.unsaved_endpoints = [Endpoint.from_uri(url)]
                 finding.unsaved_req_resp = []
                 for evidence in issue.get("evidence", []):
                     if evidence.get("type") not in {
