@@ -294,7 +294,7 @@ def edit_endpoint(request, location_id):
         form = URLForm(request.POST, instance=location.url)
         if form.is_valid():
             try:
-                form.save()
+                form.save(update_only=True)
             except ValidationError:
                 messages.add_message(
                     request,

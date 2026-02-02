@@ -31,10 +31,10 @@ class URLForm(forms.ModelForm):
         tag_validator(self.cleaned_data.get("tags"))
         return self.cleaned_data.get("tags")
 
-    def save(self, commit: bool = True) -> URL:  # noqa: FBT001, FBT002
+    def save(self, commit: bool = True, update_only: bool = False) -> URL:  # noqa: FBT001, FBT002
         url = super().save(commit=False)
         if commit:
-            url = URL.update_or_create_from_object(url)
+            url = super().save(commit=True) if update_only else URL.get_or_create_from_object(url)
             url.location.tags.set(self.cleaned_data["tags"])
         return url
 
