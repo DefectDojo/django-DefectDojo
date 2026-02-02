@@ -143,6 +143,14 @@
 
             <!-- Release Notes -->
             <div class="flex-grow-1 d-none d-lg-flex justify-content-center align-items-center">
+              {{ $url := "https://api.github.com/repos/DefectDojo/django-DefectDojo/releases/latest" }}
+              {{ $resource := resources.GetRemote $url }}
+
+              {{ if $resource }}
+              {{ $release := $resource | transform.Unmarshal }}
+
+              {{ $release.name }} |
+              {{ end }}
               <a href="/changelog/pro_changelog/">
                 <button type="button" class="btn btn-link nav-link p-2 d-none d-lg-block" aria-label="Release Notes">
                   <span class="fw-bold">Release Notes</span>
