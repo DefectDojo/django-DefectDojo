@@ -17,9 +17,7 @@ class TestTrustwaveFusionAPIParser(DojoTestCase):
             parser = TrustwaveFusionAPIParser()
             findings = parser.get_findings(testfile, Test())
 
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             # first example
             finding = findings[0]
@@ -38,7 +36,7 @@ class TestTrustwaveFusionAPIParser(DojoTestCase):
                 "Cryptography/Weak Cryptography",
                 finding.description,
             )
-            self.assertEqual(str(finding.unsaved_endpoints[0]), "https://google.com")
+            self.assertEqual(str(self.get_unsaved_locations(finding)[0]), "https://google.com")
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         with (
@@ -49,10 +47,8 @@ class TestTrustwaveFusionAPIParser(DojoTestCase):
 
             self.assertEqual(3, len(findings))  # checking dupes
 
-            # endpoint validation
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            # location validation
+            self.validate_locations(findings)
 
             finding = findings[0]
             self.assertEqual("0123456:id", finding.unique_id_from_tool)
@@ -65,11 +61,11 @@ class TestTrustwaveFusionAPIParser(DojoTestCase):
             self.assertEqual("2021-06-15T07:48:08.727000+0000", date)
             self.assertEqual("Info", finding.severity)
             self.assertIsNone(finding.unsaved_vulnerability_ids)
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual(str(endpoint), "https://google.com")
-            self.assertEqual(endpoint.host, "google.com")
-            self.assertIsNone(endpoint.path)
-            self.assertEqual(endpoint.port, 443)
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual(str(location), "https://google.com")
+            self.assertEqual(location.host, "google.com")
+            self.assertFalse(location.path)
+            self.assertEqual(location.port, 443)
 
             # testing component_name and component_version
             finding = findings[2]

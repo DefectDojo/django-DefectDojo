@@ -2,7 +2,10 @@ import datetime
 import hashlib
 import json
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class WpscanParser:
@@ -149,10 +152,15 @@ class WpscanParser:
                     interesting_finding.get("confidence"),
                 ),
             )
-            # manage endpoint
-            endpoint = Endpoint.from_uri(interesting_finding["url"])
+            if settings.V3_FEATURE_LOCATIONS:
+                location = URL.from_value(interesting_finding["url"])
+                finding.unsaved_locations = [location]
+            else:
+                # TODO: Delete this after the move to Locations
+                # manage endpoint
+                endpoint = Endpoint.from_uri(interesting_finding["url"])
+                finding.unsaved_endpoints = [endpoint]
 
-            finding.unsaved_endpoints = [endpoint]
             # manage date of finding with report date
             if report_date:
                 finding.date = report_date

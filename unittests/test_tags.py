@@ -2,18 +2,19 @@ import logging
 import random
 from pathlib import Path
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import Client
 from django.urls import reverse
 
 from dojo.models import Finding, Product, Test
 from dojo.product.helpers import propagate_tags_on_product_sync
-
-from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 
 
+@versioned_fixtures
 class TagTests(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -327,6 +328,7 @@ class TagImportMixin:
         assert_tags_in_findings(findings, 2, ["security", "network", "hardened"])
 
 
+@versioned_fixtures
 class TagImportTestAPI(DojoAPITestCase, TagImportMixin):
 
     """Test tag handling during import/reimport via API."""
@@ -342,6 +344,7 @@ class TagImportTestAPI(DojoAPITestCase, TagImportMixin):
         TagImportMixin.setUp(self)
 
 
+@versioned_fixtures
 class TagImportTestUI(DojoAPITestCase, TagImportMixin):
 
     """Test tag handling during import/reimport via UI."""
@@ -402,6 +405,7 @@ class TagImportTestUI(DojoAPITestCase, TagImportMixin):
             return {"test": new_test_id}
 
 
+@versioned_fixtures
 class InheritedTagsTests(DojoAPITestCase):
 
     """Non-import tests for inherited tags functionality."""
@@ -480,13 +484,19 @@ class InheritedTagsImportMixin:
         test_id = response["test"]
         test = Test.objects.get(id=test_id)
         finding = Finding.objects.filter(test=test).first()
-        endpoint = finding.endpoints.all().first()
+        location = self._get_location(finding)
         return {
             "engagement": engagement,
-            "endpoint": endpoint,
+            "location": location,
             "test": test,
             "finding": finding,
         }
+
+    def _get_location(self, finding):
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return finding.endpoints.all().first()
+        return finding.locations.all().first().location
 
     def test_import_without_tags(self):
         # Import some findings to create all objects
@@ -494,7 +504,7 @@ class InheritedTagsImportMixin:
         # Check that the tags all match what the product has
         product_tags = self._convert_instance_tags_to_list(self.product)
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("engagement")))
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("endpoint")))
+        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("location")))
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("test")))
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("finding")))
 
@@ -504,14 +514,14 @@ class InheritedTagsImportMixin:
         # Check that the tags all match what the product has
         product_tags = self._convert_instance_tags_to_list(self.product)
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("engagement")))
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("endpoint")))
+        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("location")))
         self.assertEqual(["import_tag", *product_tags], self._convert_instance_tags_to_list(objects.get("test")))
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("finding")))
         # Reimport now
         objects = self._import_and_return_objects(test_id=objects.get("test").id, reimport=True, tags=["reimport_tag"])
         # Check that the tags all match what the product has
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("engagement")))
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("endpoint")))
+        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("location")))
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("finding")))
         # Make a copy of the list becase of the need for the lists to be exact (index for index)
         product_tags_plus_reimport_tag = product_tags.copy()
@@ -524,7 +534,7 @@ class InheritedTagsImportMixin:
         # Check that the tags all match what the product has
         product_tags = self._convert_instance_tags_to_list(self.product)
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("engagement")))
-        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("endpoint")))
+        self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("location")))
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("test")))
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("finding")))
         # Remove a tag from the product
@@ -535,7 +545,7 @@ class InheritedTagsImportMixin:
         product_tags_post_removal = self._convert_instance_tags_to_list(self.product)
         # Check that the tags all match what the product has
         self.assertEqual(product_tags_post_removal, self._convert_instance_tags_to_list(objects.get("engagement")))
-        self.assertEqual(product_tags_post_removal, self._convert_instance_tags_to_list(objects.get("endpoint")))
+        self.assertEqual(product_tags_post_removal, self._convert_instance_tags_to_list(objects.get("location")))
         self.assertEqual(product_tags_post_removal, self._convert_instance_tags_to_list(objects.get("test")))
         self.assertEqual(product_tags_post_removal, self._convert_instance_tags_to_list(objects.get("finding")))
         # Add a tag from the product
@@ -546,11 +556,12 @@ class InheritedTagsImportMixin:
         product_tags_post_addition = self._convert_instance_tags_to_list(self.product)
         # Check that the tags all match what the product has
         self.assertEqual(product_tags_post_addition, self._convert_instance_tags_to_list(objects.get("engagement")))
-        self.assertEqual(product_tags_post_addition, self._convert_instance_tags_to_list(objects.get("endpoint")))
+        self.assertEqual(product_tags_post_addition, self._convert_instance_tags_to_list(objects.get("location")))
         self.assertEqual(product_tags_post_addition, self._convert_instance_tags_to_list(objects.get("test")))
         self.assertEqual(product_tags_post_addition, self._convert_instance_tags_to_list(objects.get("finding")))
 
 
+@versioned_fixtures
 class InheritedTagsImportTestAPI(DojoAPITestCase, InheritedTagsImportMixin):
 
     """Test inherited tags during import/reimport via API."""
@@ -566,6 +577,7 @@ class InheritedTagsImportTestAPI(DojoAPITestCase, InheritedTagsImportMixin):
         InheritedTagsImportMixin.setUp(self)
 
 
+@versioned_fixtures
 class InheritedTagsImportTestUI(DojoAPITestCase, InheritedTagsImportMixin):
 
     """Test inherited tags during import/reimport via UI."""

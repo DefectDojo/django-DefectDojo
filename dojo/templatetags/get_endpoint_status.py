@@ -1,3 +1,12 @@
+"""
+None of the templates are used any longer, but the jira templates
+were using them pretty heavily. For that reason, we should leave
+this file here for the foreseeable future.
+
+These template tags are awful for performance, so the use of them
+is strongly discouraged in any new code.
+"""
+
 from django import template
 from django.db.models import Q
 

@@ -73,6 +73,8 @@ from dojo.forms import (
 )
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
+from dojo.location.models import Location
+from dojo.location.utils import save_locations_to_add
 from dojo.models import (
     Check_List,
     Cred_Mapping,
@@ -848,11 +850,18 @@ class ImportScanResultsView(View):
         )
         # Get the product tab and any additional custom breadcrumbs
         product_tab, custom_breadcrumb = self.get_product_tab(product, engagement)
+
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = Location.objects.filter(products__product_id=product_tab.product.id)
+        else:
+            # TODO: Delete this after the move to Locations
+            endpoints = Endpoint.objects.filter(product__id=product_tab.product.id)
+
         # Get the import form with some initial data in place
         form = self.get_form(
             request,
             environment=environment,
-            endpoints=Endpoint.objects.filter(product__id=product_tab.product.id),
+            endpoints=endpoints,
             api_scan_configuration=Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id),
         )
         # Get the credential mapping form
@@ -1013,10 +1022,17 @@ class ImportScanResultsView(View):
         if close_old_findings_product_scope := form.cleaned_data.get("close_old_findings_product_scope", None):
             context["close_old_findings_product_scope"] = close_old_findings_product_scope
             context["close_old_findings"] = True
-        # Save newly added endpoints
-        added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, context.get("engagement").product)
-        endpoints_from_form = list(form.cleaned_data["endpoints"])
-        context["endpoints_to_add"] = endpoints_from_form + added_endpoints
+        if settings.V3_FEATURE_LOCATIONS:
+            # Save newly added locations
+            added_locations = save_locations_to_add(form.endpoints_to_add_list)
+            locations_from_form = [location.url for location in form.cleaned_data["endpoints"]]
+            context["endpoints_to_add"] = locations_from_form + added_locations
+        else:
+            # TODO: Delete this after the move to Locations
+            # Save newly added endpoints
+            added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, context.get("engagement").product)
+            endpoints_from_form = list(form.cleaned_data["endpoints"])
+            context["endpoints_to_add"] = endpoints_from_form + added_endpoints
         # Override the form values of active and verified
         if activeChoice := form.cleaned_data.get("active", None):
             if activeChoice == "force_to_true":

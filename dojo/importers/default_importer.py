@@ -128,7 +128,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             new_findings=new_findings,
             closed_findings=closed_findings,
         )
-        # Apply tags to findings and endpoints
+        # Apply tags to findings and endpoints/locations
         self.apply_import_tags(
             new_findings=new_findings,
             closed_findings=closed_findings,
@@ -168,7 +168,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         """
         Saves findings in memory that were parsed from the scan report into the database.
-        This process involves first saving associated objects such as endpoints, files,
+        This process involves first saving associated objects such as locations, files,
         vulnerability IDs, and request response pairs. Once all that has been completed,
         the finding may be appended to a new or existing group based upon user selection
         at import time
@@ -220,10 +220,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 unsaved_finding.unsaved_tags = merged_tags
             unsaved_finding.tags = None
             finding = self.process_cve(unsaved_finding)
-            # Calculate hash_code before saving based on unsaved_endpoints and unsaved_vulnerability_ids
+            # Calculate hash_code before saving based on unsaved_endpoints/unsaved_locations and unsaved_vulnerability_ids
             finding.set_hash_code(True)
 
-            # postprocessing will be done after processing related fields like endpoints, vulnerability ids, etc.
+            # postprocessing will be done after processing related fields like locations, vulnerability ids, etc.
             unsaved_finding.save_no_options()
 
             # Determine how the finding should be grouped
@@ -233,8 +233,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             )
             # Process any request/response pairs
             self.process_request_response_pairs(finding)
-            # Process any endpoints on the endpoint, or added on the form
-            self.process_endpoints(finding, self.endpoints_to_add)
+            if settings.V3_FEATURE_LOCATIONS:
+                # Process any locations on the finding, or added on the form
+                self.process_locations(finding, self.endpoints_to_add)
+            else:
+                # TODO: Delete this after the move to Locations
+                # Process any endpoints on the finding, or added on the form
+                self.process_endpoints(finding, self.endpoints_to_add)
             # Parsers must use unsaved_tags to store tags, so we can clean them
             cleaned_tags = clean_tags(finding.unsaved_tags)
             if isinstance(cleaned_tags, list):
@@ -305,7 +310,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         """
         Closes old findings based on a hash code match at either the product
         or the engagement scope. Closing an old finding entails setting the
-        finding to mitigated status, setting all endpoint statuses to mitigated,
+        finding to mitigated status, setting all location statuses to mitigated,
         as well as leaving a not on the finding indicating that it was mitigated
         because the vulnerability is no longer present in the submitted scan report.
         """
@@ -362,7 +367,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             old_findings = old_findings.filter(service=self.service)
         else:
             old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=""))
-        # Update the status of the findings and any endpoints
+        # Update the status of the findings and any locations
         for old_finding in old_findings:
             url = str(get_full_url(reverse("view_test", args=(self.test.id,))))
             test_title = str(self.test.title)

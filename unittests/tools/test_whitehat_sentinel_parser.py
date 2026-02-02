@@ -16,12 +16,14 @@ class TestWhiteHatSentinelParser(DojoTestCase):
             parser = WhiteHatSentinelParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+            self.validate_locations(findings)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         with (get_unit_tests_scans_path("whitehat_sentinel") / "many_vuln.json").open(encoding="utf-8") as testfile:
             parser = WhiteHatSentinelParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
+            self.validate_locations(findings)
 
     def test_parse_file_with_invalid_data(self):
         with self.assertRaises(ValueError), \

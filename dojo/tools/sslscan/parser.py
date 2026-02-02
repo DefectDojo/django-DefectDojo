@@ -2,8 +2,10 @@ import hashlib
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 __author__ = "dr3dd589"
 
@@ -84,10 +86,14 @@ class SslscanParser:
                             severity=severity,
                             dynamic_finding=True,
                         )
-                        finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
 
                         if host:
-                            endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(host=host, port=port)
-                            finding.unsaved_endpoints.append(endpoint)
+                            if settings.V3_FEATURE_LOCATIONS:
+                                location = URL.from_value(host) if "://" in host else URL(host=host, port=port)
+                                finding.unsaved_locations.append(location)
+                            else:
+                                # TODO: Delete this after the move to Locations
+                                endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(host=host, port=port)
+                                finding.unsaved_endpoints.append(endpoint)
         return list(dupes.values())

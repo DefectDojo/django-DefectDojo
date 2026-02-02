@@ -329,7 +329,7 @@ class EndPointViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_endpoints(Permissions.Endpoint_View).distinct()
+        return get_authorized_endpoints(Permissions.Location_View).distinct()
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -395,7 +395,7 @@ class EndpointStatusViewSet(
 
     def get_queryset(self):
         return get_authorized_endpoint_status(
-            Permissions.Endpoint_View,
+            Permissions.Location_View,
         ).distinct()
 
 
@@ -902,28 +902,53 @@ class FindingViewSet(
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
-        findings = get_authorized_findings(
-            Permissions.Finding_View,
-        ).prefetch_related(
-            "endpoints",
-            "reviewers",
-            "found_by",
-            "notes",
-            "risk_acceptance_set",
-            "test",
-            "tags",
-            "jira_issue",
-            "finding_group_set",
-            "files",
-            "burprawrequestresponse_set",
-            "status_finding",
-            "finding_meta",
-            "test__test_type",
-            "test__engagement",
-            "test__environment",
-            "test__engagement__product",
-            "test__engagement__product__prod_type",
-        )
+        if settings.V3_FEATURE_LOCATIONS:
+            findings = get_authorized_findings(
+                Permissions.Finding_View,
+            ).prefetch_related(
+                "locations__location__url",
+                "reviewers",
+                "found_by",
+                "notes",
+                "risk_acceptance_set",
+                "test",
+                "tags",
+                "jira_issue",
+                "finding_group_set",
+                "files",
+                "burprawrequestresponse_set",
+                "status_finding",
+                "finding_meta",
+                "test__test_type",
+                "test__engagement",
+                "test__environment",
+                "test__engagement__product",
+                "test__engagement__product__prod_type",
+            )
+        else:
+            # TODO: Delete this after the move to Locations
+            findings = get_authorized_findings(
+                Permissions.Finding_View,
+            ).prefetch_related(
+                "endpoints",
+                "reviewers",
+                "found_by",
+                "notes",
+                "risk_acceptance_set",
+                "test",
+                "tags",
+                "jira_issue",
+                "finding_group_set",
+                "files",
+                "burprawrequestresponse_set",
+                "status_finding",
+                "finding_meta",
+                "test__test_type",
+                "test__engagement",
+                "test__environment",
+                "test__engagement__product",
+                "test__engagement__product__prod_type",
+            )
 
         return findings.distinct()
 
@@ -2581,7 +2606,7 @@ class EndpointMetaImporterView(
         serializer.save()
 
     def get_queryset(self):
-        return get_authorized_products(Permissions.Endpoint_Edit)
+        return get_authorized_products(Permissions.Location_Edit)
 
 
 # Authorization: configuration

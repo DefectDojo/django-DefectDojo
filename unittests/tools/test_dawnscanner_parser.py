@@ -10,9 +10,7 @@ class TestDawnScannerParser(DojoTestCase):
         with (get_unit_tests_scans_path("dawnscanner") / "dawnscanner_v1.6.9.json").open(encoding="utf-8") as test_file:
             parser = DawnScannerParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(4, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]

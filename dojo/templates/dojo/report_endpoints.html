@@ -30,18 +30,26 @@
                        class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                     <thead>
                     <tr>
-                        <th>Endpoint</th>
-                        <th>Product</th>
-                        <th nowrap="nowrap">Open Findings</th>
+                        {% if V3_FEATURE_LOCATIONS %}
+                            <th>Endpoint</th>
+                            <th nowrap="nowrap">Open Findings</th>
+                        {% else %}
+                            <th>Endpoint</th>
+                            <th>Product</th>
+                            <th nowrap="nowrap">Open Findings</th>
+                        {% endif %}
                     </tr>
                     <tbody>
                     {% for e in endpoints %}
                         <tr>
-                            <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a></td>
-                            <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
-                            <td>
-                              <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
-                            </td>
+                            {% if V3_FEATURE_LOCATIONS %}
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a></td>
+                                <td><a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.findings.count }}</a></td>
+                            {% else %}
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a></td>
+                                <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
+                                <td><a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.findings.count }}</a></td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>

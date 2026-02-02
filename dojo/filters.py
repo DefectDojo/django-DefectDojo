@@ -55,6 +55,7 @@ from dojo.finding.helper import (
 from dojo.finding.queries import get_authorized_findings_for_queryset
 from dojo.finding_group.queries import get_authorized_finding_groups_for_queryset
 from dojo.labels import get_labels
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
     ENGAGEMENT_STATUS_CHOICES,
@@ -520,6 +521,34 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
             ])
 
     return fields
+
+
+def filter_endpoints_base(queryset, name, value, statuses=None, host=None):
+    """
+    Apply `endpoints` filter, and if location_status or host
+    are present, combine them on the same row.
+    """
+    filters_kwargs = {"locations__location": value}
+    if statuses:
+        filters_kwargs["locations__status__in"] = statuses
+    if host:
+        filters_kwargs["locations__location__url__host__icontains"] = host
+
+    return queryset.filter(**filters_kwargs)
+
+
+def filter_endpoints_host_base(queryset, name, value, statuses=None, endpoint_id=None):
+    """
+    Apply `endpoints__host` filter, and if endpoints or location_status
+    are present, combine them on the same row.
+    """
+    filters_kwargs = {"locations__location__url__host__icontains": value}
+    if endpoint_id:
+        filters_kwargs["locations__location"] = endpoint_id
+    if statuses:
+        filters_kwargs["locations__status__in"] = statuses
+
+    return queryset.filter(**filters_kwargs)
 
 
 class FindingTagFilter(DojoFilter):
@@ -1359,6 +1388,35 @@ class ProductFilterHelper(FilterSet):
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
     outside_of_sla = ProductSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
+    if settings.V3_FEATURE_LOCATIONS:
+        location_status = MultipleChoiceFilter(
+            field_name="locations__status",
+            choices=ProductLocationStatus.choices,
+            help_text="Status of the Location from the Products relationship",
+        )
+        endpoints__host = CharFilter(
+            field_name="locations__location__url__host", method="filter_endpoints_host", label="Endpoint Host",
+        )
+        endpoints = NumberFilter(field_name="locations__location", method="filter_endpoints", widget=HiddenInput())
+
+        def filter_endpoints_host(self, queryset, name, value):
+            return filter_endpoints_host_base(
+                queryset,
+                name,
+                value,
+                endpoint_id=self.data.get("endpoints"),
+                statuses=self.data.getlist("location_status"),
+            )
+
+        def filter_endpoints(self, queryset, name, value):
+            return filter_endpoints_base(
+                queryset,
+                name,
+                value,
+                statuses=self.data.getlist("location_status"),
+                host=self.data.get("endpoints__host"),
+            )
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -1447,6 +1505,13 @@ class ProductFilterWithoutObjectLookups(ProductFilterHelper):
 class ApiDojoMetaFilter(DojoFilter):
     name_case_insensitive = CharFilter(field_name="name", lookup_expr="iexact")
     value_case_insensitive = CharFilter(field_name="value", lookup_expr="iexact")
+    endpoint = NumberFilter(field_name="location__products__id", lookup_expr="exact")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.filters["endpoint"] = NumberFilter(field_name="endpoint", lookup_expr="exact")
 
     class Meta:
         model = DojoMeta
@@ -1454,6 +1519,7 @@ class ApiDojoMetaFilter(DojoFilter):
             "id",
             "product",
             "endpoint",
+            "location",
             "finding",
             "name",
             "value",
@@ -1773,18 +1839,48 @@ class FindingFilterHelper(FilterSet):
     param = CharFilter(lookup_expr="icontains")
     payload = CharFilter(lookup_expr="icontains")
     test__test_type = ModelMultipleChoiceFilter(queryset=Test_Type.objects.all(), label="Test Type")
-    endpoints__host = CharFilter(lookup_expr="icontains", label="Endpoint Host")
     service = CharFilter(lookup_expr="icontains")
     test__engagement__version = CharFilter(lookup_expr="icontains", label="Engagement Version")
     test__version = CharFilter(lookup_expr="icontains", label="Test Version")
     risk_acceptance = ReportRiskAcceptanceFilter(label="Risk Accepted")
     effort_for_fixing = MultipleChoiceFilter(choices=EFFORT_FOR_FIXING_CHOICES)
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
-    endpoints = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
     test__engagement__product__lifecycle = MultipleChoiceFilter(
         choices=Product.LIFECYCLE_CHOICES,
         label=labels.ASSET_LIFECYCLE_LABEL)
+    if settings.V3_FEATURE_LOCATIONS:
+        location_status = MultipleChoiceFilter(
+            field_name="locations__status",
+            choices=FindingLocationStatus.choices,
+            help_text="Status of the Location from the Findings relationship",
+        )
+        endpoints__host = CharFilter(
+            field_name="locations__location__url__host", method="filter_endpoints_host", label="Endpoint Host",
+        )
+        endpoints = NumberFilter(field_name="locations__location", method="filter_endpoints", widget=HiddenInput())
+
+        def filter_endpoints_host(self, queryset, name, value):
+            return filter_endpoints_host_base(
+                queryset,
+                name,
+                value,
+                endpoint_id=self.data.get("endpoints"),
+                statuses=self.data.getlist("location_status"),
+            )
+
+        def filter_endpoints(self, queryset, name, value):
+            return filter_endpoints_base(
+                queryset,
+                name,
+                value,
+                statuses=self.data.getlist("location_status"),
+                host=self.data.get("endpoints__host"),
+            )
+    else:
+        # TODO: Delete this after the move to Locations
+        endpoints__host = CharFilter(lookup_expr="icontains", label="Endpoint Host")
+        endpoints = NumberFilter(widget=HiddenInput())
 
     has_component = BooleanFilter(
         field_name="component_name",
@@ -2751,7 +2847,7 @@ class EndpointFilter(EndpointFilterHelper, DojoFilter):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_endpoints_for_queryset(Permissions.Endpoint_View, parent)
+        return get_authorized_endpoints_for_queryset(Permissions.Location_View, parent)
 
     class Meta:
         model = Endpoint
@@ -2892,7 +2988,7 @@ class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_endpoints_for_queryset(Permissions.Endpoint_View, parent)
+        return get_authorized_endpoints_for_queryset(Permissions.Location_View, parent)
 
     class Meta:
         model = Endpoint

@@ -55,6 +55,12 @@ class DedupeTest(BaseTestCase):
         driver.get(self.base_url + "system_settings")
         if not driver.find_element(By.ID, "id_enable_deduplication").is_selected():
             driver.find_element(By.XPATH, '//*[@id="id_enable_deduplication"]').click()
+            # Disable false positive history if enabled (conflicts with dedupe)
+            if driver.find_element(By.ID, "id_false_positive_history").is_selected():
+                driver.find_element(By.XPATH, '//*[@id="id_false_positive_history"]').click()
+            # Disable false positive history retroactivity if enabled (conflicts with dedupe)
+            if driver.find_element(By.ID, "id_retroactive_false_positive_history").is_selected():
+                driver.find_element(By.XPATH, '//*[@id="id_retroactive_false_positive_history"]').click()
             # save settings
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # check if it's enabled after reload

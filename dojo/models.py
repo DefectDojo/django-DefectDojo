@@ -1,4 +1,5 @@
 import base64
+import contextlib
 import copy
 import hashlib
 import logging
@@ -8,6 +9,7 @@ from contextlib import suppress
 from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -44,7 +46,11 @@ from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
 from titlecase import titlecase
 
+from dojo.base_models.base import BaseModel
 from dojo.validators import cvss3_validator, cvss4_validator
+
+if TYPE_CHECKING:
+    from dojo.location.models import AbstractLocation
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -831,7 +837,7 @@ class FileUpload(models.Model):
             raise ValidationError(msg)
 
 
-class Product_Type(models.Model):
+class Product_Type(BaseModel):
 
     """
     Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing "types" of products.
@@ -847,8 +853,6 @@ class Product_Type(models.Model):
     description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
-    updated = models.DateTimeField(auto_now=True, null=True)
-    created = models.DateTimeField(auto_now_add=True, null=True)
     members = models.ManyToManyField(Dojo_User, through="Product_Type_Member", related_name="prod_type_members", blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through="Product_Type_Group", related_name="product_type_groups", blank=True)
 
@@ -955,11 +959,17 @@ class DojoMeta(models.Model):
                                  null=True,
                                  editable=False,
                                  related_name="finding_meta")
+    location = models.ForeignKey("Location",
+                                 on_delete=models.CASCADE,
+                                 null=True,
+                                 editable=False,
+                                 related_name="location_meta")
 
     class Meta:
         unique_together = (("product", "name"),
                            ("endpoint", "name"),
-                           ("finding", "name"))
+                           ("finding", "name"),
+                           ("location", "name"))
 
     def __str__(self):
         return f"{self.name}: {self.value}"
@@ -971,7 +981,8 @@ class DojoMeta(models.Model):
 
         ids = [self.product_id,
                self.endpoint_id,
-               self.finding_id]
+               self.finding_id,
+               self.location_id]
         ids_count = 0
 
         for obj_id in ids:
@@ -979,10 +990,10 @@ class DojoMeta(models.Model):
                 ids_count += 1
 
         if ids_count == 0:
-            msg = "Metadata entries need either a product, an endpoint or a finding"
+            msg = "Metadata entries need either a product, endpoint, location or a finding"
             raise ValidationError(msg)
         if ids_count > 1:
-            msg = "Metadata entries may not have more than one relation, either a product, an endpoint either or a finding"
+            msg = "Metadata entries may not have more than one relation, either a product, endpoint, location or a finding"
             raise ValidationError(msg)
 
 
@@ -1104,7 +1115,7 @@ class SLA_Configuration(models.Model):
         return f"{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}"
 
 
-class Product(models.Model):
+class Product(BaseModel):
     WEB_PLATFORM = "web"
     IOT = "iot"
     DESKTOP_PLATFORM = "desktop"
@@ -1167,10 +1178,8 @@ class Product(models.Model):
     team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                      related_name="team_manager", on_delete=models.RESTRICT)
 
-    created = models.DateTimeField(auto_now_add=True, null=True)
     prod_type = models.ForeignKey(Product_Type, related_name="prod_type",
                                   null=False, blank=False, on_delete=models.CASCADE)
-    updated = models.DateTimeField(auto_now=True, null=True)
     sla_configuration = models.ForeignKey(SLA_Configuration,
                                           related_name="sla_config",
                                           null=False,
@@ -1271,6 +1280,7 @@ class Product(models.Model):
                                             test__engagement__product=self).count()
             return self.active_verified_finding_count
 
+    # TODO: Delete this after the move to Locations
     @cached_property
     def endpoint_host_count(self):
         # active_endpoints is (should be) prefetched
@@ -1284,6 +1294,7 @@ class Product(models.Model):
 
         return len(hosts)
 
+    # TODO: Delete this after the move to Locations
     @cached_property
     def endpoint_count(self):
         # active_endpoints is (should be) prefetched
@@ -1498,7 +1509,7 @@ ENGAGEMENT_STATUS_CHOICES = (("Not Started", "Not Started"),
                              ("Waiting for Resource", "Waiting for Resource"))
 
 
-class Engagement(models.Model):
+class Engagement(BaseModel):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
     version = models.CharField(max_length=100, null=True, blank=True, help_text=_("Version of the product the engagement tested."))
@@ -1511,8 +1522,6 @@ class Engagement(models.Model):
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    updated = models.DateTimeField(auto_now=True, null=True)
-    created = models.DateTimeField(auto_now_add=True, null=True)
     active = models.BooleanField(default=True, editable=False)
     tracker = models.URLField(max_length=200, help_text=_("Link to epic or ticket system with changes to version."), editable=True, blank=True, null=True)
     test_strategy = models.URLField(editable=True, blank=True, null=True)
@@ -1522,7 +1531,7 @@ class Engagement(models.Model):
     check_list = models.BooleanField(default=True)
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     files = models.ManyToManyField(FileUpload, blank=True, editable=False)
-    status = models.CharField(editable=True, max_length=2000, default="",
+    status = models.CharField(editable=True, max_length=2000, default="Not Started",
                               null=True,
                               choices=ENGAGEMENT_STATUS_CHOICES)
     progress = models.CharField(max_length=100,
@@ -1694,7 +1703,8 @@ class Endpoint_Status(models.Model):
         ]
 
     def __str__(self):
-        return f"'{self.finding}' on '{self.endpoint}'"
+        with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+            return f"'{self.finding}' on '{self.endpoint}'"
 
     def copy(self, finding=None):
         copy = copy_model_util(self)
@@ -1754,6 +1764,12 @@ class Endpoint(models.Model):
                 name="idx_ep_product_lower_host",
             ),
         ]
+
+    def __init__(self, *args, **kwargs):
+        if settings.V3_FEATURE_LOCATIONS and not getattr(self, "_allow_v3_init", False):
+            msg = "Endpoint model is deprecated when V3_FEATURE_LOCATIONS is enabled"
+            raise NotImplementedError(msg)
+        super().__init__(*args, **kwargs)
 
     def __hash__(self):
         return self.__str__().__hash__()
@@ -1825,6 +1841,21 @@ class Endpoint(models.Model):
 
     def get_absolute_url(self):
         return reverse("view_endpoint", args=[str(self.id)])
+
+    @classmethod
+    @contextlib.contextmanager
+    def allow_endpoint_init(cls):
+        # When migrating to Locations, Endpoints are not deleted (hooray backup!). Disallowing the initialization of
+        # Endpoints is a good way to catch where they might still be used (oops!). However, there are some circumstances
+        # -- object deletes -- where Django itself attempts to instantiate an Endpoint object. This, we need to allow:
+        # if a user wants to delete an object, including whatever Endpoints are attached to it, they should be able to.
+        # This context manager allows code to initialize Endpoints at our discretion.
+        old = getattr(cls, "_allow_v3_init", None)
+        cls._allow_v3_init = True
+        try:
+            yield
+        finally:
+            cls._allow_v3_init = old
 
     def clean(self):
         errors = []
@@ -2339,7 +2370,7 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return f"{self.finding.id}: {self.action}"
 
 
-class Finding(models.Model):
+class Finding(BaseModel):
     title = models.CharField(max_length=511,
                              verbose_name=_("Title"),
                              help_text=_("A short description of the flaw."))
@@ -2439,6 +2470,7 @@ class Finding(models.Model):
                                               blank=True,
                                               verbose_name=_("Severity Justification"),
                                               help_text=_("Text describing why a certain severity was associated with this flaw."))
+    # TODO: Delete this after the move to Locations
     endpoints = models.ManyToManyField(Endpoint,
                                        blank=True,
                                        verbose_name=_("Endpoints"),
@@ -2609,10 +2641,6 @@ class Finding(models.Model):
     dynamic_finding = models.BooleanField(default=True,
                                           verbose_name=_("Dynamic finding (DAST)"),
                                           help_text=_("Flaw has been detected from a Dynamic Application Security Testing tool (DAST)."))
-    created = models.DateTimeField(auto_now_add=True,
-                                   null=True,
-                                   verbose_name=_("Created"),
-                                   help_text=_("The date the finding was created inside DefectDojo."))
     scanner_confidence = models.IntegerField(null=True,
                                              blank=True,
                                              default=None,
@@ -2738,7 +2766,11 @@ class Finding(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.unsaved_endpoints = []
+        if settings.V3_FEATURE_LOCATIONS:
+            self.unsaved_locations: list[AbstractLocation] = []
+        else:
+            # TODO: Delete this after the move to Locations
+            self.unsaved_endpoints = []
         self.unsaved_request = None
         self.unsaved_response = None
         self.unsaved_tags = None
@@ -2799,7 +2831,14 @@ class Finding(models.Model):
         self.set_hash_code(dedupe_option)
 
         if is_new_finding:
-            if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
+            if settings.V3_FEATURE_LOCATIONS:
+                if (self.file_path is not None) and (len(self.unsaved_locations) == 0):
+                    self.static_finding = True
+                    self.dynamic_finding = False
+                elif (self.file_path is not None):
+                    self.static_finding = True
+            # TODO: Delete this after the move to Locations
+            elif (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
                 self.static_finding = True
                 self.dynamic_finding = False
             elif (self.file_path is not None):
@@ -2810,18 +2849,27 @@ class Finding(models.Model):
             finding_helper.update_finding_status(self, user, changed_fields={"id": (None, None)})
 
         # logger.debug('setting static / dynamic in save')
-        # need to have an id/pk before we can access endpoints
-        elif (self.file_path is not None) and (self.endpoints.count() == 0):
-            self.static_finding = True
-            self.dynamic_finding = False
-        elif (self.file_path is not None):
-            self.static_finding = True
+        # need to have an id/pk before we can access locations/endpoints
+        elif self.file_path is not None:
+            if settings.V3_FEATURE_LOCATIONS:
+                if not self.locations.exists():
+                    self.static_finding = True
+                    self.dynamic_finding = False
+                else:
+                    self.static_finding = True
+            # TODO: Delete this after the move to Locations
+            elif not self.endpoints.exists():
+                self.static_finding = True
+                self.dynamic_finding = False
+            else:
+                self.static_finding = True
 
         # update the SLA expiration date last, after all other finding fields have been updated
         self.set_sla_expiration_date()
 
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-        super().save(*args, **kwargs)
+        # We cannot run the full_clean method here without issue, so we specify skip_validation
+        super().save(*args, **kwargs, skip_validation=True)
 
         # Only add to found_by for newly-created findings (avoid doing this on every update)
         if is_new_finding:
@@ -2843,7 +2891,6 @@ class Finding(models.Model):
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
-        old_status_findings = list(self.status_finding.all())
         old_reviewers = list(self.reviewers.all())
         old_found_by = list(self.found_by.all())
         old_tags = list(self.tags.all())
@@ -2858,9 +2905,16 @@ class Finding(models.Model):
         # Copy the files
         for files in old_files:
             copy.files.add(files.copy())
-        # Copy the endpoint_status
-        for endpoint_status in old_status_findings:
-            endpoint_status.copy(finding=copy)  # adding or setting is not necessary, link is created by Endpoint_Status.copy()
+        if settings.V3_FEATURE_LOCATIONS:
+            old_location_refs = self.locations.all()
+            for location_ref in old_location_refs:
+                location_ref.copy(copy)
+        else:
+            # TODO: Delete this after the move to Locations
+            # Copy the endpoint_status
+            old_status_findings = list(self.status_finding.all())
+            for endpoint_status in old_status_findings:
+                endpoint_status.copy(finding=copy)  # adding or setting is not necessary, link is created by Endpoint_Status.copy()
         # Assign any reviewers
         copy.reviewers.set(old_reviewers)
         # Assign any found_by
@@ -2938,11 +2992,12 @@ class Finding(models.Model):
 
         fields_to_hash = ""
         for hashcodeField in hash_code_fields:
+            # Note: preserve this field label ("endpoints") for settings purposes through the Locations migration
             if hashcodeField == "endpoints":
-                # For endpoints, need to compute the field
-                myEndpoints = self.get_endpoints()
-                fields_to_hash += myEndpoints
-                deduplicationLogger.debug(hashcodeField + " : " + myEndpoints)
+                # For locations/endpoints, need to compute the field
+                locations = self.get_locations()
+                fields_to_hash += locations
+                deduplicationLogger.debug(hashcodeField + " : " + locations)
             elif hashcodeField == "vulnerability_ids":
                 # For vulnerability_ids, need to compute the field
                 my_vulnerability_ids = self.get_vulnerability_ids()
@@ -2992,33 +3047,59 @@ class Finding(models.Model):
 
         return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnerability_ids(self)
 
-    # Get endpoints to use for hash_code computation
-    # (This sometimes reports "None")
-    def get_endpoints(self):
+    # Get locations/endpoints to use for hash_code computation
+    def get_locations(self):
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            # Get endpoints to use for hash_code computation
+            # (This sometimes reports "None")
+            def _get_unsaved_endpoints(finding) -> str:
+                if len(finding.unsaved_endpoints) > 0:
+                    deduplicationLogger.debug("get_endpoints before the finding was saved")
+                    # convert list of unsaved endpoints to the list of their canonical representation
+                    endpoint_str_list = [str(endpoint) for endpoint in finding.unsaved_endpoints]
+                    # deduplicate (usually done upon saving finding) and sort endpoints
+                    return "".join(dict.fromkeys(endpoint_str_list))
+                # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
+                # In this case, before saving the finding, both static_finding and dynamic_finding are True
+                # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
+                deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
+                return ""
 
-        def _get_unsaved_endpoints(finding) -> str:
-            if len(finding.unsaved_endpoints) > 0:
-                deduplicationLogger.debug("get_endpoints before the finding was saved")
-                # convert list of unsaved endpoints to the list of their canonical representation
-                endpoint_str_list = [str(endpoint) for endpoint in finding.unsaved_endpoints]
-                # deduplicate (usually done upon saving finding) and sort endpoints
-                return "".join(dict.fromkeys(endpoint_str_list))
+            def _get_saved_endpoints(finding) -> str:
+                if finding.id is not None:
+                    deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(finding.endpoints.count()))
+                    # convert list of endpoints to the list of their canonical representation
+                    endpoint_str_list = [str(endpoint) for endpoint in finding.endpoints.all()]
+                    # sort endpoints strings
+                    return "".join(sorted(endpoint_str_list))
+                return ""
+
+            return _get_saved_endpoints(self) or _get_unsaved_endpoints(self)
+
+        def _get_unsaved_locations(finding) -> str:
+            if len(finding.unsaved_locations) > 0:
+                deduplicationLogger.debug("get_locations before the finding was saved")
+                # convert list of unsaved locations to the list of their canonical representation
+                # deduplicate (usually done upon saving finding) and sort locations
+                locations = sorted({location.get_location_value() for location in finding.unsaved_locations})
+                return "".join(locations)
             # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
             # In this case, before saving the finding, both static_finding and dynamic_finding are True
             # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
-            deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
+            deduplicationLogger.debug("trying to get locations on a finding before it was saved but no locations found (static parser wrongly identified as dynamic?")
             return ""
 
-        def _get_saved_endpoints(finding) -> str:
+        def _get_saved_locations(finding) -> str:
             if finding.id is not None:
-                deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(finding.endpoints.count()))
-                # convert list of endpoints to the list of their canonical representation
-                endpoint_str_list = [str(endpoint) for endpoint in finding.endpoints.all()]
-                # sort endpoints strings
-                return "".join(sorted(endpoint_str_list))
+                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(finding.locations.count()))
+                # convert list of locations to the list of their canonical representation
+                locations = sorted({location_ref.location.get_location_value() for location_ref in finding.locations.all()})
+                # sort locations strings
+                return "".join(sorted(locations))
             return ""
 
-        return _get_saved_endpoints(self) or _get_unsaved_endpoints(self)
+        return _get_saved_locations(self) or _get_unsaved_locations(self)
 
     # Compute the hash_code from the fields to hash
     def hash_fields(self, fields_to_hash):
@@ -3501,6 +3582,7 @@ class Finding(models.Model):
 
 
 class FindingAdmin(admin.ModelAdmin):
+    # TODO: Delete this after the move to Locations
     # For efficiency with large databases, display many-to-many fields with raw
     # IDs rather than multi-select
     raw_id_fields = (

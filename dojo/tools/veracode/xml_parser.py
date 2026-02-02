@@ -6,6 +6,7 @@ from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 XML_NAMESPACE = {"x": "https://www.veracode.com/schema/reports/export/1.0"}
 
@@ -261,7 +262,11 @@ class VeracodeXMLParser:
         finding.dynamic_finding = True
 
         url_host = xml_node.attrib.get("url")
-        finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations = [URL.from_value(url_host)]
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
 
         finding.unsaved_tags = ["dast"]
 

@@ -5,8 +5,10 @@ from datetime import datetime
 
 import dateutil
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 __author__ = "properam"
 logger = logging.getLogger(__name__)
@@ -57,9 +59,9 @@ class ImmuniwebParser:
             # just to make sure severity is in the recognised sentence casing
             # form
             severity = vulnerability.find("Risk").text.capitalize()
-            # Set 'Warning' severity === 'Informational'
+            # Set 'Warning' severity === 'Info'
             if severity == "Warning":
-                severity = "Informational"
+                severity = "Info"
 
             description = vulnerability.find("Description").text
             url = vulnerability.find("URL").text
@@ -89,10 +91,13 @@ class ImmuniwebParser:
                 )
                 if vulnerability_id:
                     finding.unsaved_vulnerability_ids = [vulnerability_id]
-                finding.unsaved_endpoints = []
+                # manage endpoint/location
+                if settings.V3_FEATURE_LOCATIONS:
+                    finding.unsaved_locations = [URL.from_value(url)]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints = [Endpoint.from_uri(url)]
                 dupes[dupe_key] = finding
-
-                finding.unsaved_endpoints.append(Endpoint.from_uri(url))
 
         return list(dupes.values())
 
@@ -121,11 +126,6 @@ class ImmuniwebParser:
             date = dateutil.parser.parse(item["discovered"]) if item.get("discovered") else datetime.now()
 
             tag = item["tag"] if item.get("tag") else None
-            endpoints = []
-            if item.get("link", None):
-                endpoints.append(Endpoint.from_uri(item["link"]) if "://" in item["link"] else Endpoint.from_uri("https://" + item["link"]))
-            if item.get("ip", None):
-                endpoints.append(Endpoint.from_uri(item["ip"]))
 
             # censor passwords in examples
             # this is a bit of a hack, but it's unclear what fields the json can contain
@@ -152,11 +152,29 @@ class ImmuniwebParser:
                     date=date,
                     description=description,
                     mitigation=mitigation,
-                    severity="Informational",
+                    severity="Info",
                     dynamic_finding=True,
                 )
                 finding.unsaved_tags = [tag] if tag else None
-                finding.unsaved_endpoints = endpoints
+
+                if settings.V3_FEATURE_LOCATIONS:
+                    locations = []
+                    if item.get("link", None):
+                        locations.append(URL.from_value(item["link"]) if "://" in item["link"] else URL.from_value(
+                            "https://" + item["link"]))
+                    if item.get("ip", None):
+                        locations.append(URL.from_value(item["ip"]))
+                    finding.unsaved_locations = locations
+                else:
+                    # TODO: Delete this after the move to Locations
+                    locations = []
+                    if item.get("link", None):
+                        locations.append(
+                            Endpoint.from_uri(item["link"]) if "://" in item["link"] else Endpoint.from_uri(
+                                "https://" + item["link"]))
+                    if item.get("ip", None):
+                        locations.append(Endpoint.from_uri(item["ip"]))
+                    finding.unsaved_endpoints = locations
 
                 findings.append(finding)
         return findings

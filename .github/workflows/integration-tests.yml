@@ -41,10 +41,16 @@ jobs:
           "tests/notifications_test.py",
           "tests/tool_config.py",
           "openapi-validatator",
-
         ]
         os: [alpine, debian]
+        v3_feature_locations: [true, false]
+        exclude:
+          # standalone create endpoint page is gone in v3
+          - v3_feature_locations: true
+            test-case: "tests/endpoint_test.py"
       fail-fast: false
+    env:
+      DD_V3_FEATURE_LOCATIONS: ${{ matrix.v3_feature_locations }}
 
     steps:
       - name: Checkout

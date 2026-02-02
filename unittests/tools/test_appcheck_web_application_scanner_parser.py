@@ -26,6 +26,7 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             parser = AppCheckWebApplicationScannerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+            self.validate_locations(findings)
 
             # OpenVAS engine
             finding = findings[0]
@@ -49,16 +50,17 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             for section in ["**Impact**:", "**Detection**:", "**Technical Details**:"]:
                 self.assertIn(section, finding.description)
 
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual(21, endpoint.port)
-            self.assertEqual("0.0.0.1", endpoint.host)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            location.clean()
+            self.assertEqual(21, location.port)
+            self.assertEqual("0.0.0.1", location.host)
 
     def test_appcheck_web_application_scanner_parser_with_many_vuln_has_many_findings(self):
         with (get_unit_tests_scans_path("appcheck_web_application_scanner") / "appcheck_web_application_scanner_many_vul.json").open(encoding="utf-8") as testfile:
             parser = AppCheckWebApplicationScannerParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             self.assertEqual(6, len(findings))
 
             # First item is the same as the single-vuln entry (checked above); test the others here
@@ -86,13 +88,11 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
                 "Host: 0.0.0.1 (0.0.0.1)\nHost is up, received user-set (0.015s latency).\nScanned at 2020-01-29 15:44:46 UTC for 15763s\nNot shown: 65527 filtered ports, 4 closed ports\nReason: 65527 no-responses and 4 resets\nSome closed ports may be reported as filtered due to --defeat-rst-ratelimit\nPORT      STATE SERVICE     REASON          VERSION\n21/tcp    open  ftp         syn-ack ttl 116 Microsoft ftpd\n45000/tcp open  ssl/asmp?   syn-ack ttl 116\n45010/tcp open  unknown     syn-ack ttl 116\n60001/tcp open  ssl/unknown syn-ack ttl 116\n60011/tcp open  unknown     syn-ack ttl 116\nService Info: OS: Windows; CPE: cpe:/o:microsoft:windows",
                 finding.description,
             )
-
             expected_ports = [21, 45000, 45010, 60001, 60011]
-            self.assertEqual(5, len(finding.unsaved_endpoints))
-            for idx, endpoint in enumerate(finding.unsaved_endpoints):
-                endpoint.clean()
-                self.assertEqual("0.0.0.1", endpoint.host)
-                self.assertEqual(expected_ports[idx], endpoint.port)
+            self.assertEqual(5, len(self.get_unsaved_locations(finding)))
+            for idx, location in enumerate(self.get_unsaved_locations(finding)):
+                self.assertEqual("0.0.0.1", location.host)
+                self.assertEqual(expected_ports[idx], location.port)
 
             # AppCheck proprietary (?) engine findings
 
@@ -113,13 +113,11 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             self.assertTrue(finding.description.startswith('**Product Background**\n\n**Apache Tomcat** is a free and open-source Java web application server. It provides a "pure Java" HTTP web server environment in which Java code can also run, implementing the Jakarta Servlet, Jakarta Expression Language, and WebSocket technologies. Tomcat is released with **Catalina** (a servlet and JSP Java Server Pages container), **Coyote** (an HTTP connector), **Coyote JK** (JK protocol proxy connector) and **Jasper** (a JSP engine). Tomcat can optionally be bundled with Java Enterprise Edition (Jakarta EE) as **Apache TomEE** to deliver a complete application server with enterprise features such as distributed computing and web services.\n\n**Vulnerability Summary**\n\nA malicious web application running on Apache Tomcat 9.0.0.M1 to 9.0.0.M9, 8.5.0 to 8.5.4, 8.0.0.RC1 to 8.0.36, 7.0.0 to 7.0.70 and 6.0.0 to 6.0.45 was able to bypass a configured SecurityManager via manipulation of the configuration parameters for the JSP Servlet.\n\n**References**\n\n* http://www.securitytracker.com/id/1038757\n\n* http://www.securitytracker.com/id/1037141\n\n* http://www.securityfocus.com/bid/93944\n\n* http://www.debian.org/security/2016/dsa-3720\n\n* https://access.redhat.com/errata/RHSA-2017:2247\n\n* https://access.redhat.com/errata/RHSA-2017:1552\n\n* https://access.redhat.com/errata/RHSA-2017:1550\n\n* https://access.redhat.com/errata/RHSA-2017:1549\n\n* https://access.redhat.com/errata/RHSA-2017:1548\n\n* https://access.redhat.com/errata/RHSA-2017:0456\n\n* https://access.redhat.com/errata/RHSA-2017:0455\n\n* http://rhn.redhat.com/errata/RHSA-2017-1551.html\n\n* http://rhn.redhat.com/errata/RHSA-2017-0457.html\n\n* https://security.netapp.com/advisory/ntap-20180605-0001/\n\n* https://usn.ubuntu.com/4557-1/\n\n* https://www.oracle.com/security-alerts/cpuoct2021.html\n\n'), finding.description)
             for section in ["**Technical Details**:", "**Classifications**:"]:
                 self.assertIn(section, finding.description)
-
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("poes.x73zjffz.services", endpoint.host)
-            self.assertEqual(443, endpoint.port)
-            self.assertEqual("https", endpoint.protocol)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("poes.x73zjffz.services", location.host)
+            self.assertEqual(443, location.port)
+            self.assertEqual("https", location.protocol)
 
             finding = findings[3]
             self.assertEqual("02769aa244c456f0aad810354748faaa70d089c1129dc9c5", finding.unique_id_from_tool)
@@ -142,13 +140,11 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             )
             for section in ["**Permitted HTTP Methods**:"]:
                 self.assertIn(section, finding.description)
-
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("example.x73zjffz.com", endpoint.host)
-            self.assertEqual(443, endpoint.port)
-            self.assertEqual("https", endpoint.protocol)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("example.x73zjffz.com", location.host)
+            self.assertEqual(443, location.port)
+            self.assertEqual("https", location.protocol)
 
             # Defaults to Unknown engine
             finding = findings[4]
@@ -180,13 +176,11 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             )
             for section in ["**Technical Details**:", "**External Sources**"]:
                 self.assertIn(section, finding.description)
-
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("poes.x73zjffz.services", endpoint.host)
-            self.assertEqual(443, endpoint.port)
-            self.assertIsNone(endpoint.protocol)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("poes.x73zjffz.services", location.host)
+            self.assertEqual(443, location.port)
+            self.assertFalse(location.protocol)
 
             finding = findings[5]
             self.assertEqual("fc0d905439bde7b9e709cb2feecdf53fe226e72043f46133", finding.unique_id_from_tool)
@@ -212,19 +206,19 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             )
             for section in ["**Technical Details**:"]:
                 self.assertIn(section, finding.description)
-
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("example.x73zjffz.com", endpoint.host)
-            self.assertEqual(443, endpoint.port)
-            self.assertEqual("https", endpoint.protocol)
-            self.assertEqual("ajax/ShelfEdgeLabel/ShelfEdgeLabelsPromotionalBatch", endpoint.path)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            location.clean()
+            self.assertEqual("example.x73zjffz.com", location.host)
+            self.assertEqual(443, location.port)
+            self.assertEqual("https", location.protocol)
+            self.assertEqual("ajax/ShelfEdgeLabel/ShelfEdgeLabelsPromotionalBatch", location.path)
 
     def test_appcheck_web_application_scanner_parser_dupes(self):
         with (get_unit_tests_scans_path("appcheck_web_application_scanner") / "appcheck_web_application_scanner_dupes.json").open(encoding="utf-8") as testfile:
             parser = AppCheckWebApplicationScannerParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             # Test has 5 entries, but we should only return 3 findings.
             self.assertEqual(3, len(findings))
 
@@ -232,26 +226,27 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
         with (get_unit_tests_scans_path("appcheck_web_application_scanner") / "appcheck_web_application_scanner_http2.json").open(encoding="utf-8") as testfile:
             parser = AppCheckWebApplicationScannerParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             self.assertEqual(3, len(findings))
 
             finding = findings[0]
             self.assertEqual("1c564bddf78f7642468474a49c9be6653f39e9df6b32d658", finding.unique_id_from_tool)
             self.assertEqual("2024-08-06", finding.date)
             self.assertEqual("HTTP/2 Supported", finding.title)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("www.xzzvwy.com", location.host)
+            self.assertEqual(443, location.port)
+            self.assertEqual("https", location.protocol)
+            self.assertEqual("media/vzdldjmk/pingpong2.jpg", location.path)
+            self.assertEqual("rmode=max&height=500", location.query)
+
             self.assertNotIn("**Messages**", finding.description)
             self.assertNotIn("\x00", finding.description)
             self.assertIsNotNone(finding.unsaved_request)
             self.assertTrue(finding.unsaved_request.startswith(":method  =   GET"), finding.unsaved_request)
             self.assertIsNotNone(finding.unsaved_response)
             self.assertTrue(finding.unsaved_response.startswith(":status: 200"), finding.unsaved_response)
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("www.xzzvwy.com", endpoint.host)
-            self.assertEqual(443, endpoint.port)
-            self.assertEqual("https", endpoint.protocol)
-            self.assertEqual("media/vzdldjmk/pingpong2.jpg", endpoint.path)
-            self.assertEqual("rmode=max&height=500", endpoint.query)
 
             finding = findings[1]
             self.assertEqual("4e7c0b570ff6083376b99e1897102a87907effe2199dc8d4", finding.unique_id_from_tool)
@@ -264,14 +259,13 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             self.assertTrue(finding.unsaved_request.startswith(":method  =   POST"), finding.unsaved_request)
             self.assertIsNotNone(finding.unsaved_response)
             self.assertTrue(finding.unsaved_response.startswith(":status: 200"), finding.unsaved_response)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("www.xzzvwy.com", endpoint.host)
-            self.assertEqual(443, endpoint.port)
-            self.assertEqual("https", endpoint.protocol)
-            self.assertEqual("media/mmzzvwy/pingpong2.jpg", endpoint.path)
-            self.assertEqual("rmode=max&height=500", endpoint.query)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("www.xzzvwy.com", location.host)
+            self.assertEqual(443, location.port)
+            self.assertEqual("https", location.protocol)
+            self.assertEqual("media/mmzzvwy/pingpong2.jpg", location.path)
+            self.assertEqual("rmode=max&height=500", location.query)
 
             finding = findings[2]
             self.assertEqual("2f1fb384e6a866f9ee0c6f7550e3b607e8b1dd2b1ab0fd02", finding.unique_id_from_tool)
@@ -284,14 +278,13 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             self.assertTrue(finding.unsaved_request.startswith(":method  =   POST"), finding.unsaved_request)
             self.assertIsNotNone(finding.unsaved_response)
             self.assertTrue(finding.unsaved_response.startswith(":status: 200"), finding.unsaved_response)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
-            self.assertEqual("www.zzvwy.com", endpoint.host)
-            self.assertEqual(443, endpoint.port)
-            self.assertEqual("https", endpoint.protocol)
-            self.assertEqual("media/bnhfz2s2/transport-hubs.jpeg", endpoint.path)
-            self.assertEqual("width=768&height=505&mode=crop&format=webp&quality=60", endpoint.query)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("www.zzvwy.com", location.host)
+            self.assertEqual(443, location.port)
+            self.assertEqual("https", location.protocol)
+            self.assertEqual("media/bnhfz2s2/transport-hubs.jpeg", location.path)
+            self.assertEqual("width=768&height=505&mode=crop&format=webp&quality=60", location.query)
 
     def test_appcheck_web_application_scanner_parser_base_engine_parser(self):
         engine = BaseEngineParser()
@@ -406,22 +399,27 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             self.assertEqual(expected, engine.get_port(port))
 
         # Test Endpoint parsing/construction
-        for item, expected in [
-            ({"host": "foobar.baz", "ipv4_address": "10.0.1.1", "port": 80}, ("foobar.baz", 80, None)),
+        for item, (expected_host, expected_port, expected_path) in [
+            ({"host": "foobar.baz", "ipv4_address": "10.0.1.1", "port": 80}, ("foobar.baz", 80, "")),
             (
                 {"url": "http://foobar.baz.qux/http/local", "ipv4_address": "10.0.1.1", "port": 443},
                 ("foobar.baz.qux", 443, "http/local"),
             ),
-            ({"ipv4_address": "10.0.1.1", "port": 227}, ("10.0.1.1", 227, None)),
+            ({"ipv4_address": "10.0.1.1", "port": 227}, ("10.0.1.1", 227, "")),
             ({"url": "http://examplecom.com/bar", "port": 0}, ("examplecom.com", 80, "bar")),
             ({"url": "http://examplecom.com/bar", "port": 8080}, ("examplecom.com", 8080, "bar")),
-            ({"ipv4_address": "10.0.1.1", "port": ""}, ("10.0.1.1", None, None)),
+            ({"ipv4_address": "10.0.1.1", "port": ""}, ("10.0.1.1", None, "")),
         ]:
-            endpoints = engine.parse_endpoints(item)
-            self.assertEqual(1, len(endpoints))
-            endpoint = endpoints[0]
-            endpoint.clean()
-            self.assertEqual(expected, (endpoint.host, endpoint.port, endpoint.path))
+            locations = self.parse_locations(engine, item)
+            self.assertEqual(1, len(locations))
+            location = locations[0]
+            location.clean()
+            self.assertEqual(expected_host, location.host)
+            self.assertEqual(expected_port, location.port)
+            if not expected_path:
+                self.assertFalse(location.path)
+            else:
+                self.assertEqual(expected_path, location.path)
 
         for item in [
             {"host": None, "port": 0},
@@ -430,8 +428,11 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             {"ipv4_address": "", "port": 0},
             {"ipv4_address": "", "url": "", "host": "", "port": 0},
         ]:
-            endpoints = engine.parse_endpoints(item)
-            self.assertEqual(0, len(endpoints))
+            locations = self.parse_locations(engine, item)
+            self.assertEqual(0, len(locations))
+
+    def parse_locations(self, engine, item):
+        return engine.parse_locations(item)
 
     def test_appcheck_web_application_scanner_parser_nmap_engine_parser(self):
         engine = NmapScanningEngineParser()

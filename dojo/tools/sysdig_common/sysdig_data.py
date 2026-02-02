@@ -13,10 +13,10 @@ class SysdigData:
             "HIGH": "High",
             "MEDIUM": "Medium",
             "LOW": "Low",
-            "NEGLIGIBLE": "Informational",
+            "NEGLIGIBLE": "Info",
         }
 
-        return severity_mapping.get(severity.upper() if severity else "", "Informational")
+        return severity_mapping.get(severity.upper() if severity else "", "Info")
 
     """
     Data class to represent the Sysdig data extracted from sources like CSV or JSON.
