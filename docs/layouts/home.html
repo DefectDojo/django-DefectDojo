@@ -7,26 +7,8 @@
     <div class="row justify-content-center text-center">Official documentation for DefectDojo Pro and Open-Source editions,<br>maintained by DefectDojo Inc. and the Open-Source community.</div>
     <div class="col-lg-9 col-xl-8 text-center">
       <p class="lead">{{ .Params.lead | safeHTML }}</p>
-      <a class="btn btn-primary btn-cta rounded-pill btn-lg my-3" href="/en/{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}about_defectdojo/about_docs/" role="button" style="--bs-btn-bg: #f2561d; --bs-btn-hover-bg: #f28d1d;">Open The Docs</a>
+      <a class="btn btn-primary btn-cta rounded-pill btn-lg my-3" href="{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}/get_started/about/about_defectdojo/" role="button" style="--bs-btn-bg: #f2561d; --bs-btn-hover-bg: #f28d1d;">Open The Docs</a>
       {{ .Content }}
-    </div>
-  </div>
-</section>
-<section class="section section-md section-features">
-  <div class="container">
-    <div class="row justify-content-center text-center">
-      <div class="col-lg-5" style="border-style: solid; border-radius: 2px;">
-        <h2 class="h4">Getting Started</h2>
-        <p>Start your journey with DefectDojo with our <a href="/en/about_defectdojo/new_user_checklist/">New User Checklist</a>.</p>
-      </div>
-      <div class="col-lg-5" style="border-style: solid; border-radius: 2px;">
-        <h2 class="h4">Import Data</h2>
-        <p>Learn how to import data from 190+ supported security tools <a href="/en/connecting_your_tools/import_intro/">here</a>.</p>
-      </div>
-      <div class="col-lg-5" style="border-style: solid; border-radius: 2px;">
-        <h2 class="h4">Create Reports</h2>
-        <p>Use the <a href="en/share_your_findings/pro_reports/using_the_report_builder/">Report Builder</a> to present customizable reports of Findings.</p>
-      </div>
     </div>
   </div>
 </section>
