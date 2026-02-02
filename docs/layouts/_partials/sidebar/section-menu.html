@@ -1,0 +1,32 @@
+{{- /* section-menu.html with version toggle */ -}}
+
+{{- $sidebar := printf "sidebar_%s" .Section -}}
+{{- $nodes := slice -}}
+
+{{- /* Get nodes from menu or section */ -}}
+{{- with index site.Menus $sidebar }}
+{{- $nodes = . -}}
+{{- else }}
+{{- with (.Site.GetPage "section" .Section).Sections }}
+{{- $nodes = . -}}
+{{- end }}
+{{- end }}
+
+<!-- Version selector dropdown -->
+<nav class="docs-version-toggle mb-3">
+  <label for="version-select" class="form-label" style="padding-top: 2.5rem;">DefectDojo Version</label>
+  <select id="version-select" name="version" class="form-select" aria-label="Select documentation version">
+    <option value="opensource">DefectDojo Open Source</option>
+    <option value="pro">DefectDojo Pro</option>
+  </select>
+</nav>
+
+<div class="version-menu-wrapper" style="border-top: 1px solid; border-top-color: #6c757d;">
+  <div class="version-opensource">
+    {{ partial "sidebar/render-section-menu.html" (dict "currentPage" $ "nodes" $nodes "version" "opensource") }}
+  </div>
+
+  <div class="version-pro">
+    {{ partial "sidebar/render-section-menu.html" (dict "currentPage" $ "nodes" $nodes "version" "pro") }}
+  </div>
+</div>

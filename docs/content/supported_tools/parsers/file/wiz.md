@@ -5,7 +5,7 @@ toc_hide: true
 
 The [Wiz](https://www.wiz.io/) parser for DefectDojo supports imports from both Wiz Scanner Standard and SCA (Software Composition Analysis) .csv output from Wiz.io. This document details the parsing of both formats into DefectDojo field mappings, unmapped fields, and location of each field's parsing code for easier troubleshooting and analysis.
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">⚠️ **DefectDojo Pro**</span> Users can also automatically create Findings directly from Wiz using the Wiz Connector.  See our [Connectors documentation](/en/connecting_your_tools/connectors/about_connectors/) for more details.
+<span style="background-color:rgba(242, 86, 29, 0.3)">⚠️ **DefectDojo Pro**</span> Users can also automatically create Findings directly from Wiz using the Wiz Connector.  See our [Connectors documentation](/import_data/pro/connectors/about_connectors/) for more details.
 
 ## Link To Tool
 

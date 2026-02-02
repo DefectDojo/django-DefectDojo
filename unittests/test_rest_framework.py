@@ -12,6 +12,7 @@ from unittest.mock import ANY, MagicMock, PropertyMock, call, patch
 
 from django.conf import settings
 from django.contrib.auth.models import Permission
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import tag as test_tag
 from django.test.utils import override_settings
 from django.urls import reverse
@@ -19,6 +20,7 @@ from django.utils import timezone
 from drf_spectacular.drainage import GENERATOR_STATS
 from drf_spectacular.settings import spectacular_settings
 from drf_spectacular.validation import validate_schema
+from parameterized import parameterized
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.mixins import (
@@ -381,34 +383,36 @@ class TestType(Enum):
 
 class BaseClass:
     class RESTEndpointTest(DojoAPITestCase):
+        NOT_AUTHORIZED_USER_ID = 3
+        GLOBAL_READER_USER_ID = 5
+        GLOBAL_WRITER_USER_ID = 7
+        GLOBAL_OWNER_USER_ID = 6
+
         def __init__(self, *args, **kwargs):
             DojoAPITestCase.__init__(self, *args, **kwargs)
 
-        def setUp(self):
-            testuser = User.objects.get(username="admin")
+        def _get_client(self, user_criteria: dict) -> None:
+            testuser = User.objects.get(**user_criteria)
             token = Token.objects.get(user=testuser)
             self.client = APIClient()
             self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+
+        def setUp(self):
+            self._get_client({"username": "admin"})
             self.url = reverse(self.viewname + "-list")
             self.schema = get_open_api3_json_schema()
 
         def setUp_not_authorized(self):
-            testuser = User.objects.get(id=3)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+            self._get_client({"id": self.NOT_AUTHORIZED_USER_ID})
 
         def setUp_global_reader(self):
-            testuser = User.objects.get(id=5)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+            self._get_client({"id": self.GLOBAL_READER_USER_ID})
+
+        def setUp_global_writer(self):
+            self._get_client({"id": self.GLOBAL_WRITER_USER_ID})
 
         def setUp_global_owner(self):
-            testuser = User.objects.get(id=6)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+            self._get_client({"id": self.GLOBAL_OWNER_USER_ID})
 
         def check_schema(self, schema, obj):
             schema_checker = SchemaChecker(self.schema["components"])
@@ -1512,6 +1516,42 @@ class EngagementTest(BaseClass.BaseClassTest):
         self.permission_delete = Permissions.Engagement_Delete
         self.deleted_objects = 23
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    @parameterized.expand(
+        [
+            ("files", {"title": "test", "file": b"empty"}),
+            ("notes", {"entry": "string"}),
+        ],
+    )
+    def test_related_objects(self, related_object_path, payload):
+        """
+        Tests that BaseRelatedObjectPermission enforces the permissions not associated
+        with the base object. For example, even though a request to add a note to an
+        engagement is a POST, we do not need engagement add permissions, but rather
+        engagement edit permissions since that is what is defined in the
+        UserHasEngagementRelatedObjectPermission class
+        """
+        self.setUp_global_reader()
+        # Get an engagement
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        engagement_id = response.data["results"][0]["id"]
+        # Attempt to add a related object
+        relative_url = f"{self.url}{engagement_id}/{related_object_path}/"
+        response = self.client.post(relative_url, payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        # Now switch to a user with edit permissions (but not create)
+        self.setUp_global_writer()
+        # Retry adding the related object
+        if related_object_path == "files":
+            # Convert bytes to a mock uploaded file
+            payload["file"] = SimpleUploadedFile(
+                name="test_file.txt",
+                content=payload["file"],  # the b"empty"
+                content_type="text/plain",
+            )
+        response = self.client.post(relative_url, payload)
+        self.assertEqual(201, response.status_code, response.content[:1000])
 
 
 @versioned_fixtures
@@ -3821,6 +3861,66 @@ class DevelopmentEnvironmentTest(BaseClass.AuthenticatedViewTest):
         response = self.client.delete(relative_url)
         self.assertEqual(409, response.status_code, response.content[:1000])
 
+    def test_list_method_requires_no_authorization(self):
+        """
+        Tests the use case of not supplying GET permissions for the BaseDjangoModelPermission
+        class used in the UserHasDevelopmentEnvironmentPermission class.
+        """
+        self.setUp_not_authorized()
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+    @parameterized.expand(
+        [
+            (
+                "add_development_environment",
+                "post",
+                201,
+                {
+                    "name": "Test_1",
+                },
+            ),
+            (
+                "change_development_environment",
+                "put",
+                200,
+                {"name": "Test_2"},
+            ),
+            (
+                "change_development_environment",
+                "put",
+                200,
+                {"name": "Test_3"},
+            ),
+            (
+                "delete_development_environment",
+                "delete",
+                409,  # Deletion is blocked because of existing references, but it is better than 403 for this test
+                None,
+            ),
+        ],
+    )
+    def test_user_needs_configuration_permission(self, codename, method, expected_status, payload):
+        """
+        Tests that BaseDjangoModelPermission enforces the django configuration permissions
+        through the class used in the UserHasDevelopmentEnvironmentPermission class.
+        """
+        # Ensure we get a 403 first
+        self.setUp_not_authorized()
+        response = self.client.post(self.url, payload, format="json")
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        # Now Get the same user as self.client is using, add the permission, and try again
+        testuser = User.objects.get(id=self.NOT_AUTHORIZED_USER_ID)
+        permission = Permission.objects.get(codename=codename)
+        testuser.user_permissions.add(permission)
+        if method in {"put", "patch", "delete"}:
+            current_objects = self.client.get(self.url, format="json").data
+            relative_url = self.url + "{}/".format(current_objects["results"][-1]["id"])
+        else:
+            relative_url = self.url
+        response = getattr(self.client, method)(relative_url, payload, format="json")
+        self.assertEqual(expected_status, response.status_code, response.content[:1000])
+
 
 @versioned_fixtures
 class TestTypeTest(BaseClass.AuthenticatedViewTest):
@@ -4021,7 +4121,7 @@ class AnnouncementTest(BaseClass.BaseClassTest):
         }
         self.update_fields = {"style": "warning"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 7
+        self.deleted_objects = 8
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create(self):

@@ -1,0 +1,67 @@
+{{- /* Get parameters */ -}}
+{{- $currentPage := .currentPage -}}
+{{- $nodes := .nodes -}}
+{{- $version := .version | default "opensource" -}}
+
+<nav class="section-nav docs-links">
+  <ul class="list-unstyled">
+    {{- range $nodes }}
+      {{- template "walk" (dict "node" . "currentPage" $currentPage "version" $version) }}
+    {{- end }}
+  </ul>
+</nav>
+
+{{- define "walk" }}
+  {{- $currentPage := .currentPage -}}
+  {{- $node := .node -}}
+  {{- $version := .version -}}
+
+  {{- /* Skip node if it has a Page with an audience that does not match version */ -}}
+  {{- $skip := false -}}
+  {{- with $node.Page }}
+    {{- $audience := .Params.audience -}}
+    {{- if and $audience (ne $audience $version) }}
+      {{- $skip = true -}}
+    {{- end }}
+  {{- end }}
+
+  {{- if not $skip }}
+    {{- $linkContent := $node.Page.LinkTitle -}}
+    {{- with $node.Name }}
+      {{- $linkContent = . }}
+    {{- end }}
+
+    {{- $ariaCurrent := "" -}}
+    {{- $liClass := "" -}}
+
+    {{- if $node.Page }}
+      {{- if in $currentPage.Ancestors $node.Page }}
+        {{- $ariaCurrent = "true" }}
+      {{- end }}
+      {{- if $currentPage.Eq $node.Page }}
+        {{- $ariaCurrent = "page" }}
+        {{- $liClass = "active" }}
+      {{- end }}
+    {{- end }}
+
+    <li {{- with $liClass }} class="{{ . }}" {{ end -}}>
+      {{- with $node.Page.Pages }}
+        <details{{- with $ariaCurrent }} open{{- end }}{{- if ne $node.Page.Params.sidebar.collapsed true }} open{{- end }}>
+          <summary>{{ $linkContent }}</summary>
+          <ul class="list-unstyled list-nested">
+            {{- range . }}
+              {{- template "walk" (dict "node" . "currentPage" $currentPage "version" $version) }}
+            {{- end }}
+          </ul>
+        </details>
+      {{- else }}
+        {{- if $node.Page }}
+          <a {{- with $ariaCurrent }} aria-current="{{ . }}" {{- end }} href="{{- $node.Page.RelPermalink }}">{{ $linkContent }}</a>
+        {{- else }}
+          {{- /* Menu-only item with no page */ -}}
+          {{ $linkContent }}
+        {{- end }}
+      {{- end }}
+    </li>
+  {{- end }}
+{{- end }}
