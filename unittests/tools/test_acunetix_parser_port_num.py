@@ -11,9 +11,7 @@ class TestAcunetixParser(DojoTestCase):
         with (get_unit_tests_scans_path("acunetix") / "one_finding_with_port_num.xml").open(encoding="utf-8") as testfile:
             parser = AcunetixParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -26,22 +24,20 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertEqual("Vijay Test Imapact", finding.impact)
                 self.assertIsNotNone(finding.references)
                 self.assertGreater(len(finding.references), 0)
-                self.assertEqual(1, len(finding.unsaved_endpoints))
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
                 # check endpoints
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual("https", endpoint.protocol)
-                self.assertEqual(443, endpoint.port)
-                self.assertEqual("vijaytest.com", endpoint.host)
-                self.assertEqual("some/path", endpoint.path)
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual("https", location.protocol)
+                self.assertEqual(443, location.port)
+                self.assertEqual("vijaytest.com", location.host)
+                self.assertEqual("some/path", location.path)
 
     def test_parse_file_with_multiple_finding(self):
         with (get_unit_tests_scans_path("acunetix") / "many_findings_with_port_number.xml").open(encoding="utf-8") as testfile:
             parser = AcunetixParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(4, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -55,12 +51,12 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertIsNotNone(finding.references)
                 self.assertGreater(len(finding.references), 0)
                 # check endpoints
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertIsNone(endpoint.protocol)
-                self.assertEqual(endpoint.port, 8080)
-                self.assertEqual("www.itsecgames.com", endpoint.host)
-                self.assertIsNone(endpoint.path)
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertFalse(location.protocol)
+                self.assertEqual(location.port, 8080)
+                self.assertEqual("www.itsecgames.com", location.host)
+                self.assertFalse(location.path)
                 # check req/resp
                 self.assertEqual(1, len(finding.unsaved_req_resp))
                 req_resp = finding.unsaved_req_resp[0]
@@ -85,12 +81,12 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertIsNotNone(finding.references)
                 self.assertGreater(len(finding.references), 0)
                 # check endpoints
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertIsNone(endpoint.protocol)
-                self.assertEqual(endpoint.port, 8080)
-                self.assertEqual("www.itsecgames.com", endpoint.host)
-                self.assertIsNone(endpoint.path)
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertFalse(location.protocol)
+                self.assertEqual(location.port, 8080)
+                self.assertEqual("www.itsecgames.com", location.host)
+                self.assertFalse(location.path)
                 # check req/resp
                 self.assertEqual(1, len(finding.unsaved_req_resp))
                 req_resp = finding.unsaved_req_resp[0]
@@ -114,12 +110,12 @@ class TestAcunetixParser(DojoTestCase):
                 # check that this finding have no references
                 self.assertIsNone(finding.references)
                 # check endpoints
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertIsNone(endpoint.protocol)
-                self.assertEqual(endpoint.port, 8080)
-                self.assertEqual("www.itsecgames.com", endpoint.host)
-                self.assertIsNone(endpoint.path)
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertFalse(location.protocol)
+                self.assertEqual(location.port, 8080)
+                self.assertEqual("www.itsecgames.com", location.host)
+                self.assertFalse(location.path)
                 # check req/resp
                 self.assertEqual(1, len(finding.unsaved_req_resp))
                 req_resp = finding.unsaved_req_resp[0]
@@ -134,9 +130,7 @@ class TestAcunetixParser(DojoTestCase):
         with (get_unit_tests_scans_path("acunetix") / "XML_http_example_co_id_port_num.xml").open(encoding="utf-8") as testfile:
             parser = AcunetixParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(7, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -153,17 +147,17 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertIsNotNone(finding.references)
                 self.assertGreater(len(finding.references), 0)
                 # check endpoints
-                self.assertEqual(3, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertIsNone(endpoint.protocol)
-                self.assertEqual(endpoint.port, 9000)
-                self.assertEqual("example.co.id", endpoint.host)
-                self.assertEqual("h/search", endpoint.path)
-                endpoint = finding.unsaved_endpoints[1]
-                self.assertIsNone(endpoint.protocol)
-                self.assertEqual(endpoint.port, 9000)
-                self.assertEqual("example.co.id", endpoint.host)
-                self.assertEqual("m/zmain", endpoint.path)
+                self.assertEqual(3, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertFalse(location.protocol)
+                self.assertEqual(location.port, 9000)
+                self.assertEqual("example.co.id", location.host)
+                self.assertEqual("h/search", location.path)
+                location = self.get_unsaved_locations(finding)[1]
+                self.assertFalse(location.protocol)
+                self.assertEqual(location.port, 9000)
+                self.assertEqual("example.co.id", location.host)
+                self.assertEqual("m/zmain", location.path)
                 # check req/resp
                 self.assertEqual(3, len(finding.unsaved_req_resp))
                 for req_resp in finding.unsaved_req_resp:
@@ -186,12 +180,12 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertIsNotNone(finding.references)
                 self.assertGreater(len(finding.references), 0)
                 # check endpoints
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertIsNone(endpoint.protocol)
-                self.assertEqual(endpoint.port, 9000)
-                self.assertEqual("example.co.id", endpoint.host)
-                self.assertIsNone(endpoint.path)
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertFalse(location.protocol)
+                self.assertEqual(location.port, 9000)
+                self.assertEqual("example.co.id", location.host)
+                self.assertFalse(location.path)
                 # check req/resp
                 self.assertEqual(1, len(finding.unsaved_req_resp))
                 req_resp = finding.unsaved_req_resp[0]

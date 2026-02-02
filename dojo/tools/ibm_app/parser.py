@@ -2,8 +2,10 @@ import hashlib
 import logging
 
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 LOGGER = logging.getLogger(__name__)
 
@@ -110,7 +112,6 @@ class IbmAppParser:
                             finding.fix_available = True
                         else:
                             finding.fix_available = False
-                        finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
 
                         # in case empty string is returned as url
@@ -118,9 +119,11 @@ class IbmAppParser:
                         # As most of the actions of any vuln scanner depends on
                         # urls
                         if url:
-                            finding.unsaved_endpoints.append(
-                                Endpoint.from_uri(url),
-                            )
+                            if settings.V3_FEATURE_LOCATIONS:
+                                finding.unsaved_locations.append(URL.from_value(url))
+                            else:
+                                # TODO: Delete this after the move to Locations
+                                finding.unsaved_endpoints.append(Endpoint.from_uri(url))
 
         return list(dupes.values())
 

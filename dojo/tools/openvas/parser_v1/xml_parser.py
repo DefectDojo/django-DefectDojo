@@ -2,8 +2,10 @@ import contextlib
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class OpenVASXMLParser:
@@ -18,7 +20,10 @@ class OpenVASXMLParser:
         results = report.find("results")
         for result in results:
             script_id = None
-            unsaved_endpoint = Endpoint()
+
+            # TODO: Delete this after the move to Locations
+            unsaved_location = URL() if settings.V3_FEATURE_LOCATIONS else Endpoint()
+
             for field in result:
                 if field.tag == "name":
                     title = field.text
@@ -27,20 +32,20 @@ class OpenVASXMLParser:
                     title = title + "_" + field.text
                     description.append(f"**Hostname**: {field.text}")
                     if field.text:
-                        unsaved_endpoint.host = field.text.strip()  # strip due to https://github.com/greenbone/gvmd/issues/2378
+                        unsaved_location.host = field.text.strip()  # strip due to https://github.com/greenbone/gvmd/issues/2378
                 if field.tag == "host":
                     title = title + "_" + field.text
                     description.append(f"**Host**: {field.text}")
-                    if not unsaved_endpoint.host and field.text:
-                        unsaved_endpoint.host = field.text.strip()  # strip due to https://github.com/greenbone/gvmd/issues/2378
+                    if not unsaved_location.host and field.text:
+                        unsaved_location.host = field.text.strip()  # strip due to https://github.com/greenbone/gvmd/issues/2378
                 if field.tag == "port":
                     title = title + "_" + field.text
                     description.append(f"**Port**: {field.text}")
                     if field.text:
                         port_str, protocol = field.text.split("/")
                         with contextlib.suppress(ValueError):
-                            unsaved_endpoint.port = int(port_str)
-                        unsaved_endpoint.protocol = protocol
+                            unsaved_location.port = int(port_str)
+                        unsaved_location.protocol = protocol
                 if field.tag == "nvt":
                     description.append(f"**NVT**: {field.text}")
                     script_id = field.get("oid") or field.text
@@ -63,7 +68,11 @@ class OpenVASXMLParser:
                 static_finding=False,
                 vuln_id_from_tool=script_id,
             )
-            finding.unsaved_endpoints = [unsaved_endpoint]
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [unsaved_location]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [unsaved_location]
             findings.append(finding)
         return findings
 

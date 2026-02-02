@@ -5,9 +5,11 @@ import textwrap
 from datetime import datetime
 
 import dateutil.parser
+from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 from .importer import BugcrowdApiImporter
 
@@ -85,28 +87,8 @@ class ApiBugcrowdParser:
 
             date = dateutil.parser.parse(entry["attributes"]["submitted_at"])
 
-            bug_url = ""
-            bug_endpoint = None
-            if entry["attributes"]["bug_url"]:
-                try:
-                    if (
-                        "://" in entry["attributes"]["bug_url"]
-                    ):  # is the host full uri?
-                        bug_endpoint = Endpoint.from_uri(
-                            entry["attributes"]["bug_url"].strip(),
-                        )
-                        # can raise exception if the host is not valid URL
-                    else:
-                        bug_endpoint = Endpoint.from_uri(
-                            "//" + entry["attributes"]["bug_url"].strip(),
-                        )
-                        # can raise exception if there is no way to parse the
-                        # host
-                except (
-                    ValueError
-                ):  # We don't want to fail the whole import just for 1 error in the bug_url
-                    logger.error("Error parsing bugcrowd bug_url : %s", entry["attributes"]["bug_url"].strip())
-                bug_url = entry["attributes"]["bug_url"]
+            bug_url = (entry["attributes"]["bug_url"] or "").strip()
+            bug_location = self.get_bug_location(bug_url)
 
             description = "\n".join(
                 [
@@ -148,18 +130,22 @@ class ApiBugcrowdParser:
                 finding.active = False
                 finding.severity = "Info"
 
-            if bug_endpoint:
+            if bug_location:
                 try:
-                    bug_endpoint.clean()
+                    bug_location.clean()
                     try:
-                        finding.unsaved_endpoints = [bug_endpoint]
+                        if settings.V3_FEATURE_LOCATIONS:
+                            finding.unsaved_locations = [bug_location]
+                        else:
+                            # TODO: Delete this after the move to Locations
+                            finding.unsaved_endpoints = [bug_location]
                     except Exception as e:
                         logger.error(
-                            "%s bug url from bugcrowd failed to parse to endpoint, error= %s", bug_endpoint, e,
+                            "%s bug url from bugcrowd failed to parse to location, error= %s", bug_location, e,
                         )
                 except ValidationError:
                     logger.error(
-                        f"Broken Bugcrowd endpoint {bug_endpoint.host} was skipped.",
+                        f"Broken Bugcrowd location {bug_location.host} was skipped.",
                     )
 
             findings.append(finding)
@@ -175,6 +161,23 @@ class ApiBugcrowdParser:
         last_index = len(log) - 1
         entry = log[last_index]
         return self.convert_log_timestamp(entry["timestamp"])
+
+    def get_bug_location(self, bug_url):
+        if not bug_url:
+            return None
+
+        # is the host not a full uri?
+        if "://" not in bug_url:
+            bug_url = "//" + bug_url
+
+        try:
+            # TODO: Delete this after the move to Locations
+            if not settings.V3_FEATURE_LOCATIONS:
+                return Endpoint.from_uri(bug_url)
+            return URL.from_value(bug_url)
+        except ValueError:
+            # We don't want to fail the whole import just for 1 error in the bug_url
+            logger.error("Error parsing bugcrowd bug_url : %s", bug_url)
 
     def include_finding(self, entry):
         """Determine whether this finding should be imported to DefectDojo"""

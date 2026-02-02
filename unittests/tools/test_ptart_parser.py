@@ -1,3 +1,4 @@
+
 from dojo.models import Engagement, Product, Test
 from dojo.tools.ptart.parser import PTARTParser
 from dojo.tools.ptart.ptart_parser_tools import (
@@ -5,7 +6,7 @@ from dojo.tools.ptart.ptart_parser_tools import (
     parse_attachment_from_hit,
     parse_cwe_from_hit,
     parse_cwe_id_from_cwe,
-    parse_endpoints_from_hit,
+    parse_locations_from_hit,
     parse_ptart_fix_effort,
     parse_ptart_severity,
     parse_references_from_hit,
@@ -444,58 +445,61 @@ class TestPTARTParser(DojoTestCase):
             hit = {}
             self.assertEqual(None, parse_cwe_from_hit(hit))
 
-    def test_ptart_parser_tools_parse_endpoints_from_hit(self):
+    def test_ptart_parser_tools_parse_locations_from_hit(self):
         with self.subTest("No Asset"):
             hit = {}
-            self.assertEqual([], parse_endpoints_from_hit(hit))
+            self.assertEqual([], parse_locations_from_hit(hit))
         with self.subTest("Empty Asset"):
             hit = {
                 "asset": "",
             }
-            self.assertEqual([], parse_endpoints_from_hit(hit))
+            self.assertEqual([], parse_locations_from_hit(hit))
         with self.subTest("Valid Asset"):
             hit = {
                 "asset": "https://test.example.com",
             }
-            endpoints = parse_endpoints_from_hit(hit)
-            self.assertEqual(1, len(endpoints))
-            endpoint = endpoints[0]
-            self.assertEqual("test.example.com", endpoint.host)
-            self.assertEqual("https", endpoint.protocol)
-            self.assertEqual(443, endpoint.port)
-            self.assertEqual(None, endpoint.path)
+            locations = parse_locations_from_hit(hit)
+            self.assertEqual(1, len(locations))
+            location = locations[0]
+            self.assertEqual("test.example.com", location.host)
+            self.assertEqual("https", location.protocol)
+            self.assertEqual(443, location.port)
+            self.assertFalse(location.path)
         with self.subTest("Asset with Invalid Port"):
             hit = {
                 "asset": "https://test.example.com:<random_port>",
             }
-            endpoints = parse_endpoints_from_hit(hit)
-            self.assertEqual(0, len(endpoints))
+            locations = parse_locations_from_hit(hit)
+            self.assertEqual(0, len(locations))
         with self.subTest("Asset with Invalid Protocol"):
             hit = {
                 "asset": "test.example.com",
             }
-            endpoints = parse_endpoints_from_hit(hit)
-            self.assertEqual(1, len(endpoints))
-            endpoint = endpoints[0]
-            self.assertEqual("test.example.com", endpoint.host)
-            self.assertEqual("https", endpoint.protocol)
+            locations = parse_locations_from_hit(hit)
+            self.assertEqual(1, len(locations))
+            location = locations[0]
+            self.assertEqual("test.example.com", location.host)
+            self.assertEqual("https", location.protocol)
 
     def test_ptart_parser_with_empty_json_throws_error(self):
         with (get_unit_tests_scans_path("ptart") / "empty_with_error.json").open(encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
+            self.validate_locations(findings)
             self.assertEqual(0, len(findings))
 
     def test_ptart_parser_with_no_assessments_has_no_findings(self):
         with (get_unit_tests_scans_path("ptart") / "ptart_zero_vul.json").open(encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
+            self.validate_locations(findings)
             self.assertEqual(0, len(findings))
 
     def test_ptart_parser_with_one_assessment_has_one_finding(self):
         with (get_unit_tests_scans_path("ptart") / "ptart_one_vul.json").open(encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             with self.subTest("Test Assessment: Broken Access Control"):
                 finding = findings[0]
@@ -520,9 +524,9 @@ class TestPTARTParser(DojoTestCase):
                     "A01:2021-Broken Access Control",
                     "A04:2021-Insecure Design",
                 ], finding.unsaved_tags)
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual(str(endpoint), "https://test.example.com")
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual(str(location), "https://test.example.com")
                 self.assertEqual(2, len(finding.unsaved_files))
                 screenshot = finding.unsaved_files[0]
                 self.assertEqual("Borked.png", screenshot["title"])
@@ -536,6 +540,7 @@ class TestPTARTParser(DojoTestCase):
         with (get_unit_tests_scans_path("ptart") / "ptart_many_vul.json").open(encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
+            self.validate_locations(findings)
             self.assertEqual(2, len(findings))
             with self.subTest("Test Assessment: Broken Access Control"):
                 finding = findings[0]
@@ -555,9 +560,9 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
                 self.assertEqual(862, finding.cwe)
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual(str(endpoint), "https://test.example.com")
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual(str(location), "https://test.example.com")
                 self.assertEqual(2, len(finding.unsaved_files))
                 screenshot = finding.unsaved_files[0]
                 self.assertEqual("Borked.png", screenshot["title"])
@@ -586,6 +591,7 @@ class TestPTARTParser(DojoTestCase):
         with (get_unit_tests_scans_path("ptart") / "ptart_vulns_with_mult_assessments.json").open(encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
+            self.validate_locations(findings)
             self.assertEqual(3, len(findings))
             with self.subTest("Test Assessment: Broken Access Control"):
                 finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00002"), None)
@@ -605,9 +611,9 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
                 self.assertEqual(862, finding.cwe)
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual(str(endpoint), "https://test.example.com")
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual(str(location), "https://test.example.com")
                 self.assertEqual(2, len(finding.unsaved_files))
                 screenshot = finding.unsaved_files[0]
                 self.assertEqual("Borked.png", screenshot["title"])
@@ -649,7 +655,7 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("New API", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
                 self.assertEqual(79, finding.cwe)
-                self.assertEqual(0, len(finding.unsaved_endpoints))
+                self.assertEqual(0, len(self.get_unsaved_locations(finding)))
                 self.assertEqual(0, len(finding.unsaved_files))
                 self.assertEqual(None, finding.references)
 
@@ -688,9 +694,9 @@ class TestPTARTParser(DojoTestCase):
                 "A01:2021-Broken Access Control",
                 "A04:2021-Insecure Design",
             ], finding.unsaved_tags)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual(str(endpoint), "https://test.example.com")
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual(str(location), "https://test.example.com")
             self.assertEqual(2, len(finding.unsaved_files))
             screenshot = finding.unsaved_files[0]
             self.assertEqual("Borked.png", screenshot["title"])
@@ -704,6 +710,7 @@ class TestPTARTParser(DojoTestCase):
         with (get_unit_tests_scans_path("ptart") / "ptart_vuln_plus_retest.json").open(encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
+            self.validate_locations(findings)
             self.assertEqual(3, len(findings))
             with self.subTest("Test Assessment: Broken Access Control"):
                 finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00002"), None)
@@ -723,9 +730,9 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
                 self.assertEqual(862, finding.cwe)
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual(str(endpoint), "https://test.example.com")
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual(str(location), "https://test.example.com")
                 self.assertEqual(2, len(finding.unsaved_files))
                 screenshot = finding.unsaved_files[0]
                 self.assertEqual("Borked.png", screenshot["title"])
@@ -765,9 +772,9 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Retest: Test Retest", finding.component_name)
                 self.assertEqual("2024-09-08", finding.date.strftime("%Y-%m-%d"))
                 self.assertEqual(862, finding.cwe)
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual(str(endpoint), "https://test.example.com")
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                location = self.get_unsaved_locations(finding)[0]
+                self.assertEqual(str(location), "https://test.example.com")
                 self.assertEqual(1, len(finding.unsaved_files))
                 screenshot = finding.unsaved_files[0]
                 self.assertEqual("Yet another Screenshot.png", screenshot["title"])
@@ -808,9 +815,9 @@ class TestPTARTParser(DojoTestCase):
                 "A01:2021-Broken Access Control",
                 "A04:2021-Insecure Design",
             ], finding.unsaved_tags)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual(str(endpoint), "https://test.example.com")
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual(str(location), "https://test.example.com")
             self.assertEqual(2, len(finding.unsaved_files))
             screenshot = finding.unsaved_files[0]
             self.assertEqual("Borked.png", screenshot["title"])
@@ -855,9 +862,9 @@ class TestPTARTParser(DojoTestCase):
                 "A01:2021-Broken Access Control",
                 "A04:2021-Insecure Design",
             ], finding.unsaved_tags)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual(str(endpoint), "https://test.example.com")
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual(str(location), "https://test.example.com")
             self.assertEqual(2, len(finding.unsaved_files))
             screenshot = finding.unsaved_files[0]
             self.assertEqual("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut l...png", screenshot["title"])

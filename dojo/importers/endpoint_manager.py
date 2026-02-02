@@ -17,6 +17,7 @@ from dojo.models import (
 logger = logging.getLogger(__name__)
 
 
+# TODO: Delete this after the move to Locations
 class EndpointManager:
     @dojo_async_task
     @app.task()

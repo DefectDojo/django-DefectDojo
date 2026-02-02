@@ -7,8 +7,10 @@ import sys
 
 from cpe import CPE
 from cvss import CVSS3
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding, Test
+from dojo.url.models import URL
 
 LOGGER = logging.getLogger(__name__)
 
@@ -245,8 +247,6 @@ class TenableCSVParser:
                             f"Failed to parse CPE '{detected_cpe[0]}': {e}. "
                             "Skipping component_name and component_version.",
                         )
-
-                find.unsaved_endpoints = []
                 find.unsaved_vulnerability_ids = []
                 dupes[dupe_key] = find
             else:
@@ -266,7 +266,7 @@ class TenableCSVParser:
                     find.unsaved_vulnerability_ids += detected_cve
                 else:
                     find.unsaved_vulnerability_ids.append(detected_cve)
-            # Endpoint related fields
+            # Location related fields
             host = row.get("Host", row.get("asset.host_name", ""))
             if not host:
                 host = row.get("DNS Name", "")
@@ -275,12 +275,18 @@ class TenableCSVParser:
 
             protocol = row.get("Protocol", row.get("protocol", ""))
             protocol = protocol.lower() if protocol else None
-            port = str(row.get("Port", row.get("asset.port", "")))
-            if isinstance(port, str) and port in {"", "0"}:
-                port = None
-            # Update the endpoints
-            endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(protocol=protocol, host=host, port=port)
-            # Add the list to be processed later
-            find.unsaved_endpoints.append(endpoint)
+            port = int(row.get("Port", row.get("asset.port", "")) or "0") or None
+
+            if settings.V3_FEATURE_LOCATIONS:
+                # Update the location
+                location = URL.from_value(host) if "://" in host else URL(protocol=protocol, host=host, port=port)
+                # Add the list to be processed later
+                find.unsaved_locations.append(location)
+            else:
+                # TODO: Delete this after the move to Locations
+                # Update the endpoints
+                endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(protocol=protocol, host=host, port=port)
+                # Add the list to be processed later
+                find.unsaved_endpoints.append(endpoint)
 
         return list(dupes.values())

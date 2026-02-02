@@ -2,8 +2,10 @@ import hashlib
 import json
 
 import hyperlink
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class WFuzzParser:
@@ -58,14 +60,25 @@ class WFuzzParser:
                     cwe=200,
                     nb_occurences=1,
                 )
-                finding.unsaved_endpoints = [
-                    Endpoint(
-                        path="/".join(url.path),
-                        host=url.host,
-                        protocol=url.scheme,
-                        port=url.port,
-                    ),
-                ]
+                if settings.V3_FEATURE_LOCATIONS:
+                    finding.unsaved_locations = [
+                        URL(
+                            path="/".join(url.path),
+                            host=url.host,
+                            protocol=url.scheme,
+                            port=url.port,
+                        ),
+                    ]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints = [
+                        Endpoint(
+                            path="/".join(url.path),
+                            host=url.host,
+                            protocol=url.scheme,
+                            port=url.port,
+                        ),
+                    ]
                 finding.unsaved_req_resp = [
                     {"req": item["payload"], "resp": str(return_code)},
                 ]

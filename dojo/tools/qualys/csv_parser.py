@@ -8,6 +8,7 @@ from dateutil import parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 from dojo.utils import parse_cvss_data
 
 _logger = logging.getLogger(__name__)
@@ -185,14 +186,6 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
     """
     dojo_findings = []
     for report_finding in report_findings:
-        # Get endpoint meta
-        if report_finding.get("FQDN"):
-            endpoint = Endpoint.from_uri(report_finding.get("FQDN"))
-        elif report_finding.get("DNS"):
-            endpoint = Endpoint(host=report_finding.get("DNS"))
-        else:
-            endpoint = Endpoint(host=report_finding["IP"])
-
         # Get CVE meta
         cve_data = report_finding.get("CVE ID", report_finding.get("CVEID", ""))
         # Clean up the CVE data appropriately
@@ -282,7 +275,23 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
             # Set the initial cve list for new findings
             finding.unsaved_vulnerability_ids = cve_list
         finding.verified = True
-        finding.unsaved_endpoints.append(endpoint)
+        if settings.V3_FEATURE_LOCATIONS:
+            if report_finding.get("FQDN"):
+                location = URL.from_value(report_finding.get("FQDN"))
+            elif report_finding.get("DNS"):
+                location = URL(host=report_finding.get("DNS"))
+            else:
+                location = URL(host=report_finding["IP"])
+            finding.unsaved_locations.append(location)
+        else:
+            # TODO: Delete this after the move to Locations
+            if report_finding.get("FQDN"):
+                endpoint = Endpoint.from_uri(report_finding.get("FQDN"))
+            elif report_finding.get("DNS"):
+                endpoint = Endpoint(host=report_finding.get("DNS"))
+            else:
+                endpoint = Endpoint(host=report_finding["IP"])
+            finding.unsaved_endpoints.append(endpoint)
         if not finding_with_id:
             dojo_findings.append(finding)
     return dojo_findings

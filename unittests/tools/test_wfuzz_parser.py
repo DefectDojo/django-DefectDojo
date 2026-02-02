@@ -15,36 +15,28 @@ class TestWFuzzParser(DojoTestCase):
         with (get_unit_tests_scans_path("wfuzz") / "one_finding.json").open(encoding="utf-8") as testfile:
             parser = WFuzzParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
 
     def test_parse_many_finding(self):
         with (get_unit_tests_scans_path("wfuzz") / "many_findings.json").open(encoding="utf-8") as testfile:
             parser = WFuzzParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(4, len(findings))
 
     def test_one_dup_finding(self):
         with (get_unit_tests_scans_path("wfuzz") / "one_dup_finding.json").open(encoding="utf-8") as testfile:
             parser = WFuzzParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(4, len(findings))
 
     def test_issue_7863(self):
         with (get_unit_tests_scans_path("wfuzz") / "issue_7863.json").open(encoding="utf-8") as testfile:
             parser = WFuzzParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             self.assertEqual("Medium", findings[0].severity)
 
@@ -52,7 +44,5 @@ class TestWFuzzParser(DojoTestCase):
         with (get_unit_tests_scans_path("wfuzz") / "one_finding_responsecode_missing.json").open(encoding="utf-8") as testfile:
             parser = WFuzzParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))

@@ -30,7 +30,7 @@ class TestStackHawkParser(DojoTestCase):
         with (get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vul.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             findings = parser.get_findings(testfile, Test())
-            self.__assertAllEndpointsAreClean(findings)
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
 
             finding = findings[0]
@@ -53,7 +53,7 @@ class TestStackHawkParser(DojoTestCase):
         with (get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             findings = parser.get_findings(testfile, Test())
-            self.__assertAllEndpointsAreClean(findings)
+            self.validate_locations(findings)
             self.assertEqual(6, len(findings))
 
             self.__assertFindingEquals(
@@ -158,7 +158,7 @@ class TestStackHawkParser(DojoTestCase):
         with (get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vuln_all_endpoints_false_positive.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             findings = parser.get_findings(testfile, Test())
-            self.__assertAllEndpointsAreClean(findings)
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             self.__assertFindingEquals(
                 findings[0],
@@ -178,7 +178,7 @@ class TestStackHawkParser(DojoTestCase):
         with (get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vuln_all_endpoints_risk_accepted.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             findings = parser.get_findings(testfile, Test())
-            self.__assertAllEndpointsAreClean(findings)
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             self.__assertFindingEquals(
                 findings[0],
@@ -198,7 +198,7 @@ class TestStackHawkParser(DojoTestCase):
         with (get_unit_tests_scans_path("stackhawk") / "stackhawk_one_vuln_all_endpoints_have_different_status.json").open(encoding="utf-8") as testfile:
             parser = StackHawkParser()
             findings = parser.get_findings(testfile, Test())
-            self.__assertAllEndpointsAreClean(findings)
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             self.__assertFindingEquals(
                 findings[0],
@@ -248,8 +248,3 @@ class TestStackHawkParser(DojoTestCase):
         self.assertEqual(risk_accepted, actual_finding.risk_accepted)
         # The following fields should be not be set from this parser.
         self.assertIsNone(actual_finding.unique_id_from_tool)
-
-    def __assertAllEndpointsAreClean(self, findings):
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()

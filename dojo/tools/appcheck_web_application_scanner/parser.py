@@ -32,7 +32,7 @@ class AppCheckWebApplicationScannerParser:
     (Finding object, duplicate key), the latter entry of which is used to consolidate duplicates from the input data.
     """
 
-    def get_scan_types(self) -> [str]:
+    def get_scan_types(self) -> list[str]:
         return ["AppCheck Web Application Scanner"]
 
     def get_label_for_scan_types(self, scan_type: str) -> str:

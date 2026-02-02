@@ -2,10 +2,13 @@ import hashlib
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
 
 __author__ = "dr3dd589"
+
+from dojo.url.models import URL
 
 # TODO: discuss this list as maintenance subject
 WEAK_CIPHER_LIST = [
@@ -62,7 +65,7 @@ class SSLyzeXMLParser:
         dupes = {}
         for target in results:
             host = target.attrib["host"]
-            port = target.attrib["port"]
+            port = int(target.attrib["port"] or "0") or None
             protocol = target.attrib["tlsWrappedProtocol"]
             for element in target:
                 title = ""
@@ -149,13 +152,20 @@ class SSLyzeXMLParser:
                             severity=severity,
                             dynamic_finding=True,
                         )
-                        finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
 
                         if host is not None:
-                            finding.unsaved_endpoints.append(
-                                Endpoint(
-                                    host=host, port=port, protocol=protocol,
-                                ),
-                            )
+                            if settings.V3_FEATURE_LOCATIONS:
+                                finding.unsaved_locations.append(
+                                    URL(
+                                        host=host, port=port, protocol=protocol,
+                                    ),
+                                )
+                            else:
+                                # TODO: Delete this after the move to Locations
+                                finding.unsaved_endpoints.append(
+                                    Endpoint(
+                                        host=host, port=port, protocol=protocol,
+                                    ),
+                                )
         return list(dupes.values())

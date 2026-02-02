@@ -10,9 +10,7 @@ class TestWapitiParser(DojoTestCase):
         with (get_unit_tests_scans_path("wapiti") / "juicyshop.xml").open(encoding="utf-8") as testfile:
             parser = WapitiParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(3, len(findings))
             finding = findings[0]
             self.assertEqual("Content Security Policy Configuration: CSP is not set", finding.title)
@@ -31,9 +29,7 @@ class TestWapitiParser(DojoTestCase):
         with (get_unit_tests_scans_path("wapiti") / "demo.xml").open(encoding="utf-8") as testfile:
             parser = WapitiParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(3, len(findings))
             finding = findings[2]
             self.assertEqual("Secure Flag cookie: Secure flag is not set in the cookie : csrftoken", finding.title)
@@ -44,9 +40,7 @@ class TestWapitiParser(DojoTestCase):
         with (get_unit_tests_scans_path("wapiti") / "example.xml").open(encoding="utf-8") as testfile:
             parser = WapitiParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(5, len(findings))
             finding = findings[2]
             self.assertEqual("HTTP Secure Headers: X-XSS-Protection is not set", finding.title)
@@ -57,9 +51,7 @@ class TestWapitiParser(DojoTestCase):
         with (get_unit_tests_scans_path("wapiti") / "cwe.xml").open(encoding="utf-8") as testfile:
             parser = WapitiParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("Cross Site Request Forgery: CSP is not set", finding.title)

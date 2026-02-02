@@ -1,9 +1,11 @@
 import logging
 import re
 
+from django.conf import settings
 from lxml import etree, html
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -245,8 +247,12 @@ class BurpSuiteDASTParser:
                 **finding_dict,
             )
             # Add the unsaved versions of the other things
-            # Endpoints
-            finding.unsaved_endpoints = [Endpoint.from_uri(endpoint) for endpoint in endpoints]
+            # Endpoints/Locations
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [URL.from_value(endpoint) for endpoint in endpoints]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint.from_uri(endpoint) for endpoint in endpoints]
             # Request Response Pairs
 
             finding.unsaved_req_resp = [

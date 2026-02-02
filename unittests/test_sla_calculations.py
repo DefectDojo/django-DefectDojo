@@ -11,12 +11,12 @@ from dojo.models import (
     Test,
 )
 from dojo.templatetags.display_tags import finding_sla
-
-from .dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 
 
+@versioned_fixtures
 class TestSLACalculations(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 

@@ -2,7 +2,10 @@ import json
 import logging
 import zipfile
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +133,6 @@ class MSDefenderParser:
         if vulnerability["cveId"] is not None:
             finding.unsaved_vulnerability_ids = []
             finding.unsaved_vulnerability_ids.append(vulnerability["cveId"])
-        finding.unsaved_endpoints = []
         return finding
 
     def process_json_with_machine_info(self, vulnerability, machine):
@@ -177,16 +179,32 @@ class MSDefenderParser:
         if "cveId" in vulnerability:
             finding.unsaved_vulnerability_ids = []
             finding.unsaved_vulnerability_ids.append(vulnerability["cveId"])
-        finding.unsaved_endpoints = []
-        if "computerDnsName" in machine and machine["computerDnsName"] is not None:
-            finding.unsaved_endpoints.append(Endpoint(host=str(machine["computerDnsName"]).replace(" ", "").replace("(", "_").replace(")", "_")))
-        if "lastIpAddress" in machine and machine["lastIpAddress"] is not None:
-            finding.unsaved_endpoints.append(Endpoint(host=str(machine["lastIpAddress"])))
-        if "lastExternalIpAddress" in machine and machine["lastExternalIpAddress"] is not None:
-            finding.unsaved_endpoints.append(Endpoint(host=str(machine["lastExternalIpAddress"])))
+
+        locations = []
+        if settings.V3_FEATURE_LOCATIONS:
+            if "computerDnsName" in machine and machine["computerDnsName"] is not None:
+                host = str(machine["computerDnsName"]).replace(" ", "").replace("(", "_").replace(")", "_")
+                locations.append(URL(host=host))
+            if "lastIpAddress" in machine and machine["lastIpAddress"] is not None:
+                locations.append(URL(host=str(machine["lastIpAddress"])))
+            if "lastExternalIpAddress" in machine and machine["lastExternalIpAddress"] is not None:
+                locations.append(URL(host=str(machine["lastExternalIpAddress"])))
+            finding.unsaved_locations = locations
+        else:
+            # TODO: Delete this after the move to Locations
+            if "computerDnsName" in machine and machine["computerDnsName"] is not None:
+                host = str(machine["computerDnsName"]).replace(" ", "").replace("(", "_").replace(")", "_")
+                locations.append(URL(host=host))
+            if "lastIpAddress" in machine and machine["lastIpAddress"] is not None:
+                locations.append(Endpoint(host=str(machine["lastIpAddress"])))
+            if "lastExternalIpAddress" in machine and machine["lastExternalIpAddress"] is not None:
+                locations.append(Endpoint(host=str(machine["lastExternalIpAddress"])))
+            finding.unsaved_endpoints = locations
+
         return finding
 
     def severity_check(self, severity_input):
-        if severity_input in {"Informational", "Low", "Medium", "High", "Critical"}:
+        if severity_input in {"Low", "Medium", "High", "Critical"}:
             return severity_input
-        return "Informational"
+        # "Informational"/Other
+        return "Info"

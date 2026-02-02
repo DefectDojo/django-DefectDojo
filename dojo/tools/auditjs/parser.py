@@ -4,6 +4,8 @@ import re
 from json.decoder import JSONDecodeError
 
 # import cvss.parser
+from django.conf import settings
+
 from dojo.models import Finding
 from dojo.utils import parse_cvss_data
 
@@ -34,7 +36,7 @@ class AuditJSParser:
             return "High"
         if cvss >= 9:
             return "Critical"
-        return "Informational"
+        return "Info"
 
     def get_findings(self, filename, test):
         try:
@@ -143,9 +145,15 @@ class AuditJSParser:
                         find = dupes[dupe_key]
                         if finding.description:
                             find.description += "\n" + finding.description
-                        find.unsaved_endpoints.extend(
-                            finding.unsaved_endpoints,
-                        )
+                        if settings.V3_FEATURE_LOCATIONS:
+                            find.unsaved_locations.extend(
+                                finding.unsaved_locations,
+                            )
+                        else:
+                            # TODO: Delete this after the move to Locations
+                            find.unsaved_endpoints.extend(
+                                finding.unsaved_endpoints,
+                            )
                         dupes[dupe_key] = find
                     else:
                         dupes[dupe_key] = finding

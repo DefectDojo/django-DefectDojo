@@ -1,3 +1,4 @@
+
 from dojo.models import Test
 from dojo.tools.api_edgescan.parser import ApiEdgescanParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -41,6 +42,7 @@ class TestApiEdgescanParser(DojoTestCase):
             parser = ApiEdgescanParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+            self.validate_locations(findings)
             finding = findings[0]
             self.assertEqual(finding.title, "Cross-site scripting (reflected)")
             self.assertEqual(finding.date, "2014-12-05")
@@ -55,15 +57,16 @@ class TestApiEdgescanParser(DojoTestCase):
             self.assertEqual(finding.active, True)
             self.assertEqual(finding.unsaved_tags, ["APPROVED", "Demo-Asset", "ABC Corporate", "test"])
             self.assertEqual(finding.unique_id_from_tool, 21581)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            self.assertEqual(finding.unsaved_endpoints[0].host, "192.168.1.1")
-            self.assertEqual(finding.unsaved_endpoints[0].protocol, None)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            self.assertEqual(self.get_unsaved_locations(finding)[0].host, "192.168.1.1")
+            self.assertFalse(self.get_unsaved_locations(finding)[0].protocol)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         with (get_unit_tests_scans_path("api_edgescan") / "many_vulns.json").open(encoding="utf-8") as testfile:
             parser = ApiEdgescanParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
+            self.validate_locations(findings)
             finding_1 = findings[0]
             finding_2 = findings[1]
             self.assertEqual(finding_1.title, "Cross-site scripting (reflected)")
@@ -79,9 +82,9 @@ class TestApiEdgescanParser(DojoTestCase):
             self.assertEqual(finding_1.active, True)
             self.assertEqual(finding_1.unsaved_tags, ["APPROVED", "Demo-Asset"])
             self.assertEqual(finding_1.unique_id_from_tool, 21581)
-            self.assertEqual(1, len(finding_1.unsaved_endpoints))
-            self.assertEqual(finding_1.unsaved_endpoints[0].host, "test.example.com")
-            self.assertEqual(finding_1.unsaved_endpoints[0].protocol, "https")
+            self.assertEqual(1, len(self.get_unsaved_locations(finding_1)))
+            self.assertEqual(self.get_unsaved_locations(finding_1)[0].host, "test.example.com")
+            self.assertEqual(self.get_unsaved_locations(finding_1)[0].protocol, "https")
             self.assertEqual(finding_2.title, "Directory listing")
             self.assertEqual(finding_2.date, "2014-09-05")
             self.assertEqual(finding_2.cwe, 77)
@@ -95,6 +98,6 @@ class TestApiEdgescanParser(DojoTestCase):
             self.assertEqual(finding_2.active, False)
             self.assertEqual(finding_2.unsaved_tags, None)
             self.assertEqual(finding_2.unique_id_from_tool, 21583)
-            self.assertEqual(1, len(finding_2.unsaved_endpoints))
-            self.assertEqual(finding_2.unsaved_endpoints[0].host, "example.test.com")
-            self.assertEqual(finding_2.unsaved_endpoints[0].protocol, None)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding_2)))
+            self.assertEqual(self.get_unsaved_locations(finding_2)[0].host, "example.test.com")
+            self.assertFalse(self.get_unsaved_locations(finding_2)[0].protocol)

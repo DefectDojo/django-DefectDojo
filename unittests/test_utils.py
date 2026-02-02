@@ -2,7 +2,10 @@ import logging
 from contextlib import contextmanager
 from unittest.mock import Mock, patch
 
+from django.conf import settings
+
 from dojo.authorization.roles_permissions import Roles
+from dojo.location.models import Location
 from dojo.models import (
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,
@@ -44,6 +47,7 @@ ENGAGEMENTS = Engagement.objects.all()
 PRODUCTS = Product.objects.all()
 PRODUCT_TYPES = Product_Type.objects.all()
 ENDPOINTS = Endpoint.objects.all()
+LOCATIONS = Location.objects.all()
 
 
 class TestUtils(DojoTestCase):
@@ -225,11 +229,13 @@ def assertTestImportModelsCreated(test_case, imports=0, reimports=0, affected_fi
 @contextmanager
 def assertImportModelsCreated(test_case, tests=0, engagements=0, products=0, product_types=0, endpoints=0):
 
+    locations_count = LOCATIONS if settings.V3_FEATURE_LOCATIONS else ENDPOINTS
+
     with assertNumOfModelsCreated(test_case, TESTS, num=tests) as test_count, \
             assertNumOfModelsCreated(test_case, ENGAGEMENTS, num=engagements) as engagement_count, \
             assertNumOfModelsCreated(test_case, PRODUCTS, num=products) as product_count, \
             assertNumOfModelsCreated(test_case, PRODUCT_TYPES, num=product_types) as product_type_count, \
-            assertNumOfModelsCreated(test_case, ENDPOINTS, num=endpoints) as endpoint_count:
+            assertNumOfModelsCreated(test_case, locations_count, num=endpoints) as endpoint_count:
 
         yield (
                 test_count,

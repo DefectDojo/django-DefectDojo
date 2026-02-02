@@ -1,6 +1,7 @@
 import datetime
 
 from crum import impersonate
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.exceptions import PermissionDenied
@@ -25,8 +26,7 @@ from dojo.models import (
     Vulnerability_Id,
 )
 from dojo.test import views as test_views
-
-from .dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
 class FindingMother:
@@ -137,6 +137,7 @@ class FindingTemplateTestUtil:
         return post_request
 
 
+@versioned_fixtures
 class TestApplyFindingTemplate(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -287,6 +288,7 @@ class TestApplyFindingTemplate(DojoTestCase):
         self.assertContains(result, "There appears to be errors on the form")
 
 
+@versioned_fixtures
 class TestFindTemplateToApply(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -323,6 +325,7 @@ class TestFindTemplateToApply(DojoTestCase):
         self.assertContains(result, "Apply Template to Finding")
 
 
+@versioned_fixtures
 class TestChooseFindingTemplateOptions(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -363,6 +366,7 @@ class TestChooseFindingTemplateOptions(DojoTestCase):
         self.assertContains(result, "<h3> Apply template to a Finding</h3>")
 
 
+@versioned_fixtures
 class TestMkTemplate(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -439,6 +443,7 @@ class TestMkTemplate(DojoTestCase):
             self.make_request(user, self.finding.id)
 
 
+@versioned_fixtures
 class TestAddFindingFromTemplate(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -563,8 +568,12 @@ class TestAddFindingFromTemplate(DojoTestCase):
         self.assertIn("CVE-2023-5678", vulnerability_ids)
 
         # Verify endpoints were copied
-        self.assertTrue(any("example.com/api" in str(ep) for ep in finding.endpoints.all()))
-        self.assertTrue(any("example.com/admin" in str(ep) for ep in finding.endpoints.all()))
+        if settings.V3_FEATURE_LOCATIONS:
+            self.assertTrue(any("example.com/api" in str(loc_ref.location) for loc_ref in finding.locations.all()))
+            self.assertTrue(any("example.com/admin" in str(loc_ref.location) for loc_ref in finding.locations.all()))
+        else:
+            self.assertTrue(any("example.com/api" in str(ep) for ep in finding.endpoints.all()))
+            self.assertTrue(any("example.com/admin" in str(ep) for ep in finding.endpoints.all()))
 
         # Verify note was created
         notes = Notes.objects.filter(finding=finding)

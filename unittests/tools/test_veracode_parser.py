@@ -2,7 +2,7 @@ import datetime
 
 from django.test import override_settings
 
-from dojo.models import Endpoint, Engagement, Product, Product_Type, Test
+from dojo.models import Engagement, Product, Product_Type, Test
 from dojo.tools.veracode.parser import VeracodeParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
@@ -11,7 +11,7 @@ class TestVeracodeScannerParser(DojoTestCase):
 
     def setUp(self):
         product_type, _ = Product_Type.objects.get_or_create(name="Fake unit tests")
-        product, _ = Product.objects.get_or_create(name="product", prod_type=product_type)
+        product, _ = Product.objects.get_or_create(name="product", description="Test Product", prod_type=product_type)
         engagement = Engagement(product=product)
 
         self.test = Test(engagement=engagement)
@@ -214,11 +214,11 @@ class TestVeracodeScannerParser(DojoTestCase):
             self.assertEqual("Description", finding.description)
             self.assertFalse(finding.is_mitigated)
             self.assertIn("dast", finding.unsaved_tags)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual("https", endpoint.protocol)
-            self.assertEqual("www.example.com", endpoint.host)
-            self.assertEqual("index.html", endpoint.path)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("https", location.protocol)
+            self.assertEqual("www.example.com", location.host)
+            self.assertEqual("index.html", location.path)
 
             return finding
 
@@ -385,13 +385,12 @@ class TestVeracodeScannerParser(DojoTestCase):
                 "- [CWE](http://cwe.mitre.org/cgi-bin/jumpmenu.cgi?id=74)\n"
             ))
             self.assertEqual(finding.unsaved_tags, ["policy-violation"])
-            self.assertEqual(finding.unsaved_endpoints[0], Endpoint(
-                protocol="https",
-                host="application.insecure-company-alliance.com",
-                port=443,
-                path="api/*_*//new_user_sign_up",
-                query="param=wild-things",
-            ))
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual(location.protocol, "https")
+            self.assertEqual(location.host, "application.insecure-company-alliance.com")
+            self.assertEqual(location.port, 443)
+            self.assertEqual(location.path, "api/*_*//new_user_sign_up")
+            self.assertEqual(location.query, "param=wild-things")
 
     @override_settings(USE_FIRST_SEEN=True)
     def test_json_dynamic_findings_list_format_first_seen(self):

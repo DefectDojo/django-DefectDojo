@@ -4,8 +4,10 @@ from datetime import datetime
 import html2text
 from dateutil import parser
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +31,6 @@ def issue_r(raw_row, vuln, scan_date):
         issue_row["fqdn"] = None
     # port
     port = raw_row.get("port")
-
-    # Create Endpoint
-    ep = Endpoint(host=issue_row["fqdn"]) if issue_row["fqdn"] else Endpoint(host=issue_row["ip_address"])
 
     # OS NAME
     issue_row["os"] = raw_row.findtext("OS")
@@ -101,8 +100,14 @@ def issue_r(raw_row, vuln, scan_date):
                 vuln_id_from_tool=gid,
                 date=scan_date,
             )
-            finding.unsaved_endpoints = []
-            finding.unsaved_endpoints.append(ep)
+            # Create Endpoint/Location
+            if settings.V3_FEATURE_LOCATIONS:
+                location = URL(host=issue_row["fqdn"]) if issue_row["fqdn"] else URL(host=issue_row["ip_address"])
+                finding.unsaved_locations = [location]
+            else:
+                # TODO: Delete this after the move to Locations
+                ep = Endpoint(host=issue_row["fqdn"]) if issue_row["fqdn"] else Endpoint(host=issue_row["ip_address"])
+                finding.unsaved_endpoints = [ep]
             ret_rows.append(finding)
     return ret_rows
 

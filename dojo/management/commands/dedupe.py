@@ -8,8 +8,8 @@ from django.db.models import Prefetch
 from dojo.finding.deduplication import (
     dedupe_batch_of_findings,
     do_dedupe_batch_task,
-    do_dedupe_finding,
     do_dedupe_finding_task,
+    do_dedupe_finding_task_internal,
     get_finding_models_for_deduplication,
 )
 from dojo.models import Finding, Product
@@ -89,16 +89,29 @@ class Command(BaseCommand):
             findings = Finding.objects.all().filter(id__gt=0).exclude(duplicate=True)
             logger.info("######## Will process the full database with %d findings ########", findings.count())
 
-        # Prefetch related objects for synchronous deduplication
-        findings = findings.select_related(
-            "test", "test__engagement", "test__engagement__product", "test__test_type",
-        ).prefetch_related(
-            "endpoints",
-            Prefetch(
-                "original_finding",
-                queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
-            ),
-        )
+        if settings.V3_FEATURE_LOCATIONS:
+            # Prefetch related objects for synchronous deduplication
+            findings = findings.select_related(
+                "test", "test__engagement", "test__engagement__product", "test__test_type",
+            ).prefetch_related(
+                "locations",
+                Prefetch(
+                    "original_finding",
+                    queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
+                ),
+            )
+        else:
+            # TODO: Delete this after the move to Locations
+            # Prefetch related objects for synchronous deduplication
+            findings = findings.select_related(
+                "test", "test__engagement", "test__engagement__product", "test__test_type",
+            ).prefetch_related(
+                "endpoints",
+                Prefetch(
+                    "original_finding",
+                    queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
+                ),
+            )
 
         # Phase 1: update hash_codes without deduplicating
         if not dedupe_only:
@@ -115,7 +128,7 @@ class Command(BaseCommand):
                 if dedupe_batch_mode:
                     self._dedupe_batch_mode(findings, dedupe_sync=dedupe_sync)
                 elif dedupe_sync:
-                    mass_model_updater(Finding, findings, do_dedupe_finding, fields=None, order="desc", page_size=100, log_prefix="deduplicating ")
+                    mass_model_updater(Finding, findings, do_dedupe_finding_task_internal, fields=None, order="desc", page_size=100, log_prefix="deduplicating ")
                 else:
                     # async tasks only need the id
                     mass_model_updater(Finding, findings.only("id"), lambda f: do_dedupe_finding_task(f.id), fields=None, order="desc", log_prefix="deduplicating ")
@@ -125,7 +138,7 @@ class Command(BaseCommand):
                     # in async mode the background task that grades products every hour will pick it up
                     logger.debug("Updating grades for products...")
                     for product in Product.objects.all():
-                        calculate_grade(product)
+                        calculate_grade(product.id)
 
                 logger.info("######## Done deduplicating (%s) ########", ("foreground" if dedupe_sync else "tasks submitted to celery"))
             else:

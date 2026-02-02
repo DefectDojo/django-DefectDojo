@@ -7,6 +7,7 @@ from dojo.authorization.roles_permissions import (
     get_global_roles_with_permissions,
     get_roles_with_permissions,
 )
+from dojo.location.models import AbstractLocation, Location
 from dojo.models import (
     App_Analysis,
     Cred_Mapping,
@@ -144,19 +145,30 @@ def user_has_permission(user: Dojo_User, obj: Model, permission: int) -> bool:
             user, obj.test.engagement.product, permission,
         )
     if (
+        isinstance(obj, Location)
+        and permission in Permissions.get_location_permissions()
+    ):
+        return any(user_has_permission(user, ref.product, permission) for ref in obj.products.all())
+    if (
+        isinstance(obj, AbstractLocation)
+        and permission in Permissions.get_location_permissions()
+    ):
+        return user_has_permission(user, obj.location, permission)
+    if (
+        # TODO: Delete this after the move to Locations
         isinstance(obj, Endpoint)
-        and permission in Permissions.get_endpoint_permissions()
+        and permission in Permissions.get_location_permissions()
     ) or (
         isinstance(obj, Languages)
         and permission in Permissions.get_language_permissions()
-    ) or ((
+    ) or (
         isinstance(obj, App_Analysis)
         and permission in Permissions.get_technology_permissions()
     ) or (
         isinstance(obj, Product_API_Scan_Configuration)
         and permission
         in Permissions.get_product_api_scan_configuration_permissions()
-    )):
+    ):
         return user_has_permission(user, obj.product, permission)
     if (
         isinstance(obj, Product_Type_Member)

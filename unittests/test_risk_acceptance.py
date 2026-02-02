@@ -15,12 +15,12 @@ from django.utils.http import urlencode
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.models import Finding, Risk_Acceptance, System_Settings
 from dojo.utils import get_system_setting
-
-from .dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 
 
+@versioned_fixtures
 class RiskAcceptanceTestUI(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 

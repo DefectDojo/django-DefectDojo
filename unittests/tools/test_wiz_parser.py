@@ -10,34 +10,28 @@ class TestWizParser(DojoTestCase):
         with (get_unit_tests_scans_path("wiz") / "no_findings.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(0, len(findings))
 
     def test_one_findings(self):
         with (get_unit_tests_scans_path("wiz") / "one_finding.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("AKS role/cluster role assigned permissions that contain wildcards ", finding.title)
-            self.assertEqual("Informational", finding.severity)
+            self.assertEqual("Info", finding.severity)
 
     def test_multiple_findings(self):
         with (get_unit_tests_scans_path("wiz") / "multiple_findings.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(98, len(findings))
             finding = findings[0]
             self.assertEqual("AKS role/cluster role assigned permissions that contain wildcards ", finding.title)
-            self.assertEqual("Informational", finding.severity)
+            self.assertEqual("Info", finding.severity)
             finding = findings[1]
             self.assertEqual("Unusual activity by a principal from previously unseen country", finding.title)
             self.assertEqual("High", finding.severity)
@@ -64,7 +58,7 @@ class TestWizParser(DojoTestCase):
             self.assertEqual(
                 "User/service account with get/list/watch permissions on secrets in an AKS cluster", finding.title,
             )
-            self.assertEqual("Informational", finding.severity)
+            self.assertEqual("Info", finding.severity)
 
     def test_sca_format(self):
         with (get_unit_tests_scans_path("wiz") / "sca_format.csv").open(encoding="utf-8") as testfile:
@@ -126,9 +120,7 @@ class TestWizParser(DojoTestCase):
         with (get_unit_tests_scans_path("wiz") / "resolved_findings.csv").open(encoding="utf-8") as testfile:
             parser = WizParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(3, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]

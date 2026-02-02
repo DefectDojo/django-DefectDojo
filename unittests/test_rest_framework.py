@@ -8,8 +8,6 @@ from datetime import timedelta
 from enum import Enum
 from json import dumps
 from pathlib import Path
-
-# from drf_spectacular.renderers import OpenApiJsonRenderer
 from unittest.mock import ANY, MagicMock, PropertyMock, call, patch
 
 from django.conf import settings
@@ -95,6 +93,9 @@ from dojo.asset.api.views import (
     AssetViewSet,
 )
 from dojo.authorization.roles_permissions import Permissions
+from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
+from dojo.location.api.views import LocationFindingReferenceViewSet, LocationProductReferenceViewSet, LocationViewSet
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import (
     Announcement,
     Answered_Survey,
@@ -153,8 +154,16 @@ from dojo.organization.api.views import (
     OrganizationMemberViewSet,
     OrganizationViewSet,
 )
+from dojo.url.api.views import URLViewSet
+from dojo.url.models import URL
 
-from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
+from .dojo_test_case import (
+    DojoAPITestCase,
+    get_unit_tests_scans_path,
+    skip_unless_v2,
+    skip_unless_v3,
+    versioned_fixtures,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -197,6 +206,10 @@ def skipIfNotSubclass(baseclass):
 
 def format_url(path):
     return f"{BASE_API_URL}{path}"
+
+
+def refresh_open_api3_json_schema():
+    get_open_api3_json_schema.cache_clear()
 
 
 class SchemaChecker:
@@ -664,8 +677,10 @@ class BaseClass:
 
             if self.endpoint_model == Endpoint_Status:
                 permission_object = Endpoint.objects.get(id=current_objects["results"][0]["endpoint"])
-            elif self.endpoint_model == JIRA_Issue:
+            elif self.endpoint_model in {JIRA_Issue, LocationFindingReference}:
                 permission_object = Finding.objects.get(id=current_objects["results"][0]["finding"])
+            elif self.endpoint_model == LocationProductReference:
+                permission_object = Product.objects.get(id=current_objects["results"][0]["product"])
             else:
                 permission_object = self.permission_check_class.objects.get(id=current_objects["results"][0]["id"])
 
@@ -754,8 +769,10 @@ class BaseClass:
 
             if self.endpoint_model == Endpoint_Status:
                 permission_object = Endpoint.objects.get(id=current_objects["results"][0]["endpoint"])
-            elif self.endpoint_model == JIRA_Issue:
+            elif self.endpoint_model in {JIRA_Issue, LocationFindingReference}:
                 permission_object = Finding.objects.get(id=current_objects["results"][0]["finding"])
+            elif self.endpoint_model == LocationProductReference:
+                permission_object = Product.objects.get(id=current_objects["results"][0]["product"])
             else:
                 permission_object = self.permission_check_class.objects.get(id=current_objects["results"][0]["id"])
 
@@ -840,6 +857,7 @@ class BaseClass:
             self.assertEqual(200, response.status_code, response.content[:1000])
 
 
+@versioned_fixtures
 class AppAnalysisTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -869,6 +887,7 @@ class AppAnalysisTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class FindingCloseAPITest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -938,6 +957,7 @@ class FindingCloseAPITest(DojoAPITestCase):
             self.assertTrue(add_comment_mock.called)
 
 
+@versioned_fixtures
 class FindingCreateUpdateMitigatedFieldsAPITest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -1034,6 +1054,8 @@ class FindingCreateUpdateMitigatedFieldsAPITest(DojoAPITestCase):
             self.assertEqual(updated.mitigated_by, self.admin)
 
 
+# TODO: Delete this after the move to Locations
+@skip_unless_v2
 class EndpointStatusTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1054,9 +1076,9 @@ class EndpointStatusTest(BaseClass.BaseClassTest):
         self.update_fields = {"mitigated": True}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Endpoint
-        self.permission_create = Permissions.Endpoint_Edit
-        self.permission_update = Permissions.Endpoint_Edit
-        self.permission_delete = Permissions.Endpoint_Edit
+        self.permission_create = Permissions.Location_Edit
+        self.permission_update = Permissions.Location_Edit
+        self.permission_delete = Permissions.Location_Edit
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
@@ -1125,6 +1147,8 @@ class EndpointStatusTest(BaseClass.BaseClassTest):
         self.assertIn("This endpoint-finding relation already exists", response.content.decode("utf-8"))
 
 
+# TODO: Delete this after the move to Locations
+@skip_unless_v2
 class EndpointTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1145,14 +1169,324 @@ class EndpointTest(BaseClass.BaseClassTest):
         self.update_fields = {"protocol": "ftp", "tags": ["one_new_tag"]}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Endpoint
-        self.permission_create = Permissions.Endpoint_Add
-        self.permission_update = Permissions.Endpoint_Edit
-        self.permission_delete = Permissions.Endpoint_Delete
+        self.permission_create = Permissions.Location_Add
+        self.permission_update = Permissions.Location_Edit
+        self.permission_delete = Permissions.Location_Delete
         self.deleted_objects = 2
         self.delete_id = 6
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@skip_unless_v3
+class V3EndpointStatusTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata_locations.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = LocationFindingReference
+        self.endpoint_path = "endpoint_status"
+        self.viewname = "endpoint_status"
+        self.viewset = V3EndpointStatusCompatibleViewSet
+        self.payload = {
+            "endpoint": 1,
+            "finding": 3,
+            "mitigated": False,
+            "false_positive": False,
+            "risk_accepted": False,
+            "out_of_scope": False,
+            "date": "2017-01-12",
+        }
+        self.update_fields = {"mitigated": True}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Endpoint
+        self.permission_create = Permissions.Location_Edit
+        self.permission_update = Permissions.Location_Edit
+        self.permission_delete = Permissions.Location_Edit
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create(self):
+        length = self.endpoint_model.objects.count()
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        self.assertEqual(self.endpoint_model.objects.count(), length)
+
+    @patch("dojo.api_v2.permissions.user_has_permission")
+    def test_create_object_not_authorized(self, mock):
+        length = self.endpoint_model.objects.count()
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        self.assertEqual(self.endpoint_model.objects.count(), length)
+
+    def test_delete(self):
+        length = self.endpoint_model.objects.count()
+        if delete_id := getattr(self, "delete_id", None):
+            relative_url = f"{self.url}{delete_id}/"
+        else:
+            current_objects = self.client.get(self.url, format="json").data
+            relative_url = f"{self.url}{current_objects['results'][-1]['id']}/"
+        response = self.client.delete(relative_url)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        self.assertEqual(self.endpoint_model.objects.count(), length)
+
+    @patch("dojo.api_v2.permissions.user_has_permission")
+    def test_delete_object_not_authorized(self, mock):
+        length = self.endpoint_model.objects.count()
+        current_objects = self.client.get(self.url, format="json").data
+        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
+        response = self.client.delete(relative_url)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        self.assertEqual(self.endpoint_model.objects.count(), length)
+
+    def test_update(self):
+        current_objects = self.client.get(self.url, format="json").data
+        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
+
+        response = self.client.patch(relative_url, self.update_fields)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+        response = self.client.put(relative_url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    @patch("dojo.api_v2.permissions.user_has_permission")
+    def test_update_object_not_authorized(self, mock):
+        current_objects = self.client.get(self.url, format="json").data
+        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
+
+        response = self.client.patch(relative_url, self.update_fields)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+        response = self.client.put(relative_url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+
+@skip_unless_v3
+class V3EndpointTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata_locations.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = LocationProductReference
+        self.endpoint_path = "endpoints"
+        self.viewname = "endpoint"
+        self.viewset = V3EndpointCompatibleViewSet
+        self.payload = {
+            "protocol": "http",
+            "host": "127.0.0.1",
+            "path": "/",
+            "query": "test=true",
+            "fragment": "test-1",
+            "product": 1,
+            "tags": ["mytag", "yourtag"],
+        }
+        self.update_fields = {"protocol": "ftp", "tags": ["one_new_tag"]}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = LocationProductReference
+        self.permission_create = Permissions.Location_Add
+        self.permission_update = Permissions.Location_Edit
+        self.permission_delete = Permissions.Location_Delete
+        self.deleted_objects = 1
+        self.delete_id = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create(self):
+        length = self.endpoint_model.objects.count()
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        self.assertEqual(self.endpoint_model.objects.count(), length)
+
+    def test_create_object_not_authorized(self):
+        length = self.endpoint_model.objects.count()
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        self.assertEqual(self.endpoint_model.objects.count(), length)
+
+    def test_delete(self):
+        length = self.endpoint_model.objects.count()
+        if delete_id := getattr(self, "delete_id", None):
+            relative_url = f"{self.url}{delete_id}/"
+        else:
+            current_objects = self.client.get(self.url, format="json").data
+            relative_url = f"{self.url}{current_objects['results'][-1]['id']}/"
+        response = self.client.delete(relative_url)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        self.assertEqual(self.endpoint_model.objects.count(), length)
+
+    def test_delete_object_not_authorized(self):
+        length = self.endpoint_model.objects.count()
+        current_objects = self.client.get(self.url, format="json").data
+        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
+        response = self.client.delete(relative_url)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        self.assertEqual(self.endpoint_model.objects.count(), length)
+
+    def test_update(self):
+        current_objects = self.client.get(self.url, format="json").data
+        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
+
+        response = self.client.patch(relative_url, self.update_fields)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+        response = self.client.put(relative_url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_update_object_not_authorized(self):
+        current_objects = self.client.get(self.url, format="json").data
+        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
+
+        response = self.client.patch(relative_url, self.update_fields)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+        response = self.client.put(relative_url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+
+@skip_unless_v3
+class LocationTest(BaseClass.ListRequestTest, BaseClass.RetrieveRequestTest):
+    fixtures = ["dojo_testdata_locations.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Location
+        self.endpoint_path = "location"
+        self.viewname = "location"
+        self.viewset = LocationViewSet
+        self.payload = {}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Location
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_list_object_not_authorized(self):
+        self.setUp_not_authorized()
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_detail_object_not_authorized(self):
+        self.setUp_not_authorized()
+        current_objects = self.endpoint_model.objects.all()
+        relative_url = self.url + f"{current_objects[0].id}/"
+        response = self.client.get(relative_url)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+
+@skip_unless_v3
+class LocationFindingReferenceTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata_locations.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = LocationFindingReference
+        self.endpoint_path = "location_findings"
+        self.viewname = "location_findings"
+        self.viewset = LocationFindingReferenceViewSet
+        self.payload = {
+            "location": 1,
+            "finding": 3,
+        }
+        self.update_fields = {"finding": 2, "location": 2}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Finding
+        self.permission_create = Permissions.Finding_Edit
+        self.permission_update = Permissions.Finding_Edit
+        self.permission_delete = Permissions.Finding_Edit
+        self.deleted_objects = 1
+        self.delete_id = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create_object_not_authorized(self):
+        self.setUp_not_authorized()
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+
+@skip_unless_v3
+class LocationProductReferenceTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata_locations.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = LocationProductReference
+        self.endpoint_path = "location_products"
+        self.viewname = "location_products"
+        self.viewset = LocationProductReferenceViewSet
+        self.payload = {
+            "location": 1,
+            "product": 2,
+        }
+        self.update_fields = {"product": 3, "location": 2}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Product
+        self.permission_create = Permissions.Product_Edit
+        self.permission_update = Permissions.Product_Edit
+        self.permission_delete = Permissions.Product_Edit
+        self.deleted_objects = 1
+        self.delete_id = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create_object_not_authorized(self):
+        self.setUp_not_authorized()
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+
+@skip_unless_v3
+class URLTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata_locations.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = URL
+        self.endpoint_path = "url"
+        self.viewname = "url"
+        self.viewset = URLViewSet
+        self.payload = {
+            "protocol": "http",
+            "host": "127.0.0.1",
+            "path": "/",
+            "query": "test=true",
+            "fragment": "test-1",
+            "product": 1,
+            "tags": ["mytag", "yourtag"],
+        }
+        self.update_fields = {"protocol": "ftp", "tags": ["one_new_tag"]}
+        self.test_type = TestType.OBJECT_PERMISSIONS
+        self.permission_check_class = Location
+        self.permission_create = Permissions.Location_Add
+        self.permission_update = Permissions.Location_Edit
+        self.permission_delete = Permissions.Location_Delete
+        self.deleted_objects = 1
+        self.delete_id = 6
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_list_object_not_authorized(self):
+        self.setUp_not_authorized()
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_detail_object_not_authorized(self):
+        self.setUp_not_authorized()
+        current_objects = self.endpoint_model.objects.all()
+        relative_url = self.url + f"{current_objects[0].id}/"
+        response = self.client.get(relative_url)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_create_object_not_authorized(self):
+        self.setUp_not_authorized()
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_delete_object_not_authorized(self):
+        self.setUp_not_authorized()
+        current_objects = self.endpoint_model.objects.all()
+        relative_url = self.url + f"{current_objects[0].id}/"
+        response = self.client.delete(relative_url)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_update_object_not_authorized(self):
+        self.setUp_not_authorized()
+        current_objects = self.endpoint_model.objects.all()
+        relative_url = self.url + f"{current_objects[0].id}/"
+        response = self.client.patch(relative_url, self.update_fields)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+        response = self.client.put(relative_url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+
+@versioned_fixtures
 class EngagementTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1220,6 +1554,7 @@ class EngagementTest(BaseClass.BaseClassTest):
         self.assertEqual(201, response.status_code, response.content[:1000])
 
 
+@versioned_fixtures
 class RiskAcceptanceTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1293,6 +1628,7 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
         self.assertEqual(403, response.status_code, response.content[:1000])
 
 
+@versioned_fixtures
 class FindingRequestResponseTest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -1318,6 +1654,7 @@ class FindingRequestResponseTest(DojoAPITestCase):
         self.assertEqual(200, response.status_code, response.content[:1000])
 
 
+@versioned_fixtures
 class FilesTest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -1388,6 +1725,7 @@ class FilesTest(DojoAPITestCase):
             raise NotImplementedError(msg)
 
 
+@versioned_fixtures
 class FindingsTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1726,6 +2064,7 @@ class FindingsTest(BaseClass.BaseClassTest):
             self.assertEqual(None, finding.cvssv4_score)
 
 
+@versioned_fixtures
 class FindingMetadataTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1792,6 +2131,7 @@ class FindingMetadataTest(BaseClass.BaseClassTest):
         self.assertEqual(len(result), 0, "Metadata not deleted correctly")
 
 
+@versioned_fixtures
 class FindingTemplatesTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1815,6 +2155,7 @@ class FindingTemplatesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class JiraInstancesTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1845,6 +2186,7 @@ class JiraInstancesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class JiraIssuesTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1868,6 +2210,7 @@ class JiraIssuesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class JiraProjectTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1895,6 +2238,7 @@ class JiraProjectTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class SonarqubeIssueTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1914,6 +2258,7 @@ class SonarqubeIssueTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class SonarqubeIssuesTransitionTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1933,6 +2278,7 @@ class SonarqubeIssuesTransitionTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1956,6 +2302,7 @@ class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -1979,6 +2326,7 @@ class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class ProductTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2006,6 +2354,7 @@ class ProductTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class AssetTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2033,6 +2382,7 @@ class AssetTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class StubFindingsTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2064,6 +2414,7 @@ class StubFindingsTest(BaseClass.BaseClassTest):
         self.assertEqual(result.json()["severity"], ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"])
 
 
+@versioned_fixtures
 class TestsTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2097,6 +2448,7 @@ class TestsTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class ToolConfigurationsTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2123,6 +2475,7 @@ class ToolConfigurationsTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class ToolProductSettingsTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2149,6 +2502,7 @@ class ToolProductSettingsTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class ToolTypesTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2167,6 +2521,7 @@ class ToolTypesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class NoteTypesTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2188,6 +2543,7 @@ class NoteTypesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class NotesTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2207,6 +2563,7 @@ class NotesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class UsersTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2263,6 +2620,7 @@ class UsersTest(BaseClass.BaseClassTest):
         self.assertEqual(set(user_permissions), set(payload["configuration_permissions"] + [26, 28]))
 
 
+@versioned_fixtures
 class UserContactInfoTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2284,6 +2642,7 @@ class UserContactInfoTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class ProductPermissionTest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -2305,6 +2664,7 @@ class ProductPermissionTest(DojoAPITestCase):
 
 
 @test_tag("non-parallel")
+@versioned_fixtures
 class ImportScanTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2557,6 +2917,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
             reimporter_mock.assert_not_called()
 
 
+@versioned_fixtures
 class ReimportScanTest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -2933,6 +3294,7 @@ class ReimportScanTest(DojoAPITestCase):
             reimporter_mock.assert_not_called()
 
 
+@versioned_fixtures
 class ProductTypeTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2974,6 +3336,7 @@ class ProductTypeTest(BaseClass.BaseClassTest):
         self.assertEqual(201, response.status_code, response.content[:1000])
 
 
+@versioned_fixtures
 class OrganizationTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3015,6 +3378,7 @@ class OrganizationTest(BaseClass.BaseClassTest):
         self.assertEqual(201, response.status_code, response.content[:1000])
 
 
+@versioned_fixtures
 class DojoGroupsTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3082,6 +3446,7 @@ class DojoGroupsTest(BaseClass.BaseClassTest):
         Dojo_Group.objects.get(name="Group 1 Testdata").auth_group.permissions.clear()
 
 
+@versioned_fixtures
 class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3105,6 +3470,7 @@ class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class RolesTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3117,6 +3483,7 @@ class RolesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class GlobalRolesTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3135,6 +3502,7 @@ class GlobalRolesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3158,6 +3526,7 @@ class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class OrganizationMemberTest(BaseClass.MemberEndpointTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3181,6 +3550,7 @@ class OrganizationMemberTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class ProductMemberTest(BaseClass.MemberEndpointTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3204,6 +3574,7 @@ class ProductMemberTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class AssetMemberTest(BaseClass.MemberEndpointTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3227,6 +3598,7 @@ class AssetMemberTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3250,6 +3622,7 @@ class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class OrganiazationGroupTest(BaseClass.MemberEndpointTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3273,6 +3646,7 @@ class OrganiazationGroupTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class ProductGroupTest(BaseClass.MemberEndpointTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3296,6 +3670,7 @@ class ProductGroupTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class AssetGroupTest(BaseClass.MemberEndpointTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3319,6 +3694,7 @@ class AssetGroupTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class LanguageTypeTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3339,6 +3715,7 @@ class LanguageTypeTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class LanguageTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3368,6 +3745,7 @@ class LanguageTest(BaseClass.BaseClassTest):
 
 
 @test_tag("non-parallel")
+@versioned_fixtures
 class ImportLanguagesTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3410,6 +3788,7 @@ class ImportLanguagesTest(BaseClass.BaseClassTest):
         self.assertEqual(languages[1].code, 51056)
 
 
+@versioned_fixtures
 class NotificationsTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3429,6 +3808,7 @@ class NotificationsTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class UserProfileTest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -3458,6 +3838,7 @@ class UserProfileTest(DojoAPITestCase):
         self.assertEqual(3, data["product_member"][1]["product"])
 
 
+@versioned_fixtures
 class DevelopmentEnvironmentTest(BaseClass.AuthenticatedViewTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3541,6 +3922,7 @@ class DevelopmentEnvironmentTest(BaseClass.AuthenticatedViewTest):
         self.assertEqual(expected_status, response.status_code, response.content[:1000])
 
 
+@versioned_fixtures
 class TestTypeTest(BaseClass.AuthenticatedViewTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3567,6 +3949,7 @@ class TestTypeTest(BaseClass.AuthenticatedViewTest):
         self.assertEqual(current_objects["results"][-1]["name"], response.data["name"])
 
 
+@versioned_fixtures
 class ConfigurationPermissionTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3579,6 +3962,7 @@ class ConfigurationPermissionTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class CredentialMappingTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3602,6 +3986,7 @@ class CredentialMappingTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class CredentialTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3720,6 +4105,7 @@ class AnsweredSurveyTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class AnnouncementTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3742,6 +4128,7 @@ class AnnouncementTest(BaseClass.BaseClassTest):
         self.skipTest("Only one Announcement can exists")
 
 
+@versioned_fixtures
 class NotificationWebhooksTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -3763,6 +4150,7 @@ class NotificationWebhooksTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class BurpRawRequestResponseTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 

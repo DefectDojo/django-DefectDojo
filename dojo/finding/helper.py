@@ -16,14 +16,17 @@ from fieldsignals import pre_save_changed
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
-from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+from dojo.decorators import dojo_async_task
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.deduplication import (
     dedupe_batch_of_findings,
-    do_dedupe_finding,
+    do_dedupe_finding_task_internal,
     get_finding_models_for_deduplication,
 )
+from dojo.location.models import Location
+from dojo.location.status import FindingLocationStatus
+from dojo.location.utils import save_locations_to_add
 from dojo.models import (
     Endpoint,
     Endpoint_Status,
@@ -38,11 +41,13 @@ from dojo.models import (
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
 from dojo.tools import tool_issue_updater
+from dojo.url.models import URL
 from dojo.utils import (
     calculate_grade,
     close_external_issue,
     do_false_positive_history,
     get_current_user,
+    get_object_or_none,
     mass_model_updater,
     to_str_typed,
 )
@@ -390,27 +395,14 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
                     finding_group.findings.add(*findings)
 
 
-@dojo_model_to_id
-@dojo_async_task(signature=True)
-@app.task
-@dojo_model_from_id
-def post_process_finding_save_signature(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
-    """
-    Returns a task signature for post-processing a finding. This is useful for creating task signatures
-    that can be used in chords or groups or to await results. We need this extra method because of our dojo_async decorator.
-    If we use more of these celery features, we should probably move away from that decorator.
-    """
-    return post_process_finding_save_internal(finding, dedupe_option, rules_option, product_grading_option,
-                                   issue_updater_option, push_to_jira, user, *args, **kwargs)
-
-
-@dojo_model_to_id
 @dojo_async_task
 @app.task
-@dojo_model_from_id
-def post_process_finding_save(finding, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+def post_process_finding_save(finding_id, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+    finding = get_object_or_none(Finding, id=finding_id)
+    if not finding:
+        logger.warning("Finding with id %s does not exist, skipping post_process_finding_save", finding_id)
+        return None
 
     return post_process_finding_save_internal(finding, dedupe_option, rules_option, product_grading_option,
                                    issue_updater_option, push_to_jira, user, *args, **kwargs)
@@ -429,7 +421,7 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
     if dedupe_option:
         if finding.hash_code is not None:
             if system_settings.enable_deduplication:
-                do_dedupe_finding(finding, *args, **kwargs)
+                do_dedupe_finding_task_internal(finding, *args, **kwargs)
             else:
                 deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
         else:
@@ -448,7 +440,7 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
 
     if product_grading_option:
         if system_settings.enable_product_grade:
-            calculate_grade(finding.test.engagement.product)
+            calculate_grade(finding.test.engagement.product.id)
         else:
             deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
 
@@ -463,14 +455,6 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
             jira_helper.push_to_jira(finding)
         elif finding.finding_group:
             jira_helper.push_to_jira(finding.finding_group)
-
-
-@dojo_async_task(signature=True)
-@app.task
-def post_process_findings_batch_signature(finding_ids, *args, dedupe_option=True, rules_option=True, product_grading_option=True,
-             issue_updater_option=True, push_to_jira=False, user=None, **kwargs):
-    return post_process_findings_batch(finding_ids, *args, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option, issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, **kwargs)
-    # Pass arguments as keyword arguments to ensure Celery properly serializes them
 
 
 @dojo_async_task
@@ -516,7 +500,7 @@ def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_op
             tool_issue_updater.async_tool_issue_update(finding)
 
     if product_grading_option and system_settings.enable_product_grade:
-        calculate_grade(findings[0].test.engagement.product)
+        calculate_grade(findings[0].test.engagement.product.id)
 
     if push_to_jira:
         for finding in findings:
@@ -715,7 +699,7 @@ def fix_loop_duplicates():
         for f in new_originals:
             deduplicationLogger.info(f"New Original: {f.id}")
             f.duplicate = False
-            super(Finding, f).save()
+            super(Finding, f).save(skip_validation=True)
 
         loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
         deduplicationLogger.info(f"{loop_count} Finding found which still has Loops, please run fix loop duplicates again")
@@ -736,7 +720,7 @@ def removeLoop(finding_id, counter):
         # loop fully removed
         finding.duplicate_finding = None
         # duplicate remains True, will be set to False in fix_loop_duplicates (and logged as New Original?).
-        super(Finding, finding).save()
+        super(Finding, finding).save(skip_validation=True)
         return
 
     # Only modify the findings if the original ID is lower to get the oldest finding as original
@@ -750,31 +734,53 @@ def removeLoop(finding_id, counter):
     if real_original in finding.original_finding.all():
         # remove the original from the duplicate list if it is there
         finding.original_finding.remove(real_original)
-        super(Finding, finding).save()
+        super(Finding, finding).save(skip_validation=True)
     if counter <= 0:
         # Maximum recursion depth as safety method to circumvent recursion here
         return
     for f in finding.original_finding.all():
         # for all duplicates set the original as their original, get rid of self in between
         f.duplicate_finding = real_original
-        super(Finding, f).save()
-        super(Finding, real_original).save()
+        super(Finding, f).save(skip_validation=True)
+        super(Finding, real_original).save(skip_validation=True)
         removeLoop(f.id, counter - 1)
 
 
-def add_endpoints(new_finding, form):
-    added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, new_finding.test.engagement.product)
-    endpoint_ids = [endpoint.id for endpoint in added_endpoints]
+def add_locations(finding, form):
+    # TODO: Delete this after the move to Locations
+    if not settings.V3_FEATURE_LOCATIONS:
+        added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, finding.test.engagement.product)
+        endpoint_ids = [endpoint.id for endpoint in added_endpoints]
 
-    # Merge form endpoints with existing endpoints (don't replace)
-    form_endpoints = form.cleaned_data.get("endpoints", Endpoint.objects.none())
-    new_endpoints = Endpoint.objects.filter(id__in=endpoint_ids)
-    new_finding.endpoints.set(form_endpoints | new_endpoints | new_finding.endpoints.all())
+        # Merge form endpoints with existing endpoints (don't replace)
+        form_endpoints = form.cleaned_data.get("endpoints", Endpoint.objects.none())
+        new_endpoints = Endpoint.objects.filter(id__in=endpoint_ids)
+        finding.endpoints.set(form_endpoints | new_endpoints | finding.endpoints.all())
 
-    for endpoint in new_finding.endpoints.all():
-        _eps, _created = Endpoint_Status.objects.get_or_create(
-            finding=new_finding,
-            endpoint=endpoint, defaults={"date": form.cleaned_data["date"] or timezone.now()})
+        for endpoint in finding.endpoints.all():
+            _eps, _created = Endpoint_Status.objects.get_or_create(
+                finding=finding,
+                endpoint=endpoint, defaults={"date": form.cleaned_data["date"] or timezone.now()})
+
+        return set(finding.endpoints.all())
+
+    added_locations = save_locations_to_add(form.endpoints_to_add_list)
+    location_ids = [abstract_location.location.id for abstract_location in added_locations]
+
+    new_locations = Location.objects.filter(id__in=location_ids)
+    form_locations = form.cleaned_data.get("endpoints", Location.objects.none())
+
+    if date := form.cleaned_data.get("date"):
+        audit_time = timezone.make_aware(datetime(date.year, date.month, date.day))
+    else:
+        audit_time = timezone.now()
+
+    locations_to_associate = (form_locations | new_locations).distinct()
+
+    for location in locations_to_associate:
+        location.associate_with_finding(finding, audit_time=audit_time)
+
+    return set(locations_to_associate)
 
 
 def sanitize_vulnerability_ids(vulnerability_ids) -> None:
@@ -934,21 +940,26 @@ def copy_template_fields_to_finding(
             product = finding.test.engagement.product
             for endpoint_url in endpoint_urls:
                 try:
-                    endpoint = Endpoint.from_uri(endpoint_url)
-                    ep, _ = endpoint_get_or_create(
-                        protocol=endpoint.protocol,
-                        host=endpoint.host,
-                        port=endpoint.port,
-                        path=endpoint.path,
-                        query=endpoint.query,
-                        fragment=endpoint.fragment,
-                        product=product,
-                    )
-                    Endpoint_Status.objects.get_or_create(
-                        finding=finding,
-                        endpoint=ep,
-                        defaults={"date": finding.date or timezone.now()},
-                    )
+                    if settings.V3_FEATURE_LOCATIONS:
+                        saved_url = URL.create_location_from_value(endpoint_url)
+                        saved_url.location.associate_with_finding(finding)
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        endpoint = Endpoint.from_uri(endpoint_url)
+                        ep, _ = endpoint_get_or_create(
+                            protocol=endpoint.protocol,
+                            host=endpoint.host,
+                            port=endpoint.port,
+                            path=endpoint.path,
+                            query=endpoint.query,
+                            fragment=endpoint.fragment,
+                            product=product,
+                        )
+                        Endpoint_Status.objects.get_or_create(
+                            finding=finding,
+                            endpoint=ep,
+                            defaults={"date": finding.date or timezone.now()},
+                        )
                 except Exception as e:
                     logger.warning(f"Failed to parse endpoint URL '{endpoint_url}': {e}")
 
@@ -1026,19 +1037,25 @@ def close_finding(
         )
         finding.notes.add(new_note)
 
-    # Endpoint statuses
-    for status in finding.status_finding.all():
-        status.mitigated_by = finding.mitigated_by
-        status.mitigated_time = mitigated_date
-        status.mitigated = True
-        status.last_modified = current_time
-        status.save()
+    if settings.V3_FEATURE_LOCATIONS:
+        # Related locations
+        for ref in finding.locations.all():
+            ref.set_status(FindingLocationStatus.Mitigated, finding.mitigated_by, mitigated_date)
+    else:
+        # TODO: Delete this after the move to Locations
+        # Endpoint statuses
+        for status in finding.status_finding.all():
+            status.mitigated_by = finding.mitigated_by
+            status.mitigated_time = mitigated_date
+            status.mitigated = True
+            status.last_modified = current_time
+            status.save()
 
     # Risk acceptance
     ra_helper.risk_unaccept(user, finding, perform_save=False)
 
     # External issues (best effort)
-    close_external_issue(finding, "Closed by defectdojo", "github")
+    close_external_issue(finding.id, "Closed by defectdojo", "github")
 
     # JIRA sync
     push_to_jira = False
