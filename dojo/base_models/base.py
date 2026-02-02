@@ -2,6 +2,7 @@ import contextlib
 import logging
 from typing import TypeVar
 
+from django.conf import settings
 from django.db.models import DateTimeField, Manager, Model, QuerySet
 from django.utils.translation import gettext_lazy as _
 
@@ -41,7 +42,7 @@ class BaseModelWithoutTimeMeta(Model):
 
         abstract = True
 
-    def save(self, *args: list, skip_validation: bool = False, **kwargs: dict) -> None:
+    def save(self, *args: list, skip_validation: bool = not settings.V3_FEATURE_LOCATIONS, **kwargs: dict) -> None:
         """
         Override save method to call the `full_clean()` validation function each save.
 
