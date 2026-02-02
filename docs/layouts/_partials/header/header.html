@@ -141,10 +141,19 @@
               <span class="ms-2 text-bs-body fw-bold">| docs</span>
             </span>
 
+            <!-- Release Notes -->
+            <div class="flex-grow-1 d-none d-lg-flex justify-content-center align-items-center">
+              <a href="/changelog/pro_changelog/">
+                <button type="button" class="btn btn-link nav-link p-2 d-none d-lg-block" aria-label="Release Notes">
+                  <span class="fw-bold">Release Notes</span>
+                </button>
+              </a>
+            </div>
+
             <!-- Search -->
             <div class="flex-grow-1 d-none d-lg-flex justify-content-center align-items-center">
               <div class="d-flex align-items-center border rounded px-3">
-                
+
                 <!-- FlexSearch desktop -->
                 {{ partial "main/showFlexSearch" . }}
                 {{ $showFlexSearch := .Scratch.Get "showFlexSearch" -}}
@@ -225,7 +234,8 @@
                 {{ $isTranslated := in $translatedLangs .Lang -}}
                 <li><a class="dropdown-item {{ if not $isTranslated }}untranslated{{ end }}" rel="alternate"
                     href="{{ if $isTranslated }}{{ (index (where $.Translations " Lang" .Lang) 0).RelPermalink }}{{ else
-                    }}{{ .Lang | relURL }}{{ end }}" hreflang="{{ .Lang }}" lang="{{ .Lang }}">{{ .LanguageName }}</a>
+                    }}{{ .Lang | relURL }}{{ end }}" hreflang="{{ .Lang }}" lang="{{ .Lang }}">{{ .LanguageName
+                    }}</a>
                 </li>
                 {{- end }}
                 {{- end }}
@@ -316,7 +326,8 @@
             <!-- Navbar button mobile -->
             {{ if site.Params.doks.navBarButton -}}
             <a class="btn btn-primary rounded-pill mt-2 btn-block d-lg-none"
-              href="{{ site.Params.doks.navBarButtonUrl | absURL }}" role="button">{{ site.Params.doks.navBarButtonText
+              href="{{ site.Params.doks.navBarButtonUrl | absURL }}" role="button">{{
+              site.Params.doks.navBarButtonText
               }}</a>
             {{ end -}}
           </div>
