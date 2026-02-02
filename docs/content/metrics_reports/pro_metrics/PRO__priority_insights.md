@@ -5,7 +5,7 @@ audience: pro
 weight: 3
 ---
 
-The **Priority Insights** metrics page shows the most critical Findings as determined by Risk, Severity, eEploitability, or custom scoring, helping teams understand which vulnerabilities pose the greatest threat at any given moment and focus their efforts accordingly.
+The **Priority Insights** metrics page shows the most critical Findings as determined by Risk, Severity, Exploitability, or custom scoring, helping teams understand which vulnerabilities pose the greatest threat at any given moment and focus their efforts accordingly.
 
 Apart from various charts and graphs, Priority Insights includes four clickable modals that will open a separate tab with a table for all of the data those four modals represent: 
 
