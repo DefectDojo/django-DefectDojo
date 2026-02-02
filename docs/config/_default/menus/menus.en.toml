@@ -10,7 +10,7 @@
 
 [[main]]
   name = "Triage Findings ⏷"
-  url = "/triage_findings/findings/intro_to_findings/"
+  url = "/triage_findings/findings_workflows/intro_to_findings/"
   weight = 12
 
 [[main]]
