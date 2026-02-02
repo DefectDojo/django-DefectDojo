@@ -4,7 +4,7 @@ toc_hide: true
 ---
 ### File Types
 DefectDojo parser accepts Burp Issue data as an .xml file.
-To parse an HTML file instead, use this method: https://docs.defectdojo.com/en/connecting_your_tools/parsers/file/burp_suite_dast/
+To parse an HTML file instead, use this method: https://docs.defectdojo.com/supported_tools/file/burp_suite_dast/
 
 When the Burp report is generated, **the recommended option is Base64
 encoding both the request and response fields** - e.g. check the box
