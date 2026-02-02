@@ -3,6 +3,7 @@ import threading
 from functools import wraps
 
 from django.conf import settings
+from django.http import Http404
 from django_ratelimit import UNSAFE
 from django_ratelimit.core import is_ratelimited
 from django_ratelimit.exceptions import Ratelimited
@@ -157,4 +158,21 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
                 raise Ratelimited
             return fn(request, *args, **kw)
         return _wrapped
+
+    return decorator
+
+
+def require_v3_feature_set():
+    """Decorator that raises 404 if the V3_FEATURE_LOCATIONS is False."""
+
+    def decorator(func):
+        @wraps(func)
+        def _wrapped_view(request, *args, **kwargs):
+            if not getattr(settings, "V3_FEATURE_LOCATIONS", False):
+                msg = "V3_FEATURE_LOCATIONS must be enabled."
+                raise Http404(msg)
+            return func(request, *args, **kwargs)
+
+        return _wrapped_view
+
     return decorator

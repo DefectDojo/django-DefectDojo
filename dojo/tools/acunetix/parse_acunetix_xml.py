@@ -6,8 +6,11 @@ import html2text
 import hyperlink
 from cvss import parser as cvss_parser
 from defusedxml.ElementTree import parse
+from django.conf import settings
 
+from dojo.location.models import Location
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -146,14 +149,26 @@ class AcunetixXMLParser:
                         )
                 # manage the endpoint
                 url = hyperlink.parse(start_url)
-                endpoint = Endpoint(
-                    host=url.host,
-                    port=url.port,
-                    path=item.findtext("Affects"),
-                )
-                if url.scheme is not None and url.scheme:
-                    endpoint.protocol = url.scheme
-                finding.unsaved_endpoints = [endpoint]
+                if settings.V3_FEATURE_LOCATIONS:
+                    url_obj = URL(
+                        host=url.host,
+                        port=url.port,
+                        path=item.findtext("Affects"),
+                    )
+                    url_obj.location = Location()
+                    if url.scheme is not None and url.scheme:
+                        url_obj.protocol = url.scheme
+                    finding.unsaved_locations.append(url_obj)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    endpoint = Endpoint(
+                        host=url.host,
+                        port=url.port,
+                        path=item.findtext("Affects"),
+                    )
+                    if url.scheme is not None and url.scheme:
+                        endpoint.protocol = url.scheme
+                    finding.unsaved_endpoints = [endpoint]
                 dupe_key = hashlib.sha256(
                     "|".join(
                         [
@@ -175,7 +190,10 @@ class AcunetixXMLParser:
                                 html2text.html2text(item.findtext("Details")),
                             )
                         )
-                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    if settings.V3_FEATURE_LOCATIONS:
+                        find.unsaved_locations.extend(finding.unsaved_locations)
+                    else:
+                        find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                     find.unsaved_req_resp.extend(finding.unsaved_req_resp)
                     find.nb_occurences += finding.nb_occurences
                     logger.debug(

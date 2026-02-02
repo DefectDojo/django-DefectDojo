@@ -1,12 +1,14 @@
 import logging
-from functools import partial
 
 from crum import get_current_user
-from django.db.models import OuterRef, Q, Subquery, Value
-from django.db.models.functions import Coalesce
+from django.conf import settings
+from django.db.models import Case, CharField, Count, Exists, F, Q, Subquery, Value, When
+from django.db.models.functions import Concat
 from django.db.models.query import Prefetch, QuerySet
 
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
+from dojo.location.models import LocationFindingReference
+from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     Endpoint_Status,
@@ -19,7 +21,6 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Vulnerability_Id,
 )
-from dojo.query_utils import build_count_subquery
 from dojo.request_cache import cache_for_request
 
 logger = logging.getLogger(__name__)
@@ -286,23 +287,110 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
     else:
         prefetched_findings = prefetched_findings.prefetch_related("test_import_finding_action_set")
 
-    # Standard prefetches
-    prefetched_findings = prefetched_findings.prefetch_related(
-        "notes",
-        "tags",
-        "endpoints",
-        "status_finding",
-        "finding_group_set",
-        "finding_group_set__jira_issue",  # Include both variants
-        "test__engagement__product__members",
-        "test__engagement__product__prod_type__members",
-        "vulnerability_id_set",
-    )
-
     # Endpoint counts using optimized subqueries
-    base_status = Endpoint_Status.objects.filter(finding_id=OuterRef("pk"))
-    count_subquery = partial(build_count_subquery, group_field="finding_id")
-    return prefetched_findings.annotate(
-        active_endpoint_count=Coalesce(count_subquery(base_status.filter(mitigated=False)), Value(0)),
-        mitigated_endpoint_count=Coalesce(count_subquery(base_status.filter(mitigated=True)), Value(0)),
-    )
+    if settings.V3_FEATURE_LOCATIONS:
+        # Standard prefetches
+        prefetched_findings = prefetched_findings.prefetch_related(
+            "notes",
+            "tags",
+            "locations__location__url",
+            "status_finding",
+            "finding_group_set",
+            "finding_group_set__jira_issue",  # Include both variants
+            "test__engagement__product__members",
+            "test__engagement__product__prod_type__members",
+            "vulnerability_id_set",
+        )
+        base_status = LocationFindingReference.objects.prefetch_related("location__url").all()
+        prefetched_findings = prefetched_findings.annotate(
+            has_endpoints=Exists(base_status),
+            active_endpoint_count=Count(
+                "locations",
+                filter=Q(locations__status=FindingLocationStatus.Active),
+                distinct=True,
+            ),
+            mitigated_endpoint_count=Count(
+                "locations",
+                filter=(~Q(locations__status=FindingLocationStatus.Active)),
+                distinct=True,
+            ),
+        ).prefetch_related(
+            Prefetch(
+                "locations",
+                queryset=base_status.filter(status=FindingLocationStatus.Active).annotate(is_broken=F("location__url__host_validation_failure"), object_id=F("location__id")).order_by("audit_time"),
+                to_attr="active_endpoints",
+            ),
+            Prefetch(
+                "locations",
+                queryset=base_status.filter(~Q(status=FindingLocationStatus.Active)).annotate(is_broken=F("location__url__host_validation_failure"), object_id=F("location__id")).order_by("audit_time"),
+                to_attr="mitigated_endpoints",
+            ),
+        )
+    else:
+        # Standard prefetches
+        prefetched_findings = prefetched_findings.prefetch_related(
+            "notes",
+            "tags",
+            "endpoints",
+            "status_finding",
+            "finding_group_set",
+            "finding_group_set__jira_issue",  # Include both variants
+            "test__engagement__product__members",
+            "test__engagement__product__prod_type__members",
+            "vulnerability_id_set",
+        )
+        base_status = Endpoint_Status.objects.prefetch_related("endpoint")
+        status = Case(
+                When(
+                    Q(false_positive=True) | Q(risk_accepted=True) | Q(out_of_scope=True) | Q(mitigated=True),
+                    then=Concat(
+                        Case(When(false_positive=True, then=Value("False Positive, ")), default=Value("")),
+                        Case(When(risk_accepted=True, then=Value("Risk Accepted, ")), default=Value("")),
+                        Case(When(out_of_scope=True, then=Value("Out of Scope, ")), default=Value("")),
+                        Case(When(mitigated=True, then=Value("Mitigated, ")), default=Value("")),
+                        output_field=CharField(),
+                    ),
+                ),
+                default=Value("Active"),
+                output_field=CharField(),
+            )
+        prefetched_findings = prefetched_findings.annotate(
+            has_endpoints=Exists(base_status),
+            active_endpoint_count=Count(
+                "status_finding",
+                filter=Q(
+                    status_finding__mitigated=False,
+                    status_finding__false_positive=False,
+                    status_finding__out_of_scope=False,
+                    status_finding__risk_accepted=False,
+                ),
+                distinct=True,
+            ),
+            mitigated_endpoint_count=Count(
+                "status_finding",
+                filter=(
+                    Q(status_finding__mitigated=True)
+                    | Q(status_finding__false_positive=True)
+                    | Q(status_finding__out_of_scope=True)
+                    | Q(status_finding__risk_accepted=True)
+                ),
+                distinct=True,
+            ),
+        ).prefetch_related(
+            Prefetch(
+                "status_finding",
+                queryset=base_status.filter(
+                    mitigated=False, false_positive=False, out_of_scope=False, risk_accepted=False,
+                ).annotate(status=status, object_id=F("endpoint__id")).order_by("last_modified"),
+                to_attr="active_endpoints",
+            ),
+            Prefetch(
+                "status_finding",
+                queryset=base_status.filter(
+                    Q(mitigated=True) | Q(false_positive=True) | Q(out_of_scope=True) | Q(risk_accepted=True),
+                ).annotate(status=status, object_id=F("endpoint__id")).order_by("mitigated_time"),
+                to_attr="mitigated_endpoints",
+            ),
+        )
+
+    return prefetched_findings

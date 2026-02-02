@@ -3,8 +3,10 @@ import datetime
 
 from cpe import CPE
 from defusedxml.ElementTree import parse
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class NmapParser:
@@ -62,21 +64,28 @@ class NmapParser:
 
             for port_element in host.findall("ports/port"):
                 protocol = port_element.attrib["protocol"]
-                endpoint = Endpoint(
-                    host=fqdn or ip, protocol=protocol,
-                )
+                if settings.V3_FEATURE_LOCATIONS:
+                    location = URL(
+                        host=fqdn or ip, protocol=protocol,
+                    )
+                else:
+                    # TODO: Delete this after the move to Locations
+                    location = Endpoint(
+                        host=fqdn or ip, protocol=protocol,
+                    )
+
                 if (
                     "portid" in port_element.attrib
                     and port_element.attrib["portid"].isdigit()
                 ):
-                    endpoint.port = int(port_element.attrib["portid"])
+                    location.port = int(port_element.attrib["portid"])
 
                 # filter on open ports
                 if port_element.find("state").attrib.get("state") != "open":
                     continue
-                title = f"Open port: {endpoint.port}/{endpoint.protocol}"
+                title = f"Open port: {location.port}/{location.protocol}"
                 description = host_info
-                description += f"**Port/Protocol:** {endpoint.port}/{endpoint.protocol}\n"
+                description += f"**Port/Protocol:** {location.port}/{location.protocol}\n"
 
                 service_info = "\n\n"
                 if port_element.find("service") is not None:
@@ -110,11 +119,11 @@ class NmapParser:
                     'script[@id="vulners"]',
                 ):
                     self.manage_vulner_script(
-                        test, dupes, script_element, endpoint, report_date,
+                        test, dupes, script_element, location, report_date,
                     )
 
                 severity = "Info"
-                dupe_key = "nmap:" + str(endpoint.port)
+                dupe_key = "nmap:" + str(location.port)
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
                     if description is not None:
@@ -129,12 +138,15 @@ class NmapParser:
                         impact="No impact provided",
                         vuln_id_from_tool=script_id,
                     )
-                    find.unsaved_endpoints = []
                     dupes[dupe_key] = find
                     if report_date:
                         find.date = report_date
 
-                find.unsaved_endpoints.append(endpoint)
+                if settings.V3_FEATURE_LOCATIONS:
+                    find.unsaved_locations.append(location)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    find.unsaved_endpoints.append(location)
         return list(dupes.values())
 
     def convert_cvss_score(self, raw_value):
@@ -158,7 +170,7 @@ class NmapParser:
         return "Critical"
 
     def manage_vulner_script(
-        self, test, dupes, script_element, endpoint, report_date=None,
+        self, test, dupes, script_element, location, report_date=None,
     ):
         for component_element in script_element.findall("table"):
             component_cpe = CPE(component_element.attrib["key"])
@@ -196,7 +208,11 @@ class NmapParser:
                     vuln_id_from_tool=vuln_id,
                     nb_occurences=1,
                 )
-                finding.unsaved_endpoints = [endpoint]
+                if settings.V3_FEATURE_LOCATIONS:
+                    finding.unsaved_locations = [location]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints = [location]
 
                 # manage if CVE is in metadata
                 if (
@@ -215,7 +231,11 @@ class NmapParser:
                         find.description += (
                             "\n-----\n\n" + finding.description
                         )  # fives '-' produces an horizontal line
-                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    if settings.V3_FEATURE_LOCATIONS:
+                        find.unsaved_locations.extend(finding.unsaved_locations)
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                     find.nb_occurences += finding.nb_occurences
                 else:
                     dupes[dupe_key] = finding

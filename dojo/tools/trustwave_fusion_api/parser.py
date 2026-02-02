@@ -3,8 +3,10 @@ import json
 from datetime import datetime
 
 from cpe import CPE
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class TrustwaveFusionAPIParser:
@@ -35,9 +37,15 @@ class TrustwaveFusionAPIParser:
             ).hexdigest()
 
             if item_key in items:
-                items[item_key].unsaved_endpoints.extend(
-                    item.unsaved_endpoints,
-                )
+                if settings.V3_FEATURE_LOCATIONS:
+                    items[item_key].unsaved_locations.extend(
+                        item.unsaved_locations,
+                    )
+                else:
+                    # TODO: Delete this after the move to Locations
+                    items[item_key].unsaved_endpoints.extend(
+                        item.unsaved_endpoints,
+                    )
                 items[item_key].nb_occurences += 1
             else:
                 items[item_key] = item
@@ -55,6 +63,71 @@ class TrustwaveFusionAPIParser:
         return "Info"
 
 
+def extract_location(finding, location_data):
+    if settings.V3_FEATURE_LOCATIONS:
+        # Location
+        #  using url
+        if "url" in location_data and location_data["url"] and location_data["url"] != "None":
+            location = URL.from_value(location_data["url"])
+        # fallback to using old way of creating endpoints
+        elif (
+            "domain" in location_data
+            and location_data["domain"]
+            and location_data["domain"] != "None"
+        ):
+            location = URL(host=str(location_data["domain"]))
+        elif "ip" in location_data and location_data["ip"] and location_data["ip"] != "None":
+            location = URL(host=str(location_data["ip"]))
+        else:
+            # No host, which is required for URLs
+            return
+        # check for protocol
+        if (
+            "applicationProtocol" in location_data
+            and location_data["applicationProtocol"]
+            and location_data["applicationProtocol"] != "None"
+        ):
+            location.protocol = location_data["applicationProtocol"]
+        # check for port
+        if (
+            "port" in location_data
+            and location_data["port"] in location_data
+            and location_data["port"] != "None"
+        ):
+            location.port = location_data["port"]
+        finding.unsaved_locations = [location]
+    else:
+        # TODO: Delete this after the move to Locations
+        # Endpoint
+        #  using url
+        if "url" in location_data and location_data["url"] and location_data["url"] != "None":
+            endpoint = Endpoint.from_uri(location_data["url"])
+        # fallback to using old way of creating endpoints
+        elif (
+            "domain" in location_data
+            and location_data["domain"]
+            and location_data["domain"] != "None"
+        ):
+            endpoint = Endpoint(host=str(location_data["domain"]))
+        elif "ip" in location_data and location_data["ip"] and location_data["ip"] != "None":
+            endpoint = Endpoint(host=str(location_data["ip"]))
+        # check for protocol
+        if (
+            "applicationProtocol" in location_data
+            and location_data["applicationProtocol"]
+            and location_data["applicationProtocol"] != "None"
+        ):
+            endpoint.protocol = location_data["applicationProtocol"]
+        # check for port
+        if (
+            "port" in location_data
+            and location_data["port"] in location_data
+            and location_data["port"] != "None"
+        ):
+            endpoint.port = location_data["port"]
+        finding.unsaved_endpoints = [endpoint]  # assigning endpoint
+
+
 def get_item(vuln, test):
     finding = Finding(
         test=test,
@@ -63,36 +136,9 @@ def get_item(vuln, test):
     )
 
     # Defining variables
-    location = vuln["location"]
+    location_data = vuln["location"]
 
-    # Endpoint
-    #  using url
-    if "url" in location and location["url"] and location["url"] != "None":
-        endpoint = Endpoint.from_uri(location["url"])
-    # fallback to using old way of creating endpoints
-    elif (
-        "domain" in location
-        and location["domain"]
-        and location["domain"] != "None"
-    ):
-        endpoint = Endpoint(host=str(location["domain"]))
-    elif "ip" in location and location["ip"] and location["ip"] != "None":
-        endpoint = Endpoint(host=str(location["ip"]))
-    # check for protocol
-    if (
-        "applicationProtocol" in location
-        and location["applicationProtocol"]
-        and location["applicationProtocol"] != "None"
-    ):
-        endpoint.protocol = location["applicationProtocol"]
-    # check for port
-    if (
-        "port" in location
-        and location["port"] in location
-        and location["port"] != "None"
-    ):
-        endpoint.port = location["port"]
-    finding.unsaved_endpoints = [endpoint]  # assigning endpoint
+    extract_location(finding, location_data)
 
     # Title
     finding.title = vuln["name"]
@@ -117,11 +163,11 @@ def get_item(vuln, test):
 
     # Component Name and Version
     if (
-        "applicationCpe" in location
-        and location["applicationCpe"]
-        and location["applicationCpe"] != "None"
+        "applicationCpe" in location_data
+        and location_data["applicationCpe"]
+        and location_data["applicationCpe"] != "None"
     ):
-        cpe = CPE(location["applicationCpe"])
+        cpe = CPE(location_data["applicationCpe"])
 
         component_name = (
             cpe.get_vendor()[0] + ":" if len(cpe.get_vendor()) > 0 else ""

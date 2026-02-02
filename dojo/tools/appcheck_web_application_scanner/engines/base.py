@@ -6,9 +6,11 @@ import cvss.parser
 import dateutil.parser
 from cpe import CPE
 from cvss.exceptions import CVSSError
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 #######
 # Helpers/Utils
@@ -282,6 +284,27 @@ class BaseEngineParser:
     def get_port(self, item: dict[str, Any]) -> int | None:
         return self.parse_port(item.get("port"))
 
+    def construct_location(self, host: str, port: int | None) -> URL:
+        url = URL.from_value(host)
+        if url.host:
+            if port:
+                url.port = port
+        else:
+            url = URL(host=host, port=port, path="")
+        return url
+
+    def parse_locations(self, item: dict[str, Any]) -> list[URL]:
+        # Location requires a host
+        if host := self.get_host(item):
+            port = self.get_port(item)
+            return [self.construct_location(host, port)]
+        return []
+
+    def set_locations(self, finding: Finding, item: Any) -> None:
+        locations = self.parse_locations(item)
+        finding.unsaved_locations.extend(locations)
+
+    # TODO: Delete this after the move to Locations
     def construct_endpoint(self, host: str, port: int | None) -> Endpoint:
         endpoint = Endpoint.from_uri(host)
         if endpoint.host:
@@ -291,13 +314,15 @@ class BaseEngineParser:
             endpoint = Endpoint(host=host, port=port)
         return endpoint
 
-    def parse_endpoints(self, item: dict[str, Any]) -> [Endpoint]:
+    # TODO: Delete this after the move to Locations
+    def parse_endpoints(self, item: dict[str, Any]) -> list[Endpoint]:
         # Endpoint requires a host
         if host := self.get_host(item):
             port = self.get_port(item)
             return [self.construct_endpoint(host, port)]
         return []
 
+    # TODO: Delete this after the move to Locations
     def set_endpoints(self, finding: Finding, item: Any) -> None:
         endpoints = self.parse_endpoints(item)
         finding.unsaved_endpoints.extend(endpoints)
@@ -339,7 +364,11 @@ class BaseEngineParser:
 
     def process_whole_item(self, finding: Finding, item: Any) -> None:
         self.set_severity(finding, item)
-        self.set_endpoints(finding, item)
+        if settings.V3_FEATURE_LOCATIONS:
+            self.set_locations(finding, item)
+        else:
+            # TODO: Delete this after the move to Locations
+            self.set_endpoints(finding, item)
 
     # Returns the complete field processing map: common fields plus any engine-specific
     def get_engine_fields(self) -> dict[str, FieldType]:
@@ -348,10 +377,18 @@ class BaseEngineParser:
             **self._ENGINE_FIELDS_MAP}
 
     def get_finding_key(self, finding: Finding) -> tuple:
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return (
+                finding.severity,
+                finding.title,
+                tuple(sorted([(e.host, e.port) for e in finding.unsaved_endpoints])),
+                self.SCANNING_ENGINE,
+            )
         return (
             finding.severity,
             finding.title,
-            tuple(sorted([(e.host, e.port) for e in finding.unsaved_endpoints])),
+            tuple(sorted([(location.host, location.port) for location in finding.unsaved_locations])),
             self.SCANNING_ENGINE,
         )
 

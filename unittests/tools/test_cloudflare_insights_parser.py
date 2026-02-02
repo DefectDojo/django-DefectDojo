@@ -1,3 +1,4 @@
+
 from dojo.models import Test
 from dojo.tools.cloudflare_insights.parser import CloudflareInsightsParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path

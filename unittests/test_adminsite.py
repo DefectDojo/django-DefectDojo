@@ -5,7 +5,6 @@ from .dojo_test_case import DojoTestCase
 
 
 class AdminSite(DojoTestCase):
-    fixtures = ["dojo_testdata.json"]
 
     def test_is_model_defined(self):
         for subclass in django.apps.apps.get_models():

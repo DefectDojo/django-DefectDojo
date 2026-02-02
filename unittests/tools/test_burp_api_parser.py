@@ -1,3 +1,4 @@
+
 from dojo.models import Test
 from dojo.tools.burp_api.parser import BurpApiParser, convert_confidence, convert_severity
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -10,9 +11,7 @@ class TestParser(DojoTestCase):
         with testfile.open(encoding="utf-8") as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
         self.assertEqual(5, len(findings))
         with self.subTest(i=0):
             item = findings[0]
@@ -28,9 +27,7 @@ class TestParser(DojoTestCase):
         with testfile.open(encoding="utf-8") as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             for item in findings:
                 self.assertIsNotNone(item.impact)
 
@@ -65,8 +62,6 @@ class TestParser(DojoTestCase):
         with testfile.open(encoding="utf-8") as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             for item in findings:
                 self.assertIsNotNone(item.impact)

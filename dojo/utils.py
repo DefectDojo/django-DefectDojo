@@ -54,6 +54,8 @@ from dojo.github import (
     update_external_issue_github,
 )
 from dojo.labels import get_labels
+from dojo.location.models import Location
+from dojo.location.status import ProductLocationStatus
 from dojo.models import (
     NOTIFICATION_CHOICES,
     Benchmark_Type,
@@ -151,7 +153,7 @@ def do_false_positive_history(finding, *args, **kwargs):
             find.false_p = True
             find.active = False
             find.verified = False
-            super(Finding, find).save(*args, **kwargs)
+            super(Finding, find).save(skip_validation=True, *args, **kwargs)
         except Exception as e:
             deduplicationLogger.debug(str(e))
 
@@ -1354,12 +1356,18 @@ class Product_Tab:
 
     @cached_property
     def _active_endpoints(self):
-        return Endpoint.objects.filter(
-            product=self._product,
-            status_endpoint__mitigated=False,
-            status_endpoint__false_positive=False,
-            status_endpoint__out_of_scope=False,
-            status_endpoint__risk_accepted=False,
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return Endpoint.objects.filter(
+                product=self.product,
+                status_endpoint__mitigated=False,
+                status_endpoint__false_positive=False,
+                status_endpoint__out_of_scope=False,
+                status_endpoint__risk_accepted=False,
+            )
+        return Location.objects.filter(
+            products__product=self.product,
+            products__status=ProductLocationStatus.Active,
         )
 
     @cached_property
@@ -1368,7 +1376,10 @@ class Product_Tab:
 
     @cached_property
     def endpoint_hosts_count(self):
-        return self._active_endpoints.values("host").distinct().count()
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return self._active_endpoints.values("host").distinct().count()
+        return self._active_endpoints.values("url__host").distinct().count()
 
     @cached_property
     def benchmark_type(self):
@@ -2098,30 +2109,31 @@ class async_delete:
     @app.task
     def crawl(self, obj, model_list, **kwargs):
         logger.debug("ASYNC_DELETE: Crawling " + self.get_object_name(obj) + ": " + str(obj))
-        for model_info in model_list:
-            task_results = []
-            model = model_info[0]
-            model_query = model_info[1]
-            filter_dict = {model_query: obj.id}
-            # Only fetch the IDs since we will make a list of IDs in the following function call
-            objects_to_delete = model.objects.only("id").filter(**filter_dict).distinct().order_by("id")
-            logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + self.get_object_name(model) + "s in chunks")
-            chunks = self.chunk_list(model, objects_to_delete)
-            for chunk in chunks:
-                logger.debug(f"deleting {len(chunk)} {self.get_object_name(model)}")
-                result = self.delete_chunk(chunk)
-                # Collect async task results to wait for them all at once
-                if hasattr(result, "get"):
-                    task_results.append(result)
-            # Wait for all chunk deletions to complete (they run in parallel)
-            for task_result in task_results:
-                task_result.get(timeout=300)  # 5 minute timeout per chunk
-        # Now delete the main object after all chunks are done
-        result = self.delete_chunk([obj])
-        # Wait for final deletion to complete
-        if hasattr(result, "get"):
-            result.get(timeout=300)  # 5 minute timeout
-        logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(obj) + ": " + str(obj))
+        with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+            for model_info in model_list:
+                task_results = []
+                model = model_info[0]
+                model_query = model_info[1]
+                filter_dict = {model_query: obj.id}
+                # Only fetch the IDs since we will make a list of IDs in the following function call
+                objects_to_delete = model.objects.only("id").filter(**filter_dict).distinct().order_by("id")
+                logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + self.get_object_name(model) + "s in chunks")
+                chunks = self.chunk_list(model, objects_to_delete)
+                for chunk in chunks:
+                    logger.debug(f"deleting {len(chunk)} {self.get_object_name(model)}")
+                    result = self.delete_chunk(chunk)
+                    # Collect async task results to wait for them all at once
+                    if hasattr(result, "get"):
+                        task_results.append(result)
+                # Wait for all chunk deletions to complete (they run in parallel)
+                for task_result in task_results:
+                    task_result.get(timeout=300)  # 5 minute timeout per chunk
+            # Now delete the main object after all chunks are done
+            result = self.delete_chunk([obj])
+            # Wait for final deletion to complete
+            if hasattr(result, "get"):
+                result.get(timeout=300)  # 5 minute timeout
+            logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(obj) + ": " + str(obj))
 
     def chunk_list(self, model, full_list):
         chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")

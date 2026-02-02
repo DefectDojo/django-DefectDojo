@@ -2,9 +2,11 @@ import pathlib
 from datetime import datetime
 
 import cvss
+from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint
+from dojo.url.models import URL
 
 ATTACHMENT_ERROR = "Attachment data not found"
 SCREENSHOT_ERROR = "Screenshot data not found"
@@ -155,7 +157,7 @@ def get_attachement_title(attachment):
     return title
 
 
-def parse_endpoints_from_hit(hit):
+def parse_locations_from_hit(hit):
     if "asset" not in hit or not hit["asset"]:
         return []
     try:
@@ -165,10 +167,11 @@ def parse_endpoints_from_hit(hit):
         # Workaround for Defect Dojo being silly when parsing uris.
         # If there's no protocol, it will assume the hostname is the protocol.
         asset = f"https://{asset}" if "://" not in asset else asset
-        endpoint = Endpoint.from_uri(asset)
+        # TODO: Delete this after the move to Locations
+        location = URL.from_value(asset) if settings.V3_FEATURE_LOCATIONS else Endpoint.from_uri(asset)
     except ValidationError:
-        endpoint = None
-    return [] if not endpoint else [endpoint]
+        location = None
+    return [] if not location else [location]
 
 
 def generate_test_description_from_report(data):

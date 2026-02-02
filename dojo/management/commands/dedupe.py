@@ -89,16 +89,29 @@ class Command(BaseCommand):
             findings = Finding.objects.all().filter(id__gt=0).exclude(duplicate=True)
             logger.info("######## Will process the full database with %d findings ########", findings.count())
 
-        # Prefetch related objects for synchronous deduplication
-        findings = findings.select_related(
-            "test", "test__engagement", "test__engagement__product", "test__test_type",
-        ).prefetch_related(
-            "endpoints",
-            Prefetch(
-                "original_finding",
-                queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
-            ),
-        )
+        if settings.V3_FEATURE_LOCATIONS:
+            # Prefetch related objects for synchronous deduplication
+            findings = findings.select_related(
+                "test", "test__engagement", "test__engagement__product", "test__test_type",
+            ).prefetch_related(
+                "locations",
+                Prefetch(
+                    "original_finding",
+                    queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
+                ),
+            )
+        else:
+            # TODO: Delete this after the move to Locations
+            # Prefetch related objects for synchronous deduplication
+            findings = findings.select_related(
+                "test", "test__engagement", "test__engagement__product", "test__test_type",
+            ).prefetch_related(
+                "endpoints",
+                Prefetch(
+                    "original_finding",
+                    queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
+                ),
+            )
 
         # Phase 1: update hash_codes without deduplicating
         if not dedupe_only:

@@ -30,11 +30,11 @@ class TestUserQueries(DojoTestCase):
 
         self.product_type_1 = Product_Type(name="product_type_1")
         self.product_type_1.save()
-        self.product_1 = Product(name="product_1", prod_type=self.product_type_1)
+        self.product_1 = Product(name="product_1", description="test", prod_type=self.product_type_1)
         self.product_1.save()
         self.product_type_2 = Product_Type(name="product_type_2")
         self.product_type_2.save()
-        self.product_2 = Product(name="product_2", prod_type=self.product_type_2)
+        self.product_2 = Product(name="product_2", description="test", prod_type=self.product_type_2)
         self.product_2.save()
 
         self.admin_user = Dojo_User(username="admin_user", is_superuser=True)
@@ -250,6 +250,7 @@ class TestGetAuthorizedUsersForProductAndProductType(DojoTestCase):
         cls.product_type = Product_Type.objects.create(name="UQ PPT Test PT")
         cls.product = Product.objects.create(
             name="UQ PPT Test Product",
+            description="Test",
             prod_type=cls.product_type,
         )
 

@@ -292,10 +292,12 @@ def register_django_pghistory_models():
     triggers.
     """
     # Import models inside function to avoid AppRegistryNotReady errors
+    from dojo.location.models import Location  # noqa: PLC0415
     from dojo.models import (  # noqa: PLC0415
         App_Analysis,
         Cred_User,
         Dojo_User,
+        # TODO: Delete this after the move to Locations
         Endpoint,
         Engagement,
         Finding,
@@ -308,6 +310,7 @@ def register_django_pghistory_models():
         Risk_Acceptance,
         Test,
     )
+    from dojo.url.models import URL  # noqa: PLC0415
 
     # Only log during actual application startup, not during shell commands
     if "shell" not in sys.argv:
@@ -525,6 +528,34 @@ def register_django_pghistory_models():
             ],
         },
     )(FindingReviewers)
+
+    pghistory.track(
+        pghistory.InsertEvent(),
+        pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
+        pghistory.DeleteEvent(),
+        pghistory.ManualEvent(label="initial_backfill"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
+    )(Location)
+
+    pghistory.track(
+        pghistory.InsertEvent(),
+        pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
+        pghistory.DeleteEvent(),
+        pghistory.ManualEvent(label="initial_backfill"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
+    )(URL)
 
     # Track tag through models for all TagField relationships
     # Must use proxy pattern like FindingReviewers because tagulous auto-generates
@@ -1035,6 +1066,7 @@ def get_tracked_models():
         "Product_Type", "Product", "Test", "Risk_Acceptance",
         "Finding_Template", "Cred_User", "Notification_Webhooks",
         "FindingReviewers",  # M2M through table for Finding.reviewers
+        "Location", "URL",
         # Tag through tables (tagulous auto-generated)
         "FindingTags",
         "FindingInheritedTags",

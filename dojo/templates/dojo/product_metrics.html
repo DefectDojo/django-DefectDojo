@@ -14,23 +14,25 @@
                   Metrics Overview
                 <div class="dropdown pull-right ">
                     <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                            data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
-                        <span class="fa-solid fa-bars"></span>
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                        <li role="presentation">
-                            <a href="{% url 'view_product_metrics' prod.id %}?type=Finding">
-                                <i class="fa-solid fa-file-lines"></i> Measure Findings
-                            </a>
-                        </li>
-                        <li role="presentation">
-                            <a href="{% url 'view_product_metrics' prod.id %}?type=Endpoint">
-                                <i class="fa-solid fa-file-lines"></i> Measure Affected Endpoints
-                            </a>
-                        </li>
-                    </ul>
+                    {% if not V3_FEATURE_LOCATIONS %}
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
+                            <span class="fa-solid fa-bars"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                            <li role="presentation">
+                                <a href="{% url 'view_product_metrics' prod.id %}?type=Finding">
+                                    <i class="fa-solid fa-file-lines"></i> Measure Findings
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a href="{% url 'view_product_metrics' prod.id %}?type=Endpoint">
+                                    <i class="fa-solid fa-file-lines"></i> Measure Affected Endpoints
+                                </a>
+                            </li>
+                        </ul>
+                    {% endif %}
                 </div>
               </h3>
             </div>

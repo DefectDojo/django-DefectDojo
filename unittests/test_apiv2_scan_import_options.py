@@ -6,8 +6,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
 from dojo.models import Finding, Test, Test_Type
+from unittests.dojo_test_case import versioned_fixtures
 
 
+@versioned_fixtures
 class ScanImportOptionsTest(APITestCase):
 
     """Test uploading empty reports or no report at all"""

@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from dojo.models import Endpoint, Test
+from dojo.models import Test
 from dojo.tools.asff.parser import AsffParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
@@ -34,9 +34,9 @@ class TestAsffParser(DojoTestCase):
         expected_ipv4s = data[0]["Resources"][0]["Details"]["AwsEc2Instance"][
             "IpV4Addresses"
         ]
-        for endpoint in finding.unsaved_endpoints:
-            self.assertIn(str(endpoint), expected_ipv4s)
-            endpoint.clean()
+        for location in self.get_unsaved_locations(finding):
+            self.assertIn(str(location), expected_ipv4s)
+            location.clean()
 
     def test_asff_one_vuln(self):
         data = self.load_sample_json("one_vuln.json")
@@ -63,5 +63,5 @@ class TestAsffParser(DojoTestCase):
             self.assertEqual(len(findings), 1)
             for index, finding in enumerate(findings):
                 self.common_check_finding(finding, data, index, guarddutydate=True)
-            self.assertEqual(finding.unsaved_endpoints[0], Endpoint(host="10.0.0.1"))
+            self.assertEqual(self.get_unsaved_locations(finding)[0].host, "10.0.0.1")
             self.assertTrue(finding.active)

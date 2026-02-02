@@ -1,10 +1,12 @@
 import base64
 
 import dateutil
+from django.conf import settings
 from django.core.files.base import ContentFile
 
 from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.parser_test import ParserTest
+from dojo.url.models import URL
 
 
 class GenericJSONParser:
@@ -23,9 +25,9 @@ class GenericJSONParser:
         test_internal.findings = []
         for item in data.get("findings", []):
             # remove endpoints from the dictionary
-            unsaved_endpoints = None
+            unsaved_locations = None
             if "endpoints" in item:
-                unsaved_endpoints = item["endpoints"]
+                unsaved_locations = item["endpoints"]
                 del item["endpoints"]
             # remove files from the dictionary
             unsaved_files = None
@@ -116,20 +118,31 @@ class GenericJSONParser:
             finding = Finding(**item)
 
             # manage endpoints
-            if unsaved_endpoints:
-                finding.unsaved_endpoints = []
-                for endpoint_item in unsaved_endpoints:
-                    if isinstance(endpoint_item, str):
-                        if "://" in endpoint_item:  # is the host full uri?
-                            endpoint = Endpoint.from_uri(endpoint_item)
-                            # can raise exception if the host is not valid URL
+            if unsaved_locations:
+                if settings.V3_FEATURE_LOCATIONS:
+                    for location_item in unsaved_locations:
+                        if isinstance(location_item, str):
+                            if "://" in location_item:  # is the host full uri?
+                                location = URL.from_value(location_item)
+                            else:
+                                location = URL.from_value("//" + location_item)
                         else:
-                            endpoint = Endpoint.from_uri("//" + endpoint_item)
-                            # can raise exception if there is no way to parse
-                            # the host
-                    else:
-                        endpoint = Endpoint(**endpoint_item)
-                    finding.unsaved_endpoints.append(endpoint)
+                            location = URL(**location_item)
+                        finding.unsaved_locations.append(location)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    for endpoint_item in unsaved_locations:
+                        if isinstance(endpoint_item, str):
+                            if "://" in endpoint_item:  # is the host full uri?
+                                endpoint = Endpoint.from_uri(endpoint_item)
+                                # can raise exception if the host is not valid URL
+                            else:
+                                endpoint = Endpoint.from_uri("//" + endpoint_item)
+                                # can raise exception if there is no way to parse
+                                # the host
+                        else:
+                            endpoint = Endpoint(**endpoint_item)
+                        finding.unsaved_endpoints.append(endpoint)
             if unsaved_files:
                 for unsaved_file in unsaved_files:
                     data = base64.b64decode(unsaved_file.get("data"))

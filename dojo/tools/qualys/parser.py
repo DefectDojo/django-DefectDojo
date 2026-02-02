@@ -8,6 +8,7 @@ from django.conf import settings
 
 from dojo.models import Endpoint, Finding
 from dojo.tools.qualys import csv_parser
+from dojo.url.models import URL
 from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
@@ -141,14 +142,14 @@ TYPE_MAP = {
 # Severity mapping taken from
 # https://qualysguard.qg2.apps.qualys.com/portal-help/en/malware/knowledgebase/severity_levels.htm
 LEGACY_SEVERITY_LOOKUP = {
-    1: "Informational",
+    1: "Info",
     2: "Low",
     3: "Medium",
     4: "High",
     5: "Critical",
 }
 NON_LEGACY_SEVERITY_LOOKUP = {
-    "Informational": "Low",
+    "Info": "Low",
     "Low": "Low",
     "Medium": "Medium",
     "High": "High",
@@ -171,7 +172,7 @@ def get_severity(severity_value_str: str | None) -> str:
             "Could not determine severity from severity_value_str: %s",
             severity_value_str,
         )
-        sev = "Informational"
+        sev = "Info"
 
     return sev
 
@@ -208,9 +209,6 @@ def parse_finding(host, tree):
 
     # FQDN
     issue_row["fqdn"] = host.findtext("DNS")
-
-    # Create Endpoint
-    ep = Endpoint(host=issue_row["fqdn"]) if issue_row["fqdn"] else Endpoint(host=issue_row["ip_address"])
 
     # OS NAME
     issue_row["os"] = host.findtext("OPERATING_SYSTEM")
@@ -355,8 +353,14 @@ def parse_finding(host, tree):
         if temp.get("CVSS_value") is not None:
             finding.cvssv3_score = temp.get("CVSS_value")
         finding.verified = True
-        finding.unsaved_endpoints = []
-        finding.unsaved_endpoints.append(ep)
+        # manage endpoint/location
+        if settings.V3_FEATURE_LOCATIONS:
+            location = URL(host=issue_row["fqdn"]) if issue_row["fqdn"] else URL(host=issue_row["ip_address"])
+            finding.unsaved_locations = [location]
+        else:
+            # TODO: Delete this after the move to Locations
+            location = Endpoint(host=issue_row["fqdn"]) if issue_row["fqdn"] else Endpoint(host=issue_row["ip_address"])
+            finding.unsaved_endpoints = [location]
         finding.unsaved_vulnerability_ids = temp.get("cve_list", [])
         ret_rows.append(finding)
     return ret_rows

@@ -2,8 +2,10 @@ import json
 from datetime import UTC, datetime
 
 from dateutil import parser as date_parser
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 from dojo.utils import parse_cvss_data
 
 
@@ -261,9 +263,16 @@ class AWSInspector2Parser:
             else:
                 msg = "Incorrect Inspector2 report format"
                 raise TypeError(msg)
-            endpoints.append(Endpoint(host=endpoint_host))
+            if settings.V3_FEATURE_LOCATIONS:
+                endpoints.append(URL(host=endpoint_host))
+            else:
+                # TODO: Delete this after the move to Locations
+                endpoints.append(Endpoint(host=endpoint_host))
         finding.impact = "\n".join(impact)
-        finding.unsaved_endpoints = []
-        finding.unsaved_endpoints.extend(endpoints)
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations = endpoints
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints = endpoints
 
         return finding

@@ -3,7 +3,7 @@ from collections.abc import Callable
 from datetime import datetime
 from functools import wraps
 from pprint import pformat as pp
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.contrib.auth.models import User
 from django.db.models import Model
@@ -21,6 +21,10 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.utils import get_current_user, is_finding_groups_enabled
+
+if TYPE_CHECKING:
+    from dojo.location.models import AbstractLocation
+
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +62,7 @@ class ImporterOptions:
         self.do_not_reactivate: bool = self.validate_do_not_reactivate(*args, **kwargs)
         self.commit_hash: str = self.validate_commit_hash(*args, **kwargs)
         self.create_finding_groups_for_all_findings: bool = self.validate_create_finding_groups_for_all_findings(*args, **kwargs)
-        self.endpoints_to_add: list[Endpoint] | None = self.validate_endpoints_to_add(*args, **kwargs)
+        self.endpoints_to_add: list[Endpoint] | list[AbstractLocation] | None = self.validate_endpoints_to_add(*args, **kwargs)
         self.engagement: Engagement | None = self.validate_engagement(*args, **kwargs)
         self.environment: Development_Environment | None = self.validate_environment(*args, **kwargs)
         self.group_by: str = self.validate_group_by(*args, **kwargs)

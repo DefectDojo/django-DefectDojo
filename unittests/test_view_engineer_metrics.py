@@ -8,11 +8,11 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.models import Finding, Risk_Acceptance, User
-
-from .dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+@versioned_fixtures
 class ViewEngineerMetricsTest(DojoTestCase):
 
     """Test suite for the optimized view_engineer endpoint"""

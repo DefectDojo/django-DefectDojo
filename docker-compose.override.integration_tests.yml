@@ -36,6 +36,7 @@ services:
       DD_SECURE_CROSS_ORIGIN_OPENER_POLICY: 'None'
       DD_SECRET_KEY: "${DD_SECRET_KEY:-.}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
+      DD_V3_FEATURE_LOCATIONS: ${DD_V3_FEATURE_LOCATIONS:-False}
   celerybeat:
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/test_defectdojo}
@@ -43,6 +44,7 @@ services:
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-celery-worker-dev.sh']
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/test_defectdojo}
+      DD_V3_FEATURE_LOCATIONS: ${DD_V3_FEATURE_LOCATIONS:-False}
   initializer:
     environment:
       PYTHONWARNINGS: error  # We are strict about Warnings during testing
