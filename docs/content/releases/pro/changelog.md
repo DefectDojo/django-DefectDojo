@@ -6,7 +6,7 @@ exclude_search: true
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
 
-For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/open_source/upgrading/upgrading_guide/).
+For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/changelog/os_upgrading/upgrading_guide/).
 
 ## Jan 2025: v2.54
 
