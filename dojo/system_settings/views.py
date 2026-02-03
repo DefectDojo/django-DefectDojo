@@ -113,9 +113,11 @@ class SystemSettingsView(View):
 
             q_len = get_celery_queue_length()
             if q_len is None:
-                context["celery_q_len"] = " It is not possible to identify number of waiting tasks."
-            elif q_len:
-                context["celery_q_len"] = f"{q_len} tasks are waiting to be proccessed."
+                context["celery_q_len"] = "It is not possible to identify number of waiting tasks."
+            elif len(q_len):
+                context["celery_q_len"] = f"{sum(q_len.values())} tasks are waiting to be proccessed."
+                context["celery_stats"] = q_len
+                context["celery_stats_desc"] = settings.CELERY_QUEUE_TYPES
             else:
                 context["celery_q_len"] = "No task is waiting to be proccessed."
 

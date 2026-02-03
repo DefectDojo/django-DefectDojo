@@ -28,6 +28,24 @@
                     </div>
                     <div class="panel-body text-left">
                         {{celery_q_len}}
+                        {% if celery_stats %}
+                            <table id="general" class="tablesorter-bootstrap table table-condensed table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name of the Queue</th>
+                                        <th>Number of Tasks</th>
+                                        <th>Description of the Queue</th>
+                                    </tr>
+                                </thead>
+                                {% for key, value in celery_stats.items %}
+                                    <tr>
+                                        <td>{{ key | first }}</td>
+                                        <td>{{ value }}</td>
+                                        <td>{{ key | last }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        {% endif %}
                     </div>
                 </div>
             </div>

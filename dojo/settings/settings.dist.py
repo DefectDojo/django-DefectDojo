@@ -17,7 +17,6 @@ from pathlib import Path
 import environ
 import pghistory
 from celery.schedules import crontab
-from kombu import Queue
 from netaddr import IPNetwork, IPSet
 
 from dojo import __version__
@@ -1255,27 +1254,26 @@ if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
 else:
     CELERY_BROKER_TRANSPORT_OPTIONS = {}
 
+# There are 5 queues. Lower number = higher priority. Plus one legacy (for backward compatibility)
+CELERY_QUEUE_TYPES = {
+    "celery": "legacy",
+    "celery:1": "live checks",
+    "celery:2": "keep system consistent (e.g. activation/deactivation webhooks)",
+    "celery:3": "regular tasks",
+    "celery:4": "notifications and jira",
+    "celery:5": "garbidge collectors",
+}
+
 if not CELERY_BROKER_URL.startswith("sqla+sqlite"):  # Priority queues are not supported by sqlite based engine
     if "queue_order_strategy" not in CELERY_BROKER_TRANSPORT_OPTIONS:
         CELERY_BROKER_TRANSPORT_OPTIONS["queue_order_strategy"] = "priority"
 
     if "priority_steps" not in CELERY_BROKER_TRANSPORT_OPTIONS:
-        # There are 4 queues. Lower number = higher priority
-        # 0 - live checks
-        # 1 - keep system consistent (e.g. activation/deavtivation webhooks)
-        # 2 - regular tasks
-        # 3 - notifications and jira
-        # 4 - garbidge collectors
-        CELERY_BROKER_TRANSPORT_OPTIONS["priority_steps"] = list(range(5))
-    CELERY_TASK_DEFAULT_PRIORITY = 2
+        CELERY_BROKER_TRANSPORT_OPTIONS["priority_steps"] = list(range(len(CELERY_QUEUE_TYPES)))
+    CELERY_TASK_DEFAULT_PRIORITY = 3
 
     if "sep" not in CELERY_BROKER_TRANSPORT_OPTIONS:
         CELERY_BROKER_TRANSPORT_OPTIONS["sep"] = ":"
-
-    # TODO: needs to be tested
-    CELERY_TASK_QUEUES = [
-        Queue("celery"),  # This handles BOTH legacy AND is the base for priority queues
-    ]
 
 
 CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )

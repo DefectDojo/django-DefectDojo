@@ -777,7 +777,7 @@ def push_to_jira(obj, *args, **kwargs):
 
 # we need thre separate celery tasks due to the decorators we're using to map to/from ids
 @dojo_async_task
-@app.task(priority=3)
+@app.task(priority=4)
 def push_finding_to_jira(finding_id, *args, **kwargs):
     finding = get_object_or_none(Finding, id=finding_id)
     if not finding:
@@ -790,7 +790,7 @@ def push_finding_to_jira(finding_id, *args, **kwargs):
 
 
 @dojo_async_task
-@app.task(priority=3)
+@app.task(priority=4)
 def push_finding_group_to_jira(finding_group_id, *args, **kwargs):
     finding_group = get_object_or_none(Finding_Group, id=finding_group_id)
     if not finding_group:
@@ -807,7 +807,7 @@ def push_finding_group_to_jira(finding_group_id, *args, **kwargs):
 
 
 @dojo_async_task
-@app.task(priority=3)
+@app.task(priority=4)
 def push_engagement_to_jira(engagement_id, *args, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
     if not engagement:
@@ -1397,7 +1397,7 @@ def jira_check_attachment(issue, source_file_name):
 
 
 @dojo_async_task
-@app.task(priority=3)
+@app.task(priority=4)
 def close_epic(engagement_id, push_to_jira, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
     if not engagement:
@@ -1446,7 +1446,7 @@ def close_epic(engagement_id, push_to_jira, **kwargs):
 
 
 @dojo_async_task
-@app.task(priority=3)
+@app.task(priority=4)
 def update_epic(engagement_id, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
     if not engagement:
@@ -1493,7 +1493,7 @@ def update_epic(engagement_id, **kwargs):
 
 
 @dojo_async_task
-@app.task(priority=3)
+@app.task(priority=4)
 def add_epic(engagement_id, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
     if not engagement:
