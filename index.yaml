@@ -13,6 +13,44 @@ entries:
           description: Update valkey Docker tag from 0.15.1 to v0.15.2 (_/defect_/Chart.yaml)
         - kind: changed
           description: Update valkey Docker tag from 0.15.2 to v0.15.3 (_/defect_/Chart.yaml)
+        - kind: changed
+          description: Bump DefectDojo to 2.55.0
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: 2.55.0
+    created: "2026-02-03T00:09:08.42689504Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: 16.7.27
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.15.3
+    description: A Helm chart for Kubernetes to install DefectDojo
+    digest: 2d56eb2f03636ce82dc746c2cacf19e27bbda914df6a681ca1d3478566b2acdb
+    icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
+    maintainers:
+    - email: defectdojo-project@owasp.org
+      name: madchap
+      url: https://github.com/DefectDojo/django-DefectDojo
+    name: defectdojo
+    urls:
+    - https://github.com/DefectDojo/django-DefectDojo/releases/download/2.55.0/defectdojo-1.9.10.tgz
+    version: 1.9.10
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
+          description: Update valkey Docker tag from 0.13.0 to v0.15.0 (_/defect_/Chart.yaml)
+        - kind: changed
+          description: chore(deps)_ update valkey _ tag from 0.15.0 to v0.15.1 (_/defect_/chart.yaml)
+        - kind: changed
+          description: chore(deps)_ update gcr.io/cloudsql__/gce_proxy _ tag from 1.37.11 to v1.37.12 (_/defect_/values.yaml)
+        - kind: changed
+          description: Update valkey Docker tag from 0.15.1 to v0.15.2 (_/defect_/Chart.yaml)
+        - kind: changed
+          description: Update valkey Docker tag from 0.15.2 to v0.15.3 (_/defect_/Chart.yaml)
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 2.55.0-dev
@@ -7628,4 +7666,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2026-02-02T05:34:18.604669904Z"
+generated: "2026-02-03T00:09:08.417782728Z"
