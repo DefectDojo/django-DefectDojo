@@ -126,14 +126,14 @@ def _async_dupe_delete_impl():
         # limit to settings.DUPE_DELETE_MAX_PER_RUN to prevent overlapping jobs
         results = Finding.objects \
                 .filter(duplicate=True) \
-                .order_by("date") \
+                .order_by() \
                 .values("duplicate_finding") \
                 .annotate(num_dupes=Count("id")) \
                 .filter(num_dupes__gt=dupe_max)[:total_duplicate_delete_count_max_per_run]
 
         originals_with_too_many_duplicates_ids = [result["duplicate_finding"] for result in results]
 
-        originals_with_too_many_duplicates = Finding.objects.filter(id__in=originals_with_too_many_duplicates_ids).order_by("id")
+        originals_with_too_many_duplicates = Finding.objects.filter(id__in=originals_with_too_many_duplicates_ids).order_by("date")
 
         # prefetch to make it faster
         originals_with_too_many_duplicates = originals_with_too_many_duplicates.prefetch_related(Prefetch("original_finding",

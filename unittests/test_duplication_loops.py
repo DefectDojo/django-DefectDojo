@@ -3,12 +3,14 @@ import logging
 from crum import impersonate
 from django.test.utils import override_settings
 
+from django.conf import settings
 from dojo.finding.deduplication import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
-from dojo.models import Engagement, Finding, Product, User, copy_model_util
-from dojo.tasks import async_dupe_delete
+from dojo.models import Engagement, Finding, Product, System_Settings, User, copy_model_util
+from dojo.tasks import _async_dupe_delete_impl, async_dupe_delete  # noqa: PLC2701
+from django.db.models import Count, Prefetch
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, toggle_system_setting_boolean
 
 logger = logging.getLogger(__name__)
 
@@ -375,24 +377,36 @@ class TestDuplicationLoops(DojoTestCase):
         self.assertEqual(self.finding_b.duplicate_finding_set().count(), 2)
 
     # Test that Delete Duplicate Findings & Maximum Duplicate is correctly deleting olding finding first based off of finding date value
-    @override_settings(DELETE_DUPLICATE_FINDINGS=True)
-    @override_settings(MAXIMUM_DUPLICATES=1)
     def test_delete_duplicate_order(self):
-        self.finding_b.date = "2023-01-01"
-        self.finding_c.date = "2024-01-01"
+        # Turn on delete duplicates and set the maximum dedupe value to 1
+        system_settings = System_Settings.objects.get()
+        system_settings.delete_duplicates = True
+        system_settings.max_dupes = 1
+        system_settings.save()
+
+        # Add dates to finding b and c
+        self.finding_b.date = "2024-01-01"
+        self.finding_c.date = "2023-01-01"
+        # Make findings b and c duplicates of a
         set_duplicate(self.finding_b, self.finding_a)
         set_duplicate(self.finding_c, self.finding_a)
 
-        async_dupe_delete()
+        # Perform delete dedupe logic
+        _async_dupe_delete_impl()
 
-        # Finding b should be deleted because it is the older finding
-
-        # I think this is how you would access it from the database
-        Finding.objects.get(id=self.finding_b.id)
-        # Why am I still able to access finding b. It should be deleted???
-
-        self.assertEqual(self.finding_a.duplicate_finding_set().count(), 2)
-        self.assertEqual(self.finding_a.duplicate_finding_set().first().id, self.finding_b.id)
+        # Finding C (2023) should be deleted
+        self.assertFalse(
+            Finding.objects.filter(id=self.finding_c.id).exists(),
+            "The oldest duplicate (Finding c) should have been deleted.",
+        )
+        # Finding b (2024) should exist
+        self.assertTrue(
+            Finding.objects.filter(id=self.finding_b.id).exists(),
+            "The newest duplicate (Finding C) should still exist.",
+        )
+        # Finding A should now only have 2 duplicate in its set
+        self.finding_a.refresh_from_db()
+        self.assertEqual(self.finding_a.duplicate_finding_set().count(), 1)
 
     def test_delete_all_engagements(self):
         # make sure there is no exception when deleting all engagements
