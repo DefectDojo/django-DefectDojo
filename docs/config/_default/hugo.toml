@@ -46,9 +46,12 @@ copyRight = "Copyright (c) 2020-2024 Thulite"
   priority = 0.5
 
 [caches]
+  [caches.getresource]
+    dir = ":cacheDir/:project"
+    maxAge = "1h"
   [caches.getjson]
     dir = ":cacheDir/:project"
-    maxAge = -1 # "30m"
+    maxAge = "1h"
 
 [taxonomies]
   contributor = "contributors"
