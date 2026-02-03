@@ -29,12 +29,13 @@ class TestApiBugcrowdParser(DojoTestCase):
             test.api_scan_configuration.service_key_1 = "example"
             findings = parser.get_findings(testfile, test)
             self.assertEqual(1, len(findings))
+            self.validate_locations(findings)
             finding = findings[0]
             self.assertEqual(finding.title, "JWT Alg none")
             self.assertEqual(
                 datetime.datetime.date(finding.date), datetime.date(2002, 4, 1),
             )
-            self.assertEqual(str(finding.unsaved_endpoints[0]), "https://example.com")
+            self.assertEqual(str(self.get_unsaved_locations(finding)[0]), "https://example.com")
             self.assertEqual(finding.severity, "Info")
             # self.assertEqual(finding.description, description)
             self.assertEqual(finding.mitigation, "Properly do JWT")
@@ -46,14 +47,13 @@ class TestApiBugcrowdParser(DojoTestCase):
                 "/submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a",
                 finding.references,
             )
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         with (get_unit_tests_scans_path("api_bugcrowd") / "bugcrowd_many.json").open(encoding="utf-8") as testfile:
             parser = ApiBugcrowdParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
+            self.validate_locations(findings)
             finding_1 = findings[0]
             finding_2 = findings[1]
             finding_3 = findings[2]
@@ -73,20 +73,14 @@ class TestApiBugcrowdParser(DojoTestCase):
             )
 
             self.assertEqual(
-                str(finding_1.unsaved_endpoints[0]), "https://example.com/1",
+                str(self.get_unsaved_locations(finding_1)[0]), "https://example.com/1",
             )
             self.assertEqual(
-                str(finding_2.unsaved_endpoints[0]), "https://example.com/2",
+                str(self.get_unsaved_locations(finding_2)[0]), "https://example.com/2",
             )
             self.assertEqual(
-                str(finding_3.unsaved_endpoints[0]), "https://example.com/3",
+                str(self.get_unsaved_locations(finding_3)[0]), "https://example.com/3",
             )
-            for endpoint in finding_1.unsaved_endpoints:
-                endpoint.clean()
-            for endpoint in finding_2.unsaved_endpoints:
-                endpoint.clean()
-            for endpoint in finding_3.unsaved_endpoints:
-                endpoint.clean()
             self.assertEqual(finding_1.severity, "Info")
             self.assertEqual(finding_2.severity, "Critical")
             self.assertEqual(finding_3.severity, "Info")
@@ -130,12 +124,13 @@ class TestApiBugcrowdParser(DojoTestCase):
             parser = ApiBugcrowdParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+            self.validate_locations(findings)
             finding = findings[0]
             self.assertEqual(finding.title, "JWT Alg none")
             self.assertEqual(
                 datetime.datetime.date(finding.date), datetime.date(2002, 4, 1),
             )
-            self.assertEqual(str(finding.unsaved_endpoints[0]), "https://example.com")
+            self.assertEqual(str(self.get_unsaved_locations(finding)[0]), "https://example.com")
             self.assertEqual(finding.severity, "Info")
             # self.assertEqual(finding.description, description)
             self.assertEqual(finding.mitigation, "Properly do JWT")
@@ -144,8 +139,6 @@ class TestApiBugcrowdParser(DojoTestCase):
             self.assertEqual(
                 finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a",
             )
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
 
     def test_parse_file_with_broken_bug_url(self):
         with (get_unit_tests_scans_path("api_bugcrowd") / "bugcrowd_broken_bug_url.json").open(encoding="utf-8") as testfile:

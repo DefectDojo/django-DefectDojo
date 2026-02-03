@@ -3,9 +3,11 @@ import logging
 import re
 
 from defusedxml import ElementTree
+from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -58,18 +60,27 @@ class NiktoXMLParser:
                 vuln_id_from_tool=item.attrib.get("id"),
                 nb_occurences=1,
             )
-            # endpoint
+            # endpoint/location
             try:
                 ip = item.findtext("iplink")
-                endpoint = Endpoint.from_uri(ip)
-                finding.unsaved_endpoints = [endpoint]
+                if settings.V3_FEATURE_LOCATIONS:
+                    location = URL.from_value(ip)
+                    finding.unsaved_locations = [location]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    endpoint = Endpoint.from_uri(ip)
+                    finding.unsaved_endpoints = [endpoint]
             except ValidationError:
                 logger.debug("Invalid iplink in the report")
             dupe_key = hashlib.sha256(description.encode("utf-8")).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 find.description += "\n-----\n" + finding.description
-                find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                if settings.V3_FEATURE_LOCATIONS:
+                    find.unsaved_locations.extend(finding.unsaved_locations)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                 find.nb_occurences += 1
             else:
                 dupes[dupe_key] = finding

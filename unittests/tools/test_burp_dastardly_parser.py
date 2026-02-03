@@ -10,7 +10,5 @@ class TestBurpParser(DojoTestCase):
         with (get_unit_tests_scans_path("burp_dastardly") / "many_findings.xml").open(encoding="utf-8") as test_file:
             parser = BurpDastardlyParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(4, len(findings))

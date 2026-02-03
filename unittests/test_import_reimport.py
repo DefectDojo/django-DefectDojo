@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.test import override_settings
 from django.test.client import Client
 from django.urls import reverse
@@ -13,7 +14,7 @@ from django.utils import timezone
 
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, User
 
-from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
+from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path, versioned_fixtures
 from .test_utils import assertTestImportModelsCreated
 
 logger = logging.getLogger(__name__)
@@ -60,6 +61,7 @@ class ImportReimportMixin:
         self.zap_sample1_filename = get_unit_tests_scans_path("zap") / "1_zap_sample_0_and_new_absent.xml"
         self.zap_sample2_filename = get_unit_tests_scans_path("zap") / "2_zap_sample_0_and_new_endpoint.xml"
         self.zap_sample3_filename = get_unit_tests_scans_path("zap") / "3_zap_sampl_0_and_different_severities.xml"
+        self.zap_sample_without_zap3_filename = get_unit_tests_scans_path("zap") / "0_zap_sample_without_zap3.xml"
 
         self.anchore_file_name = get_unit_tests_scans_path("anchore_engine") / "one_vuln_many_files.json"
         self.scan_type_anchore = "Anchore Engine Scan"
@@ -1573,6 +1575,110 @@ class ImportReimportMixin:
                 self.assertFalse(finding["risk_accepted"])
                 self.assertFalse(finding["is_mitigated"])
 
+    def test_reimport_closes_risk_accepted_when_vulnerability_fixed(self):
+        """Test that risk-accepted findings are closed when vulnerability no longer in scan"""
+        logger.debug("importing zap0, risk accepting zap3, reimporting without zap3, expecting zap3 to be closed")
+
+        # Import Zap0 with 4 findings (Zap1, Zap2, Zap3, Zap5)
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        test_id = import0["test"]
+
+        # Enable simple risk acceptance
+        test_api_response = self.get_test_api(test_id)
+        product_api_response = self.get_engagement_api(test_api_response["engagement"])
+        product_id = product_api_response["product"]
+        self.patch_product_api(product_id, {"enable_simple_risk_acceptance": True})
+
+        # Get all findings and risk accept Zap3
+        findings = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(4, findings)
+
+        zap3_id = None
+        for finding in findings["results"]:
+            if "Zap3" in finding["title"]:
+                # Risk accept via API (sets active=False, risk_accepted=True)
+                self.patch_finding_api(finding["id"], {
+                    "risk_accepted": True,
+                    "active": False,
+                })
+                zap3_id = finding["id"]
+                break
+
+        self.assertIsNotNone(zap3_id, "Zap3 finding should exist")
+
+        # Verify risk acceptance was applied
+        finding = self.get_finding_api(zap3_id)
+        self.assertTrue(finding["risk_accepted"])
+        self.assertFalse(finding["active"])
+        self.assertFalse(finding["is_mitigated"])
+
+        # Reimport scan WITHOUT Zap3 (vulnerability is fixed)
+        # This should close the risk-accepted finding and remove risk acceptance
+        # Zap1, Zap2, and Zap5 are still in the scan, so they are untouched
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, closed=1, untouched=3):
+            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample_without_zap3_filename)
+
+        self.assertEqual(reimport0["test"], test_id)
+
+        # Verify Zap3 is now mitigated and risk acceptance removed
+        finding = self.get_finding_api(zap3_id)
+        self.assertTrue(finding["is_mitigated"], "Finding should be mitigated when vulnerability is fixed")
+        self.assertFalse(finding["active"], "Finding should remain inactive")
+        self.assertFalse(finding["risk_accepted"], "Risk acceptance should be removed when vulnerability is fixed")
+
+        # Verify note was added explaining the closure
+        self.assertIsNotNone(finding.get("notes"))
+
+    def test_reimport_keeps_risk_accepted_when_still_in_scan(self):
+        """Test that risk-accepted findings remain risk-accepted when still in scan (Scenario A)"""
+        logger.debug("importing zap0, risk accepting zap3, reimporting same scan, expecting zap3 to remain risk-accepted")
+
+        # Import Zap0 with 4 findings (Zap1, Zap2, Zap3, Zap5)
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        test_id = import0["test"]
+
+        # Enable simple risk acceptance
+        test_api_response = self.get_test_api(test_id)
+        product_api_response = self.get_engagement_api(test_api_response["engagement"])
+        product_id = product_api_response["product"]
+        self.patch_product_api(product_id, {"enable_simple_risk_acceptance": True})
+
+        # Get all findings and risk accept Zap3
+        findings = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(4, findings)
+
+        zap3_id = None
+        for finding in findings["results"]:
+            if "Zap3" in finding["title"]:
+                # Risk accept via API (sets active=False, risk_accepted=True)
+                self.patch_finding_api(finding["id"], {
+                    "risk_accepted": True,
+                    "active": False,
+                })
+                zap3_id = finding["id"]
+                break
+
+        self.assertIsNotNone(zap3_id, "Zap3 finding should exist")
+
+        # Verify risk acceptance was applied
+        finding = self.get_finding_api(zap3_id)
+        self.assertTrue(finding["risk_accepted"])
+        self.assertFalse(finding["active"])
+        self.assertFalse(finding["is_mitigated"])
+
+        # Reimport SAME scan (Zap3 is still present in scan)
+        # The risk-accepted finding should remain risk-accepted (NOT closed)
+        with assertTestImportModelsCreated(self, reimports=1, untouched=4):
+            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+
+        self.assertEqual(reimport0["test"], test_id)
+
+        # Verify Zap3 is still risk-accepted (NOT closed)
+        finding = self.get_finding_api(zap3_id)
+        self.assertTrue(finding["risk_accepted"], "Finding should remain risk-accepted when still in scan")
+        self.assertFalse(finding["active"], "Finding should remain inactive")
+        self.assertFalse(finding["is_mitigated"], "Finding should NOT be mitigated when still risk-accepted and present in scan")
+
     # import gitlab_dep_scan_components_filename with 6 findings
     # findings 1, 2 and 3 have the same component_name (golang.org/x/crypto) and the same CVE (CVE-2020-29652), but different component_version
     # findings 4 and 5 have the same component_name (golang.org/x/text) and the same CVE (CVE-2020-14040), but different component_version
@@ -1637,10 +1743,7 @@ class ImportReimportMixin:
         engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
         self.assertEqual(engagement_findings.count(), 4)
 
-        # findings should have only one endpoint, added with endpoint_to_add
-        for finding in engagement_findings:
-            self.assertEqual(finding.endpoints.count(), 1)
-            self.assertEqual(finding.endpoints.first().id, 1)
+        self.check_endpoints(engagement_findings)
 
         # reimport empty report to close old findings
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, closed=4):
@@ -1670,9 +1773,7 @@ class ImportReimportMixin:
         self.assertEqual(engagement_findings.count(), 4)
 
         # findings should have only one endpoint, added with endpoint_to_add
-        for finding in engagement_findings:
-            self.assertEqual(finding.endpoints.count(), 1)
-            self.assertEqual(finding.endpoints.first().id, 1)
+        self.check_endpoints(engagement_findings)
 
         # reimport empty report with no explicit close_old_findings parameter should not close old findings
         with assertTestImportModelsCreated(self, imports=1, affected_findings=0, closed=0):
@@ -1921,9 +2022,8 @@ class ImportReimportMixin:
 
         test = self.get_test_api(test_id)["id"]
         finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
-        self.assertEqual(finding.status_finding.count(), 1)
 
-        original_date = finding.status_finding.first().date
+        original_date = self.get_first_import_date(finding)
 
         self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
         self.assertEqual(endpoint_status_count_before_active + 1, self.db_endpoint_status_count(mitigated=False))
@@ -1939,9 +2039,9 @@ class ImportReimportMixin:
         self.assert_finding_count_json(1, findings)
 
         finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
-        self.assertEqual(finding.status_finding.count(), 1)
 
-        reimported_date = finding.status_finding.first().date
+        reimported_date = self.get_first_import_date(finding)
+
         self.assertEqual(original_date, reimported_date)
 
         self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
@@ -2120,7 +2220,28 @@ class ImportReimportMixin:
         self.assertEqual(0, active_finding_after.get("count", 0))
         self.assertEqual(2, false_p_finding_after.get("count", 0))
 
+    def check_endpoints(self, engagement_findings):
+        # findings should have only one location, added with endpoint_to_add
+        if settings.V3_FEATURE_LOCATIONS:
+            for finding in engagement_findings:
+                self.assertEqual(finding.locations.count(), 1)
+                self.assertEqual(finding.locations.first().location.id, 1)
+        else:
+            # TODO: Delete this after the move to Locations
+            for finding in engagement_findings:
+                self.assertEqual(finding.endpoints.count(), 1)
+                self.assertEqual(finding.endpoints.first().id, 1)
 
+    def get_first_import_date(self, finding):
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.assertEqual(finding.status_finding.count(), 1)
+            return finding.status_finding.first().date
+        self.assertEqual(finding.locations.count(), 1)
+        return finding.locations.first().audit_time
+
+
+@versioned_fixtures
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
     fixtures = ["dojo_testdata.json"]
 
@@ -2408,7 +2529,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # Step 1: Baseline import (default batch size)
         # Create engagement first and set deduplication_on_engagement before import
         product_type1, _ = Product_Type.objects.get_or_create(name="PT Bandit Baseline")
-        product1, _ = Product.objects.get_or_create(name="P Bandit Baseline", prod_type=product_type1)
+        product1, _ = Product.objects.get_or_create(name="P Bandit Baseline", description="test product", prod_type=product_type1)
         engagement1 = Engagement.objects.create(
             name="E Bandit Baseline",
             product=product1,
@@ -2484,7 +2605,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         ):
             # Create engagement first and set deduplication_on_engagement before import
             product_type2, _ = Product_Type.objects.get_or_create(name="PT Bandit Batch")
-            product2, _ = Product.objects.get_or_create(name="P Bandit Batch", prod_type=product_type2)
+            product2, _ = Product.objects.get_or_create(name="P Bandit Batch", description="test product", prod_type=product_type2)
             engagement2 = Engagement.objects.create(
                 name="E Bandit Batch",
                 product=product2,
@@ -2579,7 +2700,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # Step 1: Baseline import (default batch size)
         # Create engagement first and set deduplication_on_engagement before import
         product_type1, _ = Product_Type.objects.get_or_create(name="PT Bandit Baseline Dedupe")
-        product1, _ = Product.objects.get_or_create(name="P Bandit Baseline Dedupe", prod_type=product_type1)
+        product1, _ = Product.objects.get_or_create(name="P Bandit Baseline Dedupe", description="test product", prod_type=product_type1)
         engagement1 = Engagement.objects.create(
             name="E Bandit Baseline Dedupe",
             product=product1,
@@ -2648,7 +2769,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         ):
             # Create engagement first and set deduplication_on_engagement before import
             product_type2, _ = Product_Type.objects.get_or_create(name="PT Bandit Batch Dedupe")
-            product2, _ = Product.objects.get_or_create(name="P Bandit Batch Dedupe", prod_type=product_type2)
+            product2, _ = Product.objects.get_or_create(name="P Bandit Batch Dedupe", description="test product", prod_type=product_type2)
             engagement2 = Engagement.objects.create(
                 name="E Bandit Batch Dedupe",
                 product=product2,
@@ -2790,7 +2911,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
 
         # Create engagement and test
         product_type, _ = Product_Type.objects.get_or_create(name="PT Bandit Internal Dupes")
-        product, _ = Product.objects.get_or_create(name="P Bandit Internal Dupes", prod_type=product_type)
+        product, _ = Product.objects.get_or_create(name="P Bandit Internal Dupes", description="test product", prod_type=product_type)
         engagement = Engagement.objects.create(
             name="E Bandit Internal Dupes",
             product=product,
@@ -2846,7 +2967,20 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
             self.assertEqual(duplicate_findings, 0,
                 f"Expected 0 duplicate findings (duplicates within report should match), got {duplicate_findings}")
 
+    def db_endpoint_count(self):
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return super().db_endpoint_count()
+        return self.db_location_count()
 
+    def db_endpoint_status_count(self, mitigated=None):
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return super().db_endpoint_status_count(mitigated=mitigated)
+        return self.db_location_status_count(mitigated)
+
+
+@versioned_fixtures
 class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
     fixtures = ["dojo_testdata.json"]
     client_ui = Client()
@@ -2991,6 +3125,19 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
                 payload["service"] = service
 
             return self.reimport_scan_ui(test_id, payload)
+
+    def db_endpoint_count(self):
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return super().db_endpoint_count()
+        return self.db_location_count()
+
+    def db_endpoint_status_count(self, mitigated=None):
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return super().db_endpoint_status_count(mitigated=mitigated)
+        return self.db_location_status_count(mitigated)
+
 
 # Observations:
 # - When reopening a mitigated finding, almost no fields are updated such as title, description, severity, impact, references, ....

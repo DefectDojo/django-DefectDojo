@@ -9,7 +9,7 @@ from django.views import View
 
 from dojo.forms import SystemSettingsForm
 from dojo.models import System_Settings
-from dojo.utils import add_breadcrumb, get_celery_worker_status
+from dojo.utils import add_breadcrumb, get_celery_queue_length, get_celery_worker_status
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +110,15 @@ class SystemSettingsView(View):
             else:
                 context["celery_msg"] = "Celery does not appear to be up and running. Please ensure celery is running."
                 context["celery_status"] = "Not Running"
+
+            q_len = get_celery_queue_length()
+            if q_len is None:
+                context["celery_q_len"] = " It is not possible to identify number of waiting tasks."
+            elif q_len:
+                context["celery_q_len"] = f"{q_len} tasks are waiting to be proccessed."
+            else:
+                context["celery_q_len"] = "No task is waiting to be proccessed."
+
         else:
             context["celery_bool"] = False
             context["celery_msg"] = "Celery needs to have the setting CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite' set in settings.py."

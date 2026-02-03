@@ -60,7 +60,9 @@ class DojoAppConfig(AppConfig):
         # sast_source_file_path = models.CharField(null=True, blank=True, max_length=4000, help_text="Source filepath of the attack vector")
 
         watson.register(self.get_model("Finding_Template"))
+        # TODO: Delete this after the move to Locations
         watson.register(self.get_model("Endpoint"), store=("product__name", ))  # add product name also?
+        watson.register(self.get_model("Location"))
         watson.register(self.get_model("Engagement"), fields=get_model_fields_with_extra(self.get_model("Engagement"), ("id", "product__name")), store=("product__name", ))
         watson.register(self.get_model("App_Analysis"))
         watson.register(self.get_model("Vulnerability_Id"), store=("finding__test__engagement__product__name", ))
@@ -71,10 +73,12 @@ class DojoAppConfig(AppConfig):
         register_check(check_configuration_deduplication, "dojo")
 
         # Load any signals here that will be ready for runtime
-        # Importing the signals file is good enough if using the reciever decorator
+        # Importing the signals file is good enough if using the receiver decorator
         import dojo.announcement.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.benchmark.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.cred.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+
+        # TODO: Delete this after the move to Locations
         import dojo.endpoint.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.engagement.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.file_uploads.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
@@ -87,7 +91,7 @@ class DojoAppConfig(AppConfig):
         import dojo.tags_signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.test.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.tool_product.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
-
+        import dojo.url.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         # Configure audit system after all models are loaded
         # This must be done in ready() to avoid "Models aren't loaded yet" errors
         # Note: pghistory models are registered here (no database access), but trigger

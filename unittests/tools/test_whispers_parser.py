@@ -31,9 +31,7 @@ class TestWhispersParser(DojoTestCase):
         parser = WhispersParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(1, len(findings))
         self.assertEqual("src/pip.conf", findings[0].file_path)
         self.assertEqual(2, findings[0].line)
@@ -44,7 +42,5 @@ class TestWhispersParser(DojoTestCase):
         parser = WhispersParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(5, len(findings))

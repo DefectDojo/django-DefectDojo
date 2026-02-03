@@ -85,7 +85,7 @@ if settings.ENABLE_V3_ORGANIZATION_ASSET_RELABEL:
         ),
         re_path(
             r"^asset/(?P<pid>\d+)/add_meta_data$",
-            views.add_meta_data,
+            views.manage_meta_data,
             name="add_meta_data",
         ),
         re_path(
@@ -95,7 +95,7 @@ if settings.ENABLE_V3_ORGANIZATION_ASSET_RELABEL:
         ),
         re_path(
             r"^asset/(?P<pid>\d+)/edit_meta_data$",
-            views.edit_meta_data,
+            views.manage_meta_data,
             name="edit_meta_data",
         ),
         re_path(
@@ -239,11 +239,11 @@ else:
                 name="delete_technology"),
         re_path(r"^product/(?P<pid>\d+)/new_engagement/cicd$", views.new_eng_for_app_cicd,
                 name="new_eng_for_prod_cicd"),
-        re_path(r"^product/(?P<pid>\d+)/add_meta_data$", views.add_meta_data,
+        re_path(r"^product/(?P<pid>\d+)/add_meta_data$", views.manage_meta_data,
                 name="add_meta_data"),
         re_path(r"^product/(?P<pid>\d+)/edit_notifications$", views.edit_notifications,
                 name="edit_notifications"),
-        re_path(r"^product/(?P<pid>\d+)/edit_meta_data$", views.edit_meta_data,
+        re_path(r"^product/(?P<pid>\d+)/edit_meta_data$", views.manage_meta_data,
                 name="edit_meta_data"),
         re_path(
             r"^product/(?P<product_id>\d+)/ad_hoc_finding$",

@@ -5,9 +5,11 @@ from pathlib import Path
 
 import cvss.parser
 from cvss.cvss3 import CVSS3
+from django.conf import settings
 from django.utils import timezone
 
-from dojo.models import Endpoint, Endpoint_Status, Finding
+from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +126,7 @@ class CyberwatchGaleaxParser:
                 "cvssv3": cvssv3,
                 "cvssv3_score": cvssv3_score,
                 "products": {},
-                "no_product_endpoints": set(),
+                "no_product_locations": set(),
             }
 
         c_data = cve_data[cve_code]
@@ -150,17 +152,17 @@ class CyberwatchGaleaxParser:
             self.collect_products_data(updates_assets, server_lookup, c_data)
         else:
             for server_name in server_lookup:
-                c_data["no_product_endpoints"].add(server_name)
+                c_data["no_product_locations"].add(server_name)
 
     def collect_products_data(self, updates_assets, server_lookup, c_data):
-        """Given updates_assets and a server lookup, populate product data with endpoints, versions, and mitigation info."""
+        """Given updates_assets and a server lookup, populate product data with locations, versions, and mitigation info."""
         for product, data in updates_assets.items():
             assets_list = data.get("assets", [])
             versions_list = data.get("versions", [])
 
             if product not in c_data["products"]:
                 c_data["products"][product] = {
-                    "endpoints": set(),
+                    "locations": set(),
                     "versions": set(),
                     "active_mitigated_data": [],
                 }
@@ -205,7 +207,11 @@ class CyberwatchGaleaxParser:
         if not products:
             mitigated_date = timezone.now()
             mitigation = f"Fixed At: {mitigated_date}"
-            endpoints = [Endpoint(host=e) for e in c_data["no_product_endpoints"]]
+            if settings.V3_FEATURE_LOCATIONS:
+                locations = [URL(host=e) for e in c_data["no_product_locations"]]
+            else:
+                # TODO: Delete this after the move to Locations
+                locations = [Endpoint(host=e) for e in c_data["no_product_locations"]]
 
             findings.append(
                 self.create_finding(
@@ -220,7 +226,7 @@ class CyberwatchGaleaxParser:
                     mitigated=mitigated_date,
                     cvssv3=cvssv3,
                     cvssv3_score=cvssv3_score,
-                    endpoints=endpoints,
+                    locations=locations,
                     cwe_num=cwe_num,
                     epss=epss,
                     cve_code=cve_code,
@@ -235,7 +241,11 @@ class CyberwatchGaleaxParser:
             if mitigated_date and not active_status:
                 mitigation = f"Fixed At: {mitigated_date}"
 
-            endpoints = [Endpoint(host=e) for e in p_data["endpoints"]]
+            if settings.V3_FEATURE_LOCATIONS:
+                locations = [URL(host=e) for e in p_data["locations"]]
+            else:
+                # TODO: Delete this after the move to Locations
+                locations = [Endpoint(host=e) for e in p_data["locations"]]
 
             findings.append(
                 self.create_finding(
@@ -250,7 +260,7 @@ class CyberwatchGaleaxParser:
                     mitigated=mitigated_date,
                     cvssv3=cvssv3,
                     cvssv3_score=cvssv3_score,
-                    endpoints=endpoints,
+                    locations=locations,
                     cwe_num=cwe_num,
                     epss=epss,
                     cve_code=cve_code,
@@ -286,7 +296,7 @@ class CyberwatchGaleaxParser:
         mitigated,
         cvssv3,
         cvssv3_score,
-        endpoints,
+        locations,
         cwe_num=None,
         epss=None,
         cve_code=None,
@@ -318,7 +328,11 @@ class CyberwatchGaleaxParser:
             component_version=component_version,
         )
 
-        finding.unsaved_endpoints = endpoints
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations = locations
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints = locations
 
         if cve_code:
             finding.unsaved_vulnerability_ids = [cve_code]
@@ -408,7 +422,7 @@ class CyberwatchGaleaxParser:
             logger.error("servers is not a list: %s", servers)
             return None
 
-        unsaved_endpoints, unsaved_endpoint_status, active_status, mitigated_date = self.process_servers_for_security_issue(servers)
+        unsaved_locations, active_status, mitigated_date = self.process_servers_for_security_issue(servers)
 
         if mitigated_date:
             mitigation = f"Mitigated At: {mitigated_date}"
@@ -438,16 +452,16 @@ class CyberwatchGaleaxParser:
         if cve_announcements:
             finding.unsaved_vulnerability_ids = cve_announcements
 
-        finding.unsaved_endpoints = unsaved_endpoints
-        for endpoint_status in unsaved_endpoint_status:
-            endpoint_status.finding = finding
-        finding.unsaved_endpoint_status = unsaved_endpoint_status
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations = unsaved_locations
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints = unsaved_locations
 
         return finding
 
     def process_servers_for_security_issue(self, servers):
-        unsaved_endpoints = []
-        unsaved_endpoint_status = []
+        unsaved_locations = []
         active_status = False
         mitigated_dates = []
 
@@ -457,8 +471,13 @@ class CyberwatchGaleaxParser:
                 continue
 
             computer_name = server.get("computer_name", "Unknown Hostname")
-            endpoint = Endpoint(host=computer_name)
-            unsaved_endpoints.append(endpoint)
+            if settings.V3_FEATURE_LOCATIONS:
+                location = URL(host=computer_name)
+                unsaved_locations.append(location)
+            else:
+                # TODO: Delete this after the move to Locations
+                endpoint = Endpoint(host=computer_name)
+                unsaved_locations.append(endpoint)
 
             server_active_value = server.get("active")
             server_active_status = (server_active_value == "active")
@@ -470,22 +489,8 @@ class CyberwatchGaleaxParser:
                 mitigated_date = timezone.now()
                 mitigated_dates.append(mitigated_date)
 
-            detected_at_str = server.get("detected_at")
-            detected_at = self.parse_detected_at(detected_at_str)
-
-            endpoint_status = Endpoint_Status(
-                endpoint=endpoint,
-                finding=None,
-                mitigated=mitigated_date,
-                last_modified=detected_at,
-                false_positive=False,
-                out_of_scope=False,
-                mitigated_by=None,
-            )
-            unsaved_endpoint_status.append(endpoint_status)
-
         mitigated_date = (max(mitigated_dates) if mitigated_dates else timezone.now()) if not active_status else None
-        return unsaved_endpoints, unsaved_endpoint_status, active_status, mitigated_date
+        return unsaved_locations, active_status, mitigated_date
 
     def parse_detected_at(self, detected_at_str):
         """Parse the detected_at field for a security issue server."""

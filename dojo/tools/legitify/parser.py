@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class LegitifyParser:
@@ -42,7 +45,7 @@ class LegitifyParser:
         for content_value in report_tree.get("content", {}).values():
             policy_info = content_value.get("policyInfo", {})
             is_finding = False
-            endpoints = set()
+            locations = set()
             references = set()
             for violation in content_value.get("violations", []):
                 if violation.get("status", None) == "FAILED":
@@ -50,7 +53,11 @@ class LegitifyParser:
                     url = violation.get("canonicalLink", None)
                     if url:
                         references.add(url)
-                        endpoints.add(Endpoint.from_uri(url))
+                        if settings.V3_FEATURE_LOCATIONS:
+                            locations.add(URL.from_value(url))
+                        else:
+                            # TODO: Delete this after the move to Locations
+                            locations.add(Endpoint.from_uri(url))
 
             if is_finding:
                 remediation_steps = policy_info.get("remediationSteps", [])
@@ -69,6 +76,10 @@ class LegitifyParser:
                     vuln_id_from_tool=policy_info.get("policyName", None),
                     fix_available=fix_available,
                 )
-                finding.unsaved_endpoints = list(endpoints)
+                if settings.V3_FEATURE_LOCATIONS:
+                    finding.unsaved_locations = list(locations)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints = list(locations)
                 findings.append(finding)
         return findings

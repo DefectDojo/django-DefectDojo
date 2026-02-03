@@ -4,12 +4,12 @@ import logging
 from dojo.finding.deduplication import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Finding, copy_model_util
-
-from .dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 
 
+@versioned_fixtures
 class TestDuplicationReopen(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -56,8 +56,8 @@ class TestDuplicationReopen(DojoTestCase):
         self.finding_b.duplicate = True
         self.finding_b.duplicate_finding = self.finding_a
 
-        super(Finding, self.finding_a).save()
-        super(Finding, self.finding_b).save()
+        super(Finding, self.finding_a).save(skip_validation=True)
+        super(Finding, self.finding_b).save(skip_validation=True)
 
         fix_loop_duplicates()
 
@@ -94,9 +94,9 @@ class TestDuplicationReopen(DojoTestCase):
         # self.finding_d.duplicate_finding = self.finding_c
 
         logger.debug("saving finding_c")
-        super(Finding, self.finding_c).save()
+        super(Finding, self.finding_c).save(skip_validation=True)
         logger.debug("saving finding_d")
-        super(Finding, self.finding_d).save()
+        super(Finding, self.finding_d).save(skip_validation=True)
 
         logger.debug("c: is_mitigated3: %s", self.finding_c.is_mitigated)
         logger.debug("d: is_mitigated3: %s", self.finding_d.is_mitigated)

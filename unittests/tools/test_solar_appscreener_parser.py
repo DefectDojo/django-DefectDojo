@@ -1,3 +1,4 @@
+
 from dojo.models import Test
 from dojo.tools.solar_appscreener.parser import SolarAppscreenerParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -19,9 +20,7 @@ class TestSolarAppscreenerParser(DojoTestCase):
         parser = SolarAppscreenerParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         finding = findings[0]
         self.assertEqual(1, len(findings))
         self.assertEqual("Hardcoded password", finding.title)
@@ -37,9 +36,7 @@ class TestSolarAppscreenerParser(DojoTestCase):
         parser = SolarAppscreenerParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         finding = findings[0]
         self.assertEqual(3, len(findings))
         self.assertEqual("Hardcoded password", finding.title)

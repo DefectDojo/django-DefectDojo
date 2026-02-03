@@ -89,6 +89,8 @@ from dojo.github_issue_link.urls import urlpatterns as github_urls
 from dojo.group.urls import urlpatterns as group_urls
 from dojo.home.urls import urlpatterns as home_urls
 from dojo.jira_link.urls import urlpatterns as jira_urls
+from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
+from dojo.location.api.urls import add_locations_urls
 from dojo.metrics.urls import urlpatterns as metrics_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.notes.urls import urlpatterns as notes_urls
@@ -107,6 +109,8 @@ from dojo.test_type.urls import urlpatterns as test_type_urls
 from dojo.tool_config.urls import urlpatterns as tool_config_urls
 from dojo.tool_product.urls import urlpatterns as tool_product_urls
 from dojo.tool_type.urls import urlpatterns as tool_type_urls
+from dojo.url.api.urls import add_url_urls
+from dojo.url.ui.urls import urlpatterns as url_patterns
 from dojo.user.urls import urlpatterns as user_urls
 from dojo.utils import get_system_setting
 
@@ -128,9 +132,7 @@ v2_api.register(r"credentials", CredentialsViewSet, basename="cred_user")
 v2_api.register(r"development_environments", DevelopmentEnvironmentViewSet, basename="development_environment")
 v2_api.register(r"dojo_groups", DojoGroupViewSet, basename="dojo_group")
 v2_api.register(r"dojo_group_members", DojoGroupMemberViewSet, basename="dojo_group_member")
-v2_api.register(r"endpoints", EndPointViewSet, basename="endpoint")
 v2_api.register(r"endpoint_meta_import", EndpointMetaImporterView, basename="endpointmetaimport")
-v2_api.register(r"endpoint_status", EndpointStatusViewSet, basename="endpoint_status")
 v2_api.register(r"engagements", EngagementViewSet, basename="engagement")
 v2_api.register(r"engagement_presets", EngagementPresetsViewset, basename="engagement_presets")
 v2_api.register(r"finding_templates", FindingTemplatesViewSet, basename="finding_template")
@@ -182,6 +184,16 @@ v2_api.register(r"questionnaire_answered_questionnaires", QuestionnaireAnsweredS
 v2_api.register(r"questionnaire_engagement_questionnaires", QuestionnaireEngagementSurveyViewSet, basename="engagement_survey")
 v2_api.register(r"questionnaire_general_questionnaires", QuestionnaireGeneralSurveyViewSet, basename="general_survey")
 v2_api.register(r"questionnaire_questions", QuestionnaireQuestionViewSet, basename="question")
+# Add the location routes
+if settings.V3_FEATURE_LOCATIONS:
+    # Endpoints -> Locations
+    v2_api = add_locations_urls(v2_api)
+    v2_api = add_url_urls(v2_api)
+    v2_api.register(r"endpoints", V3EndpointCompatibleViewSet, basename="endpoint")
+    v2_api.register(r"endpoint_status", V3EndpointStatusCompatibleViewSet, basename="endpoint_status")
+else:
+    v2_api.register(r"endpoints", EndPointViewSet, basename="endpoint")
+    v2_api.register(r"endpoint_status", EndpointStatusViewSet, basename="endpoint_status")
 # V3
 add_asset_urls(v2_api)
 add_organization_urls(v2_api)
@@ -189,7 +201,6 @@ add_organization_urls(v2_api)
 ur = []
 ur += asset_urls
 ur += dev_env_urls
-ur += endpoint_urls
 ur += eng_urls
 ur += finding_urls
 ur += finding_group_urls
@@ -219,6 +230,13 @@ ur += banner_urls
 ur += component_urls
 ur += regulations
 ur += announcement_urls
+
+if settings.V3_FEATURE_LOCATIONS:
+    # Endpoints -> Location
+    ur += url_patterns
+else:
+    ur += endpoint_urls
+
 
 api_v2_urls = [
     #  Django Rest Framework API v2

@@ -31,6 +31,7 @@ class TestHCLAppScanParser(DojoTestCase):
         findings = parser.get_findings(my_file_handle, None)
         my_file_handle.close()
         self.assertEqual(18, len(findings))
+        self.validate_locations(findings)
         self.assertEqual(findings[0].title, "attUnnecessaryResponseHeaders_7089695691196187648_insecureWebAppConfiguration")
         self.assertEqual(findings[1].title, "attHttpsToHttp_7089695691196187648_sensitiveDataNotSSL")
         self.assertEqual(findings[0].severity, "Low")
@@ -44,4 +45,5 @@ class TestHCLAppScanParser(DojoTestCase):
             findings = parser.get_findings(my_file_handle, None)
             my_file_handle.close()
             self.assertEqual(4, len(findings))
+            self.validate_locations(findings)
             self.assertEqual(findings[0].severity, "Info")

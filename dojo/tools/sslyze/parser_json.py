@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 # TODO: discuss this list as maintenance subject
 # Recommended cipher suites according to German BSI as of 2020
@@ -96,16 +99,16 @@ class SSLyzeJSONParser:
         items = []
 
         for node in tree["server_scan_results"]:
-            endpoint = get_endpoint(node)
+            location = get_location(node)
             if "scan_commands_results" in node:
                 scr_node = node["scan_commands_results"]
-                item = get_heartbleed(scr_node, test, endpoint)
+                item = get_heartbleed(scr_node, test, location)
                 if item:
                     items.append(item)
-                item = get_ccs(scr_node, test, endpoint)
+                item = get_ccs(scr_node, test, location)
                 if item:
                     items.append(item)
-                item = get_renegotiation(scr_node, test, endpoint)
+                item = get_renegotiation(scr_node, test, location)
                 if item:
                     items.append(item)
                 item = get_weak_protocol(
@@ -113,7 +116,7 @@ class SSLyzeJSONParser:
                     "SSL 2.0",
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
@@ -122,7 +125,7 @@ class SSLyzeJSONParser:
                     "SSL 3.0",
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
@@ -131,7 +134,7 @@ class SSLyzeJSONParser:
                     "TLS 1.0",
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
@@ -140,7 +143,7 @@ class SSLyzeJSONParser:
                     "TLS 1.1",
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
@@ -150,7 +153,7 @@ class SSLyzeJSONParser:
                     TLS12_RECOMMENDED_CIPHERS,
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
@@ -160,23 +163,23 @@ class SSLyzeJSONParser:
                     TLS13_RECOMMENDED_CIPHERS,
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
-                item = get_certificate_information(scr_node, test, endpoint)
+                item = get_certificate_information(scr_node, test, location)
                 if item:
                     items.append(item)
 
             elif "scan_result" in node:
                 scr_node = node["scan_result"]
-                item = get_heartbleed(scr_node, test, endpoint)
+                item = get_heartbleed(scr_node, test, location)
                 if item:
                     items.append(item)
-                item = get_ccs(scr_node, test, endpoint)
+                item = get_ccs(scr_node, test, location)
                 if item:
                     items.append(item)
-                item = get_renegotiation(scr_node, test, endpoint)
+                item = get_renegotiation(scr_node, test, location)
                 if item:
                     items.append(item)
                 item = get_weak_protocol(
@@ -184,7 +187,7 @@ class SSLyzeJSONParser:
                     "SSL 2.0",
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
@@ -193,7 +196,7 @@ class SSLyzeJSONParser:
                     "SSL 3.0",
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
@@ -202,7 +205,7 @@ class SSLyzeJSONParser:
                     "TLS 1.0",
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
@@ -211,7 +214,7 @@ class SSLyzeJSONParser:
                     "TLS 1.1",
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
@@ -221,7 +224,7 @@ class SSLyzeJSONParser:
                     TLS12_RECOMMENDED_CIPHERS,
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
@@ -231,18 +234,18 @@ class SSLyzeJSONParser:
                     TLS13_RECOMMENDED_CIPHERS,
                     scr_node,
                     test,
-                    endpoint,
+                    location,
                 )
                 if item:
                     items.append(item)
-                item = get_certificate_information(scr_node, test, endpoint)
+                item = get_certificate_information(scr_node, test, location)
                 if item:
                     items.append(item)
 
         return list(items)
 
 
-def get_heartbleed(node, test, endpoint):
+def get_heartbleed(node, test, location):
     if "heartbleed" in node and node["heartbleed"] is not None:
         heartbleed = node["heartbleed"]
         if heartbleed.get("status") == "NOT_SCHEDULED":
@@ -253,11 +256,11 @@ def get_heartbleed(node, test, endpoint):
             if vulnerable:
                 title = "Heartbleed"
                 description = (
-                    get_url(endpoint) + " is vulnerable to heartbleed"
+                    get_url(location) + " is vulnerable to heartbleed"
                 )
                 vulnerability_id = "CVE-2014-0160"
                 return get_finding(
-                    title, description, vulnerability_id, None, test, endpoint,
+                    title, description, vulnerability_id, None, test, location,
                 )
         elif "result" in heartbleed:
             hb_result = heartbleed["result"]
@@ -266,7 +269,7 @@ def get_heartbleed(node, test, endpoint):
                 if vulnerable:
                     title = "Heartbleed"
                     description = (
-                        get_url(endpoint) + " is vulnerable to heartbleed"
+                        get_url(location) + " is vulnerable to heartbleed"
                     )
                     vulnerability_id = "CVE-2014-0160"
                     return get_finding(
@@ -275,13 +278,13 @@ def get_heartbleed(node, test, endpoint):
                         vulnerability_id,
                         None,
                         test,
-                        endpoint,
+                        location,
                     )
         return None
     return None
 
 
-def get_ccs(node, test, endpoint):
+def get_ccs(node, test, location):
     if "openssl_ccs_injection" in node:
         ccs_injection = node["openssl_ccs_injection"]
         vulnerable = False
@@ -292,12 +295,12 @@ def get_ccs(node, test, endpoint):
             if vulnerable:
                 title = "CCS injection"
                 description = (
-                    get_url(endpoint)
+                    get_url(location)
                     + " is vulnerable to OpenSSL CCS injection"
                 )
                 vulnerability_id = "CVE-2014-0224"
                 return get_finding(
-                    title, description, vulnerability_id, None, test, endpoint,
+                    title, description, vulnerability_id, None, test, location,
                 )
 
         elif "result" in ccs_injection:
@@ -307,7 +310,7 @@ def get_ccs(node, test, endpoint):
                 if vulnerable:
                     title = "CCS injection"
                     description = (
-                        get_url(endpoint)
+                        get_url(location)
                         + " is vulnerable to OpenSSL CCS injection"
                     )
                     vulnerability_id = "CVE-2014-0224"
@@ -317,13 +320,13 @@ def get_ccs(node, test, endpoint):
                         vulnerability_id,
                         None,
                         test,
-                        endpoint,
+                        location,
                     )
         return None
     return None
 
 
-def get_renegotiation(node, test, endpoint):
+def get_renegotiation(node, test, location):
     if "session_renegotiation" in node:
         renegotiation = node["session_renegotiation"]
         if renegotiation.get("status") == "NOT_SCHEDULED":
@@ -335,7 +338,7 @@ def get_renegotiation(node, test, endpoint):
             vulnerable = False
             title = "Session renegotiation"
             description = (
-                get_url(endpoint) + " has problems with session renegotiation:"
+                get_url(location) + " has problems with session renegotiation:"
             )
             vulnerable_cr = (
                 "accepts_client_renegotiation" in renegotiation
@@ -355,7 +358,7 @@ def get_renegotiation(node, test, endpoint):
                 )
             if vulnerable:
                 return get_finding(
-                    title, description, None, None, test, endpoint,
+                    title, description, None, None, test, location,
                 )
 
         elif "result" in renegotiation:
@@ -367,28 +370,28 @@ def get_renegotiation(node, test, endpoint):
                 if reneg_dos:
                     title = "Is vulnerable to client negotiation DoS"
                     description = (
-                        get_url(endpoint)
+                        get_url(location)
                         + " has problems with session renegotiation:"
                     )
                     return get_finding(
-                        title, description, None, None, test, endpoint,
+                        title, description, None, None, test, location,
                     )
             if "supports_secure_renegotiation" in reneg_result:
                 reneg_secure = reneg_result["supports_secure_renegotiation"]
                 if not reneg_secure:
                     title = "Does not support secure negotiations"
                     description = (
-                        get_url(endpoint)
+                        get_url(location)
                         + " has problems with session renegotiation:"
                     )
                     return get_finding(
-                        title, description, None, None, test, endpoint,
+                        title, description, None, None, test, location,
                     )
         return None
     return None
 
 
-def get_weak_protocol(cipher, text, node, test, endpoint):
+def get_weak_protocol(cipher, text, node, test, location):
     if cipher in node:
         weak_node = node[cipher]
         if weak_node.get("status") == "NOT_SCHEDULED":
@@ -399,10 +402,10 @@ def get_weak_protocol(cipher, text, node, test, endpoint):
         ):
             title = text + " not recommended"
             description = (
-                get_url(endpoint) + " accepts " + text + " connections"
+                get_url(location) + " accepts " + text + " connections"
             )
             return get_finding(
-                title, description, None, REFERENCES, test, endpoint,
+                title, description, None, REFERENCES, test, location,
             )
         if "result" in weak_node:
             weak_node_result = weak_node["result"]
@@ -412,16 +415,16 @@ def get_weak_protocol(cipher, text, node, test, endpoint):
             ):
                 title = text + " not recommended"
                 description = (
-                    get_url(endpoint) + " accepts " + text + " connections"
+                    get_url(location) + " accepts " + text + " connections"
                 )
                 return get_finding(
-                    title, description, None, REFERENCES, test, endpoint,
+                    title, description, None, REFERENCES, test, location,
                 )
         return None
     return None
 
 
-def get_strong_protocol(cipher, text, suites, node, test, endpoint):
+def get_strong_protocol(cipher, text, suites, node, test, location):
     if cipher in node:
         strong_node = node[cipher]
         if strong_node.get("status") == "NOT_SCHEDULED":
@@ -434,7 +437,7 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
             unrecommended_cipher_found = False
             title = "Unrecommended cipher suites for " + text
             description = (
-                get_url(endpoint)
+                get_url(location)
                 + " accepts unrecommended cipher suites for "
                 + text
                 + ":"
@@ -447,7 +450,7 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
                         description += "\n - " + cs_node["name"]
             if unrecommended_cipher_found:
                 return get_finding(
-                    title, description, None, REFERENCES, test, endpoint,
+                    title, description, None, REFERENCES, test, location,
                 )
 
         elif "result" in strong_node:
@@ -459,7 +462,7 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
             ):
                 title = "Unrecommended cipher suites for " + text
                 description = (
-                    get_url(endpoint)
+                    get_url(location)
                     + " accepts unrecommended cipher suites for "
                     + text
                     + ":"
@@ -474,13 +477,13 @@ def get_strong_protocol(cipher, text, suites, node, test, endpoint):
                             description += "\n - " + cs_node["name"]
                 if unrecommended_cipher_found:
                     return get_finding(
-                        title, description, None, REFERENCES, test, endpoint,
+                        title, description, None, REFERENCES, test, location,
                     )
         return None
     return None
 
 
-def get_certificate_information(node, test, endpoint):
+def get_certificate_information(node, test, location):
     if "certificate_info" in node:
         ci_node = node["certificate_info"]
         if ci_node.get("status") == "NOT_SCHEDULED":
@@ -489,7 +492,7 @@ def get_certificate_information(node, test, endpoint):
             for cd_node in ci_node["certificate_deployments"]:
                 title = "Problems in certificate deployments"
                 description = (
-                    get_url(endpoint)
+                    get_url(location)
                     + " has problems in certificate deployments:"
                 )
                 vulnerable = False
@@ -524,7 +527,7 @@ def get_certificate_information(node, test, endpoint):
                             description += ", version " + version
                 if vulnerable:
                     return get_finding(
-                        title, description, None, None, test, endpoint,
+                        title, description, None, None, test, location,
                     )
 
         elif "result" in ci_node:
@@ -533,7 +536,7 @@ def get_certificate_information(node, test, endpoint):
                 for cd_node in ci_node_result["certificate_deployments"]:
                     title = "Problems in certificate deployments"
                     description = (
-                        get_url(endpoint)
+                        get_url(location)
                         + " has problems in certificate deployments:"
                     )
                     vulnerable = False
@@ -566,16 +569,16 @@ def get_certificate_information(node, test, endpoint):
                                 description += ", version " + version
                     if vulnerable:
                         return get_finding(
-                            title, description, None, None, test, endpoint,
+                            title, description, None, None, test, location,
                         )
         return None
     return None
 
 
 def get_finding(
-    title, description, vulnerability_id, references, test, endpoint,
+    title, description, vulnerability_id, references, test, location,
 ):
-    title += " (" + get_url(endpoint) + ")"
+    title += " (" + get_url(location) + ")"
     severity = "Medium"
     finding = Finding(
         title=title,
@@ -588,24 +591,28 @@ def get_finding(
     )
     if vulnerability_id:
         finding.unsaved_vulnerability_ids = [vulnerability_id]
-    if endpoint is not None:
-        finding.unsaved_endpoints = []
-        finding.unsaved_endpoints.append(endpoint)
+    if location is not None:
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations.append(location)
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints.append(location)
     return finding
 
 
-def get_url(endpoint):
-    url = "unkown host"
-    if endpoint is not None:
-        if endpoint.host is not None:
-            url = endpoint.host
-        if endpoint.port is not None:
-            url = url + ":" + str(endpoint.port)
+def get_url(location):
+    url = "unknown host"
+    if location is not None:
+        if location.host is not None:
+            url = location.host
+        if location.port is not None:
+            url = url + ":" + str(location.port)
     return url
 
 
-def get_endpoint(node):
+def get_location(node):
     hostname = None
+    port = None
     if "server_info" in node:
         si_node = node["server_info"]
         if "server_location" in si_node:
@@ -621,6 +628,10 @@ def get_endpoint(node):
             hostname = si_node["hostname"]
         if "port" in si_node:
             port = si_node["port"]
+
     if hostname is not None:
-        return Endpoint(host=hostname, port=port)
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return Endpoint(host=hostname, port=port)
+        return URL(host=hostname, port=port)
     return None

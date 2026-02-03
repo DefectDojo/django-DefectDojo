@@ -36,6 +36,8 @@ def globalize_vars(request):
         "API_TOKENS_ENABLED": settings.API_TOKENS_ENABLED,
         "API_TOKEN_AUTH_ENDPOINT_ENABLED": settings.API_TOKEN_AUTH_ENDPOINT_ENABLED,
         "CREATE_CLOUD_BANNER": settings.CREATE_CLOUD_BANNER,
+        # V3 Feature Flags
+        "V3_FEATURE_LOCATIONS": settings.V3_FEATURE_LOCATIONS,
     }
 
 

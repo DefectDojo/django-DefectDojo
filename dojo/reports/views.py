@@ -7,7 +7,6 @@ from tempfile import NamedTemporaryFile
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.db.models import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -29,7 +28,10 @@ from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
 from dojo.labels import get_labels
-from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Notes, Product, Product_Type, Test
+from dojo.location.models import Location
+from dojo.location.status import FindingLocationStatus
+from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
+from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
 from dojo.reports.widgets import (
     CoverPage,
     CustomReportJsonForm,
@@ -42,6 +44,7 @@ from dojo.reports.widgets import (
     WYSIWYGContent,
     report_widget_factory,
 )
+from dojo.url.filters import URLFilter
 from dojo.utils import (
     Product_Tab,
     add_breadcrumb,
@@ -89,18 +92,23 @@ class ReportBuilder(View):
         return filter_class(self.request.GET, queryset=findings)
 
     def get_endpoints(self, request: HttpRequest):
-        endpoints = Endpoint.objects.filter(finding__active=True,
-                                            finding__false_p=False,
-                                            finding__duplicate=False,
-                                            finding__out_of_scope=False,
-                                            )
-        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
-            endpoints = endpoints.filter(finding__active=True)
-
-        endpoints = endpoints.distinct()
-
-        filter_string_matching = get_system_setting("filter_string_matching", False)
-        filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
+            filter_class = URLFilter
+        else:
+            endpoints = Endpoint.objects.filter(
+                finding__active=True,
+                finding__false_p=False,
+                finding__duplicate=False,
+                finding__out_of_scope=False,
+            )
+            if get_system_setting("enforce_verified_status", True) or get_system_setting(
+                "enforce_verified_status_metrics", True,
+            ):
+                endpoints = endpoints.filter(finding__active=True)
+            endpoints = endpoints.distinct()
+            filter_string_matching = get_system_setting("filter_string_matching", False)
+            filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
         return filter_class(request.GET, queryset=endpoints, user=request.user)
 
     def get_available_widgets(self, request: HttpRequest) -> list[Widget]:
@@ -203,16 +211,23 @@ def report_findings(request):
 
 
 def report_endpoints(request):
-    endpoints = Endpoint.objects.filter(finding__active=True,
-                                        finding__false_p=False,
-                                        finding__duplicate=False,
-                                        finding__out_of_scope=False,
-                                        )
-    if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
-        endpoints = endpoints.filter(finding__active=True)
-
-    endpoints = endpoints.distinct()
-    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
+    if settings.V3_FEATURE_LOCATIONS:
+        endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
+        endpoints = URLFilter(request.GET, queryset=endpoints)
+    else:
+        # TODO: Delete this after the move to Locations
+        endpoints = Endpoint.objects.filter(
+            finding__active=True,
+            finding__false_p=False,
+            finding__duplicate=False,
+            finding__out_of_scope=False,
+        )
+        if get_system_setting("enforce_verified_status", True) or get_system_setting(
+            "enforce_verified_status_metrics", True,
+        ):
+            endpoints = endpoints.filter(finding__active=True)
+        endpoints = endpoints.distinct()
+        endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
@@ -265,33 +280,23 @@ def test_report(request, tid):
     return generate_report(request, test)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
-def endpoint_report(request, eid):
-    endpoint = get_object_or_404(Endpoint, id=eid)
-    return generate_report(request, endpoint, host_view=False)
-
-
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
-def endpoint_host_report(request, eid):
-    endpoint = get_object_or_404(Endpoint, id=eid)
-    return generate_report(request, endpoint, host_view=True)
-
-
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def product_endpoint_report(request, pid):
     product = get_object_or_404(Product.objects.all().prefetch_related("engagement_set__test_set__test_type", "engagement_set__test_set__environment"), id=pid)
-    endpoints = Endpoint.objects.filter(finding__active=True,
-                                         finding__false_p=False,
-                                         finding__duplicate=False,
-                                         finding__out_of_scope=False)
-
-    if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
-        endpoint_ids = endpoints.filter(finding__active=True).values_list("id", flat=True)
-
-    endpoint_ids = endpoints.values_list("id", flat=True)
-
-    endpoints = prefetch_related_endpoints_for_report(Endpoint.objects.filter(id__in=endpoint_ids))
-    endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
+    if settings.V3_FEATURE_LOCATIONS:
+        endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active)
+        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct())
+        endpoints = URLFilter(request.GET, queryset=endpoints)
+    else:
+        # TODO: Delete this after the move to Locations
+        endpoints = Endpoint.objects.filter(finding__active=True,
+                                            finding__false_p=False,
+                                            finding__duplicate=False,
+                                            finding__out_of_scope=False)
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
+            endpoints = endpoints.filter(finding__active=True)
+        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct())
+        endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
     report_format = request.GET.get("report_type", "HTML")
@@ -352,17 +357,17 @@ def generate_report(request, obj, *, host_view=False):
     endpoints = None
     report_title = None
 
-    if type(obj).__name__ == "Product_Type":
+    if isinstance(obj, Product_Type):
         user_has_permission_or_403(request.user, obj, Permissions.Product_Type_View)
-    elif type(obj).__name__ == "Product":
+    elif isinstance(obj, Product):
         user_has_permission_or_403(request.user, obj, Permissions.Product_View)
-    elif type(obj).__name__ == "Engagement":
+    elif isinstance(obj, Engagement):
         user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
-    elif type(obj).__name__ == "Test":
+    elif isinstance(obj, Test):
         user_has_permission_or_403(request.user, obj, Permissions.Test_View)
-    elif type(obj).__name__ == "Endpoint":
-        user_has_permission_or_403(request.user, obj, Permissions.Endpoint_View)
-    elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet" or type(obj).__name__ == "TagulousCastTaggedQuerySet":
+    elif isinstance(obj, (Endpoint, Location)):
+        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
+    elif type(obj).__name__ in {"QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"}:
         # authorization taken care of by only selecting findings from product user is authed to see
         pass
     else:
@@ -387,7 +392,8 @@ def generate_report(request, obj, *, host_view=False):
     filter_string_matching = get_system_setting("filter_string_matching", False)
     report_finding_filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
     add_breadcrumb(title="Generate Report", top_level=False, request=request)
-    if type(obj).__name__ == "Product_Type":
+
+    if isinstance(obj, Product_Type):
         product_type = obj
         template = "dojo/product_type_pdf_report.html"
         report_name = labels.ORG_REPORT_WITH_NAME_TITLE % {"name": str(product_type)}
@@ -437,17 +443,21 @@ def generate_report(request, obj, *, host_view=False):
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
 
-    elif type(obj).__name__ == "Product":
+    elif isinstance(obj, Product):
         product = obj
         template = "dojo/product_pdf_report.html"
         report_name = labels.ASSET_REPORT_WITH_NAME_TITLE % {"name": str(product)}
         report_title = labels.ASSET_REPORT_LABEL
         findings = report_finding_filter_class(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
             test__engagement__product=product)))
-        ids = set(finding.id for finding in findings.qs)  # noqa: C401
+        ids = findings.qs.values_list("id", flat=True)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-        endpoints = Endpoint.objects.filter(product=product).distinct()
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = Location.objects.prefetch_related("products__product").filter(products__product=product).distinct()
+        else:
+            # TODO: Delete this after the move to Locations
+            endpoints = Endpoint.objects.filter(product=product).distinct()
         context = {"product": product,
                    "engagements": engagements,
                    "tests": tests,
@@ -466,7 +476,7 @@ def generate_report(request, obj, *, host_view=False):
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
 
-    elif type(obj).__name__ == "Engagement":
+    elif isinstance(obj, Engagement):
         logger.debug("generating report for Engagement")
         engagement = obj
         findings = report_finding_filter_class(request.GET, engagement=engagement,
@@ -475,9 +485,13 @@ def generate_report(request, obj, *, host_view=False):
         template = "dojo/engagement_pdf_report.html"
         report_title = "Engagement Report"
 
-        ids = set(finding.id for finding in findings.qs)  # noqa: C401
+        ids = findings.qs.values_list("id", flat=True)
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-        endpoints = Endpoint.objects.filter(product=engagement.product).distinct()
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = Location.objects.prefetch_related("products__product").filter(products__product=engagement.product).distinct()
+        else:
+            # TODO: Delete this after the move to Locations
+            endpoints = Endpoint.objects.filter(product=engagement.product).distinct()
 
         context = {"engagement": engagement,
                    "tests": tests,
@@ -496,7 +510,7 @@ def generate_report(request, obj, *, host_view=False):
                    "user_id": request.user.id,
                    "endpoints": endpoints}
 
-    elif type(obj).__name__ == "Test":
+    elif isinstance(obj, Test):
         test = obj
         findings = report_finding_filter_class(request.GET, engagement=test.engagement,
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(test=test)))
@@ -519,7 +533,8 @@ def generate_report(request, obj, *, host_view=False):
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
 
-    elif type(obj).__name__ == "Endpoint":
+    # TODO: Delete this after the move to Locations
+    elif isinstance(obj, Endpoint):
         endpoint = obj
         if host_view:
             report_name = "Endpoint Host Report: " + endpoint.host
@@ -532,7 +547,7 @@ def generate_report(request, obj, *, host_view=False):
             report_title = "Endpoint Report"
         template = "dojo/endpoint_pdf_report.html"
         findings = report_finding_filter_class(request.GET,
-                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
+                                    queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
         context = {"endpoint": endpoint,
                    "endpoints": endpoints,
@@ -549,6 +564,41 @@ def generate_report(request, obj, *, host_view=False):
                    "title": report_title,
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
+
+    elif isinstance(obj, Location):
+        endpoint = obj
+        if host_view:
+            report_name = "Endpoint Host Report: " + endpoint.url.host
+            endpoints = Location.objects.prefetch_related("url").filter(url__host=endpoint.url.host).distinct()
+            report_title = "Endpoint Host Report"
+        else:
+            report_name = "Endpoint Report: " + str(endpoint)
+            endpoints = Location.objects.filter(id=endpoint.id).distinct()
+            report_title = "Endpoint Report"
+        template = "dojo/endpoint_pdf_report.html"
+        findings = report_finding_filter_class(
+            request.GET,
+            queryset=prefetch_related_findings_for_report(Finding.objects.filter(locations__location__in=endpoints)),
+        )
+
+        context = {
+            "endpoint": endpoint,
+            "endpoints": endpoints,
+            "report_name": report_name,
+            "findings": findings.qs.distinct().order_by("numerical_severity"),
+            "include_finding_notes": include_finding_notes,
+            "include_finding_images": include_finding_images,
+            "include_executive_summary": include_executive_summary,
+            "include_table_of_contents": include_table_of_contents,
+            "include_disclaimer": include_disclaimer,
+            "disclaimer": disclaimer,
+            "user": user,
+            "team_name": get_system_setting("team_name"),
+            "title": report_title,
+            "host": report_url_resolver(request),
+            "user_id": request.user.id,
+        }
+
     elif type(obj).__name__ in {"QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"}:
         findings = report_finding_filter_class(request.GET, queryset=prefetch_related_findings_for_report(obj).distinct())
         report_name = "Finding"
@@ -568,6 +618,7 @@ def generate_report(request, obj, *, host_view=False):
                    "title": report_title,
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
+
     else:
         raise Http404
 
@@ -614,10 +665,12 @@ def generate_report(request, obj, *, host_view=False):
     elif product:
         product_tab = Product_Tab(product, title=str(labels.ASSET_REPORT_LABEL), tab="findings")
     elif endpoints:
-        if host_view:
-            product_tab = Product_Tab(endpoint.product, title="Endpoint Host Report", tab="endpoints")
-        else:
-            product_tab = Product_Tab(endpoint.product, title="Endpoint Report", tab="endpoints")
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            if host_view:
+                product_tab = Product_Tab(endpoint.product, title="Endpoint Host Report", tab="endpoints")
+            else:
+                product_tab = Product_Tab(endpoint.product, title="Endpoint Report", tab="endpoints")
 
     return render(request, "dojo/request_report.html",
                   {"product_type": product_type,
@@ -632,29 +685,6 @@ def generate_report(request, obj, *, host_view=False):
                    "host_view": host_view,
                    "context": context,
                    })
-
-
-def prefetch_related_findings_for_report(findings):
-    return findings.prefetch_related("test",
-                                     "test__engagement__product",
-                                     "test__engagement__product__prod_type",
-                                     "risk_acceptance_set",
-                                     "risk_acceptance_set__accepted_findings",
-                                     "burprawrequestresponse_set",
-                                     "endpoints",
-                                     "tags",
-                                     Prefetch("notes", queryset=Notes.objects.filter(private=False)),
-                                     "files",
-                                     "reporter",
-                                     "mitigated_by",
-                                     )
-
-
-def prefetch_related_endpoints_for_report(endpoints):
-    return endpoints.prefetch_related(
-                                      "product",
-                                      "tags",
-                                     )
 
 
 def get_list_index(full_list, index):
@@ -760,7 +790,7 @@ class QuickReportView(View):
     def get(self, request):
         findings, obj = get_findings(request)
         self.findings = findings
-        findings = self.add_findings_data()
+        findings = prefetch_related_findings_for_report(self.add_findings_data())
         return self.generate_quick_report(request, findings, obj)
 
     def generate_quick_report(self, request, findings, obj=None):
@@ -789,8 +819,6 @@ class QuickReportView(View):
 
 def get_excludes():
     return ["SEVERITIES", "age", "github_issue", "jira_issue", "objects", "risk_acceptance",
-    "test__engagement__product__authorized_group", "test__engagement__product__member",
-    "test__engagement__product__prod_type__authorized_group", "test__engagement__product__prod_type__member",
     "unsaved_endpoints", "unsaved_vulnerability_ids", "unsaved_files", "unsaved_request", "unsaved_response",
     "unsaved_tags", "vulnerability_ids", "cve"]
 

@@ -1,3 +1,4 @@
+
 from dojo.models import Test
 from dojo.tools.sysdig_cli.parser import SysdigCLIParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -9,18 +10,16 @@ class TestSysdigParsers(DojoTestCase):
         with (get_unit_tests_scans_path("sysdig_cli") / "sysdig_reports_many_vul.csv").open(encoding="utf-8") as testfile:
             parser = SysdigCLIParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             # Verify each CVE appears exactly once
             all_vuln_ids = [vid for f in findings for vid in f.unsaved_vulnerability_ids]
             self.assertEqual(1, all_vuln_ids.count("CVE-2023-5752"), "CVE-2023-5752 should appear exactly once")
             self.assertEqual(1, all_vuln_ids.count("CVE-2024-49766"), "CVE-2024-49766 should appear exactly once")
-
             for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
                 if "CVE-2023-5752" in finding.unsaved_vulnerability_ids:
-                    self.assertEqual(finding.severity, "Informational")  # Negligible maps to Informational
+                    self.assertEqual(finding.severity, "Info")  # Negligible maps to Info
                 if "CVE-2024-49766" in finding.unsaved_vulnerability_ids:
-                    self.assertEqual(finding.severity, "Informational")  # Other maps to Informational
+                    self.assertEqual(finding.severity, "Info")  # Other maps to Info
 
             self.assertEqual(31, len(findings))
             finding = findings[0]
@@ -37,18 +36,16 @@ class TestSysdigParsers(DojoTestCase):
         with (get_unit_tests_scans_path("sysdig_cli") / "sysdig_reports_many_vul.json").open(encoding="utf-8") as testfile:
             parser = SysdigCLIParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             # Verify each CVE appears exactly once
             all_vuln_ids = [vid for f in findings for vid in f.unsaved_vulnerability_ids]
             self.assertEqual(1, all_vuln_ids.count("CVE-2024-49766"), "CVE-2024-49766 should appear exactly once")
             self.assertEqual(1, all_vuln_ids.count("CVE-2024-49767"), "CVE-2024-49767 should appear exactly once")
-
             for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
                 if "CVE-2024-49766" in finding.unsaved_vulnerability_ids:
-                    self.assertEqual(finding.severity, "Informational")  # Negligible maps to Informational
+                    self.assertEqual(finding.severity, "Info")  # Negligible maps to Info
                 if "CVE-2024-49767" in finding.unsaved_vulnerability_ids:
-                    self.assertEqual(finding.severity, "Informational")  # Other maps to Informational
+                    self.assertEqual(finding.severity, "Info")  # Other maps to Info
 
             self.assertEqual(31, len(findings))
             finding = findings[0]

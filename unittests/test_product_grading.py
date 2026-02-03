@@ -3,9 +3,10 @@ import uuid
 from crum import impersonate
 
 from dojo.models import Finding, User
-from unittests.dojo_test_case import DojoTestCase, toggle_system_setting_boolean
+from unittests.dojo_test_case import DojoTestCase, toggle_system_setting_boolean, versioned_fixtures
 
 
+@versioned_fixtures
 class ProductGradeTest(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -43,6 +44,8 @@ class ProductGradeTest(DojoTestCase):
         self.assertIsNone(self.product.prod_numeric_grade)
         # Add a single critical finding
         self.create_finding_on_test(severity="Critical", verified=verified)
+        # Refresh product from database to get updated grade
+        self.product.refresh_from_db()
         # See that the grade does not degrade at all
         self.assertEqual(self.product.prod_numeric_grade, expected_grade)
 

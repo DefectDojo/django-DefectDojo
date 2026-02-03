@@ -49,7 +49,7 @@ from dojo.filters import (
     TestImportFilter,
     TestImportFindingActionFilter,
 )
-from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
+from dojo.finding.queries import get_authorized_findings, get_authorized_findings_for_queryset, prefetch_for_findings
 from dojo.forms import (
     ApplyFindingTemplateForm,
     ClearFindingReviewForm,
@@ -72,6 +72,7 @@ from dojo.forms import (
     StubFindingForm,
     TypedNoteForm,
 )
+from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     BurpRawRequestResponse,
@@ -428,7 +429,7 @@ class ListClosedFindings(ListFindings):
 
 class ViewFinding(View):
     def get_finding(self, finding_id: int):
-        finding_qs = prefetch_for_findings(Finding.objects.all(), exclude_untouched=False)
+        finding_qs = prefetch_for_findings(Finding.objects.filter(id=finding_id), exclude_untouched=False)
         return get_object_or_404(finding_qs, id=finding_id)
 
     def get_dojo_user(self, request: HttpRequest):
@@ -853,17 +854,27 @@ class EditFinding(View):
         ) and context["form"]["duplicate"].value() is False):
             now = timezone.now()
             finding.is_mitigated = True
-            endpoint_status = finding.status_finding.all()
-            for status in endpoint_status:
-                status.mitigated_by = (
-                    context["form"].cleaned_data.get("mitigated_by") or request.user
-                )
-                status.mitigated_time = (
-                    context["form"].cleaned_data.get("mitigated") or now
-                )
-                status.mitigated = True
-                status.last_modified = timezone.now()
-                status.save()
+
+            if settings.V3_FEATURE_LOCATIONS:
+                for ref in finding.locations.all():
+                    ref.set_status(
+                        FindingLocationStatus.Mitigated,
+                        context["form"].cleaned_data.get("mitigated_by") or request.user,
+                        context["form"].cleaned_data.get("mitigated") or now,
+                    )
+            else:
+                # TODO: Delete this after the move to Locations
+                endpoint_status = finding.status_finding.all()
+                for status in endpoint_status:
+                    status.mitigated_by = (
+                        context["form"].cleaned_data.get("mitigated_by") or request.user
+                    )
+                    status.mitigated_time = (
+                        context["form"].cleaned_data.get("mitigated") or now
+                    )
+                    status.mitigated = True
+                    status.last_modified = timezone.now()
+                    status.save()
 
     def process_false_positive_history(self, finding: Finding):
         if get_system_setting("false_positive_history", False):
@@ -920,13 +931,19 @@ class EditFinding(View):
                     ra_helper.simple_risk_accept(request.user, new_finding, perform_save=False)
             elif new_finding.risk_accepted:
                 ra_helper.risk_unaccept(request.user, new_finding, perform_save=False)
-            # Save and add new endpoints
-            finding_helper.add_endpoints(new_finding, context["form"])
+            # Save and add new locations
+            associated_locations = finding_helper.add_locations(new_finding, context["form"])
             # Remove unrelated endpoints
-            endpoint_status_list = Endpoint_Status.objects.filter(finding=new_finding)
-            for endpoint_status in endpoint_status_list:
-                if endpoint_status.endpoint not in new_finding.endpoints.all():
-                    endpoint_status.delete()
+            if settings.V3_FEATURE_LOCATIONS:
+                for ref in new_finding.locations.all():
+                    if ref.location not in associated_locations:
+                        ref.location.disassociate_from_finding(new_finding)
+            else:
+                # TODO: Delete this after the move to Locations
+                endpoint_status_list = Endpoint_Status.objects.filter(finding=new_finding)
+                for endpoint_status in endpoint_status_list:
+                    if endpoint_status.endpoint not in new_finding.endpoints.all():
+                        endpoint_status.delete()
             # Handle some of the other steps
             self.process_mitigated_data(request, new_finding, context)
             self.process_false_positive_history(new_finding)
@@ -1003,9 +1020,9 @@ class EditFinding(View):
 
         if context["gform"].is_valid():
             if GITHUB_Issue.objects.filter(finding=finding).exists():
-                update_external_issue(finding, old_status, "github")
+                update_external_issue(finding.id, old_status, "github")
             else:
-                add_external_issue(finding, "github")
+                add_external_issue(finding.id, "github")
 
             return request, True
         add_field_errors_to_response(context["gform"])
@@ -1082,7 +1099,7 @@ class DeleteFinding(View):
             product = finding.test.engagement.product
             finding.delete()
             # Update the grade of the product async
-            calculate_grade(product)
+            calculate_grade(product.id)
             # Add a message to the request that the finding was successfully deleted
             messages.add_message(
                 request,
@@ -1305,20 +1322,24 @@ def reopen_finding(request, fid):
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
     finding.under_review = False
-    endpoint_status = finding.status_finding.all()
-    for status in endpoint_status:
-        status.mitigated_by = None
-        status.mitigated_time = None
-        status.mitigated = False
-        status.last_modified = timezone.now()
-        status.save()
+    if settings.V3_FEATURE_LOCATIONS:
+        for ref in finding.locations.all():
+            ref.set_status(FindingLocationStatus.Active, request.user, timezone.now())
+    else:
+        endpoint_status = finding.status_finding.all()
+        for status in endpoint_status:
+            status.mitigated_by = None
+            status.mitigated_time = None
+            status.mitigated = False
+            status.last_modified = timezone.now()
+            status.save()
     # Clear the risk acceptance, if present
     ra_helper.risk_unaccept(request.user, finding)
     finding.save(dedupe_option=False, push_to_jira=False)
     if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
         jira_helper.push_to_jira(finding)
 
-    reopen_external_issue(finding, "re-opened by defectdojo", "github")
+    reopen_external_issue(finding.id, "re-opened by defectdojo", "github")
 
     messages.add_message(
         request, messages.SUCCESS, "Finding Reopened.", extra_tags="alert-success",
@@ -1353,7 +1374,7 @@ def copy_finding(request, fid):
             test = form.cleaned_data.get("test")
             product = finding.test.engagement.product
             finding_copy = finding.copy(test=test)
-            calculate_grade(product)
+            calculate_grade(product.id)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -2045,7 +2066,7 @@ def promote_to_finding(request, fid):
 
             new_finding.save()
 
-            finding_helper.add_endpoints(new_finding, form)
+            finding_helper.add_locations(new_finding, form)
 
             push_to_jira = False
             if jform and jform.is_valid():
@@ -2101,7 +2122,7 @@ def promote_to_finding(request, fid):
                     ).push_all_issues,
                 )
                 if gform.is_valid():
-                    add_external_issue(new_finding, "github")
+                    add_external_issue(new_finding.id, "github")
 
             messages.add_message(
                 request,
@@ -2641,7 +2662,7 @@ def _bulk_delete_findings(request, pid, form, finding_to_update, finds, total_fi
                 request.user, product, Permissions.Finding_Delete,
             )
 
-        finds = get_authorized_findings(
+        finds = get_authorized_findings_for_queryset(
             Permissions.Finding_Delete, finds,
         ).distinct()
 
@@ -2733,7 +2754,7 @@ def _bulk_update_finding_status_and_severity(finds, form, request, system_settin
                             fp.save_no_options()
 
         for prod in prods:
-            calculate_grade(prod)
+            calculate_grade(prod.id)
 
     if skipped_duplicate_count > 0:
         messages.add_message(
@@ -2789,7 +2810,7 @@ def _bulk_update_risk_acceptance(finds, form, request, prods):
                 ra_helper.risk_unaccept(request.user, finding)
 
         for prod in prods:
-            calculate_grade(prod)
+            calculate_grade(prod.id)
 
     if skipped_risk_accept_count > 0:
         messages.add_message(
@@ -3047,7 +3068,7 @@ def finding_bulk_update_all(request, pid=None):
                 )
 
             # make sure users are not editing stuff they are not authorized for
-            finds = get_authorized_findings(
+            finds = get_authorized_findings_for_queryset(
                 Permissions.Finding_Edit, finds,
             ).distinct()
 
@@ -3084,9 +3105,9 @@ def finding_bulk_update_all(request, pid=None):
                     old_status = finding.status()
                     if form.cleaned_data["push_to_github"]:
                         if GITHUB_Issue.objects.filter(finding=finding).exists():
-                            update_external_issue(finding, old_status, "github")
+                            update_external_issue(finding.id, old_status, "github")
                         else:
-                            add_external_issue(finding, "github")
+                            add_external_issue(finding.id, "github")
 
             if form.cleaned_data["notes"]:
                 logger.debug("Setting bulk notes")

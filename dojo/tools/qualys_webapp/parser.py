@@ -4,8 +4,10 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 try:
     from django.conf.settings import QUALYS_WAS_WEAKNESS_IS_VULN
@@ -41,7 +43,7 @@ def get_cwe(cwe):
 
 
 def attach_unique_extras(
-    endpoints,
+    locations,
     requests,
     responses,
     finding,
@@ -57,7 +59,6 @@ def attach_unique_extras(
     if finding is None:
         finding = Finding()
         finding.unsaved_req_resp = []
-        finding.unsaved_endpoints = []
         if date is not None:
             finding.date = date
         finding.vuln_id_from_tool = str(qid)
@@ -69,8 +70,8 @@ def attach_unique_extras(
     elif date is not None and finding.date > date:
         finding.date = date
 
-    for endpoint in endpoints:
-        parsedUrl = urlparse(endpoint)
+    for location in locations:
+        parsedUrl = urlparse(location)
         protocol = parsedUrl.scheme
         query = parsedUrl.query
         fragment = parsedUrl.fragment
@@ -82,16 +83,29 @@ def attach_unique_extras(
         except BaseException:  # there's no port attached to address
             host = parsedUrl.netloc
 
-        finding.unsaved_endpoints.append(
-            Endpoint(
-                host=truncate_str(host, 500),
-                port=port,
-                path=truncate_str(path, 500),
-                protocol=protocol,
-                query=truncate_str(query, 1000),
-                fragment=truncate_str(fragment, 500),
-            ),
-        )
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations.append(
+                URL(
+                    host=truncate_str(host, 500),
+                    port=port,
+                    path=truncate_str(path, 500),
+                    protocol=protocol,
+                    query=truncate_str(query, 1000),
+                    fragment=truncate_str(fragment, 500),
+                ),
+            )
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints.append(
+                Endpoint(
+                    host=truncate_str(host, 500),
+                    port=port,
+                    path=truncate_str(path, 500),
+                    protocol=protocol,
+                    query=truncate_str(query, 1000),
+                    fragment=truncate_str(fragment, 500),
+                ),
+            )
 
     for i in range(len(requests)):
         if requests[i] or responses[i]:
@@ -110,14 +124,13 @@ def attach_unique_extras(
     return finding
 
 
-# Inputs are a list of endpoints and request/response pairs and doctors
+# Inputs are a list of locations and request/response pairs and doctors
 # them to fit their respective model structures and the adds them to a
 # newly generated Finding
-def attach_extras(endpoints, requests, responses, finding, date, qid, test):
+def attach_extras(locations, requests, responses, finding, date, qid, test):
     if finding is None:
         finding = Finding()
         finding.unsaved_req_resp = []
-        finding.unsaved_endpoints = []
         finding.test = test
         if date is not None:
             finding.date = date
@@ -126,8 +139,12 @@ def attach_extras(endpoints, requests, responses, finding, date, qid, test):
     elif date is not None and finding.date > date:
         finding.date = date
 
-    for endpoint in endpoints:
-        finding.unsaved_endpoints.append(Endpoint.from_uri(endpoint))
+    for location in locations:
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations.append(URL.from_value(location))
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints.append(Endpoint.from_uri(location))
 
     for i in range(len(requests)):
         if requests[i] or responses[i]:
@@ -246,7 +263,7 @@ def get_unique_vulnerabilities(
 
 
 # Traverse and retreive any information in the VULNERABILITY_LIST
-# section of the report. This includes all endpoints and request/response pairs
+# section of the report. This includes all locations and request/response pairs
 def get_vulnerabilities(
     vulnerabilities, test, *, is_info=False, is_app_report=False,
 ):

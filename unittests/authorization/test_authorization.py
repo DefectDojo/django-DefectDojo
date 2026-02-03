@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 
@@ -35,11 +36,11 @@ from dojo.models import (
     Stub_Finding,
     Test,
 )
+from dojo.url.models import URL
 from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAuthorization(DojoTestCase):
-
     @classmethod
     def setUpTestData(cls):
         cls.user = Dojo_User()
@@ -52,13 +53,16 @@ class TestAuthorization(DojoTestCase):
         cls.global_role_user.user = cls.user2
         cls.global_role_user.role = Role.objects.get(id=Roles.Reader)
 
-        cls.product_type = Product_Type()
-        cls.product_type.id = 1
+        cls.product_type = Product_Type.objects.get_or_create(
+            name="test product type",
+        )[0]
         cls.product_type_member = Product_Type_Member()
         cls.product_type_member.id = 1
 
-        cls.product = Product()
-        cls.product.id = 1
+        cls.product = Product.objects.get_or_create(
+            name="test product",
+            description="test product description",
+            prod_type=cls.product_type)[0]
         cls.product_member = Product_Member()
         cls.product_member.id = 1
         cls.product.prod_type = cls.product_type
@@ -75,8 +79,14 @@ class TestAuthorization(DojoTestCase):
         cls.stub_finding = Stub_Finding()
         cls.stub_finding.test = cls.test
 
-        cls.endpoint = Endpoint()
-        cls.endpoint.product = cls.product
+        if settings.V3_FEATURE_LOCATIONS:
+            cls.location = URL(host="testhost.com")
+            cls.location.save()
+            cls.location.location.associate_with_product(cls.product)
+        else:
+            # TODO: Delete this after the move to Locations
+            cls.location = Endpoint()
+            cls.location.product = cls.product
 
         cls.technology = App_Analysis()
         cls.technology.product = cls.product
@@ -367,23 +377,23 @@ class TestAuthorization(DojoTestCase):
         mock_foo.filter.assert_called_with(user=self.user)
 
     @patch("dojo.models.Product_Member.objects")
-    def test_user_has_permission_endpoint_no_permissions(self, mock_foo):
+    def test_user_has_permission_location_no_permissions(self, mock_foo):
         mock_foo.select_related.return_value = mock_foo
         mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [self.product_member_reader]
 
-        result = user_has_permission(self.user, self.endpoint, Permissions.Endpoint_Edit)
+        result = user_has_permission(self.user, self.location, Permissions.Location_Edit)
 
         self.assertFalse(result)
         mock_foo.filter.assert_called_with(user=self.user)
 
     @patch("dojo.models.Product_Member.objects")
-    def test_user_has_permission_endpoint_success(self, mock_foo):
+    def test_user_has_permission_location_success(self, mock_foo):
         mock_foo.select_related.return_value = mock_foo
         mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [self.product_member_owner]
 
-        result = user_has_permission(self.user, self.endpoint, Permissions.Endpoint_Delete)
+        result = user_has_permission(self.user, self.location, Permissions.Location_Delete)
 
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(user=self.user)

@@ -3,9 +3,11 @@ import re
 
 from cvss import CVSS3
 from defusedxml import ElementTree
+from django.conf import settings
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
 from dojo.models import Endpoint, Finding, Test
+from dojo.url.models import URL
 
 LOGGER = logging.getLogger(__name__)
 
@@ -126,9 +128,7 @@ class TenableXMLParser:
                     # Set the title
                     title = item.attrib.get("pluginName")
                     # Get and clean the port
-                    port = None
-                    if float(item.attrib.get("port")) > 0:
-                        port = item.attrib.get("port")
+                    port = int(item.attrib.get("port") or "0") or None
 
                     # Get and clean the protocol
                     protocol = str(item.attrib.get("svc_name", ""))
@@ -294,7 +294,6 @@ class TenableXMLParser:
                             cvssv3=cvssv3,
                             cvssv3_score=cvssv3_score,
                         )
-                        find.unsaved_endpoints = []
                         find.unsaved_vulnerability_ids = []
                         dupes[dupe_key] = find
                     else:
@@ -305,17 +304,32 @@ class TenableXMLParser:
                     # Update existing vulnerability IDs
                     if vulnerability_id is not None:
                         find.unsaved_vulnerability_ids.append(vulnerability_id)
-                    # Create a new endpoint object
-                    if fqdn is not None and "://" in fqdn:
-                        endpoint = Endpoint.from_uri(fqdn)
-                    elif protocol == "general":
-                        endpoint = Endpoint(host=fqdn or ip)
+                    if settings.V3_FEATURE_LOCATIONS:
+                        # Create a new url object
+                        if fqdn is not None and "://" in fqdn:
+                            location = URL.from_value(fqdn)
+                        elif protocol == "general":
+                            location = URL(host=fqdn or ip)
+                        else:
+                            location = URL(
+                                protocol=protocol,
+                                host=fqdn or ip,
+                                port=port,
+                            )
+                        find.unsaved_locations.append(location)
                     else:
-                        endpoint = Endpoint(
-                            protocol=protocol,
-                            host=fqdn or ip,
-                            port=port,
-                        )
-                    find.unsaved_endpoints.append(endpoint)
+                        # TODO: Delete this after the move to Locations
+                        # Create a new endpoint object
+                        if fqdn is not None and "://" in fqdn:
+                            endpoint = Endpoint.from_uri(fqdn)
+                        elif protocol == "general":
+                            endpoint = Endpoint(host=fqdn or ip)
+                        else:
+                            endpoint = Endpoint(
+                                protocol=protocol,
+                                host=fqdn or ip,
+                                port=port,
+                            )
+                        find.unsaved_endpoints.append(endpoint)
 
         return list(dupes.values())

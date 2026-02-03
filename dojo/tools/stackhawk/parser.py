@@ -1,8 +1,10 @@
 import json
 
+from django.conf import settings
 from django.utils.dateparse import parse_datetime
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class StackHawkScanMetadata:
@@ -63,7 +65,7 @@ class StackHawkParser:
         steps_to_reproduce = "Use a specific message link and click 'Validate' to see the cURL!\n\n"
 
         host = raw_finding["host"]
-        endpoints = []
+        locations = []
 
         paths = raw_finding["paths"]
         for path in paths:
@@ -76,8 +78,12 @@ class StackHawkParser:
                 + self.__hyperlink(path["pathURL"])
                 + "\n"
             )
-            endpoint = Endpoint.from_uri(host + path["path"])
-            endpoints.append(endpoint)
+            if settings.V3_FEATURE_LOCATIONS:
+                location = URL.from_value(host + path["path"])
+            else:
+                # TODO: Delete this after the move to Locations
+                location = Endpoint.from_uri(host + path["path"])
+            locations.append(location)
 
         are_all_endpoints_risk_accepted = self.__are_all_endpoints_in_status(
             paths, "RISK_ACCEPTED",
@@ -105,7 +111,11 @@ class StackHawkParser:
             risk_accepted=are_all_endpoints_risk_accepted,
         )
 
-        finding.unsaved_endpoints.extend(endpoints)
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations.extend(locations)
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints.extend(locations)
         return finding
 
     @staticmethod

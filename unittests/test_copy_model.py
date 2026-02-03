@@ -1,6 +1,9 @@
-from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Test, User
 
-from .dojo_test_case import DojoTestCase
+from dojo.location.models import Location, LocationFindingReference
+from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Test, User
+from dojo.url.models import URL
+
+from .dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3
 
 
 class TestCopyFindingModel(DojoTestCase):
@@ -102,6 +105,8 @@ class TestCopyFindingModel(DojoTestCase):
         # Do the notes match
         self.assertQuerySetEqual(finding.notes.all(), finding_copy.notes.all())
 
+    # TODO: Delete this after the move to Locations
+    @skip_unless_v2
     def test_duplicate_finding_with_endpoints(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
@@ -130,6 +135,37 @@ class TestCopyFindingModel(DojoTestCase):
         self.assertEqual(current_endpoint_status_count + 1, Endpoint_Status.objects.filter(endpoint=endpoint).count())
         # Make sure the endpoint status objects point at different findings
         self.assertNotEqual(endpoint_status, finding_copy.status_finding.all().first())
+
+    @skip_unless_v3
+    def test_duplicate_finding_with_locations(self):
+        # Set the scene
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_finding", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
+        finding = Finding.objects.create(test=test, reporter=user)
+        url = URL(host="0.0.0.0")  # noqa: S104
+        url.save()
+        location = url.location
+        location_ref = location.associate_with_finding(finding=finding)
+        # Do the counting
+        current_finding_count = Finding.objects.filter(test=test).count()
+        current_location_finding_count = location.findings.count()
+        current_location_count = Location.objects.all().count()
+        current_location_ref_count = LocationFindingReference.objects.filter(location=location).count()
+        # Do the copy
+        finding_copy = finding.copy(test=test)
+        # Make sure the copy was made without error
+        self.assertEqual(current_finding_count + 1, Finding.objects.filter(test=test).count())
+        # Make sure the number of locations stayed the same
+        self.assertEqual(current_location_count, Location.objects.all().count())
+        # Make sure the number of findings on the location grew
+        self.assertEqual(current_location_finding_count + 1, location.findings.count())
+        # Make sure the number of location status objects grew
+        self.assertEqual(current_location_ref_count + 1, LocationFindingReference.objects.filter(location=location).count())
+        # Make sure the location status objects point at different findings
+        self.assertNotEqual(location_ref, finding_copy.status_finding.all().first())
 
 
 class TestCopyTestModel(DojoTestCase):

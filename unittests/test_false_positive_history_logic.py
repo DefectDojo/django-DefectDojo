@@ -2,7 +2,9 @@ import logging
 from datetime import datetime
 
 from crum import impersonate
+from django.conf import settings
 
+from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
     Endpoint,
     Endpoint_Status,
@@ -15,7 +17,7 @@ from dojo.models import (
     copy_model_util,
 )
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -120,6 +122,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 # product 3: Security Podcast
 
 
+@versioned_fixtures
 class TestFalsePositiveHistoryLogic(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -1688,21 +1691,34 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         else:
             logger.debug("\t\t" + "findings:")
             for finding in findings:
+                # TODO: Delete this after the move to Locations
+                locs_count = ": locs: " + str(finding.locations.count()) if settings.V3_FEATURE_LOCATIONS else ": eps: " + str(finding.endpoints.count())
+
                 logger.debug(f"\t\t\t{finding.id!s:4.4}" + ': "' + f"{finding.title:20.20}" + '": ' + f"{finding.severity:5.5}" + ": act: " + f"{finding.active!s:5.5}"
                         + ": ver: " + f"{finding.verified!s:5.5}" + ": mit: " + f"{finding.is_mitigated!s:5.5}"
                         + ": dup: " + f"{finding.duplicate!s:5.5}" + ": dup_id: "
                         + (f"{finding.duplicate_finding.id!s:4.4}" if finding.duplicate_finding else "None") + ": hash_code: " + str(finding.hash_code)
-                        + ": eps: " + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()])
+                        + locs_count + ": notes: " + str([n.id for n in finding.notes.all()])
                         + ": uid: " + f"{finding.unique_id_from_tool!s:5.5}" + (" fp" if finding.false_p else ""),
                         )
 
-        logger.debug("\t\tendpoints")
-        for ep in Endpoint.objects.all():
-            logger.debug("\t\t\t" + str(ep.id) + ": " + str(ep))
+        if settings.V3_FEATURE_LOCATIONS:
+            logger.debug("\t\tlocations")
+            for location in Location.objects.all():
+                logger.debug("\t\t\t" + str(location.id) + ": " + str(location))
 
-        logger.debug("\t\t" + "endpoint statuses")
-        for eps in Endpoint_Status.objects.all():
-            logger.debug("\t\t\t" + str(eps.id) + ": " + str(eps))
+            logger.debug("\t\t" + "location finding refs")
+            for ref in LocationFindingReference.objects.all():
+                logger.debug("\t\t\t" + str(ref.id) + ": " + str(ref))
+        else:
+            # TODO: Delete this after the move to Locations
+            logger.debug("\t\tendpoints")
+            for ep in Endpoint.objects.all():
+                logger.debug("\t\t\t" + str(ep.id) + ": " + str(ep))
+
+            logger.debug("\t\t" + "endpoint statuses")
+            for eps in Endpoint_Status.objects.all():
+                logger.debug("\t\t\t" + str(eps.id) + ": " + str(eps))
 
     def log_summary(self, product=None, engagement=None, test=None):
         if product:

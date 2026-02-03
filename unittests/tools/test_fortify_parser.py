@@ -1,3 +1,4 @@
+
 from dojo.models import Test
 from dojo.tools.fortify.parser import FortifyParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -9,6 +10,7 @@ class TestFortifyParser(DojoTestCase):
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(324, len(findings))
+            self.validate_locations(findings)
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Poor Logging Practice: Use of a System Output Stream - XXE.java: 81", finding.title)
@@ -21,6 +23,7 @@ class TestFortifyParser(DojoTestCase):
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
+            self.validate_locations(findings)
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Privilege Management: Unnecessary Permission - AndroidManifest.xml: 11", finding.title)
@@ -35,6 +38,7 @@ class TestFortifyParser(DojoTestCase):
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
+            self.validate_locations(findings)
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Privilege Management: Unnecessary Permission - AndroidManifest.xml: 11", finding.title)
@@ -48,6 +52,7 @@ class TestFortifyParser(DojoTestCase):
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(16, len(findings))
+            self.validate_locations(findings)
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Command Injection - command.java: 40", finding.title)
@@ -61,6 +66,7 @@ class TestFortifyParser(DojoTestCase):
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
+            self.validate_locations(findings)
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Privacy Violation: Autocomplete - login.html: 19", finding.title)
@@ -81,6 +87,7 @@ class TestFortifyParser(DojoTestCase):
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(61, len(findings))
+            self.validate_locations(findings)
             # for i in range(len(findings)):
             #     print(f"{i}: {findings[i]}: {findings[i].severity}")
 
@@ -104,6 +111,7 @@ class TestFortifyParser(DojoTestCase):
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
+            self.validate_locations(findings)
             # for i in range(len(findings)):
             #     print(f"{i}: {findings[i]}: {findings[i].severity}")
 
@@ -127,6 +135,7 @@ class TestFortifyParser(DojoTestCase):
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(15, len(findings))
+            self.validate_locations(findings)
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Cookie Security: Cookie not Sent Over SSL", finding.title)
@@ -137,6 +146,7 @@ class TestFortifyParser(DojoTestCase):
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
+            self.validate_locations(findings)
             # for i in range(len(findings)):
             #     print(f"{i}: {findings[i]}: {findings[i].active}")
 
@@ -160,6 +170,7 @@ class TestFortifyParser(DojoTestCase):
             parser = FortifyParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
+            self.validate_locations(findings)
             # for i in range(len(findings)):
             #     print(f"{i}: {findings[i]}: {findings[i].severity}")
 
@@ -167,7 +178,7 @@ class TestFortifyParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEqual("Password Management - HelloWorld.java: 5 (720E3A66-55AC-4D2D-8DB9-DC30E120A52F)", finding.title)
                 # Info as rule has no metainfo/impact
-                self.assertEqual("Informational", finding.severity)
+                self.assertEqual("Info", finding.severity)
                 self.assertEqual("A5338E223E737FF81F8A806C50A05969", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
                 self.assertEqual(5, finding.line)

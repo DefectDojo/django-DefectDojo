@@ -2,10 +2,12 @@ import hashlib
 import re
 
 from defusedxml.ElementTree import parse
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv46_address
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class OpenscapParser:
@@ -97,14 +99,26 @@ class OpenscapParser:
                 )
                 if vulnerability_ids:
                     finding.unsaved_vulnerability_ids = vulnerability_ids
-                finding.unsaved_endpoints = []
-                for ip in ips:
-                    try:
-                        validate_ipv46_address(ip)
-                        endpoint = Endpoint(host=ip)
-                    except ValidationError:
-                        endpoint = Endpoint.from_uri(ip) if "://" in ip else Endpoint.from_uri("//" + ip)
-                    finding.unsaved_endpoints.append(endpoint)
+                # manage endpoint/location
+                if settings.V3_FEATURE_LOCATIONS:
+                    finding.unsaved_locations = []
+                    for ip in ips:
+                        try:
+                            validate_ipv46_address(ip)
+                            location = URL(host=ip)
+                        except ValidationError:
+                            location = URL.from_value(ip) if "://" in ip else URL.from_value("//" + ip)
+                        finding.unsaved_locations.append(location)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints = []
+                    for ip in ips:
+                        try:
+                            validate_ipv46_address(ip)
+                            endpoint = Endpoint(host=ip)
+                        except ValidationError:
+                            endpoint = Endpoint.from_uri(ip) if "://" in ip else Endpoint.from_uri("//" + ip)
+                        finding.unsaved_endpoints.append(endpoint)
 
                 dupe_key = hashlib.sha256(
                     references.encode("utf-8"),
@@ -113,7 +127,11 @@ class OpenscapParser:
                     find = dupes[dupe_key]
                     if finding.references:
                         find.references = finding.references
-                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    if settings.V3_FEATURE_LOCATIONS:
+                        find.unsaved_locations.extend(finding.unsaved_locations)
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                 else:
                     dupes[dupe_key] = finding
 

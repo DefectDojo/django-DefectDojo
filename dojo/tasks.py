@@ -14,6 +14,7 @@ from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
 from dojo.decorators import dojo_async_task
 from dojo.finding.helper import fix_loop_duplicates
+from dojo.location.models import Location
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
 from dojo.models import Alerts, Announcement, Endpoint, Engagement, Finding, Product, System_Settings, User
 from dojo.notifications.helper import create_notification
@@ -72,7 +73,7 @@ def add_alerts(self, runinterval):
     if system_settings.enable_product_grade:
         products = Product.objects.all()
         for product in products:
-            calculate_grade(product)
+            calculate_grade(product.id)
 
 
 @app.task(bind=True)
@@ -169,7 +170,7 @@ def _async_dupe_delete_impl():
             if system_settings.enable_product_grade:
                 logger.info("performing batch product grading for %s products", len(affected_products))
                 for product in affected_products:
-                    calculate_grade(product)
+                    calculate_grade(product.id)
 
 
 @app.task(ignore_result=False)
@@ -223,7 +224,11 @@ def evaluate_pro_proposition(*args, **kwargs):
     ):
         return
     # Count the objects the determine if the banner should be updated
-    object_count = Finding.objects.count() + Endpoint.objects.count()
+    if settings.V3_FEATURE_LOCATIONS:
+        object_count = Finding.objects.count() + Location.objects.count()
+    else:
+        # TODO: Delete this after the move to Locations
+        object_count = Finding.objects.count() + Endpoint.objects.count()
     # Unless the count is greater than 100k, exit early
     if object_count < 100000:
         return
