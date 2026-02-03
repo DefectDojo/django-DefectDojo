@@ -3,14 +3,12 @@ import logging
 from crum import impersonate
 from django.test.utils import override_settings
 
-from django.conf import settings
 from dojo.finding.deduplication import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Engagement, Finding, Product, System_Settings, User, copy_model_util
-from dojo.tasks import _async_dupe_delete_impl, async_dupe_delete  # noqa: PLC2701
-from django.db.models import Count, Prefetch
+from dojo.tasks import _async_dupe_delete_impl  # noqa: PLC2701
 
-from .dojo_test_case import DojoTestCase, toggle_system_setting_boolean
+from .dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
 
