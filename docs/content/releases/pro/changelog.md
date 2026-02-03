@@ -8,18 +8,30 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/changelog/os_upgrading/upgrading_guide/).
 
-## Jan 2025: v2.54
+## Feb 2025: v2.55
 
-### Jan 20, 2025: v2.54.2
+### Feb 2, 2026: v2.55.0
+* **(Pro UI)** Risk Acceptances can now have Notes added.
+* **(Pro UI)** Note Types are now available in the Pro UI.
+
+## Jan 2026: v2.54
+
+### Jan 27, 2026: v2.54.3
+
+* **(Pro UI)** Findings Under Review can now be Mitigated when clearing Review.
+* **(Pro UI)** An Asset's Parent and Child Assets can now be quickly added to a Pro Metrics query.
+
+
+### Jan 20, 2026: v2.54.2
 
 * **(Pro UI)** corrected a bug where unordered lists would display as ordered lists in editor forms.
 * **(Smart Upload)** introduced severity filtering to the Smart Importer to skip findings below a specified severity level. Added detailed logging throughout the findings processing to improve traceability and debugging.
 
-### Jan 12, 2025: v2.54.1
+### Jan 12, 2026: v2.54.1
 
 * **(AI Tools)** added Risk Scores to schema for MCP processing.
 
-### Jan 5, 2025: v2.54.0
+### Jan 5, 2026: v2.54.0
 
 No significant UX changes.
 
