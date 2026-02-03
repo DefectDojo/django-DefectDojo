@@ -11,6 +11,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 ## Feb 2025: v2.55
 
 ### Feb 2, 2026: v2.55.0
+
 * **(Pro UI)** Risk Acceptances can now have Notes added.
 * **(Pro UI)** Note Types are now available in the Pro UI.
 
@@ -18,6 +19,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ### Jan 27, 2026: v2.54.3
 
+* **(Connectors)** Added a "Pending" status to Connectors when Sync or Discovery operations are in progress.
 * **(Pro UI)** Findings Under Review can now be Mitigated when clearing Review.
 * **(Pro UI)** An Asset's Parent and Child Assets can now be quickly added to a Pro Metrics query.
 
