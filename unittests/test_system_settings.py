@@ -57,7 +57,7 @@ class CloseFindingViewInstanceTest(TestCase):
         )
         self.client.force_login(self.user)
         self.product_type = Product_Type.objects.create(name="Test Product Type")
-        self.product = Product.objects.create(name="Test Product", prod_type=self.product_type)
+        self.product = Product.objects.create(name="Test Product", description="test", prod_type=self.product_type)
         self.engagement = Engagement.objects.create(
             name="Test Engagement",
             product=self.product,

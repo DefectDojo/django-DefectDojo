@@ -8,6 +8,7 @@ import logging
 import os
 import sys
 import time
+from collections import defaultdict
 
 import pghistory
 from dateutil.relativedelta import relativedelta
@@ -23,6 +24,153 @@ logger = logging.getLogger(__name__)
 # Cannot be defined at module level because Finding.reviewers.through requires
 # Django's app registry to be ready (AppRegistryNotReady error)
 # The function is called from DojoAppConfig.ready() which guarantees the registry is ready
+
+# Populated by register_django_pghistory_models() - maps proxy_name -> (parent_model, field_name)
+TAG_MODEL_MAPPING = {}
+
+
+def _reconstruct_object_str(model_name: str, pgh_data: dict, obj_id: int) -> str:
+    """Reconstruct object string representation from pgh_data snapshot."""
+    if not pgh_data:
+        return f"{model_name} #{obj_id}" if obj_id else "N/A"
+
+    model_lower = model_name.lower()
+
+    # Model-specific reconstruction based on __str__ implementations
+    if model_lower in {"finding", "finding_template"}:
+        if pgh_data.get("title"):
+            return str(pgh_data["title"])
+    elif model_lower == "engagement":
+        name = pgh_data.get("name", "")
+        if name:
+            return f"Engagement {obj_id}: {name}"
+    elif model_lower == "dojo_user":
+        first = pgh_data.get("first_name", "")
+        last = pgh_data.get("last_name", "")
+        if first or last:
+            return f"{first} {last}".strip()
+        if pgh_data.get("username"):
+            return pgh_data["username"]
+    elif model_lower in {"product", "product_type", "finding_group", "test_type"}:
+        if pgh_data.get("name"):
+            return str(pgh_data["name"])
+    elif model_lower == "test":
+        if pgh_data.get("title"):
+            return pgh_data["title"]
+    elif model_lower == "endpoint":
+        if pgh_data.get("host"):
+            return pgh_data["host"]
+
+    # Fallback: try common fields
+    for field in ["title", "name", "username", "label", "host"]:
+        if pgh_data.get(field):
+            return str(pgh_data[field])
+
+    return f"{model_name} #{obj_id}" if obj_id else "N/A"
+
+
+def process_events_for_display(events):
+    """Process events to add object_str and object_url."""
+    # Import here to avoid circular imports
+    from dojo.models import Dojo_User  # noqa: PLC0415
+
+    ids_by_model = defaultdict(set)
+    user_ids = set()
+    tag_ids_by_model = defaultdict(set)
+
+    # First pass: collect IDs
+    for event in events:
+        if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
+            continue
+        model_name = event.pgh_obj_model.split(".")[-1]
+        pgh_data = getattr(event, "pgh_data", None) or {}
+        obj_id = getattr(event, "pgh_obj_id", None)
+
+        if model_name == "FindingReviewers":
+            if user_id := pgh_data.get("dojo_user_id"):
+                user_ids.add(int(user_id))
+        elif model_name in TAG_MODEL_MAPPING:
+            # Find tag ID from pgh_data (key starts with "tagulous_" and ends with "_id")
+            for key, value in pgh_data.items():
+                if key.startswith("tagulous_") and key.endswith("_id") and value:
+                    tag_ids_by_model[model_name].add(int(value))
+                    break
+        elif obj_id:
+            ids_by_model[model_name].add(int(obj_id))
+
+    # Batch fetch model instances
+    instances_cache = {}
+    for model_name, obj_ids in ids_by_model.items():
+        if obj_ids:
+            try:
+                model_class = apps.get_model("dojo", model_name)
+                instances_cache[model_name] = {
+                    obj.id: obj for obj in model_class.objects.filter(id__in=obj_ids)
+                }
+            except LookupError:
+                pass
+
+    # Batch fetch users for FindingReviewers
+    users_cache = {}
+    if user_ids:
+        users_cache = {u.id: u for u in Dojo_User.objects.filter(id__in=user_ids)}
+
+    # Batch fetch tags per model type
+    tags_cache = {}
+    for model_name, tag_ids in tag_ids_by_model.items():
+        if tag_ids and model_name in TAG_MODEL_MAPPING:
+            parent_model, field_name = TAG_MODEL_MAPPING[model_name]
+            tag_model = parent_model._meta.get_field(field_name).remote_field.model
+            tags_cache[model_name] = {t.id: t.name for t in tag_model.objects.filter(id__in=tag_ids)}
+
+    # Second pass: annotate events
+    for event in events:
+        try:
+            if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
+                event.object_str = "N/A"
+                event.object_url = None
+                continue
+
+            model_name = event.pgh_obj_model.split(".")[-1]
+            pgh_data = getattr(event, "pgh_data", None) or {}
+            obj_id = getattr(event, "pgh_obj_id", None)
+            obj_id_int = int(obj_id) if obj_id else None
+
+            if model_name == "FindingReviewers":
+                user_id = pgh_data.get("dojo_user_id")
+                user = users_cache.get(int(user_id)) if user_id else None
+                if user:
+                    event.object_str = f"Reviewer: {user.get_full_name() or user.username}"
+                else:
+                    event.object_str = f"FindingReviewers #{obj_id}"
+                event.object_url = None
+            elif model_name in TAG_MODEL_MAPPING:
+                # Find tag name from cache
+                tag_name = None
+                for key, value in pgh_data.items():
+                    if key.startswith("tagulous_") and key.endswith("_id") and value:
+                        tag_name = tags_cache.get(model_name, {}).get(int(value))
+                        break
+                if tag_name:
+                    event.object_str = f"Tag: {tag_name}"
+                else:
+                    event.object_str = f"{model_name} #{obj_id}"
+                event.object_url = None
+            else:
+                instance = instances_cache.get(model_name, {}).get(obj_id_int)
+                if instance:
+                    event.object_str = str(instance)
+                    event.object_url = instance.get_absolute_url() if hasattr(instance, "get_absolute_url") else None
+                else:
+                    event.object_str = _reconstruct_object_str(model_name, pgh_data, obj_id)
+                    event.object_url = None
+        except Exception:
+            # Fallback if anything fails
+            logger.debug("Error processing event: %s", event, exc_info=True)
+            event.object_str = f"{getattr(event, 'pgh_obj_model', 'Unknown')} #{getattr(event, 'pgh_obj_id', '?')}"
+            event.object_url = None
+
+    return events
 
 
 def _flush_models_in_batches(models_to_flush, timestamp_field: str, retention_period: int, batch_size: int, max_batches: int, *, dry_run: bool = False) -> tuple[int, int, bool]:
@@ -144,20 +292,25 @@ def register_django_pghistory_models():
     triggers.
     """
     # Import models inside function to avoid AppRegistryNotReady errors
+    from dojo.location.models import Location  # noqa: PLC0415
     from dojo.models import (  # noqa: PLC0415
+        App_Analysis,
         Cred_User,
         Dojo_User,
+        # TODO: Delete this after the move to Locations
         Endpoint,
         Engagement,
         Finding,
         Finding_Group,
         Finding_Template,
         Notification_Webhooks,
+        Objects_Product,
         Product,
         Product_Type,
         Risk_Acceptance,
         Test,
     )
+    from dojo.url.models import URL  # noqa: PLC0415
 
     # Only log during actual application startup, not during shell commands
     if "shell" not in sys.argv:
@@ -376,6 +529,82 @@ def register_django_pghistory_models():
         },
     )(FindingReviewers)
 
+    pghistory.track(
+        pghistory.InsertEvent(),
+        pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
+        pghistory.DeleteEvent(),
+        pghistory.ManualEvent(label="initial_backfill"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
+    )(Location)
+
+    pghistory.track(
+        pghistory.InsertEvent(),
+        pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
+        pghistory.DeleteEvent(),
+        pghistory.ManualEvent(label="initial_backfill"),
+        meta={
+            "indexes": [
+                models.Index(fields=["pgh_created_at"]),
+                models.Index(fields=["pgh_label"]),
+                models.Index(fields=["pgh_context_id"]),
+            ],
+        },
+    )(URL)
+
+    # Track tag through models for all TagField relationships
+    # Must use proxy pattern like FindingReviewers because tagulous auto-generates
+    # through models that cannot be imported at module level
+    tag_through_models = [
+        # (Parent model, field name, proxy class name)
+        (Finding, "tags", "FindingTags"),
+        (Finding, "inherited_tags", "FindingInheritedTags"),
+        (Product, "tags", "ProductTags"),
+        (Engagement, "tags", "EngagementTags"),
+        (Engagement, "inherited_tags", "EngagementInheritedTags"),
+        (Test, "tags", "TestTags"),
+        (Test, "inherited_tags", "TestInheritedTags"),
+        (Endpoint, "tags", "EndpointTags"),
+        (Endpoint, "inherited_tags", "EndpointInheritedTags"),
+        (Finding_Template, "tags", "FindingTemplateTags"),
+        (App_Analysis, "tags", "AppAnalysisTags"),
+        (Objects_Product, "tags", "ObjectsProductTags"),
+    ]
+
+    for parent_model, field_name, proxy_name in tag_through_models:
+        # Populate the mapping for use in process_events_for_display
+        TAG_MODEL_MAPPING[proxy_name] = (parent_model, field_name)
+
+        through_model = parent_model._meta.get_field(field_name).remote_field.through
+
+        # Create proxy class dynamically
+        proxy_class = type(proxy_name, (through_model,), {
+            "__module__": __name__,
+            "Meta": type("Meta", (), {"proxy": True}),
+        })
+
+        # Derive event table name from through table name
+        db_table = through_model._meta.db_table + "event"
+
+        pghistory.track(
+            pghistory.InsertEvent(),
+            pghistory.DeleteEvent(),
+            pghistory.ManualEvent(label="initial_backfill"),
+            meta={
+                "db_table": db_table,
+                "indexes": [
+                    models.Index(fields=["pgh_created_at"]),
+                    models.Index(fields=["pgh_label"]),
+                    models.Index(fields=["pgh_context_id"]),
+                ],
+            },
+        )(proxy_class)
+
     # Only log during actual application startup, not during shell commands
     if "shell" not in sys.argv:
         logger.info("Successfully registered models with django-pghistory")
@@ -488,6 +717,43 @@ def get_table_names(model_name):
         # M2M through table: Django creates dojo_finding_reviewers for Finding.reviewers
         table_name = "dojo_finding_reviewers"
         event_table_name = "dojo_finding_reviewersevent"
+    # Tag through tables (tagulous auto-generated)
+    elif model_name == "FindingTags":
+        table_name = "dojo_finding_tags"
+        event_table_name = "dojo_finding_tagsevent"
+    elif model_name == "FindingInheritedTags":
+        table_name = "dojo_finding_inherited_tags"
+        event_table_name = "dojo_finding_inherited_tagsevent"
+    elif model_name == "ProductTags":
+        table_name = "dojo_product_tags"
+        event_table_name = "dojo_product_tagsevent"
+    elif model_name == "EngagementTags":
+        table_name = "dojo_engagement_tags"
+        event_table_name = "dojo_engagement_tagsevent"
+    elif model_name == "EngagementInheritedTags":
+        table_name = "dojo_engagement_inherited_tags"
+        event_table_name = "dojo_engagement_inherited_tagsevent"
+    elif model_name == "TestTags":
+        table_name = "dojo_test_tags"
+        event_table_name = "dojo_test_tagsevent"
+    elif model_name == "TestInheritedTags":
+        table_name = "dojo_test_inherited_tags"
+        event_table_name = "dojo_test_inherited_tagsevent"
+    elif model_name == "EndpointTags":
+        table_name = "dojo_endpoint_tags"
+        event_table_name = "dojo_endpoint_tagsevent"
+    elif model_name == "EndpointInheritedTags":
+        table_name = "dojo_endpoint_inherited_tags"
+        event_table_name = "dojo_endpoint_inherited_tagsevent"
+    elif model_name == "FindingTemplateTags":
+        table_name = "dojo_finding_template_tags"
+        event_table_name = "dojo_finding_template_tagsevent"
+    elif model_name == "AppAnalysisTags":
+        table_name = "dojo_app_analysis_tags"
+        event_table_name = "dojo_app_analysis_tagsevent"
+    elif model_name == "ObjectsProductTags":
+        table_name = "dojo_objects_product_tags"
+        event_table_name = "dojo_objects_product_tagsevent"
     else:
         table_name = f"dojo_{model_name.lower()}"
         event_table_name = f"dojo_{model_name.lower()}event"
@@ -539,7 +805,16 @@ def process_model_backfill(
     """
     if progress_callback is None:
         def progress_callback(msg, style=None):
-            logger.info(msg)
+            if style == "ERROR":
+                logger.error(msg)
+            elif style == "WARNING":
+                logger.warning(msg)
+            elif style == "SUCCESS":
+                logger.info(msg)
+            elif style == "DEBUG":
+                logger.debug(msg)
+            else:
+                logger.info(msg)
 
     try:
         table_name, event_table_name = get_table_names(model_name)
@@ -555,7 +830,7 @@ def process_model_backfill(
             progress_callback(
                 f"  Event table {event_table_name} not found. "
                 f"Is {model_name} tracked by pghistory?",
-                "ERROR",
+                "DEBUG",
             )
             return 0, 0.0
 
@@ -791,4 +1066,18 @@ def get_tracked_models():
         "Product_Type", "Product", "Test", "Risk_Acceptance",
         "Finding_Template", "Cred_User", "Notification_Webhooks",
         "FindingReviewers",  # M2M through table for Finding.reviewers
+        "Location", "URL",
+        # Tag through tables (tagulous auto-generated)
+        "FindingTags",
+        "FindingInheritedTags",
+        "ProductTags",
+        "EngagementTags",
+        "EngagementInheritedTags",
+        "TestTags",
+        "TestInheritedTags",
+        "EndpointTags",
+        "EndpointInheritedTags",
+        "FindingTemplateTags",
+        "AppAnalysisTags",
+        "ObjectsProductTags",
     ]

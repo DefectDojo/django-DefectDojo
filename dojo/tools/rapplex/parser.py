@@ -1,14 +1,24 @@
 import json
 from datetime import datetime
 
+from django.conf import settings
 from html2text import html2text
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class RapplexParser:
 
     """Rapplex - Web Application Security Scanner"""
+
+    severities = {
+        "Information": "Info",
+        "Low": "Low",
+        "Medium": "Medium",
+        "High": "High",
+        "Critical": "Critical",
+    }
 
     def get_scan_types(self):
         return ["Rapplex Scan"]
@@ -19,23 +29,25 @@ class RapplexParser:
     def get_description_for_scan_types(self, scan_type):
         return "Import Rapplex JSON report."
 
+    def get_finding_severity(self, severity_level):
+        return self.severities.get(severity_level, "Info")
+
     def get_findings(self, filename, test):
         data = json.load(filename)
         findings = []
-        severities = ["Information", "Low", "Medium", "High", "Critical"]
 
-        for severity in severities:
+        for severity in self.severities:
             current_severity = data.get("Severities", {}).get(severity)
             if not current_severity:
                 continue
 
+            finding_severity = self.get_finding_severity(current_severity.get("Name", ""))
             main_issue_groups = current_severity.get("IssueGroups", [])
             for main_issue_group in main_issue_groups:
                 issues = main_issue_group.get("Issues", [])
 
                 for issue in issues:
                     formatted_date = datetime.strptime(data.get("StartedDate", ""), "%d/%m/%Y %H:%M:%S").strftime("%Y-%m-%d")
-                    severity_level = current_severity.get("Name", "")
                     title = issue.get("Title", "")
                     url = issue.get("Url", "")
                     req = issue.get("HttpRequest", "")
@@ -56,7 +68,7 @@ class RapplexParser:
                     finding = Finding(
                         title=title,
                         test=test,
-                        severity=severity_level,
+                        severity=finding_severity,
                         date=formatted_date,
                         description=summary,
                         mitigation=rem,
@@ -68,8 +80,12 @@ class RapplexParser:
                     finding.unsaved_request = req
                     finding.unsaved_response = res
 
-                    endpoint = Endpoint.from_uri(url)
-                    finding.unsaved_endpoints.append(endpoint)
+                    if settings.V3_FEATURE_LOCATIONS:
+                        finding.unsaved_locations = [URL.from_value(url)]
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        endpoint = Endpoint.from_uri(url)
+                        finding.unsaved_endpoints.append(endpoint)
 
                     findings.append(finding)
         return findings

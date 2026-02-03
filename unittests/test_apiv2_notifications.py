@@ -2,9 +2,10 @@ from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from unittests.dojo_test_case import DojoAPITestCase
+from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
 
+@versioned_fixtures
 class NotificationsTest(DojoAPITestCase):
 
     """Test the metadata APIv2 endpoint."""

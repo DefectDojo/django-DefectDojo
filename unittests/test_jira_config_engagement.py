@@ -10,8 +10,7 @@ from django.utils.http import urlencode
 
 from dojo.jira_link import helper as jira_helper
 from dojo.models import Engagement, Product
-
-from .dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 
@@ -240,6 +239,7 @@ class JIRAConfigEngagementBase:
         return response
 
 
+@versioned_fixtures
 class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
     fixtures = ["dojo_testdata.json"]
 

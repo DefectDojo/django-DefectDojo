@@ -7,8 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.models import Engagement, Finding, Risk_Acceptance, System_Settings, Test
-
-from .dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 User = get_user_model()
 
@@ -60,6 +59,7 @@ def verify(when: datetime, product_id: int, title: str):
         Finding.objects.filter(test__engagement__product_id=product_id, title=title).update(verified=True)
 
 
+@versioned_fixtures
 class TestDashboard(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 

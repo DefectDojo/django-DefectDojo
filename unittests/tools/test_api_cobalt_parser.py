@@ -12,24 +12,21 @@ class TestApiCobaltParser(DojoTestCase):
         with (get_unit_tests_scans_path("api_cobalt") / "cobalt_api_zero_vul.json").open(encoding="utf-8") as testfile:
             parser = ApiCobaltParser()
             findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
             self.assertEqual(0, len(findings))
 
     def test_cobalt_api_parser_with_many_vuln_has_many_findings(self):
         with (get_unit_tests_scans_path("api_cobalt") / "cobalt_api_many_vul.json").open(encoding="utf-8") as testfile:
             parser = ApiCobaltParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(3, len(findings))
 
     def test_cobalt_api_parser_with_carried_over_finding(self):
         with (get_unit_tests_scans_path("api_cobalt") / "cobalt_api_one_vul_carried_over.json").open(encoding="utf-8") as testfile:
             parser = ApiCobaltParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("Missing firewall", finding.title)
@@ -54,9 +51,7 @@ class TestApiCobaltParser(DojoTestCase):
         with (get_unit_tests_scans_path("api_cobalt") / "cobalt_api_one_vul_check_fix.json").open(encoding="utf-8") as testfile:
             parser = ApiCobaltParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("Cross Site Scripting", finding.title)
@@ -81,9 +76,7 @@ class TestApiCobaltParser(DojoTestCase):
         with (get_unit_tests_scans_path("api_cobalt") / "cobalt_api_one_vul_invalid.json").open(encoding="utf-8") as testfile:
             parser = ApiCobaltParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("SQL Injection", finding.title)
@@ -108,9 +101,7 @@ class TestApiCobaltParser(DojoTestCase):
         with (get_unit_tests_scans_path("api_cobalt") / "cobalt_api_one_vul_need_fix.json").open(encoding="utf-8") as testfile:
             parser = ApiCobaltParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("SQL Injection", finding.title)
@@ -135,9 +126,7 @@ class TestApiCobaltParser(DojoTestCase):
         with (get_unit_tests_scans_path("api_cobalt") / "cobalt_api_one_vul_new.json").open(encoding="utf-8") as testfile:
             parser = ApiCobaltParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("SQL Injection", finding.title)
@@ -162,9 +151,7 @@ class TestApiCobaltParser(DojoTestCase):
         with (get_unit_tests_scans_path("api_cobalt") / "cobalt_api_one_vul_out_of_scope.json").open(encoding="utf-8") as testfile:
             parser = ApiCobaltParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("SQL Injection", finding.title)
@@ -189,9 +176,7 @@ class TestApiCobaltParser(DojoTestCase):
         with (get_unit_tests_scans_path("api_cobalt") / "cobalt_api_one_vul_triaging.json").open(encoding="utf-8") as testfile:
             parser = ApiCobaltParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("SQL Injection", finding.title)
@@ -216,9 +201,7 @@ class TestApiCobaltParser(DojoTestCase):
         with (get_unit_tests_scans_path("api_cobalt") / "cobalt_api_one_vul_valid_fix.json").open(encoding="utf-8") as testfile:
             parser = ApiCobaltParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("SQL Injection", finding.title)
@@ -243,9 +226,7 @@ class TestApiCobaltParser(DojoTestCase):
         with (get_unit_tests_scans_path("api_cobalt") / "cobalt_api_one_vul_wont_fix.json").open(encoding="utf-8") as testfile:
             parser = ApiCobaltParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("SQL Injection", finding.title)
@@ -279,6 +260,7 @@ class TestApiCobaltParser(DojoTestCase):
 
         parser = ApiCobaltParser()
         findings = parser.get_findings(None, test)
+        self.validate_locations(findings)
 
         mock.assert_called_with(test)
         self.assertEqual(3, len(findings))

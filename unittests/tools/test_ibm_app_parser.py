@@ -1,3 +1,4 @@
+
 from dojo.models import Test
 from dojo.tools.ibm_app.parser import IbmAppParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -9,9 +10,7 @@ class TestIbmAppParser(DojoTestCase):
         testfile = (get_unit_tests_scans_path("ibm_app") / "testfire.xml").open(encoding="utf-8")
         parser = IbmAppParser()
         findings = parser.get_findings(testfile, Test())
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         testfile.close()
         self.assertEqual(27, len(findings))
 

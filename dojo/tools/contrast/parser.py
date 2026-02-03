@@ -4,7 +4,10 @@ import hashlib
 import io
 import sys
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class ContrastParser:
@@ -55,14 +58,22 @@ class ContrastParser:
                 unique_id_from_tool=row.get("Vulnerability ID"),
                 nb_occurences=1,
             )
-            finding.unsaved_endpoints = []
-            if row.get("Request URI"):
-                endpoint = Endpoint(
-                    host="0.0.0.0",  # noqa: S104
-                    path=row.get("Request URI"),
-                    protocol=row.get("Request Protocol"),
-                )
-                finding.unsaved_endpoints.append(endpoint)
+            if uri := row.get("Request URI"):
+                if settings.V3_FEATURE_LOCATIONS:
+                    location = URL(
+                        host="0.0.0.0",  # noqa: S104
+                        path=uri,
+                        protocol=row.get("Request Protocol"),
+                    )
+                    finding.unsaved_locations.append(location)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    endpoint = Endpoint(
+                        host="0.0.0.0",  # noqa: S104
+                        path=uri,
+                        protocol=row.get("Request Protocol"),
+                    )
+                    finding.unsaved_endpoints.append(endpoint)
 
             if (
                 row.get("Request Qs", "")
@@ -88,9 +99,15 @@ class ContrastParser:
                     + "\n-----\n"
                     + finding.description
                 )
-                dupes[dupe_key].unsaved_endpoints.extend(
-                    finding.unsaved_endpoints,
-                )
+                if settings.V3_FEATURE_LOCATIONS:
+                    dupes[dupe_key].unsaved_locations.extend(
+                        finding.unsaved_locations,
+                    )
+                else:
+                    # TODO: Delete this after the move to Locations
+                    dupes[dupe_key].unsaved_endpoints.extend(
+                        finding.unsaved_endpoints,
+                    )
                 dupes[dupe_key].nb_occurences += finding.nb_occurences
                 dupes[
                     dupe_key

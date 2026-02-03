@@ -2,11 +2,11 @@ from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
+from unittests.dojo_test_case import versioned_fixtures
 
+
+@versioned_fixtures
 class MetadataTest(APITestCase):
-
-    """Test the metadata APIv2 endpoint."""
-
     fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
@@ -114,4 +114,4 @@ class MetadataTest(APITestCase):
             name="foo",
             value="bar",
         )
-        self.assertEqual(r.status_code, 201)
+        self.assertEqual(r.status_code, 201, r.json())

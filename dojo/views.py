@@ -3,7 +3,6 @@ from contextlib import suppress
 from pathlib import Path
 
 from auditlog.models import LogEntry
-from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -13,48 +12,30 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
+from dojo.auditlog import process_events_for_display
 from dojo.authorization.authorization import (
     user_has_configuration_permission_or_403,
+    user_has_global_permission,
     user_has_permission,
     user_has_permission_or_403,
 )
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import LogEntryFilter, PgHistoryFilter
 from dojo.forms import ManageFileFormSet
-from dojo.models import Endpoint, Engagement, FileUpload, Finding, Product, Test
+from dojo.location.models import Location
+from dojo.models import (
+    Endpoint,
+    Engagement,
+    FileUpload,
+    Finding,
+    Product,
+    Test,
+)
 from dojo.pghistory_models import DojoEvents
 from dojo.product_announcements import ErrorPageProductAnnouncement
 from dojo.utils import Product_Tab, generate_file_response, get_page_items
 
 logger = logging.getLogger(__name__)
-
-
-def get_object_str(event):
-    """Get the __str__ representation of the original object from pghistory event data."""
-    try:
-        if not hasattr(event, "pgh_obj_model") or not event.pgh_obj_model:
-            return "N/A"
-
-        app_label, model_name = event.pgh_obj_model.split(".")
-        model_class = apps.get_model(app_label, model_name)
-
-        if hasattr(event, "pgh_data") and event.pgh_data:
-            # Create a temporary instance with the event data
-            temp_instance = model_class(**event.pgh_data)
-            return str(temp_instance)
-        if hasattr(event, "pgh_obj_id") and event.pgh_obj_id:
-            return f"Object ID: {event.pgh_obj_id}"
-        return "N/A"  # noqa: TRY300 it complains that it wants an else, but if I add an else, it complains that the elise is unnecessary
-
-    except (ValueError, LookupError, TypeError, AttributeError):
-        # Fallback to name from data if available
-        if hasattr(event, "pgh_data") and event.pgh_data and "name" in event.pgh_data:
-            return event.pgh_data["name"]
-
-        if hasattr(event, "pgh_obj_id") and event.pgh_obj_id:
-            return f"Object ID: {event.pgh_obj_id}"
-
-        return "N/A"
 
 
 def custom_error_view(request, exception=None):
@@ -107,18 +88,30 @@ def action_history(request, cid, oid):
         product_id = object_value.test.engagement.product.id
         active_tab = "findings"
         finding = object_value
+    elif ct.model == "location":
+        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
+        object_value = Location.objects.get(id=obj.id)
+        active_tab = "endpoints"
+    # TODO: Delete this after the move to Locations
     elif ct.model == "endpoint":
-        user_has_permission_or_403(request.user, obj, Permissions.Endpoint_View)
+        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
         object_value = Endpoint.objects.get(id=obj.id)
         product_id = object_value.product.id
         active_tab = "endpoints"
     elif ct.model == "risk_acceptance":
         engagements = Engagement.objects.filter(risk_acceptance=obj)
         authorized = False
-        for engagement in engagements:
-            if user_has_permission(request.user, engagement, Permissions.Engagement_View):
-                authorized = True
-                break
+        fetched_engagements = list(engagements)
+        # Check the case that there are no engagements associated with the risk acceptance
+        if len(fetched_engagements) == 0:
+            # Determine if the user has risk acceptance view permission globally
+            authorized = user_has_global_permission(request.user, Permissions.Risk_Acceptance)
+        else:
+            # Iterate through engagements to see if the user has view permission on any of them
+            for engagement in fetched_engagements:
+                if user_has_permission(request.user, engagement, Permissions.Engagement_View):
+                    authorized = True
+                    break
         if not authorized:
             raise PermissionDenied
     elif ct.model == "user":
@@ -147,23 +140,18 @@ def action_history(request, cid, oid):
     auditlog_history = auditlog_queryset
 
     # Use custom DojoEvents proxy model - provides proper diff calculation and context fields
-    # Filter by the specific object using tracks() method
+    # Filter by the specific object using references() method
+    # references() returns events where any FK points to the object (including through models like tags/reviewers)
     # Note: Events is a CTE that doesn't support select_related, but includes context data
-    pghistory_history = DojoEvents.objects.tracks(obj).order_by("-pgh_created_at")
+    pghistory_history = DojoEvents.objects.references(obj).order_by("-pgh_created_at")
 
-    # Add object string representation based on the original models __str__ method
-    # this value was available in the old auditlogs, so we mimic that here
-    # it can be useful to see the object_str that was changed, but we'll have to see how it performs
-
-    # Apply filtering first, then process for object strings
+    # Apply filtering first, then process for display
     pghistory_filter = PgHistoryFilter(request.GET, queryset=pghistory_history)
     filtered_pghistory = pghistory_filter.qs
 
-    # Process filtered events to add object string representation
-    processed_events = []
-    for event in filtered_pghistory:
-        event.object_str = get_object_str(event)
-        processed_events.append(event)
+    # Process events in batch to add object_str and object_url
+    processed_events = list(filtered_pghistory)
+    process_events_for_display(processed_events)
 
     # Paginate the processed events
     paged_pghistory_history = get_page_items(request, processed_events, 25)

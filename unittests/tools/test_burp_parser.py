@@ -10,21 +10,17 @@ class TestBurpParser(DojoTestCase):
         with (get_unit_tests_scans_path("burp") / "one_finding.xml").open(encoding="utf-8") as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             self.assertEqual(1, len(findings))
             self.assertEqual("1049088", findings[0].vuln_id_from_tool)
-            self.assertEqual(3, len(findings[0].unsaved_endpoints))
+            self.assertEqual(3, len(self.get_unsaved_locations(findings[0])))
 
     def test_burp_with_multiple_vulns_has_multiple_findings(self):
         with (get_unit_tests_scans_path("burp") / "seven_findings.xml").open(encoding="utf-8") as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(7, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -36,25 +32,21 @@ class TestBurpParser(DojoTestCase):
         with (get_unit_tests_scans_path("burp") / "one_finding_with_blank_response.xml").open(encoding="utf-8") as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             self.assertEqual(1, len(findings))
 
             self.assertEqual("7121655797013284864", findings[0].unique_id_from_tool)
             self.assertEqual("1049088", findings[0].vuln_id_from_tool)
             self.assertEqual("SQL injection", findings[0].title)
-            self.assertEqual(1, len(findings[0].unsaved_endpoints))
+            self.assertEqual(1, len(self.get_unsaved_locations(findings[0])))
             self.assertEqual("High", findings[0].severity)
 
     def test_burp_with_one_vuln_with_cwe(self):
         with (get_unit_tests_scans_path("burp") / "one_finding_with_cwe.xml").open(encoding="utf-8") as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
             self.assertEqual(1, len(findings))
 
@@ -68,9 +60,7 @@ class TestBurpParser(DojoTestCase):
         with (get_unit_tests_scans_path("burp") / "issue4399.xml").open(encoding="utf-8") as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(20, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]

@@ -6,6 +6,7 @@ from dateutil import parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class VeracodeJSONParser:
@@ -111,7 +112,6 @@ class VeracodeJSONParser:
         )
         # Set some unsaved fields
         finding.unsaved_tags = []
-        finding.unsaved_endpoints = []
         finding.unsaved_vulnerability_ids = []
         # Determine if this finding violates a policy
         if policy_violated:
@@ -188,8 +188,30 @@ class VeracodeJSONParser:
             finding.title = category_title
         elif backup_title:
             finding.title = backup_title
+
+        if settings.V3_FEATURE_LOCATIONS:
+            # Add the url to the finding
+            if url := finding_details.get("url"):
+                # Create the Location object from the url
+                finding.unsaved_locations.append(
+                    URL.from_value(url),
+                )
+            else:
+                # build it from the other attributes
+                host = finding_details.get("hostname")
+                port = finding_details.get("port")
+                path = finding_details.get("path")
+                # Create the Location object from all the pieces
+                finding.unsaved_locations.append(
+                    URL(
+                        host=host,
+                        port=port,
+                        path=path,
+                    ),
+                )
+        # TODO: Delete this after the move to Locations
         # Add the url to the finding
-        if url := finding_details.get("url"):
+        elif url := finding_details.get("url"):
             # Create the Endpoint object from the url
             finding.unsaved_endpoints.append(
                 Endpoint.from_uri(url),

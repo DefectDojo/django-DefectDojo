@@ -16,6 +16,10 @@ services:
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-admin}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
   celeryworker:
+    build:
+      context: .
+      dockerfile: Dockerfile.django-${DEFECT_DOJO_OS:-debian}
+      target: development
     entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-celery-worker-dev.sh']
     volumes:
       - '.:/app:z'
@@ -24,12 +28,20 @@ services:
       DD_DEBUG: 'True'
       DD_EMAIL_URL: "smtp://mailhog:1025"
   celerybeat:
+    build:
+      context: .
+      dockerfile: Dockerfile.django-${DEFECT_DOJO_OS:-debian}
+      target: development
     volumes:
       - '.:/app:z'
     environment:
       PYTHONWARNINGS: error  # We are strict about Warnings during development
       DD_DEBUG: 'True'
   initializer:
+    build:
+      context: .
+      dockerfile: Dockerfile.django-${DEFECT_DOJO_OS:-debian}
+      target: development
     volumes:
       - '.:/app:z'
     environment:
@@ -60,4 +72,4 @@ services:
         protocol: tcp
         mode: host
   "webhook.endpoint":
-    image: mccutchen/go-httpbin:2.19.0@sha256:be41c6c3772393c097e15f9f8ac381de4ce9e9841c545556af98fbe2e707c619
+    image: mccutchen/go-httpbin:2.20.0@sha256:b1620821b6ff191d911629f87a720b88df5397c2554045f1cfb1ffde17c9b898

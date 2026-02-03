@@ -38,7 +38,7 @@ from polymorphic.base import ManagerInheritanceWarning
 # from tagulous.forms import TagWidget
 # import tagulous
 from dojo.authorization.roles_permissions import Permissions
-from dojo.endpoint.queries import get_authorized_endpoints
+from dojo.endpoint.queries import get_authorized_endpoints_for_queryset
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.helper import (
     ACCEPTED_FINDINGS_QUERY,
@@ -52,9 +52,10 @@ from dojo.finding.helper import (
     VERIFIED_FINDINGS_QUERY,
     WAS_ACCEPTED_FINDINGS_QUERY,
 )
-from dojo.finding.queries import get_authorized_findings
-from dojo.finding_group.queries import get_authorized_finding_groups
+from dojo.finding.queries import get_authorized_findings_for_queryset
+from dojo.finding_group.queries import get_authorized_finding_groups_for_queryset
 from dojo.labels import get_labels
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
     ENGAGEMENT_STATUS_CHOICES,
@@ -520,6 +521,34 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
             ])
 
     return fields
+
+
+def filter_endpoints_base(queryset, name, value, statuses=None, host=None):
+    """
+    Apply `endpoints` filter, and if location_status or host
+    are present, combine them on the same row.
+    """
+    filters_kwargs = {"locations__location": value}
+    if statuses:
+        filters_kwargs["locations__status__in"] = statuses
+    if host:
+        filters_kwargs["locations__location__url__host__icontains"] = host
+
+    return queryset.filter(**filters_kwargs)
+
+
+def filter_endpoints_host_base(queryset, name, value, statuses=None, endpoint_id=None):
+    """
+    Apply `endpoints__host` filter, and if endpoints or location_status
+    are present, combine them on the same row.
+    """
+    filters_kwargs = {"locations__location__url__host__icontains": value}
+    if endpoint_id:
+        filters_kwargs["locations__location"] = endpoint_id
+    if statuses:
+        filters_kwargs["locations__status__in"] = statuses
+
+    return queryset.filter(**filters_kwargs)
 
 
 class FindingTagFilter(DojoFilter):
@@ -1359,6 +1388,35 @@ class ProductFilterHelper(FilterSet):
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
     outside_of_sla = ProductSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
+    if settings.V3_FEATURE_LOCATIONS:
+        location_status = MultipleChoiceFilter(
+            field_name="locations__status",
+            choices=ProductLocationStatus.choices,
+            help_text="Status of the Location from the Products relationship",
+        )
+        endpoints__host = CharFilter(
+            field_name="locations__location__url__host", method="filter_endpoints_host", label="Endpoint Host",
+        )
+        endpoints = NumberFilter(field_name="locations__location", method="filter_endpoints", widget=HiddenInput())
+
+        def filter_endpoints_host(self, queryset, name, value):
+            return filter_endpoints_host_base(
+                queryset,
+                name,
+                value,
+                endpoint_id=self.data.get("endpoints"),
+                statuses=self.data.getlist("location_status"),
+            )
+
+        def filter_endpoints(self, queryset, name, value):
+            return filter_endpoints_base(
+                queryset,
+                name,
+                value,
+                statuses=self.data.getlist("location_status"),
+                host=self.data.get("endpoints__host"),
+            )
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
@@ -1447,6 +1505,13 @@ class ProductFilterWithoutObjectLookups(ProductFilterHelper):
 class ApiDojoMetaFilter(DojoFilter):
     name_case_insensitive = CharFilter(field_name="name", lookup_expr="iexact")
     value_case_insensitive = CharFilter(field_name="value", lookup_expr="iexact")
+    endpoint = NumberFilter(field_name="location__products__id", lookup_expr="exact")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.filters["endpoint"] = NumberFilter(field_name="endpoint", lookup_expr="exact")
 
     class Meta:
         model = DojoMeta
@@ -1454,6 +1519,7 @@ class ApiDojoMetaFilter(DojoFilter):
             "id",
             "product",
             "endpoint",
+            "location",
             "finding",
             "name",
             "value",
@@ -1773,18 +1839,48 @@ class FindingFilterHelper(FilterSet):
     param = CharFilter(lookup_expr="icontains")
     payload = CharFilter(lookup_expr="icontains")
     test__test_type = ModelMultipleChoiceFilter(queryset=Test_Type.objects.all(), label="Test Type")
-    endpoints__host = CharFilter(lookup_expr="icontains", label="Endpoint Host")
     service = CharFilter(lookup_expr="icontains")
     test__engagement__version = CharFilter(lookup_expr="icontains", label="Engagement Version")
     test__version = CharFilter(lookup_expr="icontains", label="Test Version")
     risk_acceptance = ReportRiskAcceptanceFilter(label="Risk Accepted")
     effort_for_fixing = MultipleChoiceFilter(choices=EFFORT_FOR_FIXING_CHOICES)
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
-    endpoints = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
     test__engagement__product__lifecycle = MultipleChoiceFilter(
         choices=Product.LIFECYCLE_CHOICES,
         label=labels.ASSET_LIFECYCLE_LABEL)
+    if settings.V3_FEATURE_LOCATIONS:
+        location_status = MultipleChoiceFilter(
+            field_name="locations__status",
+            choices=FindingLocationStatus.choices,
+            help_text="Status of the Location from the Findings relationship",
+        )
+        endpoints__host = CharFilter(
+            field_name="locations__location__url__host", method="filter_endpoints_host", label="Endpoint Host",
+        )
+        endpoints = NumberFilter(field_name="locations__location", method="filter_endpoints", widget=HiddenInput())
+
+        def filter_endpoints_host(self, queryset, name, value):
+            return filter_endpoints_host_base(
+                queryset,
+                name,
+                value,
+                endpoint_id=self.data.get("endpoints"),
+                statuses=self.data.getlist("location_status"),
+            )
+
+        def filter_endpoints(self, queryset, name, value):
+            return filter_endpoints_base(
+                queryset,
+                name,
+                value,
+                statuses=self.data.getlist("location_status"),
+                host=self.data.get("endpoints__host"),
+            )
+    else:
+        # TODO: Delete this after the move to Locations
+        endpoints__host = CharFilter(lookup_expr="icontains", label="Endpoint Host")
+        endpoints = NumberFilter(widget=HiddenInput())
 
     has_component = BooleanFilter(
         field_name="component_name",
@@ -1889,6 +1985,8 @@ class FindingFilterHelper(FilterSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if "test__test_type" in self.form.fields:
+            self.form.fields["test__test_type"].queryset = get_visible_scan_types()
 
     def set_date_fields(self, *args: list, **kwargs: dict):
         date_input_widget = forms.DateInput(attrs={"class": "datepicker", "placeholder": "YYYY-MM-DD"}, format="%Y-%m-%d")
@@ -2023,9 +2121,6 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
             del self.form.fields["test__engagement__product__name_contains"]
             del self.form.fields["test__engagement__product__prod_type__name"]
             del self.form.fields["test__engagement__product__prod_type__name_contains"]
-        else:
-            del self.form.fields["test__name"]
-            del self.form.fields["test__name_contains"]
 
 
 class FindingFilter(FindingFilterHelper, FindingTagFilter):
@@ -2075,9 +2170,6 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         # Don't show the product filter on the product finding view
         self.set_related_object_fields(*args, **kwargs)
 
-        if "test__test_type" in self.form.fields:
-            self.form.fields["test__test_type"].queryset = get_visible_scan_types()
-
     def set_related_object_fields(self, *args: list, **kwargs: dict):
         finding_group_query = Finding_Group.objects.all()
         if self.pid is not None:
@@ -2098,7 +2190,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         if self.form.fields.get("test__engagement__product"):
             self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
         if self.form.fields.get("finding_group", None):
-            self.form.fields["finding_group"].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View, queryset=finding_group_query)
+            self.form.fields["finding_group"].queryset = get_authorized_finding_groups_for_queryset(Permissions.Finding_Group_View, finding_group_query)
         self.form.fields["reporter"].queryset = get_authorized_users(Permissions.Finding_View)
         self.form.fields["reviewers"].queryset = self.form.fields["reporter"].queryset
 
@@ -2205,7 +2297,7 @@ class SimilarFindingHelper(FilterSet):
 
     def filter_queryset(self, *args: list, **kwargs: dict):
         queryset = super().filter_queryset(*args, **kwargs)
-        queryset = get_authorized_findings(Permissions.Finding_View, queryset, self.user)
+        queryset = get_authorized_findings_for_queryset(Permissions.Finding_View, queryset, self.user)
         return queryset.exclude(pk=self.finding.pk)
 
 
@@ -2751,7 +2843,7 @@ class EndpointFilter(EndpointFilterHelper, DojoFilter):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_endpoints(Permissions.Endpoint_View, parent)
+        return get_authorized_endpoints_for_queryset(Permissions.Location_View, parent)
 
     class Meta:
         model = Endpoint
@@ -2892,7 +2984,7 @@ class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_endpoints(Permissions.Endpoint_View, parent)
+        return get_authorized_endpoints_for_queryset(Permissions.Location_View, parent)
 
     class Meta:
         model = Endpoint
@@ -3240,7 +3332,7 @@ class ReportFindingFilterHelper(FilterSet):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_findings(Permissions.Finding_View, parent)
+        return get_authorized_findings_for_queryset(Permissions.Finding_View, parent)
 
 
 class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
@@ -3260,7 +3352,7 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
         # duplicate_finding queryset needs to restricted in line with permissions
         # and inline with report scope to avoid a dropdown with 100K entries
         duplicate_finding_query_set = self.form.fields["duplicate_finding"].queryset
-        duplicate_finding_query_set = get_authorized_findings(Permissions.Finding_View, duplicate_finding_query_set)
+        duplicate_finding_query_set = get_authorized_findings_for_queryset(Permissions.Finding_View, duplicate_finding_query_set)
 
         if self.test:
             duplicate_finding_query_set = duplicate_finding_query_set.filter(test=self.test)

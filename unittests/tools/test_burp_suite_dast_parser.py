@@ -10,9 +10,7 @@ class TestBurpSuiteDASTParser(DojoTestCase):
         with (get_unit_tests_scans_path("burp_suite_dast") / "many_vulns.html").open(encoding="utf-8") as test_file:
             parser = BurpSuiteDASTParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(12, len(findings))
 
             with self.subTest(i=0):
@@ -24,8 +22,8 @@ class TestBurpSuiteDASTParser(DojoTestCase):
                 self.assertIn("**Issue detail**:\nThe application implements an HTML5 cross-origin resource sharing (CORS) policy", finding.description)
                 self.assertIn("An HTML5 cross-origin resource sharing (CORS) policy controls", finding.impact)
                 self.assertIn("[Web Security Academy: Cross-origin resource sharing (CORS)](https://portswigger.net/web-security/cors)", finding.references)
-                self.assertEqual(1, len(finding.unsaved_endpoints))
-                self.assertEqual("example.com", finding.unsaved_endpoints[0].host)
+                self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+                self.assertEqual("example.com", self.get_unsaved_locations(finding)[0].host)
 
             with self.subTest(i=5):
                 finding = findings[5]
@@ -39,9 +37,7 @@ class TestBurpSuiteDASTParser(DojoTestCase):
         with (get_unit_tests_scans_path("burp_suite_dast") / "many_vulns_updated_format.html").open(encoding="utf-8") as test_file:
             parser = BurpSuiteDASTParser()
             findings = parser.get_findings(test_file, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(12, len(findings))
 
             with self.subTest(i=0):
@@ -53,8 +49,8 @@ class TestBurpSuiteDASTParser(DojoTestCase):
                 self.assertIn("**Issue description**:\nThe application fails to prevent users from connecting to it over unencrypted connections.", finding.description)
                 self.assertIn("**Issue remediation**:\nThe application should instruct web browsers to only access the application using HTTPS.", finding.impact)
                 self.assertIn("- [HTTP Strict Transport Security](https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security)", finding.references)
-                self.assertEqual(7, len(finding.unsaved_endpoints))
-                self.assertEqual("instance.example.com", finding.unsaved_endpoints[0].host)
+                self.assertEqual(7, len(self.get_unsaved_locations(finding)))
+                self.assertEqual("instance.example.com", self.get_unsaved_locations(finding)[0].host)
 
             with self.subTest(i=5):
                 finding = findings[5]

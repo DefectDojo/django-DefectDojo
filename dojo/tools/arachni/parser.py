@@ -2,9 +2,11 @@ import json
 from datetime import datetime
 
 import html2text
+from django.conf import settings
 from django.utils.encoding import force_str
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class ArachniParser:
@@ -40,7 +42,11 @@ class ArachniParser:
             item = self.get_item(node, report_date)
             dupe_key = item.severity + item.title
             if dupe_key in items:
-                items[dupe_key].unsaved_endpoints += item.unsaved_endpoints
+                if settings.V3_FEATURE_LOCATIONS:
+                    items[dupe_key].unsaved_locations += item.unsaved_locations
+                else:
+                    # TODO: Delete this after the move to Locations
+                    items[dupe_key].unsaved_endpoints += item.unsaved_endpoints
                 items[dupe_key].unsaved_req_resp += item.unsaved_req_resp
                 items[dupe_key].nb_occurences += 1
             else:
@@ -73,8 +79,6 @@ class ArachniParser:
 
         if request is not None and respz is not None:
             unsaved_req_resp.append({"req": req, "resp": resp})
-
-        endpoint = Endpoint.from_uri(url)
 
         description = item_node.get("description", "N/A")
         description = html2text.html2text(description)
@@ -112,7 +116,11 @@ class ArachniParser:
             cwe=item_node.get("cwe"),
             vuln_id_from_tool=item_node.get("digest"),
         )
-        finding.unsaved_endpoints = [endpoint]
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations = [URL.from_value(url)]
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints = [Endpoint.from_uri(url)]
         finding.unsaved_req_resp = unsaved_req_resp
         finding.unsaved_tags = item_node.get("tags")
 

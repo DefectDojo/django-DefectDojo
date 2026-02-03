@@ -1,7 +1,9 @@
 import logging
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
+from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
     Development_Environment,
     Dojo_User,
@@ -15,6 +17,7 @@ from dojo.models import (
     User,
     UserContactInfo,
 )
+from dojo.url.models import URL
 
 from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
 
@@ -44,11 +47,17 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         self.system_settings(enable_deduplication=True)
 
         # Warm up ContentType cache for relevant models. This is needed if we want to be able to run the test in isolation
-        # As part of the test suite the ContentTYpe ids will already be cached and won't affect the query count.
+        # As part of the test suite the ContentType ids will already be cached and won't affect the query count.
         # But if we run the test in isolation, the ContentType ids will not be cached and will result in more queries.
         # By warming up the cache here, these queries are executed before we start counting queries
-        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test]:
+        for model in self.get_models_for_contenttype_cache():
             ContentType.objects.get_for_model(model)
+
+    def get_models_for_contenttype_cache(self):
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test]
+        return [Development_Environment, Dojo_User, Location, URL, LocationFindingReference, Engagement, Finding, Product, Product_Type, User, Test]
 
     # Internal helper methods for reusable test logic
     def _test_single_import_assess_duplicates(self, filename, scan_type, expected_duplicates):

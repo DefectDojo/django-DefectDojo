@@ -1,5 +1,5 @@
-import re
 
+from django.conf import settings
 from django.db.models import Model
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
@@ -18,8 +18,10 @@ from dojo.authorization.authorization import (
 )
 from dojo.authorization.roles_permissions import Permissions
 from dojo.importers.auto_create_context import AutoCreateContextManager
+from dojo.location.models import Location
 from dojo.models import (
     Cred_Mapping,
+    Development_Environment,
     Dojo_Group,
     Endpoint,
     Engagement,
@@ -27,6 +29,8 @@ from dojo.models import (
     Finding_Group,
     Product,
     Product_Type,
+    Regulation,
+    SLA_Configuration,
     Test,
 )
 
@@ -58,6 +62,72 @@ def check_object_permission(
     if request.method == "POST":
         return user_has_permission(request.user, obj, post_permission)
     return False
+
+
+class BaseRelatedObjectPermission(permissions.BasePermission):
+
+    """
+    An "abstract" base class for related object permissions (like notes, metadata, etc.)
+    that only need object permissions, not general permissions. This class will serve as
+    the base class for other more aptly named permission classes.
+    """
+
+    permission_map: dict[str, int] = {
+        "get_permission": None,
+        "put_permission": None,
+        "delete_permission": None,
+        "post_permission": None,
+    }
+
+    def has_permission(self, request: Request, view):
+        # related object only need object permission
+        return True
+
+    def has_object_permission(self, request: Request, view, obj):
+        return check_object_permission(
+            request,
+            obj,
+            **self.permission_map,
+        )
+
+
+class BaseDjangoModelPermission(permissions.BasePermission):
+
+    """
+    An "abstract" base class for Django model permissions.
+    This class will serve as the base class for other more aptly named permission classes.
+    """
+
+    django_model: Model = None
+    request_method_permission_map: dict[str, str] = {
+        "GET": "view",
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+    def _evaluate_permissions(self, request: Request, permissions: dict[str, str]) -> bool:
+        # Short circuit if the request method is not in the expected methods
+        if request.method not in permissions:
+            return True
+        # Evaluate the permissions as usual
+        for method, permission in permissions.items():
+            if request.method == method:
+                return user_has_configuration_permission(
+                    request.user,
+                    f"{self.django_model._meta.app_label}.{permission}_{self.django_model._meta.model_name}",
+                )
+        return False
+
+    def has_permission(self, request: Request, view):
+        # First restrict the mapping got GET/POST only
+        expected_request_method_permission_map = {k: v for k, v in self.request_method_permission_map.items() if k in {"GET", "POST"}}
+        # Evaluate the permissions
+        return self._evaluate_permissions(request, expected_request_method_permission_map)
+
+    def has_object_permission(self, request: Request, view, obj):
+        return self._evaluate_permissions(request, self.request_method_permission_map)
 
 
 class UserHasAppAnalysisPermission(permissions.BasePermission):
@@ -177,13 +247,26 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
                         request.user, obj, Permissions.Finding_Edit,
                     )
                 )
-            endpoint_id = request.data.get("endpoint", None)
-            if endpoint_id:
-                obj = get_object_or_404(Endpoint, pk=endpoint_id)
+            location_id = request.data.get("location", None)
+            if location_id:
+                obj = get_object_or_404(Location, pk=location_id)
                 has_permission_result = (
                     has_permission_result
                     and user_has_permission(
-                        request.user, obj, Permissions.Endpoint_Edit,
+                        request.user, obj, Permissions.Location_Edit,
+                    )
+                )
+            # TODO: Delete this after the move to Locations
+            endpoint_id = request.data.get("endpoint", None)
+            if endpoint_id:
+                if settings.V3_FEATURE_LOCATIONS:
+                    obj = get_object_or_404(Location, pk=endpoint_id)
+                else:
+                    obj = get_object_or_404(Endpoint, pk=endpoint_id)
+                has_permission_result = (
+                    has_permission_result
+                    and user_has_permission(
+                        request.user, obj, Permissions.Location_Edit,
                     )
                 )
             return has_permission_result
@@ -215,6 +298,19 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
                     Permissions.Finding_Edit,
                 )
             )
+        location = obj.location
+        if location:
+            has_permission_result = (
+                has_permission_result
+                and check_object_permission(
+                    request,
+                    location,
+                    Permissions.Location_View,
+                    Permissions.Location_Edit,
+                    Permissions.Location_Edit,
+                )
+            )
+        # TODO: Delete this after the move to Locations
         endpoint = obj.endpoint
         if endpoint:
             has_permission_result = (
@@ -222,9 +318,9 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
                 and check_object_permission(
                     request,
                     endpoint,
-                    Permissions.Endpoint_View,
-                    Permissions.Endpoint_Edit,
-                    Permissions.Endpoint_Edit,
+                    Permissions.Location_View,
+                    Permissions.Location_Edit,
+                    Permissions.Location_Edit,
                 )
             )
         return has_permission_result
@@ -246,163 +342,115 @@ class UserHasToolProductSettingsPermission(permissions.BasePermission):
         )
 
 
+# TODO: Delete this after the move to Locations
 class UserHasEndpointPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Endpoint_Add,
+            request, Product, "product", Permissions.Location_Add,
         )
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(
             request,
             obj,
-            Permissions.Endpoint_View,
-            Permissions.Endpoint_Edit,
-            Permissions.Endpoint_Delete,
+            Permissions.Location_View,
+            Permissions.Location_Edit,
+            Permissions.Location_Delete,
         )
 
 
+# TODO: Delete this after the move to Locations
 class UserHasEndpointStatusPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Endpoint, "endpoint", Permissions.Endpoint_Edit,
+            request, Endpoint, "endpoint", Permissions.Location_Edit,
         )
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(
             request,
             obj.endpoint,
-            Permissions.Endpoint_View,
-            Permissions.Endpoint_Edit,
-            Permissions.Endpoint_Edit,
+            Permissions.Location_View,
+            Permissions.Location_Edit,
+            Permissions.Location_Edit,
         )
 
 
 class UserHasEngagementPermission(permissions.BasePermission):
-    # Permission checks for related objects (like notes or metadata) can be moved
-    # into a seperate class, when the legacy authorization will be removed.
-    path_engagement_post = re.compile(r"^/api/v2/engagements/$")
-    path_engagement = re.compile(r"^/api/v2/engagements/\d+/$")
-
     def has_permission(self, request, view):
-        if UserHasEngagementPermission.path_engagement_post.match(
-            request.path,
-        ) or UserHasEngagementPermission.path_engagement.match(request.path):
-            return check_post_permission(
+        return check_post_permission(
                 request, Product, "product", Permissions.Engagement_Add,
             )
-        # related object only need object permission
-        return True
 
     def has_object_permission(self, request, view, obj):
-        if UserHasEngagementPermission.path_engagement_post.match(
-            request.path,
-        ) or UserHasEngagementPermission.path_engagement.match(request.path):
-            return check_object_permission(
-                request,
-                obj,
-                Permissions.Engagement_View,
-                Permissions.Engagement_Edit,
-                Permissions.Engagement_Delete,
-            )
         return check_object_permission(
             request,
             obj,
             Permissions.Engagement_View,
             Permissions.Engagement_Edit,
-            Permissions.Engagement_Edit,
-            Permissions.Engagement_Edit,
+            Permissions.Engagement_Delete,
         )
 
 
-class UserHasRiskAcceptancePermission(permissions.BasePermission):
-    # Permission checks for related objects (like notes or metadata) can be moved
-    # into a seperate class, when the legacy authorization will be removed.
-    path_risk_acceptance_post = re.compile(r"^/api/v2/risk_acceptances/$")
-    path_risk_acceptance = re.compile(r"^/api/v2/risk_acceptances/\d+/$")
+class UserHasEngagementRelatedObjectPermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Engagement_View,
+        "put_permission": Permissions.Engagement_Edit,
+        "delete_permission": Permissions.Engagement_Edit,
+        "post_permission": Permissions.Engagement_Edit,
+    }
 
+
+class UserHasRiskAcceptancePermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
-            request.path,
-        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(
-            request.path,
-        ):
-            return check_post_permission(
-                request, Product, "product", Permissions.Risk_Acceptance,
-            )
-        # related object only need object permission
+        # The previous implementation only checked for the object permission if the path was
+        # /api/v2/risk_acceptances/, but the path has always been /api/v2/risk_acceptance/ (notice the missing "s")
+        # So there really has not been a notion of a post permission check for risk acceptances.
+        # It would be best to leave as is to not break any existing implementations.
         return True
 
     def has_object_permission(self, request, view, obj):
-        if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
-            request.path,
-        ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(
-            request.path,
-        ):
-            return check_object_permission(
-                request,
-                obj,
-                Permissions.Risk_Acceptance,
-                Permissions.Risk_Acceptance,
-                Permissions.Risk_Acceptance,
-            )
         return check_object_permission(
             request,
             obj,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance,
-            Permissions.Risk_Acceptance,
         )
 
 
-class UserHasFindingPermission(permissions.BasePermission):
-    # Permission checks for related objects (like notes or metadata) can be moved
-    # into a seperate class, when the legacy authorization will be removed.
-    path_finding_post = re.compile(r"^/api/v2/findings/$")
-    path_finding = re.compile(r"^/api/v2/findings/\d+/$")
-    path_stub_finding_post = re.compile(r"^/api/v2/stub_findings/$")
-    path_stub_finding = re.compile(r"^/api/v2/stub_findings/\d+/$")
+class UserHasRiskAcceptanceRelatedObjectPermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Risk_Acceptance,
+        "put_permission": Permissions.Risk_Acceptance,
+        "delete_permission": Permissions.Risk_Acceptance,
+        "post_permission": Permissions.Risk_Acceptance,
+    }
 
+
+class UserHasFindingPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if (
-            UserHasFindingPermission.path_finding_post.match(request.path)
-            or UserHasFindingPermission.path_finding.match(request.path)
-            or UserHasFindingPermission.path_stub_finding_post.match(
-                request.path,
-            )
-            or UserHasFindingPermission.path_stub_finding.match(request.path)
-        ):
-            return check_post_permission(
-                request, Test, "test", Permissions.Finding_Add,
-            )
-        # related object only need object permission
-        return True
+        return check_post_permission(
+            request, Test, "test", Permissions.Finding_Add,
+        )
 
     def has_object_permission(self, request, view, obj):
-        if (
-            UserHasFindingPermission.path_finding_post.match(request.path)
-            or UserHasFindingPermission.path_finding.match(request.path)
-            or UserHasFindingPermission.path_stub_finding_post.match(
-                request.path,
-            )
-            or UserHasFindingPermission.path_stub_finding.match(request.path)
-        ):
-            return check_object_permission(
-                request,
-                obj,
-                Permissions.Finding_View,
-                Permissions.Finding_Edit,
-                Permissions.Finding_Delete,
-            )
         return check_object_permission(
             request,
             obj,
             Permissions.Finding_View,
             Permissions.Finding_Edit,
-            Permissions.Finding_Edit,
-            Permissions.Finding_Edit,
+            Permissions.Finding_Delete,
         )
+
+
+class UserHasFindingRelatedObjectPermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Finding_View,
+        "put_permission": Permissions.Finding_Edit,
+        "delete_permission": Permissions.Finding_Edit,
+        "post_permission": Permissions.Finding_Edit,
+    }
 
 
 class UserHasImportPermission(permissions.BasePermission):
@@ -761,40 +809,28 @@ class UserHasReimportPermission(permissions.BasePermission):
 
 
 class UserHasTestPermission(permissions.BasePermission):
-    # Permission checks for related objects (like notes or metadata) can be moved
-    # into a seperate class, when the legacy authorization will be removed.
-    path_tests_post = re.compile(r"^/api/v2/tests/$")
-    path_tests = re.compile(r"^/api/v2/tests/\d+/$")
-
     def has_permission(self, request, view):
-        if UserHasTestPermission.path_tests_post.match(
-            request.path,
-        ) or UserHasTestPermission.path_tests.match(request.path):
-            return check_post_permission(
-                request, Engagement, "engagement", Permissions.Test_Add,
-            )
-        # related object only need object permission
-        return True
+        return check_post_permission(
+            request, Engagement, "engagement", Permissions.Test_Add,
+        )
 
     def has_object_permission(self, request, view, obj):
-        if UserHasTestPermission.path_tests_post.match(
-            request.path,
-        ) or UserHasTestPermission.path_tests.match(request.path):
-            return check_object_permission(
-                request,
-                obj,
-                Permissions.Test_View,
-                Permissions.Test_Edit,
-                Permissions.Test_Delete,
-            )
         return check_object_permission(
             request,
             obj,
             Permissions.Test_View,
             Permissions.Test_Edit,
-            Permissions.Test_Edit,
-            Permissions.Test_Edit,
+            Permissions.Test_Delete,
         )
+
+
+class UserHasTestRelatedObjectPermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Test_View,
+        "put_permission": Permissions.Test_Edit,
+        "delete_permission": Permissions.Test_Edit,
+        "post_permission": Permissions.Test_Edit,
+    }
 
 
 class UserHasTestImportPermission(permissions.BasePermission):
@@ -1021,6 +1057,36 @@ class UserHasEngagementPresetPermission(permissions.BasePermission):
             Permissions.Product_Edit,
             Permissions.Product_Edit,
         )
+
+
+class UserHasSLAPermission(BaseDjangoModelPermission):
+    django_model = SLA_Configuration
+
+
+class UserHasDevelopmentEnvironmentPermission(BaseDjangoModelPermission):
+    django_model = Development_Environment
+    # https://github.com/DefectDojo/django-DefectDojo/blob/963d4a35bfd8f5138330f0d70595a755fa4999b0/dojo/user/utils.py#L93
+    # It looks like view permission was explicitly not supported, so I assume
+    # reading these endpoints are not necessarily restricted (unless you're auth'd of course)
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasRegulationPermission(BaseDjangoModelPermission):
+    django_model = Regulation
+    # https://github.com/DefectDojo/django-DefectDojo/blob/963d4a35bfd8f5138330f0d70595a755fa4999b0/dojo/user/utils.py#L104
+    # It looks like view permission was explicitly not supported, so I assume
+    # reading these endpoints are not necessarily restricted (unless you're auth'd of course)
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
 
 
 def raise_no_auto_create_import_validation_error(

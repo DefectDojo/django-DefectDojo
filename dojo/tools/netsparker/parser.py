@@ -4,8 +4,10 @@ import json
 import html2text
 from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class NetsparkerParser:
@@ -97,12 +99,21 @@ class NetsparkerParser:
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
             finding.unsaved_req_resp = [{"req": str(request), "resp": str(response)}]
-            finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+            # manage endpoint/location
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [URL.from_value(url)]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 find.unsaved_req_resp.extend(finding.unsaved_req_resp)
-                find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                if settings.V3_FEATURE_LOCATIONS:
+                    find.unsaved_locations.extend(finding.unsaved_locations)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
             else:
                 dupes[dupe_key] = finding
 

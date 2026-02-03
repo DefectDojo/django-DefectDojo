@@ -20,9 +20,7 @@ class TestGitlabSecretDetectionReportParser(DojoTestCase):
         with (get_unit_tests_scans_path("gitlab_secret_detection_report") / "gitlab_secret_detection_report_1_vuln_v14.json").open(encoding="utf-8") as testfile:
             parser = GitlabSecretDetectionReportParser()
             findings = parser.get_findings(testfile, Test())
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         first_finding = findings[0]
         self.assertEqual(1, len(findings))
         self.assertEqual(datetime(2021, 6, 2, 9, 13, 9), first_finding.date)
@@ -41,9 +39,7 @@ class TestGitlabSecretDetectionReportParser(DojoTestCase):
         with (get_unit_tests_scans_path("gitlab_secret_detection_report") / "gitlab_secret_detection_report_1_vuln_v15.json").open(encoding="utf-8") as testfile:
             parser = GitlabSecretDetectionReportParser()
             findings = parser.get_findings(testfile, Test())
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         first_finding = findings[0]
         self.assertEqual(1, len(findings))
         self.assertEqual(datetime(2021, 6, 2, 9, 13, 9), first_finding.date)
@@ -62,9 +58,7 @@ class TestGitlabSecretDetectionReportParser(DojoTestCase):
         with (get_unit_tests_scans_path("gitlab_secret_detection_report") / "gitlab_secret_detection_report_3_vuln_v14.json").open(encoding="utf-8") as testfile:
             parser = GitlabSecretDetectionReportParser()
             findings = parser.get_findings(testfile, Test())
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(3, len(findings))
 
     def test_gitlab_secret_detection_report_parser_with_many_vuln_has_many_findings_v15(
@@ -73,7 +67,5 @@ class TestGitlabSecretDetectionReportParser(DojoTestCase):
         with (get_unit_tests_scans_path("gitlab_secret_detection_report") / "gitlab_secret_detection_report_3_vuln_v15.json").open(encoding="utf-8") as testfile:
             parser = GitlabSecretDetectionReportParser()
             findings = parser.get_findings(testfile, Test())
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.validate_locations(findings)
         self.assertEqual(3, len(findings))

@@ -1,9 +1,11 @@
 import json
 
 import dateutil
+from django.conf import settings
 from netaddr import IPAddress
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 SEVERITY_MAPPING = {
     "INFORMATIONAL": "Info",  # No issue was found.
@@ -84,31 +86,37 @@ class AsffParser:
             )
 
             if "Resources" in item:
-                endpoints = []
                 for resource in item["Resources"]:
                     if resource["Type"] == "AwsEc2Instance" and "Details" in resource:
                         details = resource["Details"]["AwsEc2Instance"]
-                        # Adding only non-"global" IP addresses as endpoints:
+                        # Adding only non-"global" IP addresses as locations:
                         #
                         # 1. **Stability**: In AWS, the private IP address of an EC2 instance remains consistent
                         #    unless the instance is terminated. In contrast, public IP addresses in AWS are separate
                         #    resources from the EC2 instances and can change (e.g., when an EC2 instance stops and starts).
                         #
                         # 2. **Reliability**: By focusing on private IP addresses, we reduce potential ambiguities.
-                        #    If we were to include every IP address, DefectDojo would create an endpoint for each,
+                        #    If we were to include every IP address, DefectDojo would create a location for each,
                         #    leading to potential redundancies and confusion.
                         #
-                        # By limiting our endpoints to private IP addresses, we're ensuring that the data remains
+                        # By limiting our locations to private IP addresses, we're ensuring that the data remains
                         # relevant even if the AWS resources undergo changes, and we also ensure a cleaner representation.
                         #
                         # netaddr deprecated the "is_private" method previously used here, so the logic has been
                         # flipped to exclude "global" addresses.
                         #
                         # Ref: https://netaddr.readthedocs.io/en/latest/api.html#netaddr.IPAddress.is_global
-                        endpoints.extend(Endpoint(host=ip) for ip in details.get("IpV4Addresses", [])
-                                                            if not IPAddress(ip).is_global())
-                finding.unsaved_endpoints = endpoints
-
+                        if settings.V3_FEATURE_LOCATIONS:
+                            finding.unsaved_locations.extend(
+                                URL(host=ip) for ip in details.get("IpV4Addresses", [])
+                                if not IPAddress(ip).is_global()
+                            )
+                        else:
+                            # TODO: Delete this after the move to Locations
+                            finding.unsaved_endpoints.extend(
+                                Endpoint(host=ip) for ip in details.get("IpV4Addresses", [])
+                                if not IPAddress(ip).is_global()
+                            )
             result.append(finding)
         return result
 

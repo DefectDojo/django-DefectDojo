@@ -2,8 +2,10 @@ import json
 import logging
 
 from cvss.cvss3 import CVSS3
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 from .importer import VulnersImporter
 
@@ -77,8 +79,12 @@ class ApiVulnersParser:
                 else agentip,
             )
 
-            endpoint = Endpoint(host=agentip)
-            finding.unsaved_endpoints = [endpoint]
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [URL(host=agentip)]
+            else:
+                # TODO: Delete this after the move to Locations
+                endpoint = Endpoint(host=agentip)
+                finding.unsaved_endpoints = [endpoint]
             finding.unsaved_vulnerability_ids = ["VNS/" + vuln_id]
 
             # CVE List

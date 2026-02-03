@@ -44,3 +44,37 @@
     position: fixed !important;
   }
 }
+
+.logo-darkmode {
+  display: none;
+}
+
+[data-bs-theme="dark"] .logo-lightmode {
+  display: none;
+}
+
+[data-bs-theme="dark"] .logo-darkmode {
+  display: inline-block;
+}
+
+html {
+  font-size: 85%; /* scales all rem/em fonts */
+}
+
+/* Hide sidebar until version is resolved */
+.docs-sidebar {
+  visibility: hidden;
+}
+
+
+#version-select[data-version="opensource"] {
+  background-color: #003964b7;
+  border: 2px solid #003864;
+  color: white;
+}
+
+#version-select[data-version="pro"] {
+  background-color: #a84e32b7;
+  border: 2px solid #a84e32;
+  color: white;
+}

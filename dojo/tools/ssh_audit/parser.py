@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class SSHAuditParser:
@@ -33,12 +36,23 @@ class SSHAuditParser:
             return "High"
         return "Critical"
 
+    def add_location(self, finding, host, port):
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations.append(URL(host=host, port=port))
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints.append(Endpoint(host=host, port=port))
+
     def get_findings(self, filename, test):
         items = []
         try:
             data = json.load(filename)
         except ValueError:
             data = {}
+
+        target = data["target"].split(":", 1)
+        host = target[0]
+        port = int(target[1])
         if data != {}:
             title = data["banner"]["raw"]
             for cve in data["cves"]:
@@ -57,9 +71,7 @@ class SSHAuditParser:
                 finding.unsaved_vulnerability_ids = []
                 finding.unsaved_vulnerability_ids.append(cvename)
                 items.append(finding)
-                finding.unsaved_endpoints = []
-                endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])
-                finding.unsaved_endpoints.append(endpoint)
+                self.add_location(finding, host, port)
             for kex in data["kex"]:
                 if "fail" in kex["notes"] and "warn" in kex["notes"]:
                     kexname = kex["algorithm"]
@@ -75,9 +87,7 @@ class SSHAuditParser:
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = []
-                    endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])
-                    finding.unsaved_endpoints.append(endpoint)
+                    self.add_location(finding, host, port)
                 elif "fail" in kex["notes"]:
                     kexname = kex["algorithm"]
                     description = [f"**Algorithm**: {kexname}"]
@@ -91,9 +101,7 @@ class SSHAuditParser:
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = []
-                    endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])
-                    finding.unsaved_endpoints.append(endpoint)
+                    self.add_location(finding, host, port)
                 elif "warn" in kex["notes"]:
                     kexname = kex["algorithm"]
                     description = [f"**Algorithm**: {kexname}"]
@@ -107,9 +115,7 @@ class SSHAuditParser:
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = []
-                    endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])
-                    finding.unsaved_endpoints.append(endpoint)
+                    self.add_location(finding, host, port)
             for key in data["key"]:
                 if "fail" in key["notes"] and "warn" in key["notes"]:
                     keyname = key["algorithm"]
@@ -127,9 +133,7 @@ class SSHAuditParser:
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = []
-                    endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])
-                    finding.unsaved_endpoints.append(endpoint)
+                    self.add_location(finding, host, port)
                 elif "fail" in key["notes"]:
                     keyname = key["algorithm"]
                     description = [f"**Algorithm**: {keyname}"]
@@ -145,9 +149,7 @@ class SSHAuditParser:
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = []
-                    endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])
-                    finding.unsaved_endpoints.append(endpoint)
+                    self.add_location(finding, host, port)
                 elif "warn" in key["notes"]:
                     keyname = key["algorithm"]
                     description = [f"**Algorithm**: {keyname}"]
@@ -163,9 +165,7 @@ class SSHAuditParser:
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = []
-                    endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])
-                    finding.unsaved_endpoints.append(endpoint)
+                    self.add_location(finding, host, port)
             for mac in data["mac"]:
                 if "fail" in mac["notes"] and "warn" in mac["notes"]:
                     macname = mac["algorithm"]
@@ -181,9 +181,7 @@ class SSHAuditParser:
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = []
-                    endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])
-                    finding.unsaved_endpoints.append(endpoint)
+                    self.add_location(finding, host, port)
                 elif "fail" in mac["notes"]:
                     macname = mac["algorithm"]
                     description = [f"**Algorithm**: {macname}"]
@@ -197,9 +195,7 @@ class SSHAuditParser:
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = []
-                    endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])
-                    finding.unsaved_endpoints.append(endpoint)
+                    self.add_location(finding, host, port)
                 elif "warn" in mac["notes"]:
                     macname = mac["algorithm"]
                     description = [f"**Algorithm**: {macname}"]
@@ -213,7 +209,5 @@ class SSHAuditParser:
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = []
-                    endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])
-                    finding.unsaved_endpoints.append(endpoint)
+                    self.add_location(finding, host, port)
         return items

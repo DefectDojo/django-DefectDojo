@@ -24,9 +24,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
         ) as testfile:
             parser = QualysInfrascanWebguiParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
 
             finding = findings[0]
@@ -41,9 +39,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
         ) as testfile:
             parser = QualysInfrascanWebguiParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(6, len(findings))
             # finding 0
             finding = findings[0]
@@ -64,15 +60,13 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
         ) as testfile:
             parser = QualysInfrascanWebguiParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             # finding 0
             finding = findings[0]
             self.assertEqual("UDP Constant IP Identification Field Fingerprinting Vulnerability", finding.title)
             self.assertEqual("Low", finding.severity)
             self.assertEqual(datetime(2019, 4, 2, 10, 14, 53, tzinfo=zoneinfo.ZoneInfo("UTC")), finding.date)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            unsaved_endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual("10.1.10.1", unsaved_endpoint.host)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            unsaved_location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("10.1.10.1", unsaved_location.host)

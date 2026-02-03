@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from functools import reduce
 
 import pghistory
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import ValidationError
@@ -44,6 +45,7 @@ from dojo.forms import (
 )
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.location.models import Location
 from dojo.models import (
     BurpRawRequestResponse,
     Cred_Mapping,
@@ -343,7 +345,7 @@ def copy_test(request, tid):
             engagement = form.cleaned_data.get("engagement")
             product = test.engagement.product
             test_copy = test.copy(engagement=engagement)
-            calculate_grade(product)
+            calculate_grade(product.id)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -524,8 +526,8 @@ class AddFindingView(View):
             finding.tags = context["form"].cleaned_data["tags"]
             finding.unsaved_vulnerability_ids = context["form"].cleaned_data["vulnerability_ids"].split()
             finding.save()
-            # Save and add new endpoints
-            finding_helper.add_endpoints(finding, context["form"])
+            # Save and add new locations
+            finding_helper.add_locations(finding, context["form"])
             # Save the finding at the end and return
             finding.save()
 
@@ -716,8 +718,8 @@ def add_finding_from_template(request, tid, fid):
                 copy_notes=True,
             )
 
-            # Save and add new endpoints from form (user may have added more)
-            finding_helper.add_endpoints(new_finding, form)
+            # Save and add new locations from form (user may have added more)
+            finding_helper.add_locations(new_finding, form)
 
             new_finding.save()
             if "jiraform-push_to_jira" in request.POST:
@@ -906,10 +908,15 @@ class ReImportScanResultsView(View):
         product_tab = Product_Tab(test.engagement.product, title=_("Re-upload a %s") % scan_type, tab="engagements")
         product_tab.setEngagement(test.engagement)
         # Get the import form with some initial data in place
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = Location.objects.filter(products__product__id=product_tab.product.id)
+        else:
+            # TODO: Delete this after the move to Locations
+            endpoints = Endpoint.objects.filter(product__id=product_tab.product.id)
         form = self.get_form(
             request,
             test,
-            endpoints=Endpoint.objects.filter(product__id=product_tab.product.id),
+            endpoints=endpoints,
             api_scan_configuration=test.api_scan_configuration,
             api_scan_configuration_queryset=Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id),
         )

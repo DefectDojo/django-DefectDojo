@@ -2,7 +2,7 @@
 {% load static %}
 {% load display_tags %}
 {% load humanize %}
-{% load get_endpoint_status %}
+
 {% load get_note_status %}
 {% load get_notetype_availability %}
 {% load event_tags %}
@@ -31,7 +31,7 @@
                         <div class="panel-heading">
                             <h4>Vulnerable Services</h4>
                         </div>
-                        {% if  endpoints %}
+                        {% if endpoints %}
                             {% colgroup endpoints into 2 cols as grouped_items %}
                             <table class="table-striped table table table-condensed table-hover finding-endpoints">
                                 {% for row in grouped_items %}

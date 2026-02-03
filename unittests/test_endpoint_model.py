@@ -9,9 +9,10 @@ from django.utils import timezone
 from dojo.endpoint.utils import endpoint_get_or_create, remove_broken_endpoint_statuses
 from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, Test
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, skip_unless_v2
 
 
+@skip_unless_v2
 class TestEndpointModel(DojoTestCase):
 
     def test_empty(self):
@@ -171,7 +172,7 @@ class TestEndpointModel(DojoTestCase):
         # Define the product
         p = Product.objects.get_or_create(
             name="test product",
-            description="",
+            description="test product",
             prod_type=Product_Type.objects.get_or_create(name="test pt")[0],
         )[0]
         e1 = Endpoint(host="localhost")
@@ -184,12 +185,12 @@ class TestEndpointModel(DojoTestCase):
         # Define the product
         p1 = Product.objects.get_or_create(
             name="test product 1",
-            description="",
+            description="test product",
             prod_type=Product_Type.objects.get_or_create(name="test pt")[0],
         )[0]
         p2 = Product.objects.get_or_create(
             name="test product 2",
-            description="",
+            description="test product",
             prod_type=Product_Type.objects.get_or_create(name="test pt")[0],
         )[0]
         # Define the endpoints
@@ -294,6 +295,7 @@ class TestEndpointStatusBrokenModel(DojoTestCase):
             self.assertEqual(e.endpoint_status.count(), 0)
 
 
+@skip_unless_v2
 class TestEndpointStatusModel(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
