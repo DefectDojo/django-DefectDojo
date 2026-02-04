@@ -68,10 +68,7 @@ def build_description(title, category, source, inventory_name, cloud_account_nam
     if last_seen:
         parts.append(f"**Last Seen:** {last_seen}")
     if labels:
-        if isinstance(labels, list):
-            labels_str = ", ".join(str(lbl) for lbl in labels)
-        else:
-            labels_str = str(labels)
+        labels_str = ", ".join(str(lbl) for lbl in labels) if isinstance(labels, list) else str(labels)
         if labels_str:
             parts.append(f"**Labels:** {labels_str}")
     return "\n\n".join(parts) if parts else "No details available."

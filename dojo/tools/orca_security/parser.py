@@ -10,16 +10,17 @@ from dojo.tools.orca_security.json_parser import OrcaSecurityJSONParser
 
 # Re-export helpers so existing imports from this module still work
 __all__ = [
+    "OrcaSecurityParser",
     "build_description",
     "build_unique_id",
     "map_orca_severity",
     "parse_date",
     "truncate_title",
-    "OrcaSecurityParser",
 ]
 
 
 class OrcaSecurityParser:
+
     """Parser for Orca Security alert exports (CSV and JSON)."""
 
     ID = "Orca Security Alerts"

@@ -11,6 +11,7 @@ from dojo.tools.orca_security.helpers import (
 
 
 class OrcaSecurityJSONParser:
+
     """Parse Orca Security JSON alert exports."""
 
     def parse(self, content):

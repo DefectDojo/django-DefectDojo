@@ -13,6 +13,7 @@ from dojo.tools.orca_security.helpers import (
 
 
 class OrcaSecurityCSVParser:
+
     """Parse Orca Security CSV alert exports."""
 
     def parse(self, content):
