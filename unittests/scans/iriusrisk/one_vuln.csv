@@ -1,0 +1,2 @@
+"Component","Use case","Source","Threat","Risk Response","Inherent Risk","Current Risk","Countermeasure progress","Weakness tests","Countermeasure tests","Projected Risk","Owner"
+"Router","Elevation of Privilege","Created by Rules Engine","Accessing functionality not properly constrained by ACLs","Planned mitigation: 0%. Mitigated: 0%. Unmitigated: 100%.","High","High","0%","Not tested","Not tested","High",
