@@ -5,7 +5,8 @@ from django.test.utils import override_settings
 
 from dojo.finding.deduplication import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
-from dojo.models import Engagement, Finding, Product, User, copy_model_util
+from dojo.models import Engagement, Finding, Product, System_Settings, User, copy_model_util
+from dojo.tasks import _async_dupe_delete_impl  # noqa: PLC2701
 
 from .dojo_test_case import DojoTestCase, versioned_fixtures
 
@@ -373,6 +374,38 @@ class TestDuplicationLoops(DojoTestCase):
         self.assertEqual(self.finding_a.duplicate_finding, None)
         self.assertEqual(self.finding_c.duplicate_finding_set().count(), 2)
         self.assertEqual(self.finding_b.duplicate_finding_set().count(), 2)
+
+    # Test that Delete Duplicate Findings & Maximum Duplicate is correctly deleting olding finding first based off of finding date value
+    def test_delete_duplicate_order(self):
+        # Turn on delete duplicates and set the maximum dedupe value to 1
+        system_settings = System_Settings.objects.get()
+        system_settings.delete_duplicates = True
+        system_settings.max_dupes = 1
+        system_settings.save()
+
+        # Add dates to finding b and c
+        self.finding_b.date = "2024-01-01"
+        self.finding_c.date = "2023-01-01"
+        # Make findings b and c duplicates of a
+        set_duplicate(self.finding_b, self.finding_a)
+        set_duplicate(self.finding_c, self.finding_a)
+
+        # Perform delete dedupe logic
+        _async_dupe_delete_impl()
+
+        # Finding C (2023) should be deleted
+        self.assertFalse(
+            Finding.objects.filter(id=self.finding_c.id).exists(),
+            "The oldest duplicate (Finding c) should have been deleted.",
+        )
+        # Finding b (2024) should exist
+        self.assertTrue(
+            Finding.objects.filter(id=self.finding_b.id).exists(),
+            "The newest duplicate (Finding B) should still exist.",
+        )
+        # Finding A should now only have 2 duplicate in its set
+        self.finding_a.refresh_from_db()
+        self.assertEqual(self.finding_a.duplicate_finding_set().count(), 1)
 
     def test_delete_all_engagements(self):
         # make sure there is no exception when deleting all engagements
