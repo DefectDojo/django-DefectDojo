@@ -345,11 +345,11 @@ class NewJiraView(View):
             # Get the open and close keys
             msg = "Unable to find Open/Close ID's (invalid issue key specified?). They will need to be found manually"
             try:
+                open_key = close_key = None
                 issue_id = jform.cleaned_data.get("issue_key")
                 key_url = jira_server.strip("/") + "/rest/api/latest/issue/" + issue_id + "/transitions?expand=transitions.fields"
                 response = jira._session.get(key_url).json()
                 logger.debug("Retrieved JIRA issue successfully")
-                open_key = close_key = None
                 for node in response["transitions"]:
                     if node["to"]["statusCategory"]["name"] == "To Do":
                         open_key = open_key or int(node["id"])
