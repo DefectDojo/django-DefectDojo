@@ -1,0 +1,2 @@
+"id","fqdn/ip","port","severity","finding","cve","cwe"
+"scanProblem","testssl.target.de/1.2.3.4","443","FATAL","Can't connect to '1.2.3.4:443' Make sure a firewall is not between you and your scanning target!","",""

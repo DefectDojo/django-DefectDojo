@@ -154,5 +154,161 @@
       "description": "The General Data Protection Regulation (GDPR) (EU) 2016/679 is a regulation in EU law on data protection and privacy for all individuals within the European Union (EU) and the European Economic Area (EEA). It also addresses the export of personal data outside the EU and EEA. The GDPR aims primarily to give control to citizens and residents over their personal data and to simplify the regulatory environment for international business by unifying the regulation within the EU.\r\n\r\nSuperseding the Data Protection Directive 95/46/EC, the regulation contains provisions and requirements pertaining to the processing of personally identifiable information of data subjects inside the European Union, and applies to all enterprises, regardless of location, that are doing business with the European Economic Area. Business processes that handle personal data must be built with data protection by design and by default, meaning that personal data must be stored using pseudonymisation or full anonymisation, and use the highest-possible privacy settings by default, so that the data is not available publicly without explicit consent, and cannot be used to identify a subject without additional information stored separately. No personal data may be processed unless it is done under a lawful basis specified by the regulation, or if the data controller or processor has received explicit, opt-in consent from the data's owner. The data owner has the right to revoke this permission at any time.",
       "reference": "https://www.eugdpr.org/"
     }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 14,
+    "fields": {
+      "name": "System and Organization Controls",
+      "acronym": "SOC2",
+      "jurisdiction": "United States",
+      "category": "finance",
+      "reference": "https://en.wikipedia.org/wiki/System_and_Organization_Controls",
+      "description": "System and Organization Controls (SOC, also sometimes referred to as service organizations controls) as defined by the American Institute of Certified Public Accountants (AICPA), is the name of a suite of reports produced during an audit. It is intended for use by service organizations (organizations that provide information systems as a service to other organizations) to issue validated reports of internal controls over those information systems to the users of those services. The AICPA auditing standard Statement on Standards for Attestation Engagements no. 18 (SSAE 18), section 320, \"Reporting on an Examination of Controls at a Service Organization Relevant to User Entities' Internal Control Over Financial Reporting\", defines two levels of reporting, type 1 and type 2. Additional AICPA guidance materials specify three types of reporting: SOC 1, SOC 2, and SOC 3."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 15,
+    "fields": {
+      "name": "Information Security Standard 27001",
+      "acronym": "ISO 27001",
+      "jurisdiction": "International",
+      "category": "security",
+      "reference": "https://en.wikipedia.org/wiki/ISO/IEC_27001",
+      "description": "ISO/IEC 27001 is an international information security standard. The aim of which is to help organizations make the information assets they hold more secure. Organizations that meet the standard's requirements can choose to be certified by an accredited certification body following successful completion of an audit. It was originally published jointly by the International Organization for Standardization (ISO) and the International Electrotechnical Commission (IEC) in 2005, and was revised in 2013. The current version of the standard is ISO/IEC 27001:2022."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 16,
+    "fields": {
+      "name": "CISA Secure Software Development Attestation",
+      "acronym": "CISA-SSDA",
+      "jurisdiction": "United States",
+      "category": "government",
+      "reference": "https://www.cisa.gov/secure-software-attestation-form",
+      "description": "To ensure a safe and secure digital ecosystem for all Americans, CISA released the Secure Software Development Attestation Form on March 11, 2024, taking a major step in the implementation of its requirement that producers of software used by the Federal Government attest to the adoption of secure development practices. CISA developed this form in close consultation with the Office of Management and Budget (OMB) and based upon practices established in the National Institute of Standards and Technology’s Secure Software Development Framework (SSDF). The release of the secure software development attestation form reinforces secure by design principles advanced by CISA, Federal government partners, and international allies. As a step on this journey, Executive Order 14028 and the OMB M-22-18, Enhancing the Security of the Software Supply Chain through Secure Software Development Practices, and OMB M-23-16, Update to Memorandum M-22-18, required development of an attestation form in which software producers serving the federal government will be required to confirm implementation of specific security practices."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 17,
+    "fields": {
+      "name": "FEDRAMP",
+      "acronym": "FEDRAMP",
+      "jurisdiction": "United States",
+      "category": "government",
+      "reference": "https://en.wikipedia.org/wiki/FedRAMP",
+      "description": "The Federal Risk and Authorization Management Program (FedRAMP) is a United States federal government-wide compliance program that provides a standardized approach to security assessment, authorization, and continuous monitoring for cloud products and services. The FedRAMP PMO mission is to promote the adoption of secure cloud services across the federal government by providing a standardized approach to security and risk assessment. Per the OMB memorandum, any cloud services that hold federal data must be FedRAMP authorized. FedRAMP prescribes the security requirements and processes that cloud service providers must follow in order for the government to use their service."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 18,
+    "fields": {
+      "name": "Supply Chain Levels for Software Artifacts",
+      "acronym": "SLSA",
+      "jurisdiction": "International",
+      "category": "security",
+      "reference": "https://slsa.dev/",
+      "description": "Supply-chain Levels for Software Artifacts, or SLSA (\"salsa\"). It’s a security framework, a checklist of standards and controls to prevent tampering, improve integrity, and secure packages and infrastructure. It’s how you get from \"safe enough\" to being as resilient as possible, at any link in the chain."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 19,
+    "fields": {
+      "name": "NIST 800-218 Security Software Development Framework",
+      "acronym": "SSDF",
+      "jurisdiction": "United States",
+      "category": "security",
+      "reference": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "description": "Few software development life cycle (SDLC) models explicitly address software security in detail, so secure software development practices usually need to be added to each SDLC model to ensure that the software being developed is well-secured. This document recommends the Secure Software Development Framework (SSDF) – a core set of high-level secure software development practices that can be integrated into each SDLC implementation. Following these practices should help software producers reduce the number of vulnerabilities in released software, mitigate the potential impact of the exploitation of undetected or unaddressed vulnerabilities, and address the root causes of vulnerabilities to prevent future recurrences. Because the framework provides a common vocabulary for secure software development, software purchasers and consumers can also use it to foster communications with suppliers in acquisition processes and other management activities."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 20,
+    "fields": {
+      "name": "CIS Controls & Benchmarks",
+      "acronym": "CIS Benchmark",
+      "jurisdiction": "United States",
+      "category": "security",
+      "reference": "https://en.wikipedia.org/wiki/Center_for_Internet_Security",
+      "description": "The CIS Critical Security Controls, the CIS Controls as they are called today is a set of 18 prioritized safeguards to mitigate the most prevalent cyber-attacks against today's modern systems and networks. The CIS Controls are grouped into Implementation Groups (IGs), which allow organizations to use a risk assessment in order to determine the appropriate level of IG (one through three) that should be implemented for their organization."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 21,
+    "fields": {
+      "name": "NIST Cybersecurity Framework",
+      "acronym": "CSF",
+      "jurisdiction": "United States",
+      "category": "security",
+      "reference": "https://en.wikipedia.org/wiki/NIST_Cybersecurity_Framework",
+      "description": "The NIST Cybersecurity Framework (CSF) is a set of voluntary guidelines designed to help organizations assess and improve their ability to prevent, detect, and respond to cybersecurity risks. Developed by the U.S. National Institute of Standards and Technology (NIST), the framework was initially published in 2014 for critical infrastructure sectors but has since been widely adopted across various industries, including government and private enterprises globally. The framework integrates existing standards, guidelines, and best practices to provide a structured approach to cybersecurity risk management."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 22,
+    "fields": {
+      "name": "OWASP Application Security Verification Standard",
+      "acronym": "ASVS",
+      "jurisdiction": "International",
+      "category": "security",
+      "reference": "https://owasp.org/www-project-application-security-verification-standard/",
+      "description": "The OWASP Application Security Verification Standard (ASVS) Project provides a basis for testing web application technical security controls and also provides developers with a list of requirements for secure development. The primary aim of the OWASP Application Security Verification Standard (ASVS) Project is to normalize the range in the coverage and level of rigor available in the market when it comes to performing Web application security verification using a commercially-workable open standard. The standard provides a basis for testing application technical security controls, as well as any technical security controls in the environment, that are relied on to protect against vulnerabilities such as Cross-Site Scripting (XSS) and SQL injection. This standard can be used to establish a level of confidence in the security of Web applications."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 23,
+    "fields": {
+      "name": "OWASP Top 10",
+      "acronym": "OWASP T10",
+      "jurisdiction": "International",
+      "category": "security",
+      "reference": "https://owasp.org/www-project-top-ten/",
+      "description": "The OWASP Top 10 is a standard awareness document for developers and web application security. It represents a broad consensus about the most critical security risks to web applications. Companies should adopt this document and start the process of ensuring that their web applications minimize these risks. Using the OWASP Top 10 is perhaps the most effective first step towards changing the software development culture within your organization into one that produces more secure code."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 24,
+    "fields": {
+      "name": "OWASP API Security Top 10",
+      "acronym": "OWASP API T10",
+      "jurisdiction": "International",
+      "category": "security",
+      "reference": "https://owasp.org/www-project-api-security/",
+      "description": "The primary goal of the OWASP API Security Top 10 is to educate those involved in API development and maintenance, for example, developers, designers, architects, managers, or organizations. This awareness document was first published back in 2019. Since then, the API Security industry has flourished and become more mature. We strongly believe this work has positively contributed to it, due to it being quickly adopted as an industry reference."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 25,
+    "fields": {
+      "name": "California Consumer Privacy Act",
+      "acronym": "CCPA",
+      "jurisdiction": "United States",
+      "category": "privacy",
+      "reference": "https://en.wikipedia.org/wiki/California_Consumer_Privacy_Act",
+      "description": "The California Consumer Privacy Act (CCPA) is a state statute intended to enhance privacy rights and consumer protection for residents of the state of California in the United States. The intentions of the Act are to provide California residents with the right to: (1)Know what personal data is being collected about them. (2)Know whether their personal data is sold or disclosed and to whom. (3)Say no to the sale of personal data. (4)Access their personal data. (5)Request a business to delete any personal information about a consumer collected from that consumer. (6)Not be discriminated against for exercising their privacy rights."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 26,
+    "fields": {
+      "name": "California Privacy Rights Act",
+      "acronym": "CPRA",
+      "jurisdiction": "United States",
+      "category": "privacy",
+      "reference": "https://en.wikipedia.org/wiki/California_Privacy_Rights_Act",
+      "description": "The California Privacy Rights Act of 2020 (CPRA), also known as Proposition 24, is a California ballot proposition that was approved by a majority of voters in California. This proposition expands California's consumer privacy law and builds upon the California Consumer Privacy Act (CCPA) of 2018, which established a foundation for consumer privacy regulations. The proposition enshrines more provisions in California state law, allowing consumers to prevent businesses from sharing their personal data, correct inaccurate personal data, and limit businesses' usage of \"sensitive personal information\", which includes precise geolocation, race, ethnicity, religion, genetic data, private communications, sexual orientation, and specified health information."
+    }
   }
 ]

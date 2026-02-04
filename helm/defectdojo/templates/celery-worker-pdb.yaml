@@ -1,0 +1,31 @@
+{{- if and .Values.celery.worker.podDisruptionBudget.enabled (or (gt (int .Values.celery.worker.replicas) 1) .Values.celery.worker.autoscaling.enabled) }}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  {{- with mergeOverwrite dict .Values.extraAnnotations .Values.celery.annotations .Values.celery.worker.annotations }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  {{- end }}
+  labels:
+    defectdojo.org/component: celery
+    defectdojo.org/subcomponent: worker
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  name: {{ $fullName }}-celery-worker
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+      defectdojo.org/component: celery
+      defectdojo.org/subcomponent: worker
+{{ toYaml (omit .Values.celery.worker.podDisruptionBudget "enabled" ) | indent 2 }}
+{{- end }}

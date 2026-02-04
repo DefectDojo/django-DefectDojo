@@ -1,0 +1,895 @@
+{
+    "type": "flattened",
+    "content": {
+      "data.repository.actions_can_approve_pull_requests": {
+        "policyInfo": {
+          "title": "Workflows Should Not Be Allowed To Approve Pull Requests",
+          "description": "The default GitHub Actions configuration allows for workflows to approve pull requests. This could allow users to bypass code-review restrictions.",
+          "policyName": "actions_can_approve_pull_requests",
+          "fullyQualifiedPolicyName": "data.repository.actions_can_approve_pull_requests",
+          "severity": "HIGH",
+          "threat": [
+            "Attackers can exploit this misconfiguration to bypass code-review restrictions by creating a workflow that approves their own pull request and then merging the pull request without anyone noticing, introducing malicious code that would go straight ahead to production."
+          ],
+          "remediationSteps": [
+            "1. Make sure you have admin permissions",
+            "2. Go to the org's settings page",
+            "3. Enter 'Actions - General' tab",
+            "4. Under 'Workflow permissions'",
+            "5. Uncheck 'Allow GitHub actions to create and approve pull requests.'",
+            "6. Click 'Save'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "SKIPPED"
+          }
+        ]
+      },
+      "data.repository.code_review_not_required": {
+        "policyInfo": {
+          "title": "Default Branch Should Require Code Review",
+          "description": "In order to comply with separation of duties principle and enforce secure code practices, a code review should be mandatory using the source-code-management system's built-in enforcement. This option is found in the branch protection setting of the repository.",
+          "policyName": "code_review_not_required",
+          "fullyQualifiedPolicyName": "data.repository.code_review_not_required",
+          "severity": "HIGH",
+          "threat": [
+            "Users can merge code without being reviewed, which can lead to insecure code reaching the main branch and production."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Check 'Require a pull request before merging'",
+            "7. Check 'Require approvals'",
+            "8. Set 'Required number of approvals before merging' to 1 or more",
+            "9. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "FAILED"
+          }
+        ]
+      },
+      "data.repository.repository_not_maintained": {
+        "policyInfo": {
+          "title": "Repository Should Be Updated At Least Quarterly",
+          "description": "A project which is not actively maintained may not be patched against security issues within its code and dependencies, and is therefore at higher risk of including known vulnerabilities.",
+          "policyName": "repository_not_maintained",
+          "fullyQualifiedPolicyName": "data.repository.repository_not_maintained",
+          "severity": "HIGH",
+          "threat": [
+            "As new vulnerabilities are found over time, unmaintained repositories are more likely to point to dependencies that have known vulnerabilities, exposing these repositories to 1-day attacks."
+          ],
+          "remediationSteps": [
+            "1. Make sure you have admin permissions",
+            "2. Either Delete or Archive the repository"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.code_review_by_two_members_not_required": {
+        "policyInfo": {
+          "title": "Default Branch Should Require Code Review By At Least Two Reviewers",
+          "description": "In order to comply with separation of duties principle and enforce secure code practices, a code review should be mandatory using the source-code-management built-in enforcement. This option is found in the branch protection setting of the repository.",
+          "policyName": "code_review_by_two_members_not_required",
+          "fullyQualifiedPolicyName": "data.repository.code_review_by_two_members_not_required",
+          "severity": "MEDIUM",
+          "threat": [
+            "Users can merge code without being reviewed, which can lead to insecure code reaching the main branch and production.",
+            "Requiring code review by at least two reviewers further decreases the risk of an insider threat (as merging code requires compromising at least 2 identities with write permissions), and decreases the likelihood of human error in the review process."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Check 'Require a pull request before merging'",
+            "7. Check 'Require approvals'",
+            "8. Set 'Required number of approvals before merging' to 2 or more",
+            "9. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.ghas_dependency_review_not_enabled": {
+        "policyInfo": {
+          "title": "GitHub Advanced Security – Dependency Review Should Be Enabled For A Repository",
+          "description": "Enable GitHub Advanced Security dependency review to avoid introducing new vulnerabilities and detect newly discovered vulnerabilities in existing packages.",
+          "policyName": "ghas_dependency_review_not_enabled",
+          "fullyQualifiedPolicyName": "data.repository.ghas_dependency_review_not_enabled",
+          "severity": "MEDIUM",
+          "threat": [
+            "A contributor may add vulnerable third-party dependencies to the repository, introducing vulnerabilities to your application that will only be detected after merge."
+          ],
+          "remediationSteps": [
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Code security and analysis' tab",
+            "4. Set 'Dependency graph' as Enabled"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.missing_default_branch_protection": {
+        "policyInfo": {
+          "title": "Default Branch Should Be Protected",
+          "description": "Branch protection is not enabled for this repository’s default branch. Protecting branches ensures new code changes must go through a controlled merge process and allows enforcement of code review as well as other security tests. This issue is raised if the default branch protection is turned off.",
+          "policyName": "missing_default_branch_protection",
+          "fullyQualifiedPolicyName": "data.repository.missing_default_branch_protection",
+          "severity": "MEDIUM",
+          "threat": [
+            "Any contributor with write access may push potentially dangerous code to this repository, making it easier to compromise and difficult to audit."
+          ],
+          "remediationSteps": [
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Add rule'",
+            "6. Set 'Branch name pattern' as the default branch name (usually 'main' or 'master')",
+            "7. Set desired protections",
+            "8. Click 'Create' and save the rule"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.missing_default_branch_protection_deletion": {
+        "policyInfo": {
+          "title": "Default Branch Deletion Protection Should Be Enabled",
+          "description": "The history of the default branch is not protected against deletion for this repository.",
+          "policyName": "missing_default_branch_protection_deletion",
+          "fullyQualifiedPolicyName": "data.repository.missing_default_branch_protection_deletion",
+          "severity": "MEDIUM",
+          "threat": [
+            "Rewriting project history can make it difficult to trace back when bugs or security issues were introduced, making them more difficult to remediate."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Uncheck 'Allow deletions', Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.missing_default_branch_protection_force_push": {
+        "policyInfo": {
+          "title": "Default Branch Should Not Allow Force Pushes",
+          "description": "The history of the default branch is not protected against changes for this repository. Protecting branch history ensures every change that was made to code can be retained and later examined. This issue is raised if the default branch history can be modified using force push.",
+          "policyName": "missing_default_branch_protection_force_push",
+          "fullyQualifiedPolicyName": "data.repository.missing_default_branch_protection_force_push",
+          "severity": "MEDIUM",
+          "threat": [
+            "Rewriting project history can make it difficult to trace back when bugs or security issues were introduced, making them more difficult to remediate."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Uncheck 'Allow force pushes'",
+            "7. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.non_linear_history": {
+        "policyInfo": {
+          "title": "Default Branch Should Require Linear History",
+          "description": "Prevent merge commits from being pushed to protected branches.",
+          "policyName": "non_linear_history",
+          "fullyQualifiedPolicyName": "data.repository.non_linear_history",
+          "severity": "MEDIUM",
+          "threat": [
+            "Having a non-linear history makes it harder to reverse changes, making recovery from bugs and security risks slower and more difficult."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Check 'Require linear history'",
+            "7. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.repository_secret_is_stale": {
+        "policyInfo": {
+          "title": "Repository Secrets Should Be Updated At Least Yearly",
+          "description": "Some of the repository secrets have not been updated for over a year. It is recommended to refresh secret values regularly in order to minimize the risk of breach in case of an information leak.",
+          "policyName": "repository_secret_is_stale",
+          "fullyQualifiedPolicyName": "data.repository.repository_secret_is_stale",
+          "severity": "MEDIUM",
+          "threat": [
+            "Sensitive data may have been inadvertently made public in the past, and an attacker who holds this data may gain access to your current CI and services. In addition, there may be old or unnecessary tokens that have not been inspected and can be used to access sensitive information."
+          ],
+          "remediationSteps": [
+            "1. Enter your repository's landing page",
+            "2. Go to the settings tab",
+            "3. Under the 'Security' title on the left, choose 'Secrets and variables'",
+            "4. Click 'Actions'",
+            "5. Sort secrets by 'Last Updated'",
+            "6. Regenerate every secret older than one year and add the new value to GitHub's secret manager"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas",
+              "secretsList": []
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.requires_branches_up_to_date_before_merge": {
+        "policyInfo": {
+          "title": "Default Branch Should Require Branches To Be Up To Date Before Merge",
+          "description": "Status checks are required, but branches that are not up to date can be merged. This can result in previously remediated issues being merged in over fixes.",
+          "policyName": "requires_branches_up_to_date_before_merge",
+          "fullyQualifiedPolicyName": "data.repository.requires_branches_up_to_date_before_merge",
+          "severity": "MEDIUM",
+          "threat": [
+            "Required status checks may be failing on the latest version after passing on an earlier version of the code, making it easy to commit buggy or otherwise insecure code."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Check 'Require status checks to pass before merging'",
+            "7. Check 'Require branches to be up to date before merging'",
+            "8. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.requires_status_checks": {
+        "policyInfo": {
+          "title": "Default Branch Should Require All Checks To Pass Before Merge",
+          "description": "Branch protection is enabled. However, the checks that validate the quality and security of the code are not required to pass before submitting new changes. The default check ensures the code is up-to-date to prevent faulty merges and unexpected behaviors, as well as other custom checks that test security and quality. It is advised to turn this control on to ensure any existing or future check will be required to pass.",
+          "policyName": "requires_status_checks",
+          "fullyQualifiedPolicyName": "data.repository.requires_status_checks",
+          "severity": "MEDIUM",
+          "threat": [
+            "Not defining a set of required status checks can make it easy for contributors to introduce buggy or insecure code as manual review, whether mandated or optional, is the only line of defense."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Check 'Require status checks to pass before merging'",
+            "7. Add the required checks that must pass before merging (tests, lint, etc...)",
+            "8. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.scorecard_score_too_low": {
+        "policyInfo": {
+          "title": "OSSF Scorecard Score Should Be Above 7",
+          "description": "Scorecard is an open-source tool from the OSSF that helps to assess the security posture of repositories. A low scorecard score means your repository may be at risk.",
+          "policyName": "scorecard_score_too_low",
+          "fullyQualifiedPolicyName": "data.repository.scorecard_score_too_low",
+          "severity": "MEDIUM",
+          "threat": [
+            "A low Scorecard score can indicate that the repository is more vulnerable to attack than others, making it a prime attack target."
+          ],
+          "remediationSteps": [
+            "2. - Run legitify with --scorecard verbose",
+            "3. - Run scorecard manually",
+            "4. Fix the failed checks"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "SKIPPED"
+          }
+        ]
+      },
+      "data.repository.secret_scanning_not_enabled": {
+        "policyInfo": {
+          "title": "Secret Scanning should be enabled",
+          "description": "Repository should have secret scanning enabled. Secret scanning helps prevent the exposure of sensitive information and ensures compliance.",
+          "policyName": "secret_scanning_not_enabled",
+          "fullyQualifiedPolicyName": "data.repository.secret_scanning_not_enabled",
+          "severity": "MEDIUM",
+          "threat": [
+            "Exposed secrets increases the risk of sensitive information such as API keys, passwords, and tokens being disclosed, leading to unauthorized access to systems and services, and data breaches."
+          ],
+          "remediationSteps": [
+            "1. Go to the repository settings page",
+            "2. Under the 'Security' title on the left, select 'Code security and analysis'",
+            "3. Under 'Secret scanning', click 'Enable'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "SKIPPED"
+          }
+        ]
+      },
+      "data.repository.token_default_permissions_is_read_write": {
+        "policyInfo": {
+          "title": "Default Workflow Token Permission Should Be Set To Read Only",
+          "description": "The default GitHub Action workflow token permission is set to read-write. When creating workflow tokens, it is highly recommended to follow the Principle of Least Privilege and force workflow authors to specify explicitly which permissions they need.",
+          "policyName": "token_default_permissions_is_read_write",
+          "fullyQualifiedPolicyName": "data.repository.token_default_permissions_is_read_write",
+          "severity": "MEDIUM",
+          "threat": [
+            "In case of token compromise (due to a vulnerability or malicious third-party GitHub actions), an attacker can use this token to sabotage various assets in your CI/CD pipeline, such as packages, pull-requests, deployments, and more."
+          ],
+          "remediationSteps": [
+            "1. Make sure you have admin permissions",
+            "2. Go to the org's settings page",
+            "3. Enter 'Actions - General' tab",
+            "4. Under 'Workflow permissions'",
+            "5. Select 'Read repository contents permission'",
+            "6. Click 'Save'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "SKIPPED"
+          }
+        ]
+      },
+      "data.repository.users_allowed_to_bypass_ruleset": {
+        "policyInfo": {
+          "title": "Users Are Allowed To Bypass Ruleset Rules",
+          "description": "Rulesets rules are not enforced for some users. When defining rulesets it is recommended to make sure that no one is allowed to bypass these rules in order to avoid inadvertent or intentional alterations to critical code which can lead to potential errors or vulnerabilities in the software.",
+          "policyName": "users_allowed_to_bypass_ruleset",
+          "fullyQualifiedPolicyName": "data.repository.users_allowed_to_bypass_ruleset",
+          "severity": "MEDIUM",
+          "threat": [
+            "Attackers that gain access to a user that can bypass the ruleset rules can compromise the codebase without anyone noticing, introducing malicious code that would go straight ahead to production."
+          ],
+          "remediationSteps": [
+            "1. Go to the repository settings page",
+            "2. Under 'Code and automation', select 'Rules -\u003e Rulesets'",
+            "3. Find the relevant ruleset",
+            "4. Empty the 'Bypass list'",
+            "5. Press 'Save Changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.vulnerability_alerts_not_enabled": {
+        "policyInfo": {
+          "title": "Vulnerability Alerts Should Be Enabled",
+          "description": "Enable GitHub Dependabot to regularly scan for open source vulnerabilities.",
+          "policyName": "vulnerability_alerts_not_enabled",
+          "fullyQualifiedPolicyName": "data.repository.vulnerability_alerts_not_enabled",
+          "severity": "MEDIUM",
+          "threat": [
+            "An open source vulnerability may be affecting your code without your knowledge, making it vulnerable to exploitation."
+          ],
+          "remediationSteps": [
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Code security and analysis' tab",
+            "4. Set 'Dependabot alerts' as Enabled"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.code_review_not_limited_to_code_owners": {
+        "policyInfo": {
+          "title": "Default Branch Should Limit Code Review to Code-Owners",
+          "description": "It is recommended to require code review only from designated individuals specified in CODEOWNERS file. Turning this option on enforces that only the allowed owners can approve a code change. This option is found in the branch protection setting of the repository.",
+          "policyName": "code_review_not_limited_to_code_owners",
+          "fullyQualifiedPolicyName": "data.repository.code_review_not_limited_to_code_owners",
+          "severity": "LOW",
+          "threat": [
+            "A pull request may be approved by any contributor with write access. Specifying specific code owners can ensure review is only done by individuals with the correct expertise required for the review of the changed files, potentially preventing bugs and security risks."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Check 'Require a pull request before merging'",
+            "7. Check 'Require review from Code Owners'",
+            "8. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.dismisses_stale_reviews": {
+        "policyInfo": {
+          "title": "Default Branch Should Require New Code Changes After Approval To Be Re-Approved",
+          "description": "This security control prevents merging code that was approved but later on changed. Turning it on ensures any new changes must be reviewed again. This setting is part of the branch protection and code-review settings, and hardens the review process. If turned off - a developer can change the code after approval, and push code that is different from the one that was previously allowed. This option is found in the branch protection setting for the repository.",
+          "policyName": "dismisses_stale_reviews",
+          "fullyQualifiedPolicyName": "data.repository.dismisses_stale_reviews",
+          "severity": "LOW",
+          "threat": [
+            "Buggy or insecure code may be committed after approval and will reach the main branch without review. Alternatively, an attacker can attempt a just-in-time attack to introduce dangerous code just before merge."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Check 'Require a pull request before merging'",
+            "7. Check 'Dismiss stale pull request approvals when new commits are pushed'",
+            "8. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.forking_allowed_for_repository": {
+        "policyInfo": {
+          "title": "Forking Should Not Be Allowed for Private/Internal Repositories",
+          "description": "Forking private or internal repositories can lead to unauthorized spread and potential exposure of sensitive source code. It is recommended to disable forking for private repositories in the repository or the organization configuration to maintain control over the source code. If forking is necessary, it should be enabled selectively by admins for specific collaboration needs on private repositories.",
+          "policyName": "forking_allowed_for_repository",
+          "fullyQualifiedPolicyName": "data.repository.forking_allowed_for_repository",
+          "severity": "LOW",
+          "threat": [
+            "Forked repositories cause more code and secret sprawl in the organization as forks are independent copies of the repository and need to be tracked separately, making it more difficult to keep track of sensitive assets and contain potential incidents."
+          ],
+          "remediationSteps": [
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'General' tab",
+            "4. Under 'Features', Toggle off 'Allow forking'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "SKIPPED"
+          }
+        ]
+      },
+      "data.repository.no_conversation_resolution": {
+        "policyInfo": {
+          "title": "Default Branch Should Require All Conversations To Be Resolved Before Merge",
+          "description": "Require all Pull Request conversations to be resolved before merging. Check this to avoid bypassing/missing a Pull Request comment.",
+          "policyName": "no_conversation_resolution",
+          "fullyQualifiedPolicyName": "data.repository.no_conversation_resolution",
+          "severity": "LOW",
+          "threat": [
+            "Allowing the merging of code without resolving all conversations can promote poor and vulnerable code, as important comments may be forgotten or deliberately ignored when the code is merged."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Check 'Require conversation resolution before merging'",
+            "7. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.no_signed_commits": {
+        "policyInfo": {
+          "title": "Default Branch Should Require All Commits To Be Signed",
+          "description": "Require all commits to be signed and verified",
+          "policyName": "no_signed_commits",
+          "fullyQualifiedPolicyName": "data.repository.no_signed_commits",
+          "severity": "LOW",
+          "threat": [
+            "A commit containing malicious code may be crafted by a malicious actor that has acquired write access to the repository to initiate a supply chain attack. Commit signing provides another layer of defense that can prevent this type of compromise."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Check 'Require signed commits'",
+            "7. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.pushes_are_not_restricted": {
+        "policyInfo": {
+          "title": "Default Branch Should Restrict Who Can Push To It",
+          "description": "By default, commits can be pushed directly to protected branches without going through a Pull Request. Restrict who can push commits to protected branches so that commits can be added only via merges, which require Pull Request.",
+          "policyName": "pushes_are_not_restricted",
+          "fullyQualifiedPolicyName": "data.repository.pushes_are_not_restricted",
+          "severity": "LOW",
+          "threat": [
+            "An attacker with write credentials may introduce vulnerabilities to your code without your knowledge. Alternatively, contributors may commit unsafe code that is buggy or easy to exploit that could have been caught using a review process."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Check 'Restrict who can push to matching branches'",
+            "7. Choose who should be allowed to push",
+            "8. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.repository_has_too_many_admins": {
+        "policyInfo": {
+          "title": "Repository Should Have A Low Admin Count",
+          "description": "Repository admins are highly privileged and could create great damage if they are compromised. It is recommended to limit the number of repository admins to the minimum required, and no more than 5% of the userbase (Up to 3 admins are always allowed).",
+          "policyName": "repository_has_too_many_admins",
+          "fullyQualifiedPolicyName": "data.repository.repository_has_too_many_admins",
+          "severity": "LOW",
+          "threat": [
+            "A compromised user with admin permissions can initiate a supply chain attack in a plethora of ways.",
+            "Having many admin users increases the overall risk of user compromise, and makes it more likely to lose track of unused admin permissions given to users in the past."
+          ],
+          "remediationSteps": [
+            "1. Make sure you have admin permissions",
+            "2. Go to the repository settings page",
+            "3. Press 'Collaborators and teams'",
+            "4. Select the unwanted admin users",
+            "5. Select 'Change Role'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "SKIPPED"
+          }
+        ]
+      },
+      "data.repository.repository_webhook_doesnt_require_ssl": {
+        "policyInfo": {
+          "title": "Webhooks Should Be Configured To Use SSL",
+          "description": "Webhooks that are not configured with SSL enabled could expose your software to man-in-the-middle attacks (MITM).",
+          "policyName": "repository_webhook_doesnt_require_ssl",
+          "fullyQualifiedPolicyName": "data.repository.repository_webhook_doesnt_require_ssl",
+          "severity": "LOW",
+          "threat": [
+            "If SSL verification is disabled, any party with access to the target DNS domain can masquerade as your designated payload URL, allowing it to freely read and affect the response of any webhook request.",
+            "In the case of GitHub Enterprise Server instances, it may be sufficient only to control the DNS configuration of the network where the instance is deployed, as an attacker can redirect traffic to the target domain in your internal network directly to them, and this is often much easier than compromising an internet-facing domain."
+          ],
+          "remediationSteps": [
+            "1. Make sure you can manage webhooks for the repository",
+            "2. Go to the repository settings page",
+            "3. Select 'Webhooks'",
+            "4. Verify URL starts with https",
+            "5. Press on the insecure webhook",
+            "6. Enable 'SSL verification'",
+            "7. Click 'Update webhook'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas",
+              "hooksList": []
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.repository_webhook_no_secret": {
+        "policyInfo": {
+          "title": "Webhooks Should Be Configured With A Secret",
+          "description": "Webhooks are not configured with a shared secret to validate the origin and content of the request. This could allow your webhook to be triggered by any bad actor with the URL.",
+          "policyName": "repository_webhook_no_secret",
+          "fullyQualifiedPolicyName": "data.repository.repository_webhook_no_secret",
+          "severity": "LOW",
+          "threat": [
+            "Not using a webhook secret makes the service receiving the webhook unable to determine the authenticity of the request.",
+            "This allows attackers to masquerade as your repository, potentially creating an unstable or insecure state in other systems."
+          ],
+          "remediationSteps": [
+            "1. Make sure you can manage webhooks for the repository",
+            "2. Go to the repository settings page",
+            "3. Select 'Webhooks'",
+            "4. Press on the insecure webhook",
+            "5. Configure a secret",
+            "6. Click 'Update webhook'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas",
+              "hooksList": []
+            },
+            "status": "PASSED"
+          }
+        ]
+      },
+      "data.repository.review_dismissal_allowed": {
+        "policyInfo": {
+          "title": "Default Branch Should Restrict Who Can Dismiss Reviews",
+          "description": "Any user with write access to the repository can dismiss pull-request reviews. Pull-request review contains essential information on the work that needs to be done and helps keep track of the changes. Dismissing it might cause a loss of this information and should be restricted to a limited number of users.",
+          "policyName": "review_dismissal_allowed",
+          "fullyQualifiedPolicyName": "data.repository.review_dismissal_allowed",
+          "severity": "LOW",
+          "threat": [
+            "Allowing the dismissal of reviews can promote poor and vulnerable code, as important comments may be forgotten and ignored during the review process."
+          ],
+          "remediationSteps": [
+            "Note: The remediation steps apply to legacy branch protections, rules set-based protection should be updated from the rules set page",
+            "1. Make sure you have admin permissions",
+            "2. Go to the repo's settings page",
+            "3. Enter 'Branches' tab",
+            "4. Under 'Branch protection rules'",
+            "5. Click 'Edit' on the default branch rule",
+            "6. Check 'Restrict who can dismiss pull request reviews'",
+            "7. Click 'Save changes'"
+          ],
+          "namespace": "repository"
+        },
+        "violations": [
+          {
+            "violationEntityType": "repository",
+            "canonicalLink": "https://github.com/damianpr/pruebas",
+            "aux": {
+              "entityId": "596502887",
+              "entityName": "pruebas"
+            },
+            "status": "PASSED"
+          }
+        ]
+      }
+    }
+  }

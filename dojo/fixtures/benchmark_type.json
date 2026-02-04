@@ -22,5 +22,17 @@
       "updated": "2019-03-27T10:44:17.930Z",
       "enabled": true
     }
+  },
+  {
+    "model": "dojo.benchmark_type",
+    "pk": 3,
+    "fields": {
+      "name": "OWASP ASVS",
+      "version": "v. 5.0.0",
+      "benchmark_source": "OWASP ASVS",
+      "created": "2025-05-30T09:35:00.000Z",
+      "updated": "2025-05-30T09:35:00.000Z",
+      "enabled": true
+    }
   }
 ]

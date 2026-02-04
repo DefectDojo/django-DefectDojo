@@ -1,62 +1,84 @@
 import re
 
+from django.contrib.auth.password_validation import CommonPasswordValidator
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext
+from django.utils.translation import gettext
+
+from dojo.utils import get_system_setting
 
 
-class NumberValidator(object):
+class MinLengthValidator:
     def validate(self, password, user=None):
-        if not re.findall('\d', password): # noqa W605
+        if len(password) < get_system_setting("minimum_password_length"):
             raise ValidationError(
-                ugettext("The password must contain at least 1 digit, 0-9."),
-                code='password_no_number',
-            )
+                self.get_help_text(),
+                code="password_too_short")
 
     def get_help_text(self):
-        return ugettext(
-            "Your password must contain at least 1 digit, 0-9."
+        return gettext("Password must be at least %s characters long.") % get_system_setting("minimum_password_length")
+
+
+class MaxLengthValidator:
+    def validate(self, password, user=None):
+        if len(password) > get_system_setting("maximum_password_length"):
+            raise ValidationError(
+                self.get_help_text(),
+                code="password_too_short")
+
+    def get_help_text(self):
+        return gettext("Password must be less than %s characters long.") % get_system_setting("maximum_password_length")
+
+
+class NumberValidator:
+    def validate(self, password, user=None):
+        if not re.findall(r"\d", password) and get_system_setting("number_character_required"):
+            raise ValidationError(
+                self.get_help_text(),
+                code="password_no_number")
+
+    def get_help_text(self):
+        return gettext("Password must contain at least 1 digit, 0-9.")
+
+
+class UppercaseValidator:
+    def validate(self, password, user=None):
+        if not re.findall(r"[A-Z]", password) and get_system_setting("uppercase_character_required"):
+            raise ValidationError(
+                self.get_help_text(),
+                code="password_no_upper")
+
+    def get_help_text(self):
+        return gettext("Password must contain at least 1 uppercase letter, A-Z.")
+
+
+class LowercaseValidator:
+    def validate(self, password, user=None):
+        if not re.findall(r"[a-z]", password) and get_system_setting("lowercase_character_required"):
+            raise ValidationError(
+                self.get_help_text(),
+                code="password_no_lower")
+
+    def get_help_text(self):
+        return gettext("Password must contain at least 1 lowercase letter, a-z.")
+
+
+class SymbolValidator:
+    def validate(self, password, user=None):
+        contains_special_character = re.findall(r'[(){}\[\]|~!@#$%^&*_\-+=;:\'",\`<>\./?]', password)
+        if not contains_special_character and get_system_setting("special_character_required"):
+            raise ValidationError(
+                self.get_help_text(),
+                code="password_no_symbol")
+
+    def get_help_text(self):
+        return gettext(
+            "The password must contain at least 1 special character, "
+            """()[]{}|`~!@#$%^&*_-+=;:'",<>./?.""",
         )
 
 
-class UppercaseValidator(object):
+class DojoCommonPasswordValidator(CommonPasswordValidator):
     def validate(self, password, user=None):
-        if not re.findall('[A-Z]', password):
-            raise ValidationError(
-                ugettext("The password must contain at least 1 uppercase letter, A-Z."),
-                code='password_no_upper',
-            )
-
-    def get_help_text(self):
-        return ugettext(
-            "Your password must contain at least 1 uppercase letter, A-Z."
-        )
-
-
-class LowercaseValidator(object):
-    def validate(self, password, user=None):
-        if not re.findall('[a-z]', password):
-            raise ValidationError(
-                ugettext("The password must contain at least 1 lowercase letter, a-z."),
-                code='password_no_lower',
-            )
-
-    def get_help_text(self):
-        return ugettext(
-            "Your password must contain at least 1 lowercase letter, a-z."
-        )
-
-
-class SymbolValidator(object):
-    def validate(self, password, user=None):
-        if not re.findall('[()[\]{}|\\`~!@#$%^&*_\-+=;:\'",<>./?]', password): # noqa W605
-            raise ValidationError(
-                ugettext("The password must contain at least 1 symbol: " +
-                  "()[]{}|\`~!@#$%^&*_-+=;:'\",<>./?"), # noqa W605
-                code='password_no_symbol',
-            )
-
-    def get_help_text(self):
-        return ugettext(
-            "Your password must contain at least 1 symbol: " +
-            "()[]{}|\`~!@#$%^&*_-+=;:'\",<>./?" # noqa W605
-        )
+        if get_system_setting("non_common_password_required"):
+            return super().validate(password, user)
+        return None

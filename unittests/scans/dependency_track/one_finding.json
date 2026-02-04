@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "meta" : {
+    "application": "Dependency-Track",
+    "version": "3.4.0",
+    "timestamp": "2018-11-18T23:31:42Z",
+    "baseUrl": "http://dtrack.example.org"
+  },
+  "project" : {
+    "uuid": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+    "name": "Acme Example",
+    "version": "1.0",
+    "description": "A sample application"
+  },
+  "findings" : [
+    {
+      "component": {
+        "uuid": "b815b581-fec1-4374-a871-68862a8f8d52",
+        "name": "timespan",
+        "version": "2.3.0",
+        "purl": "pkg:npm/timespan@2.3.0"
+      },
+      "vulnerability": {
+        "uuid": "115b80bb-46c4-41d1-9f10-8a175d4abb46",
+        "source": "NPM",
+        "vulnId": "533",
+        "title": "Regular Expression Denial of Service",
+        "subtitle": "timespan",
+        "severity": "LOW",
+        "severityRank": 3,
+        "cweId": 400,
+        "cweName": "Uncontrolled Resource Consumption ('Resource Exhaustion')",
+        "description": "Affected versions of `timespan`...",
+        "recommendation": "No direct patch is available..."
+      },
+      "analysis": {
+        "state": "NOT_SET",
+        "isSuppressed": false
+      },
+      "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:b815b581-fec1-4374-a871-68862a8f8d52:115b80bb-46c4-41d1-9f10-8a175d4abb46"
+    }]
+}

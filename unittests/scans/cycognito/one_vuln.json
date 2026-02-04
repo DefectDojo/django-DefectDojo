@@ -1,0 +1,160 @@
+[
+    {
+        "compliance_violations": [
+            "NIST-800-171",
+            "CIS",
+            "ISO27002"
+        ],
+        "confidence": 30,
+        "mitre_attack_next_technique_name": "Credential Access: Network Sniffing",
+        "affected_asset": "ip/2.3.4.5",
+        "package": "ASM",
+        "cis_controls": [
+            "7.6",
+            "16.4",
+            "16.5",
+            "18.2",
+            "7.5",
+            "7.4"
+        ],
+        "exploitation_availability": "None",
+        "tools": [],
+        "last_detected": "2025-05-15T17:10:37.000Z",
+        "continent": [
+            "America"
+        ],
+        "references": [
+            "https://dheatattack.gitlab.io/"
+        ],
+        "tech_owners": [],
+        "teams": [],
+        "potential_threat": "Vulnerable Software",
+        "attacker_interest": "None",
+        "tags": [],
+        "nist_800_171_controls": [
+            "3.3.5",
+            "3.12.2",
+            "3.11.2",
+            "3.1.12",
+            "3.14.6",
+            "3.11.3"
+        ],
+        "base_severity_score": 7.5,
+        "id": "issue/2.3.45-o-",
+        "mitre_attack_technique_name": "Credential Access: Adversary-in-the-Middle",
+        "revalidation_requested": false,
+        "nist_800_53_controls": [
+            "AC-17(2)",
+            "AC-17(9)",
+            "CM-8",
+            "SI-2(3)",
+            "SI-4(16)",
+            "SI-2(6)",
+            "SC-7",
+            "AU-14",
+            "SI-2(5)",
+            "AC-17",
+            "CM-6",
+            "RA-5",
+            "AC-17(5)",
+            "SI-2(4)",
+            "SI-4(2)",
+            "SI-4(12)",
+            "SC-5",
+            "AU-2",
+            "AU-6",
+            "AC-17(1)",
+            "SI-4(5)"
+        ],
+        "issue_status": "new",
+        "iso27001_controls": [],
+        "is_snoozed": false,
+        "remediation_method": "Patch",
+        "severity_change_reason": null,
+        "issue_id": "WLD-O-",
+        "first_detected": "2025-05-15T17:10:37.000Z",
+        "mitre_attack_next_technique_subtitle": "Network Sniffing",
+        "summary": "The remote SSH server is supporting Diffie-Hellman ephemeral\n  (DHE) Key Exchange (KEX) algorithms and thus could be prone to a denial of service (DoS)\n  vulnerability.\n",
+        "exploitation_complexity": "unknown",
+        "underground_activity": null,
+        "enhanced_severity": "medium",
+        "resolved_at": null,
+        "snooze_expiration": null,
+        "attractiveness_label": "extreme",
+        "investigation_status": "uninvestigated",
+        "affected_ptr_domains": [],
+        "affected_asset_tags": [],
+        "enhanced_severity_score": 6.0,
+        "severity_score": 7.5,
+        "advisories": [],
+        "environments": [
+            "Remote Connection"
+        ],
+        "revalidation_request_time": null,
+        "locations": [
+            "fasadf"
+        ],
+        "region": [
+            "USA"
+        ],
+        "issue_types": [
+            "Cryptographic Vulnerability"
+        ],
+        "detection_complexity": "Service Detection",
+        "mitre_attack_technique_title": "Credential Access",
+        "port": 22,
+        "remediation_effort": "medium",
+        "exploitation_method": "unknown",
+        "attractiveness": 4.0,
+        "title": "Diffie-Hellman Ephemeral Key Exchange DoS Vulnerability (SSH, D(HE)ater)",
+        "platforms": [
+            "OpenSSH",
+            "SSH Protocol"
+        ],
+        "exploitation_score": 0,
+        "comments": [],
+        "base_severity": "medium",
+        "issue_type": "Cryptographic Vulnerability",
+        "organizations": [
+            "organization"
+        ],
+        "mitre_attack_next_technique_title": "Credential Access",
+        "business_units": [
+            "business-unit/it"
+        ],
+        "mitre_attack_technique_subtitle": "Adversary-in-the-Middle",
+        "investigating_since": null,
+        "asset_status": "new",
+        "cve_ids": [
+            "CVE-2024-41996",
+            "CVE-2022-40735",
+            "CVE-2002-20001"
+        ],
+        "comment": null,
+        "severity": "medium",
+        "evidence": {
+            "evidence": "The remote SSH server supports the following DHE KEX algorithm(s):\n\ndiffie-hellman-group1-sha1\ndiffie-hellman-group14-sha1\ndiffie-hellman-group14-sha256\ndiffie-hellman-group16-sha512\ndiffie-hellman-group18-sha512\ndiffie-hellman-group-exchange-sha1\ndiffie-hellman-group-exchange-sha256\n",
+            "more-details-link": "",
+            "curl-cmd": "",
+            "hostname": "2.3.4.5"
+        },
+        "iso27002_controls": [
+            "5.9",
+            "8.16",
+            "8.15",
+            "8.8"
+        ],
+        "remediation_steps": [
+            "- DHE key exchange should be disabled if no other mitigation\n  mechanism can be used and either elliptic-curve variant of Diffie-Hellman (ECDHE) or RSA key\n  exchange is supported by the clients. The fact that RSA key exchange is not forward secret should\n  be considered.\n\n  - Limit the maximum number of concurrent connections in e.g. the configuration of the remote\n  server. For OpenSSH this limit can be configured via the 'MaxStartups' option, for other products\n  please refer to the manual of the product in question on configuration possibilities."
+        ],
+        "potential_impact": [],
+        "pci_dss_controls": [
+            "10.2.1",
+            "10.4.1",
+            "6.4.1",
+            "1.2.6",
+            "6.3.2",
+            "11.4.3"
+        ]
+    }
+]

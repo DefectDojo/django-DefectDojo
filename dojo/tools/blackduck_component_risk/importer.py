@@ -1,13 +1,14 @@
 import csv
 import io
-import zipfile
 import logging
+import zipfile
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 
-class BlackduckCRImporter(object):
+class BlackduckCRImporter:
+
     """
     Importer for blackduck. V3 is different in that it creates a Finding in defect dojo
     for each vulnerable component version used in a project, for each license that is
@@ -16,6 +17,7 @@ class BlackduckCRImporter(object):
     Security Risks and License Risks.
     Security Risks have the severity and impact of it's highest vulnerability the component has.
     """
+
     def parse_findings(self, report: Path) -> (dict, dict, dict):
         """
         Given a path to a zip file, this function will find the relevant CSV files and
@@ -24,12 +26,11 @@ class BlackduckCRImporter(object):
         :param report: Path to zip file
         :return: ( {component_id:details} , {component_id:[vulns]}, {component_id:[source]} )
         """
-        if not issubclass(type(report), Path):
-            report = Path(report.temporary_file_path())
-        if zipfile.is_zipfile(str(report)):
+        if zipfile.is_zipfile(report):
+            report.seek(0)  # rewind after the check
             return self._process_zipfile(report)
-        else:
-            raise ValueError(f"File {report} not a zip!")
+        msg = f"File {report} not a zip!"
+        raise ValueError(msg)
 
     def _process_zipfile(self, report: Path) -> (dict, dict, dict):
         """
@@ -38,36 +39,35 @@ class BlackduckCRImporter(object):
         :param report: the file
         :return: (dict, dict, dict)
         """
-        components = dict()
-        source = dict()
+        components = {}
+        source = {}
         try:
-            with zipfile.ZipFile(str(report)) as zip:
+            with zipfile.ZipFile(report) as zipf:
                 c_file = False
                 s_file = False
-                src_file = False
-                for full_file_name in zip.namelist():
+                for full_file_name in zipf.namelist():
                     # Just in case the word component or security is in the name of
                     # zip file, best to ignore it.
                     file_name = full_file_name.split("/")[-1]
                     # Look for the component and security CSVs.
-                    if 'component' in file_name:
-                        with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                    if "component" in file_name:
+                        with io.TextIOWrapper(zipf.open(full_file_name), encoding="utf-8") as f:
                             components = self.__get_components(f)
                             c_file = True
-                    elif 'security' in file_name:
-                        with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                    elif "security" in file_name:
+                        with io.TextIOWrapper(zipf.open(full_file_name), encoding="utf-8") as f:
                             security_issues = self.__get_security_risks(f)
                             s_file = True
-                    elif 'source' in file_name:
-                        with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                    elif "source" in file_name:
+                        with io.TextIOWrapper(zipf.open(full_file_name), encoding="utf-8") as f:
                             source = self.__get_source(f)
-                            src_file = True
-                # Raise exception to error-out if the zip is missing either of these files.
-                if not (c_file and s_file):
-                    raise Exception("Zip file missing needed files!")
-
-        except Exception as e:
+        except Exception:
             logger.exception("Could not process zip file")
+            # Raise exception to error-out if the zip is missing either of
+            # these files.
+            if not (c_file and s_file):
+                msg = "Zip file missing needed files!"
+                raise Exception(msg)
 
         return components, security_issues, source
 
@@ -87,9 +87,14 @@ class BlackduckCRImporter(object):
         source = {}
         records = csv.DictReader(src_file)
         for record in records:
-            # Using component_id:version_id for unique identifier of each component
-            source[record.get("Component id") + ":" + record.get("Version id") + ":License"]\
-                = {x[0]: x[1] for x in record.items()}
+            # Using component_id:version_id for unique identifier of each
+            # component
+            source[
+                record.get("Component id")
+                + ":"
+                + record.get("Version id")
+                + ":License"
+            ] = {x[0]: x[1] for x in record.items()}
         return source
 
     def __get_components(self, csv_file) -> dict:
@@ -108,9 +113,14 @@ class BlackduckCRImporter(object):
         components = {}
         records = csv.DictReader(csv_file)
         for record in records:
-            # Using component_id:version_id for unique identifier of each component
-            components[record.get("Component id") + ":" + record.get("Version id") + ":License"]\
-                = {x[0]: x[1] for x in record.items()}
+            # Using component_id:version_id for unique identifier of each
+            # component
+            components[
+                record.get("Component id")
+                + ":"
+                + record.get("Version id")
+                + ":License"
+            ] = {x[0]: x[1] for x in record.items()}
         return components
 
     def __get_security_risks(self, csv_file) -> dict:
@@ -129,7 +139,12 @@ class BlackduckCRImporter(object):
         securities = {}
         records = csv.DictReader(csv_file)
         for record in records:
-            key = record.get("Component id") + ":" + record.get("Version id") + ":security"
+            key = (
+                record.get("Component id")
+                + ":"
+                + record.get("Version id")
+                + ":security"
+            )
             vulns = securities.get(key) or []
             vulns.append({x[0]: x[1] for x in record.items()})
             securities[key] = vulns

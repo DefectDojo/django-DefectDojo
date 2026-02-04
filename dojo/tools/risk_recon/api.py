@@ -1,4 +1,5 @@
 import requests
+from django.conf import settings
 
 
 class RiskReconAPI:
@@ -10,18 +11,20 @@ class RiskReconAPI:
         self.toe_map = {}
 
         if not self.key:
-            raise Exception(
-                'Please supply a Risk Recon API key. \n'
-                'This can be generated in the system admin panel. \n'
-                'See https://defectdojo.github.io/django-DefectDojo/integrations/import/#risk-recon-api-importer \n'
+            msg = (
+                "Please supply a Risk Recon API key. \n"
+                "This can be generated in the system admin panel. \n"
+                "See https://documentation.defectdojo.com/integrations/import/#risk-recon-api-importer \n"
             )
+            raise Exception(msg)
         if not self.url:
-            raise Exception(
-                'Please supply a Risk Recon API url. \n'
-                'A general url is https://api.riskrecon.com/v1/ \n'
-                'See https://defectdojo.github.io/django-DefectDojo/integrations/import/#risk-recon-api-importer \n'
+            msg = (
+                "Please supply a Risk Recon API url. \n"
+                "A general url is https://api.riskrecon.com/v1/ \n"
+                "See https://documentation.defectdojo.com/integrations/import/#risk-recon-api-importer \n"
             )
-        if self.url.endswith('/'):
+            raise Exception(msg)
+        if self.url.endswith("/"):
             self.url = endpoint[:-1]
         self.session = requests.Session()
         self.map_toes()
@@ -29,11 +32,9 @@ class RiskReconAPI:
 
     def map_toes(self):
         response = self.session.get(
-            url='{}/toes'.format(self.url),
-            headers={
-                'accept': 'application/json',
-                'Authorization': self.key
-            }
+            url=f"{self.url}/toes",
+            headers={"accept": "application/json", "Authorization": self.key},
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response.ok:
@@ -41,28 +42,27 @@ class RiskReconAPI:
             data = response.json()
             if isinstance(self.data, list):
                 for company in self.data:
-                    name = company.get('name', None)
-                    filters = company.get('filters', None)
+                    name = company.get("name", None)
+                    filters = company.get("filters", None)
                     if name:
                         comps[name] = filters
             name_list = comps.keys()
             for item in data:
-                toe_id = item.get('toe_id', None)
-                name = item.get('toe_short_name', None)
+                toe_id = item.get("toe_id", None)
+                name = item.get("toe_short_name", None)
                 if not comps or name in name_list:
-                    filters = comps.get(name, None)
-                    self.toe_map[toe_id] = filters if filters else self.data
+                    filters = comps.get(name)
+                    self.toe_map[toe_id] = filters or self.data
         else:
-            raise Exception('Unable to query Target of Evaluations due to {} - {}'.format(
-                response.status_code, response.content
-            ))
+            msg = f"Unable to query Target of Evaluations due to {response.status_code} - {response.content}"
+            raise Exception(msg)   # TODO: when implementing ruff BLE001, please fix also TODO in unittests/test_risk_recon.py
 
     def filter_finding(self, finding):
-        filters = self.toe_map[finding['toe_id']]
+        filters = self.toe_map[finding["toe_id"]]
         if not filters:
             return False
 
-        for filter_item in filters.keys():
+        for filter_item in filters:
             filter_list = filters.get(filter_item, None)
             if filter_list and finding[filter_item] not in filter_list:
                 return True
@@ -70,13 +70,14 @@ class RiskReconAPI:
         return False
 
     def get_findings(self):
-        for toe in self.toe_map.keys():
+        for toe in self.toe_map:
             response = self.session.get(
-                url='{}/findings/{}'.format(self.url, toe),
+                url=f"{self.url}/findings/{toe}",
                 headers={
-                    'accept': 'application/json',
-                    'Authorization': self.key
-                }
+                    "accept": "application/json",
+                    "Authorization": self.key,
+                },
+                timeout=settings.REQUESTS_TIMEOUT,
             )
 
             if response.ok:
@@ -85,6 +86,5 @@ class RiskReconAPI:
                     if not self.filter_finding(finding):
                         self.findings.append(finding)
             else:
-                raise Exception('Unable to collect findings from toe: {} due to {} - {}'.format(
-                    toe, response.status_code, response.content
-                ))
+                msg = f"Unable to collect findings from toe: {toe} due to {response.status_code} - {response.content}"
+                raise Exception(msg)

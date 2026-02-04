@@ -4,8 +4,7 @@ import math
 from dojo.models import Finding
 
 
-class PhpSecurityAuditV2Parser(object):
-
+class PhpSecurityAuditV2Parser:
     def get_scan_types(self):
         return ["PHP Security Audit v2"]
 
@@ -18,10 +17,10 @@ class PhpSecurityAuditV2Parser(object):
     def get_findings(self, filename, test):
         tree = filename.read()
         try:
-            data = json.loads(str(tree, 'utf-8'))
-        except:
+            data = json.loads(str(tree, "utf-8"))
+        except Exception:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
 
         for filepath, report in list(data["files"].items()):
             errors = report.get("errors") or 0
@@ -36,9 +35,16 @@ class PhpSecurityAuditV2Parser(object):
                     findingdetail += "Rule Source: " + issue["source"] + "\n"
                     findingdetail += "Details: " + issue["message"] + "\n"
 
-                    sev = PhpSecurityAuditV2Parser.get_severity_word(issue["severity"])
+                    sev = PhpSecurityAuditV2Parser.get_severity_word(
+                        issue["severity"],
+                    )
 
-                    dupe_key = title + filepath + str(issue["line"]) + str(issue["column"])
+                    dupe_key = (
+                        title
+                        + filepath
+                        + str(issue["line"])
+                        + str(issue["column"])
+                    )
 
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
@@ -57,7 +63,7 @@ class PhpSecurityAuditV2Parser(object):
                         )
 
                         dupes[dupe_key] = find
-                        findingdetail = ''
+                        findingdetail = ""
 
         return list(dupes.values())
 
@@ -66,10 +72,9 @@ class PhpSecurityAuditV2Parser(object):
         sev = math.ceil(severity / 2)
 
         if sev == 5:
-            return 'Critical'
-        elif sev == 4:
-            return 'High'
-        elif sev == 3:
-            return 'Medium'
-        else:
-            return 'Low'
+            return "Critical"
+        if sev == 4:
+            return "High"
+        if sev == 3:
+            return "Medium"
+        return "Low"

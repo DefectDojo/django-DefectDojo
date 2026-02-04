@@ -1,0 +1,22 @@
+{
+	"key": "typescript:S1854",
+	"repo": "typescript",
+	"name": "Dead stores should be removed",
+	"createdAt": "2018-01-17T10:11:21-0500",
+	"status": "READY",
+	"isTemplate": false,
+	"tags": [
+	],
+	"sysTags": [
+		"cert",
+		"cwe",
+		"unused"
+	],
+	"params": [
+	],
+	"debtOverloaded": false,
+	"remFnOverloaded": false,
+	"scope": "ALL",
+	"isExternal": true,
+	"type": "UNKNOWN"
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HealthcheckData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntegrityRules="a7F9k2LmPqX8vTz1R4sYbC0N3dE5gH6j">
+  <EngineVersion>3.2.0.1</EngineVersion>
+  <GenerationDate>2024-06-06T13:01:09+02:00</GenerationDate>
+  <Level>Normal</Level>
+  <MaturityLevel>2</MaturityLevel>
+  <DomainFQDN>example.local</DomainFQDN>
+  <NetBIOSName>EXAMPLE</NetBIOSName>
+  <ForestFQDN>example.local</ForestFQDN>
+  <DomainCreation>2024-03-13T00:24:53</DomainCreation>
+  <DomainSid>S-1-5-21-1111111111-2222222222-3333333333</DomainSid>
+  <NumberOfDC>1</NumberOfDC>
+  <GlobalScore>10</GlobalScore>
+  <DomainControllers>
+    <HealthcheckDomainController>
+      <DCName>DC-NQ7M31</DCName>
+      <OperatingSystem>Server OS</OperatingSystem>
+      <IP>
+        <string>198.51.10</string>
+      </IP>
+    </HealthcheckDomainController>
+  </DomainControllers>
+</HealthcheckData>

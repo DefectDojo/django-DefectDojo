@@ -1,14 +1,13 @@
-from os import path
 
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.burp_graphql.parser import BurpGraphQLParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestBurpGraphQLParser(DojoTestCase):
 
     def test_burp_one_finding(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp_graphql/one_finding.json")) as test_file:
+        with (get_unit_tests_scans_path("burp_graphql") / "one_finding.json").open(encoding="utf-8") as test_file:
             parser = BurpGraphQLParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:
@@ -22,18 +21,18 @@ class TestBurpGraphQLParser(DojoTestCase):
             self.assertIn("remediation 1", findings[0].mitigation)
             self.assertIn("issue description 1", findings[0].impact)
             self.assertIn("issue remediation 1", findings[0].mitigation)
-            self.assertEquals('High', findings[0].severity)
+            self.assertEqual("High", findings[0].severity)
             self.assertEqual(1, len(findings[0].unsaved_endpoints))
-            self.assertEqual('www.test.com', findings[0].unsaved_endpoints[0].host)
-            self.assertEqual('path', findings[0].unsaved_endpoints[0].path)
-            self.assertEqual('https', findings[0].unsaved_endpoints[0].protocol)
+            self.assertEqual("www.test.com", findings[0].unsaved_endpoints[0].host)
+            self.assertEqual("path", findings[0].unsaved_endpoints[0].path)
+            self.assertEqual("https", findings[0].unsaved_endpoints[0].protocol)
             self.assertEqual(1, len(findings[0].unsaved_req_resp))
-            self.assertEqual('request data 1/request data 2/request data 3/', findings[0].unsaved_req_resp[0]['req'])
-            self.assertIn('ref 1', findings[0].references)
-            self.assertIn('CWE-79', findings[0].references)
+            self.assertEqual("request data 1/request data 2/request data 3/", findings[0].unsaved_req_resp[0]["req"])
+            self.assertIn("ref 1", findings[0].references)
+            self.assertIn("CWE-79", findings[0].references)
 
     def test_burp_two_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp_graphql/two_findings.json")) as test_file:
+        with (get_unit_tests_scans_path("burp_graphql") / "two_findings.json").open(encoding="utf-8") as test_file:
             parser = BurpGraphQLParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:
@@ -49,27 +48,26 @@ class TestBurpGraphQLParser(DojoTestCase):
             self.assertIn("description 3", findings[1].description)
 
     def test_burp_no_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp_graphql/no_findings.json")) as test_file:
+        with (get_unit_tests_scans_path("burp_graphql") / "no_findings.json").open(encoding="utf-8") as test_file:
 
             parser = BurpGraphQLParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(0, len(findings))
 
     def test_burp_null_title(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_title.json")) as test_file:
-
-            with self.assertRaises(ValueError):
-                parser = BurpGraphQLParser()
-                findings = parser.get_findings(test_file, Test())
+        with (get_unit_tests_scans_path("burp_graphql") / "null_title.json").open(encoding="utf-8") as test_file, \
+          self.assertRaises(ValueError):
+            parser = BurpGraphQLParser()
+            parser.get_findings(test_file, Test())
 
     def test_burp_null_request_segments(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_request_segments.json")) as test_file:
+        with (get_unit_tests_scans_path("burp_graphql") / "null_request_segments.json").open(encoding="utf-8") as test_file:
             parser = BurpGraphQLParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(1, len(findings))
 
     def test_burp_null_data(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_data.json")) as test_file:
+        with (get_unit_tests_scans_path("burp_graphql") / "null_data.json").open(encoding="utf-8") as test_file:
             parser = BurpGraphQLParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:

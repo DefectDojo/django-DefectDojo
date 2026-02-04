@@ -1,0 +1,21 @@
+{
+  "result": "OK",
+  "data": {
+    "report": [
+      {
+        "vulnID": "RHSA-2018:2285",
+        "title": "(RHSA-2018:2285) Important: yum-utils security update",
+        "family": "redhat",
+        "severity": 5,
+        "severityText": "critical",
+        "agentip": "12.34.56.78",
+        "agentfqdn": "localhost",
+        "cumulativeFix": "sudo yum -y update yum-utils",
+        "scanid": "BO1T5ZYXH9SFTOJ189NE1XJDNEH7IX9W4OWMTZNDAH9AECACJCXPN330NGBBOH8YBI3YYY25QJ11L89LTMAHHBMNLNRQQO001F2DWJFIDDXZ7D9UTCLVBUZPWCXEDZY"
+      }
+    ],
+    "vulns": {},
+    "indexName": "es6_scanner_35ee2944abab0b2c4f6e63916fc96bec0b1642ce_scanresults",
+    "totalCount": 1
+  }
+}

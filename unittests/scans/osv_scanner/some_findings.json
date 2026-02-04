@@ -1,0 +1,106 @@
+{
+    "results": [
+      {
+        "source": {
+          "path": "/tmp/components/yarn.lock",
+          "type": "lockfile"
+        },
+        "packages": [
+          {
+            "package": {
+              "name": "flot-axis",
+              "version": "0.0.0",
+              "ecosystem": "npm"
+            },
+            "vulnerabilities": [
+              {
+                "modified": "2023-11-08T04:17:07Z",
+                "published": "2023-08-01T05:29:33Z",
+                "schema_version": "1.6.0",
+                "id": "MAL-2023-1035",
+                "aliases": [
+                  "GHSA-8348-2q94-ffjx"
+                ],
+                "summary": "Malicious code in flot-axis (npm)",
+                "details": "\n---\n_-= Per source details. Do not edit below this line.=-_\n\n## Source: ghsa-malware (75e800a2dadaa8f5d0ac8a5db1564e97a702c66176c2da0c537191d88cf8fc81)\nAny computer that has this package installed or running should be considered fully compromised. All secrets and keys stored on that computer should be rotated immediately from a different computer. The package should be removed, but as full control of the computer may have been given to an outside entity, there is no guarantee that removing the package will remove all malicious software resulting from installing it.\n",
+                "affected": [
+                  {
+                    "package": {
+                      "ecosystem": "npm",
+                      "name": "flot-axis",
+                      "purl": "pkg:npm/flot-axis"
+                    },
+                    "ranges": [
+                      {
+                        "type": "SEMVER",
+                        "events": [
+                          {
+                            "introduced": "0"
+                          }
+                        ]
+                      }
+                    ],
+                    "database_specific": {
+                      "cwes": [
+                        {
+                          "cweId": "CWE-506",
+                          "description": "The product contains code that appears to be malicious in nature.",
+                          "name": "Embedded Malicious Code"
+                        }
+                      ],
+                      "source": "https://github.com/ossf/malicious-packages/blob/main/osv/malicious/npm/flot-axis/MAL-2023-1035.json"
+                    }
+                  }
+                ],
+                "references": [
+                  {
+                    "type": "ADVISORY",
+                    "url": "https://github.com/advisories/GHSA-8348-2q94-ffjx"
+                  }
+                ],
+                "database_specific": {
+                  "malicious-packages-origins": [
+                    {
+                      "id": "GHSA-8348-2q94-ffjx",
+                      "import_time": "2023-08-02T00:26:05.915581218Z",
+                      "modified_time": "2023-08-01T05:29:34Z",
+                      "ranges": [
+                        {
+                          "events": [
+                            {
+                              "introduced": "0"
+                            }
+                          ],
+                          "type": "SEMVER"
+                        }
+                      ],
+                      "sha256": "75e800a2dadaa8f5d0ac8a5db1564e97a702c66176c2da0c537191d88cf8fc81",
+                      "source": "ghsa-malware"
+                    }
+                  ]
+                }
+              }
+            ],
+            "groups": [
+              {
+                "ids": [
+                  "MAL-2023-1035"
+                ],
+                "aliases": [
+                  "GHSA-8348-2q94-ffjx",
+                  "MAL-2023-1035"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "experimental_config": {
+      "licenses": {
+        "summary": false,
+        "allowlist": null
+      }
+    }
+  }
+  

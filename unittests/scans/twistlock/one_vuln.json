@@ -5,17 +5,20 @@
 			"distro": "Debian GNU/Linux 9 (stretch)",
 			"compliances": [
 				{
-					"title": "Sensitive information provided in environment variables",
+					"id": 912,
+					"title": "(CIS_Kubernetes_v1.6.0 - 1.1) Ensure API server encryption is enabled",
 					"severity": "high",
-					"cause": "The environment variables DD_CELERY_BROKER_PASSWORD,DD_DATABASE_PASSWORD,DD_SECRET_KEY contain sensitive data"
+					"description": "Encrypting etcd data at rest ensures sensitive information is protected from unauthorized access.",
+					"layerTime": "2024-07-01T12:00:00Z",
+					"category": "Kubernetes"
 				}
 			],
 			"complianceDistribution": {
 				"critical": 0,
 				"high": 1,
-				"medium": 0,
+				"medium": 1,
 				"low": 0,
-				"total": 1
+				"total": 2
 			},
 			"vulnerabilities": [
 				{

@@ -3425,7 +3425,7 @@
             },
             {
                "location":{
-                  "uri":"dojo/tools/whitesource/parser.py",
+                  "uri":"dojo/tools/mend/parser.py",
                   "uriBaseId":"%SRCROOT%",
                   "index":113
                }
@@ -12193,7 +12193,7 @@
                   {
                      "physicalLocation":{
                         "artifactLocation":{
-                           "uri":"dojo/tools/whitesource/parser.py",
+                           "uri":"dojo/tools/mend/parser.py",
                            "uriBaseId":"%SRCROOT%",
                            "index":113
                         },
@@ -17161,7 +17161,7 @@
                   {
                      "physicalLocation":{
                         "artifactLocation":{
-                           "uri":"dojo/tools/whitesource/parser.py",
+                           "uri":"dojo/tools/mend/parser.py",
                            "uriBaseId":"%SRCROOT%",
                            "index":113
                         },
@@ -17188,7 +17188,7 @@
                   {
                      "physicalLocation":{
                         "artifactLocation":{
-                           "uri":"dojo/tools/whitesource/parser.py",
+                           "uri":"dojo/tools/mend/parser.py",
                            "uriBaseId":"%SRCROOT%",
                            "index":113
                         },

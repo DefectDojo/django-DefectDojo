@@ -57,7 +57,8 @@ function homepage_pie_chart(critical, high, medium, low, info) {
 function homepage_severity_plot(critical, high, medium, low) {
     var options = {
         xaxes: [{
-            mode: 'time'
+            mode: 'time',
+            minTickSize: [1, "month"]
         }],
         yaxes: [{
             min: 0
@@ -103,11 +104,16 @@ function homepage_severity_plot(critical, high, medium, low) {
         dashboard-metrics.html
 */
 
+function getTicks(critical, high, medium, low) {
+    return [...new Set(critical.concat(high, medium, low).map(x => x[0]))]
+}
+
 function opened_per_month(critical, high, medium, low) {
     var options = {
         xaxes: [{
             mode: 'time',
-            timeformat: "%m/%y"
+            timeformat: "%m/%y",
+            ticks: getTicks(critical, high, medium, low),
         }],
         yaxes: [{
             min: 0
@@ -153,7 +159,8 @@ function accepted_per_month(critical, high, medium, low) {
     var options = {
         xaxes: [{
             mode: 'time',
-            timeformat: "%m/%y"
+            timeformat: "%m/%y",
+            ticks: getTicks(critical, high, medium, low),
         }],
         yaxes: [{
             min: 0
@@ -199,7 +206,8 @@ function opened_per_week(critical, high, medium, low) {
     var options = {
         xaxes: [{
             mode: 'time',
-            timeformat: "%m/%d/%Y"
+            timeformat: "%m/%d/%Y",
+            ticks: getTicks(critical, high, medium, low),
         }],
         yaxes: [{
             min: 0
@@ -245,7 +253,8 @@ function accepted_per_week(critical, high, medium, low) {
     var options = {
         xaxes: [{
             mode: 'time',
-            timeformat: "%m/%d/%Y"
+            timeformat: "%m/%d/%Y",
+            ticks: getTicks(critical, high, medium, low),
         }],
         yaxes: [{
             min: 0
@@ -729,9 +738,133 @@ function accepted_per_week_2(critical, high, medium, low) {
         options);
 }
 
+
+// This function is valid besides metrics.html also for the dashboard-metrics.html, 
+// dashboard.html, and product-metrics.html
+function updatePunchcardTable(punchcardData, ticks) {
+    let tableBody = $("#punchcard-table tbody");
+
+    const daysMap = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    let formattedData = {};
+    
+    // No table processing in case of no data
+    if (punchcardData.length === 0 || ticks.length === 0) return; 
+
+    // Removing html elements from the ticks dates
+    let ticksMap = {};
+    ticks.forEach(entry => {
+        let weekIndex = String(entry[0]);
+        let rawHtml = entry[1]; 
+
+        // Goodbye <span> + space instead of <br/> 
+        let cleanDate = rawHtml.replace(/<\/?span[^>]*>/g, "").replace(/<br\s*\/?>/g, " ");
+        cleanDate = cleanDate.trim();
+        ticksMap[weekIndex] = cleanDate;
+    });
+
+    let minWeekOffset = ticks[0][0]; 
+    let maxWeekOffset = ticks[ticks.length - 1][0]; 
+    
+    for (let weekOffset = minWeekOffset; weekOffset <= maxWeekOffset; weekOffset++) {
+        let formattedDate = ticksMap[String(weekOffset)] || "Unknown Date";
+        let formattedWeek = `Week ${weekOffset - minWeekOffset + 1}, starting on ${formattedDate}`;
+
+        formattedData[formattedWeek] = {
+            "Monday": 0, "Tuesday": 0, "Wednesday": 0,
+            "Thursday": 0, "Friday": 0, "Saturday": 0, "Sunday": 0
+        };
+    }
+
+    // Populating week data
+    punchcardData.forEach(entry => {
+        let weekOffset = entry[0]; 
+        let day = daysMap[entry[1]];
+        let value = entry[3] || 0;
+
+        let formattedDate = ticksMap[String(weekOffset)] || "Unknown Date";
+        let formattedWeek = `Week ${weekOffset - minWeekOffset + 1}, starting on ${formattedDate}`;
+
+        if (formattedData[formattedWeek]) {
+            formattedData[formattedWeek][day] = value;
+        }
+    });
+
+    // Rendering accessibility table body
+    Object.entries(formattedData).forEach(([week, values]) => {
+        let newRow = `
+            <tr>
+                <td scope="row">${week}</td>
+                <td>${values.Monday || '0'}</td>
+                <td>${values.Tuesday || '0'}</td>
+                <td>${values.Wednesday || '0'}</td>
+                <td>${values.Thursday || '0'}</td>
+                <td>${values.Friday || '0'}</td>
+                <td>${values.Saturday || '0'}</td>
+                <td>${values.Sunday || '0'}</td>
+            </tr>
+        `;
+        tableBody.append(newRow);
+    });
+}
+
 /*
         product_metrics.html
 */
+
+function open_findings_burndown(critical, high, medium, low, info, y_max, y_min) {
+    var options = {
+        xaxes: [{
+            mode: "time",
+            timeformat: "%Y/%m/%d"
+        }],
+        yaxes: [{
+            max: y_max,
+            min: y_min
+        }],
+        series: {
+            lines: {
+                show: true
+            },
+            points: {
+                show: true,
+                radius: 1
+            }
+        },
+        grid: {
+            hoverable: true,
+            borderWidth: 1,
+            borderColor: '#e7e7e7',
+    
+        },
+        legend: {
+            position: 'nw'
+        },
+        tooltip: true,
+    };
+
+    var plotObj = $.plot($("#open_findings_burndown"), [{
+                data: critical,
+                label: " Critical",
+                color: "#d9534f",
+            }, {
+                data: high,
+                label: " High",
+                color: '#f0ad4e',
+            }, {
+                data: medium,
+                label: " Medium",
+                color: '#f0de28',
+            }, {
+                data: low,
+                label: " Low",
+                color: '#4cae4c',
+            }, {
+                data: info,
+                label: " Info",
+                color: '#337ab7',
+            }],
+            options);
+}
 
 function accepted_objs(d1, d2, d3, d4, d5, ticks) {
     var data = [
@@ -1563,8 +1696,6 @@ function open_close_weekly(opened, closed, accepted, ticks) {
     var options = {
         xaxes: [{
             ticks: ticks,
-            transform: function(v) { return -v; },
-            inverseTransform: function(v) { return -v; }
         }],
         yaxes: [{
             min: 0
@@ -1606,8 +1737,6 @@ function severity_weekly(critical, high, medium, low, info, ticks) {
     var options = {
         xaxes: [{
             ticks: ticks,
-            transform: function(v) { return -v; },
-            inverseTransform: function(v) { return -v; }
         }],
         yaxes: [{
             min: 0
@@ -1658,8 +1787,6 @@ function severity_counts_weekly(critical, high, medium, ticks) {
     var options = {
         xaxes: [{
             ticks: ticks,
-            transform: function(v) { return -v; },
-            inverseTransform: function(v) { return -v; }
         }],
         yaxes: [{
             min: 0
@@ -1980,7 +2107,8 @@ function languages_pie(data) {
             }
         },
         legend: {
-            show: true
+            show: true,
+            container: "#donut-lang-container",
         },
         grid: {
             hoverable: true,

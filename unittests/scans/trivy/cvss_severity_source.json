@@ -1,0 +1,148 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "sbom.json",
+  "ArtifactType": "cyclonedx",
+  "Metadata": {
+    "ImageConfig": {
+      "architecture": "",
+      "created": "0001-01-01T00:00:00Z",
+      "os": "",
+      "rootfs": {
+        "type": "",
+        "diff_ids": null
+      },
+      "config": {}
+    }
+  },
+  "Results": [
+    {
+      "Target": "requirements.txt",
+      "Class": "lang-pkgs",
+      "Type": "pip",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2023-46218",
+          "PkgID": "curl@7.81.0-1ubuntu1.14",
+          "PkgName": "curl",
+          "PkgIdentifier": {
+            "PURL": "pkg:deb/ubuntu/curl@7.81.0-1ubuntu1.14?arch=amd64\u0026distro=ubuntu-22.04",
+            "UID": "43a41104920d137"
+          },
+          "InstalledVersion": "7.81.0-1ubuntu1.14",
+          "FixedVersion": "7.81.0-1ubuntu1.15",
+          "Status": "fixed",
+          "Layer": {
+            "DiffID": "sha256:3a9073a4d18e5ed2ae6f9fd9fee81ea43774907ce603ba955bba8fc0819aa250"
+          },
+          "SeveritySource": "ubuntu",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2023-46218",
+          "DataSource": {
+            "ID": "ubuntu",
+            "Name": "Ubuntu CVE Tracker",
+            "URL": "https://git.launchpad.net/ubuntu-cve-tracker"
+          },
+          "Title": "curl: information disclosure by exploiting a mixed case flaw",
+          "Description": "This flaw allows a malicious HTTP server to set \"super cookies\" in curl that\nare then passed back to more origins than what is otherwise allowed or\npossible. This allows a site to set cookies that then would get sent to\ndifferent and unrelated sites and domains.\n\nIt could do this by exploiting a mixed case flaw in curl's function that\nverifies a given cookie domain against the Public Suffix List (PSL). For\nexample a cookie could be set with `domain=co.UK` when the URL used a lower\ncase hostname `curl.co.uk`, even though `co.uk` is listed as a PSL domain.",
+          "Severity": "MEDIUM",
+          "VendorSeverity": {
+            "alma": 2,
+            "amazon": 2,
+            "azure": 2,
+            "cbl-mariner": 2,
+            "nvd": 2,
+            "oracle-oval": 2,
+            "photon": 2,
+            "redhat": 2,
+            "rocky": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+              "V3Score": 6.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+              "V3Score": 5.3
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2024:1129",
+            "https://access.redhat.com/security/cve/CVE-2023-46218",
+            "https://bugzilla.redhat.com/2252030",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2196793",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2240033",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2241938",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2252030",
+            "https://curl.se/docs/CVE-2023-46218.html",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-28322",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-38546",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-46218",
+            "https://errata.almalinux.org/9/ALSA-2024-1129.html",
+            "https://errata.rockylinux.org/RLSA-2024:1601",
+            "https://hackerone.com/reports/2212193",
+            "https://linux.oracle.com/cve/CVE-2023-46218.html",
+            "https://linux.oracle.com/errata/ELSA-2024-1601.html",
+            "https://lists.debian.org/debian-lts-announce/2023/12/msg00015.html",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/3ZX3VW67N4ACRAPMV2QS2LVYGD7H2MVE/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/UOGXU25FMMT2X6UUITQ7EZZYMJ42YWWD/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2023-46218",
+            "https://security.netapp.com/advisory/ntap-20240125-0007/",
+            "https://ubuntu.com/security/notices/USN-6535-1",
+            "https://ubuntu.com/security/notices/USN-6641-1",
+            "https://www.cve.org/CVERecord?id=CVE-2023-46218",
+            "https://www.debian.org/security/2023/dsa-5587"
+          ],
+          "PublishedDate": "2023-12-07T01:15:07.16Z",
+          "LastModifiedDate": "2025-02-13T18:15:33.843Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2023-37920",
+          "PkgName": "certifi",
+          "InstalledVersion": "2022.5.18.1",
+          "FixedVersion": "2023.7.22",
+          "Layer": {},
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2023-37920",
+          "Ref": "pkg:pypi/certifi@2022.5.18.1",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Title": "python-certifi: Removal of e-Tugra root certificate",
+          "Description": "Certifi is a curated collection of Root Certificates for validating the trustworthiness of SSL certificates while verifying the identity of TLS hosts. Certifi prior to version 2023.07.22 recognizes \"e-Tugra\" root certificates. e-Tugra's root certificates were subject to an investigation prompted by reporting of security issues in their systems. Certifi 2023.07.22 removes root certificates from \"e-Tugra\" from the root store.",
+          "Severity": "HIGH",
+          "CweIDs": ["CWE-345"],
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "V3Score": 7.5
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 9.8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2023-37920",
+            "https://github.com/certifi/python-certifi",
+            "https://github.com/certifi/python-certifi/commit/8fb96ed81f71e7097ed11bc4d9b19afd7ea5c909",
+            "https://github.com/certifi/python-certifi/security/advisories/GHSA-xqr8-7jwr-rhp7",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/certifi/PYSEC-2023-135.yaml",
+            "https://groups.google.com/a/mozilla.org/g/dev-security-policy/c/C-HrP1SEq1A",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/5EX6NG7WUFNUKGFHLM35KHHU3GAKXRTG/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2023-37920",
+            "https://www.cve.org/CVERecord?id=CVE-2023-37920"
+          ],
+          "PublishedDate": "2023-07-25T21:15:00Z",
+          "LastModifiedDate": "2023-08-12T06:16:00Z"
+        }
+      ]
+    }
+  ]
+}

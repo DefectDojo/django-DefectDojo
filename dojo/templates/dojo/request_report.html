@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load humanize %}
+{% load display_tags %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -9,9 +10,9 @@
                     <h3 class="has-filters">
                         Generate
                         {% if product_type %}
-                            Product Type
+                            {{ labels.ORG_LABEL }}
                         {% elif product %}
-                            Product
+                            {{ labels.ASSET_LABEL }}
                         {% elif engagement %}
                             Engagement
                         {% elif test %}
@@ -19,7 +20,7 @@
                         {% endif %}
                         Report
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                         </div>
 
                     </h3>
@@ -35,7 +36,7 @@
                     <br/>
 
                     <div class="alert alert-info" role="alert">
-                        <span class="fa fa-lightbulb-o" aria-hidden="true"></span>
+                        <span class="fa-solid fa-lightbulb" aria-hidden="true"></span>
                         <span class=""><b>Hint:</b></span>
                         To generate a report of all mitigated findings select: Active: Either, Verified: Either,
                         Mitigated: Yes
@@ -70,7 +71,8 @@
                             <th>Status</th>
                             <th>Mitigated</th>
                             <th>Severity</th>
-                            <th>Product</th>
+                            <th>EPSS Score / Percentile</th>
+                            <th>{{ labels.ASSET_LABEL }}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -86,6 +88,11 @@
                                 <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                                     <p class="text-error">
                                 {% else %}<p>{% endif %}{{ finding.severity }}</p></td>
+                                <td>
+                                    {{ finding.epss_score|format_epss }}
+                                    /
+                                    {{ finding.epss_percentile|format_epss }}
+                                </td>
                                 <td>{{ finding.test.engagement.product }}</td>
                             </tr>
                         {% endfor %}

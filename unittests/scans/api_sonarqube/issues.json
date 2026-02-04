@@ -1,0 +1,96 @@
+[
+	{
+		"key": "AWKWIl8pZpu0CyehMfc4",
+		"rule": "typescript:S1854",
+		"severity": "MAJOR",
+		"component": "internal.dummy.project:src/main/javascript/TranslateDirective.ts",
+		"project": "internal.dummy.project",
+		"line": 242,
+		"hash": "1c5dcad1e37da3215ff6366dce3054bc",
+		"textRange": {
+			"startLine": 242,
+			"endLine": 242,
+			"startOffset": 98,
+			"endOffset": 110
+		},
+		"flows": [
+		],
+		"status": "CONFIRMED",
+		"message": "Remove this useless assignment to local variable \"currentValue\".",
+		"effort": "15min",
+		"debt": "15min",
+		"author": "randomguy1@domain.com",
+		"tags": [
+			"cert",
+			"cwe",
+			"unused"
+		],
+		"creationDate": "2017-10-18T04:51:38-0400",
+		"updateDate": "2019-07-31T10:42:14-0400",
+		"type": "CODE_SMELL",
+		"organization": "default-organization",
+		"fromHotspot": false
+	},
+	{
+		"key": "AWKWIl8pZpu0CyehMfc3",
+		"rule": "typescript:S1854",
+		"severity": "MAJOR",
+		"component": "internal.dummy.project:src/main/javascript/TranslateDirective.ts",
+		"project": "internal.dummy.project",
+		"line": 237,
+		"hash": "85282183a62571c437db451c4a08c970",
+		"textRange": {
+			"startLine": 237,
+			"endLine": 237,
+			"startOffset": 98,
+			"endOffset": 110
+		},
+		"flows": [
+		],
+		"resolution": "FALSE-POSITIVE",
+		"status": "RESOLVED",
+		"message": "Remove this useless assignment to local variable \"currentValue\".",
+		"effort": "15min",
+		"debt": "15min",
+		"author": "randomguy2@domain.com",
+		"tags": [
+			"cert",
+			"cwe",
+			"unused"
+		],
+		"creationDate": "2017-10-18T04:51:38-0400",
+		"updateDate": "2019-07-18T11:15:30-0400",
+		"type": "CODE_SMELL",
+		"organization": "default-organization",
+		"fromHotspot": false
+	},
+    {
+		"key": "AWKWIlkyZpu0CyehMfb7",
+		"rule": "scss:unknown-type-selector",
+		"severity": "CRITICAL",
+		"component": "internal.dummy.project:src/main/javascript/ui/PrimaryAccordionComponent.scss",
+		"project": "internal.dummy.project",
+		"line": 1,
+		"hash": "6562ff4baceb0a79e45d821bee180b9f",
+		"textRange": {
+			"startLine": 1,
+			"endLine": 1,
+			"startOffset": 16,
+			"endOffset": 41
+		},
+		"flows": [
+		],
+		"status": "OPEN",
+		"message": "Remove this usage of the unknown \"bx-primary-accordion-item\" type selector.",
+		"effort": "10min",
+		"debt": "10min",
+		"author": "randomguy3@domain.com",
+		"tags": [
+		],
+		"creationDate": "2018-03-28T03:41:35-0400",
+		"updateDate": "2018-04-05T10:06:59-0400",
+		"type": "BUG",
+		"organization": "default-organization",
+		"fromHotspot": false
+	}
+]

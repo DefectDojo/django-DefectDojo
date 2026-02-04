@@ -1,0 +1,548 @@
+Plugin ID,CVE,CVSS,Risk,Host,Protocol,Port,Name,Synopsis,Description,Solution,See Also,Plugin Output,,Vulnerability State,IP Address,FQDN,NetBios,OS,,Plugin Family,CVSS Base Score,CVSS Temporal Score,CVSS Temporal Vector,CVSS Vector,CVSS3 Base Score,CVSS3 Temporal Score,CVSS3 Temporal Vector,CVSS3 Vector,System Type,Host Start,Host End,Vulnerability Priority Rating (VPR),First Found,Last Found,Host Scan Schedule ID,Host Scan ID,Indexed At,Last Authenticated Results Date,Last Unauthenticated Results Date,Tracked,Risk Factor,Severity,Original Severity,Modification,Plugin Family ID,Plugin Type,Plugin Version,Service,Plugin Modification Date,Plugin Publication Date,Checks for Malware,Exploit Available,Exploited by Malware,Exploited by Nessus,CANVAS,D2 Elliot,Metasploit,Core Exploits,ExploitHub,Default Account,Patch Available,In The News,Unsupported By Vendor,Last Fixed
+176700,CVE-2023-32233,6.8,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : kernel (ALAS-2023-2050),The remote Amazon Linux 2 host is missing a security update.,"The version of kernel installed on the remote host is prior to 4.14.314-238.539. It is, therefore, affected by a vulnerability as referenced in the ALAS2-2023-2050 advisory.
+
+  - In the Linux kernel through 6.3.1, a use-after-free in Netfilter nf_tables when processing batch requests     can be abused to perform arbitrary read and write operations on kernel memory. Unprivileged local users     can obtain root privileges. This occurs because anonymous sets are mishandled. (CVE-2023-32233)
+
+Note that Nessus has not tested for this issue but has instead relied only on the application's self-reported version number.",Run 'yum update kernel' to update your system.,"https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2023-32233.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2050.html","
+Remote package installed : kernel-4.14.314-237.533.amzn2
+Should be                : kernel-4.14.314-238.539.amzn2
+
+Remote package installed : kernel-tools-4.14.314-237.533.amzn2
+Should be                : kernel-tools-4.14.314-238.539.amzn2
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,6.8,5.3,E:POC/RL:OF/RC:C,AV:L/AC:L/Au:S/C:C/I:C/A:C,7.8,7,E:P/RL:O/RC:C,AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.612Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176703,CVE-2021-46666,5,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : mariadb (ALAS-2023-2057),The remote Amazon Linux 2 host is missing a security update.,"The version of mariadb installed on the remote host is prior to 5.5.68-1. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2057 advisory.
+
+  - get_sort_by_table in MariaDB before 10.6.2 allows an application crash via certain subquery uses of ORDER     BY. (CVE-2021-46657)
+
+  - MariaDB before 10.7.2 allows an application crash because it does not recognize that     SELECT_LEX::nest_level is local to each VIEW. (CVE-2021-46659)
+
+  - MariaDB through 10.5.9 allows an application crash in find_field_in_tables and find_order_in_list via an     unused common table expression (CTE). (CVE-2021-46661)
+
+  - MariaDB through 10.5.13 allows a ha_maria::extra application crash via certain SELECT statements.
+    (CVE-2021-46663)
+
+  - MariaDB before 10.6.2 allows an application crash because of mishandling of a pushdown from a HAVING     clause to a WHERE clause. (CVE-2021-46666)
+
+  - MariaDB before 10.6.5 has a sql_lex.cc integer overflow, leading to an application crash. (CVE-2021-46667)
+
+  - MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that     improperly interact with storage-engine resource limitations for temporary data structures.
+    (CVE-2021-46668)
+
+  - An issue in the component my_decimal::operator= of MariaDB Server v10.6.3 and below was discovered to     allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements. (CVE-2022-27380)
+
+  - An issue in the component Item_subselect::init_expr_cache_tracker of MariaDB Server v10.6 and below was     discovered to allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements.
+    (CVE-2022-27384)
+
+  - MariaDB Server before 10.7 is vulnerable to Denial of Service. While executing the     plugin/server_audit/server_audit.c method log_statement_ex, the held lock lock_bigbuffer is not released     correctly, which allows local users to trigger a denial of service due to the deadlock. (CVE-2022-31624)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update mariadb' to update your system.,"https://alas.aws.amazon.com/cve/html/CVE-2021-46659.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46661.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46663.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46667.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46668.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27380.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27384.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-31624.html
+https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46657.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46666.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2057.html","
+Remote package installed : mariadb-libs-5.5.68-1.amzn2
+Should be                : mariadb-libs-5.5.68-1.amzn2.0.1
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,5,3.9,E:POC/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:P,7.5,6.7,E:P/RL:O/RC:C,AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.594Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176703,CVE-2021-46663,5,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : mariadb (ALAS-2023-2057),The remote Amazon Linux 2 host is missing a security update.,"The version of mariadb installed on the remote host is prior to 5.5.68-1. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2057 advisory.
+
+  - get_sort_by_table in MariaDB before 10.6.2 allows an application crash via certain subquery uses of ORDER     BY. (CVE-2021-46657)
+
+  - MariaDB before 10.7.2 allows an application crash because it does not recognize that     SELECT_LEX::nest_level is local to each VIEW. (CVE-2021-46659)
+
+  - MariaDB through 10.5.9 allows an application crash in find_field_in_tables and find_order_in_list via an     unused common table expression (CTE). (CVE-2021-46661)
+
+  - MariaDB through 10.5.13 allows a ha_maria::extra application crash via certain SELECT statements.
+    (CVE-2021-46663)
+
+  - MariaDB before 10.6.2 allows an application crash because of mishandling of a pushdown from a HAVING     clause to a WHERE clause. (CVE-2021-46666)
+
+  - MariaDB before 10.6.5 has a sql_lex.cc integer overflow, leading to an application crash. (CVE-2021-46667)
+
+  - MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that     improperly interact with storage-engine resource limitations for temporary data structures.
+    (CVE-2021-46668)
+
+  - An issue in the component my_decimal::operator= of MariaDB Server v10.6.3 and below was discovered to     allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements. (CVE-2022-27380)
+
+  - An issue in the component Item_subselect::init_expr_cache_tracker of MariaDB Server v10.6 and below was     discovered to allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements.
+    (CVE-2022-27384)
+
+  - MariaDB Server before 10.7 is vulnerable to Denial of Service. While executing the     plugin/server_audit/server_audit.c method log_statement_ex, the held lock lock_bigbuffer is not released     correctly, which allows local users to trigger a denial of service due to the deadlock. (CVE-2022-31624)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update mariadb' to update your system.,"https://alas.aws.amazon.com/cve/html/CVE-2021-46659.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46661.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46663.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46667.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46668.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27380.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27384.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-31624.html
+https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46657.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46666.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2057.html","
+Remote package installed : mariadb-libs-5.5.68-1.amzn2
+Should be                : mariadb-libs-5.5.68-1.amzn2.0.1
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,5,3.9,E:POC/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:P,7.5,6.7,E:P/RL:O/RC:C,AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.594Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176703,CVE-2022-31624,5,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : mariadb (ALAS-2023-2057),The remote Amazon Linux 2 host is missing a security update.,"The version of mariadb installed on the remote host is prior to 5.5.68-1. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2057 advisory.
+
+  - get_sort_by_table in MariaDB before 10.6.2 allows an application crash via certain subquery uses of ORDER     BY. (CVE-2021-46657)
+
+  - MariaDB before 10.7.2 allows an application crash because it does not recognize that     SELECT_LEX::nest_level is local to each VIEW. (CVE-2021-46659)
+
+  - MariaDB through 10.5.9 allows an application crash in find_field_in_tables and find_order_in_list via an     unused common table expression (CTE). (CVE-2021-46661)
+
+  - MariaDB through 10.5.13 allows a ha_maria::extra application crash via certain SELECT statements.
+    (CVE-2021-46663)
+
+  - MariaDB before 10.6.2 allows an application crash because of mishandling of a pushdown from a HAVING     clause to a WHERE clause. (CVE-2021-46666)
+
+  - MariaDB before 10.6.5 has a sql_lex.cc integer overflow, leading to an application crash. (CVE-2021-46667)
+
+  - MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that     improperly interact with storage-engine resource limitations for temporary data structures.
+    (CVE-2021-46668)
+
+  - An issue in the component my_decimal::operator= of MariaDB Server v10.6.3 and below was discovered to     allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements. (CVE-2022-27380)
+
+  - An issue in the component Item_subselect::init_expr_cache_tracker of MariaDB Server v10.6 and below was     discovered to allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements.
+    (CVE-2022-27384)
+
+  - MariaDB Server before 10.7 is vulnerable to Denial of Service. While executing the     plugin/server_audit/server_audit.c method log_statement_ex, the held lock lock_bigbuffer is not released     correctly, which allows local users to trigger a denial of service due to the deadlock. (CVE-2022-31624)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update mariadb' to update your system.,"https://alas.aws.amazon.com/cve/html/CVE-2021-46659.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46661.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46663.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46667.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46668.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27380.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27384.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-31624.html
+https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46657.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46666.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2057.html","
+Remote package installed : mariadb-libs-5.5.68-1.amzn2
+Should be                : mariadb-libs-5.5.68-1.amzn2.0.1
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,5,3.9,E:POC/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:P,7.5,6.7,E:P/RL:O/RC:C,AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.594Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176703,CVE-2021-46661,5,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : mariadb (ALAS-2023-2057),The remote Amazon Linux 2 host is missing a security update.,"The version of mariadb installed on the remote host is prior to 5.5.68-1. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2057 advisory.
+
+  - get_sort_by_table in MariaDB before 10.6.2 allows an application crash via certain subquery uses of ORDER     BY. (CVE-2021-46657)
+
+  - MariaDB before 10.7.2 allows an application crash because it does not recognize that     SELECT_LEX::nest_level is local to each VIEW. (CVE-2021-46659)
+
+  - MariaDB through 10.5.9 allows an application crash in find_field_in_tables and find_order_in_list via an     unused common table expression (CTE). (CVE-2021-46661)
+
+  - MariaDB through 10.5.13 allows a ha_maria::extra application crash via certain SELECT statements.
+    (CVE-2021-46663)
+
+  - MariaDB before 10.6.2 allows an application crash because of mishandling of a pushdown from a HAVING     clause to a WHERE clause. (CVE-2021-46666)
+
+  - MariaDB before 10.6.5 has a sql_lex.cc integer overflow, leading to an application crash. (CVE-2021-46667)
+
+  - MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that     improperly interact with storage-engine resource limitations for temporary data structures.
+    (CVE-2021-46668)
+
+  - An issue in the component my_decimal::operator= of MariaDB Server v10.6.3 and below was discovered to     allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements. (CVE-2022-27380)
+
+  - An issue in the component Item_subselect::init_expr_cache_tracker of MariaDB Server v10.6 and below was     discovered to allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements.
+    (CVE-2022-27384)
+
+  - MariaDB Server before 10.7 is vulnerable to Denial of Service. While executing the     plugin/server_audit/server_audit.c method log_statement_ex, the held lock lock_bigbuffer is not released     correctly, which allows local users to trigger a denial of service due to the deadlock. (CVE-2022-31624)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update mariadb' to update your system.,"https://alas.aws.amazon.com/cve/html/CVE-2021-46659.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46661.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46663.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46667.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46668.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27380.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27384.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-31624.html
+https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46657.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46666.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2057.html","
+Remote package installed : mariadb-libs-5.5.68-1.amzn2
+Should be                : mariadb-libs-5.5.68-1.amzn2.0.1
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,5,3.9,E:POC/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:P,7.5,6.7,E:P/RL:O/RC:C,AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.594Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176703,CVE-2022-27380,5,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : mariadb (ALAS-2023-2057),The remote Amazon Linux 2 host is missing a security update.,"The version of mariadb installed on the remote host is prior to 5.5.68-1. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2057 advisory.
+
+  - get_sort_by_table in MariaDB before 10.6.2 allows an application crash via certain subquery uses of ORDER     BY. (CVE-2021-46657)
+
+  - MariaDB before 10.7.2 allows an application crash because it does not recognize that     SELECT_LEX::nest_level is local to each VIEW. (CVE-2021-46659)
+
+  - MariaDB through 10.5.9 allows an application crash in find_field_in_tables and find_order_in_list via an     unused common table expression (CTE). (CVE-2021-46661)
+
+  - MariaDB through 10.5.13 allows a ha_maria::extra application crash via certain SELECT statements.
+    (CVE-2021-46663)
+
+  - MariaDB before 10.6.2 allows an application crash because of mishandling of a pushdown from a HAVING     clause to a WHERE clause. (CVE-2021-46666)
+
+  - MariaDB before 10.6.5 has a sql_lex.cc integer overflow, leading to an application crash. (CVE-2021-46667)
+
+  - MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that     improperly interact with storage-engine resource limitations for temporary data structures.
+    (CVE-2021-46668)
+
+  - An issue in the component my_decimal::operator= of MariaDB Server v10.6.3 and below was discovered to     allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements. (CVE-2022-27380)
+
+  - An issue in the component Item_subselect::init_expr_cache_tracker of MariaDB Server v10.6 and below was     discovered to allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements.
+    (CVE-2022-27384)
+
+  - MariaDB Server before 10.7 is vulnerable to Denial of Service. While executing the     plugin/server_audit/server_audit.c method log_statement_ex, the held lock lock_bigbuffer is not released     correctly, which allows local users to trigger a denial of service due to the deadlock. (CVE-2022-31624)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update mariadb' to update your system.,"https://alas.aws.amazon.com/cve/html/CVE-2021-46659.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46661.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46663.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46667.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46668.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27380.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27384.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-31624.html
+https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46657.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46666.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2057.html","
+Remote package installed : mariadb-libs-5.5.68-1.amzn2
+Should be                : mariadb-libs-5.5.68-1.amzn2.0.1
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,5,3.9,E:POC/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:P,7.5,6.7,E:P/RL:O/RC:C,AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.594Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176703,CVE-2021-46659,5,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : mariadb (ALAS-2023-2057),The remote Amazon Linux 2 host is missing a security update.,"The version of mariadb installed on the remote host is prior to 5.5.68-1. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2057 advisory.
+
+  - get_sort_by_table in MariaDB before 10.6.2 allows an application crash via certain subquery uses of ORDER     BY. (CVE-2021-46657)
+
+  - MariaDB before 10.7.2 allows an application crash because it does not recognize that     SELECT_LEX::nest_level is local to each VIEW. (CVE-2021-46659)
+
+  - MariaDB through 10.5.9 allows an application crash in find_field_in_tables and find_order_in_list via an     unused common table expression (CTE). (CVE-2021-46661)
+
+  - MariaDB through 10.5.13 allows a ha_maria::extra application crash via certain SELECT statements.
+    (CVE-2021-46663)
+
+  - MariaDB before 10.6.2 allows an application crash because of mishandling of a pushdown from a HAVING     clause to a WHERE clause. (CVE-2021-46666)
+
+  - MariaDB before 10.6.5 has a sql_lex.cc integer overflow, leading to an application crash. (CVE-2021-46667)
+
+  - MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that     improperly interact with storage-engine resource limitations for temporary data structures.
+    (CVE-2021-46668)
+
+  - An issue in the component my_decimal::operator= of MariaDB Server v10.6.3 and below was discovered to     allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements. (CVE-2022-27380)
+
+  - An issue in the component Item_subselect::init_expr_cache_tracker of MariaDB Server v10.6 and below was     discovered to allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements.
+    (CVE-2022-27384)
+
+  - MariaDB Server before 10.7 is vulnerable to Denial of Service. While executing the     plugin/server_audit/server_audit.c method log_statement_ex, the held lock lock_bigbuffer is not released     correctly, which allows local users to trigger a denial of service due to the deadlock. (CVE-2022-31624)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update mariadb' to update your system.,"https://alas.aws.amazon.com/cve/html/CVE-2021-46659.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46661.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46663.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46667.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46668.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27380.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27384.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-31624.html
+https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46657.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46666.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2057.html","
+Remote package installed : mariadb-libs-5.5.68-1.amzn2
+Should be                : mariadb-libs-5.5.68-1.amzn2.0.1
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,5,3.9,E:POC/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:P,7.5,6.7,E:P/RL:O/RC:C,AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.594Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176703,CVE-2021-46667,5,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : mariadb (ALAS-2023-2057),The remote Amazon Linux 2 host is missing a security update.,"The version of mariadb installed on the remote host is prior to 5.5.68-1. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2057 advisory.
+
+  - get_sort_by_table in MariaDB before 10.6.2 allows an application crash via certain subquery uses of ORDER     BY. (CVE-2021-46657)
+
+  - MariaDB before 10.7.2 allows an application crash because it does not recognize that     SELECT_LEX::nest_level is local to each VIEW. (CVE-2021-46659)
+
+  - MariaDB through 10.5.9 allows an application crash in find_field_in_tables and find_order_in_list via an     unused common table expression (CTE). (CVE-2021-46661)
+
+  - MariaDB through 10.5.13 allows a ha_maria::extra application crash via certain SELECT statements.
+    (CVE-2021-46663)
+
+  - MariaDB before 10.6.2 allows an application crash because of mishandling of a pushdown from a HAVING     clause to a WHERE clause. (CVE-2021-46666)
+
+  - MariaDB before 10.6.5 has a sql_lex.cc integer overflow, leading to an application crash. (CVE-2021-46667)
+
+  - MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that     improperly interact with storage-engine resource limitations for temporary data structures.
+    (CVE-2021-46668)
+
+  - An issue in the component my_decimal::operator= of MariaDB Server v10.6.3 and below was discovered to     allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements. (CVE-2022-27380)
+
+  - An issue in the component Item_subselect::init_expr_cache_tracker of MariaDB Server v10.6 and below was     discovered to allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements.
+    (CVE-2022-27384)
+
+  - MariaDB Server before 10.7 is vulnerable to Denial of Service. While executing the     plugin/server_audit/server_audit.c method log_statement_ex, the held lock lock_bigbuffer is not released     correctly, which allows local users to trigger a denial of service due to the deadlock. (CVE-2022-31624)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update mariadb' to update your system.,"https://alas.aws.amazon.com/cve/html/CVE-2021-46659.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46661.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46663.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46667.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46668.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27380.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27384.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-31624.html
+https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46657.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46666.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2057.html","
+Remote package installed : mariadb-libs-5.5.68-1.amzn2
+Should be                : mariadb-libs-5.5.68-1.amzn2.0.1
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,5,3.9,E:POC/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:P,7.5,6.7,E:P/RL:O/RC:C,AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.594Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176703,CVE-2022-27384,5,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : mariadb (ALAS-2023-2057),The remote Amazon Linux 2 host is missing a security update.,"The version of mariadb installed on the remote host is prior to 5.5.68-1. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2057 advisory.
+
+  - get_sort_by_table in MariaDB before 10.6.2 allows an application crash via certain subquery uses of ORDER     BY. (CVE-2021-46657)
+
+  - MariaDB before 10.7.2 allows an application crash because it does not recognize that     SELECT_LEX::nest_level is local to each VIEW. (CVE-2021-46659)
+
+  - MariaDB through 10.5.9 allows an application crash in find_field_in_tables and find_order_in_list via an     unused common table expression (CTE). (CVE-2021-46661)
+
+  - MariaDB through 10.5.13 allows a ha_maria::extra application crash via certain SELECT statements.
+    (CVE-2021-46663)
+
+  - MariaDB before 10.6.2 allows an application crash because of mishandling of a pushdown from a HAVING     clause to a WHERE clause. (CVE-2021-46666)
+
+  - MariaDB before 10.6.5 has a sql_lex.cc integer overflow, leading to an application crash. (CVE-2021-46667)
+
+  - MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that     improperly interact with storage-engine resource limitations for temporary data structures.
+    (CVE-2021-46668)
+
+  - An issue in the component my_decimal::operator= of MariaDB Server v10.6.3 and below was discovered to     allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements. (CVE-2022-27380)
+
+  - An issue in the component Item_subselect::init_expr_cache_tracker of MariaDB Server v10.6 and below was     discovered to allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements.
+    (CVE-2022-27384)
+
+  - MariaDB Server before 10.7 is vulnerable to Denial of Service. While executing the     plugin/server_audit/server_audit.c method log_statement_ex, the held lock lock_bigbuffer is not released     correctly, which allows local users to trigger a denial of service due to the deadlock. (CVE-2022-31624)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update mariadb' to update your system.,"https://alas.aws.amazon.com/cve/html/CVE-2021-46659.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46661.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46663.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46667.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46668.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27380.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27384.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-31624.html
+https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46657.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46666.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2057.html","
+Remote package installed : mariadb-libs-5.5.68-1.amzn2
+Should be                : mariadb-libs-5.5.68-1.amzn2.0.1
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,5,3.9,E:POC/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:P,7.5,6.7,E:P/RL:O/RC:C,AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.594Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176703,CVE-2021-46657,5,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : mariadb (ALAS-2023-2057),The remote Amazon Linux 2 host is missing a security update.,"The version of mariadb installed on the remote host is prior to 5.5.68-1. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2057 advisory.
+
+  - get_sort_by_table in MariaDB before 10.6.2 allows an application crash via certain subquery uses of ORDER     BY. (CVE-2021-46657)
+
+  - MariaDB before 10.7.2 allows an application crash because it does not recognize that     SELECT_LEX::nest_level is local to each VIEW. (CVE-2021-46659)
+
+  - MariaDB through 10.5.9 allows an application crash in find_field_in_tables and find_order_in_list via an     unused common table expression (CTE). (CVE-2021-46661)
+
+  - MariaDB through 10.5.13 allows a ha_maria::extra application crash via certain SELECT statements.
+    (CVE-2021-46663)
+
+  - MariaDB before 10.6.2 allows an application crash because of mishandling of a pushdown from a HAVING     clause to a WHERE clause. (CVE-2021-46666)
+
+  - MariaDB before 10.6.5 has a sql_lex.cc integer overflow, leading to an application crash. (CVE-2021-46667)
+
+  - MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that     improperly interact with storage-engine resource limitations for temporary data structures.
+    (CVE-2021-46668)
+
+  - An issue in the component my_decimal::operator= of MariaDB Server v10.6.3 and below was discovered to     allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements. (CVE-2022-27380)
+
+  - An issue in the component Item_subselect::init_expr_cache_tracker of MariaDB Server v10.6 and below was     discovered to allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements.
+    (CVE-2022-27384)
+
+  - MariaDB Server before 10.7 is vulnerable to Denial of Service. While executing the     plugin/server_audit/server_audit.c method log_statement_ex, the held lock lock_bigbuffer is not released     correctly, which allows local users to trigger a denial of service due to the deadlock. (CVE-2022-31624)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update mariadb' to update your system.,"https://alas.aws.amazon.com/cve/html/CVE-2021-46659.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46661.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46663.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46667.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46668.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27380.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27384.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-31624.html
+https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46657.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46666.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2057.html","
+Remote package installed : mariadb-libs-5.5.68-1.amzn2
+Should be                : mariadb-libs-5.5.68-1.amzn2.0.1
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,5,3.9,E:POC/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:P,7.5,6.7,E:P/RL:O/RC:C,AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.594Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176703,CVE-2021-46668,5,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : mariadb (ALAS-2023-2057),The remote Amazon Linux 2 host is missing a security update.,"The version of mariadb installed on the remote host is prior to 5.5.68-1. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2057 advisory.
+
+  - get_sort_by_table in MariaDB before 10.6.2 allows an application crash via certain subquery uses of ORDER     BY. (CVE-2021-46657)
+
+  - MariaDB before 10.7.2 allows an application crash because it does not recognize that     SELECT_LEX::nest_level is local to each VIEW. (CVE-2021-46659)
+
+  - MariaDB through 10.5.9 allows an application crash in find_field_in_tables and find_order_in_list via an     unused common table expression (CTE). (CVE-2021-46661)
+
+  - MariaDB through 10.5.13 allows a ha_maria::extra application crash via certain SELECT statements.
+    (CVE-2021-46663)
+
+  - MariaDB before 10.6.2 allows an application crash because of mishandling of a pushdown from a HAVING     clause to a WHERE clause. (CVE-2021-46666)
+
+  - MariaDB before 10.6.5 has a sql_lex.cc integer overflow, leading to an application crash. (CVE-2021-46667)
+
+  - MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that     improperly interact with storage-engine resource limitations for temporary data structures.
+    (CVE-2021-46668)
+
+  - An issue in the component my_decimal::operator= of MariaDB Server v10.6.3 and below was discovered to     allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements. (CVE-2022-27380)
+
+  - An issue in the component Item_subselect::init_expr_cache_tracker of MariaDB Server v10.6 and below was     discovered to allow attackers to cause a Denial of Service (DoS) via specially crafted SQL statements.
+    (CVE-2022-27384)
+
+  - MariaDB Server before 10.7 is vulnerable to Denial of Service. While executing the     plugin/server_audit/server_audit.c method log_statement_ex, the held lock lock_bigbuffer is not released     correctly, which allows local users to trigger a denial of service due to the deadlock. (CVE-2022-31624)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update mariadb' to update your system.,"https://alas.aws.amazon.com/cve/html/CVE-2021-46659.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46661.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46663.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46667.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46668.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27380.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-27384.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-31624.html
+https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46657.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-46666.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2057.html","
+Remote package installed : mariadb-libs-5.5.68-1.amzn2
+Should be                : mariadb-libs-5.5.68-1.amzn2.0.1
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,5,3.9,E:POC/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:P,7.5,6.7,E:P/RL:O/RC:C,AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.594Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176711,CVE-2019-9923,5,High,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : tar (ALAS-2023-2064),The remote Amazon Linux 2 host is missing a security update.,"The version of tar installed on the remote host is prior to 1.26-35. It is, therefore, affected by a vulnerability as referenced in the ALAS2-2023-2064 advisory.
+
+  - pax_decode_header in sparse.c in GNU Tar before 1.32 had a NULL pointer dereference when parsing certain     archives that have malformed extended headers. (CVE-2019-9923)
+
+Note that Nessus has not tested for this issue but has instead relied only on the application's self-reported version number.",Run 'yum update tar' to update your system.,"https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2019-9923.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2064.html","
+Remote package installed : tar-1.26-35.amzn2.0.1
+Should be                : tar-1.26-35.amzn2.0.2
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,5,3.7,E:U/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:P,7.5,6.5,E:U/RL:O/RC:C,AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.602Z,2023-06-08T01:25:48Z,,TRUE,Medium,3,3,NONE,54,local,1,,2023-06-05T00:00:00Z,2023-06-05T00:00:00Z,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+164329,CVE-2022-37439,4.6,Medium,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,"Splunk Enterprise 8.1 < 8.1.11, 8.2.0 < 8.2.7.1 / Universal Forwarders 8.1 < 8.1.11, 8.2.0 < 8.2.7.1 (SVD-2022-0803)",An application running on a remote web server host is affected by a vulnerability,"The version of Splunk installed on the remote host is prior to tested version. It is, therefore, affected by a vulnerability as referenced in the SVD-2022-0803 advisory.
+
+  - In Splunk Enterprise and Universal Forwarder versions in the following table, indexing a specially crafted     ZIP file using the file monitoring input can result in a crash of the application. Attempts to restart the     application would result in a crash and would require manually removing the malformed file.
+    (CVE-2022-37439)
+
+Note that Nessus has not tested for this issue but has instead relied only on the application's self-reported version number.","For Splunk Enterprise and Universal Forwarder customers, upgrade versions to 8.1.11, 8.2.7.1, or higher.",http://www.nessus.org/u?06538c78,"
+  Path              : /opt/splunkforwarder
+  Installed version : 8.2.0
+  Fixed version     : 8.2.7.1
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,CGI abuses,4.6,3.4,E:U/RL:OF/RC:C,AV:L/AC:L/Au:S/C:N/I:N/A:C,5.5,4.8,E:U/RL:O/RC:C,AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-05-19T15:08:24.420Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.613Z,2023-06-08T01:25:48Z,,TRUE,Medium,2,2,NONE,6,combined,1.4,,2022-12-06T00:00:00Z,2022-08-22T00:00:00Z,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176699,CVE-2021-3800,4.9,Medium,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : glib2 (ALAS-2023-2058),The remote Amazon Linux 2 host is missing a security update.,"The version of glib2 installed on the remote host is prior to 2.56.1-9. It is, therefore, affected by a vulnerability as referenced in the ALAS2-2023-2058 advisory.
+
+  - A flaw was found in glib before version 2.63.6. Due to random charset alias, pkexec can leak content from     files owned by privileged users to unprivileged ones under the right condition. (CVE-2021-3800)
+
+Note that Nessus has not tested for this issue but has instead relied only on the application's self-reported version number.",Run 'yum update glib2' to update your system.,"https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-3800.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2058.html","
+Remote package installed : glib2-2.56.1-9.amzn2.0.3
+Should be                : glib2-2.56.1-9.amzn2.0.5
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,4.9,3.8,E:POC/RL:OF/RC:C,AV:L/AC:L/Au:N/C:C/I:N/A:N,5.5,5,E:P/RL:O/RC:C,AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.594Z,2023-06-08T01:25:48Z,,TRUE,Medium,2,2,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176705,CVE-2022-21216,7.2,Medium,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : microcode_ctl (ALAS-2023-2056),The remote Amazon Linux 2 host is missing a security update.,"The version of microcode_ctl installed on the remote host is prior to 2.1-47. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2056 advisory.
+
+  - Insufficient granularity of access control in out-of-band management in some Intel(R) Atom and Intel Xeon     Scalable Processors may allow a privileged user to potentially enable escalation of privilege via adjacent     network access. (CVE-2022-21216)
+
+  - Incorrect calculation in microcode keying mechanism for some 3rd Generation Intel(R) Xeon(R) Scalable     Processors may allow a privileged user to potentially enable information disclosure via local access.
+    (CVE-2022-33972)
+
+  - Improper isolation of shared resources in some Intel(R) Processors when using Intel(R) Software Guard     Extensions may allow a privileged user to potentially enable information disclosure via local access.
+    (CVE-2022-38090)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update microcode_ctl' to update your system.,"https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-21216.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-33972.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-38090.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2056.html","
+Remote package installed : microcode_ctl-2.1-47.amzn2.0.14
+Should be                : microcode_ctl-2.1-47.amzn2.0.15
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,7.2,5.3,E:U/RL:OF/RC:C,AV:A/AC:L/Au:M/C:C/I:C/A:C,6.8,5.9,E:U/RL:O/RC:C,AV:A/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.596Z,2023-06-08T01:25:48Z,,TRUE,High,2,2,NONE,54,local,1,,2023-06-05T00:00:00Z,2023-06-05T00:00:00Z,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176705,CVE-2022-33972,7.2,Medium,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : microcode_ctl (ALAS-2023-2056),The remote Amazon Linux 2 host is missing a security update.,"The version of microcode_ctl installed on the remote host is prior to 2.1-47. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2056 advisory.
+
+  - Insufficient granularity of access control in out-of-band management in some Intel(R) Atom and Intel Xeon     Scalable Processors may allow a privileged user to potentially enable escalation of privilege via adjacent     network access. (CVE-2022-21216)
+
+  - Incorrect calculation in microcode keying mechanism for some 3rd Generation Intel(R) Xeon(R) Scalable     Processors may allow a privileged user to potentially enable information disclosure via local access.
+    (CVE-2022-33972)
+
+  - Improper isolation of shared resources in some Intel(R) Processors when using Intel(R) Software Guard     Extensions may allow a privileged user to potentially enable information disclosure via local access.
+    (CVE-2022-38090)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update microcode_ctl' to update your system.,"https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-21216.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-33972.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-38090.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2056.html","
+Remote package installed : microcode_ctl-2.1-47.amzn2.0.14
+Should be                : microcode_ctl-2.1-47.amzn2.0.15
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,7.2,5.3,E:U/RL:OF/RC:C,AV:A/AC:L/Au:M/C:C/I:C/A:C,6.8,5.9,E:U/RL:O/RC:C,AV:A/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.596Z,2023-06-08T01:25:48Z,,TRUE,High,2,2,NONE,54,local,1,,2023-06-05T00:00:00Z,2023-06-05T00:00:00Z,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176705,CVE-2022-38090,7.2,Medium,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : microcode_ctl (ALAS-2023-2056),The remote Amazon Linux 2 host is missing a security update.,"The version of microcode_ctl installed on the remote host is prior to 2.1-47. It is, therefore, affected by multiple vulnerabilities as referenced in the ALAS2-2023-2056 advisory.
+
+  - Insufficient granularity of access control in out-of-band management in some Intel(R) Atom and Intel Xeon     Scalable Processors may allow a privileged user to potentially enable escalation of privilege via adjacent     network access. (CVE-2022-21216)
+
+  - Incorrect calculation in microcode keying mechanism for some 3rd Generation Intel(R) Xeon(R) Scalable     Processors may allow a privileged user to potentially enable information disclosure via local access.
+    (CVE-2022-33972)
+
+  - Improper isolation of shared resources in some Intel(R) Processors when using Intel(R) Software Guard     Extensions may allow a privileged user to potentially enable information disclosure via local access.
+    (CVE-2022-38090)
+
+Note that Nessus has not tested for these issues but has instead relied only on the application's self-reported version number.",Run 'yum update microcode_ctl' to update your system.,"https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-21216.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-33972.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-38090.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2056.html","
+Remote package installed : microcode_ctl-2.1-47.amzn2.0.14
+Should be                : microcode_ctl-2.1-47.amzn2.0.15
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,7.2,5.3,E:U/RL:OF/RC:C,AV:A/AC:L/Au:M/C:C/I:C/A:C,6.8,5.9,E:U/RL:O/RC:C,AV:A/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.596Z,2023-06-08T01:25:48Z,,TRUE,High,2,2,NONE,54,local,1,,2023-06-05T00:00:00Z,2023-06-05T00:00:00Z,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176717,CVE-2022-2521,7.8,Medium,ip-127-0-0-1.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : libtiff (ALAS-2023-2055),The remote Amazon Linux 2 host is missing a security update.,"The version of libtiff installed on the remote host is prior to 4.0.3-35. It is, therefore, affected by a vulnerability as referenced in the ALAS2-2023-2055 advisory.
+
+  - It was found in libtiff 4.4.0rc1 that there is an invalid pointer free operation in TIFFClose() at     tif_close.c:131 called by tiffcrop.c:2522 that can cause a program crash and denial of service while     processing crafted input. (CVE-2022-2521)
+
+Note that Nessus has not tested for this issue but has instead relied only on the application's self-reported version number.",Run 'yum update libtiff' to update your system.,"https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2022-2521.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2055.html","
+Remote package installed : libtiff-4.0.3-35.amzn2.0.5
+Should be                : libtiff-4.0.3-35.amzn2.0.6
+
+",,Active,127.0.0.1,ip-127-0-0-1.us-west-2.compute.internal,,Linux Kernel 4.14.313-235.533.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,7.8,6.1,E:POC/RL:OF/RC:C,AV:N/AC:L/Au:N/C:N/I:N/A:C,6.5,5.9,E:P/RL:O/RC:C,AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T01:58:56.166Z,null,2023-06-08T01:58:56.166Z,2023-06-08T01:58:56.166Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:00:22.609Z,2023-06-08T01:25:48Z,,TRUE,High,2,2,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+164329,CVE-2022-37439,4.6,Medium,ip-192-168-1-110.us-west-2.compute.internal,TCP,0,"Splunk Enterprise 8.1 < 8.1.11, 8.2.0 < 8.2.7.1 / Universal Forwarders 8.1 < 8.1.11, 8.2.0 < 8.2.7.1 (SVD-2022-0803)",An application running on a remote web server host is affected by a vulnerability,"The version of Splunk installed on the remote host is prior to tested version. It is, therefore, affected by a vulnerability as referenced in the SVD-2022-0803 advisory.
+
+  - In Splunk Enterprise and Universal Forwarder versions in the following table, indexing a specially crafted     ZIP file using the file monitoring input can result in a crash of the application. Attempts to restart the     application would result in a crash and would require manually removing the malformed file.
+    (CVE-2022-37439)
+
+Note that Nessus has not tested for this issue but has instead relied only on the application's self-reported version number.","For Splunk Enterprise and Universal Forwarder customers, upgrade versions to 8.1.11, 8.2.7.1, or higher.",http://www.nessus.org/u?06538c78,"
+  Path              : /opt/splunkforwarder
+  Installed version : 8.2.0
+  Fixed version     : 8.2.7.1
+",,Active,192.168.1.110,ip-192-168-1-110.us-west-2.compute.internal,,Linux Kernel 4.14.311-233.529.amzn2.x86_64 on Amazon Linux 2,,CGI abuses,4.6,3.4,E:U/RL:OF/RC:C,AV:L/AC:L/Au:S/C:N/I:N/A:C,5.5,4.8,E:U/RL:O/RC:C,AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T02:01:27.233Z,null,2023-05-18T01:42:29.529Z,2023-06-08T02:01:27.233Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:02:49.981Z,2023-06-08T01:28:20Z,,TRUE,Medium,2,2,NONE,6,combined,1.4,,2022-12-06T00:00:00Z,2022-08-22T00:00:00Z,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+176699,CVE-2021-3800,4.9,Medium,ip-192-168-1-110.us-west-2.compute.internal,TCP,0,Amazon Linux 2 : glib2 (ALAS-2023-2058),The remote Amazon Linux 2 host is missing a security update.,"The version of glib2 installed on the remote host is prior to 2.56.1-9. It is, therefore, affected by a vulnerability as referenced in the ALAS2-2023-2058 advisory.
+
+  - A flaw was found in glib before version 2.63.6. Due to random charset alias, pkexec can leak content from     files owned by privileged users to unprivileged ones under the right condition. (CVE-2021-3800)
+
+Note that Nessus has not tested for this issue but has instead relied only on the application's self-reported version number.",Run 'yum update glib2' to update your system.,"https://alas.aws.amazon.com/faqs.html
+https://alas.aws.amazon.com/cve/html/CVE-2021-3800.html
+https://alas.aws.amazon.com/AL2/ALAS-2023-2058.html","
+Remote package installed : glib2-2.56.1-9.amzn2.0.3
+Should be                : glib2-2.56.1-9.amzn2.0.5
+
+",,Active,192.167.1.110,ip-192-168-1-110.us-west-2.compute.internal,,Linux Kernel 4.14.311-233.529.amzn2.x86_64 on Amazon Linux 2,,Amazon Linux Local Security Checks,4.9,3.8,E:POC/RL:OF/RC:C,AV:L/AC:L/Au:N/C:C/I:N/A:N,5.5,5,E:P/RL:O/RC:C,AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N,general-purpose,2023-06-08T01:07:18.371Z,2023-06-08T02:01:27.233Z,null,2023-06-08T02:01:27.233Z,2023-06-08T02:01:27.233Z,template-1f03a3b4-dc06-2525-a174-f7a3392cca43702ca449c77037a3,6411de3d-b7d5-4a18-b428-4c24bbfd5162,2023-06-08T02:02:50.018Z,2023-06-08T01:28:20Z,,TRUE,Medium,2,2,NONE,54,local,1.1,,2023-06-06T00:00:00Z,2023-06-05T00:00:00Z,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

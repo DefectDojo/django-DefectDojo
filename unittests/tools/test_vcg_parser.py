@@ -1,16 +1,14 @@
-import io
 import csv
+import io
 
 from defusedxml import ElementTree
-from ..dojo_test_case import DojoTestCase
 
 from dojo.models import Test
-from dojo.tools.vcg.parser import VCGCsvParser
-from dojo.tools.vcg.parser import VCGParser
-from dojo.tools.vcg.parser import VCGXmlParser
+from dojo.tools.vcg.parser import VCGCsvParser, VCGParser, VCGXmlParser
+from unittests.dojo_test_case import DojoTestCase
 
 
-class TestFile(object):
+class TestFile:
     def read(self):
         return self.content
 
@@ -181,7 +179,7 @@ class TestVCGCsvParser(DojoTestCase):
         self.assertIsNone(finding)
 
     def test_parseissuerow_with_empty_row_has_no_finding(self):
-        row = dict()
+        row = {}
         finding = self.parser.parse_issue(row, Test())
         self.assertIsNone(finding)
 

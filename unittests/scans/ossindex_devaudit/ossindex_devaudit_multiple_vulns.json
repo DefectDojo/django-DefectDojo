@@ -1,0 +1,43 @@
+{
+	"Packages Audited": 1,
+	"Vulnerabilities Found": 1,
+	"Packages": [
+    {
+        "Package": {
+            "pm": "npm",
+            "group": "None",
+            "name": "react-dom",
+            "version": "16.4.1",
+            "vendor": "None"
+        },
+        "Vulnerabilities": [{
+                "id": "422fd048-4155-4213-8126-75b4c3135820",
+                "title": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+                "description": "The software does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users.",
+                "cvssScore": "6.1",
+                "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+                "cwe": "CWE-79",
+                "reference": "https://ossindex.sonatype.org/vuln/422fd048-4155-4213-8126-75b4c3135820?component-type=npm&component-name=react-dom&utm_source=devaudit&utm_medium=integration&utm_content=3.4"
+            }
+        ]
+    },
+    {
+        "Package": {
+            "pm": "npm",
+            "group": "None",
+            "name": "axios",
+            "version": "0.19.2",
+            "vendor": "None"
+        },
+        "Vulnerabilities": [{
+                "id": "f7fc0998-d7c0-4f98-aba5-661f7db01bfd",
+                "title": "[CVE-2020-28168] Axios NPM package 0.21.0 contains a Server-Side Request Forgery (SSRF) vulnerabi...",
+                "description": "Axios NPM package 0.21.0 contains a Server-Side Request Forgery (SSRF) vulnerability where an attacker is able to bypass a proxy by providing a URL that responds with a redirect to a restricted host or IP address.",
+                "cvssScore": "5.9",
+                "cvssVector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                "cwe": "None",
+                "reference": "https://ossindex.sonatype.org/vuln/f7fc0998-d7c0-4f98-aba5-661f7db01bfd?component-type=npm&component-name=axios&utm_source=devaudit&utm_medium=integration&utm_content=3.4"
+            }
+        ]
+    }]
+}

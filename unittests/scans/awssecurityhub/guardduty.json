@@ -1,0 +1,429 @@
+{
+  "Findings": [
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:guardduty:us-east-1:123456789012:detector/123456789/finding/123456789789",
+      "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/guardduty",
+      "ProductName": "GuardDuty",
+      "CompanyName": "Amazon",
+      "Region": "us-east-1",
+      "GeneratorId": "arn:aws:guardduty:us-east-1:123456789012:detector/123456789",
+      "AwsAccountId": "123456789012",
+      "Types": [
+        "TTPs/Defense Evasion/DefenseEvasion:EC2-UnusualDNSResolver"
+      ],
+      "FirstObservedAt": "2024-01-17T11:19:23.000Z",
+      "LastObservedAt": "2200-01-17T11:21:23.000Z",
+      "CreatedAt": "2024-01-17T11:33:20.845Z",
+      "UpdatedAt": "2024-01-17T11:33:21.196Z",
+      "Severity": {
+        "Product": 5,
+        "Label": "MEDIUM",
+        "Normalized": 50
+      },
+      "Title": "EC2 instance i-1234567890 is communicating with an Unusual DNS Resolver 1.1.1.1.",
+      "Description": "EC2 instance i-1234567890 is communicating with an Unusual DNS Resolver 1.1.1.1.",
+      "SourceUrl": "https://us-east-1.console.aws.amazon.com/guardduty/home?region=us-east-1#/findings?macros=current&fId=123456789789",
+      "ProductFields": {
+        "aws/guardduty/service/action/networkConnectionAction/remotePortDetails/portName": "DNS",
+        "aws/guardduty/service/archived": "false",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/asnOrg": "Rostelecom",
+        "aws/guardduty/service/additionalInfo/value": "{\"inBytes\":\"318\",\"outBytes\":\"88\",\"unusual\":\"Rostelecom\"}",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/geoLocation/lat": "42.1123123",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/ipAddressV4": "1.1.1.1",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/geoLocation/lon": "3458.123",
+        "aws/guardduty/service/action/networkConnectionAction/blocked": "false",
+        "aws/guardduty/service/action/networkConnectionAction/remotePortDetails/port": "53",
+        "aws/guardduty/service/additionalInfo/inBytes": "318",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/country/countryName": "Russia",
+        "aws/guardduty/service/serviceName": "guardduty",
+        "aws/guardduty/service/action/networkConnectionAction/localIpDetails/ipAddressV4": "127.0.0.1",
+        "aws/guardduty/service/detectorId": "123456789",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/org": "Rostelecom",
+        "aws/guardduty/service/action/networkConnectionAction/connectionDirection": "OUTBOUND",
+        "aws/guardduty/service/eventFirstSeen": "2024-01-17T11:19:23.000Z",
+        "aws/guardduty/service/eventLastSeen": "2024-01-17T11:21:23.000Z",
+        "aws/guardduty/service/action/networkConnectionAction/localPortDetails/portName": "Unknown",
+        "aws/guardduty/service/action/actionType": "NETWORK_CONNECTION",
+        "aws/guardduty/service/additionalInfo/unusual": "Rostelecom",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/city/cityName": "Yeysk",
+        "aws/guardduty/service/resourceRole": "ACTOR",
+        "aws/guardduty/service/action/networkConnectionAction/localPortDetails/port": "53814",
+        "aws/guardduty/service/action/networkConnectionAction/protocol": "UDP",
+        "aws/guardduty/service/additionalInfo/outBytes": "88",
+        "aws/guardduty/service/count": "108",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/asn": "25490",
+        "aws/guardduty/service/additionalInfo/type": "default",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/isp": "Rostelecom",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/guardduty/arn:aws:guardduty:us-east-1:123456789012:detector/123456789/finding/123456789789",
+        "aws/securityhub/ProductName": "GuardDuty",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsEc2Instance",
+          "Id": "arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890",
+          "Partition": "aws",
+          "Region": "us-east-1",
+          "Tags": {
+            "ManagedBy": "Terraform",
+            "map-migrated": "d-server-asdfasdf",
+            "Name": "asdf-namenamename",
+            "domain": "asdf"
+          },
+          "Details": {
+            "AwsEc2Instance": {
+              "Type": "t2.small",
+              "ImageId": "ami-asdfasdf",
+              "IpV4Addresses": [
+                "1.2.2.2",
+                "127.0.0.1"
+              ],
+              "IamInstanceProfileArn": "arn:aws:iam::123456789012:instance-profile/asdf-iamrole-asdf-new",
+              "VpcId": "vpc-12354467879",
+              "SubnetId": "subnet-123123123",
+              "LaunchedAt": "2023-10-23T09:09:47.000Z"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "MEDIUM"
+        },
+        "Types": [
+          "TTPs/Defense Evasion/DefenseEvasion:EC2-UnusualDNSResolver"
+        ]
+      },
+      "Sample": false
+    },
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:guardduty:us-east-1:123456789012:detector/123456789/finding/12312312312312312",
+      "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/guardduty",
+      "ProductName": "GuardDuty",
+      "CompanyName": "Amazon",
+      "Region": "us-east-1",
+      "GeneratorId": "arn:aws:guardduty:us-east-1:123456789012:detector/123456789",
+      "AwsAccountId": "123456789012",
+      "Types": [
+        "TTPs/Discovery/Recon:EC2-Portscan"
+      ],
+      "FirstObservedAt": "2024-01-17T11:22:23.000Z",
+      "LastObservedAt": "2200-01-17T11:25:23.000Z",
+      "CreatedAt": "2024-01-17T11:33:20.699Z",
+      "UpdatedAt": "2024-01-17T11:33:20.699Z",
+      "Severity": {
+        "Product": 5,
+        "Label": "MEDIUM",
+        "Normalized": 50
+      },
+      "Title": "Outbound portscan from EC2 instance i-1234567890.",
+      "Description": "EC2 instance i-1234567890 is performing outbound port scans against remote host 1.2.3.4.",
+      "SourceUrl": "https://us-east-1.console.aws.amazon.com/guardduty/home?region=us-east-1#/findings?macros=current&fId=12312312312312312",
+      "ProductFields": {
+        "aws/guardduty/service/additionalInfo/portsScannedSample.18_": "8443",
+        "aws/guardduty/service/action/networkConnectionAction/remotePortDetails/portName": "Unknown",
+        "aws/guardduty/service/archived": "false",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.16_": "3389",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/asnOrg": "AMAZON-02",
+        "aws/guardduty/service/additionalInfo/value": "{\"portsScannedSample\":[88,25,646,106,8888,993,995,5060,5000,873,37,389,110,587,179,514,3389,1433,8443,1900]}",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/geoLocation/lat": "10.188",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/ipAddressV4": "1.2.3.4",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.2_": "646",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/geoLocation/lon": "123.43",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.0_": "88",
+        "aws/guardduty/service/action/networkConnectionAction/blocked": "false",
+        "aws/guardduty/service/action/networkConnectionAction/remotePortDetails/port": "995",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/country/countryName": "USA",
+        "aws/guardduty/service/serviceName": "guardduty",
+        "aws/guardduty/service/action/networkConnectionAction/localIpDetails/ipAddressV4": "127.0.0.1",
+        "aws/guardduty/service/detectorId": "123456789",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.10_": "37",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.8_": "5000",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/org": "Amazon.com",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.6_": "995",
+        "aws/guardduty/service/action/networkConnectionAction/connectionDirection": "OUTBOUND",
+        "aws/guardduty/service/eventFirstSeen": "2024-01-17T11:22:23.000Z",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.14_": "179",
+        "aws/guardduty/service/eventLastSeen": "2024-01-17T11:25:23.000Z",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.4_": "8888",
+        "aws/guardduty/service/action/networkConnectionAction/localPortDetails/portName": "Unknown",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.12_": "110",
+        "aws/guardduty/service/action/actionType": "NETWORK_CONNECTION",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.17_": "1433",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.15_": "514",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.19_": "1900",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/city/cityName": "America",
+        "aws/guardduty/service/resourceRole": "ACTOR",
+        "aws/guardduty/service/action/networkConnectionAction/localPortDetails/port": "38090",
+        "aws/guardduty/service/action/networkConnectionAction/protocol": "TCP",
+        "aws/guardduty/service/count": "4",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.3_": "106",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/asn": "16509",
+        "aws/guardduty/service/additionalInfo/type": "default",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.1_": "25",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/isp": "Amazon.com",
+        "aws/guardduty/service/additionalInfo/portsScannedSample.9_": "873",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/guardduty/arn:aws:guardduty:us-east-1:123456789012:detector/123456789/finding/12312312312312312",
+        "aws/securityhub/ProductName": "GuardDuty",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsEc2Instance",
+          "Id": "arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890",
+          "Partition": "aws",
+          "Region": "us-east-1",
+          "Tags": {
+            "ManagedBy": "Terraform",
+            "map-migrated": "d-server-asdfasdf",
+            "Name": "asdf-namenamename",
+            "domain": "asdf"
+          },
+          "Details": {
+            "AwsEc2Instance": {
+              "Type": "t2.small",
+              "ImageId": "ami-asdfasdf",
+              "IpV4Addresses": [
+                "1.2.2.2",
+                "127.0.0.1"
+              ],
+              "IamInstanceProfileArn": "arn:aws:iam::123456789012:instance-profile/asdf-iamrole-asdf-new",
+              "VpcId": "vpc-12354467879",
+              "SubnetId": "subnet-123123123",
+              "LaunchedAt": "2023-10-23T09:09:47.000Z"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "MEDIUM"
+        },
+        "Types": [
+          "TTPs/Discovery/Recon:EC2-Portscan"
+        ]
+      },
+      "Sample": false
+    },
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:guardduty:us-east-1:123456789012:detector/123456789/finding/4897489798789",
+      "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/guardduty",
+      "ProductName": "GuardDuty",
+      "CompanyName": "Amazon",
+      "Region": "us-east-1",
+      "GeneratorId": "arn:aws:guardduty:us-east-1:123456789012:detector/123456789",
+      "AwsAccountId": "123456789012",
+      "Types": [
+        "TTPs/Initial Access/UnauthorizedAccess:EC2-SSHBruteForce"
+      ],
+      "FirstObservedAt": "2023-11-06T15:28:58.000Z",
+      "LastObservedAt": "2200-01-12T07:30:38.000Z",
+      "CreatedAt": "2023-11-06T15:42:44.710Z",
+      "UpdatedAt": "2024-01-12T07:45:57.163Z",
+      "Severity": {
+        "Product": 2,
+        "Label": "LOW",
+        "Normalized": 40
+      },
+      "Title": "1.2.9.9 is performing SSH brute force attacks against i-1234567890.",
+      "Description": "1.2.9.9 is performing SSH brute force attacks against i-1234567890. Brute force attacks are used to gain unauthorized access to your instance by guessing the SSH password.",
+      "SourceUrl": "https://us-east-1.console.aws.amazon.com/guardduty/home?region=us-east-1#/findings?macros=current&fId=4897489798789",
+      "ProductFields": {
+        "aws/guardduty/service/action/networkConnectionAction/remotePortDetails/portName": "Unknown",
+        "aws/guardduty/service/archived": "false",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/asnOrg": "C1V",
+        "aws/guardduty/service/additionalInfo/value": "",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/geoLocation/lat": "11231.61269",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/ipAddressV4": "1.22.9.9",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/geoLocation/lon": "11232.22",
+        "aws/guardduty/service/action/networkConnectionAction/blocked": "false",
+        "aws/guardduty/service/action/networkConnectionAction/remotePortDetails/port": "37726",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/country/countryName": "Italy",
+        "aws/guardduty/service/serviceName": "guardduty",
+        "aws/guardduty/service/action/networkConnectionAction/localIpDetails/ipAddressV4": "127.0.0.1",
+        "aws/guardduty/service/detectorId": "123456789",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/org": "C1V",
+        "aws/guardduty/service/action/networkConnectionAction/connectionDirection": "INBOUND",
+        "aws/guardduty/service/eventFirstSeen": "2023-11-06T15:28:58.000Z",
+        "aws/guardduty/service/eventLastSeen": "2099-01-12T07:30:38.000Z",
+        "aws/guardduty/service/action/networkConnectionAction/localPortDetails/portName": "SSH",
+        "aws/guardduty/service/action/actionType": "NETWORK_CONNECTION",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/city/cityName": "Pomezia",
+        "aws/guardduty/service/resourceRole": "TARGET",
+        "aws/guardduty/service/action/networkConnectionAction/localPortDetails/port": "22",
+        "aws/guardduty/service/action/networkConnectionAction/protocol": "TCP",
+        "aws/guardduty/service/count": "7",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/asn": "212271",
+        "aws/guardduty/service/additionalInfo/type": "default",
+        "aws/guardduty/service/action/networkConnectionAction/remoteIpDetails/organization/isp": "C1V",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/guardduty/arn:aws:guardduty:us-east-1:123456789012:detector/123456789/finding/4897489798789",
+        "aws/securityhub/ProductName": "GuardDuty",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsEc2Instance",
+          "Id": "arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890",
+          "Partition": "aws",
+          "Region": "us-east-1",
+          "Tags": {
+            "ManagedBy": "Terraform",
+            "map-migrated": "d-server-asdfasdf",
+            "Name": "asdf-namenamename",
+            "domain": "asdf"
+          },
+          "Details": {
+            "AwsEc2Instance": {
+              "Type": "t2.small",
+              "ImageId": "ami-asdfasdf",
+              "IpV4Addresses": [
+                "1.2.2.2",
+                "127.0.0.1"
+              ],
+              "IamInstanceProfileArn": "arn:aws:iam::123456789012:instance-profile/asdf-iamrole-asdf-new",
+              "VpcId": "vpc-12354467879",
+              "SubnetId": "subnet-123123123",
+              "LaunchedAt": "2023-10-23T09:09:47.000Z"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "LOW"
+        },
+        "Types": [
+          "TTPs/Initial Access/UnauthorizedAccess:EC2-SSHBruteForce"
+        ]
+      },
+      "Sample": false
+    },
+    {
+      "SchemaVersion": "2018-10-08",
+      "Id": "arn:aws:guardduty:us-east-1:123456789012:detector/123456789/finding/2123123123123",
+      "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/guardduty",
+      "ProductName": "GuardDuty",
+      "CompanyName": "Amazon",
+      "Region": "us-east-1",
+      "GeneratorId": "arn:aws:guardduty:us-east-1:123456789012:detector/123456789",
+      "AwsAccountId": "123456789012",
+      "Types": [
+        "TTPs/Discovery/IAMUser-AnomalousBehavior"
+      ],
+      "FirstObservedAt": "2023-12-12T12:51:24.000Z",
+      "LastObservedAt": "2200-12-12T12:56:22.000Z",
+      "CreatedAt": "2023-12-12T13:17:27.087Z",
+      "UpdatedAt": "2023-12-12T13:17:27.087Z",
+      "Severity": {
+        "Product": 2,
+        "Label": "LOW",
+        "Normalized": 40
+      },
+      "Title": "User AssumedRole : 123123123 is anomalously invoking APIs commonly used in Discovery tactics.",
+      "Description": "APIs commonly used in Discovery tactics were invoked by user AssumedRole : 123123123, under anomalous circumstances. Such activity is not typically seen from this user.",
+      "SourceUrl": "https://us-east-1.console.aws.amazon.com/guardduty/home?region=us-east-1#/findings?macros=current&fId=2123123123123",
+      "ProductFields": {
+        "aws/guardduty/service/additionalInfo/profiledBehavior/rareProfiledAPIsUserIdentityProfiling": "",
+        "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/organization/asnOrg": "Russia.o.",
+        "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/organization/org": "SBB",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/rareProfiledUserTypesAccountProfiling": "",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/frequentProfiledUserAgentsUserIdentityProfiling": "OTHER , browser , AWS Internal",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/rareProfiledUserNamesAccountProfiling": "AWSServiceRoleForRDS , AWSServiceRoleForAmazonGuardDuty , asdf-sec_audit_role_assumed_by_sectools",
+        "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/country/countryName": "Russia",
+        "aws/guardduty/service/serviceName": "guardduty",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/frequentProfiledUserNamesAccountProfiling": "123123123 , AWSServiceRoleForSecurityHub , AWSServiceRoleForAccessAnalyzer , nv-rl-awsconfig-all-tflz , OrganizationAccountAccessRole , asdf-iamrole-asdf-new",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/rareProfiledASNsUserIdentityProfiling": "asnNumber: 6805 asn",
+        "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/geoLocation/lon": "20.4637",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/frequentProfiledUserAgentsAccountProfiling": "AWS Service , aws-sdk-go , aws-sdk-go-v2 , AWS Internal , aws-cli , Botocore , OTHER , browser",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/frequentProfiledASNsAccountProfiling": "asnNumber: 31042 asnOrg: Russia ",
+        "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/organization/asn": "31042",
+        "aws/guardduty/service/action/actionType": "AWS_API_CALL",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/frequentProfiledAPIsAccountProfiling": "ListTopics , ListRoles , DescribeAddresses , BatchGetResourceConfig , ListGrants , SelectResourceConfig , DescribeConfigurationRecorderStatus , DescribeByoipCidrs , DescribeVpcs , GetKeyPolicy , DescribeTrails , GetBucketLocation , ListSecrets , GetAccountPublicAccessBlock , ListKeys , GetRepositoryPolicy , GenerateCredentialReport , GetResourcePolicy , GetSecretValue",
+        "aws/guardduty/service/additionalInfo/userAgent/fullUserAgent": "AWS Internal",
+        "aws/guardduty/service/additionalInfo/unusualBehavior/unusualAPIsUserIdentityProfiling": "DescribeInstanceConnectEndpoints , ListAnomalies , ListLogAnomalyDetectors , GetConnectionStatus",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/frequentProfiledUserTypesAccountProfiling": "ASSUMED_ROLE",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/infrequentProfiledAPIsAccountProfiling": "DescribeInstanceInformation",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/infrequentProfiledUserAgentsUserIdentityProfiling": "aws-internal/3",
+        "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/ipAddressV4": "1.2.3.5",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/rareProfiledASNsAccountProfiling": "ade",
+        "aws/guardduty/service/action/awsApiCallAction/affectedResources": "",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/infrequentProfiledAPIsUserIdentityProfiling": "DescribeInstanceInformation , DescribeAccountAttributes , DescribeSubnets , GetResourcePolicy , DescribeAlarms , DescribeSecret , DescribeSecurityGroups , ListRoles , DescribeKeyPairs , DescribeVolumes , DescribeAddresses , DescribeAvailabilityZones , DescribeVpcs , DescribeLoadBalancers , DescribeAutoScalingGroups",
+        "aws/guardduty/service/additionalInfo/unusualBehavior/unusualAPIsAccountProfiling": "DescribeInstanceConnectEndpoints , ListAnomalies , ListLogAnomalyDetectors , GetConnectionStatus",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/infrequentProfiledUserTypesAccountProfiling": "",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/rareProfiledUserAgentsAccountProfiling": "",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/rareProfiledUserAgentsUserIdentityProfiling": "",
+        "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/geoLocation/lat": "42123.46",
+        "aws/guardduty/service/additionalInfo/unusualBehavior/unusualASNsAccountProfiling": "",
+        "aws/guardduty/service/action/awsApiCallAction/serviceName": "ssm.amazonaws.com",
+        "aws/guardduty/service/detectorId": "123456789",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/frequentProfiledASNsUserIdentityProfiling": "asnNumber: 1G",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/infrequentProfiledASNsAccountProfiling": "",
+        "aws/guardduty/service/additionalInfo/anomalies/anomalousAPIs": "ssm.amazonaws.com:[DescribeInstanceInformation:success , GetConnectionStatus:success] , ec2.amazonaws.com:[DescribeLaunchTemplates:success , DescribeKeyPairs:success , DescribeInstanceConnectEndpoints:success , DescribeAvailabilityZones:success] , logs.amazonaws.com:[ListAnomalies:success , ListLogAnomalyDetectors:success] , autoscaling.amazonaws.com:[DescribeAutoScalingGroups:success]",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/rareProfiledAPIsAccountProfiling": "",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/infrequentProfiledUserAgentsAccountProfiling": "aws-internal/3",
+        "aws/guardduty/service/resourceRole": "TARGET",
+        "aws/guardduty/service/additionalInfo/unusualBehavior/unusualUserNamesAccountProfiling": "",
+        "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/organization/isp": "SBB",
+        "aws/guardduty/service/additionalInfo/unusualBehavior/unusualUserAgentsAccountProfiling": "",
+        "aws/guardduty/service/action/awsApiCallAction/callerType": "Remote IP",
+        "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/city/cityName": "Belgrade",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/infrequentProfiledUserNamesAccountProfiling": "terraform-12312312312313 , oudWatchLogRole , AWSServiceRoleForElasticLoadBalancing , AWSServiceRoleForSSO",
+        "aws/guardduty/service/action/awsApiCallAction/api": "DescribeInstanceInformation",
+        "aws/guardduty/service/additionalInfo/unusualBehavior/unusualUserTypesAccountProfiling": "",
+        "aws/guardduty/service/additionalInfo/userAgent/userAgentCategory": "AWS Internal",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/infrequentProfiledASNsUserIdentityProfiling": "",
+        "aws/guardduty/service/additionalInfo/profiledBehavior/frequentProfiledAPIsUserIdentityProfiling": "DescribeRegions , GetSigninToken , ConsoleLogin , ListSecrets , ListAliases",
+        "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/guardduty/arn:aws:guardduty:us-east-1:123456789012:detector/123456789/finding/2123123123123",
+        "aws/securityhub/ProductName": "GuardDuty",
+        "aws/securityhub/CompanyName": "Amazon"
+      },
+      "Resources": [
+        {
+          "Type": "AwsIamAccessKey",
+          "Id": "AWS::IAM::AccessKey:123123123",
+          "Partition": "aws",
+          "Region": "us-east-1",
+          "Details": {
+            "AwsIamAccessKey": {
+              "PrincipalId": "asdfasdfasdfasfd",
+              "PrincipalType": "AssumedRole",
+              "PrincipalName": "asdfasdfasdf"
+            }
+          }
+        }
+      ],
+      "WorkflowState": "NEW",
+      "Workflow": {
+        "Status": "NEW"
+      },
+      "RecordState": "ACTIVE",
+      "FindingProviderFields": {
+        "Severity": {
+          "Label": "LOW"
+        },
+        "Types": [
+          "TTPs/Discovery/IAMUser-AnomalousBehavior"
+        ]
+      },
+      "Sample": false
+    }
+  ]
+}

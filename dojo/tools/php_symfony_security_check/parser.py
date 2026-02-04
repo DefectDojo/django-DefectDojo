@@ -3,8 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class PhpSymfonySecurityCheckParser(object):
-
+class PhpSymfonySecurityCheckParser:
     def get_scan_types(self):
         return ["PHP Symfony Security Check"]
 
@@ -20,15 +19,16 @@ class PhpSymfonySecurityCheckParser(object):
 
     def parse_json(self, json_file):
         if json_file is None:
-            return
+            return None
         try:
             data = json_file.read()
             try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
+                tree = json.loads(str(data, "utf-8"))
+            except Exception:
                 tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
+        except Exception:
+            msg = "Invalid format"
+            raise Exception(msg)
 
         return tree
 
@@ -36,41 +36,54 @@ class PhpSymfonySecurityCheckParser(object):
         items = {}
 
         for dependency_name, dependency_data in list(tree.items()):
-            advisories = dependency_data.get('advisories')
-            dependency_version = dependency_data['version']
-            if dependency_version and dependency_version.startswith('v'):
+            advisories = dependency_data.get("advisories")
+            dependency_version = dependency_data["version"]
+            if dependency_version and dependency_version.startswith("v"):
                 dependency_version = dependency_version[1:]
 
             for advisory in advisories:
-                item = get_item(dependency_name, dependency_version, advisory, test)
-                unique_key = str(dependency_name) + str(dependency_data['version'] + str(advisory['cve']))
+                item = get_item(
+                    dependency_name, dependency_version, advisory, test,
+                )
+                unique_key = str(dependency_name) + str(
+                    dependency_data["version"] + str(advisory["cve"]),
+                )
                 items[unique_key] = item
 
         return list(items.values())
 
 
 def get_item(dependency_name, dependency_version, advisory, test):
+    finding = Finding(
+        title=dependency_name
+        + " - "
+        + "("
+        + dependency_version
+        + ", "
+        + advisory["cve"]
+        + ")",
+        test=test,
+        # TODO: decide how to handle the fact we don't have a severity. None
+        # will lead to problems handling minimum severity on import
+        severity="Info",
+        description=advisory["title"],
+        # TODO: Decide if the default '1035: vulnerable 3rd party component' is
+        # OK to use?
+        cwe=1035,
+        mitigation="upgrade",
+        references=advisory["link"],
+        false_p=False,
+        duplicate=False,
+        out_of_scope=False,
+        mitigated=None,
+        impact="No impact provided",
+        static_finding=True,
+        dynamic_finding=False,
+        component_name=dependency_name,
+        component_version=dependency_version,
+    )
 
-    finding = Finding(title=dependency_name + " - " + "(" + dependency_version + ", " + advisory['cve'] + ")",
-                      test=test,
-                      # TODO decide how to handle the fact we don't have a severity. None will lead to problems handling minimum severity on import
-                      severity='Info',
-                      description=advisory['title'],
-                      # TODO Decide if the default '1035: vulnerable 3rd party component' is OK to use?
-                      cwe=1035,
-                      mitigation='upgrade',
-                      references=advisory['link'],
-                      false_p=False,
-                      duplicate=False,
-                      out_of_scope=False,
-                      mitigated=None,
-                      impact="No impact provided",
-                      static_finding=True,
-                      dynamic_finding=False,
-                      component_name=dependency_name,
-                      component_version=dependency_version)
-
-    if advisory['cve']:
-        finding.unsaved_vulnerability_ids = [advisory['cve']]
+    if advisory["cve"]:
+        finding.unsaved_vulnerability_ids = [advisory["cve"]]
 
     return finding

@@ -1,5 +1,6 @@
-from .dojo_test_case import DojoTestCase
 from dojo.search.views import parse_search_query
+
+from .dojo_test_case import DojoTestCase
 
 
 class TestSearch(DojoTestCase):
@@ -25,8 +26,6 @@ class TestSearch(DojoTestCase):
         self.assertEqual(keywords[2], "space inside")
 
         operators, keywords = parse_search_query("tag:anchore word tags:php")
-        # print(operators)
-        # print(keywords)
 
         self.assertEqual(len(operators), 2)
         self.assertEqual(len(operators["tag"]), 1)
@@ -57,7 +56,7 @@ class TestSearch(DojoTestCase):
         self.assertEqual(keywords[1], "space inside")
 
         operators, keywords = parse_search_query(
-            "tags:anchore cve:CVE-2020-1234 jquery tags:beer"
+            "tags:anchore cve:CVE-2020-1234 jquery tags:beer",
         )
         self.assertEqual(len(operators), 2)
         self.assertEqual(len(operators["tags"]), 2)

@@ -1,0 +1,595 @@
+{
+    "Findings": [
+        {
+            "SchemaVersion": "2018-10-08",
+            "Id": "arn:aws:inspector2:us-east-1:XXXXXXXXXXXX:finding/c830773636319eaf8313475ae5876490",
+            "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/inspector",
+            "ProductName": "Inspector",
+            "CompanyName": "Amazon",
+            "Region": "us-east-1",
+            "GeneratorId": "AWSInspector",
+            "AwsAccountId": "XXXXXXXXXXXX",
+            "Types": [
+                "Software and Configuration Checks/Vulnerabilities/CVE"
+            ],
+            "FirstObservedAt": "2023-03-01T08:04:10Z",
+            "LastObservedAt": "2023-03-01T08:34:29Z",
+            "CreatedAt": "2023-03-01T08:04:10Z",
+            "UpdatedAt": "2023-03-01T08:34:29Z",
+            "Severity": {
+                "Label": "CRITICAL",
+                "Normalized": 90
+            },
+            "Title": "CVE-2022-3643 - kernel",
+            "Description": "Guests can trigger NIC interface reset/abort/crash via netback It is possible for a guest to trigger a NIC interface reset/abort/crash in a Linux based network backend by sending certain kinds of packets. It appears to be an (unwritten?) assumption in the rest of the Linux network stack that packet protocol headers are all contained within the linear section of the SKB and some NICs behave badly if this is not the case. This has been reported to occur with Cisco (enic) and Broadcom NetXtrem II BCM5780 (bnx2x) though it may be an issue with other NICs/drivers as well. In case the frontend is sending requests with split headers, netback will forward those violating above mentioned assumption to the networking core, resulting in said misbehavior.",
+            "Remediation": {
+                "Recommendation": {
+                    "Text": "None Provided"
+                }
+            },
+            "ProductFields": {
+                "aws/inspector/FindingStatus": "ACTIVE",
+                "aws/inspector/inspectorScore": "10.0",
+                "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "AMAZON_LINUX_2",
+                "aws/inspector/ProductVersion": "2",
+                "aws/inspector/instanceId": "i-11111111111111111",
+                "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/inspector/arn:aws:inspector2:us-east-1:XXXXXXXXXXXX:finding/c830773636319eaf8313475ae5876490",
+                "aws/securityhub/ProductName": "Inspector",
+                "aws/securityhub/CompanyName": "Amazon"
+            },
+            "Resources": [
+                {
+                    "Type": "AwsEc2Instance",
+                    "Id": "arn:aws:ec2:us-east-1:XXXXXXXXXXXX:i-11111111111111111",
+                    "Partition": "aws",
+                    "Region": "us-east-1",
+                    "Tags": {},
+                    "Details": {
+                        "AwsEc2Instance": {
+                            "Type": "c6i.large",
+                            "ImageId": "ami-11111111111111111",
+                            "IpV4Addresses": [
+                                "11.1.11.111"
+                            ],
+                            "IamInstanceProfileArn": "arn:aws:iam::XXXXXXXXXXXX:instance-profile/something",
+                            "VpcId": "vpc-11111111111111111",
+                            "SubnetId": "subnet-11111111111111111",
+                            "LaunchedAt": "2023-03-01T08:03:19Z"
+                        }
+                    }
+                }
+            ],
+            "WorkflowState": "NEW",
+            "Workflow": {
+                "Status": "NEW"
+            },
+            "RecordState": "ACTIVE",
+            "Vulnerabilities": [
+                {
+                    "Id": "CVE-2022-3643",
+                    "VulnerablePackages": [
+                        {
+                            "Name": "kernel",
+                            "Version": "4.14.301",
+                            "Epoch": "0",
+                            "Release": "224.520.amzn2",
+                            "Architecture": "X86_64",
+                            "PackageManager": "OS",
+                            "FixedInVersion": "0:5.10.162-141.675.amzn2",
+                            "Remediation": "yum update kernel"
+                        }
+                    ],
+                    "Cvss": [
+                        {
+                            "Version": "3.1",
+                            "BaseScore": 10,
+                            "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                            "Source": "NVD"
+                        },
+                        {
+                            "Version": "3.1",
+                            "BaseScore": 10,
+                            "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                            "Source": "NVD",
+                            "Adjustments": []
+                        }
+                    ],
+                    "Vendor": {
+                        "Name": "NVD",
+                        "Url": "https://nvd.nist.gov/vuln/detail/CVE-2022-3643",
+                        "VendorSeverity": "CRITICAL",
+                        "VendorCreatedAt": "2022-12-07T01:15:00Z",
+                        "VendorUpdatedAt": "2023-01-10T19:41:00Z"
+                    },
+                    "ReferenceUrls": [
+                        "https://xenbits.xenproject.org/xsa/advisory-423.txt",
+                        "https://lists.debian.org/debian-lts-announce/2022/12/msg00031.html",
+                        "https://lists.debian.org/debian-lts-announce/2022/12/msg00034.html"
+                    ],
+                    "FixAvailable": "YES"
+                }
+            ],
+            "FindingProviderFields": {
+                "Severity": {
+                    "Label": "CRITICAL"
+                },
+                "Types": [
+                    "Software and Configuration Checks/Vulnerabilities/CVE"
+                ]
+            }
+        },
+        {
+            "SchemaVersion": "2018-10-08",
+            "Id": "arn:aws:inspector2:us-east-1:111111111111:finding/421f47a297307b649173d4ac3e44bc0c",
+            "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/inspector",
+            "ProductName": "Inspector",
+            "CompanyName": "Amazon",
+            "Region": "us-east-1",
+            "GeneratorId": "AWSInspector",
+            "AwsAccountId": "111111111111",
+            "Types": [
+                "Software and Configuration Checks/Vulnerabilities/CVE"
+            ],
+            "FirstObservedAt": "2023-03-01T08:06:17Z",
+            "LastObservedAt": "2023-03-01T08:06:17Z",
+            "CreatedAt": "2023-03-01T08:06:17Z",
+            "UpdatedAt": "2023-03-01T08:06:17Z",
+            "Severity": {
+                "Label": "CRITICAL",
+                "Normalized": 90
+            },
+            "Title": "CVE-2022-3643 - kernel",
+            "Description": "Guests can trigger NIC interface reset/abort/crash via netback It is possible for a guest to trigger a NIC interface reset/abort/crash in a Linux based network backend by sending certain kinds of packets. It appears to be an (unwritten?) assumption in the rest of the Linux network stack that packet protocol headers are all contained within the linear section of the SKB and some NICs behave badly if this is not the case. This has been reported to occur with Cisco (enic) and Broadcom NetXtrem II BCM5780 (bnx2x) though it may be an issue with other NICs/drivers as well. In case the frontend is sending requests with split headers, netback will forward those violating above mentioned assumption to the networking core, resulting in said misbehavior.",
+            "Remediation": {
+                "Recommendation": {
+                    "Text": "None Provided"
+                }
+            },
+            "ProductFields": {
+                "aws/inspector/FindingStatus": "ACTIVE",
+                "aws/inspector/inspectorScore": "10.0",
+                "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "AMAZON_LINUX_2",
+                "aws/inspector/ProductVersion": "2",
+                "aws/inspector/instanceId": "i-11111111111111111",
+                "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/inspector/arn:aws:inspector2:us-east-1:111111111111:finding/421f47a297307b649173d4ac3e44bc0c",
+                "aws/securityhub/ProductName": "Inspector",
+                "aws/securityhub/CompanyName": "Amazon"
+            },
+            "Resources": [
+                {
+                    "Type": "AwsEc2Instance",
+                    "Id": "arn:aws:ec2:us-east-1:111111111111:i-11111111111111111",
+                    "Partition": "aws",
+                    "Region": "us-east-1",
+                    "Tags": {
+                    },
+                    "Details": {
+                        "AwsEc2Instance": {
+                            "Type": "c6i.large",
+                            "ImageId": "ami-11111111111111111",
+                            "IpV4Addresses": [
+                                "11.1.11.111"
+                            ],
+                            "IamInstanceProfileArn": "arn:aws:iam::111111111111:instance-profile/...2022021512482163910000000f",
+                            "VpcId": "vpc-11111111111111111",
+                            "SubnetId": "subnet-11111111111111111",
+                            "LaunchedAt": "2023-03-01T08:04:12Z"
+                        }
+                    }
+                }
+            ],
+            "WorkflowState": "NEW",
+            "Workflow": {
+                "Status": "NEW"
+            },
+            "RecordState": "ACTIVE",
+            "Vulnerabilities": [
+                {
+                    "Id": "CVE-2022-3643",
+                    "VulnerablePackages": [
+                        {
+                            "Name": "kernel",
+                            "Version": "4.14.301",
+                            "Epoch": "0",
+                            "Release": "224.520.amzn2",
+                            "Architecture": "X86_64",
+                            "PackageManager": "OS",
+                            "FixedInVersion": "0:5.10.162-141.675.amzn2",
+                            "Remediation": "yum update kernel"
+                        }
+                    ],
+                    "Cvss": [
+                        {
+                            "Version": "3.1",
+                            "BaseScore": 10,
+                            "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                            "Source": "NVD"
+                        },
+                        {
+                            "Version": "3.1",
+                            "BaseScore": 10,
+                            "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                            "Source": "NVD",
+                            "Adjustments": []
+                        }
+                    ],
+                    "Vendor": {
+                        "Name": "NVD",
+                        "Url": "https://nvd.nist.gov/vuln/detail/CVE-2022-3643",
+                        "VendorSeverity": "CRITICAL",
+                        "VendorCreatedAt": "2022-12-07T01:15:00Z",
+                        "VendorUpdatedAt": "2023-01-10T19:41:00Z"
+                    },
+                    "ReferenceUrls": [
+                        "https://xenbits.xenproject.org/xsa/advisory-423.txt",
+                        "https://lists.debian.org/debian-lts-announce/2022/12/msg00031.html",
+                        "https://lists.debian.org/debian-lts-announce/2022/12/msg00034.html"
+                    ],
+                    "FixAvailable": "YES"
+                }
+            ],
+            "FindingProviderFields": {
+                "Severity": {
+                    "Label": "CRITICAL"
+                },
+                "Types": [
+                    "Software and Configuration Checks/Vulnerabilities/CVE"
+                ]
+            }
+        },
+        {
+            "SchemaVersion": "2018-10-08",
+            "Id": "arn:aws:inspector2:us-east-1:XXXXXXXXXXXX:finding/637ce0c44b523b292b8e99f7a9481e60",
+            "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/inspector",
+            "ProductName": "Inspector",
+            "CompanyName": "Amazon",
+            "Region": "us-east-1",
+            "GeneratorId": "AWSInspector",
+            "AwsAccountId": "XXXXXXXXXXXX",
+            "Types": [
+                "Software and Configuration Checks/Vulnerabilities/CVE"
+            ],
+            "FirstObservedAt": "2023-03-01T08:02:40Z",
+            "LastObservedAt": "2023-03-01T08:03:46Z",
+            "CreatedAt": "2023-03-01T08:02:40Z",
+            "UpdatedAt": "2023-03-01T08:03:46Z",
+            "Severity": {
+                "Label": "CRITICAL",
+                "Normalized": 90
+            },
+            "Title": "CVE-2022-3643 - kernel",
+            "Description": "Guests can trigger NIC interface reset/abort/crash via netback It is possible for a guest to trigger a NIC interface reset/abort/crash in a Linux based network backend by sending certain kinds of packets. It appears to be an (unwritten?) assumption in the rest of the Linux network stack that packet protocol headers are all contained within the linear section of the SKB and some NICs behave badly if this is not the case. This has been reported to occur with Cisco (enic) and Broadcom NetXtrem II BCM5780 (bnx2x) though it may be an issue with other NICs/drivers as well. In case the frontend is sending requests with split headers, netback will forward those violating above mentioned assumption to the networking core, resulting in said misbehavior.",
+            "Remediation": {
+                "Recommendation": {
+                    "Text": "None Provided"
+                }
+            },
+            "ProductFields": {
+                "aws/inspector/FindingStatus": "ACTIVE",
+                "aws/inspector/inspectorScore": "10.0",
+                "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "AMAZON_LINUX_2",
+                "aws/inspector/ProductVersion": "2",
+                "aws/inspector/instanceId": "i-11111111111111111",
+                "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/inspector/arn:aws:inspector2:us-east-1:XXXXXXXXXXXX:finding/637ce0c44b523b292b8e99f7a9481e60",
+                "aws/securityhub/ProductName": "Inspector",
+                "aws/securityhub/CompanyName": "Amazon"
+            },
+            "Resources": [
+                {
+                    "Type": "AwsEc2Instance",
+                    "Id": "arn:aws:ec2:us-east-1:XXXXXXXXXXXX:i-11111111111111111",
+                    "Partition": "aws",
+                    "Region": "us-east-1",
+                    "Tags": {},
+                    "Details": {
+                        "AwsEc2Instance": {
+                            "Type": "c6i.large",
+                            "ImageId": "ami-11111111111111111",
+                            "IpV4Addresses": [
+                                "11.1.11.111"
+                            ],
+                            "IamInstanceProfileArn": "arn:aws:iam::XXXXXXXXXXXX:instance-profile/...20220119092435965400000017",
+                            "VpcId": "vpc-11111111111111111",
+                            "SubnetId": "subnet-11111111111111111",
+                            "LaunchedAt": "2023-03-01T08:01:37Z"
+                        }
+                    }
+                }
+            ],
+            "WorkflowState": "NEW",
+            "Workflow": {
+                "Status": "NEW"
+            },
+            "RecordState": "ACTIVE",
+            "Vulnerabilities": [
+                {
+                    "Id": "CVE-2022-3643",
+                    "VulnerablePackages": [
+                        {
+                            "Name": "kernel",
+                            "Version": "4.14.301",
+                            "Epoch": "0",
+                            "Release": "224.520.amzn2",
+                            "Architecture": "X86_64",
+                            "PackageManager": "OS",
+                            "FixedInVersion": "0:5.10.162-141.675.amzn2",
+                            "Remediation": "yum update kernel"
+                        }
+                    ],
+                    "Cvss": [
+                        {
+                            "Version": "3.1",
+                            "BaseScore": 10,
+                            "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                            "Source": "NVD"
+                        },
+                        {
+                            "Version": "3.1",
+                            "BaseScore": 10,
+                            "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                            "Source": "NVD",
+                            "Adjustments": []
+                        }
+                    ],
+                    "Vendor": {
+                        "Name": "NVD",
+                        "Url": "https://nvd.nist.gov/vuln/detail/CVE-2022-3643",
+                        "VendorSeverity": "CRITICAL",
+                        "VendorCreatedAt": "2022-12-07T01:15:00Z",
+                        "VendorUpdatedAt": "2023-01-10T19:41:00Z"
+                    },
+                    "ReferenceUrls": [
+                        "https://xenbits.xenproject.org/xsa/advisory-423.txt",
+                        "https://lists.debian.org/debian-lts-announce/2022/12/msg00031.html",
+                        "https://lists.debian.org/debian-lts-announce/2022/12/msg00034.html"
+                    ],
+                    "FixAvailable": "YES"
+                }
+            ],
+            "FindingProviderFields": {
+                "Severity": {
+                    "Label": "CRITICAL"
+                },
+                "Types": [
+                    "Software and Configuration Checks/Vulnerabilities/CVE"
+                ]
+            }
+        },
+        {
+            "SchemaVersion": "2018-10-08",
+            "Id": "arn:aws:inspector2:us-east-1:XXXXXXXXXXXX:finding/7133acf918e320c6e3a85f17bd251800",
+            "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/inspector",
+            "ProductName": "Inspector",
+            "CompanyName": "Amazon",
+            "Region": "us-east-1",
+            "GeneratorId": "AWSInspector",
+            "AwsAccountId": "XXXXXXXXXXXX",
+            "Types": [
+                "Software and Configuration Checks/Vulnerabilities/CVE"
+            ],
+            "FirstObservedAt": "2023-03-01T07:01:16Z",
+            "LastObservedAt": "2023-03-01T07:32:14Z",
+            "CreatedAt": "2023-03-01T07:01:16Z",
+            "UpdatedAt": "2023-03-01T07:32:14Z",
+            "Severity": {
+                "Label": "CRITICAL",
+                "Normalized": 90
+            },
+            "Title": "CVE-2022-3643 - kernel",
+            "Description": "Guests can trigger NIC interface reset/abort/crash via netback It is possible for a guest to trigger a NIC interface reset/abort/crash in a Linux based network backend by sending certain kinds of packets. It appears to be an (unwritten?) assumption in the rest of the Linux network stack that packet protocol headers are all contained within the linear section of the SKB and some NICs behave badly if this is not the case. This has been reported to occur with Cisco (enic) and Broadcom NetXtrem II BCM5780 (bnx2x) though it may be an issue with other NICs/drivers as well. In case the frontend is sending requests with split headers, netback will forward those violating above mentioned assumption to the networking core, resulting in said misbehavior.",
+            "Remediation": {
+                "Recommendation": {
+                    "Text": "None Provided"
+                }
+            },
+            "ProductFields": {
+                "aws/inspector/FindingStatus": "ACTIVE",
+                "aws/inspector/inspectorScore": "10.0",
+                "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "AMAZON_LINUX_2",
+                "aws/inspector/ProductVersion": "2",
+                "aws/inspector/instanceId": "i-11111111111111111",
+                "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/inspector/arn:aws:inspector2:us-east-1:XXXXXXXXXXXX:finding/7133acf918e320c6e3a85f17bd251800",
+                "aws/securityhub/ProductName": "Inspector",
+                "aws/securityhub/CompanyName": "Amazon"
+            },
+            "Resources": [
+                {
+                    "Type": "AwsEc2Instance",
+                    "Id": "arn:aws:ec2:us-east-1:XXXXXXXXXXXX:i-11111111111111111",
+                    "Partition": "aws",
+                    "Region": "us-east-1",
+                    "Tags": {},
+                    "Details": {
+                        "AwsEc2Instance": {
+                            "Type": "c6i.large",
+                            "ImageId": "ami-11111111111111111",
+                            "IpV4Addresses": [
+                                "11.1.11.111"
+                            ],
+                            "IamInstanceProfileArn": "arn:aws:iam::XXXXXXXXXXXX:instance-profile/...20220119092435965400000017",
+                            "VpcId": "vpc-11111111111111111",
+                            "SubnetId": "subnet-11111111111111111",
+                            "LaunchedAt": "2023-03-01T07:00:13Z"
+                        }
+                    }
+                }
+            ],
+            "WorkflowState": "NEW",
+            "Workflow": {
+                "Status": "NEW"
+            },
+            "RecordState": "ACTIVE",
+            "Vulnerabilities": [
+                {
+                    "Id": "CVE-2022-3643",
+                    "VulnerablePackages": [
+                        {
+                            "Name": "kernel",
+                            "Version": "4.14.301",
+                            "Epoch": "0",
+                            "Release": "224.520.amzn2",
+                            "Architecture": "X86_64",
+                            "PackageManager": "OS",
+                            "FixedInVersion": "0:5.10.162-141.675.amzn2",
+                            "Remediation": "yum update kernel"
+                        }
+                    ],
+                    "Cvss": [
+                        {
+                            "Version": "3.1",
+                            "BaseScore": 10,
+                            "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                            "Source": "NVD"
+                        },
+                        {
+                            "Version": "3.1",
+                            "BaseScore": 10,
+                            "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                            "Source": "NVD",
+                            "Adjustments": []
+                        }
+                    ],
+                    "Vendor": {
+                        "Name": "NVD",
+                        "Url": "https://nvd.nist.gov/vuln/detail/CVE-2022-3643",
+                        "VendorSeverity": "CRITICAL",
+                        "VendorCreatedAt": "2022-12-07T01:15:00Z",
+                        "VendorUpdatedAt": "2023-01-10T19:41:00Z"
+                    },
+                    "ReferenceUrls": [
+                        "https://xenbits.xenproject.org/xsa/advisory-423.txt",
+                        "https://lists.debian.org/debian-lts-announce/2022/12/msg00031.html",
+                        "https://lists.debian.org/debian-lts-announce/2022/12/msg00034.html"
+                    ],
+                    "FixAvailable": "YES"
+                }
+            ],
+            "FindingProviderFields": {
+                "Severity": {
+                    "Label": "CRITICAL"
+                },
+                "Types": [
+                    "Software and Configuration Checks/Vulnerabilities/CVE"
+                ]
+            }
+        },
+        {
+            "SchemaVersion": "2018-10-08",
+            "Id": "arn:aws:inspector2:us-east-1:XXXXXXXXXXXX:finding/adbc664a6ecdbd966b0cd30cde9f805d",
+            "ProductArn": "arn:aws:securityhub:us-east-1::product/aws/inspector",
+            "ProductName": "Inspector",
+            "CompanyName": "Amazon",
+            "Region": "us-east-1",
+            "GeneratorId": "AWSInspector",
+            "AwsAccountId": "XXXXXXXXXXXX",
+            "Types": [
+                "Software and Configuration Checks/Vulnerabilities/CVE"
+            ],
+            "FirstObservedAt": "2023-03-01T07:02:22Z",
+            "LastObservedAt": "2023-03-01T07:31:54Z",
+            "CreatedAt": "2023-03-01T07:02:22Z",
+            "UpdatedAt": "2023-03-01T07:31:54Z",
+            "Severity": {
+                "Label": "CRITICAL",
+                "Normalized": 90
+            },
+            "Title": "CVE-2022-3643 - kernel",
+            "Description": "Guests can trigger NIC interface reset/abort/crash via netback It is possible for a guest to trigger a NIC interface reset/abort/crash in a Linux based network backend by sending certain kinds of packets. It appears to be an (unwritten?) assumption in the rest of the Linux network stack that packet protocol headers are all contained within the linear section of the SKB and some NICs behave badly if this is not the case. This has been reported to occur with Cisco (enic) and Broadcom NetXtrem II BCM5780 (bnx2x) though it may be an issue with other NICs/drivers as well. In case the frontend is sending requests with split headers, netback will forward those violating above mentioned assumption to the networking core, resulting in said misbehavior.",
+            "Remediation": {
+                "Recommendation": {
+                    "Text": "None Provided"
+                }
+            },
+            "ProductFields": {
+                "aws/inspector/FindingStatus": "ACTIVE",
+                "aws/inspector/inspectorScore": "10.0",
+                "aws/inspector/resources/1/resourceDetails/awsEc2InstanceDetails/platform": "AMAZON_LINUX_2",
+                "aws/inspector/ProductVersion": "2",
+                "aws/inspector/instanceId": "i-11111111111111111",
+                "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::product/aws/inspector/arn:aws:inspector2:us-east-1:XXXXXXXXXXXX:finding/adbc664a6ecdbd966b0cd30cde9f805d",
+                "aws/securityhub/ProductName": "Inspector",
+                "aws/securityhub/CompanyName": "Amazon"
+            },
+            "Resources": [
+                {
+                    "Type": "AwsEc2Instance",
+                    "Id": "arn:aws:ec2:us-east-1:XXXXXXXXXXXX:i-11111111111111111",
+                    "Partition": "aws",
+                    "Region": "us-east-1",
+                    "Tags": {},
+                    "Details": {
+                        "AwsEc2Instance": {
+                            "Type": "c6i.large",
+                            "ImageId": "ami-11111111111111111",
+                            "IpV4Addresses": [
+                                "11.1.11.111"
+                            ],
+                            "IamInstanceProfileArn": "arn:aws:iam::XXXXXXXXXXXX:instance-profile/...20211202232238853000000014",
+                            "VpcId": "vpc-11111111111111111",
+                            "SubnetId": "subnet-11111111111111111",
+                            "LaunchedAt": "2023-03-01T07:00:23Z"
+                        }
+                    }
+                }
+            ],
+            "WorkflowState": "NEW",
+            "Workflow": {
+                "Status": "NEW"
+            },
+            "RecordState": "ACTIVE",
+            "Vulnerabilities": [
+                {
+                    "Id": "CVE-2022-3643",
+                    "VulnerablePackages": [
+                        {
+                            "Name": "kernel",
+                            "Version": "4.14.301",
+                            "Epoch": "0",
+                            "Release": "224.520.amzn2",
+                            "Architecture": "X86_64",
+                            "PackageManager": "OS",
+                            "FixedInVersion": "0:5.10.162-141.675.amzn2",
+                            "Remediation": "yum update kernel"
+                        }
+                    ],
+                    "Cvss": [
+                        {
+                            "Version": "3.1",
+                            "BaseScore": 10,
+                            "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                            "Source": "NVD"
+                        },
+                        {
+                            "Version": "3.1",
+                            "BaseScore": 10,
+                            "BaseVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                            "Source": "NVD",
+                            "Adjustments": []
+                        }
+                    ],
+                    "Vendor": {
+                        "Name": "NVD",
+                        "Url": "https://nvd.nist.gov/vuln/detail/CVE-2022-3643",
+                        "VendorSeverity": "CRITICAL",
+                        "VendorCreatedAt": "2022-12-07T01:15:00Z",
+                        "VendorUpdatedAt": "2023-01-10T19:41:00Z"
+                    },
+                    "ReferenceUrls": [
+                        "https://xenbits.xenproject.org/xsa/advisory-423.txt",
+                        "https://lists.debian.org/debian-lts-announce/2022/12/msg00031.html",
+                        "https://lists.debian.org/debian-lts-announce/2022/12/msg00034.html"
+                    ],
+                    "FixAvailable": "YES"
+                }
+            ],
+            "FindingProviderFields": {
+                "Severity": {
+                    "Label": "CRITICAL"
+                },
+                "Types": [
+                    "Software and Configuration Checks/Vulnerabilities/CVE"
+                ]
+            }
+        }
+    ]
+}

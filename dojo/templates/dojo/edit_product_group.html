@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<h3> Edit a Product Group </h3>
+<h3>{{ name }}</h3>
 <form class="form-horizontal" action="{%  url 'edit_product_group' groupid %}" method="post">{% csrf_token %}
   {% include "dojo/form_fields.html" with form=form %}
   <div class="form-group">

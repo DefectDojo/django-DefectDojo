@@ -37,7 +37,7 @@ def move_images_to_files(apps, schema_editor):
             if not passed:
                 finding.files.add(file)
             else:
-                logger.warn('unable to migrate image %s with caption %s', image.image.name, image.caption)
+                logger.warning('unable to migrate image %s with caption %s', image.image.name, image.caption)
 
 
 class Migration(migrations.Migration):

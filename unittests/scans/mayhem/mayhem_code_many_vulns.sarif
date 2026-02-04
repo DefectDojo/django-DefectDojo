@@ -1,0 +1,394 @@
+{
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Mayhem Code Security",
+          "rules": [
+            {
+              "id": "MI110",
+              "name": "UndefinedBehavior",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://www.mayhem.security/",
+              "shortDescription": {
+                "text": "The software exhibits behavior that is undefined or unpredictable, often leading to a crash."
+              }
+            },
+            {
+              "id": "MI103",
+              "name": "ImproperResourceManagement",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://www.mayhem.security/",
+              "shortDescription": {
+                "text": "The software does not properly restrict reading from or writing to dynamically-managed code resources such as variables, objects, classes, attributes, functions, or executable instructions or statements."
+              }
+            },
+            {
+              "id": "MI102",
+              "name": "ImproperMemoryManagement",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://www.mayhem.security/",
+              "shortDescription": {
+                "text": "The software does not sufficiently track and release allocated memory after it has been used, which slowly consumes remaining memory."
+              }
+            },
+            {
+              "id": "MI107",
+              "name": "OutOfBoundsAccess",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://www.mayhem.security/",
+              "shortDescription": {
+                "text": "The software accesses data past the end, or before the beginning, of the intended buffer."
+              }
+            }
+          ],
+          "version": "2.12.0",
+          "informationUri": "https://www.mayhem.security/"
+        }
+      },
+      "results": [
+        {
+          "message": {
+            "markdown": "#0 0x5595b43dea57 in parse_lat_lon src/gps_uploader.c:97\n#1 0x5595b43dee40 in main src/gps_uploader.c:145\n#2 0x7fc924cdfd67 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58\n#3 0x7fc924cdfe24 in __libc_start_main_impl ../csu/libc-start.c:360\n#4 0x5595b43de180 in _start (/app/gps_uploader+0x2180) (BuildId: ef91952468b4d0b95713614a2a77d345bbc745ca)\n\n[Details](https://app.mayhem.security:443/forallsecure-demo/mayhem-demo/car/77?defect=2307883)",
+            "text": "TDID-2307883 - Integer Overflow or Wraparound"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 97,
+                  "startColumn": 1,
+                  "startLine": 97
+                },
+                "artifactLocation": {
+                  "uri": "src/gps_uploader.c"
+                }
+              }
+            }
+          ],
+          "taxa": [
+            {
+              "id": "190",
+              "toolComponent": {
+                "name": "CWE"
+              }
+            }
+          ],
+          "ruleId": "MI110"
+        },
+        {
+          "message": {
+            "markdown": "#0 0x7ffff7848e5c in __vfscanf_internal at ./stdio-common/vfscanf-internal.c:2320:18\n#1 0x7ffff77f4c82 in __GI_raise at ./signal/../sysdeps/posix/raise.c:27:6\n#2 0x7ffff77dd4f0 in __GI_abort at ./stdlib/abort.c:81:7\n#3 0x7ffff77de32d in _IO_acquire_lock_fct at ./libio/libioP.h:979:6 (inlined by) _IO_peekc_locked at ./libio/peekc.c:37:3\n#4 0x7ffff78529e5 in __vfwscanf_internal at ./stdio-common/vfscanf-internal.c:1480:13\n#5 0x7ffff7854e59 in __vfwscanf_internal at ./stdio-common/vfscanf-internal.c:783:8\n#6 0x7ffff78574ff in __vfwscanf_internal at ./stdio-common/vfscanf-internal.c:2936:7\n#7 0x555555556560 in double_free at /app/src/gps_uploader.c:46:1\n#8 0x55555555660d in vulnerable_c at /app/src/gps_uploader.c:62:5\n#9 0x555555556e61 in main at /app/src/gps_uploader.c:148:6\n#10 0x7ffff77ded68 in __libc_start_call_main at ./csu/../sysdeps/nptl/libc_start_call_main.h:74:3\n#11 0x7ffff77dee25 in call_init at ./csu/../csu/libc-start.c:128:20 (inlined by) __libc_start_main_impl at ./csu/../csu/libc-start.c:347:5\n#12 0x555555556181 in _start+0x21 at ??:0:0\n\n\n[Details](https://app.mayhem.security:443/forallsecure-demo/mayhem-demo/car/77?defect=2305663)",
+            "text": "TDID-2305663 - Double Free"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "endColumn": 18,
+                  "endLine": 2320,
+                  "startColumn": 18,
+                  "startLine": 2320
+                },
+                "artifactLocation": {
+                  "uri": "./stdio-common/vfscanf-internal.c"
+                }
+              }
+            }
+          ],
+          "taxa": [
+            {
+              "id": "415",
+              "toolComponent": {
+                "name": "CWE"
+              }
+            }
+          ],
+          "ruleId": "MI103"
+        },
+        {
+          "message": {
+            "markdown": "#0 0x55ba7a2e2316 in integer_overflow_negative src/gps_uploader.c:19\n#1 0x55ba7a2e25df in vulnerable_c src/gps_uploader.c:58\n#2 0x55ba7a2e2e60 in main src/gps_uploader.c:146\n#3 0x7f1b1ef74d67 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58\n#4 0x7f1b1ef74e24 in __libc_start_main_impl ../csu/libc-start.c:360\n#5 0x55ba7a2e2180 in _start (/app/gps_uploader+0x2180) (BuildId: ef91952468b4d0b95713614a2a77d345bbc745ca)\n\n[Details](https://app.mayhem.security:443/forallsecure-demo/mayhem-demo/car/77?defect=2305660)",
+            "text": "TDID-2305660 - Integer Overflow or Wraparound"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 19,
+                  "startColumn": 1,
+                  "startLine": 19
+                },
+                "artifactLocation": {
+                  "uri": "src/gps_uploader.c"
+                }
+              }
+            }
+          ],
+          "taxa": [
+            {
+              "id": "190",
+              "toolComponent": {
+                "name": "CWE"
+              }
+            }
+          ],
+          "ruleId": "MI110"
+        },
+        {
+          "message": {
+            "markdown": "#0 0x55555555656e in stack_exhaustion at /app/src/gps_uploader.c:48:41\n#1 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#2 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#3 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#4 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#5 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#6 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#7 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#8 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#9 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#10 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#11 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#12 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#13 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#14 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#15 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#16 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#17 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#18 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#19 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#20 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#21 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#22 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#23 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#24 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#25 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#26 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#27 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#28 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#29 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#30 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#31 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#32 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#33 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#34 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#35 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#36 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#37 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#38 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#39 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#40 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#41 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#42 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#43 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#44 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#45 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#46 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#47 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#48 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#49 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#50 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#51 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#52 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#53 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#54 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#55 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#56 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#57 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#58 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#59 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#60 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#61 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#62 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#63 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#64 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#65 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#66 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#67 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#68 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#69 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#70 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#71 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#72 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#73 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#74 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#75 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#76 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#77 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#78 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#79 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#80 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#81 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#82 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#83 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#84 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#85 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#86 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#87 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#88 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#89 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#90 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#91 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#92 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#93 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#94 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#95 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#96 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#97 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#98 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#99 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#100 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#101 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#102 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#103 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#104 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#105 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#106 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#107 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#108 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#109 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#110 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#111 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#112 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#113 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#114 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#115 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#116 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#117 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#118 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#119 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#120 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#121 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#122 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#123 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#124 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#125 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#126 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n#127 0x5555555565a4 in stack_exhaustion at /app/src/gps_uploader.c:52:1\n\n\n[Details](https://app.mayhem.security:443/forallsecure-demo/mayhem-demo/car/77?defect=2305324)",
+            "text": "TDID-2305324 - Uncontrolled Resource Consumption"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "endColumn": 41,
+                  "endLine": 48,
+                  "startColumn": 41,
+                  "startLine": 48
+                },
+                "artifactLocation": {
+                  "uri": "app/src/gps_uploader.c"
+                }
+              }
+            }
+          ],
+          "taxa": [
+            {
+              "id": "400",
+              "toolComponent": {
+                "name": "CWE"
+              }
+            }
+          ],
+          "ruleId": "MI102"
+        },
+        {
+          "message": {
+            "markdown": "#0 0x55648cb75495 in oob_write src/gps_uploader.c:37\n#1 0x55648cb755fd in vulnerable_c src/gps_uploader.c:60\n#2 0x55648cb75e60 in main src/gps_uploader.c:146\n#3 0x7ffb323f8d67 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58\n#4 0x7ffb323f8e24 in __libc_start_main_impl ../csu/libc-start.c:360\n#5 0x55648cb75180 in _start (/app/gps_uploader+0x2180) (BuildId: ef91952468b4d0b95713614a2a77d345bbc745ca)\n\n[Details](https://app.mayhem.security:443/forallsecure-demo/mayhem-demo/car/77?defect=2305323)",
+            "text": "TDID-2305323 - Improper Validation of Array Index"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 37,
+                  "startColumn": 1,
+                  "startLine": 37
+                },
+                "artifactLocation": {
+                  "uri": "src/gps_uploader.c"
+                }
+              }
+            }
+          ],
+          "taxa": [
+            {
+              "id": "129",
+              "toolComponent": {
+                "name": "CWE"
+              }
+            }
+          ],
+          "ruleId": "MI107"
+        },
+        {
+          "message": {
+            "markdown": "#0 0x559a03964396 in oob_read src/gps_uploader.c:28\n#1 0x559a039645ee in vulnerable_c src/gps_uploader.c:59\n#2 0x559a03964e60 in main src/gps_uploader.c:146\n#3 0x7f0994757d67 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58\n#4 0x7f0994757e24 in __libc_start_main_impl ../csu/libc-start.c:360\n#5 0x559a03964180 in _start (/app/gps_uploader+0x2180) (BuildId: ef91952468b4d0b95713614a2a77d345bbc745ca)\n\n[Details](https://app.mayhem.security:443/forallsecure-demo/mayhem-demo/car/77?defect=2305322)",
+            "text": "TDID-2305322 - Improper Validation of Array Index"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 28,
+                  "startColumn": 1,
+                  "startLine": 28
+                },
+                "artifactLocation": {
+                  "uri": "src/gps_uploader.c"
+                }
+              }
+            }
+          ],
+          "taxa": [
+            {
+              "id": "129",
+              "toolComponent": {
+                "name": "CWE"
+              }
+            }
+          ],
+          "ruleId": "MI107"
+        },
+        {
+          "message": {
+            "markdown": "#0 0x55bd9f855a9c in parse_lat_lon src/gps_uploader.c:98\n#1 0x55bd9f855e40 in main src/gps_uploader.c:145\n#2 0x7fc35fcb5d67 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58\n#3 0x7fc35fcb5e24 in __libc_start_main_impl ../csu/libc-start.c:360\n#4 0x55bd9f855180 in _start (/app/gps_uploader+0x2180) (BuildId: ef91952468b4d0b95713614a2a77d345bbc745ca)\n\n[Details](https://app.mayhem.security:443/forallsecure-demo/mayhem-demo/car/77?defect=2175978)",
+            "text": "TDID-2175978 - Integer Overflow or Wraparound"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 98,
+                  "startColumn": 1,
+                  "startLine": 98
+                },
+                "artifactLocation": {
+                  "uri": "src/gps_uploader.c"
+                }
+              }
+            }
+          ],
+          "taxa": [
+            {
+              "id": "190",
+              "toolComponent": {
+                "name": "CWE"
+              }
+            }
+          ],
+          "ruleId": "MI110"
+        },
+        {
+          "message": {
+            "markdown": "#0 0x55d6929d62a0 in divide_by_zero src/gps_uploader.c:11\n#1 0x55d6929d65d0 in vulnerable_c src/gps_uploader.c:57\n#2 0x55d6929d6e60 in main src/gps_uploader.c:146\n#3 0x7f6b72682d67 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58\n#4 0x7f6b72682e24 in __libc_start_main_impl ../csu/libc-start.c:360\n#5 0x55d6929d6180 in _start (/app/gps_uploader+0x2180) (BuildId: ef91952468b4d0b95713614a2a77d345bbc745ca)\n\n[Details](https://app.mayhem.security:443/forallsecure-demo/mayhem-demo/car/77?defect=2175973)",
+            "text": "TDID-2175973 - Divide By Zero"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 11,
+                  "startColumn": 1,
+                  "startLine": 11
+                },
+                "artifactLocation": {
+                  "uri": "src/gps_uploader.c"
+                }
+              }
+            }
+          ],
+          "taxa": [
+            {
+              "id": "369",
+              "toolComponent": {
+                "name": "CWE"
+              }
+            }
+          ],
+          "ruleId": "MI110"
+        }
+      ],
+      "taxonomies": [
+        {
+          "name": "CWE",
+          "organization": "MITRE",
+          "taxa": [
+            {
+              "id": "190",
+              "help": {
+                "text": "The product performs a calculation that can produce an integer overflow or wraparound, when the logic assumes that the resulting value will always be larger than the original value. This can introduce other weaknesses when the calculation is used for resource management or execution control."
+              },
+              "name": "Integer Overflow or Wraparound",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "The product performs a calculation that can produce an integer overflow or wraparound, when the logic assumes that the resulting value will always be larger than the original value. This can introduce other weaknesses when the calculation is used for resource management or execution control."
+              },
+              "shortDescription": {
+                "text": "The product performs a calculation that can produce an integer overflow or wraparound, when the logic assumes that the resulting value will always be larger than the original value. This can introduce other weaknesses when the calculation is used for resource management or execution control."
+              }
+            },
+            {
+              "id": "415",
+              "help": {
+                "text": "The product calls free() twice on the same memory address, potentially leading to modification of unexpected memory locations."
+              },
+              "name": "Double Free",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "The product calls free() twice on the same memory address, potentially leading to modification of unexpected memory locations."
+              },
+              "shortDescription": {
+                "text": "The product calls free() twice on the same memory address, potentially leading to modification of unexpected memory locations."
+              }
+            },
+            {
+              "id": "400",
+              "help": {
+                "text": "The product does not properly control the allocation and maintenance of a limited resource, thereby enabling an actor to influence the amount of resources consumed, eventually leading to the exhaustion of available resources."
+              },
+              "name": "Uncontrolled Resource Consumption",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "The product does not properly control the allocation and maintenance of a limited resource, thereby enabling an actor to influence the amount of resources consumed, eventually leading to the exhaustion of available resources."
+              },
+              "shortDescription": {
+                "text": "The product does not properly control the allocation and maintenance of a limited resource, thereby enabling an actor to influence the amount of resources consumed, eventually leading to the exhaustion of available resources."
+              }
+            },
+            {
+              "id": "129",
+              "help": {
+                "text": "The product uses untrusted input when calculating or using an array index, but the product does not validate or incorrectly validates the index to ensure the index references a valid position within the array."
+              },
+              "name": "Improper Validation of Array Index",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "The product uses untrusted input when calculating or using an array index, but the product does not validate or incorrectly validates the index to ensure the index references a valid position within the array."
+              },
+              "shortDescription": {
+                "text": "The product uses untrusted input when calculating or using an array index, but the product does not validate or incorrectly validates the index to ensure the index references a valid position within the array."
+              }
+            },
+            {
+              "id": "369",
+              "help": {
+                "text": "The product divides a value by zero."
+              },
+              "name": "Divide By Zero",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "The product divides a value by zero."
+              },
+              "shortDescription": {
+                "text": "The product divides a value by zero."
+              }
+            }
+          ],
+          "shortDescription": {
+            "text": "The MITRE Common Weakness Enumeration"
+          }
+        }
+      ]
+    }
+  ],
+  "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Documents/CommitteeSpecifications/2.1.0/sarif-schema-2.1.0.json"
+}

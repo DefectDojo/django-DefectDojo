@@ -44,7 +44,7 @@
                 {% include "dojo/form_fields.html" with form=risk_acceptance_form %}
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <input class="btn btn-primary" type="submit" value="Save"/>
+                        <input class="btn" type="submit" value="Save"/>
                     </div>
                 </div>
             </form>
@@ -59,8 +59,8 @@
 
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                data-toggle="dropdown" aria-expanded="true">
-                            <span class="fa fa-bars"></span>
+                                data-toggle="dropdown" aria-expanded="true" aria-label="Risk acceptance options">
+                            <span class="fa-solid fa-bars"></span>
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
@@ -82,18 +82,18 @@
                         <th>Findings</th>
                         <th>Proof</th>
                         <th>Reactivate
-                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Reactivate findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Reactivate findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
                             </i>
                         </th>
                         <th>Restart SLA
-                            <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="Restart SLA for findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Restart SLA for findings when risk acceptance expires?" data-placement="right" data-container="body" data-original-title="" title="">
                             </i>
                         </th>
                         <th>Owner</th>
                     </tr>
                     <tr>
                         <td>{{ risk_acceptance.created|date }}</td>
-                        <td>{{ risk_acceptance.accepted_by.get_full_name }}</td>
+                        <td>{{ risk_acceptance.accepted_by }}</td>
                         <td>{{ risk_acceptance.name }}</td>
                         <td>{{ risk_acceptance.get_decision_display|default_if_none:"" }}</td>
                         <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
@@ -165,6 +165,7 @@
                 <thead>
                 <tr>
                     <th>Severity</th>
+                    <th>EPSS Score / Percentile</th>
                     <th>Name</th>
                     <th>Date</th>
                     <th>Active</th>
@@ -177,6 +178,11 @@
                           <span class="label severity severity-{{ finding.severity }}">
                               {{ finding.severity_display }}
                           </span>
+                        </td>
+                        <td>
+                            {{ finding.epss_score|format_epss }}
+                            /
+                            {{ finding.epss_percentile|format_epss }}
                         </td>
                         <td><a href="{% url 'view_finding' finding.id %}"
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
@@ -216,14 +222,17 @@
             </div>
             <br/>
             <form method="post" class="form-horizontal">{% csrf_token %}
-                <div class="show_add_findings_form">
-                    {% include "dojo/form_fields.html" with form=add_findings_form %}
+                <div class="show_add_findings_form" style="padding: 1em;">
+                    <div class="text-left"><b>Add findings as accepted:</b></div>
+                    {{ add_findings_form.as_p }}
                 </div>
                 <div class="panel-body">
                     {% include "dojo/paging_snippet.html" with page=add_findings prefix="apage" %}
                 </div>
-                <div class="panel-footer text-center">
-                    <input class="btn btn-primary" name="add_findings" type="submit" value="Add Selected Findings"/>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input class="btn" name="add_findings" type="submit" value="Add Selected Findings"/>
+                    </div>
                 </div>
             </form>
         </div>
@@ -358,6 +367,7 @@
 
             var mde = new EasyMDE({
                 spellChecker: false,
+                inputStyle: "contenteditable",
                 element: elem,
                 autofocus: false,
                 forceSync: true,
@@ -375,5 +385,55 @@
 
 <script type="text/javascript">
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+</script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var observer = window.ResizeObserver ? new ResizeObserver(function (entries) {
+            entries.forEach(function (entry) {
+                $(entry.target).DataTable().columns.adjust();
+            });
+        }) : null;
+
+        resizeHandler = function ($table) {
+            if (observer)
+                observer.observe($table[0]);
+        };
+    
+        {% if enable_table_filtering %}
+            setTimeout(function() {
+                var table = $('#findings_table').DataTable({
+                    "paging": false,
+                    "searching": true,
+                    "ordering": true,
+                    "info": false,
+                    scrollCollapse: true,
+                    scrollY: '30vh',
+                    columns: [
+                        { title: '' },
+                        { title: 'ID' },
+                        { title: 'Severity' },
+                        { title: 'Name' },
+                        { title: 'CWE' },
+                        { title: 'Vulnerability Id' },
+                        { title: 'EPSS Score' },
+                        { title: 'EPSS Precentile' },
+                        { 
+                            title: 'Date', 
+                            render: function(data) {
+                                var date = new Date(data);
+                                var year = date.getFullYear();
+                                var month = (1 + date.getMonth()).toString().padStart(2, '0');
+                                var day = date.getDate().toString().padStart(2, '0');
+
+                                return year + '-' + month + '-' + day;
+                            }
+                        },
+                        { title: 'Active' }
+                    ]
+                });
+                resizeHandler($('#findings_table'));
+            }, 0);
+        {% endif %}
+    });
 </script>
 {% endblock %}

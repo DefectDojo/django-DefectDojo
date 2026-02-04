@@ -1,43 +1,44 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load display_tags %}
 {% load authorization_tags %}
 
 {% block content %}
     {{ block.super }}
-    <h3 id="id_heading"> Product Type {{ pt.name }}</h3>
+    <h3 id="id_heading">{{ labels.ORG_LABEL }} {{ pt.name }}</h3>
     <div class="row">
         <div id="tests" class="col-md-8">
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                   <div class="clearfix">
-                    <h3 class="pull-left">Description</h3>
+                    <h3 class="pull-left">{% trans "Description" %}</h3>
                     <div class="dropdown pull-right">
                       <div class="btn-group">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" label="Actions" data-toggle="dropdown" aria-expanded="true">
-                                      <span class="fa fa-bars"></span>
-                                      <span class="caret"></span>
-                                  </button>
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" label="Actions" data-toggle="dropdown" aria-expanded="true" aria-label="{{ labels.ORG_LABEL }} options">
+                          <span class="fa-solid fa-bars"></span>
+                          <span class="caret"></span>
+                        </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                             {% if pt|has_object_permission:"Product_Type_Edit" %}
                             <li>
                                 <a class="" href="{% url 'edit_product_type' pt.id %}">
-                                <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}</a>
                             </li>
                             <li role="separator" class="divider"></li>
                             {% endif %}
                             <li>
                                 <a class="" href="{% url 'product_type_metrics' pt.id %}">
-                                <i class="fa fa-line-chart"></i> Metrics</a>
+                                <i class="fa-solid fa-chart-line"></i> {% trans "Metrics" %}</a>
                             </li>
                             <li>
                                 <a class="" href="{% url 'product_type_report' pt.id %}">
-                                <i class="fa fa-file-text-o"></i> Product Type Report</a>
+                                <i class="fa-solid fa-file-lines"></i> {{ labels.ORG_REPORT_LABEL }}</a>
                             </li>
                             {% if pt|has_object_permission:"Product_Type_Delete" %}
                             <li role="separator" class="divider"></li>
                             <li>
                                 <a class="" href="{% url 'delete_product_type' pt.id %}">
-                                <i class="fa fa-trash"></i> Delete</a>
+                                <i class="fa-solid fa-trash"></i> {% trans "Delete" %}</a>
                             </li>
                             {% endif %}
                         </ul>
@@ -52,24 +53,28 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="clearfix">
-                        <h4 class="pull-left">Products</h4>
-                        {% if pt|has_object_permission:"Product_Type_Add_Product" %}
+                        <h4 class="pull-left">{{ labels.ASSET_PLURAL_LABEL }}</h4>
                         <div class="dropdown pull-right">
                             <div class="btn-group">
-                                <button class="btn btn-primary dropdown-toggle" type="button" label="Actions" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-                                            <span class="fa fa-bars"></span>
-                                            <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                    <li>
-                                        <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
-                                        <i class="fa fa-plus"></i> Add Product</a>
-                                    </li>
-                                </ul>
+                                <button name="Show Filters" id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                                {% if pt|has_object_permission:"Product_Type_Add_Product" %}
+                                    <button name="Add Product" aria-label="{{ labels.ASSET_CREATE_LABEL }}" class="btn btn-primary dropdown-toggle" type="button" label="Actions" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                                                <span class="fa-solid fa-bars"></span>
+                                                <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                        <li>
+                                            <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
+                                            <i class="fa-solid fa-plus"></i> {{ labels.ASSET_CREATE_LABEL }}</a>
+                                        </li>
+                                    </ul>
+                                {% endif %}
                             </div>
                         </div>
-                        {% endif %}
                     </div>
+                </div>
+                <div id="the-filters" class="is-filters panel-body collapse {% if prod_filter.form.has_changed %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=prod_filter.form %}
                 </div>
                 {% if products %}
                     <div class="clearfix pagination-in-panel">
@@ -80,10 +85,10 @@
                             <thead>
                             <tr>
                                 <th>Name</th>
-                                <th class="text-center">Tags</th>
-                                <th class="text-center">Criticality</th>
-                                <th class="text-center">Metadata</th>
-                                <th class="text-center">Active (Verified) Findings</th>
+                                <th class="text-center">{% trans "Tags" %}</th>
+                                <th class="text-center">{% trans "Criticality" %}</th>
+                                <th class="text-center">{% trans "Metadata" %}</th>
+                                <th class="text-center">{% trans "Active (Verified) Findings" %}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -121,28 +126,28 @@
                     </div>
                 {% else %}
                     <div class="panel-body">
-                        <small class="text-muted"><em>No products found.</em></small>
+                        <small class="text-muted"><em>{{ labels.ASSET_NONE_FOUND_MESSAGE }}</em></small>
                     </div>
                 {% endif %}
             </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <div class="clearfix">
-                            <h4 class="pull-left">Members</h4>
+                            <h4 class="pull-left">{% trans "Members" %}</h4>
                             &nbsp;
-                            <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                                <i class="fa fa-question-circle"></i></a>
+                            <a href="https://docs.defectdojo.com/en/customize_dojo/user_management/about_perms_and_roles/#productproduct-type-membership--roles" target="_blank">
+                                <i class="fa-solid fa-circle-question"></i></a>
                             {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                             <div class="dropdown pull-right">
                                 <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductTypeMember"
-                                        data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Type Member">
-                                    <span class="fa fa-bars"></span>
+                                        data-toggle="dropdown" aria-expanded="true" aria-label="{{ labels.ORG_USERS_ADD_LABEL }}">
+                                    <span class="fa-solid fa-bars"></span>
                                     <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a id="addProductTypeMember" href="{% url 'add_product_type_member' pt.id %}">
-                                            <i class="fa fa-plus"></i> Add Users
+                                            <i class="fa-solid fa-plus"></i> {% trans "Add Members" %}
                                         </a>
                                     </li>
                                 </ul>
@@ -150,14 +155,14 @@
                             {% endif %}
                         </div>
                     </div>
-                    {% if members %}
+                    {% if members or global_members %}
                         <div class="table-responsive">
                             <table class="tablesorter-bootstrap table table-condensed table-striped">
                                 <thead>
                                 <tr>
                                     <th></th>
-                                    <th>User</th>
-                                    <th>Role</th>
+                                    <th>{% trans "User" %}</th>
+                                    <th>{% trans "Role" %}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -166,18 +171,18 @@
                                         <td>
                                             <ul>
                                             <li class="dropdown" style="list-style:none;position:absolute">
-                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeMember">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                                 <ul class="dropdown-menu">
                                                     {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                                                     <li>
                                                         <a name="editProductTypeMember" href="{% url 'edit_product_type_member' member.id %}">
-                                                        <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                                        <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}</a>
                                                     </li>
                                                     {% endif %}
                                                     {% if member|has_object_permission:"Product_Type_Member_Delete" %}
                                                     <li>
                                                         <a name="deleteProductTypeMember" href="{% url 'delete_product_type_member' member.id %}">
-                                                        <i class="fa fa-trash"></i> Delete</a>
+                                                        <i class="fa-solid fa-trash"></i> {% trans "Delete" %}</a>
                                                     </li>
                                                     {% endif %}
                                                 </ul>
@@ -188,12 +193,20 @@
                                         <td name="member_role">{{ member.role }}</td>
                                     </tr>
                                 {% endfor %}
+                                {% for member in global_members %}
+                                    <tr>
+                                        <td>
+                                        </td>
+                                        <td name="member_global_user">{{ member.user.get_full_name }}</td>
+                                        <td name="member_global_role">{{ member.role }} (Global role)</td>
+                                    </tr>
+                                {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                     {% else %}
                         <div class="panel-body">
-                            <small class="text-muted"><em>No members found.</em></small>
+                            <small class="text-muted"><em>{% trans "No members found." %}</em></small>
                         </div>
                     {% endif %}
                 </div>
@@ -201,21 +214,21 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="clearfix">
-                        <h4 class="pull-left">Groups</h4>
+                        <h4 class="pull-left">{% trans "Groups" %}</h4>
                         &nbsp;
-                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                            <i class="fa fa-question-circle"></i></a>
+                        <a href="https://docs.defectdojo.com/en/customize_dojo/user_management/about_perms_and_roles/#group-memberships" target="_blank">
+                            <i class="fa-solid fa-circle-question"></i></a>
                         {% if pt|has_object_permission:"Product_Type_Group_Add" %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductTypeGroup"
-                                    data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Type Group">
-                                <span class="fa fa-bars"></span>
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="{{ labels.ORG_GROUPS_ADD_LABEL }}">
+                                <span class="fa-solid fa-bars"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                 <li role="presentation">
                                     <a id="addProductTypeGroup" href="{% url 'add_product_type_group' pt.id %}">
-                                        <i class="fa fa-plus"></i> Add Groups
+                                        <i class="fa-solid fa-plus"></i> {% trans "Add Groups" %}
                                     </a>
                                 </li>
                             </ul>
@@ -223,14 +236,14 @@
                         {% endif %}
                     </div>
                 </div>
-                {% if groups %}
+                {% if groups or global_groups %}
                 <div class="table-responsive">
                     <table class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
                             <th></th>
-                            <th>Group</th>
-                            <th>Role</th>
+                            <th>{% trans "Group" %}</th>
+                            <th>{% trans "Role" %}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -239,18 +252,18 @@
                             <td>
                                 <ul>
                                     <li class="dropdown" style="list-style:none;position:absolute">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeGroup">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeGroup">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                         <ul class="dropdown-menu">
                                             {% if pt|has_object_permission:"Product_Type_Group_Edit" %}
                                             <li>
                                                 <a name="editProductTypeGroup" href="{% url 'edit_product_type_group' group.id %}">
-                                                    <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                                    <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}</a>
                                             </li>
                                             {% endif %}
                                             {% if pt|has_object_permission:"Product_Type_Group_Delete" %}
                                             <li>
                                                 <a name="deleteProductTypeGroup" href="{% url 'delete_product_type_group' group.id %}">
-                                                    <i class="fa fa-trash"></i> Delete</a>
+                                                    <i class="fa-solid fa-trash"></i> {% trans "Delete" %}</a>
                                             </li>
                                             {% endif %}
                                         </ul>
@@ -261,12 +274,20 @@
                             <td name="product_type_group_role">{{ group.role }}</td>
                         </tr>
                         {% endfor %}
+                        {% for group in global_groups %}
+                        <tr>
+                            <td>
+                            </td>
+                            <td name="product_type_group_global_group">{{ group.group.name }}</td>
+                            <td name="product_type_group_global_role">{{ group.role }} (Global role)</td>
+                        </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
                 {% else %}
                 <div class="panel-body">
-                    <small class="text-muted"><em>No groups found.</em></small>
+                    <small class="text-muted"><em>{% trans "No groups found." %}</em></small>
                 </div>
                 {% endif %}
             </div>
@@ -274,7 +295,7 @@
         <div class="col-md-4">
             <div class="panel panel-default-secondary">
                 <div class="panel-heading">
-                    <h3 class="panel-title"><span class="fa fa-info-circle fa-fw" aria-hidden="true"></span>
+                    <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw" aria-hidden="true"></span>
                         {{ pt.name }}
                     </h3>
                 </div>
@@ -282,22 +303,22 @@
                     <table class="table table-striped">
                       <tbody>
                         <tr>
-                          <td style="width: 150px;"><strong>Critical product</strong></td>
+                          <td style="width: 150px;"><strong>{{ labels.ORG_CRITICAL_PRODUCT_LABEL }}</strong></td>
                           <td>
                             {% if pt.critical_product %}
-                            <i class="text-success fa fa-check"></i>
+                            <i class="text-success fa-solid fa-check"></i>
                             {% else %}
-                            <i class="text-danger fa fa-times"></i>
+                            <i class="text-danger fa-solid fa-xmark"></i>
                             {% endif %}
                         </td>
                     </tr>
                         <tr>
-                            <td style="width: 150px;"><strong>Key product</strong></td>
+                            <td style="width: 150px;"><strong>{{ labels.ORG_KEY_PRODUCT_LABEL }}</strong></td>
                             <td>
                                 {% if pt.key_product %}
-                                <i class="text-success fa fa-check"></i>
+                                <i class="text-success fa-solid fa-check"></i>
                                 {% else %}
-                                <i class="text-danger fa fa-times"></i>
+                                <i class="text-danger fa-solid fa-xmark"></i>
                                 {% endif %}
                             </td>
                         </tr>
@@ -307,4 +328,7 @@
             </div>
         </div>
     </div>
+{% endblock %}
+{% block postscript %}
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

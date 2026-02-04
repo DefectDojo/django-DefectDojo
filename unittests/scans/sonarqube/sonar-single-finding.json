@@ -1,0 +1,79 @@
+{
+  "date": "Thursday, Jan 18, 2024",
+  "projectName": "vulnerable-flask-app",
+  "inNewCodePeriod": false,
+  "allBugs": false,
+  "fixMissingRule": false,
+  "noSecurityHotspot": false,
+  "noRulesInReport": false,
+  "onlyDetectedRules": true,
+  "vulnerabilityPhrase": "Vulnerability",
+  "noCoverage": true,
+  "vulnerabilityPluralPhrase": "Vulnerabilities",
+  "sonarBaseURL": "https://sonar.192-168-38-31.nip.io",
+  "sonarComponent": "vulnerable-flask-app",
+  "rules": {
+    "python:S4502": {
+      "name": "Disabling CSRF protections is security-sensitive",
+      "htmlDesc": "<p>A cross-site request forgery (CSRF) attack occurs when a trusted user of a web application can be forced, by an attacker, to perform sensitive\nactions that he didn’t intend, such as updating his profile or sending a message, more generally anything that can change the state of the\napplication.</p>\n<p>The attacker can trick the user/victim to click on a link, corresponding to the privileged action, or to visit a malicious web site that embeds a\nhidden web request and as web browsers automatically include cookies, the actions can be authenticated and sensitive.</p>\n<h2>Ask Yourself Whether</h2>\n<ul>\n  <li> The web application uses cookies to authenticate users. </li>\n  <li> There exist sensitive operations in the web application that can be performed when the user is authenticated. </li>\n  <li> The state / resources of the web application can be modified by doing HTTP POST or HTTP DELETE requests for example. </li>\n</ul>\n<p>There is a risk if you answered yes to any of those questions.</p>\n<h2>Recommended Secure Coding Practices</h2>\n<ul>\n  <li> Protection against CSRF attacks is strongly recommended:\n    <ul>\n      <li> to be activated by default for all <a href=\"https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Safe_methods\">unsafe HTTP\n      methods</a>. </li>\n      <li> implemented, for example, with an unguessable CSRF token </li>\n    </ul>  </li>\n  <li> Of course all sensitive operations should not be performed with <a\n  href=\"https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Safe_methods\">safe HTTP</a> methods like <code>GET</code> which are designed to be\n  used only for information retrieval. </li>\n</ul>\n<h2>Sensitive Code Example</h2>\n<p>For a <a href=\"https://docs.djangoproject.com/fr/3.0/ref/csrf/\">Django</a> application, the code is sensitive when,</p>\n<ul>\n  <li> <code>django.middleware.csrf.CsrfViewMiddleware</code> is not used in the <a\n  href=\"https://docs.djangoproject.com/en/3.0/topics/settings/\">Django settings</a>: </li>\n</ul>\n<pre>\nMIDDLEWARE = [\n    'django.middleware.security.SecurityMiddleware',\n    'django.contrib.sessions.middleware.SessionMiddleware',\n    'django.middleware.common.CommonMiddleware',\n    'django.contrib.auth.middleware.AuthenticationMiddleware',\n    'django.contrib.messages.middleware.MessageMiddleware',\n    'django.middleware.clickjacking.XFrameOptionsMiddleware',\n] # Sensitive: django.middleware.csrf.CsrfViewMiddleware is missing\n</pre>\n<ul>\n  <li> the CSRF protection is disabled on a view: </li>\n</ul>\n<pre>\n@csrf_exempt # Sensitive\ndef example(request):\n    return HttpResponse(\"default\")\n</pre>\n<p>For a <a href=\"https://flask-wtf.readthedocs.io/en/latest/csrf.html\">Flask</a> application, the code is sensitive when,</p>\n<ul>\n  <li> the <code>WTF_CSRF_ENABLED</code> setting is set to <code>false</code>: </li>\n</ul>\n<pre>\napp = Flask(__name__)\napp.config['WTF_CSRF_ENABLED'] = False # Sensitive\n</pre>\n<ul>\n  <li> the application doesn’t use the <code>CSRFProtect</code> module: </li>\n</ul>\n<pre>\napp = Flask(__name__) # Sensitive: CSRFProtect is missing\n\n@app.route('/')\ndef hello_world():\n    return 'Hello, World!'\n</pre>\n<ul>\n  <li> the CSRF protection is disabled on a view: </li>\n</ul>\n<pre>\napp = Flask(__name__)\ncsrf = CSRFProtect()\ncsrf.init_app(app)\n\n@app.route('/example/', methods=['POST'])\n@csrf.exempt # Sensitive\ndef example():\n    return 'example '\n</pre>\n<ul>\n  <li> the CSRF protection is disabled on a form: </li>\n</ul>\n<pre>\nclass unprotectedForm(FlaskForm):\n    class Meta:\n        csrf = False # Sensitive\n\n    name = TextField('name')\n    submit = SubmitField('submit')\n</pre>\n<h2>Compliant Solution</h2>\n<p>For a <a href=\"https://docs.djangoproject.com/fr/3.0/ref/csrf/\">Django</a> application,</p>\n<ul>\n  <li> it is recommended to protect all the views with <code>django.middleware.csrf.CsrfViewMiddleware</code>: </li>\n</ul>\n<pre>\nMIDDLEWARE = [\n    'django.middleware.security.SecurityMiddleware',\n    'django.contrib.sessions.middleware.SessionMiddleware',\n    'django.middleware.common.CommonMiddleware',\n    'django.middleware.csrf.CsrfViewMiddleware', # Compliant\n    'django.contrib.auth.middleware.AuthenticationMiddleware',\n    'django.contrib.messages.middleware.MessageMiddleware',\n    'django.middleware.clickjacking.XFrameOptionsMiddleware',\n]\n</pre>\n<ul>\n  <li> and to not disable the CSRF protection on specific views: </li>\n</ul>\n<pre>\ndef example(request): # Compliant\n    return HttpResponse(\"default\")\n</pre>\n<p>For a <a href=\"https://flask-wtf.readthedocs.io/en/latest/csrf.html\">Flask</a> application,</p>\n<ul>\n  <li> the <code>CSRFProtect</code> module should be used (and not disabled further with <code>WTF_CSRF_ENABLED</code> set to <code>false</code>):\n  </li>\n</ul>\n<pre>\napp = Flask(__name__)\ncsrf = CSRFProtect()\ncsrf.init_app(app) # Compliant\n</pre>\n<ul>\n  <li> and it is recommended to not disable the CSRF protection on specific views or forms: </li>\n</ul>\n<pre>\n@app.route('/example/', methods=['POST']) # Compliant\ndef example():\n    return 'example '\n\nclass unprotectedForm(FlaskForm):\n    class Meta:\n        csrf = True # Compliant\n\n    name = TextField('name')\n    submit = SubmitField('submit')\n</pre>\n<h2>See</h2>\n<ul>\n  <li> <a href=\"https://owasp.org/Top10/A01_2021-Broken_Access_Control/\">OWASP Top 10 2021 Category A1</a> - Broken Access Control </li>\n  <li> <a href=\"https://cwe.mitre.org/data/definitions/352\">MITRE, CWE-352</a> - Cross-Site Request Forgery (CSRF) </li>\n  <li> <a href=\"https://owasp.org/www-project-top-ten/2017/A6_2017-Security_Misconfiguration\">OWASP Top 10 2017 Category A6</a> - Security\n  Misconfiguration </li>\n  <li> <a href=\"https://owasp.org/www-community/attacks/csrf\">OWASP: Cross-Site Request Forgery</a> </li>\n  <li> <a href=\"https://www.sans.org/top25-software-errors/#cat1\">SANS Top 25</a> - Insecure Interaction Between Components </li>\n</ul>",
+      "severity": "CRITICAL"
+    }
+  },
+  "issues": [
+    {
+      "rule": "python:S4502",
+      "severity": "CRITICAL",
+      "status": "TO_REVIEW",
+      "component": "vulnerable-flask-app.py",
+      "line": 8,
+      "description": "Disabling CSRF protections is security-sensitive",
+      "message": "Make sure disabling CSRF protection is safe here.",
+      "key": "AYvNd32RyD1npIoQXyT1"
+    }
+  ],
+  "hotspotKeys": [
+    "AYvNd32RyD1npIoQXyT1"
+  ],
+  "deltaAnalysis": "No",
+  "qualityGateStatusPeriodDate": "2023-11-15",
+  "qualityGateStatus": {
+    "projectStatus": {
+      "status": "OK",
+      "conditions": [
+        {
+          "status": "OK",
+          "metricKey": "new reliability rating",
+          "comparator": "GT",
+          "errorThreshold": "A",
+          "actualValue": "A"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new security rating",
+          "comparator": "GT",
+          "errorThreshold": "A",
+          "actualValue": "A"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new maintainability rating",
+          "comparator": "GT",
+          "errorThreshold": "A",
+          "actualValue": "A"
+        }
+      ],
+      "ignoredConditions": false,
+      "period": {
+        "mode": "PREVIOUS_VERSION",
+        "date": "2023-11-15T07:40:39+0000"
+      },
+      "caycStatus": "compliant"
+    }
+  },
+  "summary": {
+    "blocker": 0,
+    "critical": 1,
+    "major": 0,
+    "minor": 5
+  }
+}

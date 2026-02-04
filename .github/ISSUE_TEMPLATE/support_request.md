@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 **Slack us first!**
-The easiest and fastest way to help you is via Slack. There's a free and easy signup to join our #defectdojo channel in the OWASP Slack workspace: [Get Access.](https://owasp-slack.herokuapp.com/)
+The easiest and fastest way to help you is via Slack. There's a free and easy signup to join our #defectdojo channel in the OWASP Slack workspace: [Get Access.](https://owasp.org/slack/invite)
 If you're confident you've found a bug, or are allergic to Slack, you can submit an issue anyway.
 
 **Be informative**
@@ -33,10 +33,11 @@ A clear and concise description of what you expected to happen.
 
 **Environment information**
  - Operating System: [e.g. Ubuntu 18.04]
+ - Docker Compose or Helm version (Output of `docker compose version` or `helm version`)
  - DefectDojo version (see footer) or commit message: [use `git show -s --format="[%ci] %h: %s [%d]"`]
 
 **Logs** 
-Use `docker-compose logs` (or similar, depending on your deployment method) to get the logs and add the relevant sections here showing the error occurring (if applicable).
+Use `docker compose logs` (or similar, depending on your deployment method) to get the logs and add the relevant sections here showing the error occurring (if applicable).
 
 **Sample scan files**
 If applicable, add sample scan files to help reproduce your problem.

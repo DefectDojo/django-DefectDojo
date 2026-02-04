@@ -11,14 +11,15 @@ metadata:
   annotations:
     helm.sh/hook: test-success
 spec:
-  serviceAccountName: {{ $fullName }}
-  {{- if .Values.imagePullSecrets }}
+  serviceAccountName: {{ include "defectdojo.serviceAccountName" . }}
+  automountServiceAccountToken: {{ .Values.tests.unitTests.automountServiceAccountToken }}
+  {{- with .Values.imagePullSecrets }}
   imagePullSecrets:
-  - name: {{ .Values.imagePullSecrets }}
+    - name: {{ . }}
   {{- end }}
   containers:
     - name: unit-tests
-      image: '{{ .Values.repositoryPrefix }}/defectdojo-django:{{ .Values.tag }}'
+      image: '{{ template "unitTests.image" . }}'
       imagePullPolicy: {{ .Values.imagePullPolicy }}
       {{- if .Values.securityContext.enabled }}
       securityContext:
@@ -30,29 +31,18 @@ spec:
             name: {{ $fullName }}
       env:
         - name: DD_DATABASE_USER
-          value: {{ if eq .Values.database "postgresql" }}{{ .Values.postgresql.auth.username }}{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.postgresqlha.postgresql.username }}{{ end }}{{ if eq .Values.database "mysql" }}root{{ end }}
+          value: {{ .Values.postgresql.auth.username }}
         - name: DD_CELERY_BROKER_PASSWORD
           valueFrom:
             secretKeyRef:
               # Use broker chart secret
-              # name: {{ $fullName }}-{{ .Values.celery.broker }}
-              # Use secret handled outside of the chart
-              name: defectdojo-{{ .Values.celery.broker }}-specific
-              key: {{ .Values.celery.broker }}-password
+              name: defectdojo-valkey-specific
+              key: valkey-password
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              {{- if eq .Values.database "postgresql" }}
               name: {{ .Values.postgresql.auth.existingSecret }}
               key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
-              {{- else if eq .Values.database "postgresqlha" }}
-              name: "{{ .Values.postgresqlha.postgresql.existingSecret }}"
-              key: postgresql-postgres-password
-              {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.auth.existingSecret }}
-              key: {{ .Values.mysql.auth.secretKey }}
-              {{- end }}
-              key: {{ if eq .Values.database "postgresql" }}{{ .Values.database }}-password{{ end }}{{ if eq .Values.database "postgresqlha" }}{{ .Values.database }}-password{{ end }}{{ if eq .Values.database "mysql" }}{{ .Values.database }}-root-password{{ end }}
         - name: DD_DEBUG
           value: 'True'
         - name: DD_SECRET_KEY
@@ -60,11 +50,13 @@ spec:
             secretKeyRef:
               name: {{ $fullName }}
               key: DD_SECRET_KEY
+              optional: true
         - name: DD_CREDENTIAL_AES_256_KEY
           valueFrom:
             secretKeyRef:
               name: {{ $fullName }}
               key: DD_CREDENTIAL_AES_256_KEY
+              optional: true
       resources:
         {{- toYaml .Values.tests.unitTests.resources | nindent 8 }}
   restartPolicy: Never

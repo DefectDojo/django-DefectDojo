@@ -1,0 +1,927 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HealthcheckData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IntegrityRules="M1ZpZ0pmbWZsdUpyQmhXc1BvQnZyQ2pYc1ZrQm1xN3g0R2E0dEJjNA==">
+  <EngineVersion>3.2.0.1</EngineVersion>
+  <GenerationDate>2024-06-06T13:01:09.2643869+02:00</GenerationDate>
+  <Level>Normal</Level>
+  <MaturityLevel>2</MaturityLevel>
+  <DomainFQDN>example.local</DomainFQDN>
+  <NetBIOSName>EXAMPLE</NetBIOSName>
+  <ForestFQDN>example.local</ForestFQDN>
+  <DomainCreation>2024-03-13T00:24:53</DomainCreation>
+  <DomainSid>S-1-5-21-1111111111-2222222222-3333333333</DomainSid>
+  <DomainFunctionalLevel>7</DomainFunctionalLevel>
+  <ForestFunctionalLevel>7</ForestFunctionalLevel>
+  <SchemaVersion>88</SchemaVersion>
+  <SchemaInternalVersion>0</SchemaInternalVersion>
+  <IsRecycleBinEnabled>false</IsRecycleBinEnabled>
+  <DCWin2008Install>2024-03-13T00:25:36</DCWin2008Install>
+  <SchemaLastChanged>0001-01-01T00:00:00</SchemaLastChanged>
+  <NumberOfDC>1</NumberOfDC>
+  <GlobalScore>70</GlobalScore>
+  <StaleObjectsScore>36</StaleObjectsScore>
+  <PrivilegiedGroupScore>70</PrivilegiedGroupScore>
+  <TrustScore>0</TrustScore>
+  <AnomalyScore>65</AnomalyScore>
+  <ExchangeInstall>0001-01-01T00:00:00</ExchangeInstall>
+  <ExchangeSchemaVersion>0</ExchangeSchemaVersion>
+  <Trusts/>
+  <DomainControllers>
+    <HealthcheckDomainController AdminLocalLogin="2024-06-06T12:58:06.7250267+02:00">
+      <DCName>DC-NQ7M31</DCName>
+      <CreationDate>2024-03-13T00:25:35</CreationDate>
+      <StartupTime>2024-06-06T12:14:42.680185+02:00</StartupTime>
+      <LastComputerLogonDate>2024-06-06T09:05:02.4862126+02:00</LastComputerLogonDate>
+      <DistinguishedName>CN=DC-NQ7M31,OU=Domain Controllers,DC=example,DC=local</DistinguishedName>
+      <OperatingSystem>Server OS</OperatingSystem>
+      <OwnerSID>S-1-5-21-1111111111-2222222222-3333333333-512</OwnerSID>
+      <OwnerName>EXAMPLE\Domain Admins</OwnerName>
+      <HasNullSession>false</HasNullSession>
+      <SupportSMB1>false</SupportSMB1>
+      <SMB1SecurityMode>NotTested</SMB1SecurityMode>
+      <SupportSMB2OrSMB3>true</SupportSMB2OrSMB3>
+      <SMB2SecurityMode>SmbSigningEnabled SmbSigningRequired</SMB2SecurityMode>
+      <RemoteSpoolerDetected>true</RemoteSpoolerDetected>
+      <IP>
+        <string>fe80::2a9</string>
+        <string>198.51.10</string>
+      </IP>
+      <FSMO>
+        <string>PDC</string>
+        <string>RID pool manager</string>
+        <string>Infrastructure master</string>
+        <string>Schema master</string>
+        <string>Domain naming Master</string>
+      </FSMO>
+      <LDAPSProtocols/>
+      <ChannelBindingDisabled>false</ChannelBindingDisabled>
+      <LdapServerSigningRequirementDisabled>false</LdapServerSigningRequirementDisabled>
+      <PwdLastSet>2024-06-06T09:04:51.018471+02:00</PwdLastSet>
+      <RODC>false</RODC>
+      <SYSVOLOverwrite>false</SYSVOLOverwrite>
+      <RPCInterfacesOpen>
+        <HealthcheckDCRPCInterface IP="fe80::2a9" Interface="82273fdc-e32a-18c3-3f78-827929dc23ea" OpNum="9" Function="ElfrOpenBELW"/>
+        <HealthcheckDCRPCInterface IP="fe80::2a9" Interface="12345678-1234-abcd-ef00-0123456789ab" OpNum="62" Function="RpcRemoteFindFirstPrinterChangeNotification"/>
+        <HealthcheckDCRPCInterface IP="fe80::2a9" Interface="12345678-1234-abcd-ef00-0123456789ab" OpNum="65" Function="RpcRemoteFindFirstPrinterChangeNotificationEx"/>
+        <HealthcheckDCRPCInterface IP="198.51.10" Interface="82273fdc-e32a-18c3-3f78-827929dc23ea" OpNum="9" Function="ElfrOpenBELW"/>
+        <HealthcheckDCRPCInterface IP="198.51.10" Interface="12345678-1234-abcd-ef00-0123456789ab" OpNum="62" Function="RpcRemoteFindFirstPrinterChangeNotification"/>
+        <HealthcheckDCRPCInterface IP="198.51.10" Interface="12345678-1234-abcd-ef00-0123456789ab" OpNum="65" Function="RpcRemoteFindFirstPrinterChangeNotificationEx"/>
+      </RPCInterfacesOpen>
+    </HealthcheckDomainController>
+  </DomainControllers>
+  <ExchangeServers/>
+  <Sites>
+    <HealthcheckSite>
+      <SiteName>Default-First-Site-Name</SiteName>
+      <Networks/>
+    </HealthcheckSite>
+  </Sites>
+  <lDAPIPDenyList/>
+  <PreWindows2000AnonymousAccess>false</PreWindows2000AnonymousAccess>
+  <PreWindows2000NoDefault>false</PreWindows2000NoDefault>
+  <PreWindows2000AuthenticatedUsers>true</PreWindows2000AuthenticatedUsers>
+  <UsingNTFRSForSYSVOL>false</UsingNTFRSForSYSVOL>
+  <RiskRules>
+    <HealthcheckRiskRule>
+      <Points>20</Points>
+      <Category>PrivilegedAccounts</Category>
+      <Model>AdminControl</Model>
+      <RiskId>P-AdminLogin</RiskId>
+      <Rationale>The native administrator account has been used recently: 0 day(s) ago</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>20</Points>
+      <Category>PrivilegedAccounts</Category>
+      <Model>AccountTakeOver</Model>
+      <RiskId>P-Delegated</RiskId>
+      <Rationale>Presence of Admin accounts which do not have the flag "This account is sensitive and cannot be delegated": 7</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>15</Points>
+      <Category>StaleObjects</Category>
+      <Model>OldAuthenticationProtocols</Model>
+      <RiskId>S-OldNtlm</RiskId>
+      <Rationale>The LAN Manager Authentication Level allows the use of NTLMv1 or LM.</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>15</Points>
+      <Category>Anomalies</Category>
+      <Model>PassTheCredential</Model>
+      <RiskId>A-LAPS-Not-Installed</RiskId>
+      <Rationale>LAPS doesn't seem to be installed</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>10</Points>
+      <Category>PrivilegedAccounts</Category>
+      <Model>IrreversibleChange</Model>
+      <RiskId>P-SchemaAdmin</RiskId>
+      <Rationale>The group Schema Admins is not empty: 1 account(s)</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>10</Points>
+      <Category>Anomalies</Category>
+      <Model>WeakPassword</Model>
+      <RiskId>A-MinPwdLen</RiskId>
+      <Rationale>Policy where the password length is less than 8 characters: 1</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>10</Points>
+      <Category>StaleObjects</Category>
+      <Model>Provisioning</Model>
+      <RiskId>S-ADRegistration</RiskId>
+      <Rationale>Non-admin users can add up to 10 computer(s) to a domain</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>10</Points>
+      <Category>Anomalies</Category>
+      <Model>PassTheCredential</Model>
+      <RiskId>A-DC-Spooler</RiskId>
+      <Rationale>The spooler service is remotely accessible from 1 DC</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>10</Points>
+      <Category>PrivilegedAccounts</Category>
+      <Model>IrreversibleChange</Model>
+      <RiskId>P-RecycleBin</RiskId>
+      <Rationale>The Recycle Bin is not enabled</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>10</Points>
+      <Category>PrivilegedAccounts</Category>
+      <Model>AccountTakeOver</Model>
+      <RiskId>P-ProtectedUsers</RiskId>
+      <Rationale>Number of admins not in Protected Users: 7</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>10</Points>
+      <Category>Anomalies</Category>
+      <Model>Audit</Model>
+      <RiskId>A-AuditDC</RiskId>
+      <Rationale>The audit policy on domain controllers does not collect key events.</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>10</Points>
+      <Category>Anomalies</Category>
+      <Model>PassTheCredential</Model>
+      <RiskId>A-DC-Coerce</RiskId>
+      <Rationale>RPC interfaces of DC are likely vulnerable to coercion attacks. Identified interfaces: 6</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>5</Points>
+      <Category>StaleObjects</Category>
+      <Model>ObjectConfig</Model>
+      <RiskId>S-NoPreAuth</RiskId>
+      <Rationale>Number of accounts which do not require Kerberos pre-authentication: 1</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>5</Points>
+      <Category>Anomalies</Category>
+      <Model>Backup</Model>
+      <RiskId>A-NotEnoughDC</RiskId>
+      <Rationale>The number of DCs is too small to provide redundancy: 1 DC</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>5</Points>
+      <Category>Anomalies</Category>
+      <Model>NetworkSniffing</Model>
+      <RiskId>A-HardenedPaths</RiskId>
+      <Rationale>Hardened Paths have been modified to lower the security level</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>5</Points>
+      <Category>StaleObjects</Category>
+      <Model>NetworkTopography</Model>
+      <RiskId>S-DC-SubnetMissing</RiskId>
+      <Rationale>The subnet declaration is incomplete [1 IP of DC not found in declared subnets]</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>1</Points>
+      <Category>StaleObjects</Category>
+      <Model>ObjectConfig</Model>
+      <RiskId>S-PwdNeverExpires</RiskId>
+      <Rationale>Number of accounts which have never expiring passwords: 1</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>0</Points>
+      <Category>Anomalies</Category>
+      <Model>Reconnaissance</Model>
+      <RiskId>A-PreWin2000AuthenticatedUsers</RiskId>
+      <Rationale>The PreWin2000 compatible group contains "Authenticated Users"</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>0</Points>
+      <Category>Anomalies</Category>
+      <Model>Reconnaissance</Model>
+      <RiskId>A-DsHeuristicsLDAPSecurity</RiskId>
+      <Rationale>DsHeuristics has not been set to enable the mitigation for CVE-2019-12345</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>0</Points>
+      <Category>PrivilegedAccounts</Category>
+      <Model>ACLCheck</Model>
+      <RiskId>P-DNSAdmin</RiskId>
+      <Rationale>Number of members of the Dns Admins group: 6</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>0</Points>
+      <Category>Anomalies</Category>
+      <Model>NetworkSniffing</Model>
+      <RiskId>A-DnsZoneAUCreateChild</RiskId>
+      <Rationale>Authenticated Users can create DNS records</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>0</Points>
+      <Category>Anomalies</Category>
+      <Model>Audit</Model>
+      <RiskId>A-AuditPowershell</RiskId>
+      <Rationale>The PowerShell audit configuration is not fully enabled.</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>0</Points>
+      <Category>StaleObjects</Category>
+      <Model>ObjectConfig</Model>
+      <RiskId>S-KerberosArmoringDC</RiskId>
+      <Rationale>Verify Kerberos Armoring is enabled on DCs and the domain functional level is at least Windows Server 2012</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>0</Points>
+      <Category>Anomalies</Category>
+      <Model>WeakPassword</Model>
+      <RiskId>A-NoServicePolicy</RiskId>
+      <Rationale>No password policy for service accounts found (MinimumPasswordLength&gt;=20)</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>0</Points>
+      <Category>StaleObjects</Category>
+      <Model>ObjectConfig</Model>
+      <RiskId>S-KerberosArmoring</RiskId>
+      <Rationale>Verify Kerberos Armoring is enabled on clients and the domain functional level is at least Windows Server 2012</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>0</Points>
+      <Category>PrivilegedAccounts</Category>
+      <Model>IrreversibleChange</Model>
+      <RiskId>P-UnprotectedOU</RiskId>
+      <Rationale>OU without the accidental deletion protection have been found</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>0</Points>
+      <Category>Anomalies</Category>
+      <Model>NetworkSniffing</Model>
+      <RiskId>A-NoGPOLLMNR</RiskId>
+      <Rationale>No GPO has been found which disables LLMNR or at least one GPO does enable it explicitly</Rationale>
+    </HealthcheckRiskRule>
+    <HealthcheckRiskRule>
+      <Points>0</Points>
+      <Category>Anomalies</Category>
+      <Model>Reconnaissance</Model>
+      <RiskId>A-NoNetSessionHardening</RiskId>
+      <Rationale>No GPO has been found which implements NetCease</Rationale>
+    </HealthcheckRiskRule>
+  </RiskRules>
+  <UserAccountData>
+    <Number>105</Number>
+    <NumberEnabled>104</NumberEnabled>
+    <NumberDisabled>1</NumberDisabled>
+    <NumberActive>104</NumberActive>
+    <NumberInactive>0</NumberInactive>
+    <NumberLocked>0</NumberLocked>
+    <NumberPwdNeverExpires>1</NumberPwdNeverExpires>
+    <NumberSidHistory>0</NumberSidHistory>
+    <NumberPwdNotRequired>0</NumberPwdNotRequired>
+    <NumberBadPrimaryGroup>0</NumberBadPrimaryGroup>
+    <NumberDesEnabled>0</NumberDesEnabled>
+    <NumberNotAesEnabled>0</NumberNotAesEnabled>
+    <NumberTrustedToAuthenticateForDelegation>0</NumberTrustedToAuthenticateForDelegation>
+    <NumberReversibleEncryption>0</NumberReversibleEncryption>
+    <NumberDuplicate>0</NumberDuplicate>
+    <NumberNoPreAuth>1</NumberNoPreAuth>
+    <NumberLAPS>0</NumberLAPS>
+    <NumberLAPSNew>0</NumberLAPSNew>
+  </UserAccountData>
+  <ComputerAccountData>
+    <Number>1</Number>
+    <NumberEnabled>1</NumberEnabled>
+    <NumberDisabled>0</NumberDisabled>
+    <NumberActive>1</NumberActive>
+    <NumberInactive>0</NumberInactive>
+    <NumberLocked>0</NumberLocked>
+    <NumberPwdNeverExpires>0</NumberPwdNeverExpires>
+    <NumberSidHistory>0</NumberSidHistory>
+    <NumberPwdNotRequired>0</NumberPwdNotRequired>
+    <NumberBadPrimaryGroup>0</NumberBadPrimaryGroup>
+    <NumberDesEnabled>0</NumberDesEnabled>
+    <NumberNotAesEnabled>0</NumberNotAesEnabled>
+    <NumberTrustedToAuthenticateForDelegation>1</NumberTrustedToAuthenticateForDelegation>
+    <NumberReversibleEncryption>0</NumberReversibleEncryption>
+    <NumberDuplicate>0</NumberDuplicate>
+    <NumberNoPreAuth>0</NumberNoPreAuth>
+    <NumberLAPS>0</NumberLAPS>
+    <NumberLAPSNew>0</NumberLAPSNew>
+  </ComputerAccountData>
+  <OperatingSystem>
+    <HealthcheckOSData>
+      <OperatingSystem>Server OS</OperatingSystem>
+      <NumberOfOccurence>1</NumberOfOccurence>
+      <data>
+        <Number>1</Number>
+        <NumberEnabled>1</NumberEnabled>
+        <NumberDisabled>0</NumberDisabled>
+        <NumberActive>1</NumberActive>
+        <NumberInactive>0</NumberInactive>
+        <NumberLocked>0</NumberLocked>
+        <NumberPwdNeverExpires>0</NumberPwdNeverExpires>
+        <NumberSidHistory>0</NumberSidHistory>
+        <NumberPwdNotRequired>0</NumberPwdNotRequired>
+        <NumberBadPrimaryGroup>0</NumberBadPrimaryGroup>
+        <NumberDesEnabled>0</NumberDesEnabled>
+        <NumberNotAesEnabled>0</NumberNotAesEnabled>
+        <NumberTrustedToAuthenticateForDelegation>1</NumberTrustedToAuthenticateForDelegation>
+        <NumberReversibleEncryption>0</NumberReversibleEncryption>
+        <NumberDuplicate>0</NumberDuplicate>
+        <NumberNoPreAuth>0</NumberNoPreAuth>
+        <NumberLAPS>0</NumberLAPS>
+        <NumberLAPSNew>0</NumberLAPSNew>
+      </data>
+    </HealthcheckOSData>
+  </OperatingSystem>
+  <OperatingSystemVersion>
+    <HealthcheckOSVersionData OSVersion="10.0 (23048)" IsServer="true" NumberOfOccurence="1">
+      <data>
+        <Number>1</Number>
+        <NumberEnabled>1</NumberEnabled>
+        <NumberDisabled>0</NumberDisabled>
+        <NumberActive>1</NumberActive>
+        <NumberInactive>0</NumberInactive>
+        <NumberLocked>0</NumberLocked>
+        <NumberPwdNeverExpires>0</NumberPwdNeverExpires>
+        <NumberSidHistory>0</NumberSidHistory>
+        <NumberPwdNotRequired>0</NumberPwdNotRequired>
+        <NumberBadPrimaryGroup>0</NumberBadPrimaryGroup>
+        <NumberDesEnabled>0</NumberDesEnabled>
+        <NumberNotAesEnabled>0</NumberNotAesEnabled>
+        <NumberTrustedToAuthenticateForDelegation>1</NumberTrustedToAuthenticateForDelegation>
+        <NumberReversibleEncryption>0</NumberReversibleEncryption>
+        <NumberDuplicate>0</NumberDuplicate>
+        <NumberNoPreAuth>0</NumberNoPreAuth>
+        <NumberLAPS>0</NumberLAPS>
+        <NumberLAPSNew>0</NumberLAPSNew>
+      </data>
+    </HealthcheckOSVersionData>
+  </OperatingSystemVersion>
+  <GPOInfo>
+    <GPOInfo>
+      <GPOName>Default Domain Policy</GPOName>
+      <GPOId>{31B2F340-016D-11D2-945F-00C04FB984F9}</GPOId>
+      <IsDisabled>false</IsDisabled>
+      <AppliedTo>
+        <string>DC=example,DC=local</string>
+      </AppliedTo>
+      <AppliedOrder>
+        <int>1</int>
+      </AppliedOrder>
+    </GPOInfo>
+    <GPOInfo>
+      <GPOName>Default Domain Controllers Policy</GPOName>
+      <GPOId>{6AC1786C-016F-11D2-945F-00C04fB984F9}</GPOId>
+      <IsDisabled>false</IsDisabled>
+      <AppliedTo>
+        <string>OU=Domain Controllers,DC=example,DC=local</string>
+      </AppliedTo>
+      <AppliedOrder>
+        <int>1</int>
+      </AppliedOrder>
+    </GPOInfo>
+  </GPOInfo>
+  <LoginScript>
+    <HealthcheckLoginScriptData>
+      <LoginScript>None</LoginScript>
+      <NumberOfOccurence>104</NumberOfOccurence>
+      <Delegation/>
+    </HealthcheckLoginScriptData>
+  </LoginScript>
+  <LastADBackup>2024-06-06T10:04:32+02:00</LastADBackup>
+  <LAPSInstalled>9999-12-31T23:59:59.9999999</LAPSInstalled>
+  <NewLAPSInstalled>9999-12-31T23:59:59.9999999</NewLAPSInstalled>
+  <SCCMInstalled>0001-01-01T00:00:00</SCCMInstalled>
+  <KrbtgtLastChangeDate>2024-03-13T01:25:35.9203718+01:00</KrbtgtLastChangeDate>
+  <KrbtgtLastVersion>2</KrbtgtLastVersion>
+  <ExchangePrivEscVulnerable>false</ExchangePrivEscVulnerable>
+  <AdminLastLoginDate>2024-06-06T12:18:47.7308022+02:00</AdminLastLoginDate>
+  <GuestEnabled>false</GuestEnabled>
+  <GPPPassword/>
+  <GPPFileDeployed/>
+  <GPOAuditSimple/>
+  <GPOAuditAdvanced/>
+  <GPOWSUS/>
+  <GPPPasswordPolicy>
+    <GPPSecurityPolicy>
+      <Properties>
+        <GPPSecurityPolicyProperty>
+          <Property>MinimumPasswordAge</Property>
+          <Value>1</Value>
+        </GPPSecurityPolicyProperty>
+        <GPPSecurityPolicyProperty>
+          <Property>MaximumPasswordAge</Property>
+          <Value>42</Value>
+        </GPPSecurityPolicyProperty>
+        <GPPSecurityPolicyProperty>
+          <Property>MinimumPasswordLength</Property>
+          <Value>4</Value>
+        </GPPSecurityPolicyProperty>
+        <GPPSecurityPolicyProperty>
+          <Property>PasswordComplexity</Property>
+          <Value>0</Value>
+        </GPPSecurityPolicyProperty>
+        <GPPSecurityPolicyProperty>
+          <Property>PasswordHistorySize</Property>
+          <Value>24</Value>
+        </GPPSecurityPolicyProperty>
+        <GPPSecurityPolicyProperty>
+          <Property>LockoutBadCount</Property>
+          <Value>0</Value>
+        </GPPSecurityPolicyProperty>
+        <GPPSecurityPolicyProperty>
+          <Property>ClearTextPassword</Property>
+          <Value>0</Value>
+        </GPPSecurityPolicyProperty>
+      </Properties>
+      <GPOName>Default Domain Policy</GPOName>
+      <GPOId>{31B2F340-016D-11D2-945F-00C04FB984F9}</GPOId>
+    </GPPSecurityPolicy>
+  </GPPPasswordPolicy>
+  <GPOLsaPolicy/>
+  <GPOScreenSaverPolicy/>
+  <GPOEventForwarding/>
+  <GPODelegation/>
+  <GPOHardenedPath/>
+  <TrustedCertificates/>
+  <CertificateTemplates/>
+  <CertificateEnrollments/>
+  <PrivilegedGroups>
+    <HealthCheckGroupData>
+      <GroupName>Account Operators</GroupName>
+      <DistinguishedName>CN=Account Operators,CN=Builtin,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>0</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>0</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>0</NumberOfMemberActive>
+      <NumberOfMemberEnabled>0</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>0</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Administrators</GroupName>
+      <DistinguishedName>CN=Administrators,CN=Builtin,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>1</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>1</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>1</NumberOfMemberActive>
+      <NumberOfMemberEnabled>1</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>1</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Backup Operators</GroupName>
+      <DistinguishedName>CN=Backup Operators,CN=Builtin,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>0</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>0</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>0</NumberOfMemberActive>
+      <NumberOfMemberEnabled>0</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>0</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Certificate Operators</GroupName>
+      <DistinguishedName>CN=Cryptographic Operators,CN=Builtin,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>0</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>0</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>0</NumberOfMemberActive>
+      <NumberOfMemberEnabled>0</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>0</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Certificate Publishers</GroupName>
+      <DistinguishedName>CN=Cert Publishers,CN=Users,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>0</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>0</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>0</NumberOfMemberActive>
+      <NumberOfMemberEnabled>0</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>0</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Dns Admins</GroupName>
+      <DistinguishedName>CN=DnsAdmins,CN=Users,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>6</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>0</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>6</NumberOfMemberInactive>
+      <NumberOfMemberActive>0</NumberOfMemberActive>
+      <NumberOfMemberEnabled>6</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>6</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Domain Administrators</GroupName>
+      <DistinguishedName>CN=Domain Admins,CN=Users,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>1</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>1</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>1</NumberOfMemberActive>
+      <NumberOfMemberEnabled>1</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>1</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Enterprise Administrators</GroupName>
+      <DistinguishedName>CN=Enterprise Admins,CN=Users,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>1</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>1</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>1</NumberOfMemberActive>
+      <NumberOfMemberEnabled>1</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>1</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Enterprise Key Administrators</GroupName>
+      <DistinguishedName>CN=Enterprise Key Admins,CN=Users,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>0</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>0</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>0</NumberOfMemberActive>
+      <NumberOfMemberEnabled>0</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>0</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Key Administrators</GroupName>
+      <DistinguishedName>CN=Key Admins,CN=Users,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>0</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>0</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>0</NumberOfMemberActive>
+      <NumberOfMemberEnabled>0</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>0</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Print Operators</GroupName>
+      <DistinguishedName>CN=Print Operators,CN=Builtin,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>0</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>0</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>0</NumberOfMemberActive>
+      <NumberOfMemberEnabled>0</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>0</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Replicator</GroupName>
+      <DistinguishedName>CN=Replicator,CN=Builtin,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>0</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>0</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>0</NumberOfMemberActive>
+      <NumberOfMemberEnabled>0</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>0</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Schema Administrators</GroupName>
+      <DistinguishedName>CN=Schema Admins,CN=Users,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>1</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>1</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>1</NumberOfMemberActive>
+      <NumberOfMemberEnabled>1</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>1</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+    <HealthCheckGroupData>
+      <GroupName>Server Operators</GroupName>
+      <DistinguishedName>CN=Server Operators,CN=Builtin,DC=example,DC=local</DistinguishedName>
+      <NumberOfMember>0</NumberOfMember>
+      <NumberOfMemberDisabled>0</NumberOfMemberDisabled>
+      <NumberOfMemberPwdNotRequired>0</NumberOfMemberPwdNotRequired>
+      <NumberOfMemberPwdNeverExpires>0</NumberOfMemberPwdNeverExpires>
+      <NumberOfMemberLocked>0</NumberOfMemberLocked>
+      <NumberOfMemberInactive>0</NumberOfMemberInactive>
+      <NumberOfMemberActive>0</NumberOfMemberActive>
+      <NumberOfMemberEnabled>0</NumberOfMemberEnabled>
+      <NumberOfMemberCanBeDelegated>0</NumberOfMemberCanBeDelegated>
+      <NumberOfExternalMember>0</NumberOfExternalMember>
+      <NumberOfSmartCardRequired>0</NumberOfSmartCardRequired>
+      <NumberOfServiceAccount>0</NumberOfServiceAccount>
+      <NumberOfMemberInProtectedUsers>0</NumberOfMemberInProtectedUsers>
+    </HealthCheckGroupData>
+  </PrivilegedGroups>
+  <AdminSDHolderNotOKCount>0</AdminSDHolderNotOKCount>
+  <UnixPasswordUsersCount>0</UnixPasswordUsersCount>
+  <SmartCardNotOKCount>0</SmartCardNotOKCount>
+  <DomainControllerWithNullSessionCount>0</DomainControllerWithNullSessionCount>
+  <SIDHistoryAuditingGroupPresent>false</SIDHistoryAuditingGroupPresent>
+  <MachineAccountQuota>10</MachineAccountQuota>
+  <ListHoneyPot/>
+  <DnsZones>
+    <HealthcheckDnsZones AUCreateChild="true">
+      <name>example.local</name>
+      <InsecureUpdate>false</InsecureUpdate>
+      <ZoneTransfert>false</ZoneTransfert>
+    </HealthcheckDnsZones>
+    <HealthcheckDnsZones>
+      <name>RootDNSServers</name>
+      <InsecureUpdate>false</InsecureUpdate>
+      <ZoneTransfert>false</ZoneTransfert>
+    </HealthcheckDnsZones>
+    <HealthcheckDnsZones>
+      <name>RootDNSServers</name>
+      <InsecureUpdate>false</InsecureUpdate>
+      <ZoneTransfert>false</ZoneTransfert>
+    </HealthcheckDnsZones>
+  </DnsZones>
+  <PasswordDistribution>
+    <Dist HigherBound="2" Value="102"/>
+    <Dist HigherBound="5155" Value="2"/>
+  </PasswordDistribution>
+  <LapsDistribution/>
+  <LapsNewDistribution/>
+  <AzureADSSOLastPwdChange>0001-01-01T00:00:00</AzureADSSOLastPwdChange>
+  <AzureADSSOVersion>0</AzureADSSOVersion>
+  <AzureADSSOEncryptionType>0</AzureADSSOEncryptionType>
+  <PrivilegedDistributionLastLogon>
+    <Dist HigherBound="0" Value="1"/>
+  </PrivilegedDistributionLastLogon>
+  <PrivilegedDistributionPwdLastSet>
+    <Dist HigherBound="2" Value="7"/>
+  </PrivilegedDistributionPwdLastSet>
+  <ServicePoints/>
+  <AzureADConnect/>
+  <JavaClassFound>false</JavaClassFound>
+  <DisplaySpecifier/>
+  <ControlPaths>
+    <Data>
+      <data Name="S-1-5-32-548" Description="Account Operators" Typology="PrivilegedAccount" ObjectRisk="High">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-500" Description="Administrator" Typology="PrivilegedAccount" ObjectRisk="Critical">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-32-544" Description="Administrators" Typology="PrivilegedAccount" ObjectRisk="Critical">
+        <NumberOfDirectUserMembers>1</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-32-551" Description="Backup Operators" Typology="PrivilegedAccount" ObjectRisk="High">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="CN=Builtin,DC=example,DC=local" Description="Builtin OU" Typology="Infrastructure" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-32-569" Description="Certificate Operators" Typology="PrivilegedAccount" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-517" Description="Certificate Publishers" Typology="PrivilegedAccount" ObjectRisk="Other">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="CN=Computers,DC=example,DC=local" Description="Computers container" Typology="Infrastructure" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-1101" Description="Dns Admins" Typology="PrivilegedAccount" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>6</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>10</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-512" Description="Domain Administrators" Typology="PrivilegedAccount" ObjectRisk="Critical">
+        <NumberOfDirectUserMembers>1</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-516" Description="Domain Controllers" Typology="Infrastructure" ObjectRisk="Critical">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>1</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333" Description="Domain Root" Typology="Infrastructure" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-519" Description="Enterprise Administrators" Typology="PrivilegedAccount" ObjectRisk="Critical">
+        <NumberOfDirectUserMembers>1</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-527" Description="Enterprise Key Administrators" Typology="PrivilegedAccount" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-498" Description="Enterprise Read Only Domain Controllers" Typology="Infrastructure" ObjectRisk="Other">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-520" Description="Group Policy Creator Owners" Typology="Infrastructure" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>1</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-526" Description="Key Administrators" Typology="PrivilegedAccount" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-502" Description="Krbtgt account" Typology="Infrastructure" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-32-550" Description="Print Operators" Typology="PrivilegedAccount" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-521" Description="Read Only Domain Controllers" Typology="Infrastructure" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-32-552" Description="Replicator" Typology="PrivilegedAccount" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-21-1111111111-2222222222-3333333333-518" Description="Schema Administrators" Typology="PrivilegedAccount" ObjectRisk="Critical">
+        <NumberOfDirectUserMembers>1</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="S-1-5-32-549" Description="Server Operators" Typology="PrivilegedAccount" ObjectRisk="High">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+      <data Name="CN=Users,DC=example,DC=local" Description="Users container" Typology="Infrastructure" ObjectRisk="Medium">
+        <NumberOfDirectUserMembers>0</NumberOfDirectUserMembers>
+        <NumberOfDirectComputerMembers>0</NumberOfDirectComputerMembers>
+        <NumberOfIndirectMembers>0</NumberOfIndirectMembers>
+        <NumberOfDeletedObjects>0</NumberOfDeletedObjects>
+        <Dependancies/>
+      </data>
+    </Data>
+    <Dependancies/>
+    <AnomalyAnalysis>
+      <CompromiseGraphAnomalyAnalysisData ObjectRisk="Critical" NumberOfObjectsScreened="6" NumberOfObjectsWithIndirect="0" MaximumIndirectNumber="0" MaximumDirectIndirectRatio="0"/>
+      <CompromiseGraphAnomalyAnalysisData ObjectRisk="High" NumberOfObjectsScreened="3" NumberOfObjectsWithIndirect="0" MaximumIndirectNumber="0" MaximumDirectIndirectRatio="0"/>
+      <CompromiseGraphAnomalyAnalysisData ObjectRisk="Medium" NumberOfObjectsScreened="13" NumberOfObjectsWithIndirect="1" MaximumIndirectNumber="10" MaximumDirectIndirectRatio="166"/>
+      <CompromiseGraphAnomalyAnalysisData ObjectRisk="Other" NumberOfObjectsScreened="2" NumberOfObjectsWithIndirect="0" MaximumIndirectNumber="0" MaximumDirectIndirectRatio="0"/>
+    </AnomalyAnalysis>
+    <GlobalScore>0</GlobalScore>
+    <StaleObjectsScore>0</StaleObjectsScore>
+    <PrivilegiedGroupScore>0</PrivilegiedGroupScore>
+    <TrustScore>0</TrustScore>
+    <AnomalyScore>0</AnomalyScore>
+  </ControlPaths>
+</HealthcheckData>

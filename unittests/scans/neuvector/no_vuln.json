@@ -1,0 +1,70 @@
+{
+  "report": {
+    "vulnerabilities": [
+    ],
+    "modules": [
+      {
+        "name": "scanner",
+        "version": "1.011",
+        "source": "github",
+        "cves": [
+          {
+            "name": "",
+            "status": ""
+          }
+        ],
+        "cpes": [
+          ""
+        ]
+      }
+    ],
+    "checks": [
+      {
+        "catalog": "docker",
+        "type": "",
+        "level": "INFO",
+        "test_number": "1",
+        "profile": "Level 1",
+        "scored": true,
+        "automated": true,
+        "description": "General Configuration",
+        "message": [
+          "Host Configuration"
+        ],
+        "remediation": "",
+        "group": "nv.calico"
+      }
+    ],
+    "secrets": [
+      {
+        "type": "",
+        "evidence": "",
+        "path": "",
+        "suggestion": ""
+      }
+    ],
+    "setid_perms": [
+      {
+        "type": "",
+        "evidence": "",
+        "path": ""
+      }
+    ],
+    "envs": [
+      [
+        "PATH=/usr/local/sbin",
+        "GOSU_VERSION=1.12",
+        "REDIS_VERSION=6.0.2"
+      ]
+    ],
+    "labels": {
+      "key": [
+        ""
+      ],
+      "value": ""
+    },
+    "cmds": [
+      ""
+    ]
+  }
+}

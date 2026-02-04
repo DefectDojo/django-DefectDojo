@@ -1,0 +1,36 @@
+{
+	"total_rows": 123,
+	"rows": [
+		{
+			"cves": [
+				{
+					"cve": "CVE-2023-42282",
+					"cvss_v3_score": 9.8,
+					"cvss_v3_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+				}
+			],
+			"cvss3_max_score": 9.8,
+			"severity": "Critical",
+			"component_physical_path": "ip:2.0.0",
+			"impact_path": [
+				"somepath"
+			],
+			"fixed_versions": [
+				"2.0.1",
+				"1.1.9"
+			],
+			"issue_id": "XRAY-123",
+			"project_keys": [
+				"somepath"
+			],
+			"applicability": null,
+			"applicability_result": "not_scanned",
+			"summary": "The ip package before 1.1.9 for Node.js might allow SSRF because some IP addresses (such as 0x7f.1) are improperly categorized as globally routable via isPublic.",
+			"vulnerable_component": "npm://ip:2.0.0",
+			"impacted_artifact": "build://[some_artifact_id]",
+			"path": "somepath",
+			"published": "2024-02-09T16:30:10Z",
+			"artifact_scan_time": "2025-11-03T11:42:09Z"
+		}
+	]
+}

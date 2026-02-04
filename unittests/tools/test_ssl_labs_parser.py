@@ -1,18 +1,18 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.ssl_labs.parser import SslLabsParser
 from dojo.models import Test
+from dojo.tools.ssl_labs.parser import SslLabsParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestSslLabsParser(DojoTestCase):
     def test_parse_none(self):
         parser = SslLabsParser()
-        with open("unittests/scans/ssl_labs/none.json") as test_file:
+        with (get_unit_tests_scans_path("ssl_labs") / "none.json").open(encoding="utf-8") as test_file:
             findings = parser.get_findings(test_file, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_ok(self):
         parser = SslLabsParser()
-        with open("unittests/scans/ssl_labs/ssl_labs_ok_v1.5.0.json") as test_file:
+        with (get_unit_tests_scans_path("ssl_labs") / "ssl_labs_ok_v1.5.0.json").open(encoding="utf-8") as test_file:
             findings = parser.get_findings(test_file, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -22,11 +22,11 @@ class TestSslLabsParser(DojoTestCase):
         self.assertEqual(findings[0].unsaved_endpoints[0].host, "defectdojo.mevitae.com")
         self.assertEqual(findings[0].cwe, 310)
         self.assertEqual(findings[0].severity, "Info")
-        self.assertTrue("TLS" in findings[0].description)
+        self.assertIn("TLS", findings[0].description)
 
     def test_parse_dh1024(self):
         parser = SslLabsParser()
-        with open("unittests/scans/ssl_labs/ssl_labs_dh1024_v1.5.0.json") as test_file:
+        with (get_unit_tests_scans_path("ssl_labs") / "ssl_labs_dh1024_v1.5.0.json").open(encoding="utf-8") as test_file:
             findings = parser.get_findings(test_file, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -37,11 +37,11 @@ class TestSslLabsParser(DojoTestCase):
         self.assertEqual(findings[0].unsaved_endpoints[0].host, "dh1024.badssl.com")
         self.assertEqual(findings[0].cwe, 310)
         self.assertEqual(findings[0].severity, "Medium")
-        self.assertTrue("TLS" in findings[0].description)
+        self.assertIn("TLS", findings[0].description)
 
     def test_parse_3des(self):
         parser = SslLabsParser()
-        with open("unittests/scans/ssl_labs/ssl_labs_3des_v1.5.0.json") as test_file:
+        with (get_unit_tests_scans_path("ssl_labs") / "ssl_labs_3des_v1.5.0.json").open(encoding="utf-8") as test_file:
             findings = parser.get_findings(test_file, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -52,11 +52,11 @@ class TestSslLabsParser(DojoTestCase):
         self.assertEqual(findings[0].unsaved_endpoints[0].host, "3des.badssl.com")
         self.assertEqual(findings[0].cwe, 310)
         self.assertEqual(findings[0].severity, "High")
-        self.assertTrue("TLS" in findings[0].description)
+        self.assertIn("TLS", findings[0].description)
 
     def test_parse_revoked(self):
         parser = SslLabsParser()
-        with open("unittests/scans/ssl_labs/ssl_labs_revoked_v1.5.0.json") as test_file:
+        with (get_unit_tests_scans_path("ssl_labs") / "ssl_labs_revoked_v1.5.0.json").open(encoding="utf-8") as test_file:
             findings = parser.get_findings(test_file, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -67,11 +67,11 @@ class TestSslLabsParser(DojoTestCase):
         self.assertEqual(findings[0].unsaved_endpoints[0].host, "revoked.badssl.com")
         self.assertEqual(findings[0].cwe, 310)
         self.assertEqual(findings[0].severity, "Critical")
-        self.assertTrue("TLS" in findings[0].description)
+        self.assertIn("TLS", findings[0].description)
 
     def test_parse_multiple(self):
         parser = SslLabsParser()
-        with open("unittests/scans/ssl_labs/ssl_labs_multiple_v1.5.0.json") as test_file:
+        with (get_unit_tests_scans_path("ssl_labs") / "ssl_labs_multiple_v1.5.0.json").open(encoding="utf-8") as test_file:
             findings = parser.get_findings(test_file, Test())
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -84,7 +84,7 @@ class TestSslLabsParser(DojoTestCase):
         foundCritical = False
 
         for finding in findings:
-            self.assertTrue("TLS" in finding.description)
+            self.assertIn("TLS", finding.description)
             self.assertEqual(finding.cwe, 310)
             if finding.severity == "Info":
                 self.assertEqual(finding.title, "TLS Grade 'A+' for defectdojo.mevitae.com")

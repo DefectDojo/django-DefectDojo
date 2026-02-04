@@ -1,0 +1,119 @@
+{
+    "schema": 1,
+    "applicationInfo": {
+      "name": "Threat composer",
+      "description": ""
+    },
+    "architecture": {
+      "image": "",
+      "description": ""
+    },
+    "dataflow": {
+      "image": "",
+      "description": ""
+    },
+    "assumptions": [
+      {
+        "id": "2d2a1ddf-5bb8-4a55-8f60-e195bc0b4b90",
+        "numericId": 7,
+        "content": "lorem ipsum",
+        "tags": [
+          "lorem ipsum"
+        ],
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "lorem ipsum"
+          }
+        ],
+        "displayOrder": 7
+      }
+    ],
+    "mitigations": [
+      {
+        "id": "bdef5b69-e690-4c9c-bfc1-960390779d3b",
+        "numericId": 21,
+        "content": "lorem ipsum",
+        "tags": [
+          "lorem ipsum"
+        ],
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "lorem ipsum"
+          }
+        ],
+        "displayOrder": 21
+      },
+      {
+        "id": "11fb1c71-42f0-4004-89a7-09d8bf6f8b11",
+        "numericId": 20,
+        "content": "lorem ipsum",
+        "metadata": [
+          {
+            "key": "Comments",
+            "value": "lorem ipsum"
+          }
+        ],
+        "displayOrder": 20
+      }
+    ],
+    "assumptionLinks": [
+      {
+        "linkedId": "46db1eb4-a451-4d05-afe1-c695491e2387",
+        "assumptionId": "d8edcf30-5c76-49f7-a408-20e071bbea1c",
+        "type": "Threat"
+      }
+    ],
+    "mitigationLinks": [
+      {
+        "linkedId": "46db1eb4-a451-4d05-afe1-c695491e2387",
+        "mitigationId": "11fb1c71-42f0-4004-89a7-09d8bf6f8b11"
+      },
+      {
+        "linkedId": "46db1eb4-a451-4d05-afe1-c695491e2387",
+        "mitigationId": "bdef5b69-e690-4c9c-bfc1-960390779d3b"
+      }
+    ],
+    "threats": [
+      {
+        "id": "46db1eb4-a451-4d05-afe1-c695491e2387",
+        "numericId": 23,
+        "statement": "A lorem ipsum lorem ipsum can lorem ipsum, which leads to lorem ipsum, negatively impacting lorem ipsum",
+        "threatSource": "lorem ipsum",
+        "prerequisites": "lorem ipsum",
+        "threatAction": "lorem ipsum",
+        "threatImpact": "lorem ipsum",
+        "impactedAssets": [
+          "lorem ipsum"
+        ],
+        "displayOrder": 23,
+        "metadata": [
+          {
+            "key": "Priority",
+            "value": "High"
+          },
+          {
+            "key": "STRIDE",
+            "value": [
+              "S",
+              "T",
+              "R",
+              "I",
+              "D",
+              "E"
+            ]
+          },
+          {
+            "key": "Comments",
+            "value": "lorem ipsum. lorem ipsum lorem ipsum"
+          }
+        ],
+        "tags": [
+          "CWE-156",
+          "CVE-45",
+          "lorem ipsum"
+        ]
+      }
+    ]
+  }

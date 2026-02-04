@@ -1,6 +1,9 @@
 {
     "findings": [
         {
+            "title": "title",
+            "severity": "Low",
+            "description": "description",
             "endpoints": [
                 "www.example.com",
                 "localhost",

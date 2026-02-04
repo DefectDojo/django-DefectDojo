@@ -31,7 +31,7 @@
                                 </test>
 
                                 <test id="dns-processes-recursive-queries" key="" status="vulnerable-exploited"
-                                      scan-id="28959" vulnerable-since="20210211T164506081"
+                                      scan-id="28959" vulnerable-since="20210212T164506081"
                                       pci-compliance-status="pass">
 
                                     <Paragraph>
@@ -56,7 +56,7 @@
                             </fingerprints>
                             <tests>
                                 <test id="dns-allows-cache-snooping" key="" status="vulnerable-exploited"
-                                      scan-id="28959" vulnerable-since="20210211T164506081"
+                                      scan-id="28959" vulnerable-since="20210212T164506081"
                                       pci-compliance-status="fail">
 
                                     <Paragraph>

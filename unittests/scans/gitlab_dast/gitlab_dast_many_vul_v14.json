@@ -1,0 +1,1422 @@
+{
+    "@generated": "Fri, 23 Apr 2021 15:46:48",
+    "@version": "D-2020-08-26",
+    "remediations": [],
+    "scan": {
+      "end_time": "2021-04-23T15:46:48",
+      "messages": [],
+      "scanned_resources": [
+        {
+          "method": "GET",
+          "type": "url",
+          "url": "http://api-server/"
+        },
+        {
+          "method": "GET",
+          "type": "url",
+          "url": "http://api-server/v1"
+        },
+        {
+          "method": "DELETE",
+          "type": "url",
+          "url": "http://api-server/v1/tree/10"
+        },
+        {
+          "method": "GET",
+          "type": "url",
+          "url": "http://api-server/v1/tree/10"
+        },
+        {
+          "method": "GET",
+          "type": "url",
+          "url": "http://api-server/v1/trees"
+        },
+        {
+          "method": "POST",
+          "type": "url",
+          "url": "http://api-server/v1/trees"
+        }
+      ],
+      "scanner": {
+        "id": "zaproxy",
+        "name": "OWASP Zed Attack Proxy (ZAP)",
+        "url": "https://www.zaproxy.org",
+        "version": "D-2020-08-26",
+        "vendor": {
+          "name": "GitLab"
+        }
+      },
+      "start_time": "2021-04-23T15:46:34",
+      "status": "success",
+      "type": "dast"
+    },
+    "site": [
+      {
+        "@host": "api-server",
+        "@name": "http://api-server",
+        "@port": "80",
+        "@ssl": "false",
+        "alerts": [
+          {
+            "alert": "PII Disclosure",
+            "confidence": "3",
+            "count": "1",
+            "cweid": "359",
+            "desc": "<p>The response contains Personally Identifiable Information, such as CC number, SSN and similar sensitive data.</p>",
+            "instances": [
+              {
+                "attack": "",
+                "evidence": "378282246310005",
+                "method": "GET",
+                "param": "",
+                "uri": "http://api-server/v1/trees"
+              }
+            ],
+            "name": "PII Disclosure",
+            "otherinfo": "<p>Credit Card Type detected: American Express</p><p>Bank Identification Number: 378282</p><p>Brand: AMERICAN EXPRESS</p><p>Category: SMALL CORPORATE</p><p>Issuer: AMERICAN EXPRESS COMPANY</p>",
+            "pluginid": "10062",
+            "reference": "<p></p>",
+            "riskcode": "3",
+            "riskdesc": "High (High)",
+            "solution": "<p></p>",
+            "sourceid": "3"
+          },
+          {
+            "alert": "Content Security Policy (CSP) Header Not Set",
+            "confidence": "3",
+            "count": "1",
+            "cweid": "16",
+            "desc": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page \u2014 covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+            "instances": [
+              {
+                "attack": "",
+                "evidence": "",
+                "method": "DELETE",
+                "param": "",
+                "uri": "http://api-server/v1/tree/10"
+              }
+            ],
+            "name": "Content Security Policy (CSP) Header Not Set",
+            "otherinfo": "",
+            "pluginid": "10038",
+            "reference": "<p>https://developer.mozilla.org/en-US/docs/Web/Security/CSP/Introducing_Content_Security_Policy</p><p>https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html</p><p>http://www.w3.org/TR/CSP/</p><p>http://w3c.github.io/webappsec/specs/content-security-policy/csp-specification.dev.html</p><p>http://www.html5rocks.com/en/tutorials/security/content-security-policy/</p><p>http://caniuse.com/#feat=contentsecuritypolicy</p><p>http://content-security-policy.com/</p>",
+            "riskcode": "2",
+            "riskdesc": "Medium (High)",
+            "solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header, to achieve optimal browser support: \"Content-Security-Policy\" for Chrome 25+, Firefox 23+ and Safari 7+, \"X-Content-Security-Policy\" for Firefox 4.0+ and Internet Explorer 10+, and \"X-WebKit-CSP\" for Chrome 14+ and Safari 6+.</p>",
+            "sourceid": "3"
+          },
+          {
+            "alert": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+            "confidence": "3",
+            "count": "6",
+            "cweid": "200",
+            "desc": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+            "instances": [
+              {
+                "attack": "",
+                "evidence": "nginx/1.17.6",
+                "method": "GET",
+                "param": "",
+                "uri": "http://api-server/"
+              },
+              {
+                "attack": "",
+                "evidence": "nginx/1.17.6",
+                "method": "DELETE",
+                "param": "",
+                "uri": "http://api-server/v1/tree/10"
+              },
+              {
+                "attack": "",
+                "evidence": "nginx/1.17.6",
+                "method": "GET",
+                "param": "",
+                "uri": "http://api-server/v1/tree/10"
+              },
+              {
+                "attack": "",
+                "evidence": "nginx/1.17.6",
+                "method": "GET",
+                "param": "",
+                "uri": "http://api-server/v1/trees"
+              },
+              {
+                "attack": "",
+                "evidence": "nginx/1.17.6",
+                "method": "POST",
+                "param": "",
+                "uri": "http://api-server/v1/trees"
+              },
+              {
+                "attack": "",
+                "evidence": "nginx/1.17.6",
+                "method": "GET",
+                "param": "",
+                "uri": "http://api-server/v1"
+              }
+            ],
+            "name": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+            "otherinfo": "",
+            "pluginid": "10036",
+            "reference": "<p>http://httpd.apache.org/docs/current/mod/core.html#servertokens</p><p>http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007</p><p>http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx</p><p>http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html</p>",
+            "riskcode": "1",
+            "riskdesc": "Low (High)",
+            "solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to suppress the \"Server\" header or provide generic details.</p>",
+            "sourceid": "3"
+          },
+          {
+            "alert": "X-Content-Type-Options Header Missing",
+            "confidence": "2",
+            "count": "2",
+            "cweid": "16",
+            "desc": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+            "instances": [
+              {
+                "attack": "",
+                "evidence": "",
+                "method": "GET",
+                "param": "X-Content-Type-Options",
+                "uri": "http://api-server/v1/trees"
+              },
+              {
+                "attack": "",
+                "evidence": "",
+                "method": "POST",
+                "param": "X-Content-Type-Options",
+                "uri": "http://api-server/v1/trees"
+              }
+            ],
+            "name": "X-Content-Type-Options Header Missing",
+            "otherinfo": "<p>This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.</p><p>At \"High\" threshold this scan rule will not alert on client or server error responses.</p>",
+            "pluginid": "10021",
+            "reference": "<p>http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx</p><p>https://owasp.org/www-community/Security_Headers</p>",
+            "riskcode": "1",
+            "riskdesc": "Low (Medium)",
+            "solution": "<p>Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.</p>",
+            "sourceid": "3"
+          }
+        ]
+      }
+    ],
+    "spider": {
+      "progress": "100",
+      "result": {
+        "urlsInScope": [
+          {
+            "method": "",
+            "processed": "",
+            "reasonNotProcessed": "",
+            "statusCode": "",
+            "statusReason": "",
+            "url": ""
+          }
+        ],
+        "urlsIoError": [],
+        "urlsOutOfScope": []
+      },
+      "state": "FINISHED"
+    },
+    "version": "13.1.0",
+    "vulnerabilities": [
+      {
+        "category": "dast",
+        "confidence": "High",
+        "cve": "10062",
+        "description": "The response contains Personally Identifiable Information, such as CC number, SSN and similar sensitive data.",
+        "discovered_at": "2021-04-23T15:46:40.615",
+        "evidence": {
+          "request": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "method": "GET",
+            "url": "http://api-server/v1/trees"
+          },
+          "response": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "reason_phrase": "OK",
+            "status_code": 200
+          },
+          "summary": "378282246310005; Credit Card Type detected: American Express Bank Identification Number: 378282 Brand: AMERICAN EXPRESS Category: SMALL CORPORATE Issuer: AMERICAN EXPRESS COMPANY"
+        },
+        "id": "5ec00bbc-2e53-44cb-83e9-3d35365277e3",
+        "identifiers": [
+          {
+            "name": "PII Disclosure",
+            "type": "ZAProxy_PluginId",
+            "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+            "value": "10062"
+          },
+          {
+            "name": "CWE-359",
+            "type": "CWE",
+            "url": "https://cwe.mitre.org/data/definitions/359.html",
+            "value": "359"
+          }
+        ],
+        "links": [],
+        "location": {
+          "hostname": "http://api-server",
+          "method": "GET",
+          "param": "",
+          "path": "/v1/trees"
+        },
+        "message": "PII Disclosure",
+        "scanner": {
+          "id": "zaproxy",
+          "name": "ZAProxy"
+        },
+        "severity": "High",
+        "solution": ""
+      },
+      {
+        "category": "dast",
+        "confidence": "High",
+        "cve": "10038",
+        "description": "Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page \u2014 covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.",
+        "discovered_at": "2021-04-23T15:46:40.644",
+        "evidence": {
+          "request": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "method": "DELETE",
+            "url": "http://api-server/v1/tree/10"
+          },
+          "response": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "reason_phrase": "Not Allowed",
+            "status_code": 405
+          },
+          "summary": ""
+        },
+        "id": "87e98ddf-7d75-444a-be6d-45400151a0fe",
+        "identifiers": [
+          {
+            "name": "Content Security Policy (CSP) Header Not Set",
+            "type": "ZAProxy_PluginId",
+            "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+            "value": "10038"
+          },
+          {
+            "name": "CWE-16",
+            "type": "CWE",
+            "url": "https://cwe.mitre.org/data/definitions/16.html",
+            "value": "16"
+          }
+        ],
+        "links": [
+          {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/Security/CSP/Introducing_Content_Security_Policy"
+          },
+          {
+            "url": "https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html"
+          },
+          {
+            "url": "http://www.w3.org/TR/CSP/"
+          },
+          {
+            "url": "http://w3c.github.io/webappsec/specs/content-security-policy/csp-specification.dev.html"
+          },
+          {
+            "url": "http://www.html5rocks.com/en/tutorials/security/content-security-policy/"
+          },
+          {
+            "url": "http://caniuse.com/#feat=contentsecuritypolicy"
+          },
+          {
+            "url": "http://content-security-policy.com/"
+          }
+        ],
+        "location": {
+          "hostname": "http://api-server",
+          "method": "DELETE",
+          "param": "",
+          "path": "/v1/tree/10"
+        },
+        "message": "Content Security Policy (CSP) Header Not Set",
+        "scanner": {
+          "id": "zaproxy",
+          "name": "ZAProxy"
+        },
+        "severity": "Medium",
+        "solution": "Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header, to achieve optimal browser support: \"Content-Security-Policy\" for Chrome 25+, Firefox 23+ and Safari 7+, \"X-Content-Security-Policy\" for Firefox 4.0+ and Internet Explorer 10+, and \"X-WebKit-CSP\" for Chrome 14+ and Safari 6+."
+      },
+      {
+        "category": "dast",
+        "confidence": "High",
+        "cve": "10036",
+        "description": "The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.",
+        "discovered_at": "2021-04-23T15:46:40.644",
+        "evidence": {
+          "request": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "method": "DELETE",
+            "url": "http://api-server/v1/tree/10"
+          },
+          "response": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "reason_phrase": "Not Allowed",
+            "status_code": 405
+          },
+          "summary": "nginx/1.17.6"
+        },
+        "id": "df7641d3-1a33-4930-a1c7-e1cc5edfdc2f",
+        "identifiers": [
+          {
+            "name": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+            "type": "ZAProxy_PluginId",
+            "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+            "value": "10036"
+          },
+          {
+            "name": "CWE-200",
+            "type": "CWE",
+            "url": "https://cwe.mitre.org/data/definitions/200.html",
+            "value": "200"
+          }
+        ],
+        "links": [
+          {
+            "url": "http://httpd.apache.org/docs/current/mod/core.html#servertokens"
+          },
+          {
+            "url": "http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007"
+          },
+          {
+            "url": "http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx"
+          },
+          {
+            "url": "http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html"
+          }
+        ],
+        "location": {
+          "hostname": "http://api-server",
+          "method": "DELETE",
+          "param": "",
+          "path": "/v1/tree/10"
+        },
+        "message": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+        "scanner": {
+          "id": "zaproxy",
+          "name": "ZAProxy"
+        },
+        "severity": "Low",
+        "solution": "Ensure that your web server, application server, load balancer, etc. is configured to suppress the \"Server\" header or provide generic details."
+      },
+      {
+        "category": "dast",
+        "confidence": "High",
+        "cve": "10036",
+        "description": "The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.",
+        "discovered_at": "2021-04-23T15:46:40.584",
+        "evidence": {
+          "request": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "method": "GET",
+            "url": "http://api-server/"
+          },
+          "response": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "reason_phrase": "Moved Temporarily",
+            "status_code": 302
+          },
+          "summary": "nginx/1.17.6"
+        },
+        "id": "4ff21131-f7e3-491e-8e9b-7fcdd0352d4c",
+        "identifiers": [
+          {
+            "name": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+            "type": "ZAProxy_PluginId",
+            "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+            "value": "10036"
+          },
+          {
+            "name": "CWE-200",
+            "type": "CWE",
+            "url": "https://cwe.mitre.org/data/definitions/200.html",
+            "value": "200"
+          }
+        ],
+        "links": [
+          {
+            "url": "http://httpd.apache.org/docs/current/mod/core.html#servertokens"
+          },
+          {
+            "url": "http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007"
+          },
+          {
+            "url": "http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx"
+          },
+          {
+            "url": "http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html"
+          }
+        ],
+        "location": {
+          "hostname": "http://api-server",
+          "method": "GET",
+          "param": "",
+          "path": "/"
+        },
+        "message": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+        "scanner": {
+          "id": "zaproxy",
+          "name": "ZAProxy"
+        },
+        "severity": "Low",
+        "solution": "Ensure that your web server, application server, load balancer, etc. is configured to suppress the \"Server\" header or provide generic details."
+      },
+      {
+        "category": "dast",
+        "confidence": "High",
+        "cve": "10036",
+        "description": "The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.",
+        "discovered_at": "2021-04-23T15:46:40.605",
+        "evidence": {
+          "request": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "method": "GET",
+            "url": "http://api-server/v1"
+          },
+          "response": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "reason_phrase": "Moved Temporarily",
+            "status_code": 302
+          },
+          "summary": "nginx/1.17.6"
+        },
+        "id": "eb35495a-9b43-43bf-82ef-e014af424d2d",
+        "identifiers": [
+          {
+            "name": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+            "type": "ZAProxy_PluginId",
+            "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+            "value": "10036"
+          },
+          {
+            "name": "CWE-200",
+            "type": "CWE",
+            "url": "https://cwe.mitre.org/data/definitions/200.html",
+            "value": "200"
+          }
+        ],
+        "links": [
+          {
+            "url": "http://httpd.apache.org/docs/current/mod/core.html#servertokens"
+          },
+          {
+            "url": "http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007"
+          },
+          {
+            "url": "http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx"
+          },
+          {
+            "url": "http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html"
+          }
+        ],
+        "location": {
+          "hostname": "http://api-server",
+          "method": "GET",
+          "param": "",
+          "path": "/v1"
+        },
+        "message": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+        "scanner": {
+          "id": "zaproxy",
+          "name": "ZAProxy"
+        },
+        "severity": "Low",
+        "solution": "Ensure that your web server, application server, load balancer, etc. is configured to suppress the \"Server\" header or provide generic details."
+      },
+      {
+        "category": "dast",
+        "confidence": "High",
+        "cve": "10036",
+        "description": "The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.",
+        "discovered_at": "2021-04-23T15:46:40.638",
+        "evidence": {
+          "request": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "method": "GET",
+            "url": "http://api-server/v1/tree/10"
+          },
+          "response": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "reason_phrase": "Not Found",
+            "status_code": 404
+          },
+          "summary": "nginx/1.17.6"
+        },
+        "id": "9ffabe21-a3b2-46ef-93c9-9d2aaffed8e4",
+        "identifiers": [
+          {
+            "name": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+            "type": "ZAProxy_PluginId",
+            "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+            "value": "10036"
+          },
+          {
+            "name": "CWE-200",
+            "type": "CWE",
+            "url": "https://cwe.mitre.org/data/definitions/200.html",
+            "value": "200"
+          }
+        ],
+        "links": [
+          {
+            "url": "http://httpd.apache.org/docs/current/mod/core.html#servertokens"
+          },
+          {
+            "url": "http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007"
+          },
+          {
+            "url": "http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx"
+          },
+          {
+            "url": "http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html"
+          }
+        ],
+        "location": {
+          "hostname": "http://api-server",
+          "method": "GET",
+          "param": "",
+          "path": "/v1/tree/10"
+        },
+        "message": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+        "scanner": {
+          "id": "zaproxy",
+          "name": "ZAProxy"
+        },
+        "severity": "Low",
+        "solution": "Ensure that your web server, application server, load balancer, etc. is configured to suppress the \"Server\" header or provide generic details."
+      },
+      {
+        "category": "dast",
+        "confidence": "High",
+        "cve": "10036",
+        "description": "The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.",
+        "discovered_at": "2021-04-23T15:46:40.615",
+        "evidence": {
+          "request": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "method": "GET",
+            "url": "http://api-server/v1/trees"
+          },
+          "response": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "reason_phrase": "OK",
+            "status_code": 200
+          },
+          "summary": "nginx/1.17.6"
+        },
+        "id": "a1339166-77c2-45c7-974c-6fe6caa870ec",
+        "identifiers": [
+          {
+            "name": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+            "type": "ZAProxy_PluginId",
+            "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+            "value": "10036"
+          },
+          {
+            "name": "CWE-200",
+            "type": "CWE",
+            "url": "https://cwe.mitre.org/data/definitions/200.html",
+            "value": "200"
+          }
+        ],
+        "links": [
+          {
+            "url": "http://httpd.apache.org/docs/current/mod/core.html#servertokens"
+          },
+          {
+            "url": "http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007"
+          },
+          {
+            "url": "http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx"
+          },
+          {
+            "url": "http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html"
+          }
+        ],
+        "location": {
+          "hostname": "http://api-server",
+          "method": "GET",
+          "param": "",
+          "path": "/v1/trees"
+        },
+        "message": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+        "scanner": {
+          "id": "zaproxy",
+          "name": "ZAProxy"
+        },
+        "severity": "Low",
+        "solution": "Ensure that your web server, application server, load balancer, etc. is configured to suppress the \"Server\" header or provide generic details."
+      },
+      {
+        "category": "dast",
+        "confidence": "High",
+        "cve": "10036",
+        "description": "The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.",
+        "discovered_at": "2021-04-23T15:46:40.632",
+        "evidence": {
+          "request": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "23"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "method": "POST",
+            "url": "http://api-server/v1/trees"
+          },
+          "response": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "23"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "reason_phrase": "Created",
+            "status_code": 201
+          },
+          "summary": "nginx/1.17.6"
+        },
+        "id": "356f4003-ce8f-46b0-a3c4-2e39bbdfad62",
+        "identifiers": [
+          {
+            "name": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+            "type": "ZAProxy_PluginId",
+            "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+            "value": "10036"
+          },
+          {
+            "name": "CWE-200",
+            "type": "CWE",
+            "url": "https://cwe.mitre.org/data/definitions/200.html",
+            "value": "200"
+          }
+        ],
+        "links": [
+          {
+            "url": "http://httpd.apache.org/docs/current/mod/core.html#servertokens"
+          },
+          {
+            "url": "http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007"
+          },
+          {
+            "url": "http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx"
+          },
+          {
+            "url": "http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html"
+          }
+        ],
+        "location": {
+          "hostname": "http://api-server",
+          "method": "POST",
+          "param": "",
+          "path": "/v1/trees"
+        },
+        "message": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+        "scanner": {
+          "id": "zaproxy",
+          "name": "ZAProxy"
+        },
+        "severity": "Low",
+        "solution": "Ensure that your web server, application server, load balancer, etc. is configured to suppress the \"Server\" header or provide generic details."
+      },
+      {
+        "category": "dast",
+        "confidence": "Medium",
+        "cve": "10021",
+        "description": "The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.",
+        "discovered_at": "2021-04-23T15:46:40.615",
+        "evidence": {
+          "request": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "method": "GET",
+            "url": "http://api-server/v1/trees"
+          },
+          "response": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "reason_phrase": "OK",
+            "status_code": 200
+          },
+          "summary": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type. At \"High\" threshold this scan rule will not alert on client or server error responses."
+        },
+        "id": "36ce923d-d163-4c8e-8af2-811d235f8f02",
+        "identifiers": [
+          {
+            "name": "X-Content-Type-Options Header Missing",
+            "type": "ZAProxy_PluginId",
+            "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+            "value": "10021"
+          },
+          {
+            "name": "CWE-16",
+            "type": "CWE",
+            "url": "https://cwe.mitre.org/data/definitions/16.html",
+            "value": "16"
+          }
+        ],
+        "links": [
+          {
+            "url": "http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx"
+          },
+          {
+            "url": "https://owasp.org/www-community/Security_Headers"
+          }
+        ],
+        "location": {
+          "hostname": "http://api-server",
+          "method": "GET",
+          "param": "X-Content-Type-Options",
+          "path": "/v1/trees"
+        },
+        "message": "X-Content-Type-Options Header Missing",
+        "scanner": {
+          "id": "zaproxy",
+          "name": "ZAProxy"
+        },
+        "severity": "Low",
+        "solution": "Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages. If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing."
+      },
+      {
+        "category": "dast",
+        "confidence": "Medium",
+        "cve": "10021",
+        "description": "The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.",
+        "discovered_at": "2021-04-23T15:46:40.632",
+        "evidence": {
+          "request": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "23"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "method": "POST",
+            "url": "http://api-server/v1/trees"
+          },
+          "response": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "23"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "reason_phrase": "Created",
+            "status_code": 201
+          },
+          "summary": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type. At \"High\" threshold this scan rule will not alert on client or server error responses."
+        },
+        "id": "4c980571-fe02-4f11-aaa8-16aface3339a",
+        "identifiers": [
+          {
+            "name": "X-Content-Type-Options Header Missing",
+            "type": "ZAProxy_PluginId",
+            "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+            "value": "10021"
+          },
+          {
+            "name": "CWE-16",
+            "type": "CWE",
+            "url": "https://cwe.mitre.org/data/definitions/16.html",
+            "value": "16"
+          }
+        ],
+        "links": [
+          {
+            "url": "http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx"
+          },
+          {
+            "url": "https://owasp.org/www-community/Security_Headers"
+          }
+        ],
+        "location": {
+          "hostname": "http://api-server",
+          "method": "POST",
+          "param": "X-Content-Type-Options",
+          "path": "/v1/trees"
+        },
+        "message": "X-Content-Type-Options Header Missing",
+        "scanner": {
+          "id": "zaproxy",
+          "name": "ZAProxy"
+        },
+        "severity": "Low",
+        "solution": "Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages. If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing."
+      }
+    ]
+  }

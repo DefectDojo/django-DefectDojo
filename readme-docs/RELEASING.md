@@ -4,14 +4,16 @@
 
 We have two types of releases:
 
-1. **Feature releases** - These are created from the `dev` branch, via a new release branch, i.e. `release/x.y.z`. 
-2. **Bugfix releases** - These are created from the `master` branch,  via a new release branch, i.e. `release/x.y.z`. 
+1. **Feature releases** - These are monthly releases created from the `dev` branch, via a new release branch, i.e. `release/x.y.z`. 
+2. **Bugfix releases** - These are weekly created from the `bugfix` branch, via a new release branch, i.e. `release/x.y.z`. 
+
+Dependency updates and security patches go into the monthly releases. Urgent crirtical security patches will go into the bugfix releases.
 
 The release process will then:
 
 - Create a PR to merge that release branch into `master`
 - Tag the release, Build the dockers images and Push them to Docker Hub
-- Merge the changes in `master` "back into dev" to make sure `dev` is in sync again with `master`
+- Merge the changes in `master` "back into dev" to make sure `dev` and `bugfix` is in sync again with `master`
 
 The steps are identical for both release types, unless specified otherwise below.
 
@@ -32,7 +34,7 @@ The steps are identical for both release types, unless specified otherwise below
 - Merge the PRs
 
 ### Always
-- Make sure there's a section in [upgrading.md](https://defectdojo.github.io/django-DefectDojo/dev/getting_started/upgrading/) about any specific instructions when upgrading to this new release.
+- Make sure there's a section in [upgrading.md](../docs/content/en/open_source/upgrading) about any specific instructions when upgrading to this new release.
 
 - Remove existing draft releases with the same version number
 Due to the release drafter being a non-perfect match for our git flow based release process, we have to delete any draft that has already been created by the release drafter if it has the same versio number. This is probably not needed if you're doing a bugfix release.

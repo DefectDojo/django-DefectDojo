@@ -1,0 +1,3 @@
+Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive,Duplicate,IsMitigated,MitigatedDate
+2024-01-24T11:02:11Z,Mitigated_ISO_Finding,4,https://vulnerable.endpoint.com/resource4/asdf,Low,Some description,Some mitigation advice,Some Impact,,TRUE,TRUE,FALSE,FALSE,TRUE,2024-02-24T11:02:11Z
+28/02/2021,Mitigated_Finding,5,https://vulnerable.endpoint.com/resource5/asdf,Low,Some description,Some mitigation advice,Some Impact,,TRUE,TRUE,FALSE,FALSE,TRUE,28/03/2021

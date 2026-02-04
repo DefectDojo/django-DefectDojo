@@ -1,0 +1,48 @@
+{
+    "apiVersion": "aquasecurity.github.io/v1alpha1",
+    "kind": "ConfigAuditReport",
+    "metadata": {
+        "annotations": {
+            "trivy-operator.aquasecurity.github.io/report-ttl": "24h0m0s"
+        },
+        "creationTimestamp": "2023-03-23T16:22:54Z",
+        "generation": 1,
+        "labels": {
+            "plugin-config-hash": "659b7b9c46",
+            "resource-spec-hash": "fc85b485f",
+            "trivy-operator.resource.kind": "ReplicaSet",
+            "trivy-operator.resource.name": "nginx-deployment-965685897",
+            "trivy-operator.resource.namespace": "default"
+        },
+        "name": "replicaset-nginx-deployment-965685897",
+        "namespace": "default",
+        "ownerReferences": [
+            {
+                "apiVersion": "apps/v1",
+                "blockOwnerDeletion": false,
+                "controller": true,
+                "kind": "ReplicaSet",
+                "name": "nginx-deployment-965685897",
+                "uid": "d19c7f74-b4c3-429d-9a45-1b2f5efc3c88"
+            }
+        ],
+        "resourceVersion": "1268",
+        "uid": "a92e0951-e988-419d-8602-6852f920ce06"
+    },
+    "report": {
+        "checks": [],
+        "scanner": {
+            "name": "Trivy",
+            "vendor": "Aqua Security",
+            "version": "dev"
+        },
+        "summary": {
+            "criticalCount": 0,
+            "highCount": 0,
+            "lowCount": 0,
+            "mediumCount": 0
+        },
+        "updateTimestamp": "2023-03-23T16:22:54Z"
+    }
+}
+

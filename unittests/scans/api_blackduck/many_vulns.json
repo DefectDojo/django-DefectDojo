@@ -1,0 +1,3181 @@
+[
+  {
+    "componentVersion": "https://example.com/api/components/c432e751-ad85-4daa-8f4d-56043d6f8727/versions/f3b270e0-29b2-4923-8e75-83fe4dee30fd",
+    "componentName": "cdr/code-server",
+    "componentVersionName": "3.3.0-rc.27",
+    "componentVersionOriginName": "npmjs",
+    "componentVersionOriginId": "code-server/3.3.0-rc.27",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2021-2909",
+      "description": "code-server is vulnerable to a regular expression denial-of-service (ReDoS) issue due to how crafted input strings are mishandled.\n\nAn attacker could submit a crafted string that could cause excessive consumption of system resources that will impact stability and potentially cause a crash.",
+      "vulnerabilityPublishedDate": "2021-10-01T13:56:00.711Z",
+      "vulnerabilityUpdatedDate": "2021-10-01T13:56:00.694Z",
+      "baseScore": 7.5,
+      "overallScore": 6.7,
+      "exploitabilitySubscore": 3.9,
+      "impactSubscore": 3.6,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-400",
+      "remediationCreatedAt": "2022-07-26T12:36:02.391Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:02.391Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2021-3810",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/c432e751-ad85-4daa-8f4d-56043d6f8727/versions/f3b270e0-29b2-4923-8e75-83fe4dee30fd/origins/03d75dac-a30c-4aa7-8dd4-1c43c61536b7/vulnerabilities/BDSA-2021-2909/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/c432e751-ad85-4daa-8f4d-56043d6f8727/versions/f3b270e0-29b2-4923-8e75-83fe4dee30fd/origins/03d75dac-a30c-4aa7-8dd4-1c43c61536b7/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/c432e751-ad85-4daa-8f4d-56043d6f8727/versions/f3b270e0-29b2-4923-8e75-83fe4dee30fd/origin/03d75dac-a30c-4aa7-8dd4-1c43c61536b7/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/c432e751-ad85-4daa-8f4d-56043d6f8727/versions/f3b270e0-29b2-4923-8e75-83fe4dee30fd",
+    "componentName": "cdr/code-server",
+    "componentVersionName": "3.3.0-rc.27",
+    "componentVersionOriginName": "npmjs",
+    "componentVersionOriginId": "code-server/3.3.0-rc.27",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2021-4422",
+      "description": "Code Server contains a cross-site scripting (XSS) vulnerability. An attacker could exploit this issue by passing a crafted link to a user, which when opened could result in the loss of sensitive information such as session tokens and cookies.",
+      "vulnerabilityPublishedDate": "2022-05-30T13:59:27.631Z",
+      "vulnerabilityUpdatedDate": "2022-05-30T13:59:27.619Z",
+      "baseScore": 6.1,
+      "overallScore": 5.5,
+      "exploitabilitySubscore": 2.8,
+      "impactSubscore": 2.7,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-79",
+      "remediationCreatedAt": "2022-07-26T12:36:02.391Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:02.391Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2021-42648",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/c432e751-ad85-4daa-8f4d-56043d6f8727/versions/f3b270e0-29b2-4923-8e75-83fe4dee30fd/origins/03d75dac-a30c-4aa7-8dd4-1c43c61536b7/vulnerabilities/BDSA-2021-4422/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/c432e751-ad85-4daa-8f4d-56043d6f8727/versions/f3b270e0-29b2-4923-8e75-83fe4dee30fd/origins/03d75dac-a30c-4aa7-8dd4-1c43c61536b7/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/c432e751-ad85-4daa-8f4d-56043d6f8727/versions/f3b270e0-29b2-4923-8e75-83fe4dee30fd/origin/03d75dac-a30c-4aa7-8dd4-1c43c61536b7/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/2d45f7c0-44b9-4649-9faa-3c73599db183/versions/cf805651-77ed-4516-80c9-058e48160455",
+    "componentName": "DotNetZip",
+    "componentVersionName": "1.9.1.8",
+    "componentVersionOriginName": "nuget",
+    "componentVersionOriginId": "DotNetZip/1.9.1.8",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/c8a17cf6-5c88-4841-86fb-f48913f4039d",
+          "licenses": [],
+          "name": "Microsoft Public License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Microsoft Public License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "Microsoft Public License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "CVE-2018-1002205",
+      "description": "DotNetZip.Semvered before 1.11.0 is vulnerable to directory traversal, allowing attackers to write to arbitrary files via a ../ (dot dot slash) in a Zip archive entry that is mishandled during extraction. This vulnerability is also known as 'Zip-Slip'.",
+      "vulnerabilityPublishedDate": "2018-07-25T17:29:00.000Z",
+      "vulnerabilityUpdatedDate": "2019-10-09T23:32:00.000Z",
+      "baseScore": 5.5,
+      "overallScore": 5.5,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 3.6,
+      "source": "NVD",
+      "severity": "MEDIUM",
+      "remediationStatus": "IGNORED",
+      "remediationComment": "BDSA Auto-remediated: BDSA-2018-1821 is related to CVE-2018-1002205, but the BDSA team has determined that this component version is not affected.",
+      "cweId": "CWE-22",
+      "remediationTargetAt": "2022-08-01T14:50:33.265Z",
+      "remediationActualAt": "2022-08-01T14:50:33.265Z",
+      "remediationCreatedAt": "2022-08-01T14:50:32.432Z",
+      "remediationUpdatedAt": "2022-08-01T14:50:33.265Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/2d45f7c0-44b9-4649-9faa-3c73599db183/versions/cf805651-77ed-4516-80c9-058e48160455/origins/d4ab193c-adb0-45fc-9bc9-de8578d0d3a3/vulnerabilities/CVE-2018-1002205/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/2d45f7c0-44b9-4649-9faa-3c73599db183/versions/cf805651-77ed-4516-80c9-058e48160455/origins/d4ab193c-adb0-45fc-9bc9-de8578d0d3a3/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/2d45f7c0-44b9-4649-9faa-3c73599db183/versions/cf805651-77ed-4516-80c9-058e48160455/origin/d4ab193c-adb0-45fc-9bc9-de8578d0d3a3/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/58cdd03e-b5a0-4916-a39c-92daaa8a4ac3",
+    "componentName": "jQuery",
+    "componentVersionName": "3.6.0",
+    "componentVersionOriginName": "npmjs",
+    "componentVersionOriginId": "jquery/3.6.0",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2021-3651",
+      "description": "jQuery contains commented references to the hijacked domain `blindsignals`, within the files `src/queue/delay.js` and `test/data/jquery-1.9.1.js` (the former referring to a Web Archive version of the original site). Users without awareness of the domain's status could be exposed to unspecified attacks if they attempt to follow the links to the hijacked site.",
+      "vulnerabilityPublishedDate": "2021-12-06T16:19:48.583Z",
+      "vulnerabilityUpdatedDate": "2022-08-03T09:44:00.525Z",
+      "baseScore": 5.3,
+      "overallScore": 4.9,
+      "exploitabilitySubscore": 1.6,
+      "impactSubscore": 3.6,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "IGNORED",
+      "remediationComment": "comment in the code only - no real risk",
+      "cweId": "CWE-546",
+      "remediationCreatedAt": "2022-05-24T09:25:35.599Z",
+      "remediationUpdatedAt": "2022-06-02T08:33:06.444Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "jane.does@example.com",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/58cdd03e-b5a0-4916-a39c-92daaa8a4ac3/origins/b1722a83-5440-4d0b-8a6f-c51a6b97df6f/vulnerabilities/BDSA-2021-3651/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/58cdd03e-b5a0-4916-a39c-92daaa8a4ac3/origins/b1722a83-5440-4d0b-8a6f-c51a6b97df6f/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/58cdd03e-b5a0-4916-a39c-92daaa8a4ac3/origin/b1722a83-5440-4d0b-8a6f-c51a6b97df6f/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966",
+    "componentName": "jQuery",
+    "componentVersionName": "2.2.1",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2014-0063",
+      "description": "jQuery is vulnerable to cross-site scripting (XSS) due to lack of validation of user-supplied input. This could allow an attacker to inject arbitrary web scripts and steal a victim's session cookies.",
+      "vulnerabilityPublishedDate": "2018-05-23T09:01:53.681Z",
+      "vulnerabilityUpdatedDate": "2020-04-15T09:38:22.865Z",
+      "baseScore": 9.6,
+      "overallScore": 8.6,
+      "exploitabilitySubscore": 2.8,
+      "impactSubscore": 6.0,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-79",
+      "remediationCreatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationUpdatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities/BDSA-2014-0063/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origin/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966",
+    "componentName": "jQuery",
+    "componentVersionName": "2.2.1",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2017-2930",
+      "description": "jQuery is vulnerable to cross-site scripting (XSS) due to the way it processes certain types of Ajax requests. This can allow potential attackers to execute arbitrary code on the target system.",
+      "vulnerabilityPublishedDate": "2018-03-06T12:00:15.011Z",
+      "vulnerabilityUpdatedDate": "2020-05-26T18:32:26.432Z",
+      "baseScore": 9.3,
+      "overallScore": 8.1,
+      "exploitabilitySubscore": 2.8,
+      "impactSubscore": 5.8,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-79",
+      "remediationCreatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationUpdatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2015-9251",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities/BDSA-2017-2930/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origin/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966",
+    "componentName": "jQuery",
+    "componentVersionName": "2.2.1",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2019-1138",
+      "description": "An improper input validation vulnerability has been discovered in JQuery. An attacker could exploit this vulnerability to execute cross-site scripting (XSS) attacks, trigger a denial-of-service (DoS) condition, or gain unauthorized access to the application.",
+      "vulnerabilityPublishedDate": "2019-04-23T11:35:27.015Z",
+      "vulnerabilityUpdatedDate": "2019-04-23T11:35:27.003Z",
+      "baseScore": 9.6,
+      "overallScore": 8.3,
+      "exploitabilitySubscore": 2.8,
+      "impactSubscore": 6.0,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-20",
+      "remediationCreatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationUpdatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2019-11358",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities/BDSA-2019-1138/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origin/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966",
+    "componentName": "jQuery",
+    "componentVersionName": "2.2.1",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2020-0686",
+      "description": "It was discovered that jQuery could allow for cross-site scripting (XSS) vulnerabilities to be introduced if `jQuery.htmlPrefilter` method is used. Attackers could exploit XSS vulnerabilities to execute JavaScript code in a target's browser by tricking them into accessing the vulnerable page. This would allow an attacker to steal an administrator's session tokens or execute arbitrary code on their behalf by sending the link to an unsuspecting user or waiting for them to discover it.",
+      "vulnerabilityPublishedDate": "2020-04-14T17:24:19.811Z",
+      "vulnerabilityUpdatedDate": "2022-01-18T14:58:16.373Z",
+      "baseScore": 9.6,
+      "overallScore": 8.6,
+      "exploitabilitySubscore": 2.8,
+      "impactSubscore": 6.0,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-80",
+      "remediationCreatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationUpdatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2020-11022",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities/BDSA-2020-0686/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origin/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966",
+    "componentName": "jQuery",
+    "componentVersionName": "2.2.1",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2020-0964",
+      "description": "It was discovered that jQuery could allow for cross-site scripting (XSS) vulnerabilities to be introduced if certain HTML is passed to Document Object Model (DOM) manipulation methods. Attackers could exploit XSS vulnerabilities to execute JavaScript code in a target browser by tricking them into accessing the vulnerable page. This would allow an attacker to steal an administrator's session tokens or execute arbitrary code on their behalf by sending the link to an unsuspecting user or waiting for them to discover it.",
+      "vulnerabilityPublishedDate": "2020-05-01T16:15:08.360Z",
+      "vulnerabilityUpdatedDate": "2021-04-15T08:28:16.088Z",
+      "baseScore": 9.6,
+      "overallScore": 8.6,
+      "exploitabilitySubscore": 2.8,
+      "impactSubscore": 6.0,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-80",
+      "remediationCreatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationUpdatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2020-11023",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities/BDSA-2020-0964/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origin/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966",
+    "componentName": "jQuery",
+    "componentVersionName": "2.2.1",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2021-3651",
+      "description": "jQuery contains commented references to the hijacked domain `blindsignals`, within the files `src/queue/delay.js` and `test/data/jquery-1.9.1.js` (the former referring to a Web Archive version of the original site). Users without awareness of the domain's status could be exposed to unspecified attacks if they attempt to follow the links to the hijacked site.",
+      "vulnerabilityPublishedDate": "2021-12-06T16:19:48.583Z",
+      "vulnerabilityUpdatedDate": "2022-08-03T09:44:00.525Z",
+      "baseScore": 5.3,
+      "overallScore": 4.9,
+      "exploitabilitySubscore": 1.6,
+      "impactSubscore": 3.6,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-546",
+      "remediationCreatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationUpdatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities/BDSA-2021-3651/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origin/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966",
+    "componentName": "jQuery",
+    "componentVersionName": "2.2.1",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "CVE-2016-10707",
+      "description": "jQuery 3.0.0-rc.1 is vulnerable to Denial of Service (DoS) due to removing a logic that lowercased attribute names. Any attribute getter using a mixed-cased name for boolean attributes goes into an infinite recursion, exceeding the stack call limit.",
+      "vulnerabilityPublishedDate": "2018-01-18T23:29:00.000Z",
+      "vulnerabilityUpdatedDate": "2018-02-02T17:26:00.000Z",
+      "baseScore": 7.5,
+      "overallScore": 7.5,
+      "exploitabilitySubscore": 3.9,
+      "impactSubscore": 3.6,
+      "source": "NVD",
+      "severity": "HIGH",
+      "remediationStatus": "IGNORED",
+      "remediationComment": "BDSA Auto-remediated: BDSA-2016-1229 is related to CVE-2016-10707, but the BDSA team has determined that this component version is not affected.",
+      "cweId": "CWE-400",
+      "remediationTargetAt": "2022-08-01T14:50:33.265Z",
+      "remediationActualAt": "2022-08-01T14:50:33.265Z",
+      "remediationCreatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationUpdatedAt": "2022-08-01T14:50:33.265Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities/CVE-2016-10707/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origin/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966",
+    "componentName": "jQuery",
+    "componentVersionName": "2.2.1",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "CVE-2019-5428",
+      "description": "** REJECT ** DO NOT USE THIS CANDIDATE NUMBER. ConsultIDs: CVE-2019-11358. Reason: This candidate is a duplicate of CVE-2019-11358. Notes: All CVE users should reference CVE-2019-11358 instead of this candidate. All references and descriptions in this candidate have been removed to prevent accidental usage.",
+      "vulnerabilityPublishedDate": "2019-04-22T21:29:00.000Z",
+      "vulnerabilityUpdatedDate": "2019-04-25T16:29:00.000Z",
+      "baseScore": 0.0,
+      "overallScore": 0.0,
+      "exploitabilitySubscore": 1.2,
+      "impactSubscore": 0.0,
+      "source": "NVD",
+      "severity": "LOW",
+      "remediationStatus": "NEW",
+      "remediationCreatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationUpdatedAt": "2022-08-01T14:50:32.615Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities/CVE-2019-5428/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origins/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/7a777763-ac31-4919-8f49-52e373f3af41/versions/5f53c90e-f199-4d6e-adde-20fb27622966/origin/8dbe5b48-88ba-44cf-ac44-8dd7dd3c36da/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2012-0053",
+      "description": "LibreOffice fails to verify embedded content prior to opening. This could be exploited by an attacker to expose sensitive data from the component by supplying a victim with a maliciously crafted file.",
+      "vulnerabilityPublishedDate": "2019-12-24T14:40:30.929Z",
+      "vulnerabilityUpdatedDate": "2019-12-24T14:40:30.915Z",
+      "baseScore": 7.1,
+      "overallScore": 6.5,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 5.2,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-200",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2012-0053/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2018-1148",
+      "description": "LibreOffice contains a heap-based buffer overflow flaw. An attacker could exploit this using a specially crafted document to create a denial-of-service (*DoS*).",
+      "vulnerabilityPublishedDate": "2018-04-18T09:50:49.159Z",
+      "vulnerabilityUpdatedDate": "2018-04-18T09:50:49.149Z",
+      "baseScore": 6.2,
+      "overallScore": 5.4,
+      "exploitabilitySubscore": 2.5,
+      "impactSubscore": 3.6,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-122",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2018-10120",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2018-1148/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2018-1152",
+      "description": "LibreOffice contains a flaw due to the use of an incorrect integer data type. An attacker could exploit this to create a denial-of-service (*DoS*).",
+      "vulnerabilityPublishedDate": "2018-04-18T09:54:34.485Z",
+      "vulnerabilityUpdatedDate": "2018-04-18T09:54:34.477Z",
+      "baseScore": 6.2,
+      "overallScore": 5.4,
+      "exploitabilitySubscore": 2.5,
+      "impactSubscore": 3.6,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-416",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2018-10119",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2018-1152/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2018-1391",
+      "description": "LibreOffice contains an information disclosure vulnerability where an attacker is able to craft a malicious document containing an embedded object, linked to a malicious file. This could be exploited to obtain password hashes and other sensitive data.",
+      "vulnerabilityPublishedDate": "2018-05-25T14:39:07.362Z",
+      "vulnerabilityUpdatedDate": "2020-03-05T12:13:43.257Z",
+      "baseScore": 7.8,
+      "overallScore": 7.0,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-200",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2018-1391/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2018-2693",
+      "description": "LibreOffice is vulnerable to denial-of-service (DoS) on FreeBSD systems due to insufficient validation of buffer sizes leading to buffer overflow.",
+      "vulnerabilityPublishedDate": "2018-08-09T09:16:40.049Z",
+      "vulnerabilityUpdatedDate": "2022-01-20T15:54:55.379Z",
+      "baseScore": 5.5,
+      "overallScore": 4.7,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 3.6,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-120",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2018-14939",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2018-2693/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2019-0285",
+      "description": "A path traversal vulnerability has been discovered in LibreOffice. An attacker could exploit this vulnerability via a crafted ODT file to execute arbitrary code against the target system.",
+      "vulnerabilityPublishedDate": "2019-02-07T09:29:43.717Z",
+      "vulnerabilityUpdatedDate": "2019-09-12T11:59:10.623Z",
+      "baseScore": 7.8,
+      "overallScore": 7.2,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-22",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2018-16858",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2019-0285/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2019-0636",
+      "description": "Apache UNO API is vulnerable to Remote Code Execution (RCE). This vulnerability exists when the OpenOffice or LibreOffice is run as `office server`. A Successful exploit would allow an attacker to execute arbitrary code on a target system without authentication.",
+      "vulnerabilityPublishedDate": "2019-03-17T20:43:46.626Z",
+      "vulnerabilityUpdatedDate": "2019-03-17T20:43:46.527Z",
+      "baseScore": 9.8,
+      "overallScore": 8.0,
+      "exploitabilitySubscore": 3.9,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-648",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": [
+        "RCE"
+      ]
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2019-0636/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2019-1461",
+      "description": "LibreOffice contains an Local code execution vulnerability. A flaw when processing hyperlinks could allow an attacker to construct a document which contains links pointing to the location of an executable file on the target's system. By tricking a user into opening the link, any code within the executable file will be executed.",
+      "vulnerabilityPublishedDate": "2019-05-15T12:16:52.391Z",
+      "vulnerabilityUpdatedDate": "2020-07-21T09:00:34.461Z",
+      "baseScore": 7.8,
+      "overallScore": 6.8,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-250",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2019-9847",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2019-1461/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2019-2252",
+      "description": "LibreOffice is vulnerable to arbitrary code execution due to unrestricted access to its event-handling functionality. An attacker could execute arbitrary Python code on a victim's machine by tricking them into opening a crafted document.",
+      "vulnerabilityPublishedDate": "2019-07-22T15:38:41.785Z",
+      "vulnerabilityUpdatedDate": "2020-04-03T13:40:14.766Z",
+      "baseScore": 7.8,
+      "overallScore": 7.2,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-749",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2019-9848",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2019-2252/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2019-2257",
+      "description": "LibreOffice is vulnerable to remote file inclusion (RFI) due to the improper implementation of security measures. An attacker could cause LibreOffice to fetch remote executable code resources by tricking a victim into opening a crafted document.\ninclude remote resources within a document by providing crafted input.",
+      "vulnerabilityPublishedDate": "2019-07-22T15:41:25.999Z",
+      "vulnerabilityUpdatedDate": "2020-08-11T09:47:32.131Z",
+      "baseScore": 7.8,
+      "overallScore": 6.8,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-693",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2019-9849",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2019-2257/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2019-2891",
+      "description": "LibreOffice contains a code execution vulnerability. An attacker could exploit this using a crafted document to execute malicious scripts.",
+      "vulnerabilityPublishedDate": "2019-09-11T14:44:18.329Z",
+      "vulnerabilityUpdatedDate": "2019-09-25T13:22:39.350Z",
+      "baseScore": 8.8,
+      "overallScore": 7.7,
+      "exploitabilitySubscore": 2.8,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-73",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": [
+        "RCE"
+      ]
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2019-2891/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2019-3105",
+      "description": "Libreoffice is vulnerable to a directory traversal issue. This could allow an attacker to access scripts in arbitrary locations on the file system, possibly leading to local code execution.",
+      "vulnerabilityPublishedDate": "2019-11-27T16:03:15.435Z",
+      "vulnerabilityUpdatedDate": "2020-04-06T15:06:28.934Z",
+      "baseScore": 7.8,
+      "overallScore": 6.8,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-177",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2019-3105/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2019-4352",
+      "description": "LibreOffice is vulnerable to arbitrary code execution due to unrestricted access to its event-handling functionality. An attacker could execute arbitrary Python code on a victim's machine by tricking them into opening a crafted document.",
+      "vulnerabilityPublishedDate": "2020-04-03T14:14:32.595Z",
+      "vulnerabilityUpdatedDate": "2020-04-03T14:14:32.584Z",
+      "baseScore": 7.8,
+      "overallScore": 7.2,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-749",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2019-9850",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2019-4352/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2019-4353",
+      "description": "LibreOffice is vulnerable to arbitrary code execution due to unrestricted access to its event-handling functionality. An attacker could execute arbitrary Python code on a victim's machine by tricking them into opening a crafted document.",
+      "vulnerabilityPublishedDate": "2020-04-03T14:16:28.115Z",
+      "vulnerabilityUpdatedDate": "2020-04-03T14:16:28.110Z",
+      "baseScore": 7.8,
+      "overallScore": 7.2,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-749",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2019-9851",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2019-4353/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2019-4354",
+      "description": "A path traversal vulnerability has been discovered in LibreOffice. An attacker could exploit this vulnerability via a crafted ODT file to execute arbitrary code against the target system.",
+      "vulnerabilityPublishedDate": "2020-04-06T14:58:28.517Z",
+      "vulnerabilityUpdatedDate": "2020-08-14T15:48:28.213Z",
+      "baseScore": 7.8,
+      "overallScore": 7.2,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-22",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2019-9852",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2019-4354/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2020-1358",
+      "description": "LibreOffice is vulnerable to stealth mode bypass due to improper handling of graphic links in `.docx` documents. This could allow an attacker to supply a victim with a maliciously crafted document which bypass restrictions on the inclusion of remote resources from untrusted sources.",
+      "vulnerabilityPublishedDate": "2020-06-09T14:37:53.253Z",
+      "vulnerabilityUpdatedDate": "2020-06-09T14:37:53.242Z",
+      "baseScore": 5.5,
+      "overallScore": 4.8,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 3.6,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-20",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2020-12802",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2020-1358/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2020-1361",
+      "description": "LibreOffice is vulnerable to local file overwrites due to improper restrictions on forms in ODF documents. This could allow an attacker to overwrite a victim's local files by tricking them into accessing a form in a maliciously crafted ODF document.",
+      "vulnerabilityPublishedDate": "2020-06-09T15:06:32.753Z",
+      "vulnerabilityUpdatedDate": "2020-06-09T15:06:32.744Z",
+      "baseScore": 6.1,
+      "overallScore": 5.3,
+      "exploitabilitySubscore": 1.8,
+      "impactSubscore": 4.2,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-20",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2020-12803",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2020-1361/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2020-2450",
+      "description": "LibreOffice Online vulnerable to Cross-Site Scripting (XSS) via `Username` field. An attacker could insert malicious scripts and trick a victim user into viewing the page in order to perform actions on the victim's behalf, or steal session tokens, cookies, or other sensitive information.",
+      "vulnerabilityPublishedDate": "2020-09-21T13:25:32.121Z",
+      "vulnerabilityUpdatedDate": "2021-10-19T14:53:21.523Z",
+      "baseScore": 6.1,
+      "overallScore": 5.5,
+      "exploitabilitySubscore": 2.8,
+      "impactSubscore": 2.7,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-80",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2020-2450/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2021-1212",
+      "description": "LibreOffice is vulnerable to remote code execution (RCE) due to the possibility of bypassing restrictions that have been placed on dangerous functionality. An attacker could execute arbitrary code on a victim's computer by tricking them into interacting with a maliciously crafted document.\n\nIt should be noted that this vulnerability only affects Windows systems.",
+      "vulnerabilityPublishedDate": "2021-05-04T13:15:48.969Z",
+      "vulnerabilityUpdatedDate": "2021-09-24T14:27:21.658Z",
+      "baseScore": 8.8,
+      "overallScore": 7.9,
+      "exploitabilitySubscore": 2.8,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-184",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": [
+        "RCE"
+      ]
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2021-1212/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2021-3030",
+      "description": "LibreOffice is vulnerable to an undisclosed signature wrapping issue.\n\nThis issue could allow an attacker to manipulate the timestamp of signed documents in order to mislead users.",
+      "vulnerabilityPublishedDate": "2021-10-11T13:58:49.400Z",
+      "vulnerabilityUpdatedDate": "2022-05-20T13:22:38.724Z",
+      "baseScore": 5.3,
+      "overallScore": 4.4,
+      "exploitabilitySubscore": 3.9,
+      "impactSubscore": 1.4,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-347",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2021-3030/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2021-3031",
+      "description": "LibreOffice is vulnerable to an undisclosed document content manipulation issue.\n\nThis issue could allow an attacker to manipulate documents in such a manner that they appear to be signed by a trusted source.",
+      "vulnerabilityPublishedDate": "2021-10-11T15:08:01.771Z",
+      "vulnerabilityUpdatedDate": "2022-05-20T13:22:19.298Z",
+      "baseScore": 7.5,
+      "overallScore": 6.3,
+      "exploitabilitySubscore": 3.9,
+      "impactSubscore": 3.6,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-347",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2021-3031/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2022-0524",
+      "description": "LibreOffice does not properly verify signed ODF documents. A crafted ODF document could cause LibreOffice to perform verification using an unrelated value in the document and thus incorrectly display the status of the digital signature.",
+      "vulnerabilityPublishedDate": "2022-02-23T13:38:35.129Z",
+      "vulnerabilityUpdatedDate": "2022-02-23T13:38:35.115Z",
+      "baseScore": 6.5,
+      "overallScore": 5.7,
+      "exploitabilitySubscore": 2.8,
+      "impactSubscore": 3.6,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-295",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2022-0524/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2022-2070",
+      "description": "LibreOffice contains a local code execution vulnerability.  This allows a local attacker to create macros in a file signed with a crafted certificate to cause LibreOffice to execute untrusted code.",
+      "vulnerabilityPublishedDate": "2022-07-26T11:43:34.648Z",
+      "vulnerabilityUpdatedDate": "2022-07-26T11:43:34.639Z",
+      "baseScore": 8.4,
+      "overallScore": 7.3,
+      "exploitabilitySubscore": 2.5,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-295",
+      "remediationCreatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:01.786Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2022-2070/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2022-2081",
+      "description": "LibreOffice is vulnerable to brute force attacks against passwords stored in the users configuration database. This vulnerability is due to the master key used to encrypt passwords being incorrectly",
+      "vulnerabilityPublishedDate": "2022-07-26T14:05:31.381Z",
+      "vulnerabilityUpdatedDate": "2022-07-26T14:05:31.373Z",
+      "baseScore": 6.8,
+      "overallScore": 5.9,
+      "exploitabilitySubscore": 1.6,
+      "impactSubscore": 5.2,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-326",
+      "remediationCreatedAt": "2022-07-26T15:19:04.034Z",
+      "remediationUpdatedAt": "2022-07-26T15:19:04.034Z",
+      "remediationCreatedBy": "blackduck_system",
+      "remediationUpdatedBy": "blackduck_system",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2022-2081/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e",
+    "componentName": "LibreOffice",
+    "componentVersionName": "6.0.0.3",
+    "componentVersionOriginName": "unknown",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/bf913382-7596-42ad-8385-2f49fa655362",
+          "licenses": [],
+          "name": "GNU Lesser General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU Lesser General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/ce3dd63e-c569-4cea-986a-46bc5efe9896",
+          "licenses": [],
+          "name": "Mozilla Public License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Mozilla Public License 2.0",
+          "licenseFamilySummary": {
+            "name": "Weak Reciprocal",
+            "href": "https://example.com/api/license-families/3"
+          }
+        },
+        {
+          "license": "https://example.com/api/licenses/f80fb9a9-5329-47c2-864d-00ed5cf744bf",
+          "licenses": [],
+          "name": "GNU General Public License v3.0 or later",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "GNU General Public License v3.0 or later",
+          "licenseFamilySummary": {
+            "name": "Reciprocal",
+            "href": "https://example.com/api/license-families/2"
+          }
+        }
+      ],
+      "licenseDisplay": "(GNU Lesser General Public License v3.0 or later OR Mozilla Public License 2.0 OR GNU General Public License v3.0 or later)"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2022-2086",
+      "description": "LibreOffice is vulnerable to brute force attacks against passwords stored in the users configuration database. This vulnerability is due to the initialization vector used for password encryption always being the same.",
+      "vulnerabilityPublishedDate": "2022-07-26T15:02:39.757Z",
+      "vulnerabilityUpdatedDate": "2022-07-26T15:02:39.743Z",
+      "baseScore": 6.8,
+      "overallScore": 5.9,
+      "exploitabilitySubscore": 1.6,
+      "impactSubscore": 5.2,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-326",
+      "remediationCreatedAt": "2022-07-26T17:20:03.247Z",
+      "remediationUpdatedAt": "2022-07-26T17:20:03.247Z",
+      "remediationCreatedBy": "blackduck_system",
+      "remediationUpdatedBy": "blackduck_system",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities/BDSA-2022-2086/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origins/516e94c2-93be-492f-8f18-bfe1ab40616b/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/d8863819-658b-4873-b722-4b5eedc97072/versions/33b32068-028e-47e4-acc4-de01fbb5de6e/origin/516e94c2-93be-492f-8f18-bfe1ab40616b/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/6f775007-332d-4aef-8d3e-170ce4bfcccd/versions/6328d62a-58f2-4def-a4c5-2f0f96805048",
+    "componentName": "Protocol Buffers",
+    "componentVersionName": "v3.7.0",
+    "componentVersionOriginName": "nuget",
+    "componentVersionOriginId": "Google.Protobuf/3.7.0",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/3d238144-44e6-450e-b523-3defbdaed9dc",
+          "licenses": [],
+          "name": "BSD 3-clause \"New\" or \"Revised\" License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "BSD 3-clause \"New\" or \"Revised\" License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "BSD 3-clause \"New\" or \"Revised\" License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2022-0261",
+      "description": "A NULL pointer dereference vulnerability was identified in Protobuf. An attacker could exploit this in order to cause a denial-of-service (DoS) condition.",
+      "vulnerabilityPublishedDate": "2022-01-27T12:56:10.990Z",
+      "vulnerabilityUpdatedDate": "2022-01-27T12:56:10.968Z",
+      "baseScore": 7.5,
+      "overallScore": 6.5,
+      "exploitabilitySubscore": 3.9,
+      "impactSubscore": 3.6,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-476",
+      "remediationCreatedAt": "2022-05-24T09:23:18.971Z",
+      "remediationUpdatedAt": "2022-05-24T09:23:18.971Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2021-22570",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/6f775007-332d-4aef-8d3e-170ce4bfcccd/versions/6328d62a-58f2-4def-a4c5-2f0f96805048/origins/21c187e9-fc88-441a-9815-d9574430e871/vulnerabilities/BDSA-2022-0261/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/6f775007-332d-4aef-8d3e-170ce4bfcccd/versions/6328d62a-58f2-4def-a4c5-2f0f96805048/origins/21c187e9-fc88-441a-9815-d9574430e871/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/6f775007-332d-4aef-8d3e-170ce4bfcccd/versions/6328d62a-58f2-4def-a4c5-2f0f96805048/origin/21c187e9-fc88-441a-9815-d9574430e871/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/e0c26cd0-2252-46d5-a9fb-5d23a6bc8805/versions/553423d3-3db8-479e-b266-135205e3bf19",
+    "componentName": "Selenium",
+    "componentVersionName": "3.14.0",
+    "componentVersionOriginName": "nuget",
+    "componentVersionOriginId": "Selenium.WebDriver/3.14.0",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/7cae335f-1193-421e-92f1-8802b4243e93",
+          "licenses": [],
+          "name": "Apache License 2.0",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "Apache License 2.0",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "Apache License 2.0"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2021-4248",
+      "description": "Selenium contains a remote code execution (RCE) vulnerability. An unprivileged attacker could exploit this by using the config file to set a custom handler. This may lead to the execution of remote code.",
+      "vulnerabilityPublishedDate": "2022-03-30T09:31:44.325Z",
+      "vulnerabilityUpdatedDate": "2022-05-27T13:53:15.051Z",
+      "baseScore": 9.8,
+      "overallScore": 9.0,
+      "exploitabilitySubscore": 3.9,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "CRITICAL",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-429",
+      "remediationCreatedAt": "2022-05-24T09:23:01.294Z",
+      "remediationUpdatedAt": "2022-05-24T09:23:01.294Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "bdsaTags": [
+        "RCE"
+      ]
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/e0c26cd0-2252-46d5-a9fb-5d23a6bc8805/versions/553423d3-3db8-479e-b266-135205e3bf19/origins/20933b16-5a0d-489b-92c9-a554d4ef4295/vulnerabilities/BDSA-2021-4248/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/e0c26cd0-2252-46d5-a9fb-5d23a6bc8805/versions/553423d3-3db8-479e-b266-135205e3bf19/origins/20933b16-5a0d-489b-92c9-a554d4ef4295/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/e0c26cd0-2252-46d5-a9fb-5d23a6bc8805/versions/553423d3-3db8-479e-b266-135205e3bf19/origin/20933b16-5a0d-489b-92c9-a554d4ef4295/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/69327566-74dc-429c-baa9-20019ca79c8a/versions/b9e7a042-5ea8-4d6c-8554-2b2c7ad58933",
+    "componentName": "System.Net.Http",
+    "componentVersionName": "4.1.0",
+    "componentVersionOriginName": "nuget",
+    "componentVersionOriginId": "System.Net.Http/4.1.0",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/007bcc32-a710-447e-83f0-e5554564187e",
+          "licenses": [],
+          "name": "Microsoft .NET Library License",
+          "ownership": "PROPRIETARY",
+          "licenseDisplay": "Microsoft .NET Library License",
+          "licenseFamilySummary": {
+            "name": "Restrictive Third Party Proprietary",
+            "href": "https://example.com/api/license-families/34"
+          }
+        }
+      ],
+      "licenseDisplay": "Microsoft .NET Library License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2018-3538",
+      "description": ".NET Core is vulnerable to information disclosure due to flaws in how outbound HTTP requests are redirected. An attacker could use this vulnerability to obtain HTTP authentication information and further compromise the application.",
+      "vulnerabilityPublishedDate": "2018-10-24T15:08:34.606Z",
+      "vulnerabilityUpdatedDate": "2021-05-26T10:55:01.586Z",
+      "baseScore": 7.5,
+      "overallScore": 6.5,
+      "exploitabilitySubscore": 3.9,
+      "impactSubscore": 3.6,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "IGNORED",
+      "remediationComment": "(SW 153560)\nnot exploitable because we are not using .NET core",
+      "cweId": "CWE-201",
+      "remediationCreatedAt": "2022-05-24T09:22:54.351Z",
+      "remediationUpdatedAt": "2022-06-02T07:29:58.231Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "john.doe@example.com",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2018-8292",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/69327566-74dc-429c-baa9-20019ca79c8a/versions/b9e7a042-5ea8-4d6c-8554-2b2c7ad58933/origins/18f1af42-5a52-4cc6-8ae6-18f3494ce1fa/vulnerabilities/BDSA-2018-3538/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/69327566-74dc-429c-baa9-20019ca79c8a/versions/b9e7a042-5ea8-4d6c-8554-2b2c7ad58933/origins/18f1af42-5a52-4cc6-8ae6-18f3494ce1fa/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/69327566-74dc-429c-baa9-20019ca79c8a/versions/b9e7a042-5ea8-4d6c-8554-2b2c7ad58933/origin/18f1af42-5a52-4cc6-8ae6-18f3494ce1fa/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/11ebb755-5fc1-48d7-985e-9795b20b2f78/versions/7e9d66c9-c863-458f-bf4d-8c7859dee73f",
+    "componentName": "System.Security.Cryptography.X509Certificates",
+    "componentVersionName": "4.1.0",
+    "componentVersionOriginName": "nuget",
+    "componentVersionOriginId": "System.Security.Cryptography.X509Certificates/4.1.0",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/007bcc32-a710-447e-83f0-e5554564187e",
+          "licenses": [],
+          "name": "Microsoft .NET Library License",
+          "ownership": "PROPRIETARY",
+          "licenseDisplay": "Microsoft .NET Library License",
+          "licenseFamilySummary": {
+            "name": "Restrictive Third Party Proprietary",
+            "href": "https://example.com/api/license-families/34"
+          }
+        }
+      ],
+      "licenseDisplay": "Microsoft .NET Library License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "CVE-2017-11770",
+      "description": ".NET Core 1.0, 1.1, and 2.0 allow an unauthenticated attacker to remotely cause a denial of service attack against a .NET Core web application by improperly parsing certificate data. A denial of service vulnerability exists when .NET Core improperly handles parsing certificate data, aka \".NET CORE Denial Of Service Vulnerability\".",
+      "vulnerabilityPublishedDate": "2017-11-15T03:29:00.000Z",
+      "vulnerabilityUpdatedDate": "2019-04-16T20:01:00.000Z",
+      "baseScore": 7.5,
+      "overallScore": 7.5,
+      "exploitabilitySubscore": 3.9,
+      "impactSubscore": 3.6,
+      "source": "NVD",
+      "severity": "HIGH",
+      "remediationStatus": "IGNORED",
+      "remediationComment": "not exploitable because AS doesn't use .NET CORE. \nsee (SW 153591)",
+      "cweId": "CWE-295",
+      "remediationCreatedAt": "2022-05-24T09:22:54.415Z",
+      "remediationUpdatedAt": "2022-06-02T07:02:50.537Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "john.doe@example.com",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/11ebb755-5fc1-48d7-985e-9795b20b2f78/versions/7e9d66c9-c863-458f-bf4d-8c7859dee73f/origins/a6fb8690-18c3-4178-b2fa-13fc7e2bedf4/vulnerabilities/CVE-2017-11770/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/11ebb755-5fc1-48d7-985e-9795b20b2f78/versions/7e9d66c9-c863-458f-bf4d-8c7859dee73f/origins/a6fb8690-18c3-4178-b2fa-13fc7e2bedf4/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/11ebb755-5fc1-48d7-985e-9795b20b2f78/versions/7e9d66c9-c863-458f-bf4d-8c7859dee73f/origin/a6fb8690-18c3-4178-b2fa-13fc7e2bedf4/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/cd9f8419-7d43-49a7-a377-4853ae0a5796/versions/c41e6fa3-c0fb-4df9-b9cf-277f0abf9222",
+    "componentName": "Underscore.js",
+    "componentVersionName": "1.5.0",
+    "componentVersionOriginName": "bower",
+    "componentVersionOriginId": "underscore1/1.5.0",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/ad705c59-6893-4980-bdbf-0837f1823cc4",
+          "licenses": [],
+          "name": "MIT License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "MIT License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "MIT License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2021-1143",
+      "description": "The Underscore Javascript library contains an arbitrary code execution vulnerability.  This allows an attacker to create malicious content that, if processed by Underscore may lead to the execution of code on a system.",
+      "vulnerabilityPublishedDate": "2021-04-28T13:29:38.484Z",
+      "vulnerabilityUpdatedDate": "2021-05-26T09:43:53.822Z",
+      "baseScore": 8.1,
+      "overallScore": 7.3,
+      "exploitabilitySubscore": 2.2,
+      "impactSubscore": 5.9,
+      "source": "BDSA",
+      "severity": "HIGH",
+      "remediationStatus": "NEW",
+      "cweId": "CWE-94",
+      "remediationCreatedAt": "2022-07-26T12:36:02.576Z",
+      "remediationUpdatedAt": "2022-07-26T12:36:02.576Z",
+      "remediationCreatedBy": "bot.vsts",
+      "remediationUpdatedBy": "bot.vsts",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2021-23358",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/cd9f8419-7d43-49a7-a377-4853ae0a5796/versions/c41e6fa3-c0fb-4df9-b9cf-277f0abf9222/origins/078a2cc2-223d-4dfa-b10b-2be8e12bf0f0/vulnerabilities/BDSA-2021-1143/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/cd9f8419-7d43-49a7-a377-4853ae0a5796/versions/c41e6fa3-c0fb-4df9-b9cf-277f0abf9222/origins/078a2cc2-223d-4dfa-b10b-2be8e12bf0f0/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/cd9f8419-7d43-49a7-a377-4853ae0a5796/versions/c41e6fa3-c0fb-4df9-b9cf-277f0abf9222/origin/078a2cc2-223d-4dfa-b10b-2be8e12bf0f0/vulnerabilities"
+        }
+      ]
+    }
+  },
+  {
+    "componentVersion": "https://example.com/api/components/84533bcd-a94b-44c6-bff3-c288a6c5af30/versions/036b1b52-4ff3-4bb4-a3ce-cdab0be7b3f9",
+    "componentName": "y18n",
+    "componentVersionName": "5.0.1",
+    "componentVersionOriginName": "npmjs",
+    "componentVersionOriginId": "y18n/5.0.1",
+    "ignored": false,
+    "license": {
+      "type": "DISJUNCTIVE",
+      "licenses": [
+        {
+          "license": "https://example.com/api/licenses/14b0b50b-acd2-4fc8-ac65-3b15f9e58260",
+          "licenses": [],
+          "name": "ISC License",
+          "ownership": "OPEN_SOURCE",
+          "licenseDisplay": "ISC License",
+          "licenseFamilySummary": {
+            "name": "Permissive",
+            "href": "https://example.com/api/license-families/1"
+          }
+        }
+      ],
+      "licenseDisplay": "ISC License"
+    },
+    "vulnerabilityWithRemediation": {
+      "vulnerabilityName": "BDSA-2020-3620",
+      "description": "y18n is vulnerable to prototype pollution due to the unsafe construction of objects. An attacker could modify the properties of underlying prototypes by sending maliciously crafted requests to a vulnerable application. This could potentially allow them to crash the application, or alter the application's execution flow.",
+      "vulnerabilityPublishedDate": "2020-12-03T15:22:02.360Z",
+      "vulnerabilityUpdatedDate": "2021-05-10T11:08:42.071Z",
+      "baseScore": 7.3,
+      "overallScore": 6.6,
+      "exploitabilitySubscore": 3.9,
+      "impactSubscore": 3.4,
+      "source": "BDSA",
+      "severity": "MEDIUM",
+      "remediationStatus": "REMEDIATION_REQUIRED",
+      "remediationComment": "(SW XXXXXX)\nhttps://dev.azure.com/fake/prj/_git/product1/pullrequest/15941",
+      "cweId": "CWE-668",
+      "remediationCreatedAt": "2022-05-24T09:26:09.604Z",
+      "remediationUpdatedAt": "2022-07-29T13:13:38.522Z",
+      "remediationCreatedBy": "blackduck_system",
+      "remediationUpdatedBy": "john.doe@example.com",
+      "relatedVulnerability": "https://example.com/api/vulnerabilities/CVE-2020-7774",
+      "bdsaTags": []
+    },
+    "_meta": {
+      "allow": [
+        "GET",
+        "PUT"
+      ],
+      "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/84533bcd-a94b-44c6-bff3-c288a6c5af30/versions/036b1b52-4ff3-4bb4-a3ce-cdab0be7b3f9/origins/51e27350-2b1c-4bc7-a2fd-8f86bd33f99d/vulnerabilities/BDSA-2020-3620/remediation",
+      "links": [
+        {
+          "rel": "matched-files",
+          "href": "https://example.com/api/projects/c439460c-9ce0-461c-9679-2299c06f6e7d/versions/0d050018-307c-4619-b1f5-b15107aa4e75/components/84533bcd-a94b-44c6-bff3-c288a6c5af30/versions/036b1b52-4ff3-4bb4-a3ce-cdab0be7b3f9/origins/51e27350-2b1c-4bc7-a2fd-8f86bd33f99d/matched-files"
+        },
+        {
+          "rel": "vulnerabilities",
+          "href": "https://example.com/api/components/84533bcd-a94b-44c6-bff3-c288a6c5af30/versions/036b1b52-4ff3-4bb4-a3ce-cdab0be7b3f9/origin/51e27350-2b1c-4bc7-a2fd-8f86bd33f99d/vulnerabilities"
+        }
+      ]
+    }
+  }
+]

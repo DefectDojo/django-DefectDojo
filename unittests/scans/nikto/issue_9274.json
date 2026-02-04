@@ -1,0 +1,62 @@
+[
+    {
+      "host": "example.com",
+      "ip": "203.0.113.37",
+      "port": "443",
+      "banner": "",
+      "vulnerabilities": [
+        {
+          "id": "999986",
+          "method": "GET",
+          "url": "/",
+          "msg": "Retrieved via header: 1.1 google."
+        },
+        {
+          "id": "999978",
+          "references": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options",
+          "method": "GET",
+          "url": "/",
+          "msg": "/:X-Frame-Options header is deprecated and has been replaced with the Content-Security-Policy HTTP header with the frame-ancestors directive instead."
+        },
+        {
+          "id": "999103",
+          "references": "https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/",
+          "method": "GET",
+          "url": "/robots.txt",
+          "msg": "The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type."
+        },
+        {
+          "id": "999996",
+          "references": "https://developer.mozilla.org/en-US/docs/Glossary/Robots.txt",
+          "method": "GET",
+          "url": "/robots.txt",
+          "msg": "contains 1 entry which should be manually viewed."
+        },
+        {
+          "id": "999962",
+          "method": "GET",
+          "url": "/images/8f7c0a6.ico",
+          "msg": ": Server banner changed from 'nginx' to 'ghs'."
+        },
+        {
+          "id": "999966",
+          "references": "http://breachattack.com/",
+          "method": "GET",
+          "url": "/",
+          "msg": "The Content-Encoding header is set to \\\"deflate\\\" which may mean that the server is vulnerable to the BREACH attack."
+        },
+        {
+          "id": "999100",
+          "method": "GET",
+          "url": "/",
+          "msg": "Uncommon header 'x-google-gfe-load-report' found, with contents: utilization_percent: 51.177505 queries_per_second: 20382 errors_per_second: 0."
+        },
+        {
+          "id": "999100",
+          "method": "GET",
+          "url": "/",
+          "msg": "Uncommon header 'x-google-gfe-backend-request-cost' found, with contents: 51.177506531784765."
+        }
+      ]
+    }
+  ]

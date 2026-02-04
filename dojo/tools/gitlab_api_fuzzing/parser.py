@@ -3,7 +3,8 @@ import json
 from dojo.models import Finding
 
 
-class GitlabAPIFuzzingParser(object):
+class GitlabAPIFuzzingParser:
+
     """
     GitLab API Fuzzing Report
 
@@ -26,13 +27,12 @@ class GitlabAPIFuzzingParser(object):
         for vulnerability in vulnerabilities:
             title = vulnerability["name"]
             severity = self.normalise_severity(vulnerability["severity"])
-            description = vulnerability["category"]
-            try:
-                location = vulnerability["location"]
-                description += "\n" + location["crash_type"]
-                description += "\n" + location["crash_state"]
-            except:
-                pass
+            description = vulnerability.get("category", "")
+            if location := vulnerability.get("location"):
+                if crash_type := location.get("crash_type"):
+                    description += f"\n{crash_type}"
+                if crash_state := location.get("crash_state"):
+                    description += f"\n{crash_state}"
             findings.append(
                 Finding(
                     title=title,
@@ -42,7 +42,7 @@ class GitlabAPIFuzzingParser(object):
                     static_finding=False,
                     dynamic_finding=True,
                     unique_id_from_tool=vulnerability["id"],
-                )
+                ),
             )
         return findings
 

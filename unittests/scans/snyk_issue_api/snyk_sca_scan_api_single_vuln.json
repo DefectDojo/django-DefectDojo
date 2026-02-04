@@ -1,0 +1,146 @@
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "links": {
+    "self": "/rest/orgs/11111111111-2222-3333333-4444/issues?version=2024-10-15&limit=100",
+    "first": "/rest/orgs/11111111111-2222-3333333-4444/issues?limit=100&version=2024-10-15",
+    "last": "/rest/orgs/11111111111-2222-3333333-4444/issues?ending_before=end&limit=100&version=2024-10-15",
+    "prev": "/rest/orgs/11111111111-2222-3333333-4444/issues?ending_before="
+  },
+  "data": [
+    {
+      "id": "834bd190-3f57-46bb-b9ef-e11fee859ab4",
+      "type": "issue",
+      "attributes": {
+        "classes": [
+          {
+            "id": "CWE-122",
+            "source": "CWE",
+            "type": "weakness"
+          }
+        ],
+        "coordinates": [
+          {
+            "is_fixable_manually": false,
+            "is_fixable_snyk": true,
+            "is_fixable_upstream": false,
+            "is_patchable": false,
+            "is_pinnable": true,
+            "is_upgradeable": false,
+            "reachability": "not-applicable",
+            "representations": [
+              {
+                "dependency": {
+                  "package_name": "pillow",
+                  "package_version": "9.5.0"
+                }
+              }
+            ]
+          }
+        ],
+        "created_at": "2025-09-11T18:25:22.457Z",
+        "effective_severity_level": "critical",
+        "exploit_details": {
+          "maturity_levels": [
+            {
+              "format": "CVSSv3",
+              "level": "High"
+            },
+            {
+              "format": "CVSSv4",
+              "level": "Attacked"
+            }
+          ],
+          "sources": [
+            "CISA",
+            "PoC in GitHub",
+            "Snyk"
+          ]
+        },
+        "ignored": true,
+        "key": "SNYK-PYTHON-PILLOW-5918878",
+        "problems": [
+          {
+            "id": "SNYK-PYTHON-PILLOW-5918878",
+            "source": "SNYK",
+            "type": "vulnerability",
+            "updated_at": "2025-09-19T09:01:27.147502Z"
+          },
+          {
+            "id": "CVE-2023-4863",
+            "source": "NVD",
+            "type": "vulnerability",
+            "updated_at": "2025-09-19T09:01:27.147504Z",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-4863"
+          }
+        ],
+        "risk": {
+          "factors": [],
+          "score": {
+            "model": "v1",
+            "value": 649
+          }
+        },
+        "severities": [
+          {
+            "level": "critical",
+            "modification_time": "2024-10-01T15:25:03.834Z",
+            "score": 9.6,
+            "source": "Snyk",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:H/E:H",
+            "version": "3.1"
+          },
+          {
+            "level": "high",
+            "modification_time": "2024-03-11T09:47:26.644Z",
+            "score": 8.8,
+            "source": "NVD",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+            "version": "3.1"
+          },
+          {
+            "level": "critical",
+            "modification_time": "2024-03-11T09:54:02.586Z",
+            "score": 9.6,
+            "source": "Red Hat",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:H",
+            "version": "3.1"
+          },
+          {
+            "level": "high",
+            "modification_time": "2024-03-11T09:53:37.22Z",
+            "score": 8.8,
+            "source": "SUSE",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+            "version": "3.1"
+          }
+        ],
+        "status": "open",
+        "title": "Heap-based Buffer Overflow",
+        "type": "package_vulnerability",
+        "updated_at": "2025-09-19T09:01:03.316Z"
+      },
+      "relationships": {
+        "organization": {
+          "data": {
+            "id": "3de2b524-eae7-4f3f-ba5f-1a07e1df44c2",
+            "type": "organization"
+          },
+          "links": {
+            "related": "/orgs/3de2b524-eae7-4f3f-ba5f-1a07e1df44c2"
+          }
+        },
+        "scan_item": {
+          "data": {
+            "id": "92867a20-30b8-44fd-a59f-da71d59b58f1",
+            "type": "project"
+          },
+          "links": {
+            "related": "/orgs/3de2b524-eae7-4f3f-ba5f-1a07e1df44c2/projects/92867a20-30b8-44fd-a59f-da71d59b58f1"
+          }
+        }
+      }
+    }
+  ]
+}

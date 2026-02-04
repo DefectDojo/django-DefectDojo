@@ -69,7 +69,7 @@
                                     <td>
                                         {{ test.target_end|date }}
                                     </td>
-                                    <td>
+                                    <td class="text-right">
                                         {{ test.percent_complete }}%
                                     </td>
                                 </tr>
@@ -146,7 +146,7 @@
         {% if include_disclaimer%}
             <div style="background-color:#DADCE2; border:1px #003333; padding:.8em; ">
                 <span style="font-size:16pt;  font-family: 'Cambria','times new roman','garamond',serif; color:#ff0000;">Disclaimer</span><br/>
-                <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ disclaimer }}</p>
+                <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ disclaimer | safe }}</p>
             </div>
 		{% endif %}
         <div class="row">
@@ -208,6 +208,9 @@
                             <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
                                 Severity
                             </th>
+                            <th style="text-align: center;padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                EPSS Score / Percentile
+                            </th>
                         </tr>
                         {% for risk in test.engagement.risk_acceptance.all %}
                             {% for finding in risk.accepted_findings.all %}
@@ -215,6 +218,11 @@
                                     <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.title }}</td>
                                     <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.date }}</td>
                                     <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">{{ finding.severity }}</td>
+                                    <td style="padding: 4px;vertical-align: top;border: 1px solid #DDDDDD;">
+                                        {{ finding.epss_score|format_epss }}
+                                        /
+                                        {{ finding.epss_percentile|format_epss }}
+                                    </td>
                                 </tr>
                             {% endfor %}
                         {% endfor %}
@@ -250,6 +258,7 @@
                             <table id="notes" class="table-striped table table-condensed table-hover centered">
                                 <tr>
                                     <th>Severity</th>
+                                    <th>EPSS Score / Percentile</th>
                                     <th>Status</th>
                                     {% if finding.risk_acceptance_set.all %}
                                         <th>Acceptance</th>
@@ -276,6 +285,11 @@
                                         {% endif %}
                                     </span>
                                     </td>
+                                    <td>
+                                        {{ finding.epss_score|format_epss }}
+                                        /
+                                        {{ finding.epss_percentile|format_epss }}
+                                    </td>
                                     <td>{{ finding.status }}</td>
                                     {% if finding.risk_acceptance_set.all %}
                                     <td>
@@ -297,7 +311,7 @@
                                         <td>
                                             <a target="_blank"
                                                href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                                <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                                <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
                                             </a>
                                         </td>
                                     {% endif %}
@@ -309,41 +323,55 @@
 
                     {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
 
-                     <h6>CVSS v3</h6>
-                    <pre>{{ finding.cvssv3|markdown_render }}</pre>
+                    {% if finding.cvssv3 %}
+                        <h6>CVSS v3</h6>
+                        <pre>{{ finding.cvssv3|markdown_render }}</pre>
+                    {% endif %}
 
                     <h6>Description</h6>
                     <pre>{{ finding.description|markdown_render }}</pre>
 
-                    <h6>Mitigation</h6>
-                    <pre>{{ finding.mitigation|markdown_render }}</pre>
-                 {% if finding.get_report_requests %}
+                    {% if finding.mitigation %}
+                        <h6>Mitigation</h6>
+                        <pre>{{ finding.mitigation|markdown_render }}</pre>
+                    {% endif %}
+
+                    {% if finding.get_report_requests %}
                         <h5>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h5>
                         {% for req in finding.get_report_requests %}
-                           <h6>Request {{forloop.counter}} </h6>
-                           <pre>{{ req.get_request }}</pre>
-                        {% if req.get_response %}
-                           <h6>Response {{forloop.counter}}</h6>
-                           <pre>{{ req.get_response|truncatechars_html:800 }}</pre>
-                        {% endif %}
+                        <h6>Request {{forloop.counter}} </h6>
+                        <pre class="raw_request">{{ req.get_request }}</pre>
+                            {% if req.get_response != "" %}
+                            <h6>Response {{forloop.counter}}</h6>
+                            <pre class="raw_request">{{ req.get_response|truncatechars_html:800 }}</pre>
+                            {% endif %}
                         {% endfor %}
-                        {% endif %}
+                    {% endif %}
 
-                    <h6>Impact</h6>
-                    <pre>{{ finding.impact|markdown_render }}</pre>
+                    {% if finding.impact %}
+                        <h6>Impact</h6>
+                        <pre>{{ finding.impact|markdown_render }}</pre>
+                    {% endif %}
+                    
                     {% if finding.steps_to_reproduce %}
-                    <h6>Steps to Reproduce</h6>
-                    <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
+                        <h6>Steps to Reproduce</h6>
+                        <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
                     {% endif %}
+
                     {% if finding.severity_justification %}
-                    <h6>Severity Justification</h6>
-                    <pre>{{ finding.severity_justification|markdown_render }}</pre>
+                        <h6>Severity Justification</h6>
+                        <pre>{{ finding.severity_justification|markdown_render }}</pre>
                     {% endif %}
-                    <h6>References</h6>
-                    <pre>{{ finding.references|markdown_render }}</pre>
+
+                    {% if finding.references %}
+                        <h6>References</h6>
+                        <pre>{{ finding.references|markdown_render }}</pre>
+                    {% endif %}
+                    
                     {% if include_finding_images %}
                         {% include "dojo/snippets/file_images.html" with size='original' obj=finding size="original" format="HTML" %}
                     {% endif %}
+                    
                     {% if include_finding_notes %}
                         {% with notes=finding.notes.all|get_public_notes %}
                             {% if notes.count > 0 %}
@@ -405,7 +433,6 @@
     <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
-    <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     <script src="{{ host }}{% static "dojo/js/metrics.js" %}"></script>
     <script type="text/javascript">
         {% if include_executive_summary %}
@@ -516,7 +543,7 @@
 
                         level = parseInt(openLevel);
 
-                        var anchor = titleText.trim().replace(/ /g, "_");
+                        var anchor = titleText.trim().replace(/\s/g, "_");
 
                         if(tags)
                         {

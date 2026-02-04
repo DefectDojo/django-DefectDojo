@@ -1,0 +1,56 @@
+{
+  "vulnerabilities": [
+    {
+      "name": "WS-2019-0379",
+      "type": "WS",
+      "severity": "medium",
+      "score": "6.5",
+      "cvss3_severity": "MEDIUM",
+      "cvss3_score": "6.5",
+      "publishDate": "2019-05-20",
+      "lastUpdatedDate": "2020-03-05",
+      "scoreMetadataVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+      "description": "Apache commons-codec before version \\u201ccommons-codec-1.13-RC1\\u201d is vulnerable to information disclosure due to Improper Input validation.",
+      "project": "mend-test-sca-project",
+      "product": "mend-test-sca-product",
+      "cvss3Attributes": {
+        "attackVector": "NETWORK",
+        "attackComplexity": "LOW",
+        "userInteraction": "NONE",
+        "privilegesRequired": "NONE",
+        "scope": "UNCHANGED",
+        "confidentialityImpact": "LOW",
+        "integrityImpact": "LOW",
+        "availabilityImpact": "NONE"
+      },
+      "library": {
+        "keyUuid": "e4ad5291-19e0-4907-9cf1-5ce5a1746e89",
+        "filename": "commons-codec-1.6.jar",
+        "type": "JAVA_ARCHIVE",
+        "description": "",
+        "sha1": "b7f0fc8f61ecadeb3695f0b9464755eee44374d4",
+        "name": "commons-codec-1.6",
+        "artifactId": "commons-codec-1.6.jar",
+        "version": "1.6",
+        "groupId": "commons-codec-1.6",
+        "architecture": "",
+        "languageVersion": ""
+      },
+      "topFix": {
+        "vulnerability": "WS-2019-0379",
+        "type": "UPGRADE_VERSION",
+        "origin": "WHITESOURCE_EXPERT",
+        "url": "https://github.com/apache/commons-codec/commit/48b615756d1d770091ea3322eefc08011ee8b113",
+        "fixResolution": "Upgrade to version commons-codec:commons-codec:1.13",
+        "date": "2019-05-20 15:39:18",
+        "message": "Upgrade to version"
+      },
+      "locations": [
+        {
+          "matchType": "Exact Match",
+          "path": "D:\\MendRepo\\test-product\\test-project\\test-project-subcomponent\\path\\to\\the\\Java\\commons-codec-1.6_donotuse.jar"
+        }
+      ]
+    }
+  ]
+}

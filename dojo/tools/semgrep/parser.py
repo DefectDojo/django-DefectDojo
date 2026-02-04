@@ -3,7 +3,61 @@ import json
 from dojo.models import Finding
 
 
-class SemgrepParser(object):
+class SemgrepParser:
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the Semgrep Parser.
+
+        Fields:
+        - title: Set to the check_id value outputted by the Semgrep Scanner.
+        - severity: Set to severity from Semgrep Scanner that has been converted to DefectDojo format.
+        - description: Custom description made from elements outputted by Semgrep Scanner.
+        - file_path: Set to filepath from Semgrep Scanner.
+        - line: Set to line from Semgrep Scanner.
+        - static_finding: Set to true.
+        - dynamic_finding: Set to false.
+        - vuln_id_from_tool: Set to Vuln Id from Semgrep Scanner.
+        - nb_occurences: Initially set to 1 then updated.
+        - unique_id_from_tool: Set to corresponding field from scanner if it is present in the output.
+        - cwe: Set to cwe from scanner output if present.
+        - mitigation: Set to "fix" from scanner output or "fix_regex" if "fix" isn't present.
+        """
+        return [
+            "title",
+            "severity",
+            "description",
+            "file_path",
+            "line",
+            "static_finding",
+            "dynamic_finding",
+            "vuln_id_from_tool",
+            "nb_occurences",
+            "unique_id_from_tool",
+            "cwe",
+            "mitigation",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the Semgrep Parser.
+
+        Fields:
+        - title: Set to the title outputted by the Semgrep Scanner.
+        - cwe: Set to cwe from scanner output if present.
+        - line: Set to line from Semgrep Scanner.
+        - file_path: Set to filepath from Semgrep Scanner.
+        - description: Custom description made from elements outputted by Semgrep Scanner.
+
+        NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
+        """
+        return [
+            "title",
+            "cwe",
+            "line",
+            "file_path",
+            "description",
+        ]
 
     def get_scan_types(self):
         return ["Semgrep JSON Report"]
@@ -17,72 +71,155 @@ class SemgrepParser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
 
-        dupes = dict()
+        dupes = {}
 
-        for item in data["results"]:
-            finding = Finding(
-                test=test,
-                title=item["check_id"],
-                severity=self.convert_severity(item["extra"]["severity"]),
-                description=self.get_description(item),
-                file_path=item['path'],
-                line=item["start"]["line"],
-                static_finding=True,
-                dynamic_finding=False,
-                vuln_id_from_tool=item["check_id"],
-                nb_occurences=1,
-            )
+        if "results" in data:
+            for item in data.get("results", []):
+                finding = Finding(
+                    test=test,
+                    title=item.get("check_id"),
+                    severity=self.convert_severity(item["extra"]["severity"]),
+                    description=self.get_description(item),
+                    file_path=item["path"],
+                    line=item["start"]["line"],
+                    static_finding=True,
+                    dynamic_finding=False,
+                    vuln_id_from_tool=item["check_id"],
+                    nb_occurences=1,
+                )
 
-            # manage CWE
-            if 'cwe' in item["extra"]["metadata"]:
-                if isinstance(item["extra"]["metadata"].get("cwe"), list):
-                    finding.cwe = int(item["extra"]["metadata"].get("cwe")[0].partition(':')[0].partition('-')[2])
+                # fingerprint detection
+                unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                # treat "requires login" as if the fingerprint is absent
+                if unique_id_from_tool == "requires login":
+                    unique_id_from_tool = None
+
+                if unique_id_from_tool:
+                    finding.unique_id_from_tool = unique_id_from_tool
+
+                # manage CWE
+                if "cwe" in item["extra"]["metadata"]:
+                    if isinstance(item["extra"]["metadata"].get("cwe"), list):
+                        finding.cwe = int(
+                            item["extra"]["metadata"]
+                            .get("cwe")[0]
+                            .partition(":")[0]
+                            .partition("-")[2],
+                        )
+                    else:
+                        finding.cwe = int(
+                            item["extra"]["metadata"]
+                            .get("cwe")
+                            .partition(":")[0]
+                            .partition("-")[2],
+                        )
+
+                # manage references from metadata
+                if "references" in item["extra"]["metadata"]:
+                    finding.references = "\n".join(
+                        item["extra"]["metadata"]["references"],
+                    )
+
+                # manage mitigation from metadata
+                if "fix" in item["extra"]:
+                    finding.mitigation = item["extra"]["fix"]
+                elif "fix_regex" in item["extra"]:
+                    finding.mitigation = "\n".join(
+                        [
+                            "**You can automaticaly apply this regex:**",
+                            "\n```\n",
+                            json.dumps(item["extra"]["fix_regex"]),
+                            "\n```\n",
+                        ],
+                    )
+
+                dupe_key = finding.title + finding.file_path + str(finding.line)
+
+                if dupe_key in dupes:
+                    find = dupes[dupe_key]
+                    find.nb_occurences += 1
                 else:
-                    finding.cwe = int(item["extra"]["metadata"].get("cwe").partition(':')[0].partition('-')[2])
+                    dupes[dupe_key] = finding
 
-            # manage references from metadata
-            if 'references' in item["extra"]["metadata"]:
-                finding.references = "\n".join(item["extra"]["metadata"]["references"])
+        elif "vulns" in data:
+            for item in data.get("vulns", []):
+                finding = Finding(
+                    test=test,
+                    title=item.get("title"),
+                    severity=self.convert_severity(item["advisory"]["severity"]),
+                    description=item.get("advisory", {}).get("description"),
+                    file_path=item["dependencyFileLocation"]["path"],
+                    line=item["dependencyFileLocation"]["startLine"],
+                    static_finding=True,
+                    dynamic_finding=False,
+                    vuln_id_from_tool=item["repositoryId"],
+                    nb_occurences=1,
+                )
 
-            # manage mitigation from metadata
-            if 'fix' in item["extra"]:
-                finding.mitigation = item["extra"]["fix"]
-            elif 'fix_regex' in item["extra"]:
-                finding.mitigation = "\n".join([
-                    "**You can automaticaly apply this regex:**",
-                    "\n```\n",
-                    json.dumps(item["extra"]["fix_regex"]),
-                    "\n```\n",
-                ])
+                # fingerprint detection
+                unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                # treat "requires login" as if the fingerprint is absent
+                if unique_id_from_tool == "requires login":
+                    unique_id_from_tool = None
 
-            dupe_key = finding.title + finding.file_path + str(finding.line)
+                if unique_id_from_tool:
+                    finding.unique_id_from_tool = unique_id_from_tool
 
-            if dupe_key in dupes:
-                find = dupes[dupe_key]
-                find.nb_occurences += 1
-            else:
-                dupes[dupe_key] = finding
+                # manage CWE
+                if "cweIds" in item["advisory"]["references"]:
+                    if isinstance(item["advisory"]["references"].get("cweIds"), list):
+                        finding.cwe = int(
+                            item["advisory"]["references"]
+                            .get("cweIds")[0]
+                            .partition(":")[0]
+                            .partition("-")[2],
+                        )
+                    else:
+                        finding.cwe = int(
+                            item["advisory"]["references"]
+                            .get("cweIds")
+                            .partition(":")[0]
+                            .partition("-")[2],
+                        )
+
+                dupe_key = finding.title + finding.file_path + str(finding.line)
+
+                if dupe_key in dupes:
+                    find = dupes[dupe_key]
+                    find.nb_occurences += 1
+                else:
+                    dupes[dupe_key] = finding
 
         return list(dupes.values())
 
     def convert_severity(self, val):
-        if "WARNING" == val.upper():
+        upper_value = val.upper()
+        if upper_value == "CRITICAL":
+            return "Critical"
+        if upper_value in {"WARNING", "MEDIUM"}:
             return "Medium"
-        elif "ERROR" == val.upper():
+        if upper_value in {"ERROR", "HIGH"}:
             return "High"
-        elif "INFO" == val.upper():
-            return "Info"
-        else:
-            raise ValueError(f"Unknown value for severity: {val}")
+        if upper_value in {"LOW", "INFO"}:
+            return "Low"
+        msg = f"Unknown value for severity: {val}"
+        raise ValueError(msg)
 
     def get_description(self, item):
-        description = ''
+        description = ""
 
         message = item["extra"]["message"]
-        description += '**Result message:** {}\n'.format(message)
+        description += f"**Result message:** {message}\n"
 
         snippet = item["extra"].get("lines")
+        if snippet == "requires login":
+            snippet = None  # Treat "requires login" as no snippet
+
         if snippet is not None:
-            description += '**Snippet:**\n```{}```\n'.format(snippet)
+            if "<![" in snippet:
+                snippet = snippet.replace("<![", "<! [")
+                description += f"**Snippet:** ***Caution:*** Please remove the space between `!` and `[` to have the real value due to a workaround to circumvent [#8435](https://github.com/DefectDojo/django-DefectDojo/issues/8435).\n```{snippet}```\n"
+            else:
+                description += f"**Snippet:**\n```{snippet}```\n"
 
         return description

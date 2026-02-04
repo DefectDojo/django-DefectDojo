@@ -1,0 +1,1023 @@
+{
+    "id": "8001bd54-1d74-44a4-97f9-b9feb9d0c0dd",
+    "projects": null,
+    "createdAt": "2024-07-16T12:17:35.187550518Z",
+    "startedAt": "0001-01-01T00:00:00Z",
+    "createdBy": {
+      "serviceAccount": {
+        "id": "12341234234123412341234"
+      }
+    },
+    "status": {
+      "state": "SUCCESS",
+      "verdict": "WARN_BY_POLICY"
+    },
+    "policies": [
+      {
+        "id": "ce4872e0-ea52-463f-aad7-6ba1807062fa",
+        "name": "Default IaC policy",
+        "description": "Default built-in policy for Infrastructure as Code scanning",
+        "type": "IAC",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "AUDIT",
+            "deploymentLifecycle": "ADMISSION_CONTROLLER"
+          },
+          {
+            "enforcementMethod": "BLOCK",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamsiac",
+          "severityThreshold": "CRITICAL",
+          "countThreshold": 1,
+          "ignoredRules": null,
+          "validatableIgnoredRules": null,
+          "builtinIgnoreTagsEnabled": false,
+          "customIgnoreTags": null,
+          "securityFrameworks": null
+        }
+      },
+      {
+        "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+        "name": "Default secrets policy",
+        "description": "Default built-in policy for secret scanning",
+        "type": "SECRETS",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "AUDIT",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamssecrets",
+          "countThreshold": 1,
+          "pathAllowList": []
+        }
+      }
+    ],
+    "extraInfo": null,
+    "tags": null,
+    "outdatedPolicies": [],
+    "taggedResource": null,
+    "scanOriginResource": {
+      "__typename": "CICDScanOriginIAC",
+      "name": "IAC scan 2024-07-16T12:17:28Z",
+      "subTypes": [
+        "DOCKERFILE",
+        "KUBERNETES"
+      ]
+    },
+    "result": {
+      "__typename": "CICDIACScanResult",
+      "failedPolicyMatches": [
+        {
+          "policy": {
+            "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+            "name": "Default secrets policy",
+            "description": "Default built-in policy for secret scanning",
+            "type": "SECRETS",
+            "builtin": true,
+            "projects": null,
+            "policyLifecycleEnforcements": [
+              {
+                "enforcementMethod": "AUDIT",
+                "deploymentLifecycle": "CLI",
+                "enforcementConfig": null
+              }
+            ],
+            "ignoreRules": null,
+            "lifecycleTargets": null,
+            "Default": false,
+            "params": {
+              "__typename": "cicdscanpolicyparamssecrets",
+              "countThreshold": 1,
+              "pathAllowList": []
+            }
+          }
+        }
+      ],
+      "ruleMatches": [
+        {
+          "rule": {
+            "id": "4ac84116-456f-4d60-9e12-187607266faf",
+            "name": "Apk Add Using Local Cache Path"
+          },
+          "severity": "INFORMATIONAL",
+          "failedResourceCount": 1,
+          "failedPolicyMatches": [],
+          "matches": [
+            {
+              "failedPolicies": [],
+              "resourceName": "FROM={{registry.gitlab.com/evilorg.com/infra/images/go-lang-1.18-alpine3.17:latest as builder}}.{{RUN apk add --update make git musl-dev gcc}}",
+              "fileName": "Dockerfile",
+              "lineNumber": 8,
+              "matchContent": "RUN apk add --update make git musl-dev gcc",
+              "expected": "'RUN' should not contain 'apk add' command without '--no-cache' switch",
+              "found": "'RUN' contains 'apk add' command without '--no-cache' switch",
+              "fileType": "DOCKERFILE",
+              "remediationInstructions": null,
+              "fileRemediation": null
+            }
+          ]
+        },
+        {
+          "rule": {
+            "id": "ab1043e3-1eeb-4e38-9ca9-7ec0e99fe2ba",
+            "name": "Healthcheck Instruction Missing"
+          },
+          "severity": "LOW",
+          "failedResourceCount": 1,
+          "failedPolicyMatches": [],
+          "matches": [
+            {
+              "failedPolicies": [],
+              "resourceName": "FROM={{registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest}}",
+              "fileName": "Dockerfile",
+              "lineNumber": 58,
+              "matchContent": "FROM registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest",
+              "expected": "Dockerfile should contain instruction 'HEALTHCHECK'",
+              "found": "Dockerfile doesn't contain instruction 'HEALTHCHECK'",
+              "fileType": "DOCKERFILE",
+              "remediationInstructions": null,
+              "fileRemediation": null
+            }
+          ]
+        },
+        {
+          "rule": {
+            "id": "3c7c78be-24a9-4c23-9e8c-de498371c2c5",
+            "name": "Multiple RUN, ADD, COPY, Instructions Listed"
+          },
+          "severity": "LOW",
+          "failedResourceCount": 1,
+          "failedPolicyMatches": [],
+          "matches": [
+            {
+              "failedPolicies": [],
+              "resourceName": "FROM={{registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest}}.{{COPY --from=builder /go/src/gitlab.com/evilorg.com/apid/certs/entrust_l1k.cer /usr/local/share/ca-certificates}}",
+              "fileName": "Dockerfile",
+              "lineNumber": 77,
+              "matchContent": "COPY --from=builder /go/src/gitlab.com/evilorg.com/apid/certs/entrust_l1k.cer /usr/local/share/ca-certificates",
+              "expected": "There isn´t any COPY instruction that could be grouped",
+              "found": "There are COPY instructions that could be grouped",
+              "fileType": "DOCKERFILE",
+              "remediationInstructions": null,
+              "fileRemediation": null
+            }
+          ]
+        },
+        {
+          "rule": {
+            "id": "8fe98176-f61f-43dc-9381-f53231d807a8",
+            "name": "Image Version Using 'latest'"
+          },
+          "severity": "MEDIUM",
+          "failedResourceCount": 2,
+          "failedPolicyMatches": [],
+          "matches": [
+            {
+              "failedPolicies": [],
+              "resourceName": "FROM={{registry.gitlab.com/evilorg.com/infra/images/go-lang-1.18-alpine3.17:latest as builder}}",
+              "fileName": "Dockerfile",
+              "lineNumber": 4,
+              "matchContent": "FROM registry.gitlab.com/evilorg.com/infra/images/go-lang-1.18-alpine3.17:latest as builder",
+              "expected": "FROM registry.gitlab.com/evilorg.com/infra/images/go-lang-1.18-alpine3.17:latest:'version' where version should not be 'latest'",
+              "found": "FROM registry.gitlab.com/evilorg.com/infra/images/go-lang-1.18-alpine3.17:latest'",
+              "fileType": "DOCKERFILE",
+              "remediationInstructions": null,
+              "fileRemediation": null
+            },
+            {
+              "failedPolicies": [],
+              "resourceName": "FROM={{registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest}}",
+              "fileName": "Dockerfile",
+              "lineNumber": 58,
+              "matchContent": "FROM registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest",
+              "expected": "FROM registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest:'version' where version should not be 'latest'",
+              "found": "FROM registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest'",
+              "fileType": "DOCKERFILE",
+              "remediationInstructions": null,
+              "fileRemediation": null
+            }
+          ]
+        },
+        {
+          "rule": {
+            "id": "23f75d4b-1910-40df-b4f8-173d1ab045ca",
+            "name": "Unpinned Package Version in Apk Add"
+          },
+          "severity": "MEDIUM",
+          "failedResourceCount": 2,
+          "failedPolicyMatches": [],
+          "matches": [
+            {
+              "failedPolicies": [],
+              "resourceName": "FROM={{registry.gitlab.com/evilorg.com/infra/images/go-lang-1.18-alpine3.17:latest as builder}}.{{RUN apk add --update make git musl-dev gcc}}",
+              "fileName": "Dockerfile",
+              "lineNumber": 8,
+              "matchContent": "RUN apk add --update make git musl-dev gcc",
+              "expected": "RUN instruction with 'apk add <package>' should use package pinning form 'apk add <package>=<version>'",
+              "found": "RUN instruction apk add --update make git musl-dev gcc does not use package pinning form",
+              "fileType": "DOCKERFILE",
+              "remediationInstructions": null,
+              "fileRemediation": null
+            },
+            {
+              "failedPolicies": [],
+              "resourceName": "FROM={{registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest}}.{{RUN apk add --no-cache ca-certificates make git     && rm -rf /var/cache/apk/*}}",
+              "fileName": "Dockerfile",
+              "lineNumber": 62,
+              "matchContent": "RUN apk add --no-cache ca-certificates make git \\\n    && rm -rf /var/cache/apk/*",
+              "expected": "RUN instruction with 'apk add <package>' should use package pinning form 'apk add <package>=<version>'",
+              "found": "RUN instruction apk add --no-cache ca-certificates make git     && rm -rf /var/cache/apk/* does not use package pinning form",
+              "fileType": "DOCKERFILE",
+              "remediationInstructions": null,
+              "fileRemediation": null
+            }
+          ]
+        },
+        {
+          "rule": {
+            "id": "5855db58-e570-404d-8fb1-4c85a015d073",
+            "name": "Update Instruction Alone"
+          },
+          "severity": "MEDIUM",
+          "failedResourceCount": 1,
+          "failedPolicyMatches": [],
+          "matches": [
+            {
+              "failedPolicies": [],
+              "resourceName": "FROM={{registry.gitlab.com/evilorg.com/infra/images/go-lang-1.18-alpine3.17:latest as builder}}.RUN={{apk add --update make git musl-dev gcc}}",
+              "fileName": "Dockerfile",
+              "lineNumber": 8,
+              "matchContent": "RUN apk add --update make git musl-dev gcc",
+              "expected": "Instruction 'RUN <package-manager> update' should be followed by 'RUN <package-manager> install' ",
+              "found": "Instruction 'RUN <package-manager> update' isn't followed by 'RUN <package-manager> install in the same 'RUN' statement",
+              "fileType": "DOCKERFILE",
+              "remediationInstructions": null,
+              "fileRemediation": null
+            }
+          ]
+        },
+        {
+          "rule": {
+            "id": "00a275c9-6307-4212-b5d9-e2596571edbc",
+            "name": "Missing User Instruction"
+          },
+          "severity": "HIGH",
+          "failedResourceCount": 1,
+          "failedPolicyMatches": [],
+          "matches": [
+            {
+              "failedPolicies": [],
+              "resourceName": "FROM={{registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest}}",
+              "fileName": "Dockerfile",
+              "lineNumber": 58,
+              "matchContent": "FROM registry.gitlab.com/evilorg.com/infra/images/alpine-3.9:latest",
+              "expected": "The 'Dockerfile' should contain the 'USER' instruction",
+              "found": "The 'Dockerfile' does not contain any 'USER' instruction",
+              "fileType": "DOCKERFILE",
+              "remediationInstructions": null,
+              "fileRemediation": null
+            }
+          ]
+        }
+      ],
+      "scanStatistics": {
+        "infoMatches": 1,
+        "lowMatches": 2,
+        "mediumMatches": 5,
+        "highMatches": 1,
+        "criticalMatches": 0,
+        "totalMatches": 0,
+        "filesFound": 22,
+        "filesParsed": 22,
+        "queriesLoaded": 204,
+        "queriesExecuted": 204,
+        "queriesExecutionFailed": 0
+      },
+      "secrets": [
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Certificate for evilorg.com",
+          "path": "docker-compose.yaml",
+          "lineNumber": 239,
+          "offset": 0,
+          "type": "CERTIFICATE",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Certificate for evilorg.com",
+              "type": "CERTIFICATE"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/postgres?)",
+          "path": "docker-compose.yaml",
+          "lineNumber": 32,
+          "offset": 0,
+          "type": "PASSWORD",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/postgres?)",
+              "type": "PASSWORD"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/postgres?)",
+          "path": "docker-compose.yaml",
+          "lineNumber": 34,
+          "offset": 0,
+          "type": "PASSWORD",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/postgres?)",
+              "type": "PASSWORD"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/postgres?)",
+          "path": "docker-compose.yaml",
+          "lineNumber": 35,
+          "offset": 0,
+          "type": "PASSWORD",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/postgres?)",
+              "type": "PASSWORD"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/postgres?)",
+          "path": "docker-compose.yaml",
+          "lineNumber": 36,
+          "offset": 0,
+          "type": "PASSWORD",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/postgres?)",
+              "type": "PASSWORD"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/postgres?)",
+          "path": "docker-compose.yaml",
+          "lineNumber": 37,
+          "offset": 0,
+          "type": "PASSWORD",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/postgres?)",
+              "type": "PASSWORD"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/apid_test?)",
+          "path": "docker-compose.yaml",
+          "lineNumber": 39,
+          "offset": 0,
+          "type": "PASSWORD",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/apid_test?)",
+              "type": "PASSWORD"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/apid_test?)",
+          "path": "docker-compose.yaml",
+          "lineNumber": 40,
+          "offset": 0,
+          "type": "PASSWORD",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/apid_test?)",
+              "type": "PASSWORD"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/apid_test?)",
+          "path": "docker-compose.yaml",
+          "lineNumber": 41,
+          "offset": 0,
+          "type": "PASSWORD",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/apid_test?)",
+              "type": "PASSWORD"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/apid_test?)",
+          "path": "docker-compose.yaml",
+          "lineNumber": 42,
+          "offset": 0,
+          "type": "PASSWORD",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Password in URL (postgres://postgres:---REDACTED---@db:5432/apid_test?)",
+              "type": "PASSWORD"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Private Key",
+          "path": "docker-compose.yaml",
+          "lineNumber": 82,
+          "offset": 0,
+          "type": "PRIVATE_KEY",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Private Key",
+              "type": "PRIVATE_KEY"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Private Key",
+          "path": "docker-compose.yaml",
+          "lineNumber": 210,
+          "offset": 0,
+          "type": "PRIVATE_KEY",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Private Key",
+              "type": "PRIVATE_KEY"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Private Key",
+          "path": "docker-compose.yaml",
+          "lineNumber": 82,
+          "offset": 0,
+          "type": "PUBLIC_KEY",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Private Key",
+              "type": "PUBLIC_KEY"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Private Key",
+          "path": "docker-compose.yaml",
+          "lineNumber": 210,
+          "offset": 0,
+          "type": "PUBLIC_KEY",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Private Key",
+              "type": "PUBLIC_KEY"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - Certificate for evilorg.com",
+          "path": "docker-compose.yaml",
+          "lineNumber": 239,
+          "offset": 0,
+          "type": "PUBLIC_KEY",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - Certificate for evilorg.com",
+              "type": "PUBLIC_KEY"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        },
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Passwords And Secrets - SaaS API Key (SendGrid)",
+          "path": "docker-compose.yaml",
+          "lineNumber": 197,
+          "offset": 0,
+          "type": "SAAS_API_KEY",
+          "contains": [
+            {
+              "name": "Passwords And Secrets - SaaS API Key (SendGrid)",
+              "type": "SAAS_API_KEY"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": null
+        }
+      ],
+      "fileTypes": [
+        "DOCKERFILE"
+      ]
+    },
+    "reportUrl": "https://app.wiz.io/findings/cicd-scans"
+  }
+  

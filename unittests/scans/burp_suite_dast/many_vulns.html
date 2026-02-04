@@ -1,0 +1,2978 @@
+<html>
+<head>
+<title>Scan Remediation Report #13</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'nonce-MWU1ODBmYmQtZGY4Ny00YmI5LWE0YTgtNjk1OTRmNTc0OTJi'; base-uri 'none';">
+<style nonce="MWU1ODBmYmQtZGY4Ny00YmI5LWE0YTgtNjk1OTRmNTc0OTJi">
+body {
+font-family: 'Roboto', Helvetica, Arial, sans-serif;
+color: #4d5155;
+-webkit-font-smoothing: antialiased;
+font-size: 14px;
+background-color: #F7F9FD;
+}
+
+.report {
+width: 712px;
+margin: 0 auto;
+position: relative;
+background-color: white;
+border-left: 60px solid white;
+border-right: 60px solid white;
+border-top: 20px solid white;
+border-bottom: 20px solid white;
+}
+
+.header {
+height: 150px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-bottom: 1px solid #0094FF;
+}
+
+.header h1 {
+font-size: 44px;
+color: #333332;
+}
+
+.header h2 {
+font-size: 26px;
+color: #333332;
+}
+
+.line {
+border-left: 16px solid #0094FF;
+height: 150px;
+width: 24px;
+position: absolute;
+left: -40px;
+float: left;
+}
+
+.section {
+width: 100%;
+margin-top: 50px;
+}
+
+.section.no-margin {
+margin-top: 10px;
+}
+
+.label {
+white-space: nowrap;
+color: #8c8d8e;
+margin-top: 30px;
+}
+
+.label:first-child {
+margin-top: 0px;
+}
+
+.divider {
+border-bottom: 1px solid #0094FF;
+}
+
+.title h1 {
+color: #ffffff;
+padding: 10px 15px;
+margin: 0;
+font-size: 1.8em;
+}
+
+.title img {
+display: inline
+}
+
+table {
+line-height: 20px;
+}
+
+h1 {
+color: #333332;
+font-size: 24px;
+font-weight: bold;
+margin-bottom: 20px;
+}
+
+h2 {
+color: #333332;
+font-size: 18px;
+font-weight: normal;
+margin-top: 0;
+margin-bottom: 20px;
+}
+
+a {
+color: #ff6633;
+text-decoration: none;
+}
+
+.column-table .value.warning {
+color: #ff6633;
+font-size: 12px;
+}
+
+.info-table {
+margin-right: 50px;
+}
+
+.info-table td {
+padding: 3px 3px 3px 0;
+border-bottom: 1px solid #ebf0f2;
+vertical-align: top;
+overflow-wrap: break-word;
+word-break: break-all;
+}
+
+.info-table td + td {
+margin: 20px
+}
+
+.info-table .name {
+width: 200px;
+white-space: nowrap;
+color: #8c8d8e;
+}
+
+.info-table .value {
+text-align: right;
+}
+
+.issue-table {
+border-collapse: collapse;
+margin-top: 30px;
+}
+
+.issue-table thead th {
+white-space: nowrap;
+}
+
+.issue-table tr {
+border: 0;
+border-bottom: 1px solid #8c8d8e;
+}
+
+.issue-table tr.issue-type-row {
+font-weight: bold;
+border-bottom: 0;
+}
+
+.issue-table tr th {
+text-align: left;
+padding-bottom: 8px;
+padding-right: 8px;
+width: 98%;
+}
+
+.issue-table tr .issue-path {
+word-wrap: break-word;
+max-width: 700px;
+text-align: left;
+padding-bottom: 8px;
+padding-right: 8px;
+width: 98%;
+}
+
+.issue-table td {
+padding-right: 8px;
+}
+
+.issue-table td.nowrap {
+white-space: nowrap;
+}
+
+.column-table {
+width: 100%;
+}
+
+.column-table > tbody > tr > td {
+width: 50%;
+vertical-align: top;
+}
+
+.column-table > tbody > tr > td > .value {
+display: flex;
+}
+
+.user-icon {
+padding-right: 6px;
+}
+
+.recorded-icon {
+padding-right: 10px;
+}
+
+.url {
+word-break: break-all;
+}
+
+.section.details h1 {
+margin-bottom: 30px;
+}
+
+.section.details h2 {
+font-size: 14px;
+font-weight: bold;
+color: #4d5155;
+margin: 0;
+}
+
+.section.details h3 {
+font-size: 14px;
+font-weight: normal;
+color: #8c8d8e;
+margin-top: 30px;
+margin-bottom: 20px;
+}
+
+.center {
+text-align: center;
+}
+
+.no-bullets ul {
+list-style: none;
+padding-left: 0;
+}
+
+.request-response {
+overflow: auto;
+border-radius: 7px;
+border: 1px solid #dce3e5;
+padding: 8px;
+color: #000000;
+}
+
+.request-response .highlight {
+background-color: rgba(255, 102, 51, 0.4);
+}
+
+.request-response, .code, pre {
+font-family: "Courier New", Courier, monospace;
+line-height: 16px;
+word-break: break-all;
+white-space: pre-wrap;
+}
+
+.request-response .snip {
+margin-top: 20px;
+margin-bottom: 20px;
+position: relative;
+border-top: 1px dashed #cbd0d1;
+}
+
+.request-response .snip > span {
+position: absolute;
+top: -13px;
+display: inline-block;
+width: 100%;
+text-align: center;
+}
+
+.request-response .snip > span > span {
+color: #8c8d8e;
+padding: 0 8px;
+background-color: #ffffff;
+}
+
+.issue-container {
+margin-bottom: 30px;
+}
+
+@media print {
+body {
+color: #000000;
+position: relative;
+}
+
+.report {
+width: calc(100% - 80px);
+}
+
+h1, h2, a {
+color: #000000;
+}
+
+.no-print {
+display: none;
+}
+}
+</style>
+</head>
+<body>
+
+<div class="report">
+<div class="line"></div>
+
+<div class="header">
+<div class="text">
+<h1>Scan Remediation</h1>
+<h2>Report</h2>
+</div>
+<img src='data:image/svg+xml;base64,PHN2ZyBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCAyNzYgODkiIHZpZXdCb3g9IjAgMCAyNzYgODkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTE0OS42IDEyLjJjMi45IDAgNS40IDEgNyAyLjUgMi44IDIuOCAzLjIgNy40IDMuMiAxMi4xcy0uNSA5LjMtMy4yIDEyLjJjLTEuNiAxLjYtNCAyLjUtNyAyLjUtMy4xIDAtNS40LS43LTcuNS0zLjN2MTQuNWgtNS44di00MC4xaDUuN3YzLjFjMi4yLTIuNyA0LjYtMy41IDcuNi0zLjV6bS01Ny4zLjR2MTcuNGMwIDQuNSAyLjUgNi40IDUuOCA2LjQgMy4yIDAgNS45LTIgNS45LTYuNHYtMTcuNGg1Ljh2MjguN2gtNS42di0yLjljLTIgMi4xLTQuOCAzLjMtNy42IDMuMi0yLjYuMS01LjItLjktNy4xLTIuNi0yLjItMi4xLTIuOS00LjktMi45LTguMXYtMTguM3ptMTEyLjMgMHYxNy40YzAgNC41IDIuNSA2LjQgNS44IDYuNCAzLjIgMCA1LjktMiA1LjktNi40di0xNy40aDUuOHYyOC43aC01LjZ2LTIuOWMtMiAyLjEtNC44IDMuMy03LjYgMy4yLTIuNi4xLTUuMi0uOS03LjEtMi42LTIuMi0yLjEtMi45LTQuOS0yLjktOC4xdi0xOC4zem0tMjIuNy0xMmM1LjQgMCA5LjEgMS40IDEyLjUgNC42bC0zLjkgMy44Yy0yLjUtMi40LTUuNC0zLjEtOC45LTMuMS00LjggMC03LjMgMi42LTcuMyA2LjMtLjEgMS40LjQgMi44IDEuNSAzLjcgMSAuOSAyLjIgMS41IDQuNCAxLjhsNC44LjdjMy43LjYgNS43IDEuNCA3LjUgMyAyLjIgMiAzLjMgNC43IDMuMyA4LjMgMCA3LjQtNiAxMS44LTE0LjUgMTEuOC02LjEgMC0xMC40LTEuNC0xNC4zLTUuM2w0LTRjMi45IDIuOSA2LjMgMy45IDEwLjQgMy45IDUuMyAwIDguMy0yLjMgOC4zLTYuMiAwLTEuOC0uNS0zLjItMS42LTQuMi0xLS45LTIuNC0xLjQtNC40LTEuN2wtNC44LS43Yy0zLjMtLjUtNS44LTEuNS03LjYtMy4yLTItMS44LTMtNC40LTMtNy44LjEtNi45IDUuMi0xMS43IDEzLjYtMTEuN3ptODEuMiAxMS42YzcuNyAwIDEyLjIgNS41IDEyLjIgMTMuOXYyLjRoLTE4LjZjMCA1IDIuNSA4IDcuMyA4IDMuMiAwIDQuOS0uOSA3LTIuOWwzLjcgMy41Yy0zIDIuOS01LjcgNC41LTEwLjggNC41LTcuMiAwLTEyLjktMy44LTEyLjktMTQuNy0uMS05LjQgNC43LTE0LjcgMTIuMS0xNC43em0tMzAuNC40djI4LjdoLTUuOHYtMjguN3ptLTE2Mi42LTExLjZjNy41IDAgMTIuMiA0LjIgMTIuMiAxMSAuMSAzLjctMi4xIDcuMS01LjQgOC41IDMuMSAxLjIgNi4xIDQuMiA2LjEgOS4zIDAgNy40LTUgMTEuNC0xMi4yIDExLjRoLTE2LjR2LTQwLjJ6bTY0LjYgMTMuOS00LjQgNC40Yy0xLjMtMS4zLTIuMy0xLjktNC4zLTEuOS0zLjEgMC01LjcgMi41LTUuNyA2LjV2MTcuNGgtNS44di0yOC43aDUuN3YzLjFjMS41LTIgNC40LTMuNCA3LjYtMy40IDIuNy0uMiA1LjIuOCA2LjkgMi42em0xMDkuNS0xMC41djguMmg1LjZ2NC40aC01LjZ2MTZjMCAyLjEgMSAzLjMgMy4yIDMuM2gyLjR2NC45aC0zLjVjLTUuNCAwLTcuOS0zLjgtNy45LTh2LTE2LjJoLTMuM3YtNC40aDMuM3YtOC4yem0tOTYuMSAxM2MtNS4zIDAtNiA0LjQtNiA5LjVzLjcgOS42IDYgOS42IDUuOS00LjUgNS45LTkuNi0uNi05LjUtNS45LTkuNXptLTc3LjkgNi4xaC05LjZ2MTIuM2g5LjZjNC4yIDAgNi42LTIuNiA2LjYtNi4ycy0yLjQtNi4xLTYuNi02LjF6bTE5Mi44LTYuNWMtMi40IDAtNC43IDEuNC01LjcgMy42LS41IDEuMi0uOCAyLjUtLjcgMy45aDEyLjljMC0xLjMtLjMtMi43LS44LTMuOS0xLTIuMS0zLjItMy42LTUuNy0zLjZ6bS0xOTMuNC0xMC41aC05LjF2MTEuNWg5LjFjMy45IDAgNi42LTIgNi42LTUuOCAwLTMuNy0yLjctNS43LTYuNi01Ljd6bTE2My4zLTUuN3Y2LjFoLTYuMXYtNi4xeiIgZmlsbD0iIzAwMDAyMyIvPjxwYXRoIGQ9Im00MS42LjhoLTQwLjd2NDAuN2g0MC43eiIgZmlsbD0iIzAwOTRmZiIvPjxwYXRoIGQ9Im0yMi44IDM1LjhoLTMuMnYtNC43bDQuMy01LjJoLTQuM3YtNi40aC03LjZsNy43LTkuNXYtMy42aDMuMnY0LjdsLTQuMyA1LjJoNC4zdjYuNGg3LjdsLTcuNyA5LjV2My42eiIgZmlsbD0iI2ZmZiIvPjxwYXRoIGQ9Im0xMjQuMSA2Ni40YzEuMy0uMSAyLjcuNCAzLjcgMS4zIDEuNSAxLjUgMS45IDQgMS45IDYuM3MtLjQgNC44LTEuOSA2LjNjLTEgLjktMi4zIDEuNC0zLjcgMS4zLTEuNy4xLTMuNC0uNy00LjQtMi4xdjloLTEuNnYtMjJoMS42djEuOWMxLTEuNCAyLjctMi4yIDQuNC0yem0tMjYuMSAwYzMuNyAwIDYgMi43IDYgNy4zdi43aC0xMC40YzAgMy44IDEuNyA1LjkgNC45IDUuOSAxLjYuMSAzLjEtLjYgNC4xLTEuOGwxLjIuOWMtMS40IDEuNS0zLjMgMi40LTUuNCAyLjMtNC4xIDAtNi40LTIuNi02LjQtNy42IDAtNC45IDIuMi03LjcgNi03Ljd6bTcwLjEgMGMzLjggMCA2IDIuNyA2IDcuM3YuN2gtMTAuNGMwIDMuOCAxLjcgNS45IDQuOSA1LjkgMS42LjEgMy4xLS42IDQuMS0xLjhsMS4yLjljLTEuNCAxLjUtMy4zIDIuNC01LjQgMi4zLTQuMSAwLTYuNC0yLjYtNi40LTcuNiAwLTQuOSAyLjItNy43IDYtNy43em00Mi4xLTd2MjJoLTEuNnYtMS45Yy0xIDEuNC0yLjcgMi4yLTQuNCAyLjEtMS4zLjEtMi43LS40LTMuNy0xLjMtMS41LTEuNS0xLjktNC0xLjktNi4zIDAtMi40LjQtNC44IDEuOS02LjMgMS0uOSAyLjMtMS40IDMuNy0xLjMgMS43LS4xIDMuNC43IDQuNCAyLjF2LTloMS42em0tNTAuOSA4LjUtMS4xIDEuMWMtMS4yLS45LTIuNy0xLjMtNC4yLTEuMy0yLjUgMC0zLjggMS0zLjggMi45IDAgMS42LjkgMi4zIDMgMi41bDIuNC4yYzIuNS4yIDQuNCAxIDQuNCAzLjkgMCAyLjctMi4zIDQuNC02IDQuNC0yLjYgMC00LjUtLjctNi4xLTIuMWwxLjEtMS4xYzEuMyAxLjMgMy4xIDEuOSA0LjkgMS44IDIuOSAwIDQuNS0xIDQuNS0zIDAtMS42LS45LTIuMy0yLjktMi41bC0yLjUtLjJjLTMtLjItNC41LTEuNS00LjUtMy45IDAtMi42IDIuMS00LjIgNS40LTQuMiAyLS4xIDMuOS41IDUuNCAxLjV6bTgyLjcuMWMxLjYgMS42IDEuOSAzLjkgMS45IDZzLS4zIDQuNC0xLjkgNmMtMi4zIDIuMi02IDIuMi04LjMgMC0xLjYtMS42LTEuOS0zLjktMS45LTZzLjMtNC40IDEuOS02YzIuMy0yLjIgNS45LTIuMiA4LjMgMHptLTEyNS42LS4yLTEuMSAxLjFjLS43LS44LTEuNy0xLjItMi44LTEuMi0yLjYgMC00IDIuMS00IDQuNXY5LjJoLTEuNnYtMTQuOGgxLjZ2MmMxLTEuNCAyLjYtMi4yIDQuNC0yLjIgMS4yLS4xIDIuNS40IDMuNSAxLjR6bTI1LjkgMC0xLjEgMS4xYy0uNy0uOC0xLjctMS4yLTIuOC0xLjItMi42IDAtNCAyLjEtNCA0LjV2OS4yaC0xLjZ2LTE0LjhoMS42djJjMS0xLjQgMi42LTIuMiA0LjQtMi4yIDEuMy0uMSAyLjYuNCAzLjUgMS40em0xMTIuNC0xLjRjMi4zLjggMy44IDMuMSAzLjYgNS41djkuNWgtMS42di05LjNjMC0yLjktMS40LTQuNS00LjEtNC41cy00LjIgMS42LTQuMiA0LjV2OS4zaC0xLjZ2LTE0LjloMS42djEuOGMxLjUtMS45IDQtMi43IDYuMy0xLjl6bS01Ny43LTd2MS41aC0xMS43djguN2gxMHYxLjVoLTEwdjguOWgxMS43djEuNWgtMTMuNHYtMjJoMTMuNHptMjQuNCAyLjR2NC44aDMuNHYxLjJoLTMuNHY5LjljMCAxLjYuNyAyLjUgMi4zIDIuNWgxLjF2MS40aC0xLjRjLTIuNCAwLTMuNi0xLjYtMy42LTMuOXYtOS45aC0ydi0xLjJoMnYtNC44em0tMTQyLjkgNC43YzIuMy44IDMuOCAzLjEgMy42IDUuNXY5LjVoLTEuNnYtOS4zYzAtMi45LTEuNC00LjUtNC4xLTQuNXMtNC4yIDEuNi00LjIgNC41djkuM2gtMS42di0xNWgxLjZ2MS44YzEuNS0xLjkgNC0yLjcgNi4zLTEuOHptLTEwLjYtNy4xdjEuNWgtMTEuN3Y4LjdoMTB2MS41aC0xMHY4LjloMTEuN3YxLjVoLTEzLjR2LTIyaDEzLjR6bTE0Ny42IDcuMXYxNC45aC0xLjZ2LTE0Ljl6bS0xMjguMS00Ljd2NC44aDMuNHYxLjJoLTMuNHY5LjljMCAxLjYuNyAyLjUgMi4zIDIuNWgxLjF2MS40aC0xLjRjLTIuNCAwLTMuNi0xLjYtMy42LTMuOXYtOS45aC0ydi0xLjJoMnYtNC44em01OC4zIDQuN3YxNC45aC0xLjZ2LTE0Ljl6bTgzLjEgMHYxNC45aC0xLjZ2LTE0Ljl6bTUuOSAyLjVjLTEuMiAxLjItMS4zIDMuMS0xLjMgNC44di4yYzAgMS43LjEgMy43IDEuMyA1IDEuNyAxLjcgNC41IDEuNyA2LjIgMCAxLjItMS4yIDEuMy0zLjEgMS4zLTQuOHYtLjJjMC0xLjctLjEtMy43LTEuMy01LTEuNy0xLjctNC41LTEuNy02LjIgMHptLTMwLjMtMS4yYy0zLjcgMC00LjIgMy4yLTQuMiA2LjNzLjYgNi4zIDQuMiA2LjNjMy43IDAgNC4yLTMuMiA0LjItNi4zcy0uNi02LjMtNC4yLTYuM3ptLTgwLjUgMGMtMy43IDAtNC4yIDMuMi00LjIgNi4zcy42IDYuMyA0LjIgNi4zIDQuMi0zIDQuMi02LjF2LS4yYzAtMy4yLS41LTYuMy00LjItNi4zem00NC4yIDBjLTEuNyAwLTMuMiAxLTMuOSAyLjUtLjQuOS0uNiAxLjktLjUgMi44aDguOGMwLTEtLjItMS45LS41LTIuOC0uNy0xLjYtMi4yLTIuNi0zLjktMi41em0tNzAuMSAwYy0xLjcgMC0zLjIgMS0zLjkgMi41LS40LjktLjYgMS45LS41IDIuOGg4LjhjMC0xLS4yLTEuOS0uNS0yLjgtLjctMS42LTIuMi0yLjYtMy45LTIuNXptNDcuOS04LjR2MmgtMnYtMnptNjkuOCAwdjJoLTJ2LTJ6bTEzLjMgMHYyaC0ydi0yeiIgZmlsbD0iIzAwOTRmZiIvPjwvc3ZnPg==' width="210" height="60"/>
+</div>
+
+<div class="section no-margin">
+<span class="label">Generated by Burp Suite Enterprise Edition | 2022-06-28 11:03 AM</span>
+</div>
+
+<div class="section">
+<table class="column-table">
+<tbody>
+<tr>
+<td>
+<div class="label">Site name:</div>
+<div class="value">https://example.com</div>
+<div class="label">Scanned:</div>
+<table>
+<tbody>
+<tr>
+<td>
+<div class="value">Start:</div>
+</td>
+<td>
+<div class="value">2022-06-11 5:00 PM</div>
+</td>
+</tr>
+<tr>
+<td>
+<div class="value">End:</div>
+</td>
+<td>
+<div class="value">2022-06-12 3:49 AM</div>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="label">Duration:</div>
+<div class="value">10h 48m</div>
+<div class="label">Status:</div>
+<div class="value">Completed</div>
+</td>
+<td>
+<div class="label">Included URLs:</div>
+<div class="value url">https://example.com</div>
+
+<div class="label">Excluded URLs:</div>
+<div class="value url">https://test.example.com</div>
+
+<div class="label">Scan configurations:</div>
+<div class="value">Never stop crawl due to application errors</div><div class="value">Never stop audit due to application errors</div><div class="value">Audit coverage - maximum</div>
+
+<div class="label">Application logins:</div>
+<div class="value"> <img src='data:image/svg+xml;base64,PHN2ZyBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCAxNyAxNyIgdmlld0JveD0iMCAwIDE3IDE3IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPGcgY2xpcC1ydWxlPSJldmVub2RkIiBmaWxsPSIjMzMzMzMyIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPgogICAgICAgIDxwYXRoIGQ9Im0xNS4zIDYuMS0yLjMgMS4zYy0uMS0uOS0uOC0xLjUtMS43LTEuNWgtLjJjLjQtLjUuNy0xLjIuNy0yIDAtMS44LTEuNC0zLjItMy4yLTMuMi0xLjIgMC0yLjMuNy0yLjggMS44LS40LS4zLS45LS41LTEuNC0uNS0xLjQgMC0yLjUgMS4xLTIuNSAyLjUgMCAuNS4xLjkuNCAxLjMtLjkuMS0xLjYuOC0xLjYgMS43djUuMWMwIC45LjggMS43IDEuNyAxLjdoOWMuNyAwIDEuNC0uNSAxLjYtMS4xbDIuNS45Yy41LjIuOS0uMi45LS43di02LjdjLS4xLS41LS42LS44LTEuMS0uNnptLTYuNi00YzEgMCAxLjguOCAxLjggMS44cy0uOCAxLjgtMS44IDEuOC0xLjgtLjgtMS44LTEuOC44LTEuOCAxLjgtMS44em0tNC4zIDEuM2MuNiAwIDEuMS41IDEuMSAxLjFzLS41IDEuMS0xLjEgMS4xLTEuMS0uNS0xLjEtMS4xLjUtMS4xIDEuMS0xLjF6bTcuMyA5LjJjMCAuMi0uMS4zLS4zLjNoLTljLS4yIDAtLjMtLjEtLjMtLjN2LTUuMWMwLS4yLjEtLjMuMy0uM2g5Yy4yIDAgLjMuMS4zLjN6bTMuMi0uMi0xLjUtLjV2LTMuMWwxLjUtLjh6Ii8+CiAgICAgICAgPHBhdGggZD0ibTkuOSA5LjRoLTYtLjFjLS4zIDAtLjYuMy0uNi43cy4zLjcuNy43aDYgLjFjLjMgMCAuNi0uMy42LS43cy0uNC0uNy0uNy0uN3oiLz4KICAgIDwvZz4KPC9zdmc+' width="22" height="22" class="recorded-icon"/> Testing Credentials</div>
+
+<div class="label">Reference:</div>
+
+<div class="value">
+#13
+&nbsp;<a href="https://dast.shared.steady-fast.net/scans/13" class="no-print">Go to scan &gt;&gt;</a>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<table class="column-table">
+<tbody>
+<tr>
+<td>
+<h2>Issues by severity</h2>
+<table class="info-table">
+<tbody>
+<tr>
+<td class="name">High:</td>
+<td class="value">1</td>
+</tr>
+<tr>
+<td class="name">Medium:</td>
+<td class="value">0</td>
+</tr>
+<tr>
+<td class="name">Low:</td>
+<td class="value">2</td>
+</tr>
+<tr>
+<td class="name">Information:</td>
+<td class="value">26</td>
+</tr>
+<tr>
+<td class="name">Total issues found:</td>
+<td class="value">29</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<h2>Scan statistics</h2>
+<table class="info-table">
+<tbody>
+<tr>
+<td class="name">Total scanned URLs:</td>
+<td class="value">62</td>
+</tr>
+<tr>
+<td class="name">URLs with errors:</td>
+<td class="value">46</td>
+</tr>
+<tr>
+<td class="name">Requests made:</td>
+<td class="value">921159</td>
+</tr>
+<tr>
+<td class="name">Network errors:</td>
+<td class="value">205</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="section divider"></div>
+
+<div class="section">
+<h1>Issues found on https://example.com</h1>
+
+<table class='issue-table'>
+<thead>
+<tr>
+<th>URLs By issue type</th>
+<th>Severity</th>
+<th>Confidence</th>
+<th class="no-print">More detail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="issue-type-row">
+<td colspan="4">Cross-origin resource sharing: arbitrary origin trusted [1]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/6932387617674187776">/redacted</a>
+</td>
+<td>High</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#6932387617674187776">&gt;&gt;</a></td>
+</tr><tr class="issue-type-row">
+<td colspan="4">Strict transport security not enforced [1]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/6314402979493498880">/redacted</a>
+</td>
+<td>Low</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#6314402979493498880">&gt;&gt;</a></td>
+</tr><tr class="issue-type-row">
+<td colspan="4">Cross-origin resource sharing: unencrypted origin trusted [1]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5750058949783756800">/redacted</a>
+</td>
+<td>Low</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#5750058949783756800">&gt;&gt;</a></td>
+</tr><tr class="issue-type-row">
+<td colspan="4">TLS certificate [1]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2896098809490511872">/</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#2896098809490511872">&gt;&gt;</a></td>
+</tr><tr class="issue-type-row">
+<td colspan="4">Cross-origin resource sharing [1]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/4249243492111126528">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#4249243492111126528">&gt;&gt;</a></td>
+</tr><tr class="issue-type-row">
+<td colspan="4">WAF Detected: redacted [1]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/7008419304232607744">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#7008419304232607744">&gt;&gt;</a></td>
+</tr><tr class="issue-type-row">
+<td colspan="4">Cookie scoped to parent domain [1]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/4566977673597759488">/robots.txt</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#4566977673597759488">&gt;&gt;</a></td>
+</tr><tr class="issue-type-row">
+<td colspan="4">Email addresses disclosed [3]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/8161438409648717824">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#8161438409648717824">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/4191006133846878208">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#4191006133846878208">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5827532956736953344">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#5827532956736953344">&gt;&gt;</a></td>
+</tr><tr class="issue-type-row">
+<td colspan="4">Robots.txt file [1]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/4113548047183460352">/robots.txt</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#4113548047183460352">&gt;&gt;</a></td>
+</tr><tr class="issue-type-row">
+<td colspan="4">Cacheable HTTPS response [1]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2999375219042933760">/</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#2999375219042933760">&gt;&gt;</a></td>
+</tr><tr class="issue-type-row">
+<td colspan="4">User agent-dependent response [7]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5442473636658949120">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Firm</td>
+<td class="nowrap center no-print"><a href="#5442473636658949120">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/8831049944581746688">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Firm</td>
+<td class="nowrap center no-print"><a href="#8831049944581746688">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/6428460886000907264">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Firm</td>
+<td class="nowrap center no-print"><a href="#6428460886000907264">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5796235265052656640">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Firm</td>
+<td class="nowrap center no-print"><a href="#5796235265052656640">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2037279419205212160">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Tentative</td>
+<td class="nowrap center no-print"><a href="#2037279419205212160">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5340969456539759616">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Tentative</td>
+<td class="nowrap center no-print"><a href="#5340969456539759616">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/7532108409364955136">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Tentative</td>
+<td class="nowrap center no-print"><a href="#7532108409364955136">&gt;&gt;</a></td>
+</tr><tr class="issue-type-row">
+<td colspan="4">Cross-site request forgery [1]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/4708571323829155840">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Tentative</td>
+<td class="nowrap center no-print"><a href="#4708571323829155840">&gt;&gt;</a></td>
+</tr>
+</tbody>
+</table>
+</div><div class="section divider"></div>
+
+<div class="section">
+<h1>Issues found on https://example.com</h1>
+
+<table class='issue-table'>
+<thead>
+<tr>
+<th>URLs By issue type</th>
+<th>Severity</th>
+<th>Confidence</th>
+<th class="no-print">More detail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="issue-type-row">
+<td colspan="4">Cookie scoped to parent domain [9]</td>
+</tr>
+
+<tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/7733318645105708032">/</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#7733318645105708032">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/116916939358466048">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#116916939358466048">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5663500688597190656">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#5663500688597190656">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/8450411307224851456">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#8450411307224851456">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2374166801550126080">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#2374166801550126080">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2847743592524451840">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#2847743592524451840">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/6860252260222603264">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#6860252260222603264">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/7918190946522104832">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#7918190946522104832">&gt;&gt;</a></td>
+</tr><tr>
+<td class="issue-path issue-link">
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2702409345095615488">/redacted</a>
+</td>
+<td>Info</td>
+<td class="nowrap">Certain</td>
+<td class="nowrap center no-print"><a href="#2702409345095615488">&gt;&gt;</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="section divider"></div>
+
+<div class="section details">
+<h1>More details for https://example.com</h1>
+</div>
+
+<div class="section details">
+<div class="issue-container">
+<a name="6932387617674187776"></a>
+<h2>Cross-origin resource sharing: arbitrary origin trusted</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/6932387617674187776">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request that allows access from any domain.<br><br>The application allowed access from the requested origin <strong>https://llqvfwgbsdau.com</strong>
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.</p><p>
+Trusting arbitrary origins effectively disables the same-origin policy, allowing two-way interaction by third-party web sites. Unless the response consists only of unprotected public content, this policy is likely to present a security risk.</p>
+<p>If the site  specifies the header Access-Control-Allow-Credentials: true, third-party sites may be able to carry out privileged actions and retrieve sensitive information. Even if it does not, attackers may be able to  bypass any IP-based access controls by proxying through users'  browsers.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>Rather than using a wildcard or programmatically verifying supplied origins, use a whitelist of trusted domains.</p>
+</div>
+
+<h3>References</h3>
+<div class="no-bullets">
+<ul>
+  <li><a href="https://portswigger.net/web-security/cors">Web Security Academy: Cross-origin resource sharing (CORS)</a></li>
+  <li> <a href="https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties">Exploiting CORS Misconfigurations</a> </li>
+</ul>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/942.html">CWE-942: Overly Permissive Cross-domain Whitelist</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">POST /redacted HTTP/2
+Host: https://example.com
+Cookie: __cfruid=daed328c5bcfbc7d405794c7b97140aabba4ae88-1654942102
+<span class="highlight">Origin: https://llqvfwgbsdau.com</span>
+Accept: */*
+content-type: application/json
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Content-Length: 4685
+
+https://example.com</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 10:08:23 GMT
+<span class="highlight">Content-Type: text/plain</span>
+<span class="highlight">Access-Control-Allow-Origin: https://llqvfwgbsdau.com</span>
+Access-Control-Allow-Methods: POST,OPTIONS
+Access-Control-Max-Age: 86400
+Vary: Origin
+<span class="highlight">Access-Control-Allow-Credentials: true</span>
+Server: redacted
+Cf-Ray: 71998b93d9b330a4-SEA
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+
+</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section details">
+<div class="issue-container">
+<a name="6314402979493498880"></a>
+<h2>Strict transport security not enforced</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/6314402979493498880">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+This issue was found in multiple locations under the reported path.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p> The application fails to prevent users from connecting  to it over unencrypted connections.  An attacker able to modify a legitimate user's network traffic could bypass the application's use of SSL/TLS encryption, and use the application as a platform for attacks against its users. This attack is performed by rewriting HTTPS links as HTTP, so that if a targeted user follows a link to the site from an HTTP page, their browser never attempts to use an encrypted connection. The sslstrip tool  automates this process. </p>
+<p>
+To exploit this vulnerability, an attacker must be suitably positioned to intercept and modify the victim's network traffic.This scenario typically occurs when a client communicates with the server over an insecure connection such as public Wi-Fi, or a corporate or home network that is shared with a compromised computer. Common defenses such as switched networks are not sufficient to prevent this. An attacker situated in the user's ISP or the application's hosting infrastructure could also perform this attack. Note that an advanced adversary could potentially target any connection made over the Internet's core infrastructure. </p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>The application should instruct web browsers to only access the application using HTTPS. To do this, enable HTTP Strict Transport Security (HSTS) by adding a response header with the name 'Strict-Transport-Security' and the value 'max-age=expireTime', where expireTime is the time in seconds that browsers should remember that the site should only be accessed using HTTPS. Consider adding the 'includeSubDomains' flag if appropriate.</p>
+<p>Note that because HSTS is a &quot;trust on first use&quot; (TOFU) protocol, a user who has never accessed the application will never have seen the HSTS header, and will therefore still be vulnerable to SSL stripping attacks. To mitigate this risk, you can optionally add the 'preload' flag to the HSTS header, and submit the domain for review by browser vendors.</p>
+</div>
+
+<h3>References</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security">HTTP Strict Transport Security</a></li>
+<li><a href="https://github.com/moxie0/sslstrip">sslstrip</a></li>
+<li><a href="https://hstspreload.appspot.com/">HSTS Preload Form</a></li>
+</ul>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/523.html">CWE-523: Unprotected Transport of Credentials</a></li>
+    <li><a href="https://capec.mitre.org/data/definitions/94.html">CAPEC-94: Man in the Middle Attack</a></li>
+    <li><a href="https://capec.mitre.org/data/definitions/157.html">CAPEC-157: Sniffing Attacks</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">POST /redacted HTTP/2
+Host: https://example.com
+Cookie: __cfruid=239b7646d8e83ceff3a082b1f62dad581f4af8c3-1654931034
+Origin: https://example.com
+Accept: */*
+content-type: application/json
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Content-Length: 5077
+
+https://example.com</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 07:03:54 GMT
+Content-Type: text/plain
+Access-Control-Allow-Origin: https://example.com
+Access-Control-Allow-Methods: POST,OPTIONS
+Access-Control-Max-Age: 86400
+Vary: Origin
+Access-Control-Allow-Credentials: true
+Server: redacted
+Cf-Ray: 71987d577be960bf-SEA
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+
+</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section details">
+<div class="issue-container">
+<a name="5750058949783756800"></a>
+<h2>Cross-origin resource sharing: unencrypted origin trusted</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5750058949783756800">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request which trusts websites accessed using unencrypted communications.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.</p>
+<p>If a site allows interaction from an origin that uses unencrypted HTTP communications, then it is vulnerable to an attacker who is in a position to view and modify a user's unencrypted network traffic. The attacker can control the responses from unencrypted origins, thereby injecting content that is able to interact with the application that publishes the policy. This means that the application is effectively extending trust to all such attackers, thereby undoing much of the benefit of using HTTPS communications. </p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>Only trust origins that use encrypted HTTPS communications.</p>
+</div>
+
+<h3>References</h3>
+<div class="no-bullets">
+<ul>
+  <li><a href="https://portswigger.net/web-security/cors">Web Security Academy: Cross-origin resource sharing (CORS)</a></li>
+  <li> <a href="https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties">Exploiting CORS Misconfigurations</a> </li>
+</ul>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/942.html">CWE-942: Overly Permissive Cross-domain Whitelist</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">POST /redacted HTTP/2
+Host: https://example.com
+Cookie: __cfruid=ffba0631a3cf20c7fbba942d6291ab754c7fd041-1654934772
+<span class="highlight">Origin: https://example.com</span>
+Accept: */*
+content-type: application/json
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Content-Length: 4720
+
+https://example.com</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 08:06:13 GMT
+<span class="highlight">Content-Type: text/plain</span>
+<span class="highlight">Access-Control-Allow-Origin: https://example.com</span>
+Access-Control-Allow-Methods: POST,OPTIONS
+Access-Control-Max-Age: 86400
+Vary: Origin
+<span class="highlight">Access-Control-Allow-Credentials: true</span>
+Server: redacted
+Cf-Ray: 7198d89ece7d08ff-SEA
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+
+</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section details">
+<div class="issue-container">
+<a name="2896098809490511872"></a>
+<h2>TLS certificate</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2896098809490511872">/</a>
+
+<h3>Issue detail:</h3>
+<div>
+The server presented a valid, trusted TLS certificate. This issue is purely informational.<br><br>The server presented the following certificates:<br><br><h4>Server certificate</h4><table><tr><td><b>Issued to:</b>&nbsp;&nbsp;</td><td>redacted.com, *.kr.redacted.com</td></tr><tr><td><b>Issued by:</b>&nbsp;&nbsp;</td><td>redacted Inc ECC CA-3</td></tr><tr><td><b>Valid from:</b>&nbsp;&nbsp;</td><td>Mon Apr 18 00:00:00 GMT 2022</td></tr><tr><td><b>Valid to:</b>&nbsp;&nbsp;</td><td>Tue Apr 18 23:59:59 GMT 2023</td></tr></table><h4>Certificate chain #1</h4><table><tr><td><b>Issued to:</b>&nbsp;&nbsp;</td><td>redacted Inc ECC CA-3</td></tr><tr><td><b>Issued by:</b>&nbsp;&nbsp;</td><td>Baltimore CyberTrust Root</td></tr><tr><td><b>Valid from:</b>&nbsp;&nbsp;</td><td>Mon Jan 27 12:48:08 GMT 2020</td></tr><tr><td><b>Valid to:</b>&nbsp;&nbsp;</td><td>Tue Dec 31 23:59:59 GMT 2024</td></tr></table><h4>Certificate chain #2</h4><table><tr><td><b>Issued to:</b>&nbsp;&nbsp;</td><td>Baltimore CyberTrust Root</td></tr><tr><td><b>Issued by:</b>&nbsp;&nbsp;</td><td>Baltimore CyberTrust Root</td></tr><tr><td><b>Valid from:</b>&nbsp;&nbsp;</td><td>Fri May 12 18:46:00 GMT 2000</td></tr><tr><td><b>Valid to:</b>&nbsp;&nbsp;</td><td>Mon May 12 23:59:00 GMT 2025</td></tr></table>
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>TLS (or SSL) helps to protect the confidentiality and integrity of information in transit between the browser and server, and to provide authentication of the server's identity. To serve this purpose, the server must present an TLS certificate that is valid for the server's hostname, is issued by a trusted authority and is valid for the current date. If any one of these requirements is not met, TLS connections to the server will not provide the full protection for which TLS is designed.</p>
+<p>It should be noted that various attacks exist against TLS in general, and in the context of HTTPS web connections in particular. It may be possible for a determined and suitably-positioned attacker to compromise TLS connections without user detection even when a valid TLS certificate is used. </p>
+</div>
+
+<h3>References</h3>
+<div class="no-bullets">
+<ul><li><a href="https://wiki.mozilla.org/Security/Server_Side_TLS">SSL/TLS Configuration Guide</a></li></ul>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/295.html">CWE-295: Improper Certificate Validation</a></li>
+<li><a href="https://cwe.mitre.org/data/definitions/326.html">CWE-326: Inadequate Encryption Strength</a></li>
+<li><a href="https://cwe.mitre.org/data/definitions/327.html">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a></li>
+</ul>
+</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section details">
+<div class="issue-container">
+<a name="4249243492111126528"></a>
+<h2>Cross-origin resource sharing</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/4249243492111126528">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The application implements an HTML5 cross-origin resource sharing (CORS) policy for this request.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>An HTML5 cross-origin resource sharing (CORS) policy controls whether and how content running on other domains can perform two-way interaction with the domain that publishes the policy. The policy is fine-grained and can apply access controls per-request based on the URL and other features of the request.</p><p>If another domain is allowed by the policy, then that domain can potentially attack users of the application. If a user is logged in to the application, and visits a domain allowed by the policy, then any malicious content running on that domain can potentially retrieve content from the application, and sometimes carry out actions within the security context of the logged in user.</p>
+<p>Even if an allowed domain is not overtly malicious in itself, security vulnerabilities within that domain could potentially be leveraged by an attacker to exploit the trust relationship and attack the application that allows access. CORS policies on pages containing sensitive information should be reviewed to determine whether it is appropriate for the application to trust both the intentions and security posture of any domains granted access.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>Any inappropriate domains should be removed from the CORS policy.</p>
+</div>
+
+<h3>References</h3>
+<div class="no-bullets">
+<ul>
+  <li><a href="https://portswigger.net/web-security/cors">Web Security Academy: Cross-origin resource sharing (CORS)</a></li>
+  <li> <a href="https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties">Exploiting CORS Misconfigurations</a> </li>
+</ul>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/942.html">CWE-942: Overly Permissive Cross-domain Whitelist</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">POST /redacted HTTP/2
+Host: https://example.com
+Cookie: __cfruid=803af1a277c706c58c208ae27a67bd73f7b31e76-1654934757
+<span class="highlight">Origin: https://example.com</span>
+Accept: */*
+content-type: application/json
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Content-Length: 4727
+
+https://example.com</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 08:06:00 GMT
+<span class="highlight">Content-Type: text/plain</span>
+<span class="highlight">Access-Control-Allow-Origin: https://example.com</span>
+Access-Control-Allow-Methods: POST,OPTIONS
+Access-Control-Max-Age: 86400
+Vary: Origin
+<span class="highlight">Access-Control-Allow-Credentials: true</span>
+Server: redacted
+Cf-Ray: 7198d84b088708ff-SEA
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+
+</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section details">
+<div class="issue-container">
+<a name="7008419304232607744"></a>
+<h2>WAF Detected: redacted</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/7008419304232607744">/redacted</a>
+
+<h3>Issue origin</h3>
+<div>
+This issue was generated by the extension: WAFDetect
+</div>
+
+<h3>Issue detail:</h3>
+<div>
+Fingerprint Details:<br>
+<br>
+WAF Type             : redacted<br>
+WAF tech. details    : Cloud-based CDN, WAF & DDoS prevention<br>
+Reference            : https://www.redacted.com<br>
+Matching regex       : ^Server: redacted<br>
+Highlighting keyword : redacted<br>
+Header-only search?  : true
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=419dce148f6ccf578d6a43bbb2c10373caa4b71a-1654931022
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 07:03:42 GMT
+Content-Type: application/javascript
+Cf-Bgj: minify
+Cf-Polished: origSize=3744
+Cache-Control: public, max-age=3600, s-maxage=3600
+Content-Security-Policy: default-src &#39;none&#39;; base-uri &#39;self&#39;; media-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-eval&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; worker-src &#39;self&#39; blob:; img-src &#39;self&#39;; font-src &#39;self&#39;; manifest-src &#39;self&#39;; connect-src &#39;self&#39;; frame-ancestors &#39;none&#39;; form-action &#39;self&#39;;
+Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Opener-Policy: same-origin
+Etag: W/&quot;625ded12-ea0&quot;
+Last-Modified: Mon, 18 Apr 2022 22:58:26 GMT
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Dns-Prefetch-Control: off
+X-Envoy-Upstream-Service-Time: 2
+X-Frame-Options: DENY
+X-Xss-Protection: 1; mode=block
+Cf-Cache-Status: HIT
+Age: 188
+Expect-Ct: max-age=604800, report-uri=&quot;https://report-uri.<span class="highlight">redacted</span>.com/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/a.nel.<span class="highlight">redacted</span>.com\/report\/v3?s=zWSKP8pWrwW1sL1b7HEL93ntZ9UEq75YHco1SqKNm0oze3lJUaLse696k3D9qGAqiPmfrYrvh9q%2BzFRxAiHqD5NMsusj1bDl97%2FDe0MUS02nqj560us35UNMX49fpFPbQ5Ok2dyD&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: <span class="highlight">redacted</span>
+Cf-Ray: 71987d0d9cbf60bf-SEA
+
+https://example.com</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section details">
+<div class="issue-container">
+<a name="4566977673597759488"></a>
+<h2>Cookie scoped to parent domain</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/4566977673597759488">/robots.txt</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following cookie was issued by the application and is scoped to a parent of the issuing domain:<ul><li>__cfruid</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>A cookie's domain attribute determines which domains can access the cookie. Browsers will automatically submit the cookie in requests to in-scope domains, and those domains will also be able to access the cookie via JavaScript. If a cookie is scoped to a parent domain, then that cookie will be accessible by the parent domain and also by any other subdomains of the parent domain. If the cookie contains sensitive data (such as a session token) then this data may be accessible by less trusted or less secure applications residing at those domains, leading to a security compromise.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>By default, cookies are scoped to the issuing domain, and on IE/Edge to subdomains. If you remove the explicit domain attribute from your Set-cookie directive, then the cookie will have this default scope, which is safe and appropriate in most situations. If you particularly need a cookie to be accessible by a parent domain, then you should thoroughly review the security of the applications residing on that domain and its subdomains, and confirm that you are willing to trust the people and systems that support those applications.</p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /robots.txt HTTP/1.1
+Host: https://example.com
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 07:00:32 GMT
+Content-Type: text/plain
+Last-Modified: Mon, 18 Apr 2022 22:57:57 GMT
+Etag: W/&quot;625decf5-43&quot;
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+Content-Security-Policy: default-src &#39;none&#39;; base-uri &#39;self&#39;; media-src &#39;self&#39;; script-src &#39;self&#39; static.redactedinsights.com &#39;unsafe-eval&#39; https://*.smartlook.com https://*.smartlook.cloud; style-src &#39;self&#39; &#39;unsafe-inline&#39;; worker-src &#39;self&#39; blob:; img-src &#39;self&#39;; font-src &#39;self&#39;; manifest-src &#39;self&#39;; connect-src &#39;self&#39; https://*.smartlook.com https://*.smartlook.cloud; frame-ancestors &#39;none&#39;; form-action &#39;self&#39;;
+Cache-Control: no-store
+X-Envoy-Upstream-Service-Time: 1
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Xss-Protection: 1; mode=block
+Referrer-Policy: no-referrer
+X-Dns-Prefetch-Control: off
+Cf-Cache-Status: MISS
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=2Nm81z8201Ew37Q7eTK5zAFr6WzdIiSBDODDHSj7vi%2FLve161cFN%2B7cuS7kE2gpwyzI%2FNidAGvUSI2z9bFA8Ql9wyHjx%2BTfiht6A7Pw%2F2Qwp8a9TnQoA9J2q9ZtmRzD5grCJSUSY&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+<span class="highlight">Set-Cookie: __cfruid=3ae282485f38a38817aaed77ac83bc9b6dea168c-1654930832; path=/; domain=.redacted.com; HttpOnly; Secure; SameSite=None</span>
+Server: redacted
+Cf-Ray: 71987863dc0d08a5-SEA
+
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow:
+</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section details">
+<div class="issue-container">
+<a name="8161438409648717824"></a>
+<h2>Email addresses disclosed</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/8161438409648717824">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following email addresses were disclosed in the response:<ul><li>fake-user@testing.com</li><li>fake-admin@testing.com</li><li>support@redacted.com</li><li>contact@redacted.com</li><li>support@xijiabrainmap.com</li><li>u4E3Asupport@xijiabrainmap.com</li><li>u81F3support@xijiabrainmap.com</li><li>u81F3contact@xijiabrainmap.com</li></ul>
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>The presence of email addresses within application responses does not necessarily constitute a security vulnerability. Email addresses may appear intentionally within contact information, and many applications (such as web mail) include arbitrary third-party email addresses within their core content.</p>
+<p>However, email addresses of developers and other individuals (whether appearing on-screen or hidden within page source) may disclose information that is useful to an attacker; for example, they may represent usernames that can be used at the application's login, and they may be used in social engineering attacks against the organization's personnel. Unnecessary or excessive disclosure of email addresses may also lead to an increase in the volume of spam email received.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>Consider removing any email addresses that are unnecessary, or replacing personal addresses with anonymous mailbox addresses (such as helpdesk@example.com).</p>
+<p>To reduce the quantity of spam sent to anonymous mailbox addresses, consider hiding the email address and instead providing a form that generates the email server-side, protected by a CAPTCHA if necessary. </p>
+</div>
+
+<h3>References</h3>
+<div class="no-bullets">
+<ul>
+    <li><a href="https://portswigger.net/web-security/information-disclosure">Web Security Academy: Information disclosure</a></li>
+</ul>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/200.html">CWE-200: Information Exposure</a></li>
+    <li><a href="https://capec.mitre.org/data/definitions/37.html">CAPEC-37: Retrieve Embedded Sensitive Data</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 07:00:34 GMT
+Content-Type: application/javascript
+Cf-Bgj: minify
+Cf-Polished: origSize=1056677
+Cache-Control: public, max-age=3600, s-maxage=3600
+Content-Security-Policy: default-src &#39;none&#39;; base-uri &#39;self&#39;; media-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-eval&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; worker-src &#39;self&#39; blob:; img-src &#39;self&#39;; font-src &#39;self&#39;; manifest-src &#39;self&#39;; connect-src &#39;self&#39;; frame-ancestors &#39;none&#39;; form-action &#39;self&#39;;
+Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Opener-Policy: same-origin
+Etag: W/&quot;625ded12-101fa5&quot;
+Last-Modified: Mon, 18 Apr 2022 22:58:26 GMT
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Dns-Prefetch-Control: off
+X-Envoy-Upstream-Service-Time: 4
+X-Frame-Options: DENY
+X-Xss-Protection: 1; mode=block
+Cf-Cache-Status: HIT
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=vRqxYM8JkDo2GbO5Q9oa5Cq9wpBPHZxKtNH2bkqem%2Fu9XdfaxHKOGrOUSoUCwwOwKxL1YQqxWBfXnWi1WWp4oZmPnkEyyWj1ZbKMGUOYBxhWgbHcpRI5%2BwGdG%2Fh0ZRc%2BLZ7%2B6Pi8&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 719878719aa608a5-SEA
+
+https://example.com</div>
+
+</div><div class="issue-container">
+<a name="4191006133846878208"></a>
+<h2>Email addresses disclosed</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/4191006133846878208">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following email addresses were disclosed in the response:<ul><li>privacy@redacted.com</li><li>support@redacted.com</li><li>u81F3contact@xijiabrainmap.com</li><li>u81F3support@xijiabrainmap.com</li><li>u8FC7contact@xijiabrainmap.com</li></ul>
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>The presence of email addresses within application responses does not necessarily constitute a security vulnerability. Email addresses may appear intentionally within contact information, and many applications (such as web mail) include arbitrary third-party email addresses within their core content.</p>
+<p>However, email addresses of developers and other individuals (whether appearing on-screen or hidden within page source) may disclose information that is useful to an attacker; for example, they may represent usernames that can be used at the application's login, and they may be used in social engineering attacks against the organization's personnel. Unnecessary or excessive disclosure of email addresses may also lead to an increase in the volume of spam email received.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>Consider removing any email addresses that are unnecessary, or replacing personal addresses with anonymous mailbox addresses (such as helpdesk@example.com).</p>
+<p>To reduce the quantity of spam sent to anonymous mailbox addresses, consider hiding the email address and instead providing a form that generates the email server-side, protected by a CAPTCHA if necessary. </p>
+</div>
+
+<h3>References</h3>
+<div class="no-bullets">
+<ul>
+    <li><a href="https://portswigger.net/web-security/information-disclosure">Web Security Academy: Information disclosure</a></li>
+</ul>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/200.html">CWE-200: Information Exposure</a></li>
+    <li><a href="https://capec.mitre.org/data/definitions/37.html">CAPEC-37: Retrieve Embedded Sensitive Data</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted HTTP/2
+Host: https://example.com
+Cookie: __cfruid=8d467a9836d19fd26dfe28fbf19907453cba442d-1654930838
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 07:01:40 GMT
+Content-Type: application/javascript
+Cf-Bgj: minify
+Cf-Polished: origSize=2292583
+Cache-Control: public, max-age=3600, s-maxage=3600
+Content-Security-Policy: default-src &#39;none&#39;; base-uri &#39;self&#39;; media-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-eval&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; worker-src &#39;self&#39; blob:; img-src &#39;self&#39;; font-src &#39;self&#39;; manifest-src &#39;self&#39;; connect-src &#39;self&#39;; frame-ancestors &#39;none&#39;; form-action &#39;self&#39;;
+Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Opener-Policy: same-origin
+Etag: W/&quot;625ded12-22fb67&quot;
+Last-Modified: Mon, 18 Apr 2022 22:58:26 GMT
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Dns-Prefetch-Control: off
+X-Envoy-Upstream-Service-Time: 1
+X-Frame-Options: DENY
+X-Xss-Protection: 1; mode=block
+Cf-Cache-Status: HIT
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=bhtutj7FNAQJrPT0XV2e6Se1viu%2Bu1EgoA7kr7db2%2BAAicKCaiMX3jrhhcTv9eL2Fi5F2V5CwzUalIAfGUaeCGD6h2soxZ1zS3mxVWohIu%2F%2F5oAu1TkBUqOeAk8oyMG%2F%2FFYPrq9%2B&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 71987a0b0a6f681d-SEA
+
+https://example.com</div>
+
+</div><div class="issue-container">
+<a name="5827532956736953344"></a>
+<h2>Email addresses disclosed</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5827532956736953344">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following email address was disclosed in the response:<ul><li>support@redacted.com</li></ul>
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>The presence of email addresses within application responses does not necessarily constitute a security vulnerability. Email addresses may appear intentionally within contact information, and many applications (such as web mail) include arbitrary third-party email addresses within their core content.</p>
+<p>However, email addresses of developers and other individuals (whether appearing on-screen or hidden within page source) may disclose information that is useful to an attacker; for example, they may represent usernames that can be used at the application's login, and they may be used in social engineering attacks against the organization's personnel. Unnecessary or excessive disclosure of email addresses may also lead to an increase in the volume of spam email received.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>Consider removing any email addresses that are unnecessary, or replacing personal addresses with anonymous mailbox addresses (such as helpdesk@example.com).</p>
+<p>To reduce the quantity of spam sent to anonymous mailbox addresses, consider hiding the email address and instead providing a form that generates the email server-side, protected by a CAPTCHA if necessary. </p>
+</div>
+
+<h3>References</h3>
+<div class="no-bullets">
+<ul>
+    <li><a href="https://portswigger.net/web-security/information-disclosure">Web Security Academy: Information disclosure</a></li>
+</ul>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/200.html">CWE-200: Information Exposure</a></li>
+    <li><a href="https://capec.mitre.org/data/definitions/37.html">CAPEC-37: Retrieve Embedded Sensitive Data</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=074289c7818d20a3c6748bac71c59f2e8bf6e439-1654931032
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 07:03:52 GMT
+Content-Type: application/javascript
+Cf-Bgj: minify
+Cf-Polished: origSize=583995
+Cache-Control: public, max-age=3600, s-maxage=3600
+Content-Security-Policy: default-src &#39;none&#39;; base-uri &#39;self&#39;; media-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-eval&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; worker-src &#39;self&#39; blob:; img-src &#39;self&#39;; font-src &#39;self&#39;; manifest-src &#39;self&#39;; connect-src &#39;self&#39;; frame-ancestors &#39;none&#39;; form-action &#39;self&#39;;
+Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Opener-Policy: same-origin
+Etag: W/&quot;625ded12-8e93b&quot;
+Last-Modified: Mon, 18 Apr 2022 22:58:26 GMT
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Dns-Prefetch-Control: off
+X-Envoy-Upstream-Service-Time: 1
+X-Frame-Options: DENY
+X-Xss-Protection: 1; mode=block
+Cf-Cache-Status: HIT
+Age: 198
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=OMuLXOAyGzl4KTZKDoq8FKklHYnVo2pq7HUhdcO4mTwQ7WoSmyc5B76gc29NAmDTEwkY94AhoS9am1UmhteJug60L9%2BCP4kVpFa%2F8qtW44bT9uncd2%2BNpX700x1%2FSJImbVfAmeXB&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 71987d4c1e4960bf-SEA
+
+https://example.com</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section details">
+<div class="issue-container">
+<a name="4113548047183460352"></a>
+<h2>Robots.txt file</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/4113548047183460352">/robots.txt</a>
+
+<h3>Issue detail:</h3>
+<div>
+The web server contains a robots.txt file.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>The file robots.txt is used to give instructions to web robots, such as search engine crawlers, about locations within the web site that robots are allowed, or not allowed, to crawl and index.</p>
+<p>The presence of the robots.txt does not in itself present any kind of security vulnerability. However, it is often used to identify restricted or private areas of a site's contents. The information in the file may therefore help an attacker to map out the site's contents, especially if some of the locations identified are not linked from elsewhere in the site. If the application relies on robots.txt to protect access to these areas, and does not enforce proper access control over them, then this presents a serious vulnerability.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>The robots.txt file is not itself a security threat, and its correct use can represent good practice for non-security reasons. You should not assume that all web robots will honor the file's instructions. Rather, assume that attackers will pay close attention to any locations identified in the file. Do not rely on robots.txt to provide any kind of protection over unauthorized access.</p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/200.html">CWE-200: Information Exposure</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET <span class="highlight">/robots.txt</span> HTTP/1.1
+Host: https://example.com
+Accept-Encoding: gzip, deflate
+Accept: */*
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/1.1 200 OK
+Date: Sat, 11 Jun 2022 07:03:58 GMT
+Content-Type: text/plain
+Connection: close
+last-modified: Mon, 18 Apr 2022 22:57:57 GMT
+etag: W/&quot;625decf5-43&quot;
+cross-origin-opener-policy: same-origin
+cross-origin-embedder-policy: require-corp
+content-security-policy: default-src &#39;none&#39;; base-uri &#39;self&#39;; media-src &#39;self&#39;; script-src &#39;self&#39; static.redactedinsights.com &#39;unsafe-eval&#39; https://*.smartlook.com https://*.smartlook.cloud; style-src &#39;self&#39; &#39;unsafe-inline&#39;; worker-src &#39;self&#39; blob:; img-src &#39;self&#39;; font-src &#39;self&#39;; manifest-src &#39;self&#39;; connect-src &#39;self&#39; https://*.smartlook.com https://*.smartlook.cloud; frame-ancestors &#39;none&#39;; form-action &#39;self&#39;;
+cache-control: no-store
+x-envoy-upstream-service-time: 1
+x-content-type-options: nosniff
+x-frame-options: DENY
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-xss-protection: 1; mode=block
+referrer-policy: no-referrer
+x-dns-prefetch-control: off
+CF-Cache-Status: MISS
+Expect-CT: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=ynnvsK4T2prb16%2Fo3RPBv0jEAiLb7OGY1NTq2ExfJILS8vae2%2B4X79suO6i7bf5AmymMXmPcqotnf%2FEytPM9Tde8UN9dYIBNm%2BlOenSRurJxBX1SFBkQivzEPfqMR3b16SbatiYw&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+NEL: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Set-Cookie: __cfruid=7b3900cfcdaf23aa1f227837917f50cb19399621-1654931038; path=/; domain=.redacted.com; HttpOnly; Secure; SameSite=None
+Server: redacted
+CF-RAY: 71987d6f3a8c0899-SEA
+Content-Length: 67
+
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow:
+</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section details">
+<div class="issue-container">
+<a name="2999375219042933760"></a>
+<h2>Cacheable HTTPS response</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2999375219042933760">/</a>
+
+<h3>Issue detail:</h3>
+<div>
+This issue was found in multiple locations under the reported path.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>Unless directed otherwise, browsers may store a local cached copy of content received from web servers. Some browsers, including Internet Explorer, cache content accessed via HTTPS. If sensitive information in application responses is stored in the local cache, then this may be retrieved by other users who have access to the same computer at a future time.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>Applications should return caching directives instructing browsers not to store local copies of any sensitive data. Often, this can be achieved by configuring the web server to prevent caching for relevant paths within the web root. Alternatively, most web development platforms allow you to control the server's caching directives from within individual scripts. Ideally, the web server should return the following HTTP headers in all responses containing sensitive content:</p>
+<ul>
+<li>Cache-control: no-store</li><li>Pragma: no-cache</li></ul>
+</div>
+
+<h3>References</h3>
+<div class="no-bullets">
+<ul>
+    <li><a href="https://portswigger.net/web-security/information-disclosure">Web Security Academy: Information disclosure</a></li>
+</ul>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/524.html">CWE-524: Information Exposure Through Caching</a></li>
+<li><a href="https://cwe.mitre.org/data/definitions/525.html">CWE-525: Information Exposure Through Browser Caching</a></li>
+    <li><a href="https://capec.mitre.org/data/definitions/37.html">CAPEC-37: Retrieve Embedded Sensitive Data</a></li>
+</ul>
+</div>
+
+<h3>Request 1:</h3>
+<div class="request-response">POST /redacted HTTP/2
+Host: https://example.com
+Cookie: __cfruid=239b7646d8e83ceff3a082b1f62dad581f4af8c3-1654931034
+Origin: https://example.com
+Accept: */*
+content-type: application/json
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Content-Length: 5077
+
+https://example.com</div>
+<h3>Response 1:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 07:03:54 GMT
+Content-Type: text/plain
+Access-Control-Allow-Origin: https://example.com
+Access-Control-Allow-Methods: POST,OPTIONS
+Access-Control-Max-Age: 86400
+Vary: Origin
+Access-Control-Allow-Credentials: true
+Server: redacted
+Cf-Ray: 71987d577be960bf-SEA
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+
+</div>
+<h3>Request 2:</h3>
+<div class="request-response">POST /redacted HTTP/2
+Host: https://example.com
+Cookie: __cfruid=fff14e8fa4018dd72cbb80e5cd5b011a7248f150-1654930970
+Origin: https://example.com
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+content-type: application/json
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Content-Length: 5379
+
+https://example.com</div>
+<h3>Response 2:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 07:02:50 GMT
+Content-Type: text/plain
+Access-Control-Allow-Origin: https://example.com
+Access-Control-Allow-Methods: POST,OPTIONS
+Access-Control-Max-Age: 86400
+Vary: Origin
+Access-Control-Allow-Credentials: true
+Server: redacted
+Cf-Ray: 71987bc429b739c0-SEA
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+
+</div>
+<h3>Request 3:</h3>
+<div class="request-response">POST /redacted HTTP/2
+Host: https://example.com
+Cookie: __cfruid=6eb94ef0c78d0776ac6d858be948c98a942e2928-1654931030
+Origin: https://example.com
+Accept: */*
+content-type: application/json
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Content-Length: 3791
+
+https://example.com</div>
+<h3>Response 3:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 07:03:51 GMT
+Content-Type: text/plain
+Access-Control-Allow-Origin: https://example.com
+Access-Control-Allow-Methods: POST,OPTIONS
+Access-Control-Max-Age: 86400
+Vary: Origin
+Access-Control-Allow-Credentials: true
+Server: redacted
+Cf-Ray: 71987d40f85860bf-SEA
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+
+</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section details">
+<div class="issue-container">
+<a name="5442473636658949120"></a>
+<h2>User agent-dependent response</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5442473636658949120">/redacted</a>
+
+<h3>
+Issue description
+</h3>
+<div>
+<p>Application responses may depend systematically on the value of the User-Agent header in requests. This behavior does not itself constitute a security vulnerability, but may point towards additional attack surface within the application, which may contain vulnerabilities.</p>
+<p>This behavior often arises because applications provide different user interfaces for desktop and mobile users. Mobile interfaces have often been less thoroughly tested for vulnerabilities such as cross-site scripting, and often have simpler authentication and session handling mechanisms that may contain problems that are not present in the full interface.</p>
+<p>To review the interface provided by the alternate User-Agent header, you can configure a match/replace rule in Burp Proxy to modify the User-Agent header in all requests, and then browse the application in the normal way using your normal browser. </p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request 1:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 1:</h3>
+<div class="request-response">HTTP/2 429 Too Many Requests
+Date: Sat, 11 Jun 2022 07:32:34 GMT
+Content-Type: application/json
+Retry-After: 3006
+Cache-Control: no-cache
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=RJ%2FLblvlEwFsDazt1ays223SPw4TUGQ6m6yNvZPbNTooTY2tWTbj7PoXF4z2nI1sfyLLPN7%2Fo2tekNO0e4Lb47%2FBuPB8EeUhnxfCNBELB9uMVYQ3EQnmpN1TLj0fz7apA2dlQaL2&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 7198a750787a27ee-SEA
+
+https://example.com
+</div>
+<h3>Request 2:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=5deb9f366c412f14053591956654f073b61e26e8-1654934727
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B176 Safari/7534.48.3
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 2:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 08:05:28 GMT
+Content-Type: application/javascript
+Cf-Bgj: minify
+Cf-Polished: origSize=1056677
+Cache-Control: public, max-age=3600, s-maxage=3600
+Content-Security-Policy: default-src &#39;none&#39;; base-uri &#39;self&#39;; media-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-eval&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; worker-src &#39;self&#39; blob:; img-src &#39;self&#39;; font-src &#39;self&#39;; manifest-src &#39;self&#39;; connect-src &#39;self&#39;; frame-ancestors &#39;none&#39;; form-action &#39;self&#39;;
+Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Opener-Policy: same-origin
+Etag: W/&quot;625ded12-101fa5&quot;
+Last-Modified: Mon, 18 Apr 2022 22:58:26 GMT
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Dns-Prefetch-Control: off
+X-Envoy-Upstream-Service-Time: 4
+X-Frame-Options: DENY
+X-Xss-Protection: 1; mode=block
+Cf-Cache-Status: HIT
+Age: 25
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=YLtpwWxvA39%2BiQj%2BhHipVuV%2B4hDnBSau%2FCOvAtRkCtpVrQ8VinDRCKIVREFPXFUKS0EATeaTrgURTt%2Bwgas6IU83S35K4mI2mMuKq%2BpDVo2ZCBwh%2Bd736Nz51OTzezKBlA%2Fr9H7Y&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Set-Cookie: <span class="highlight">__cfruid</span>=2edd2ade6bfe0221a0dda2561b62f8ecb736fba6-1654934728; path=/; domain=.redacted.com; HttpOnly; Secure; SameSite=None
+Server: redacted
+Cf-Ray: 7198d78809d508ff-SEA
+
+https://example.com</div>
+
+</div><div class="issue-container">
+<a name="8831049944581746688"></a>
+<h2>User agent-dependent response</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/8831049944581746688">/redacted</a>
+
+<h3>
+Issue description
+</h3>
+<div>
+<p>Application responses may depend systematically on the value of the User-Agent header in requests. This behavior does not itself constitute a security vulnerability, but may point towards additional attack surface within the application, which may contain vulnerabilities.</p>
+<p>This behavior often arises because applications provide different user interfaces for desktop and mobile users. Mobile interfaces have often been less thoroughly tested for vulnerabilities such as cross-site scripting, and often have simpler authentication and session handling mechanisms that may contain problems that are not present in the full interface.</p>
+<p>To review the interface provided by the alternate User-Agent header, you can configure a match/replace rule in Burp Proxy to modify the User-Agent header in all requests, and then browse the application in the normal way using your normal browser. </p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request 1:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 1:</h3>
+<div class="request-response">HTTP/2 429 Too Many Requests
+Date: Sat, 11 Jun 2022 08:09:22 GMT
+Content-Type: application/json
+Retry-After: 797
+Cache-Control: no-cache
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=yKrg5BohMh0gtqakk8YPrEBpg7HBfjTL2z8btjXKdrOKvapgujhdDesRNuCm5q0H2n4AQ1Iv8ecdLGmy0L5ZGCLfuOKl%2FLSuv5RF1kmonPxQgGwuxMDV34LaBSJ0sxZNEKWYMMDG&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 7198dd3cce8b13aa-SEA
+
+https://example.com
+</div>
+<h3>Request 2:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B176 Safari/7534.48.3
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 2:</h3>
+<div class="request-response">HTTP/2 429 Too Many Requests
+Date: Sat, 11 Jun 2022 08:19:14 GMT
+Content-Type: application/json
+Retry-After: 2842
+Cache-Control: no-cache
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=f34GPKSkR279Sg8xQQ6EYiUhpgsWheW78Jr9xSe7ZgL3K3Qp1nivcC4%2BUDyE%2Fz1n6zWSGCzy1%2BIdsUrCmGOL41mRR2WAXanK8bnPeYFPAZLHFwEWs1KZf%2B4%2BowfhtuP8w4rwdhDE&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 7198ebb16865e38e-SEA
+
+https://example.com
+</div>
+
+</div><div class="issue-container">
+<a name="6428460886000907264"></a>
+<h2>User agent-dependent response</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/6428460886000907264">/redacted</a>
+
+<h3>
+Issue description
+</h3>
+<div>
+<p>Application responses may depend systematically on the value of the User-Agent header in requests. This behavior does not itself constitute a security vulnerability, but may point towards additional attack surface within the application, which may contain vulnerabilities.</p>
+<p>This behavior often arises because applications provide different user interfaces for desktop and mobile users. Mobile interfaces have often been less thoroughly tested for vulnerabilities such as cross-site scripting, and often have simpler authentication and session handling mechanisms that may contain problems that are not present in the full interface.</p>
+<p>To review the interface provided by the alternate User-Agent header, you can configure a match/replace rule in Burp Proxy to modify the User-Agent header in all requests, and then browse the application in the normal way using your normal browser. </p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request 1:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 1:</h3>
+<div class="request-response">HTTP/2 429 Too Many Requests
+Date: Sat, 11 Jun 2022 09:20:53 GMT
+Content-Type: application/json
+Retry-After: 2818
+Cache-Control: no-cache
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=Zs8esUH4FsawFLIKwTgA41O6gHo8yk6xjp5AfOcZakslERBcR8g2iDrS6ZX8Nh%2FNaUCub0RyvNUUKrI9lMnTKvzp0kZ%2FqnlkypZpJ8s8oSkusBnbwAE9wR7DEvlbclyt%2BpvjHEb2&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 719945feec8930b3-SEA
+
+https://example.com
+</div>
+<h3>Request 2:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B176 Safari/7534.48.3
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 2:</h3>
+<div class="request-response">HTTP/2 429 Too Many Requests
+Date: Sat, 11 Jun 2022 09:59:52 GMT
+Content-Type: application/json
+Retry-After: 469
+Cache-Control: no-cache
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=XfhO0F6GUs3XPeA%2FQtW7DeE9yPaC%2BR2UgUQ9wKTfCiIE65OhVd7yI6R0mrESv%2Fwvi%2FZgXQwu4qJd4sW7E7Q%2FJXYSzMsoL6UrFvEF7Ol07igCNqq8aT92HUCanVvTumb1WH1dRyfw&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 71997f197f2408ad-SEA
+
+https://example.com
+</div>
+
+</div><div class="issue-container">
+<a name="5796235265052656640"></a>
+<h2>User agent-dependent response</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5796235265052656640">/redacted</a>
+
+<h3>
+Issue description
+</h3>
+<div>
+<p>Application responses may depend systematically on the value of the User-Agent header in requests. This behavior does not itself constitute a security vulnerability, but may point towards additional attack surface within the application, which may contain vulnerabilities.</p>
+<p>This behavior often arises because applications provide different user interfaces for desktop and mobile users. Mobile interfaces have often been less thoroughly tested for vulnerabilities such as cross-site scripting, and often have simpler authentication and session handling mechanisms that may contain problems that are not present in the full interface.</p>
+<p>To review the interface provided by the alternate User-Agent header, you can configure a match/replace rule in Burp Proxy to modify the User-Agent header in all requests, and then browse the application in the normal way using your normal browser. </p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request 1:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 1:</h3>
+<div class="request-response">HTTP/2 429 Too Many Requests
+Date: Sat, 11 Jun 2022 08:10:07 GMT
+Content-Type: application/json
+Retry-After: 752
+Cache-Control: no-cache
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=q4E1umE2icia9bteAeOMZBe7zKjDpnySIZ3kaJ%2BC8T09V5bUa0tjbLZPUSyo0fwf4kgC3wbR9hyBrsTtHIj22bQjmrhdDMyFIT0C4soGiEAwN8b8pLdFLHEaPPmgU%2Bxdqx2XR5da&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 7198de55ed5013aa-SEA
+
+https://example.com
+</div>
+<h3>Request 2:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B176 Safari/7534.48.3
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 2:</h3>
+<div class="request-response">HTTP/2 429 Too Many Requests
+Date: Sat, 11 Jun 2022 08:19:26 GMT
+Content-Type: application/json
+Retry-After: 2831
+Cache-Control: no-cache
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=PaCCX51GD5LQcfV39thxYDFqKDTkny2s8t%2FpjyHlomBbTIu45mh5i1fp20%2FrmtQB5KLSA8y1RZNx5uXRsjD9OqDJg%2F7YVi%2Fa5svxPlnvdsQqZ1Ki7dHd5fRgvjo5aeBSeZU7K%2Ba%2B&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 7198ebfbfb12e38e-SEA
+
+https://example.com
+</div>
+
+</div><div class="issue-container">
+<a name="2037279419205212160"></a>
+<h2>User agent-dependent response</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2037279419205212160">/redacted</a>
+
+<h3>
+Issue description
+</h3>
+<div>
+<p>Application responses may depend systematically on the value of the User-Agent header in requests. This behavior does not itself constitute a security vulnerability, but may point towards additional attack surface within the application, which may contain vulnerabilities.</p>
+<p>This behavior often arises because applications provide different user interfaces for desktop and mobile users. Mobile interfaces have often been less thoroughly tested for vulnerabilities such as cross-site scripting, and often have simpler authentication and session handling mechanisms that may contain problems that are not present in the full interface.</p>
+<p>To review the interface provided by the alternate User-Agent header, you can configure a match/replace rule in Burp Proxy to modify the User-Agent header in all requests, and then browse the application in the normal way using your normal browser. </p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request 1:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 1:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 07:22:36 GMT
+Content-Type: application/javascript
+Cf-Bgj: minify
+Cf-Polished: origSize=20194
+Cache-Control: public, max-age=3600, s-maxage=3600
+Content-Security-Policy: default-src &#39;none&#39;; base-uri &#39;self&#39;; media-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-eval&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; worker-src &#39;self&#39; blob:; img-src &#39;self&#39;; font-src &#39;self&#39;; manifest-src &#39;self&#39;; connect-src &#39;self&#39;; frame-ancestors &#39;none&#39;; form-action &#39;self&#39;;
+Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Opener-Policy: same-origin
+Etag: W/&quot;625ded12-4ee2&quot;
+Last-Modified: Mon, 18 Apr 2022 22:58:26 GMT
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Dns-Prefetch-Control: off
+X-Envoy-Upstream-Service-Time: 0
+X-Frame-Options: DENY
+X-Xss-Protection: 1; mode=block
+Cf-Cache-Status: HIT
+Age: 1322
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=ikK%2FjEBZAL9defkuMUuqDGzJhyOtxNdPIrz8S6Wbgjb9k0oqsRfk1FY7fxUS39oGKGHRCGEY1GEit9b1CEesILnYz2oYlLj3vK2cA7Szt11BC4gG5MUSI%2FpO%2BsD4kYYlYFsv318U&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 719898b76abc39e3-SEA
+
+https://example.com</div>
+<h3>Request 2:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B176 Safari/7534.48.3
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 2:</h3>
+<div class="request-response">HTTP/2 429 Too Many Requests
+Date: Sat, 11 Jun 2022 07:41:32 GMT
+Content-Type: application/json
+Retry-After: 1410
+Cache-Control: no-cache
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=L2WFTibBpt%2BDhz%2FM6xUsroO7aDsCqxemxbtfR5S2iCsjTRaytUG%2FkpoCM14Y90hhfm8KiD88byOP3wtdTPNURqNUE18gjpH7cEXpn2yhCOZ9STqt6Hgcwd4dsUUfw4Qgt3xxCBTK&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 7198b477ff230905-SEA
+
+https://example.com
+</div>
+
+</div><div class="issue-container">
+<a name="5340969456539759616"></a>
+<h2>User agent-dependent response</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5340969456539759616">/redacted</a>
+
+<h3>
+Issue description
+</h3>
+<div>
+<p>Application responses may depend systematically on the value of the User-Agent header in requests. This behavior does not itself constitute a security vulnerability, but may point towards additional attack surface within the application, which may contain vulnerabilities.</p>
+<p>This behavior often arises because applications provide different user interfaces for desktop and mobile users. Mobile interfaces have often been less thoroughly tested for vulnerabilities such as cross-site scripting, and often have simpler authentication and session handling mechanisms that may contain problems that are not present in the full interface.</p>
+<p>To review the interface provided by the alternate User-Agent header, you can configure a match/replace rule in Burp Proxy to modify the User-Agent header in all requests, and then browse the application in the normal way using your normal browser. </p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request 1:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 1:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 09:07:48 GMT
+Content-Type: application/javascript
+Cf-Bgj: minify
+Cf-Polished: origSize=1049193
+Cache-Control: public, max-age=3600, s-maxage=3600
+Content-Security-Policy: default-src &#39;none&#39;; base-uri &#39;self&#39;; media-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-eval&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; worker-src &#39;self&#39; blob:; img-src &#39;self&#39;; font-src &#39;self&#39;; manifest-src &#39;self&#39;; connect-src &#39;self&#39;; frame-ancestors &#39;none&#39;; form-action &#39;self&#39;;
+Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Opener-Policy: same-origin
+Etag: W/&quot;625ded12-100269&quot;
+Last-Modified: Mon, 18 Apr 2022 22:58:26 GMT
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Dns-Prefetch-Control: off
+X-Envoy-Upstream-Service-Time: 2
+X-Frame-Options: DENY
+X-Xss-Protection: 1; mode=block
+Cf-Cache-Status: HIT
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=cCFLlw6n5wW3Ldjjl6LuyTV8wSe2NB%2BTvbYZ53oMUMIcG3zPtSdA%2F%2BiVsFefROIRswr1sqVCHiWhGCsJhKycCtU7E2r88BYZodxu7l8wCz98bmxHdsBkYlw%2FRLnZi1J17M0aG5T6&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 719932cea804139a-SEA
+
+https://example.com</div>
+<h3>Request 2:</h3>
+<div class="request-response">GET /redacted?94ef82ad72dfadb7b729 HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B176 Safari/7534.48.3
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 2:</h3>
+<div class="request-response">HTTP/2 429 Too Many Requests
+Date: Sat, 11 Jun 2022 09:20:42 GMT
+Content-Type: application/json
+Retry-After: 2818
+Cache-Control: no-cache
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=chRQ6%2BPF07VW3O%2B6vBiO3yqbR0IOtbfwIaFIaZhYUIc%2BJ6LqK09OIF4tLv4GV688UAYkyazUxuoKSnpPydJ5Hn0GUgRAiVx9LE2x6icFWbKHCyvnkQNcfO%2FL6hV2%2FOdai2qrPy%2Bq&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 719945bc0d4830b3-SEA
+
+https://example.com
+</div>
+
+</div><div class="issue-container">
+<a name="7532108409364955136"></a>
+<h2>User agent-dependent response</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/7532108409364955136">/redacted</a>
+
+<h3>
+Issue description
+</h3>
+<div>
+<p>Application responses may depend systematically on the value of the User-Agent header in requests. This behavior does not itself constitute a security vulnerability, but may point towards additional attack surface within the application, which may contain vulnerabilities.</p>
+<p>This behavior often arises because applications provide different user interfaces for desktop and mobile users. Mobile interfaces have often been less thoroughly tested for vulnerabilities such as cross-site scripting, and often have simpler authentication and session handling mechanisms that may contain problems that are not present in the full interface.</p>
+<p>To review the interface provided by the alternate User-Agent header, you can configure a match/replace rule in Burp Proxy to modify the User-Agent header in all requests, and then browse the application in the normal way using your normal browser. </p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request 1:</h3>
+<div class="request-response">GET /redacted HTTP/2
+Host: https://example.com
+Cookie: __cfruid=8d467a9836d19fd26dfe28fbf19907453cba442d-1654930838
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 1:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 09:13:49 GMT
+Content-Type: application/javascript
+Cf-Bgj: minify
+Cf-Polished: origSize=2292583
+Cache-Control: public, max-age=3600, s-maxage=3600
+Content-Security-Policy: default-src &#39;none&#39;; base-uri &#39;self&#39;; media-src &#39;self&#39;; script-src &#39;self&#39; &#39;unsafe-eval&#39;; style-src &#39;self&#39; &#39;unsafe-inline&#39;; worker-src &#39;self&#39; blob:; img-src &#39;self&#39;; font-src &#39;self&#39;; manifest-src &#39;self&#39;; connect-src &#39;self&#39;; frame-ancestors &#39;none&#39;; form-action &#39;self&#39;;
+Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Opener-Policy: same-origin
+Etag: W/&quot;625ded12-22fb67&quot;
+Last-Modified: Mon, 18 Apr 2022 22:58:26 GMT
+Referrer-Policy: no-referrer
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Dns-Prefetch-Control: off
+X-Envoy-Upstream-Service-Time: 1
+X-Frame-Options: DENY
+X-Xss-Protection: 1; mode=block
+Cf-Cache-Status: HIT
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=okxX%2FMljEx19SvTpIPCbfs6HvHM190lKPe8L586%2FbLJZVBx3b18wX8cvEfdTyNFluurNkt6zK%2BKSI84Ch3CNuRtnC6J6UIPetbGv55WMjnDVPFeqzFWRwboNxbRnOq5dsKos10Wj&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 71993ba43aae3089-SEA
+
+https://example.com</div>
+<h3>Request 2:</h3>
+<div class="request-response">GET /redacted HTTP/2
+Host: https://example.com
+Cookie: __cfruid=8d467a9836d19fd26dfe28fbf19907453cba442d-1654930838
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+<span class="highlight">User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B176 Safari/7534.48.3
+</span>
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response 2:</h3>
+<div class="request-response">HTTP/2 429 Too Many Requests
+Date: Sat, 11 Jun 2022 09:22:58 GMT
+Content-Type: application/json
+Retry-After: 2683
+Cache-Control: no-cache
+Expect-Ct: max-age=604800, report-uri=&quot;https://redacted/redacted/beacon/expect-ct&quot;
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=dEEtpbiEmmeZY0lUd6wmrN5rAobfkW8a6OXkOTZtaDHtG0DV04ignJ8ekAzI04sCFDml0BJW3LeC8XugVpcVPr5xO%2B8WXrgLBumMdZj9oo%2BH1OUYz8KNrMpyREuNkmMX2T1bgJpp&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Nel: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+Server: redacted
+Cf-Ray: 71994908ee1a5fe6-SEA
+</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section details">
+<div class="issue-container">
+<a name="4708571323829155840"></a>
+<h2>Cross-site request forgery</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/4708571323829155840">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The request appears to be vulnerable to cross-site request forgery (CSRF) attacks against unauthenticated functionality. This is unlikely to constitute a security vulnerability in its own right, however it may facilitate exploitation of other vulnerabilities affecting application users.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>Cross-site request forgery (CSRF) vulnerabilities may arise when applications rely solely on HTTP cookies to identify the user that has issued a particular request. Because browsers automatically add cookies to requests regardless of their origin, it may be possible for an attacker to create a malicious web site that forges a cross-domain request to the vulnerable application. For a request to be vulnerable to CSRF, the following conditions must hold:</p>
+<ul>
+<li>The request can be issued cross-domain, for example using an HTML form. If the request contains non-standard headers or body content, then it may only be issuable from a page that originated on the same domain.</li>
+<li>The application relies solely on HTTP cookies or Basic Authentication to identify the user that issued the request. If the application places session-related tokens elsewhere within the request, then it may not be vulnerable.</li>
+<li>The request performs some privileged action within the application, which modifies the application's state based on the identity of the issuing user.</li><li>The attacker can determine all the parameters required to construct a request that performs the action. If the request contains any values that the attacker cannot determine or predict, then it is not vulnerable.</li></ul>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>The most effective way to protect against CSRF vulnerabilities is to include within relevant requests an additional token that is not transmitted in a cookie: for example, a parameter in a hidden form field. This additional token should contain sufficient entropy, and be generated using a cryptographic random number generator, such that it is not feasible for an attacker to determine or predict the value of any token that was issued to another user. The token should be associated with the user's session, and the application should validate that the correct token is received before performing any action resulting from the request.</p>
+<p>An alternative approach, which may be easier to implement, is to validate that Host and Referer headers in relevant requests are both present and contain the same domain name. However, this approach is somewhat less robust: historically, quirks in browsers and plugins have often enabled attackers to forge cross-domain requests that manipulate these headers to bypass such defenses. </p>
+</div>
+
+<h3>References</h3>
+<div class="no-bullets">
+<ul>
+    <li><a href="https://portswigger.net/web-security/csrf">Web Security Academy: Cross-site request forgery</a></li>
+    <li><a href="https://support.portswigger.net/customer/portal/articles/1965674-using-burp-to-test-for-cross-site-request-forgery-csrf-">Using Burp to Test for Cross-Site Request Forgery</a></li>
+    <li><a href="https://media.blackhat.com/eu-13/briefings/Lundeen/bh-eu-13-deputies-still-confused-lundeen-wp.pdf">The Deputies Are Still Confused</a></li>
+</ul>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/352.html">CWE-352: Cross-Site Request Forgery (CSRF)</a></li>
+    <li><a href="https://capec.mitre.org/data/definitions/62.html">CAPEC-62: Cross Site Request Forgery</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">POST /redacted HTTP/2
+Host: https://example.com
+Cookie: __cfruid=d1db725338a0a9a40800e81127effa72b4e1cbde-1654931039
+Origin: https://example.com
+sec-ch-ua: 
+sec-ch-ua-mobile: ?0
+Accept: */*
+sec-ch-ua-platform: 
+Content-Type: application/json
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+Content-Length: 0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/2 200 OK
+Date: Sat, 11 Jun 2022 07:04:01 GMT
+Server: redacted
+Cf-Ray: 71987d814c2260bf-SEA
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+
+</div>
+
+</div>
+</div>
+
+<div class="section divider"></div><div class="section divider"></div>
+
+<div class="section details">
+<h1>More details for https://example.com</h1>
+</div>
+
+<div class="section details">
+<div class="issue-container">
+<a name="7733318645105708032"></a>
+<h2>Cookie scoped to parent domain</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/7733318645105708032">/</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following cookie was issued by the application and is scoped to a parent of the issuing domain:<ul><li>__cfruid</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>A cookie's domain attribute determines which domains can access the cookie. Browsers will automatically submit the cookie in requests to in-scope domains, and those domains will also be able to access the cookie via JavaScript. If a cookie is scoped to a parent domain, then that cookie will be accessible by the parent domain and also by any other subdomains of the parent domain. If the cookie contains sensitive data (such as a session token) then this data may be accessible by less trusted or less secure applications residing at those domains, leading to a security compromise.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>By default, cookies are scoped to the issuing domain, and on IE/Edge to subdomains. If you remove the explicit domain attribute from your Set-cookie directive, then the cookie will have this default scope, which is safe and appropriate in most situations. If you particularly need a cookie to be accessible by a parent domain, then you should thoroughly review the security of the applications residing on that domain and its subdomains, and confirm that you are willing to trust the people and systems that support those applications.</p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET / HTTP/1.1
+Host: https://example.com
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/1.1 301 Moved Permanently
+Date: Sat, 11 Jun 2022 07:00:33 GMT
+Connection: close
+Cache-Control: max-age=3600
+Expires: Sat, 11 Jun 2022 08:00:33 GMT
+Location: https://example.com/
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=%2FUALE32sIebIUo0DOfNh0d0AVf5FfGomVqTAAlbT%2FdyKoCo1Cr6vwT9slKXiN9Ru5jUdIU4qjqv0Fyn1EpWNLtl5fgwns8tSuUzMKsUw8sCwyfRkEFnzHfeBobZZPpuyIaPAXsrR&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+NEL: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+<span class="highlight">Set-Cookie: __cfruid=d75817bc7ad6710ac75db6ba48f6fc37f6551137-1654930833; path=/; domain=.redacted.com; HttpOnly</span>
+Server: redacted
+CF-RAY: 7198786d5cb8091d-SEA
+Content-Length: 0
+
+</div>
+
+</div><div class="issue-container">
+<a name="116916939358466048"></a>
+<h2>Cookie scoped to parent domain</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/116916939358466048">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following cookie was issued by the application and is scoped to a parent of the issuing domain:<ul><li>__cfruid</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>A cookie's domain attribute determines which domains can access the cookie. Browsers will automatically submit the cookie in requests to in-scope domains, and those domains will also be able to access the cookie via JavaScript. If a cookie is scoped to a parent domain, then that cookie will be accessible by the parent domain and also by any other subdomains of the parent domain. If the cookie contains sensitive data (such as a session token) then this data may be accessible by less trusted or less secure applications residing at those domains, leading to a security compromise.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>By default, cookies are scoped to the issuing domain, and on IE/Edge to subdomains. If you remove the explicit domain attribute from your Set-cookie directive, then the cookie will have this default scope, which is safe and appropriate in most situations. If you particularly need a cookie to be accessible by a parent domain, then you should thoroughly review the security of the applications residing on that domain and its subdomains, and confirm that you are willing to trust the people and systems that support those applications.</p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted HTTP/1.1
+Host: https://example.com
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/1.1 301 Moved Permanently
+Date: Sat, 11 Jun 2022 07:01:42 GMT
+Connection: close
+Cache-Control: max-age=3600
+Expires: Sat, 11 Jun 2022 08:01:42 GMT
+Location: https://example.com/help
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=qCzD4g%2F1kw7nbUSLpSh0sZ853HE6ito40XIvo%2FH%2BQhbpe6Uze7RDJ3zIVdgeyhfcckimNlr08Yf5F6UtGxxIUHP2pXethA72jAjfSVSQPcrYYselewPcD77kfWRFfDVkpHVlmKbY&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+NEL: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+<span class="highlight">Set-Cookie: __cfruid=b4ed5cee943ab8a032d98b9afb748493ad5508af-1654930902; path=/; domain=.redacted.com; HttpOnly</span>
+Server: redacted
+CF-RAY: 71987a1a99db3a0e-SEA
+Content-Length: 0
+
+</div>
+
+</div><div class="issue-container">
+<a name="5663500688597190656"></a>
+<h2>Cookie scoped to parent domain</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/5663500688597190656">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following cookie was issued by the application and is scoped to a parent of the issuing domain:<ul><li>__cfruid</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>A cookie's domain attribute determines which domains can access the cookie. Browsers will automatically submit the cookie in requests to in-scope domains, and those domains will also be able to access the cookie via JavaScript. If a cookie is scoped to a parent domain, then that cookie will be accessible by the parent domain and also by any other subdomains of the parent domain. If the cookie contains sensitive data (such as a session token) then this data may be accessible by less trusted or less secure applications residing at those domains, leading to a security compromise.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>By default, cookies are scoped to the issuing domain, and on IE/Edge to subdomains. If you remove the explicit domain attribute from your Set-cookie directive, then the cookie will have this default scope, which is safe and appropriate in most situations. If you particularly need a cookie to be accessible by a parent domain, then you should thoroughly review the security of the applications residing on that domain and its subdomains, and confirm that you are willing to trust the people and systems that support those applications.</p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted HTTP/1.1
+Host: https://example.com
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/1.1 301 Moved Permanently
+Date: Sat, 11 Jun 2022 07:01:43 GMT
+Connection: close
+Cache-Control: max-age=3600
+Expires: Sat, 11 Jun 2022 08:01:43 GMT
+Location: https://example.com/redacted</about
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=l7QeFSGT4p7yqKTYNVIvOb1VCRXZCBv8ojftN9wenaYVyysTyN6G%2B3orIkevvGN3F7SRtFpRAhfdl4ke3y0NXxJZ79nfC8XVYF%2B2SvEx8rPwQy1ufdZpy3cAMSHm%2FwwhvMWEOVNv&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+NEL: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+<span class="highlight">Set-Cookie: __cfruid=f6065aa88005db6a289e73f76240abfef21a0126-1654930903; path=/; domain=.redacted.com; HttpOnly</span>
+Server: redacted
+CF-RAY: 71987a23eb0b0927-SEA
+Content-Length: 0
+
+</div>
+
+</div><div class="issue-container">
+<a name="8450411307224851456"></a>
+<h2>Cookie scoped to parent domain</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/8450411307224851456">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following cookie was issued by the application and is scoped to a parent of the issuing domain:<ul><li>__cfruid</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>A cookie's domain attribute determines which domains can access the cookie. Browsers will automatically submit the cookie in requests to in-scope domains, and those domains will also be able to access the cookie via JavaScript. If a cookie is scoped to a parent domain, then that cookie will be accessible by the parent domain and also by any other subdomains of the parent domain. If the cookie contains sensitive data (such as a session token) then this data may be accessible by less trusted or less secure applications residing at those domains, leading to a security compromise.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>By default, cookies are scoped to the issuing domain, and on IE/Edge to subdomains. If you remove the explicit domain attribute from your Set-cookie directive, then the cookie will have this default scope, which is safe and appropriate in most situations. If you particularly need a cookie to be accessible by a parent domain, then you should thoroughly review the security of the applications residing on that domain and its subdomains, and confirm that you are willing to trust the people and systems that support those applications.</p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted HTTP/1.1
+Host: https://example.com
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/1.1 301 Moved Permanently
+Date: Sat, 11 Jun 2022 07:01:45 GMT
+Connection: close
+Cache-Control: max-age=3600
+Expires: Sat, 11 Jun 2022 08:01:45 GMT
+Location: https://example.com/redacted</manual
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=GmUu53yGkj4WSqr65RyIiBQ11pjH7AB5J1KrmvgcXm5FGVP5dhQkL9zvW81sdh8qP%2Bx0JSR%2Faj3gRWe7qNSKFl3YxEM7to%2F5Ieo6qMyDqUSTumtGC119meOCgpG8iYPKMqi0E7tr&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+NEL: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+<span class="highlight">Set-Cookie: __cfruid=b7ee4175eb89f8f65a910c14e5e855b2fd3a1516-1654930905; path=/; domain=.redacted.com; HttpOnly</span>
+Server: redacted
+CF-RAY: 71987a2e0a7f5fbc-SEA
+Content-Length: 0
+
+</div>
+
+</div><div class="issue-container">
+<a name="2374166801550126080"></a>
+<h2>Cookie scoped to parent domain</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2374166801550126080">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following cookie was issued by the application and is scoped to a parent of the issuing domain:<ul><li>__cfruid</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>A cookie's domain attribute determines which domains can access the cookie. Browsers will automatically submit the cookie in requests to in-scope domains, and those domains will also be able to access the cookie via JavaScript. If a cookie is scoped to a parent domain, then that cookie will be accessible by the parent domain and also by any other subdomains of the parent domain. If the cookie contains sensitive data (such as a session token) then this data may be accessible by less trusted or less secure applications residing at those domains, leading to a security compromise.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>By default, cookies are scoped to the issuing domain, and on IE/Edge to subdomains. If you remove the explicit domain attribute from your Set-cookie directive, then the cookie will have this default scope, which is safe and appropriate in most situations. If you particularly need a cookie to be accessible by a parent domain, then you should thoroughly review the security of the applications residing on that domain and its subdomains, and confirm that you are willing to trust the people and systems that support those applications.</p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted HTTP/1.1
+Host: https://example.com
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/1.1 301 Moved Permanently
+Date: Sat, 11 Jun 2022 07:02:48 GMT
+Connection: close
+Cache-Control: max-age=3600
+Expires: Sat, 11 Jun 2022 08:02:48 GMT
+Location: https://example.com/redacted</messages
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=4aypFqtbhTu3sW75dNb14LCa5M1QGS7%2FhIGXK52hQIl5Ax22oi%2FdfCXM5Wx45pgOYvA8iuN8Y7GcoGgZgqhfNn2FNK2J2M2Tvj54dM23%2B41XtzHezo7MpWXds3%2FamoUsEJtnDQg%2B&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+NEL: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+<span class="highlight">Set-Cookie: __cfruid=692fabd448314c08d72b2f148b1c1328793fe491-1654930968; path=/; domain=.redacted.com; HttpOnly</span>
+Server: redacted
+CF-RAY: 71987bb8dde327ea-SEA
+Content-Length: 0
+
+</div>
+
+</div><div class="issue-container">
+<a name="2847743592524451840"></a>
+<h2>Cookie scoped to parent domain</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2847743592524451840">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following cookie was issued by the application and is scoped to a parent of the issuing domain:<ul><li>__cfruid</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>A cookie's domain attribute determines which domains can access the cookie. Browsers will automatically submit the cookie in requests to in-scope domains, and those domains will also be able to access the cookie via JavaScript. If a cookie is scoped to a parent domain, then that cookie will be accessible by the parent domain and also by any other subdomains of the parent domain. If the cookie contains sensitive data (such as a session token) then this data may be accessible by less trusted or less secure applications residing at those domains, leading to a security compromise.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>By default, cookies are scoped to the issuing domain, and on IE/Edge to subdomains. If you remove the explicit domain attribute from your Set-cookie directive, then the cookie will have this default scope, which is safe and appropriate in most situations. If you particularly need a cookie to be accessible by a parent domain, then you should thoroughly review the security of the applications residing on that domain and its subdomains, and confirm that you are willing to trust the people and systems that support those applications.</p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted HTTP/1.1
+Host: https://example.com
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/1.1 301 Moved Permanently
+Date: Sat, 11 Jun 2022 07:02:46 GMT
+Connection: close
+Cache-Control: max-age=3600
+Expires: Sat, 11 Jun 2022 08:02:46 GMT
+Location: https://example.com/redacted</guide
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=KNdBGvbbMS0SM0n%2Fxsb3ffWOm06DJw9%2BGRlZKf9q4eoimpb%2B36yOGB05vwr5asEjm%2FGKQbuuTwx2gsHFsubpTQMNyR7nWwd8iVrtavpuBEITcz4%2BTiNgF5refFRLI0z4CTsEHTxz&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+NEL: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+<span class="highlight">Set-Cookie: __cfruid=7ef2437b49ccb592ab22c9631737966ef28f6125-1654930966; path=/; domain=.redacted.com; HttpOnly</span>
+Server: redacted
+CF-RAY: 71987bae8cb3610e-SEA
+Content-Length: 0
+
+</div>
+
+</div><div class="issue-container">
+<a name="6860252260222603264"></a>
+<h2>Cookie scoped to parent domain</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/6860252260222603264">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following cookie was issued by the application and is scoped to a parent of the issuing domain:<ul><li>__cfruid</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>A cookie's domain attribute determines which domains can access the cookie. Browsers will automatically submit the cookie in requests to in-scope domains, and those domains will also be able to access the cookie via JavaScript. If a cookie is scoped to a parent domain, then that cookie will be accessible by the parent domain and also by any other subdomains of the parent domain. If the cookie contains sensitive data (such as a session token) then this data may be accessible by less trusted or less secure applications residing at those domains, leading to a security compromise.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>By default, cookies are scoped to the issuing domain, and on IE/Edge to subdomains. If you remove the explicit domain attribute from your Set-cookie directive, then the cookie will have this default scope, which is safe and appropriate in most situations. If you particularly need a cookie to be accessible by a parent domain, then you should thoroughly review the security of the applications residing on that domain and its subdomains, and confirm that you are willing to trust the people and systems that support those applications.</p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted HTTP/1.1
+Host: https://example.com
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/1.1 301 Moved Permanently
+Date: Sat, 11 Jun 2022 07:00:37 GMT
+Connection: close
+Cache-Control: max-age=3600
+Expires: Sat, 11 Jun 2022 08:00:37 GMT
+Location: https://example.com/login
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=%2F%2B0j4iAiIhKtlxfKUYRRvGBw1A3CoB8kliM2XyzsJvn3k%2BclSaArx8aLpFKX9A4mzLetuBJjeizmhrt5uLVNbpHqg5OIa%2B%2By8ci4AnmMoFVaR2izPeSz3z7iifpcca9GK%2BnkBk4N&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+NEL: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+<span class="highlight">Set-Cookie: __cfruid=d8bd325d60ec6072ebaf4ebdf5385a328bf88620-1654930837; path=/; domain=.redacted.com; HttpOnly</span>
+Server: redacted
+CF-RAY: 719878863c0f611a-SEA
+Content-Length: 0
+
+</div>
+
+</div><div class="issue-container">
+<a name="7918190946522104832"></a>
+<h2>Cookie scoped to parent domain</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/7918190946522104832">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following cookie was issued by the application and is scoped to a parent of the issuing domain:<ul><li>__cfruid</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>A cookie's domain attribute determines which domains can access the cookie. Browsers will automatically submit the cookie in requests to in-scope domains, and those domains will also be able to access the cookie via JavaScript. If a cookie is scoped to a parent domain, then that cookie will be accessible by the parent domain and also by any other subdomains of the parent domain. If the cookie contains sensitive data (such as a session token) then this data may be accessible by less trusted or less secure applications residing at those domains, leading to a security compromise.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>By default, cookies are scoped to the issuing domain, and on IE/Edge to subdomains. If you remove the explicit domain attribute from your Set-cookie directive, then the cookie will have this default scope, which is safe and appropriate in most situations. If you particularly need a cookie to be accessible by a parent domain, then you should thoroughly review the security of the applications residing on that domain and its subdomains, and confirm that you are willing to trust the people and systems that support those applications.</p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted HTTP/1.1
+Host: https://example.com
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/1.1 301 Moved Permanently
+Date: Sat, 11 Jun 2022 07:00:38 GMT
+Connection: close
+Cache-Control: max-age=3600
+Expires: Sat, 11 Jun 2022 08:00:38 GMT
+Location: https://example.com/query
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=GITu%2FNkeUJ7i4GNvI8eqYIL8PI8PhziTbWEkjnRpK5ZqLqoUhNYcNBik1jzvHozRQg91RPLgFSl4Xdh1Yc6z%2Bch1htbvWD48lpVK4FO%2BLrybGXSUNTc7iDGy1yRu3745H7hflz4W&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+NEL: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+<span class="highlight">Set-Cookie: __cfruid=8d467a9836d19fd26dfe28fbf19907453cba442d-1654930838; path=/; domain=.redacted.com; HttpOnly</span>
+Server: redacted
+CF-RAY: 7198788f9990611a-SEA
+Content-Length: 0
+
+</div>
+
+</div><div class="issue-container">
+<a name="2702409345095615488"></a>
+<h2>Cookie scoped to parent domain</h2>
+<a href="https://dast.shared.steady-fast.net/scans/13/issues/2702409345095615488">/redacted</a>
+
+<h3>Issue detail:</h3>
+<div>
+The following cookie was issued by the application and is scoped to a parent of the issuing domain:<ul><li>__cfruid</li></ul>The cookie does not appear to contain a session token, which may reduce the risk associated with this issue. You should review the contents of the cookie to determine its function.
+</div>
+
+<h3>
+Issue background
+</h3>
+<div>
+<p>A cookie's domain attribute determines which domains can access the cookie. Browsers will automatically submit the cookie in requests to in-scope domains, and those domains will also be able to access the cookie via JavaScript. If a cookie is scoped to a parent domain, then that cookie will be accessible by the parent domain and also by any other subdomains of the parent domain. If the cookie contains sensitive data (such as a session token) then this data may be accessible by less trusted or less secure applications residing at those domains, leading to a security compromise.</p>
+</div>
+
+<h3>
+Issue remediation
+</h3>
+<div>
+<p>By default, cookies are scoped to the issuing domain, and on IE/Edge to subdomains. If you remove the explicit domain attribute from your Set-cookie directive, then the cookie will have this default scope, which is safe and appropriate in most situations. If you particularly need a cookie to be accessible by a parent domain, then you should thoroughly review the security of the applications residing on that domain and its subdomains, and confirm that you are willing to trust the people and systems that support those applications.</p>
+</div>
+
+<h3>Vulnerability classifications</h3>
+<div class="no-bullets">
+<ul>
+<li><a href="https://cwe.mitre.org/data/definitions/16.html">CWE-16: Configuration</a></li>
+</ul>
+</div>
+
+<h3>Request:</h3>
+<div class="request-response">GET /redacted HTTP/1.1
+Host: https://example.com
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Upgrade-Insecure-Requests: 1
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US;q=0.9,en;q=0.8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36
+Connection: close
+Cache-Control: max-age=0
+
+</div>
+<h3>Response:</h3>
+<div class="request-response">HTTP/1.1 301 Moved Permanently
+Date: Sat, 11 Jun 2022 07:01:40 GMT
+Connection: close
+Cache-Control: max-age=3600
+Expires: Sat, 11 Jun 2022 08:01:40 GMT
+Location: https://example.com/settings
+Report-To: {&quot;endpoints&quot;:[{&quot;url&quot;:&quot;https:\/\/redacted.com\/report\/v3?s=TOW3kVkXp0bQxMYOOZT7OMzLRtYV6%2FXOyYqp9xIhzJLiSAhal9Kjiko6HpWytDihL7fQx3esZQiCibP5337D%2FSZKaZ1IOXiFT10xheOjwURaL6hW%2BzOcUa0AArPFOf54aerC8ZdK&quot;}],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+NEL: {&quot;success_fraction&quot;:0.01,&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800}
+Vary: Accept-Encoding
+<span class="highlight">Set-Cookie: __cfruid=c5070c5ee4b26bb8d7c32b51ade8b2dbe7f31828-1654930900; path=/; domain=.redacted.com; HttpOnly</span>
+Server: redacted
+CF-RAY: 71987a1159355fda-SEA
+Content-Length: 0
+
+</div>
+
+</div>
+</div>
+
+<div class="section divider"></div>
+
+</div>
+</body>
+</html>

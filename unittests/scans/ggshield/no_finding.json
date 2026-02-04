@@ -1,0 +1,30 @@
+{
+    "id": "54c2793a-89f2-4480-8468-ad042349357b",
+    "type": "commit-range",
+    "scans": [
+        {
+            "id": "2eb228870f21f9da5eece8fdbc72f41f1cb56360",
+            "type": "commit",
+            "extra_info": {
+                "author": "iamnihal",
+                "email": "nihalcyberdude@gmail.com",
+                "date": "Thu Mar 25 22:46:08 2021 +0530"
+            },
+            "total_incidents": 0,
+            "total_occurrences": 0
+        },
+        {
+            "id": "1618bd930e893442f9d0f2a9cc220a18e200db78",
+            "type": "commit",
+            "extra_info": {
+                "author": "iamnihal",
+                "email": "nihalcyberdude@gmail.com",
+                "date": "Fri Mar 26 17:58:18 2021 +0530"
+            },
+            "total_incidents": 0,
+            "total_occurrences": 0
+        }
+    ],
+    "total_incidents": 0,
+    "total_occurrences": 0
+}
