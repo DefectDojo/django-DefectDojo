@@ -1,0 +1,29 @@
+{
+    "popeye": {
+        "score": 89,
+        "grade": "B",
+        "sanitizers": [
+            {
+                "sanitizer": "pods",
+                "gvr": "v1/pods",
+                "tally": {
+                    "ok": 0,
+                    "info": 0,
+                    "warning": 1,
+                    "error": 0,
+                    "score": 0
+                },
+                "issues": {
+                    "test-namespace/6cff44dc94-d92km": [
+                        {
+                            "group": "test-group",
+                            "gvr": "containers",
+                            "level": 2,
+                            "message": "[POP-106] No resources requests/limits defined"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

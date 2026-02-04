@@ -1,9 +1,11 @@
 # Author: apipia, wheelsvt
-from .importer import BlackduckCRImporter
 from dojo.models import Finding
 
+from .importer import BlackduckCRImporter
 
-class BlackduckComponentRiskParser(object):
+
+class BlackduckComponentRiskParser:
+
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv, sources.csv and components.csv
@@ -56,44 +58,53 @@ class BlackduckComponentRiskParser(object):
         for component_id, component in components.items():
             source = {}
             # Find the sources.csv data for this component
-            for id, src in sources.items():
-                if id in component_id:
+            for source_id, src in sources.items():
+                if source_id in component_id:
                     source = src
-            if component.get('Component policy status') == "In Violation":
+            if component.get("Component policy status") == "In Violation":
                 # We have us a license risk:
                 title = self.license_title(component)
                 description = self.license_description(component, source)
                 severity = "High"
                 mitigation = self.license_mitigation(component)
+                fix_available = bool(mitigation)
                 impact = "N/A"
                 references = self.license_references(component)
-                finding = Finding(title=title,
-                                  test=test,
-                                  description=description,
-                                  severity=severity,
-                                  mitigation=mitigation,
-                                  impact=impact,
-                                  references=references,
-                                  static_finding=True,
-                                  unique_id_from_tool=component_id)
+                finding = Finding(
+                    title=title,
+                    test=test,
+                    description=description,
+                    severity=severity,
+                    mitigation=mitigation,
+                    impact=impact,
+                    references=references,
+                    static_finding=True,
+                    unique_id_from_tool=component_id,
+                    fix_available=fix_available,
+                )
                 license_risk.append(finding)
             elif "None" not in self.license_severity(component):
-                # We have a license risk for review, but not directly "In Violation"
+                # We have a license risk for review, but not directly "In
+                # Violation"
                 title = "Review " + self.license_title(component)
                 description = self.license_description(component, source)
                 severity = self.license_severity(component)
-                mitigation = self.license_mitigation(component, False)
+                mitigation = self.license_mitigation(component, violation=False)
+                fix_available = bool(mitigation)
                 impact = "N/A"
                 references = self.license_references(component)
-                finding = Finding(title=title,
-                                  test=test,
-                                  description=description,
-                                  severity=severity,
-                                  mitigation=mitigation,
-                                  impact=impact,
-                                  references=references,
-                                  static_finding=True,
-                                  unique_id_from_tool=component_id)
+                finding = Finding(
+                    title=title,
+                    test=test,
+                    description=description,
+                    severity=severity,
+                    mitigation=mitigation,
+                    impact=impact,
+                    references=references,
+                    static_finding=True,
+                    unique_id_from_tool=component_id,
+                    fix_available=fix_available,
+                )
                 license_risk.append(finding)
         items.extend(license_risk)
 
@@ -104,20 +115,23 @@ class BlackduckComponentRiskParser(object):
             description = self.security_description(vulns)
             severity = self.security_severity(vulns)
             mitigation = self.security_mitigation(vulns)
+            fix_available = bool(mitigation)
             impact = self.security_impact(vulns)
             references = self.security_references(vulns)
             file_path = self.security_filepath(vulns)
-
-            finding = Finding(title=title,
-                              test=test,
-                              description=description,
-                              severity=severity,
-                              mitigation=mitigation,
-                              impact=impact,
-                              references=references,
-                              static_finding=True,
-                              file_path=file_path,
-                              unique_id_from_tool=component_id)
+            finding = Finding(
+                title=title,
+                test=test,
+                description=description,
+                severity=severity,
+                mitigation=mitigation,
+                impact=impact,
+                references=references,
+                static_finding=True,
+                file_path=file_path,
+                unique_id_from_tool=component_id,
+                fix_available=fix_available,
+            )
             security_risk.append(finding)
         items.extend(security_risk)
         return items
@@ -129,8 +143,10 @@ class BlackduckComponentRiskParser(object):
         :param component: Dictionary containing all components.
         :return:
         """
-        return "License Risk: {}:{}".format(component.get('Component name'),
-                                            component.get('Component version name'))
+        return "License Risk: {}:{}".format(
+            component.get("Component name"),
+            component.get("Component version name"),
+        )
 
     def license_description(self, component, source):
         """
@@ -138,23 +154,33 @@ class BlackduckComponentRiskParser(object):
         :param component: Dictionary containing all components.
         :return:
         """
-        desc = "**License Name:** {}  \n".format(component.get('License names'))
-        desc += "**License Families:** {}  \n".format(component.get('License families'))
-        desc += "**License Usage:** {}  \n".format(component.get('Usage'))
-        desc += "**License Origin name:** {} \n".format(component.get('Origin name'))
-        desc += "**License Origin id:** {} \n".format(component.get('Origin id'))
-        desc += "**Match type:** {}\n".format(component.get('Match type'))
+        desc = "**License Name:** {}  \n".format(
+            component.get("License names"),
+        )
+        desc += "**License Families:** {}  \n".format(
+            component.get("License families"),
+        )
+        desc += "**License Usage:** {}  \n".format(component.get("Usage"))
+        desc += "**License Origin name:** {} \n".format(
+            component.get("Origin name"),
+        )
+        desc += "**License Origin id:** {} \n".format(
+            component.get("Origin id"),
+        )
+        desc += "**Match type:** {}\n".format(component.get("Match type"))
         try:
-            desc += "**Path:** {}\n".format(source.get('Path'))
-            desc += "**Archive context:** {}\n".format(source.get('Archive context'))
-            desc += "**Scan:** {}\n".format(source.get('Scan'))
+            desc += "**Path:** {}\n".format(source.get("Path"))
+            desc += "**Archive context:** {}\n".format(
+                source.get("Archive context"),
+            )
+            desc += "**Scan:** {}\n".format(source.get("Scan"))
         except KeyError:
             desc += "**Path:** Unable to find path in source data."
             desc += "**Archive context:** Unable to find archive context in source data."
             desc += "**Scan:** Unable to find scan in source data."
         return desc
 
-    def license_mitigation(self, component, violation=True):
+    def license_mitigation(self, component, *, violation=True):
         """
         Uses Component name and Component version name to display the package.
         :param component: Dictionary containing all components.
@@ -164,18 +190,20 @@ class BlackduckComponentRiskParser(object):
         mit = ""
         if violation:
             mit = "Package has a license that is In Violation and should not be used: {}:{}.  ".format(
-                component.get('Component name'), component.get('Component version name')
+                component.get("Component name"),
+                component.get("Component version name"),
             )
             mit += "Please use another component with an acceptable license."
         else:
             mit = "Package has a potential license risk and should be reviewed: {}:{}. ".format(
-                component.get('Component name'), component.get('Component version name')
+                component.get("Component name"),
+                component.get("Component version name"),
             )
             mit += "A legal review may indicate that another component should be used with an acceptable license."
         return mit
 
     def license_references(self, component):
-        return "**Project:** {}\n".format(component.get('Project path'))
+        return "**Project:** {}\n".format(component.get("Project path"))
 
     def security_title(self, vulns):
         """
@@ -184,9 +212,9 @@ class BlackduckComponentRiskParser(object):
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        title = "Security Risk: {}:{}".format(vulns[0]["Component name"],
-                                              vulns[0]["Component version name"])
-        return title
+        return "Security Risk: {}:{}".format(
+            vulns[0]["Component name"], vulns[0]["Component version name"],
+        )
 
     def security_description(self, vulns):
         """
@@ -195,17 +223,20 @@ class BlackduckComponentRiskParser(object):
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        desc = "#Vulnerabilities \nThis component version contains the following " \
-               "vulnerabilities:\n\n"
+        desc = (
+            "#Vulnerabilities \nThis component version contains the following "
+            "vulnerabilities:\n\n"
+        )
         for vuln in vulns:
             desc += "###{}  \n".format(vuln["Vulnerability id"])
             desc += "**Base Score:** {} \n**Exploitability:** {} \n**Impact:** {}\n".format(
-                vuln["Base score"], vuln["Exploitability"], vuln["Impact"]
+                vuln["Base score"], vuln["Exploitability"], vuln["Impact"],
             )
             # Not all have a URL
-            if vuln["URL"] != "":
-                desc += "**URL:** [{}]({})\n".format(vuln["Vulnerability id"],
-                                                     vuln["URL"])
+            if vuln["URL"]:
+                desc += "**URL:** [{}]({})\n".format(
+                    vuln["Vulnerability id"], vuln["URL"],
+                )
             desc += "**Description:** {}\n".format(vuln["Description"])
         return desc
 
@@ -217,11 +248,17 @@ class BlackduckComponentRiskParser(object):
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        map = {"HIGH": "High", "MEDIUM": "Medium", "LOW": "Low", "INFO": "Info",
-               "CRITICAL": "Critical", "OK": "None"}
+        severity_map = {
+            "HIGH": "High",
+            "MEDIUM": "Medium",
+            "LOW": "Low",
+            "INFO": "Info",
+            "CRITICAL": "Critical",
+            "OK": "None",
+        }
         sev = "None"
         try:
-            sev = map[component.get('License Risk')]
+            sev = severity_map[component.get("License Risk")]
         except KeyError:
             sev = "None"
         return sev
@@ -234,14 +271,19 @@ class BlackduckComponentRiskParser(object):
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        map = {"HIGH": "High", "MEDIUM": "Medium", "LOW": "Low", "INFO": "Info",
-               "CRITICAL": "Critical"}
+        severity_map = {
+            "HIGH": "High",
+            "MEDIUM": "Medium",
+            "LOW": "Low",
+            "INFO": "Info",
+            "CRITICAL": "Critical",
+        }
         max_severity = 0.0
         sev = "Info"
         for vuln in vulns:
             if float(vuln["Base score"]) > max_severity:
                 max_severity = float(vuln["Base score"])
-                sev = map[vuln["Security Risk"]]
+                sev = severity_map[vuln["Security Risk"]]
         return sev
 
     def security_mitigation(self, vulns):
@@ -252,10 +294,9 @@ class BlackduckComponentRiskParser(object):
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        mit = "Update component {}:{} to a secure version".format(
-            vulns[0]["Component name"], vulns[0]["Component version name"]
+        return "Update component {}:{} to a secure version".format(
+            vulns[0]["Component name"], vulns[0]["Component version name"],
         )
-        return mit
 
     def security_impact(self, vulns):
         """
@@ -266,8 +307,7 @@ class BlackduckComponentRiskParser(object):
         """
         max_impact = 0.0
         for vuln in vulns:
-            if float(vuln["Impact"]) > max_impact:
-                max_impact = float(vuln["Impact"])
+            max_impact = max(max_impact, float(vuln["Impact"]))
         return max_impact
 
     def security_references(self, vulns):
@@ -279,9 +319,10 @@ class BlackduckComponentRiskParser(object):
         """
         references = "**Project:** {}\n".format(vulns[0]["Project path"])
         for vuln in vulns:
-            if vuln["URL"] != "":
-                references += "{}: [{}]({})\n".format(vuln["Vulnerability id"], vuln["URL"],
-                                                      vuln["URL"])
+            if vuln["URL"]:
+                references += "{}: [{}]({})\n".format(
+                    vuln["Vulnerability id"], vuln["URL"], vuln["URL"],
+                )
         return references
 
     def security_filepath(self, vulns):
@@ -294,9 +335,10 @@ class BlackduckComponentRiskParser(object):
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        if vulns[0]["Component origin id"] == "":
-            component_key = "{}/{}".format(vulns[0]["Component name"],
-                                           vulns[0]["Component version name"])
+        if not vulns[0]["Component origin id"]:
+            component_key = "{}/{}".format(
+                vulns[0]["Component name"], vulns[0]["Component version name"],
+            )
         else:
             component_key = vulns[0]["Component origin id"]
         return "{}:{}".format(vulns[0]["Component origin name"], component_key)

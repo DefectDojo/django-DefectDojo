@@ -1,0 +1,49 @@
+{
+    "[0. Info]": {
+        "Date": "2023/11/15 - 08:42:38",
+        "URL": "http://testestset.com"
+    },
+    "[HTTP Response Headers]": {
+        "CF-Cache-Status": "DYNAMIC",
+        "CF-RAY": "8265dbd49d362bde-FRA",
+        "Cache-Control": "no-store, private",
+        "Connection": "keep-alive",
+        "Content-Encoding": "gzip",
+        "Content-Type": "text/html; charset=UTF-8",
+        "Date": "Wed, 15 Nov 2023 07:42:39 GMT",
+        "Transfer-Encoding": "chunked",
+        "Vary": "Accept-Encoding",
+        "X-Content-Type-Options": "nosniff",
+        "X-UA-Compatible": "IE=edge"
+    },
+    "[1. Missing HTTP Security Headers]": [
+        "Clear-Site-Data",
+        "Cross-Origin-Embedder-Policy",
+        "Cross-Origin-Opener-Policy",
+        "Cross-Origin-Resource-Policy",
+        "Content-Security-Policy",
+        "NEL",
+        "Permissions-Policy",
+        "Referrer-Policy",
+        "Strict-Transport-Security",
+        "X-Permitted-Cross-Domain-Policies",
+        "X-Frame-Options"
+    ],
+    "[2. Fingerprint HTTP Response Headers]": [
+        "Cf-Cache-Status",
+        "Cf-Ray",
+        "Server"
+    ],
+    "[3. Deprecated HTTP Response Headers/Protocols and Insecure Values]": [
+        "Cache-Control (Recommended Values)",
+        "X-UA-compatible (Deprecated Header)"
+    ],
+    "[4. Empty HTTP Response Headers Values]": [
+        "Nothing to report, all seems OK!"
+    ],
+    "[5. Browser Compatibility for Enabled HTTP Security Headers]": {
+        "Cache-Control": "https://caniuse.com/?search=Cache-Control",
+        "Content-Type": "https://caniuse.com/?search=Content-Type",
+        "X-Content-Type-Options": "https://caniuse.com/?search=X-Content-Type-Options"
+    }
+}

@@ -1,0 +1,266 @@
+{
+    "jsonapi": {
+        "version": "1.0"
+    },
+    "links": {
+        "self": "/rest/orgs/str123/issues?limit=10&scan_item.id=25502d3a-2799-4e20-97d6-2cb552058894&scan_item.type=project&version=2024-10-15",
+        "first": "/rest/orgs/str123/issues?limit=10&scan_item.id=25502d3a-2799-4e20-97d6-2cb552058894&scan_item.type=project&version=2024-10-15",
+        "last": "/rest/orgs/str123/issues?ending_before=end&limit=10&scan_item.id=25502d3a-2799-4e20-97d6-2cb552058894&scan_item.type=project&version=2024-10-15"
+    },
+    "data": [
+        {
+            "id": "3916a413-2fca-45c9-a1bf-a1373258fe69",
+            "type": "issue",
+            "attributes": {
+                "classes": [
+                    {
+                        "id": "CWE-352",
+                        "source": "CWE",
+                        "type": "weakness"
+                    }
+                ],
+                "coordinates": [
+                    {
+                        "is_fixable_manually": false,
+                        "is_fixable_snyk": false,
+                        "is_fixable_upstream": false,
+                        "representations": [
+                            {
+                                "sourceLocation": {
+                                    "commit_id": "5ab48c7da75182753420725182db92b679c1e4f0",
+                                    "file": "path/path/file.abc",
+                                    "region": {
+                                        "end": {
+                                            "column": 22,
+                                            "line": 71
+                                        },
+                                        "start": {
+                                            "column": 9,
+                                            "line": 65
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "created_at": "2024-12-13T12:29:59.035Z",
+                "description": "Cross-Site Request Forgery (CSRF)",
+                "effective_severity_level": "high",
+                "ignored": false,
+                "key": "9a29d87f-aa94-47eb-b46f-375b293a8631",
+                "key_asset": "4312279e-39d9-463d-b684-3a10059058f6",
+                "problems": [
+                    {
+                        "id": "9a29d87f-aa94-47eb-b46f-375b293a8631",
+                        "source": "SNYK",
+                        "type": "vulnerability",
+                        "updated_at": "2025-04-13T04:13:03.151452Z"
+                    }
+                ],
+                "risk": {
+                    "factors": [],
+                    "score": {
+                        "model": "v1",
+                        "value": 829
+                    }
+                },
+                "status": "open",
+                "title": "Cross-Site Request Forgery (CSRF)",
+                "type": "code",
+                "updated_at": "2025-03-08T01:31:31.667Z"
+            },
+            "relationships": {
+                "organization": {
+                    "data": {
+                        "id": "str123",
+                        "type": "organization"
+                    },
+                    "links": {
+                        "related": "/orgs/str123"
+                    }
+                },
+                "scan_item": {
+                    "data": {
+                        "id": "25502d3a-2799-4e20-97d6-2cb552058894",
+                        "type": "project"
+                    },
+                    "links": {
+                        "related": "/orgs/str123/projects/25502d3a-2799-4e20-97d6-2cb552058894"
+                    }
+                }
+            }
+        },
+        {
+            "id": "605a2477-69d4-4317-8649-1f7b92fa7c27",
+            "type": "issue",
+            "attributes": {
+                "classes": [
+                    {
+                        "id": "CWE-79",
+                        "source": "CWE",
+                        "type": "weakness"
+                    }
+                ],
+                "coordinates": [
+                    {
+                        "is_fixable_manually": false,
+                        "is_fixable_snyk": false,
+                        "is_fixable_upstream": false,
+                        "representations": [
+                            {
+                                "sourceLocation": {
+                                    "commit_id": "pab48c7da7t682753420725182db92b6k9c1e4f0",
+                                    "file": "path/path/file.abc",
+                                    "region": {
+                                        "end": {
+                                            "column": 90,
+                                            "line": 27
+                                        },
+                                        "start": {
+                                            "column": 61,
+                                            "line": 27
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "created_at": "2024-12-13T12:29:59.035Z",
+                "description": "Cross-site Scripting (XSS)",
+                "effective_severity_level": "medium",
+                "ignored": true,
+                "key": "b25fb1d7-c99b-46fb-818b-e94971ee9db0",
+                "key_asset": "081e6cf8-4249-4cbb-ae2f-0e3cdafba0cd",
+                "problems": [
+                    {
+                        "id": "b25fb1d7-c99b-46fb-818b-e94971ee9db0",
+                        "source": "SNYK",
+                        "type": "vulnerability",
+                        "updated_at": "2025-05-10T01:45:25.464473Z"
+                    }
+                ],
+                "risk": {
+                    "factors": [],
+                    "score": {
+                        "model": "v1",
+                        "value": 579
+                    }
+                },
+                "status": "open",
+                "title": "Cross-site Scripting (XSS)",
+                "type": "code",
+                "updated_at": "2025-05-10T01:45:23.452Z"
+            },
+            "relationships": {
+                "organization": {
+                    "data": {
+                        "id": "str123",
+                        "type": "organization"
+                    },
+                    "links": {
+                        "related": "/orgs/str123"
+                    }
+                },
+                "scan_item": {
+                    "data": {
+                        "id": "25502d3a-2799-4e20-97d6-2cb552058894",
+                        "type": "project"
+                    },
+                    "links": {
+                        "related": "/orgs/str123/projects/25502d3a-2799-4e20-97d6-2cb552058894"
+                    }
+                }
+            }
+        },
+        {
+            "id": "922e2d65-d2ce-4a5c-818c-ab196ba834c3",
+            "type": "issue",
+            "attributes": {
+                "classes": [
+                    {
+                        "id": "CWE-259",
+                        "source": "CWE",
+                        "type": "weakness"
+                    },
+                    {
+                        "id": "CWE-798",
+                        "source": "CWE",
+                        "type": "weakness"
+                    }
+                ],
+                "coordinates": [
+                    {
+                        "is_fixable_manually": false,
+                        "is_fixable_snyk": false,
+                        "is_fixable_upstream": false,
+                        "representations": [
+                            {
+                                "sourceLocation": {
+                                    "commit_id": "5ab48c7da75182753420725182db92b679c1e4f0",
+                                    "file": "path/path/file.abc",
+                                    "region": {
+                                        "end": {
+                                            "column": 41,
+                                            "line": 94
+                                        },
+                                        "start": {
+                                            "column": 33,
+                                            "line": 94
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "created_at": "2024-12-13T12:29:59.035Z",
+                "description": "Use of Hardcoded Passwords",
+                "effective_severity_level": "low",
+                "ignored": false,
+                "key": "a8edd3ae-722f-4668-81da-478b46fdf961",
+                "key_asset": "1dc3c841-be59-4889-a88f-a9ad10bbcd98",
+                "problems": [
+                    {
+                        "id": "a8edd3ae-722f-4668-81da-478b46fdf961",
+                        "source": "SNYK",
+                        "type": "vulnerability",
+                        "updated_at": "2025-05-31T01:32:18.84232Z"
+                    }
+                ],
+                "risk": {
+                    "factors": [],
+                    "score": {
+                        "model": "v1",
+                        "value": 379
+                    }
+                },
+                "status": "open",
+                "title": "Use of Hardcoded Passwords",
+                "type": "code",
+                "updated_at": "2025-05-31T01:32:17.121Z"
+            },
+            "relationships": {
+                "organization": {
+                    "data": {
+                        "id": "str123",
+                        "type": "organization"
+                    },
+                    "links": {
+                        "related": "/orgs/str123"
+                    }
+                },
+                "scan_item": {
+                    "data": {
+                        "id": "25502d3a-2799-4e20-97d6-2cb552058894",
+                        "type": "project"
+                    },
+                    "links": {
+                        "related": "/orgs/str123/projects/25502d3a-2799-4e20-97d6-2cb552058894"
+                    }
+                }
+            }
+        }
+    ]
+}

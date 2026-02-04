@@ -1,0 +1,87 @@
+{
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Mayhem Code Security",
+          "rules": [
+            {
+              "id": "MI101",
+              "name": "ImproperInputValidation",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://www.mayhem.security/",
+              "shortDescription": {
+                "text": "The software receives input or data, but it does not validate or incorrectly validates that the input has the properties that are required to process the data safely and correctly."
+              }
+            }
+          ],
+          "version": "2.12.0",
+          "informationUri": "https://www.mayhem.security/"
+        }
+      },
+      "results": [
+        {
+          "message": {
+            "markdown": "#0 0x7ffff7e47b1c in vfwprintf+0x23ec at ??:0:0\n#1 0x7ffff7dee26e in raise+0x1e at ??:0:0\n#2 0x7ffff7dd18ff in abort+0xdf at ??:0:0\n#3 0x5555555559a9 in ?? at ??:0:0\n#4 0x555555555ab8 in ?? at ??:0:0\n#5 0x7ffff7dd31ca in __libc_init_first+0x8a at ??:0:0\n#6 0x7ffff7dd328b in __libc_start_main+0x8b at ??:0:0\n#7 0x555555555875 in ?? at ??:0:0\n\n\n[Details](https://app.mayhem.security:443/forallsecure-demo/bazel-rules/mayhemit/10?defect=2211925)",
+            "text": "TDID-2211925 - Improper Input Validation"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                },
+                "artifactLocation": {
+                  "uri": "unknown_file"
+                }
+              }
+            }
+          ],
+          "taxa": [
+            {
+              "id": "20",
+              "toolComponent": {
+                "name": "CWE"
+              }
+            }
+          ],
+          "ruleId": "MI101"
+        }
+      ],
+      "taxonomies": [
+        {
+          "name": "CWE",
+          "organization": "MITRE",
+          "taxa": [
+            {
+              "id": "20",
+              "help": {
+                "text": "The product receives input or data, but it does not validate or incorrectly validates that the input has the properties that are required to process the data safely and correctly."
+              },
+              "name": "Improper Input Validation",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "The product receives input or data, but it does not validate or incorrectly validates that the input has the properties that are required to process the data safely and correctly."
+              },
+              "shortDescription": {
+                "text": "The product receives input or data, but it does not validate or incorrectly validates that the input has the properties that are required to process the data safely and correctly."
+              }
+            }
+          ],
+          "shortDescription": {
+            "text": "The MITRE Common Weakness Enumeration"
+          }
+        }
+      ]
+    }
+  ],
+  "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Documents/CommitteeSpecifications/2.1.0/sarif-schema-2.1.0.json"
+}

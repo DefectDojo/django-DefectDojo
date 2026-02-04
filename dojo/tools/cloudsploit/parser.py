@@ -8,10 +8,9 @@ from dojo.models import Finding  # , Endpoint
 # from urllib.parse import urlparse
 
 
-class CloudsploitParser(object):
-    """
-    AquaSecurity CloudSploit https://github.com/aquasecurity/cloudsploit
-    """
+class CloudsploitParser:
+
+    """AquaSecurity CloudSploit https://github.com/aquasecurity/cloudsploit"""
 
     def get_scan_types(self):
         return ["Cloudsploit Scan"]
@@ -25,30 +24,39 @@ class CloudsploitParser(object):
     def get_findings(self, file, test):
         data = json.load(file)
         find_date = datetime.now()
-        dupes = dict()
+        dupes = {}
         for item in data:
-            title = item['title']
-            if type(item['region']) is str:
-                region = item['region']
-            elif type(item['region']) is list:
-                region = ','.join(item['region'])
-            description = "**Finding** : " + item['message'] + "\n" + \
-                "**Resource** : " + item['resource'] + "\n" + \
-                "**Region** : " + region
-            severity = self.convert_severity(item['status'])
+            title = item["title"]
+            if isinstance(item["region"], str):
+                region = item["region"]
+            elif isinstance(item["region"], list):
+                region = ",".join(item["region"])
+            description = (
+                "**Finding** : "
+                + item["message"]
+                + "\n"
+                + "**Resource** : "
+                + item["resource"]
+                + "\n"
+                + "**Region** : "
+                + region
+            )
+            severity = self.convert_severity(item["status"])
             finding = Finding(
                 title=title,
                 test=test,
                 description=description,
-                component_name=item['resource'],
+                component_name=item["resource"],
                 severity=severity,
-                impact=item['description'],
+                impact=item["description"],
                 date=find_date,
                 dynamic_finding=True,
             )
 
             # internal de-duplication
-            dupe_key = hashlib.sha256(str(description + title).encode('utf-8')).hexdigest()
+            dupe_key = hashlib.sha256(
+                str(description + title).encode("utf-8"),
+            ).hexdigest()
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -66,5 +74,4 @@ class CloudsploitParser(object):
             return "Medium"
         if status == "FAIL":
             return "Critical"
-        else:
-            return "Info"
+        return "Info"

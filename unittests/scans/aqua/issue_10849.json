@@ -1,0 +1,127 @@
+[
+    { "image_name":  "test:latest",
+    "results":
+    {
+      "image": "test:latest",
+      "registry": "myregistry",
+      "scan_started": {
+        "seconds": 1721416289,
+        "nanos": 744607040
+      },
+      "scan_duration": 53,
+      "digest": "sha256:97a847b2a0230e01116e00d8b988a4d150b49ee2662032456ab5c46e39ccba1d",
+      "metadata": {},
+      "os": "debian",
+      "version": "11.7",
+      "resources": [
+        {
+          "resource": {
+            "format": "npm",
+            "path": "/juice-shop/node_modules/@babel/traverse",
+            "name": "@babel/traverse",
+            "version": "7.22.15",
+            "cpe": "pkg:/npm:*:@babel/traverse:7.22.15",
+            "license": "MIT",
+            "layer": "COPY /juice-shop . # buildkit",
+            "layer_digest": "sha256:69c661528fdd4ef0a0f4fdbd62ec988b9efb5c1a4d11651adb877a13a40da37d"
+          },
+          "scanned": true,
+          "vulnerabilities": [
+            {
+              "name": "CVE-2023-45133",
+              "type": "vulnerability",
+              "description": "Babel is a compiler for writingJavaScript. In `@babel/traverse` prior to versions 7.23.2 and 8.0.0-alpha.4 and all versions of `babel-traverse`, using Babel to compile code that was specifically crafted by an attacker can lead to arbitrary code execution during compilation, when using plugins that rely on the `path.evaluate()`or `path.evaluateTruthy()` internal Babel methods. Known affected plugins are `@babel/plugin-transform-runtime`; `@babel/preset-env` when using its `useBuiltIns` option; and any \"polyfill provider\" plugin that depends on `@babel/helper-define-polyfill-provider`, such as `babel-plugin-polyfill-corejs3`, `babel-plugin-polyfill-corejs2`, `babel-plugin-polyfill-es-shims`, `babel-plugin-polyfill-regenerator`. No other plugins under the `@babel/` namespace are impacted, but third-party plugins might be. Users that only compile trusted code are not impacted. The vulnerability has been fixed in `@babel/traverse@7.23.2` and `@babel/traverse@8.0.0-alpha.4`. Those who cannot upgrade `@babel/traverse` and are using one of the affected packages mentioned above should upgrade them to their latest version to avoid triggering the vulnerable code path in affected `@babel/traverse` versions: `@babel/plugin-transform-runtime` v7.23.2, `@babel/preset-env` v7.23.2, `@babel/helper-define-polyfill-provider` v0.4.3, `babel-plugin-polyfill-corejs2` v0.4.6, `babel-plugin-polyfill-corejs3` v0.8.5, `babel-plugin-polyfill-es-shims` v0.10.0, `babel-plugin-polyfill-regenerator` v0.5.3.",
+              "nvd_url": "https://nvd.nist.gov/vuln/detail/CVE-2023-45133",
+              "publish_date": "2023-10-12",
+              "modification_date": "2023-10-24",
+              "fix_version": "7.23.2, 8.0.0-alpha.4",
+              "solution": "Upgrade package @babel/traverse to version 8.0.0-alpha.4, 7.23.2 or above.",
+              "nvd_score_v3": 8.8,
+              "nvd_vectors_v3": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H",
+              "nvd_severity_v3": "high",
+              "aqua_score": 8.8,
+              "aqua_severity": "high",
+              "aqua_vectors": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H",
+              "aqua_scoring_system": "CVSS V3",
+              "heuristic_ref_id": 265547,
+              "aqua_severity_classification": "NVD CVSS V3 Score: 8.8",
+              "aqua_score_classification": "NVD CVSS V3 Score: 8.8",
+              "cwe_info": [
+                {
+                  "Id": "CWE-697",
+                  "name": "Incorrect Comparison"
+                },
+                {
+                  "Id": "CWE-184",
+                  "name": "Incomplete List of Disallowed Inputs"
+                }
+              ],
+              "epss_score": 0.0006,
+              "epss_percentile": 0.23474,
+              "epss_date": "2024-01-22"
+            }
+          ]
+        }
+      ],
+      "image_assurance_results": {
+        "checks_performed": [
+          {
+            "policy_id": 6,
+            "policy_name": "Malware-Default-Policy",
+            "control": "malware",
+            "malware_file_scanned": 2057
+          }
+        ]
+      },
+      "vulnerability_summary": {
+        "total": 98,
+        "critical": 15,
+        "high": 47,
+        "medium": 35,
+        "low": 1,
+        "negligible": 38,
+        "sensitive": 3,
+        "score_average": 7.2989764
+      },
+      "scan_options": {
+        "scan_executables": true,
+        "scan_sensitive_data": true,
+        "scan_malware": true,
+        "scan_files": true,
+        "scan_timeout": 3600000000000,
+        "manual_pull_fallback": true,
+        "save_adhoc_scans": true,
+        "use_cvss3": true,
+        "dockerless": true,
+        "system_image_platform": "amd64:::",
+        "enable_fast_scanning": true,
+        "memoryThrottling": true,
+        "suggest_os_upgrade": true,
+        "adhoc_scan_retention": 30,
+        "enable_diff_ids": true,
+        "is_trivy_enabled": true,
+        "register_image": true,
+        "socket": "docker"
+      },
+      "initiating_user": "myuser",
+      "pull_name": "test:latest",
+      "original_registry": "myregistry",
+      "scan_id": 1060,
+      "required_image_platform": "amd64:::",
+      "scanned_image_platform": ":::",
+      "security_feeds_used": {
+        "executables": "12345"
+      },
+      "image_id": 45,
+      "internal_digest_id": {
+        "id": 276
+      },
+      "local": true,
+      "isAdhocRegister": true,
+      "OriginFromHostImage": true,
+      "FileHashEncoding": "zlib",
+      "registryType": 6
+    }
+    }
+    ]
+    

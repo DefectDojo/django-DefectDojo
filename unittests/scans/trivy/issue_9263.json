@@ -1,0 +1,75 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "sbom.json",
+  "ArtifactType": "cyclonedx",
+  "Metadata": {
+    "ImageConfig": {
+      "architecture": "",
+      "created": "0001-01-01T00:00:00Z",
+      "os": "",
+      "rootfs": {
+        "type": "",
+        "diff_ids": null
+      },
+      "config": {}
+    }
+  },
+  "Results": [
+    {
+      "Target": "requirements.txt",
+      "Class": "lang-pkgs",
+      "Type": "pip",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2013-7445",
+          "PkgID": "linux-libc-dev@6.1.55-1",
+          "PkgName": "linux-libc-dev",
+          "InstalledVersion": "6.1.55-1",
+          "Status": "will_not_fix",
+          "Layer": {
+            "Digest": "sha256:938cae48a646a95127345a544f75f4e0b83f5fa612858e524aedea6981af4a1e",
+            "DiffID": "sha256:dfe25755ef07309fcb76dd47b2bb21e6dd92adedce8d9aa7f5bbceaf7fc726c9"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2013-7445",
+          "DataSource": {
+            "ID": "debian",
+            "Name": "Debian Security Tracker",
+            "URL": "https://salsa.debian.org/security-tracker-team/security-tracker"
+          },
+          "Title": "kernel: memory exhaustion via crafted Graphics Execution Manager (GEM) objects",
+          "Description": "The Direct Rendering Manager (DRM) subsystem in the Linux kernel through 4.x mishandles requests for Graphics Execution Manager (GEM) objects, which allows context-dependent attackers to cause a denial of service (memory consumption) via an application that processes graphics data, as demonstrated by JavaScript code that creates many CANVAS elements for rendering by Chrome or Firefox.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-399"
+          ],
+          "VendorSeverity": {
+            "nvd": 3,
+            "redhat": 2,
+            "ubuntu": 2
+          },
+          "CVSS": {
+            "nvd": {
+              "V2Vector": "AV:N/AC:L/Au:N/C:N/I:N/A:C",
+              "V2Score": 7.8
+            },
+            "redhat": {
+              "V2Vector": "AV:N/AC:M/Au:N/C:N/I:N/A:P",
+              "V2Score": 4.3
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2013-7445",
+            "https://bugzilla.kernel.org/show_bug.cgi?id=60533",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2013-7445",
+            "https://lists.freedesktop.org/archives/dri-devel/2015-September/089778.html (potential start towards fixing)",
+            "https://nvd.nist.gov/vuln/detail/CVE-2013-7445",
+            "https://www.cve.org/CVERecord?id=CVE-2013-7445"
+          ],
+          "PublishedDate": "2015-10-16T01:59:00.12Z",
+          "LastModifiedDate": "2015-10-16T16:22:25.587Z"
+        }
+      ]
+    }
+  ]
+}

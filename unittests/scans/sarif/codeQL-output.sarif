@@ -5876,18 +5876,6 @@
                   "uri" : "bad/libapi.py",
                   "uriBaseId" : "%SRCROOT%",
                   "index" : 31
-                },
-                "region" : {
-                  "startLine" : 8,
-                  "startColumn" : 12,
-                  "endColumn" : 20
-                },
-                "contextRegion" : {
-                  "startLine" : 6,
-                  "endLine" : 10,
-                  "snippet" : {
-                    "text" : "\n\ndef keygen(username, password=None):\n\n    if password:\n"
-                  }
                 }
               },
               "message" : {

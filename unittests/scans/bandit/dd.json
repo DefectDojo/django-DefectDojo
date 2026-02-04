@@ -2570,7 +2570,7 @@
       "loc": 62,
       "nosec": 0
     },
-    "dojo/tools/whitesource/__init__.py": {
+    "dojo/tools/mend/__init__.py": {
       "CONFIDENCE.HIGH": 0.0,
       "CONFIDENCE.LOW": 0.0,
       "CONFIDENCE.MEDIUM": 0.0,
@@ -2582,7 +2582,7 @@
       "loc": 0,
       "nosec": 0
     },
-    "dojo/tools/whitesource/parser.py": {
+    "dojo/tools/mend/parser.py": {
       "CONFIDENCE.HIGH": 1.0,
       "CONFIDENCE.LOW": 0.0,
       "CONFIDENCE.MEDIUM": 0.0,
@@ -3336,7 +3336,7 @@
     },
     {
       "code": "103         def _dedup_and_create_finding(dupes, vuln):\n104             dupe_key = hashlib.md5(vuln.get('description').encode('utf-8') + vuln.get('title').encode('utf-8')).hexdigest()\n105 \n",
-      "filename": "dojo/tools/whitesource/parser.py",
+      "filename": "dojo/tools/mend/parser.py",
       "issue_confidence": "HIGH",
       "issue_severity": "MEDIUM",
       "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",

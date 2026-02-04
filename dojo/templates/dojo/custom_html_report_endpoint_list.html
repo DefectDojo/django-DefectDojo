@@ -15,11 +15,11 @@
     </p>
 {% endif %}
 
-<div id="endpoint_content">
+<div id="endpoint_content" class="endpoint_content report_widget">
     {% for endpoint in endpoints %}
-        <div class="panel panel-warning">
+        <div class="panel panel-default panel-warning">
             <div class="panel-heading">
-                <h4>
+                <h4 class="report_endpoint">
                     Endpoint: {{ endpoint }} with {{ endpoint.active_findings|length|apnumber }}
                     active findings
                 </h4>
@@ -28,12 +28,12 @@
 
         {% for finding in endpoint.active_findings %}
             {% ifchanged finding.severity %}
-                <h4>{{ finding.severity|capfirst }}</h4>
+                <h4 class="report_findings_severity">{{ finding.severity|capfirst }}</h4>
             {% endifchanged %}
             <div class="panel panel-default">
                 <div class="panel-heading finding-title">
                     <div class="clearfix">
-                        <h5>
+                        <h5 class="report_findings_entry">
                             Finding {{ forloop.counter }}: {{ finding.title }}
                             {% if finding.tags %}
                                 <sup>
@@ -49,6 +49,7 @@
                     <table id="heading" class="table-striped table table-condensed table-hover centered">
                         <tr>
                             <th>Severity</th>
+                            <th>EPSS Score / Percentile</th>
                             <th>Status</th>
                             {% if finding.risk_acceptance_set.all %}
                                 <th>Acceptance</th>
@@ -75,6 +76,11 @@
                                 {% endif %}
                             </span>
                             </td>
+                            <td>
+                                {{ finding.epss_score|format_epss }}
+                                /
+                                {{ finding.epss_percentile|format_epss }}
+                            </td>
                             <td>{{ finding.status }}</td>
                             {% if finding.risk_acceptance_set.all %}
                                 <td>
@@ -96,7 +102,7 @@
                                 <td>
                                     <a target="_blank"
                                         href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                        <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
                                     </a>
                                 </td>
                             {% endif %}
@@ -145,7 +151,7 @@
             <pre>{{ finding.references|markdown_render }}</pre>
             {% endif %}
             {% if include_finding_images %}
-                {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="HTML" %}
+                {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="INLINE" %}
             {% endif %}
             {% if include_finding_notes %}
                 {% with notes=finding.notes.all|get_public_notes %}

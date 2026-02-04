@@ -1,0 +1,85 @@
+{
+  "version": "1.100.0",
+  "results": [
+    {
+      "check_id": "python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args",
+      "path": "sample/brute.py",
+      "start": { "line": 31, "col": 29, "offset": 285 },
+      "end": { "line": 31, "col": 58, "offset": 314 },
+      "extra": {
+        "message": "Detected subprocess function 'run' with user controlled data. A malicious actor could leverage this to perform command injection. You may consider using 'shlex.quote()'.",
+        "metadata": {
+          "owasp": ["A01:2017 - Injection", "A03:2021 - Injection"],
+          "cwe": ["CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"],
+          "asvs": {
+            "control_id": "5.3.8 OS Command Injection",
+            "control_url": "https://github.com/OWASP/ASVS/blob/master/4.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v53-output-encoding-and-injection-prevention-requirements",
+            "section": "V5: Validation, Sanitization and Encoding Verification Requirements",
+            "version": "4"
+          },
+          "references": [
+            "https://stackoverflow.com/questions/3172470/actual-meaning-of-shell-true-in-subprocess",
+            "https://docs.python.org/3/library/subprocess.html",
+            "https://docs.python.org/3/library/shlex.html",
+            "https://semgrep.dev/docs/cheat-sheets/python-command-injection/"
+          ],
+          "category": "security",
+          "technology": ["python"],
+          "confidence": "MEDIUM",
+          "cwe2022-top25": true,
+          "cwe2021-top25": true,
+          "subcategory": ["vuln"],
+          "likelihood": "MEDIUM",
+          "impact": "MEDIUM",
+          "vulnerability_class": ["Command Injection"],
+          "source": "https://semgrep.dev/r/python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args",
+          "shortlink": "https://sg.run/pLGg"
+        },
+        "severity": "ERROR",
+        "fingerprint": "requires login",
+        "lines": "requires login"
+      }
+    },
+    {
+      "check_id": "go.lang.security.audit.database.string-formatted-query.string-formatted-query",
+      "path": "sample/function.go",
+      "start": { "line": 37, "col": 2, "offset": 541 },
+      "end": { "line": 40, "col": 27, "offset": 722 },
+      "extra": {
+        "message": "String-formatted SQL query detected. This could lead to SQL injection if the string is not sanitized properly. Audit this call to ensure the SQL is not manipulable by external data.",
+        "metadata": {
+          "owasp": ["A01:2017 - Injection", "A03:2021 - Injection"],
+          "cwe": ["CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"],
+          "references": ["https://owasp.org/Top10/A03_2021-Injection"],
+          "category": "security",
+          "technology": ["go"],
+          "confidence": "LOW",
+          "cwe2022-top25": true,
+          "cwe2021-top25": true,
+          "subcategory": ["audit"],
+          "likelihood": "LOW",
+          "impact": "HIGH",
+          "vulnerability_class": ["SQL Injection"],
+          "source": "https://semgrep.dev/r/go.lang.security.audit.database.string-formatted-query.string-formatted-query",
+          "shortlink": "https://sg.run/ydEr"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login"
+      }
+    }
+  ],
+  "errors": [],
+  "paths": {
+    "scanned": [
+      "README.md",
+      "sample/brute.py",
+      "sample/findmysecrets.go",
+      "sample/function.go",
+      "sample/go.mod",
+      "sample/session.go",
+      "sample/sqli.go"
+    ]
+  },
+  "skipped_rules": []
+}

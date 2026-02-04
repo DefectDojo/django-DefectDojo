@@ -11,11 +11,11 @@
                     <h3 class="has-filters">
                         {{ name }}
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Add" %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="Endpoint actions">
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
@@ -26,7 +26,7 @@
                                       {% else %}
                                         <a href="{% url 'add_product_endpoint' %}">
                                       {% endif %}
-                                            <i class="fa fa-plus"></i> New Endpoint
+                                            <i class="fa-solid fa-plus"></i> New Endpoint
                                         </a>
                                     </li>
                             </ul>
@@ -52,9 +52,9 @@
             </button>
                         {% endif %}
                         {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Delete" %}
-						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Endpoint">
+						<button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Endpoint" aria-label="Delete endpoint">
 								<a class="white-color delete-bulk" href="#" alt="Delete Endpoints">
-								<i class="fa fa-trash"></i>
+								<i class="fa-solid fa-trash"></i>
 								</a>
 						</button>
                         {% endif %}
@@ -70,28 +70,31 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
                             {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
-                            <th class="hidden-sm centered" title="Select all visible endpoint." id="bulk_edit">
+                            <th class="centered" title="Select all visible endpoints." aria-label="Select all visible endpoints." id="bulk_edit" scope="col">
                                 <form class="inline-form centered" action="#">
-                                    <input type="checkbox" title="Select All" name="select_all" id="select_all"></input>
+                                    <input aria-label="Select all visible endpoints checkbox" type="checkbox" title="Select All" name="select_all" id="select_all"></input>
                                 </form>
                             </th>
                             {% endif %}
                             {% if host_view %}
-                                <th>{% dojo_sort request 'Host' 'host' %}</th>
+                                {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
+                                <th scope="col">{% dojo_sort request 'Host' 'host' %}</th>
                             {% else %}
-                                <th>{% dojo_sort request 'Endpoint' 'endpoint' %}</th>
+                                {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
+                                <th scope="col">{% dojo_sort request 'Endpoint' 'endpoint' %}</th>
                             {% endif %}
                             {% if not product_tab %}
-                                <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
+                                {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
+                                <th scope="col">{% dojo_sort request 'Product' 'product' 'asc' %}</th>
                             {% endif %}
-							<th class="text-center" nowrap="nowrap">Active Verified Findings</th>
-							<th>Status</th>
+							<th class="text-center" nowrap="nowrap" scope="col">Active (Verified) Findings</th>
+							<th scope="col">Status</th>
                         </tr>
 
                         {% for e in endpoints %}
                             <tr>
                                 {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
-                                <td class="hidden-sm centered">
+                                <td class="centered">
                                     <form action="#">
                                         <input type="checkbox" title= "Select_{{ e.id }}" name="select_{{ e.id }}"
                                                id="{{ e.id }}"  class="select_one {{ e.id }}"></input>
@@ -99,14 +102,14 @@
                                 </td>
                                 {% endif %}
                                 {% if host_view %}
-                                  <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
+                                  <td><a href="{% url 'view_endpoint_host' e.id %}" title="{{ e.host }}">{{ e.host|url_shortener }}</a>
                                 {% else %}
                                 <td>
-                                  <a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
+                                  <a href="{% url 'view_endpoint' e.id %}" title="{{ e }}">{{ e|url_shortener }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                 {% endif %}
                                   {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
-                                {% if not product_tab %}
+                                {% if not product_tab and e.product %}
                                   <td>
                                     <a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}
@@ -114,13 +117,10 @@
                                 {% endif %}
                                 <td class="text-center">
                                   {% if host_view %}
-                                      {{ e.host_active_findings_count }}
+                                       {{ e.host_active_findings_count }} ({{ e.host_active_verified_findings_count }})
                                   {% else %}
-                                    {% if e.active_findings_count > 0 %}
-                                      <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">{{ e.active_findings_count }}</a>
-                                    {% else %}
-                                      0
-                                    {% endif %}
+                                      <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.active_findings_count }}</a>
+                                      <a href="{% url 'verified_findings' %}?endpoints={{ e.id }}">({{ e.active_verified_findings_count }})</a>
                                   {% endif %}
                                 </td>
                                 <td>
@@ -133,7 +133,7 @@
                                       {% if e.active_findings_count > 0 %}
                                         Vulnerable
                                       {% else %}
-                                        No active verified findings
+                                        No active findings
                                       {% endif %}
                                     {% endif %}
                                   {% endif %}
@@ -147,9 +147,9 @@
                 </div>
             {% else %}
                 {% if host_view %}
-                    <h5> No hosts </h5>
+                  <div id="no_hosts"><p class="text-center">No hosts found.</p></div>
                 {% else %}
-                    <h5> No endpoints </h5>
+                  <div id="no_endpoints"><p class="text-center">No endpoints found.</p></div>
                 {% endif %}
             {% endif %}
         </div>

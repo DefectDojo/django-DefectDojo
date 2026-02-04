@@ -4,13 +4,12 @@ from dojo.models import Finding
 
 
 class RubocopParser:
-
     ID = "Rubocop Scan"
 
     # possible values are:
     # `:info`, `:refactor`, `:convention`, `:warning`, `:error` or `:fatal`.
     # see https://github.com/rubocop/rubocop/blob/master/lib/rubocop/cop/severity.rb
-    # TODO change when the tool support it (not now 1.24.1, always "conventionnal")
+    # TODO: change when the tool support it (not now 1.24.1, always "conventionnal")
     # current version (1.13.0) always populate severity to "conventionnal"
     # so we force it to 'Medium'
     SEVERITY_MAPPING = {
@@ -37,7 +36,7 @@ class RubocopParser:
     def get_findings(self, scan_file, test):
         """Load a file as JSON file and create findings"""
         data = json.load(scan_file)
-        findings = list()
+        findings = []
         for vuln_file in data.get("files", []):
             path = vuln_file.get("path")
             for offense in vuln_file.get("offenses", []):
@@ -50,7 +49,7 @@ class RubocopParser:
                         f"**Message**: {offense.get('message')}",
                         f"**Is correctable?**: `{offense.get('correctable')}`",
                         f"**Location**: `{'-'.join(offense['location'])}`",
-                    ]
+                    ],
                 )
                 finding = Finding(
                     test=test,

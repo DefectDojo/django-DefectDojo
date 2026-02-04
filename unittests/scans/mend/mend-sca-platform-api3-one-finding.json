@@ -1,0 +1,81 @@
+{
+  "additionalData": {
+    "totalItems": 1,
+    "paging": { }
+  },
+  "supportToken": "17da68189a2eb40ec9b5d99c8141495191731541262319",
+  "response": [
+    {
+      "uuid": "7d60c0ad-1585-4aab-a74c-120e5819d84c",
+      "name": "CVE-2024-51744",
+      "type": "SECURITY_VULNERABILITY",
+      "component": {
+        "uuid": "e8e7d995-e58a-4a02-b929-76a2963f088a",
+        "name": "github.com/golang-JWT/jwt-v3.2.2+incompatible",
+        "description": "",
+        "componentType": "Library",
+        "libraryType": "GO_PACKAGE",
+        "rootLibrary": "True",
+        "references": {
+          "url": "https://proxy.golang.org/github.com/golang-!j!w!t/jwt/@v/v3.2.2+incompatible.zip",
+          "homePage": "https://pkg.go.dev/github.com/golang-JWT/jwt@v3.2.2+incompatible",
+          "genericPackageIndex": "http://go-search.org/api?action=package&id=github.com%2Fgolang-JWT%2Fjwt"
+        },
+        "groupId": "github.com/golang-JWT/jwt",
+        "artifactId": "github.com/golang-JWT/jwt",
+        "version": "v3.2.2+incompatible",
+        "path": "/source/go.mod",
+        "dependencyType": "Direct / Transitive"
+      },
+      "findingInfo": {
+        "status": "ACTIVE",
+        "comment": { },
+        "detectedAt": "2024-11-10T08:47:02Z",
+        "modifiedAt": "2024-11-10T08:47:02Z"
+      },
+      "project": {
+        "uuid": "32bff718-28a2-463b-9c4f-7f66b286b34c",
+        "name": "project-name",
+        "path": "application-name",
+        "applicationUuid": "8663102a-5f11-4139-9281-c4c72a6ea402"
+      },
+      "application": {
+        "uuid": "8663102a-5f11-4139-9281-c4c72a6ea402",
+        "name": "application-name"
+      },
+      "vulnerability": {
+        "name": "CVE-2024-51744",
+        "type": "CVSS_3",
+        "description": "golang-jwt is a Go implementation of JSON Web Tokens. Unclear documentation of the error behavior in `ParseWithClaims` can lead to situation where users are potentially not checking errors in the way they should be. Especially, if a token is both expired and invalid, the errors returned by `ParseWithClaims` return both error codes. If users only check for the `jwt.ErrTokenExpired ` using `error.Is`, they willignore the embedded `jwt.ErrTokenSignatureInvalid` and thus potentially accept invalid tokens. A fix has been back-ported with the error handling logic from the `v5` branch to the `v4` branch. In this logic, the `ParseWithClaims` function will immediately return in 'dangerous' situations (e.g., an invalid signature), limiting the combined errors only to situations where the signature is valid, but further validation failed (e.g., if the signature is valid, but is expired AND has the wrong audience). This fix is part of the 4.5.1 release. We are aware that this changes the behaviour of an established function and is not 100 % backwards compatible, so updating to 4.5.1 might break your code. In case you cannot update to 4.5.0, please make sure that you are properly checking for all errors ('dangerous' ones first), so that you are not running in the case detailed above.",
+        "score": 3.1,
+        "severity": "LOW",
+        "publishDate": "2024-11-04T21:47:12Z",
+        "modifiedDate": "2024-11-05T16:11:42Z",
+        "vulnerabilityScoring": [
+          {
+            "score": 3.1,
+            "severity": "LOW",
+            "type": "CVSS_3"
+          }
+        ]
+      },
+      "topFix": {
+        "id": 135282,
+        "vulnerability": "CVE-2024-51744",
+        "type": "UPGRADE_VERSION",
+        "origin": "WHITESOURCE_EXPERT",
+        "url": "https://github.com/golang-jwt/jwt/security/advisories/GHSA-29wx-vh33-7x7r",
+        "fixResolution": "github.com/golang-jwt/jwt-v4.5.1",
+        "date": "2024-11-04T21:47:12Z",
+        "message": "Upgrade to version"
+      },
+      "effective": "NO_SHIELD",
+      "threatAssessment": {
+        "exploitCodeMaturity": "NOT_DEFINED",
+        "epssPercentage": 0.0
+      },
+      "exploitable": "False",
+      "scoreMetadataVector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:N"
+    }
+  ]
+}

@@ -1,6 +1,11 @@
-from django.conf.urls import url
-from . import views
+from django.urls import re_path
+
+from dojo.system_settings import views
 
 urlpatterns = [
-    url(r'^system_settings$', views.system_settings, name='system_settings')
+    re_path(
+        r"^system_settings$",
+        views.SystemSettingsView.as_view(),
+        name="system_settings",
+    ),
 ]

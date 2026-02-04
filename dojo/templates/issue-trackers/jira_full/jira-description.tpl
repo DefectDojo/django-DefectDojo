@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load get_endpoint_status %}
 {% url 'view_product' finding.test.engagement.product.id as product_url %}
 {% url 'view_engagement' finding.test.engagement.id as engagement_url %}
 {% url 'view_test' finding.test.id as test_url %}
@@ -25,7 +26,7 @@
 {% endif %}
 
 {% if finding.cvssv3_score %}
-*CVSSv3 Score:* {{ finding.cvssv3_score }}
+*CVSSv3 Score:* {{ finding.cvssv3_score }} {% if finding.cvssv3 %}({{ finding.cvssv3 }}){% endif %}
 {% endif %}
 
 *Product/Engagement/Test:* [{{ finding.test.engagement.product.name }}|{{ product_url|full_url }}] / [{{ finding.test.engagement.name }}|{{ engagement_url|full_url }}] / [{{ finding.test }}|{{ test_url|full_url }}]
@@ -44,12 +45,12 @@
 
 {% if finding.endpoints.all %}
 *Systems/Endpoints*:
-{% for endpoint in finding.endpoints.all %}
-* {{ endpoint }}{% endfor %}
-{% comment %}
-    we leave the endfor at the same line to avoid double line breaks i.e. too many blank lines
-{% endcomment %}
+||System/Endpoint||Status||
+{% for endpoint in finding|get_vulnerable_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
+{% endfor %}{% for endpoint in finding|get_mitigated_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
+{% endfor %}
 {%endif%}
+
 
 {% if finding.component_name %}
 *Vulnerable Component*: {{finding.component_name }} - {{ finding.component_version }}
@@ -61,7 +62,9 @@
 *Source Line*: {{ finding.sast_source_line }}
 *Sink Object*: {{ finding.sast_sink_object }}
 {% elif finding.static_finding %}
-{% if finding.file_path %}
+{% if finding.file_path and finding.get_file_path_with_raw_link %}
+*Source File*: [{{ finding.file_path }} | {{ finding.get_file_path_with_raw_link }}]
+{% elif finding.file_path %}
 *Source File*: {{ finding.file_path }}
 {% endif %}
 {% if finding.line %}
@@ -70,26 +73,32 @@
 {% endif %}
 
 *Description*:
-{{ finding.description }}
+{{ finding.description|safe }}
 
 {% if finding.mitigation %}
 *Mitigation*:
-{{ finding.mitigation }}
+{{ finding.mitigation|safe }}
 {% endif %}
 
-{% if finding.impact %}
+{% if finding.impact|safe %}
 *Impact*:
 {{ finding.impact }}
 {% endif %}
 
 {% if finding.steps_to_reproduce %}
 *Steps to reproduce*:
-{{ finding.steps_to_reproduce }}
+{{ finding.steps_to_reproduce|safe }}
 {% endif %}
 
 {% if finding.references %}
 *References*:
-{{ finding.references }}
+{{ finding.references|safe }}
 {% endif %}
+
+{% if finding_text %}
+*Finding Text*:
+{{ finding_text|safe }}
+{% endif %}
+
 
 *Reporter:* [{{ finding.reporter|full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]

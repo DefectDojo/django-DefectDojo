@@ -1,0 +1,267 @@
+[
+    {
+        "config": {
+            "protocol_version": "v1.0.0",
+            "scanner_name": "govulncheck",
+            "scanner_version": "v1.0.0",
+            "db": "https://vuln.go.dev",
+            "db_last_modified": "2023-08-11T01:41:48Z",
+            "go_version": "go1.20.1",
+            "scan_level": "symbol"
+        }
+    },{
+        "progress": {
+            "message": "Scanning your code and 554 packages across 80 dependent modules for known vulnerabilities..."
+        }
+    },{
+        "osv": {
+            "schema_version": "1.3.1",
+            "id": "GO-2023-1840",
+            "modified": "2023-06-12T18:45:41Z",
+            "published": "2023-06-08T20:16:06Z",
+            "aliases": [
+                "CVE-2023-29403"
+            ],
+            "summary": "Unsafe behavior in setuid/setgid binaries in runtime",
+            "details": "On Unix platforms, the Go runtime does not behave differently when a binary is run with the setuid/setgid bits. This can be dangerous in certain cases, such as when dumping memory state, or assuming the status of standard i/o file descriptors.\n\nIf a setuid/setgid binary is executed with standard I/O file descriptors closed, opening any files can result in unexpected content being read or written with elevated privileges. Similarly, if a setuid/setgid program is terminated, either via panic or signal, it may leak the contents of its registers.",
+            "affected": [
+                {
+                    "package": {
+                        "name": "stdlib",
+                        "ecosystem": "Go"
+                    },
+                    "ranges": [
+                        {
+                            "type": "SEMVER",
+                            "events": [
+                                {
+                                    "introduced": "0"
+                                },
+                                {
+                                    "fixed": "1.19.10"
+                                },
+                                {
+                                    "introduced": "1.20.0-0"
+                                },
+                                {
+                                    "fixed": "1.20.5"
+                                }
+                            ]
+                        }
+                    ],
+                    "ecosystem_specific": {
+                        "imports": [
+                            {
+                                "path": "runtime"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "references": [
+                {
+                    "type": "REPORT",
+                    "url": "https://go.dev/issue/60272"
+                },
+                {
+                    "type": "FIX",
+                    "url": "https://go.dev/cl/501223"
+                },
+                {
+                    "type": "WEB",
+                    "url": "https://groups.google.com/g/golang-announce/c/q5135a9d924/m/j0ZoAJOHAwAJ"
+                }
+            ],
+            "credits": [
+                {
+                    "name": "Vincent Dehors from Synacktiv"
+                }
+            ],
+            "database_specific": {
+                "url": "https://pkg.go.dev/vuln/GO-2023-1840"
+            }
+        }
+    }, {
+        "finding": {
+            "osv": "GO-2023-1840",
+            "fixed_version": "v1.20.5",
+            "trace": [
+                {
+                    "module": "stdlib",
+                    "version": "v1.20.1",
+                    "package": "runtime",
+                    "function": "BlockProfile"
+                },
+                {
+                    "module": "stdlib",
+                    "version": "v1.20.1",
+                    "package": "runtime/pprof",
+                    "function": "writeProfileInternal",
+                    "position": {
+                        "filename": "/usr/local/go/src/runtime/pprof/pprof.go",
+                        "offset": 27563,
+                        "line": 867,
+                        "column": 25
+                    }
+                },
+                {
+                    "module": "stdlib",
+                    "version": "v1.20.1",
+                    "package": "runtime/pprof",
+                    "function": "writeBlock",
+                    "position": {
+                        "filename": "/usr/local/go/src/runtime/pprof/pprof.go",
+                        "offset": 27040,
+                        "line": 856,
+                        "column": 29
+                    }
+                },
+                {
+                    "module": "stdlib",
+                    "version": "v1.20.1",
+                    "package": "runtime/pprof",
+                    "function": "WriteTo",
+                    "receiver": "*Profile",
+                    "position": {
+                        "filename": "/usr/local/go/src/runtime/pprof/pprof.go",
+                        "offset": 10453,
+                        "line": 329,
+                        "column": 17
+                    }
+                },
+                {
+                    "module": "go.elastic.co/apm",
+                    "version": "v1.15.0",
+                    "package": "go.elastic.co/apm",
+                    "function": "newLookupProfilingState$1",
+                    "position": {
+                        "filename": "/Users/Ma1tobiose/pkg/mod/go.elastic.co/apm@v1.15.0/profiling.go",
+                        "offset": 2067,
+                        "line": 64,
+                        "column": 25
+                    }
+                },
+                {
+                    "module": "go.elastic.co/apm",
+                    "version": "v1.15.0",
+                    "package": "go.elastic.co/apm",
+                    "function": "profile",
+                    "receiver": "*profilingState",
+                    "position": {
+                        "filename": "/Users/Ma1tobiose/pkg/mod/go.elastic.co/apm@v1.15.0/profiling.go",
+                        "offset": 4506,
+                        "line": 149,
+                        "column": 30
+                    }
+                },
+                {
+                    "module": "go.elastic.co/apm",
+                    "version": "v1.15.0",
+                    "package": "go.elastic.co/apm",
+                    "function": "start$1",
+                    "position": {
+                        "filename": "/Users/Ma1tobiose/pkg/mod/go.elastic.co/apm@v1.15.0/profiling.go",
+                        "offset": 3898,
+                        "line": 128,
+                        "column": 26
+                    }
+                },
+                {
+                    "module": "go.elastic.co/apm",
+                    "version": "v1.15.0",
+                    "package": "go.elastic.co/apm",
+                    "function": "start",
+                    "receiver": "*profilingState",
+                    "position": {
+                        "filename": "/Users/Ma1tobiose/pkg/mod/go.elastic.co/apm@v1.15.0/profiling.go",
+                        "offset": 3811,
+                        "line": 126,
+                        "column": 2
+                    }
+                },
+                {
+                    "module": "go.elastic.co/apm",
+                    "version": "v1.15.0",
+                    "package": "go.elastic.co/apm",
+                    "function": "loop",
+                    "receiver": "*Tracer",
+                    "position": {
+                        "filename": "/Users/Ma1tobiose/pkg/mod/go.elastic.co/apm@v1.15.0/tracer.go",
+                        "offset": 34540,
+                        "line": 1065,
+                        "column": 27
+                    }
+                },
+                {
+                    "module": "go.elastic.co/apm",
+                    "version": "v1.15.0",
+                    "package": "go.elastic.co/apm",
+                    "function": "newTracer",
+                    "position": {
+                        "filename": "/Users/Ma1tobiose/pkg/mod/go.elastic.co/apm@v1.15.0/tracer.go",
+                        "offset": 15939,
+                        "line": 496,
+                        "column": 2
+                    }
+                },
+                {
+                    "module": "go.elastic.co/apm",
+                    "version": "v1.15.0",
+                    "package": "go.elastic.co/apm",
+                    "function": "init#2",
+                    "position": {
+                        "filename": "/Users/Ma1tobiose/pkg/mod/go.elastic.co/apm@v1.15.0/tracer.go",
+                        "offset": 1884,
+                        "line": 64,
+                        "column": 27
+                    }
+                },
+                {
+                    "module": "go.elastic.co/apm",
+                    "version": "v1.15.0",
+                    "package": "go.elastic.co/apm",
+                    "function": "init",
+                    "position": {
+                        "filename": "/Users/Ma1tobiose/pkg/mod/go.elastic.co/apm@v1.15.0/breakdown.go",
+                        "offset": 794,
+                        "line": 18,
+                        "column": 1
+                    }
+                },
+                {
+                    "module": "testproject",
+                    "package": "testproject/sdk/trace",
+                    "function": "init",
+                    "position": {
+                        "filename": "/tmp/testproject/sdk/trace/apm.go",
+                        "offset": 75,
+                        "line": 9,
+                        "column": 2
+                    }
+                },
+                {
+                    "module": "testproject",
+                    "package": "testproject/sdk/logger",
+                    "function": "init",
+                    "position": {
+                        "filename": "/tmp/testproject/sdk/logger/hooks.go",
+                        "offset": 134,
+                        "line": 8,
+                        "column": 2
+                    }
+                },
+                {
+                    "module": "testproject",
+                    "package": "testproject",
+                    "function": "init",
+                    "position": {
+                        "filename": "/tmp/testproject/main.go",
+                        "offset": 545,
+                        "line": 13,
+                        "column": 2
+                    }
+                }
+            ]
+        }
+    }
+]

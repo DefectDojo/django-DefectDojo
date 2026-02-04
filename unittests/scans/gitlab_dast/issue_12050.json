@@ -1,0 +1,112 @@
+{
+    "__comment__": "This is a cut of from the test_api_scan.json",
+    "vulnerabilities": [
+      {
+        "category": "dast",
+        "confidence": "High",
+        "cve": "10062",
+        "description": "The response contains Personally Identifiable Information, such as CC number, SSN and similar sensitive data.",
+        "discovered_at": "2021-04-23T15:46:40.615",
+        "evidence": {
+          "request": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "method": "GET",
+            "url": "http://api-server/v1/trees"
+          },
+          "response": {
+            "headers": [
+              {
+                "name": "Accept",
+                "value": "*/*"
+              },
+              {
+                "name": "Authorization",
+                "value": "********"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "name": "Content-Length",
+                "value": "0"
+              },
+              {
+                "name": "Host",
+                "value": "api-server"
+              },
+              {
+                "name": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+              }
+            ],
+            "reason_phrase": "OK",
+            "status_code": 200
+          },
+          "summary": "378282246310005; Credit Card Type detected: American Express Bank Identification Number: 378282 Brand: AMERICAN EXPRESS Category: SMALL CORPORATE Issuer: AMERICAN EXPRESS COMPANY"
+        },
+        "id": "5ec00bbc-2e53-44cb-83e9-3d35365277e3",
+        "identifiers": [
+          {
+            "name": "PII Disclosure",
+            "type": "ZAProxy_PluginId",
+            "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+            "value": "10062"
+          },
+          {
+            "name": "CWE-359",
+            "type": "CWE",
+            "url": "https://cwe.mitre.org/data/definitions/359.html",
+            "value": "359"
+          }
+        ],
+        "links": [],
+        "location": {
+          "hostname": "http://api-server",
+          "method": "GET",
+          "param": "",
+          "path": "/v1/trees"
+        },
+        "message": "PII Disclosure",
+        "scanner": {
+          "id": "zaproxy",
+          "name": "ZAProxy"
+        },
+        "severity": "High",
+        "solution": ""
+      }
+    ]
+  }

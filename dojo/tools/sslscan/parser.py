@@ -1,15 +1,14 @@
 import hashlib
 from xml.dom import NamespaceErr
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
-__author__ = 'dr3dd589'
+__author__ = "dr3dd589"
 
 
-class SslscanParser(object):
-
+class SslscanParser:
     def get_scan_types(self):
         return ["Sslscan"]
 
@@ -20,33 +19,56 @@ class SslscanParser(object):
         return "Import XML output of sslscan report."
 
     def get_findings(self, file, test):
-        tree = ET.parse(file)
+        tree = ElementTree.parse(file)
         # get root of tree.
         root = tree.getroot()
-        if 'document' not in root.tag:
-            raise NamespaceErr("This doesn't seem to be a valid sslscan xml file.")
-        dupes = dict()
+        if "document" not in root.tag:
+            msg = "This doesn't seem to be a valid sslscan xml file."
+            raise NamespaceErr(msg)
+        dupes = {}
         for ssltest in root:
             for target in ssltest:
                 title = ""
                 severity = ""
                 description = ""
                 severity = "Info"
-                host = ssltest.attrib['host']
-                port = int(ssltest.attrib['port'])
-                if target.tag == "heartbleed" and target.attrib['vulnerable'] == '1':
-                    title = "heartbleed" + " | " + target.attrib['sslversion']
-                    description = "**heartbleed** :" + "\n\n" + \
-                                "**sslversion** : " + target.attrib['sslversion'] + "\n"
-                if target.tag == "cipher" and target.attrib['strength'] not in ['acceptable', 'strong']:
-                    title = "cipher" + " | " + target.attrib['sslversion']
-                    description = "**Cipher** : " + target.attrib['cipher'] + "\n\n" + \
-                                "**Status** : " + target.attrib['status'] + "\n\n" + \
-                                "**strength** : " + target.attrib['strength'] + "\n\n" + \
-                                "**sslversion** : " + target.attrib['sslversion'] + "\n"
+                host = ssltest.attrib["host"]
+                port = int(ssltest.attrib["port"])
+                if (
+                    target.tag == "heartbleed"
+                    and target.attrib["vulnerable"] == "1"
+                ):
+                    title = "heartbleed" + " | " + target.attrib["sslversion"]
+                    description = (
+                        "**heartbleed** :"
+                        "\n\n"
+                        "**sslversion** : "
+                        + target.attrib["sslversion"]
+                        + "\n"
+                    )
+                if target.tag == "cipher" and target.attrib[
+                    "strength"
+                ] not in {"acceptable", "strong"}:
+                    title = "cipher" + " | " + target.attrib["sslversion"]
+                    description = (
+                        "**Cipher** : "
+                        + target.attrib["cipher"]
+                        + "\n\n"
+                        + "**Status** : "
+                        + target.attrib["status"]
+                        + "\n\n"
+                        + "**strength** : "
+                        + target.attrib["strength"]
+                        + "\n\n"
+                        + "**sslversion** : "
+                        + target.attrib["sslversion"]
+                        + "\n"
+                    )
 
                 if title and description is not None:
-                    dupe_key = hashlib.sha256(str(description + title).encode('utf-8')).hexdigest()
+                    dupe_key = hashlib.sha256(
+                        str(description + title).encode("utf-8"),
+                    ).hexdigest()
                     if dupe_key in dupes:
                         finding = dupes[dupe_key]
                         if finding.references:
@@ -60,16 +82,12 @@ class SslscanParser(object):
                             test=test,
                             description=description,
                             severity=severity,
-                            dynamic_finding=True,)
-                        finding.unsaved_endpoints = list()
+                            dynamic_finding=True,
+                        )
+                        finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
 
                         if host:
-                            if '://' in host:
-                                endpoint = Endpoint.from_uri(host)
-                            else:
-                                endpoint = Endpoint(
-                                    host=host,
-                                    port=port)
+                            endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(host=host, port=port)
                             finding.unsaved_endpoints.append(endpoint)
-        return dupes.values()
+        return list(dupes.values())

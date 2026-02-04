@@ -1,0 +1,80 @@
+{
+    "took": 8,
+    "timed_out": false,
+    "_shards": {
+      "total": 1,
+      "successful": 1,
+      "skipped": 0,
+      "failed": 0
+    },
+    "hits": {
+      "total": {
+        "value": 125,
+        "relation": "eq"
+      },
+      "max_score": 5.596354,
+      "hits": [
+        {
+          "_index": "wazuh-states-vulnerabilities-wazuh-server",
+          "_id": "001_c2f8c1a3b6e902b4c6d8e0g7a4b6c5d0e2b4a6n5_CVE-2025-27558",
+          "_score": 5.596323,
+          "_source": {
+            "agent": {
+              "id": "001",
+              "name": "myhost0",
+              "type": "Wazuh",
+              "version": "v4.11.1"
+            },
+            "host": {
+              "os": {
+                "full": "Ubuntu 24.04.2 LTS",
+                "kernel": "6.8.0-62-generic",
+                "name": "Ubuntu",
+                "platform": "ubuntu",
+                "type": "ubuntu",
+                "version": "24.04.2"
+              }
+            },
+            "package": {
+              "architecture": "amd64",
+              "description": "Signed kernel image generic",
+              "name": "linux-image-6.8.0-60-generic",
+              "size": 15025152,
+              "type": "deb",
+              "version": "6.8.0-60.63"
+            },
+            "vulnerability": {
+              "category": "Packages",
+              "classification": "-",
+              "description": "IEEE P603.12-REVme D1.2 through D7.1 allows FragAttacks against meshnetworks. In mesh networks using Wi-Fi Protected Access (WPA, WPA2, orWPA3) or Wired Equivalent Privacy (WEP), an adversary can exploit thisvulnerability to inject arbitrary frames towards devices that supportreceiving non-SSP A-MSDU frames. NOTE: this issue exists because of anincorrect fix for CVE-2020-24588. P802.11-REVme, as of early 2025, is aplanned release of the 802.11 standard.",
+              "detected_at": "2025-05-25T17:07:15.204Z",
+              "enumeration": "CVE",
+              "id": "CVE-2025-27558",
+              "published_at": "2025-04-22T19:16:08Z",
+              "reference": "https://ubuntu.com/security/CVE-2025-27558, https://www.cve.org/CVERecord?id=CVE-2025-27558",
+              "scanner": {
+                "condition": "Package default status",
+                "reference": "https://cti.wazuh.com/vulnerabilities/cves/CVE-2025-27558",
+                "source": "Canonical Security Tracker",
+                "vendor": "Wazuh"
+              },
+              "score": {
+                "base": 9.1,
+                "version": "3.1"
+              },
+              "severity": "-",
+              "under_evaluation": false
+            },
+            "wazuh": {
+              "cluster": {
+                "name": "wazuh-server"
+              },
+              "schema": {
+                "version": "1.0.0"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }

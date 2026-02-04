@@ -11,9 +11,9 @@
                     <div class="row-sm-2">
                         <strong>{{ entry.current_editor }}</strong> 
                         {% if forloop.first %}
-                            <span class="text-muted">{% blocktranslate %}commented {{ entry.time }}{% endblocktranslate %}</span>
+                            <span class="text-muted">{% blocktranslate with time=entry.time%}commented {{ time }}{% endblocktranslate %}</span>
                         {% else %}
-                            <span class="text-muted">{% blocktranslate %}made changes on {{ entry.time }}{% endblocktranslate %}</span>
+                            <span class="text-muted">{% blocktranslate with time=entry.time%}made changes on {{ time }}{% endblocktranslate %}</span>
                         {% endif %}
                     </div>
                 </div>

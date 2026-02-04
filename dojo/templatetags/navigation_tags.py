@@ -1,78 +1,81 @@
 from django import template
-from django.utils.safestring import mark_safe as safe
 from django.utils.html import escape
-from urllib.parse import urlencode
+from django.utils.safestring import mark_safe as safe
+from django.utils.translation import gettext as _
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
-
 
 register = template.Library()
 
 
 @register.simple_tag(takes_context=True)
 def query_string_as_hidden(context):
-    request = context['request']
-    query_string = request.META['QUERY_STRING']
-    inputs = ''
+    if "request" not in context:
+        return ""
+
+    request = context["request"]
+    query_string = request.META["QUERY_STRING"]
+    inputs = ""
     if query_string:
-        parameters = query_string.split('&')
+        parameters = query_string.split("&")
         for param in parameters:
-            parts = param.split('=')
+            parts = param.split("=")
             if len(parts) == 2:
-                inputs += "<input type='hidden' name='" + escape(parts[0]) + "' value='" + escape(parts[1]) + "'/>"
+                inputs += f"<input type='hidden' name='{escape(parts[0])}' value='{escape(parts[1])}'/>"
             else:
-                inputs += "<input type='hidden' name='" + escape(parts[0]) + "' value=''/>"
+                inputs += f"<input type='hidden' name='{escape(parts[0])}' value=''/>"
     return safe(inputs)
 
 
 @register.simple_tag
-def url_replace(request, field='page', value=1):
-    if field is None or field == '':
-        field = 'page'
+def url_replace(request, field="page", value=1):
+    if field is None or not field:
+        field = "page"
     dict_ = request.GET.copy()
     dict_[field] = value
     return dict_.urlencode()
 
 
 @register.simple_tag
-def dojo_sort(request, display='Name', value='title', default=None):
-    field = 'o'
-    icon = '<i class="fa fa-sort'
-    title = 'Click to sort '
+def dojo_sort(request, display="Name", value="title", default=None):
+    field = "o"
+    icon = '<i class="fa-solid fa-sort'
+    title = "Click to sort "
     if field in request.GET:
         if value in request.GET[field]:
-            if request.GET[field].startswith('-'):
-                icon += '-desc'
-                title += 'ascending'
+            if request.GET[field].startswith("-"):
+                icon += "-desc"
+                title += "ascending"
             else:
-                value = '-' + value
-                icon += '-asc'
-                title += 'descending'
+                value = f"-{value}"
+                icon += "-asc"
+                title += "descending"
         else:
-            title += 'ascending'
+            title += "ascending"
     elif default:
-        icon += '-' + default
-        if default == 'asc':
-            value = '-' + value
-            title += 'descending'
+        icon += f"-{default}"
+        if default == "asc":
+            value = f"-{value}"
+            title += "descending"
         else:
-            title += 'ascending'
+            title += "ascending"
     else:
-        title += 'ascending'
+        title += "ascending"
 
     icon += ' dd-sort"></i>'
     dict_ = request.GET.copy()
     dict_[field] = value
-    link = '<a title="' + title + '" href="?' + escape(urlencode(dict_)) + '">' + display + '&nbsp;' + icon + '</a>'
+    # QueryDict.urlencode() used here to properly handle cases when keys have multiple values
+    link = f'<a title="{title}" href="?{escape(dict_.urlencode())}">{_(display)}&nbsp;{icon}</a>'
     return safe(link)
 
 
-class PaginationNav(object):
-    def __init__(self, page_number=None, display=None, is_current=False):
+class PaginationNav:
+    def __init__(self, page_number=None, display=None, *, is_current=False):
         self.page_number = page_number
         self.is_current = is_current
-        self.display = display or page_number or ''
+        self.display = display or page_number or ""
 
 
 @register.filter
@@ -111,23 +114,25 @@ def paginate(page, adjacent=2):
 
     # insert first element and ellipsis if applicable
     if ellipsis_pre:
-        pages.insert(0, PaginationNav(display='...'))
+        pages.insert(0, PaginationNav(display="..."))
         pages.insert(0, create_page_nav(1))
 
     # append last element and ellipsis if applicable
     if ellipsis_post:
-        pages.append(PaginationNav(display='...'))
-        pages.append(create_page_nav(page.paginator.num_pages))
+        pages.extend((
+            PaginationNav(display="..."),
+            create_page_nav(page.paginator.num_pages),
+        ))
 
     # determine whether we need a 'previous' link and build it
     if page.has_previous():
         pages.insert(0, PaginationNav(page.previous_page_number(),
-                     safe('Previous')))
+                     safe("Previous")))
 
     # determine whether we need a 'next' link and build it
     if page.has_next():
         pages.append(PaginationNav(page.next_page_number(),
-                     safe('Next')))
+                     safe("Next")))
 
     return pages
 

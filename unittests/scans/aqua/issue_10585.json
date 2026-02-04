@@ -1,0 +1,127 @@
+{
+  "image": "your_image:latest",
+  "scan_started": {
+    "seconds": 1567784942,
+    "nanos": 28041437
+  },
+  "scan_duration": 25,
+  "image_size": 565733981,
+  "digest": "54bc57e4e876533bc61ba7bf229f0f9f96d137b787614c3d0d5c70c3578fe867",
+  "os": "alpine",
+  "version": "3.9.4",
+  "resources": [
+    {
+      "resource": {
+        "format": "apk",
+        "name": "musl",
+        "version": "1.1.20-r4",
+        "arch": "x86_64",
+        "cpe": "pkg:/alpine:3.9.4:musl:1.1.20-r4",
+        "license": "MIT"
+      },
+      "scanned": true,
+      "vulnerabilities": null
+    }
+  ],
+  "image_assurance_results": {
+    "disallowed": true,
+    "audit_required": true,
+    "policy_failures": [
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "blocking": true,
+        "controls": [
+          "max_severity"
+        ]
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "blocking": true,
+        "controls": [
+          "max_score"
+        ]
+      }
+    ],
+    "checks_performed": [
+      {
+        "failed": true,
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "max_severity",
+        "maximum_severity_allowed": "high",
+        "maximum_severity_found": "high",
+        "maximum_fixable_severity_found": "high",
+        "no_fix_excluded": true
+      },
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "malware"
+      },
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "sensitive_data"
+      },
+      {
+        "policy_id": 1,
+        "policy_name": "Default",
+        "control": "root_user"
+      },
+      {
+        "failed": true,
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "max_score",
+        "maximum_score_allowed": 7,
+        "maximum_score_found": 7.5,
+        "maximum_fixable_score_found": 7.5,
+        "no_fix_excluded": true
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "malware"
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "sensitive_data"
+      },
+      {
+        "policy_id": 6,
+        "policy_name": "Assurance_policy",
+        "control": "root_user"
+      }
+    ],
+    "block_required": true
+  },
+  "vulnerability_summary": {
+    "total": 24,
+    "high": 5,
+    "medium": 18,
+    "low": 1,
+    "negligible": 0,
+    "sensitive": 0,
+    "malware": 0,
+    "score_average": 5.454168,
+    "max_score": 7.5,
+    "max_fixable_score": 7.5,
+    "max_fixable_severity": "high"
+  },
+  "scan_options": {
+    "scan_sensitive_data": true,
+    "scan_malware": true,
+    "scan_timeout": 3600000000000,
+    "manual_pull_fallback": true,
+    "save_adhoc_scans": true
+  },
+  "initiating_user": "chk",
+  "data_date": 1567724137,
+  "pull_name": "your_image:latest",
+  "changed_result": false,
+  "required_image_platform": "amd64:::",
+  "scanned_image_platform": "amd64::linux:"
+}

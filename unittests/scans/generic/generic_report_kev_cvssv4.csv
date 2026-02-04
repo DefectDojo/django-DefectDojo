@@ -1,0 +1,2 @@
+Date,Title,CweId,epss_score,epss_percentile,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive,Duplicate,CVSSV4,CVSSV4_score,known_exploited,ransomware_used,fix_available,kev_date,CVSSV3
+01/30/2018,"Test finding",0,.00042,.23474,https://192.168.1.1/,Low,"Test finding description",,,,False,False,False,False,"CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N","7.3",True,True,True,"09/11/2025","CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N""
