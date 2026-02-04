@@ -740,7 +740,10 @@ def jira_priority(obj):
 
 def jira_environment(obj):
     if isinstance(obj, Finding):
-        return "\n".join([str(endpoint) for endpoint in obj.endpoints.all()])
+        if not settings.V3_FEATURE_LOCATIONS:
+            # TODO: Delete this after the move to Locations
+            return "\n".join([str(endpoint) for endpoint in obj.endpoints.all()])
+        return "\n".join([str(location_ref.location) for location_ref in obj.locations.all()])
     if isinstance(obj, Finding_Group):
         envs = [
             jira_environment(finding)
@@ -913,13 +916,30 @@ def add_jira_issue(obj, *args, **kwargs):
         message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
         return failure_to_add_message(message, None, obj)
 
-    obj_can_be_pushed_to_jira, error_message, _error_code = can_be_pushed_to_jira(obj)
+    obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
+        # Expected validation failures (not verified, not active, below threshold)
+        # should not create alerts when auto-pushing via "push all issues"
+        # These are expected conditions that don't indicate a problem
+        expected_validation_errors = [
+            "error_not_active_or_verified",
+            "error_below_minimum_threshold",
+            "error_empty",
+            "error_inactive",
+        ]
+
         # not sure why this check is not part of can_be_pushed_to_jira, but afraid to change it
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
-            logger.warning("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
-            log_jira_cannot_be_pushed_reason(error_message + " and findis a duplicate", obj)
+            logger.info("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
+            # Duplicates are expected, don't create alerts
+            logger.info("%s cannot be pushed to JIRA: %s (expected - duplicate finding)",
+                       to_str_typed(obj), error_message)
+        elif error_code in expected_validation_errors:
+            # These are expected when auto-pushing, only log, don't alert
+            logger.info("%s cannot be pushed to JIRA: %s (expected - finding not ready yet)",
+                       to_str_typed(obj), error_message)
         else:
+            # Unexpected errors (configuration issues, etc.) should still alert
             log_jira_cannot_be_pushed_reason(error_message, obj)
             logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
             logger.warning("The JIRA issue will NOT be created.")
@@ -1910,7 +1930,12 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
             finding.mitigated = jira_now
             finding.is_mitigated = True
             finding.mitigated_by, _created = User.objects.get_or_create(username="JIRA")
-            finding.endpoints.clear()
+            if settings.V3_FEATURE_LOCATIONS:
+                for location_ref in finding.locations.all():
+                    location_ref.location.disassociate_from_finding(finding)
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.endpoints.clear()
             finding.false_p = False
             ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
             status_changed = True

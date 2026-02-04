@@ -11,7 +11,9 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
+from dojo.location.models import Location
 from dojo.models import DojoMeta, Endpoint
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -295,7 +297,7 @@ def save_endpoints_to_add(endpoint_list, product):
     return processed_endpoints
 
 
-def endpoint_meta_import(file, product, create_endpoints, create_tags, create_meta, origin="UI", request=None):
+def endpoint_meta_import(file, product, create_endpoints, create_tags, create_meta, origin="UI", request=None, object_class=Endpoint):
     content = file.read()
     sig = content.decode("utf-8-sig")
     content = sig.encode("utf-8")
@@ -324,9 +326,17 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
         if not host:
             continue
 
-        endpoints = Endpoint.objects.filter(host=host, product=product)
-        if not endpoints.count() and create_endpoints:
-            endpoints = [Endpoint.objects.create(host=host, product=product)]
+        # TODO: Delete this after the move to Locations
+        if object_class == Endpoint:
+            endpoints = Endpoint.objects.filter(host=host, product=product)
+            if not endpoints.exists() and create_endpoints:
+                endpoints = [Endpoint.objects.create(host=host, product=product)]
+        elif object_class == Location:
+            endpoints = Location.objects.filter(url__host=host, products__product=product)
+            if not endpoints.exists() and create_endpoints:
+                url = URL.get_or_create_from_values(host=host)
+                url.location.associate_with_product(product)
+                endpoints = [url.location]
         meta = [(key, row.get(key)) for key in keys]
 
         for endpoint in endpoints:
@@ -336,9 +346,15 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
                 if item[1] is not None and len(item[1]) > 0:
                     if create_meta:
                         # check if meta exists first. Don't want to make duplicate endpoints
-                        dojo_meta, _create = DojoMeta.objects.get_or_create(
-                            endpoint=endpoint,
-                            name=item[0])
+                        # TODO: Delete this after the move to Locations
+                        if object_class == Endpoint:
+                            dojo_meta = DojoMeta.objects.get_or_create(
+                                endpoint=endpoint,
+                                name=item[0])[0]
+                        elif object_class == Location:
+                            dojo_meta = DojoMeta.objects.get_or_create(
+                                location=endpoint,
+                                name=item[0])[0]
                         dojo_meta.value = item[1]
                         dojo_meta.save()
                     if create_tags:

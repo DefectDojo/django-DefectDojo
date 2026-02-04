@@ -358,6 +358,8 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+    # Dictates if v3 functionality will be enabled
+    DD_V3_FEATURE_LOCATIONS=(bool, False),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
 )
@@ -852,6 +854,10 @@ TEAM_NAME = env("DD_TEAM_NAME")
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
 
+# V3 Feature Flags
+V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
+
+
 # ------------------------------------------------------------------------------
 # ADMIN
 # ------------------------------------------------------------------------------
@@ -1258,43 +1264,72 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.tasks.add_alerts",
         "schedule": timedelta(hours=1),
         "args": [timedelta(hours=1)],
+        "options": {
+            "expires": int(60 * 60 * 1 * 1.2),  # If a task is not executed within 72 minutes, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "cleanup-alerts": {
         "task": "dojo.tasks.cleanup_alerts",
         "schedule": timedelta(hours=8),
+        "options": {
+            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "dedupe-delete": {
         "task": "dojo.tasks.async_dupe_delete",
         "schedule": timedelta(minutes=1),
-        "args": [timedelta(minutes=1)],
+        "options": {
+            "expires": int(60 * 1 * 1.2),  # If a task is not executed within 72 seconds, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "flush_auditlog": {
         "task": "dojo.tasks.flush_auditlog",
         "schedule": timedelta(hours=8),
+        "options": {
+            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "update-findings-from-source-issues": {
         "task": "dojo.tools.tool_issue_updater.update_findings_from_source_issues",
         "schedule": timedelta(hours=3),
+        "options": {
+            "expires": int(60 * 60 * 3 * 1.2),  # If a task is not executed within 9 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "compute-sla-age-and-notify": {
         "task": "dojo.tasks.async_sla_compute_and_notify_task",
         "schedule": crontab(hour=7, minute=30),
+        "options": {
+            "expires": int(60 * 60 * 24 * 1.2),  # If a task is not executed within 28.8 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "risk_acceptance_expiration_handler": {
         "task": "dojo.risk_acceptance.helper.expiration_handler",
-        "schedule": crontab(minute=0, hour="*/3"),  # every 3 hours
+        "schedule": crontab(minute=0, hour="*/3"),  # every 72 minutes
+        "options": {
+            "expires": int(60 * 60 * 3 * 1.2),  # If a task is not executed within 9 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
+        "options": {
+            "expires": int(60 * 1 * 1.2),  # If a task is not executed within 72 seconds, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "trigger_evaluate_pro_proposition": {
         "task": "dojo.tasks.evaluate_pro_proposition",
         "schedule": timedelta(hours=8),
+        "options": {
+            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     "clear_sessions": {
         "task": "dojo.tasks.clear_sessions",
         "schedule": crontab(hour=0, minute=0, day_of_week=0),
+        "options": {
+            "expires": int(60 * 60 * 24 * 7 * 1.2),  # If a task is not executed within 8.4 days, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
@@ -1529,7 +1564,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
 }
 
 # List of fields that are known to be usable in hash_code computation)
-# 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
+# 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners). If `V3_FEATURE_LOCATIONS` is True, Dojo uses locations (URLs) instead.
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
 HASHCODE_ALLOWED_FIELDS = ["title", "cwe", "vulnerability_ids", "line", "file_path", "payload", "component_name", "component_version", "description", "endpoints", "unique_id_from_tool", "severity", "vuln_id_from_tool", "mitigation"]
 

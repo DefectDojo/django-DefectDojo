@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class HumbleParser:
@@ -32,7 +35,11 @@ class HumbleParser:
                         static_finding=False,
                         dynamic_finding=True)
                     items.append(finding)
-                    finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+                    if settings.V3_FEATURE_LOCATIONS:
+                        finding.unsaved_locations = [URL.from_value(url)]
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        finding.unsaved_endpoints = [Endpoint.from_uri(url)]
             for content in data["[2. Fingerprint HTTP Response Headers]"]:
                 if content != "Nothing to report, all seems OK!":
                     finding = Finding(title="Available fingerprint:" + str(content),
@@ -41,7 +48,11 @@ class HumbleParser:
                         static_finding=False,
                         dynamic_finding=True)
                     items.append(finding)
-                    finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+                    if settings.V3_FEATURE_LOCATIONS:
+                        finding.unsaved_locations = [URL.from_value(url)]
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        finding.unsaved_endpoints = [Endpoint.from_uri(url)]
             for content in data["[3. Deprecated HTTP Response Headers/Protocols and Insecure Values]"]:
                 if content != "Nothing to report, all seems OK!":
                     finding = Finding(title="Deprecated header: " + str(content),
@@ -50,7 +61,11 @@ class HumbleParser:
                         static_finding=False,
                         dynamic_finding=True)
                     items.append(finding)
-                    finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+                    if settings.V3_FEATURE_LOCATIONS:
+                        finding.unsaved_locations = [URL.from_value(url)]
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        finding.unsaved_endpoints = [Endpoint.from_uri(url)]
             for content in data["[4. Empty HTTP Response Headers Values]"]:
                 if content != "Nothing to report, all seems OK!":
                     finding = Finding(title="Empty HTTP response header: " + str(content),
@@ -59,5 +74,9 @@ class HumbleParser:
                         static_finding=False,
                         dynamic_finding=True)
                     items.append(finding)
-                    finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+                    if settings.V3_FEATURE_LOCATIONS:
+                        finding.unsaved_locations = [URL.from_value(url)]
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        finding.unsaved_endpoints = [Endpoint.from_uri(url)]
         return items

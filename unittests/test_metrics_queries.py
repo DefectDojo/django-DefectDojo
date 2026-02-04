@@ -10,7 +10,7 @@ from django.urls import reverse
 from dojo.metrics import utils
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, User
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, skip_unless_v2, versioned_fixtures
 
 
 class MockMessages:
@@ -46,6 +46,7 @@ CLOSED_FINDINGS = [FINDING_11, FINDING_16]
 ACCEPTED_FINDINGS = [FINDING_9, FINDING_10, FINDING_11]
 
 
+@versioned_fixtures
 class FindingQueriesTest(DojoTestCase):
     fixtures = ["dojo_testdata.json", "unit_metrics_additional_data.json"]
 
@@ -254,6 +255,8 @@ class FindingQueriesTest(DojoTestCase):
             finding_both_within.delete()
 
 
+# TODO: Delete this after the move to Locations
+@skip_unless_v2
 class EndpointQueriesTest(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 

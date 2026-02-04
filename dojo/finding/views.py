@@ -73,6 +73,7 @@ from dojo.forms import (
     StubFindingForm,
     TypedNoteForm,
 )
+from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     BurpRawRequestResponse,
@@ -429,7 +430,7 @@ class ListClosedFindings(ListFindings):
 
 class ViewFinding(View):
     def get_finding(self, finding_id: int):
-        finding_qs = prefetch_for_findings(Finding.objects.all(), exclude_untouched=False)
+        finding_qs = prefetch_for_findings(Finding.objects.filter(id=finding_id), exclude_untouched=False)
         return get_object_or_404(finding_qs, id=finding_id)
 
     def get_dojo_user(self, request: HttpRequest):
@@ -854,17 +855,27 @@ class EditFinding(View):
         ) and context["form"]["duplicate"].value() is False):
             now = timezone.now()
             finding.is_mitigated = True
-            endpoint_status = finding.status_finding.all()
-            for status in endpoint_status:
-                status.mitigated_by = (
-                    context["form"].cleaned_data.get("mitigated_by") or request.user
-                )
-                status.mitigated_time = (
-                    context["form"].cleaned_data.get("mitigated") or now
-                )
-                status.mitigated = True
-                status.last_modified = timezone.now()
-                status.save()
+
+            if settings.V3_FEATURE_LOCATIONS:
+                for ref in finding.locations.all():
+                    ref.set_status(
+                        FindingLocationStatus.Mitigated,
+                        context["form"].cleaned_data.get("mitigated_by") or request.user,
+                        context["form"].cleaned_data.get("mitigated") or now,
+                    )
+            else:
+                # TODO: Delete this after the move to Locations
+                endpoint_status = finding.status_finding.all()
+                for status in endpoint_status:
+                    status.mitigated_by = (
+                        context["form"].cleaned_data.get("mitigated_by") or request.user
+                    )
+                    status.mitigated_time = (
+                        context["form"].cleaned_data.get("mitigated") or now
+                    )
+                    status.mitigated = True
+                    status.last_modified = timezone.now()
+                    status.save()
 
     def process_false_positive_history(self, finding: Finding):
         if get_system_setting("false_positive_history", False):
@@ -921,13 +932,19 @@ class EditFinding(View):
                     ra_helper.simple_risk_accept(request.user, new_finding, perform_save=False)
             elif new_finding.risk_accepted:
                 ra_helper.risk_unaccept(request.user, new_finding, perform_save=False)
-            # Save and add new endpoints
-            finding_helper.add_endpoints(new_finding, context["form"])
+            # Save and add new locations
+            associated_locations = finding_helper.add_locations(new_finding, context["form"])
             # Remove unrelated endpoints
-            endpoint_status_list = Endpoint_Status.objects.filter(finding=new_finding)
-            for endpoint_status in endpoint_status_list:
-                if endpoint_status.endpoint not in new_finding.endpoints.all():
-                    endpoint_status.delete()
+            if settings.V3_FEATURE_LOCATIONS:
+                for ref in new_finding.locations.all():
+                    if ref.location not in associated_locations:
+                        ref.location.disassociate_from_finding(new_finding)
+            else:
+                # TODO: Delete this after the move to Locations
+                endpoint_status_list = Endpoint_Status.objects.filter(finding=new_finding)
+                for endpoint_status in endpoint_status_list:
+                    if endpoint_status.endpoint not in new_finding.endpoints.all():
+                        endpoint_status.delete()
             # Handle some of the other steps
             self.process_mitigated_data(request, new_finding, context)
             self.process_false_positive_history(new_finding)
@@ -1306,13 +1323,17 @@ def reopen_finding(request, fid):
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
     finding.under_review = False
-    endpoint_status = finding.status_finding.all()
-    for status in endpoint_status:
-        status.mitigated_by = None
-        status.mitigated_time = None
-        status.mitigated = False
-        status.last_modified = timezone.now()
-        status.save()
+    if settings.V3_FEATURE_LOCATIONS:
+        for ref in finding.locations.all():
+            ref.set_status(FindingLocationStatus.Active, request.user, timezone.now())
+    else:
+        endpoint_status = finding.status_finding.all()
+        for status in endpoint_status:
+            status.mitigated_by = None
+            status.mitigated_time = None
+            status.mitigated = False
+            status.last_modified = timezone.now()
+            status.save()
     # Clear the risk acceptance, if present
     ra_helper.risk_unaccept(request.user, finding)
     finding.save(dedupe_option=False, push_to_jira=False)
@@ -2046,7 +2067,7 @@ def promote_to_finding(request, fid):
 
             new_finding.save()
 
-            finding_helper.add_endpoints(new_finding, form)
+            finding_helper.add_locations(new_finding, form)
 
             push_to_jira = False
             if jform and jform.is_valid():

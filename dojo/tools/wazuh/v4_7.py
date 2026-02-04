@@ -1,6 +1,9 @@
 import hashlib
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class WazuhV4_7:
@@ -70,8 +73,14 @@ class WazuhV4_7:
                         date=detection_time,
                     )
 
-                    # in some cases the agent_ip is not the perfect way on how to identify a host. Thus prefer the agent_name, if existant.
-                    if agent_name:
+                    # in some cases the agent_ip is not the perfect way on how to identify a host. Thus prefer the agent_name, if it exists.
+                    if settings.V3_FEATURE_LOCATIONS:
+                        if agent_name:
+                            find.unsaved_locations = [URL(host=agent_name)]
+                        elif agent_ip:
+                            find.unsaved_locations = [URL(host=agent_ip)]
+                    # TODO: Delete this after the move to Locations
+                    elif agent_name:
                         find.unsaved_endpoints = [Endpoint(host=agent_name)]
                     elif agent_ip:
                         find.unsaved_endpoints = [Endpoint(host=agent_ip)]

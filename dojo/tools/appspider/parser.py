@@ -1,7 +1,9 @@
 import html2text
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class AppSpiderParser:
@@ -43,8 +45,6 @@ class AppSpiderParser:
             cwe = int(finding.find("CweId").text)
 
             dupe_key = severity + title
-            unsaved_endpoints = []
-            unsaved_req_resp = []
 
             if title is None:
                 title = ""
@@ -53,35 +53,41 @@ class AppSpiderParser:
             if mitigation is None:
                 mitigation = ""
 
-            if dupe_key in dupes:
-                find = dupes[dupe_key]
+            find = Finding(
+                title=title,
+                test=test,
+                description=html2text.html2text(description),
+                severity=severity,
+                mitigation=html2text.html2text(mitigation),
+                impact="N/A",
+                references=None,
+                cwe=cwe,
+            )
 
-                unsaved_endpoints.append(find.unsaved_endpoints)
-                unsaved_req_resp.append(find.unsaved_req_resp)
+            find.unsaved_req_resp = []
 
+            for attack in finding.iter("AttackRequest"):
+                req = attack.find("Request").text
+                resp = attack.find("Response").text
+
+                find.unsaved_req_resp.append({"req": req, "resp": resp})
+
+            if settings.V3_FEATURE_LOCATIONS:
+                find.unsaved_locations.append(URL.from_value(vuln_url))
             else:
-                find = Finding(
-                    title=title,
-                    test=test,
-                    description=html2text.html2text(description),
-                    severity=severity,
-                    mitigation=html2text.html2text(mitigation),
-                    impact="N/A",
-                    references=None,
-                    cwe=cwe,
-                )
-                find.unsaved_endpoints = unsaved_endpoints
-                find.unsaved_req_resp = unsaved_req_resp
+                # TODO: Delete this after the move to Locations
+                find.unsaved_endpoints.append(Endpoint.from_uri(vuln_url))
+
+            if dupe_key in dupes:
+                orig_finding = dupes[dupe_key]
+                orig_finding.unsaved_request.extend(find.unsaved_req_resp)
+                if settings.V3_FEATURE_LOCATIONS:
+                    orig_finding.unsaved_locations.extend(find.unsaved_locations)
+                else:
+                    # TODO: Delete this after the move to Locations
+                    orig_finding.unsaved_endpoints.extend(find.unsaved_endpoints)
+            else:
                 dupes[dupe_key] = find
-
-                for attack in finding.iter("AttackRequest"):
-                    req = attack.find("Request").text
-                    resp = attack.find("Response").text
-
-                    find.unsaved_req_resp.append({"req": req, "resp": resp})
-
-                endpoint = Endpoint.from_uri(vuln_url)
-                find.unsaved_endpoints.append(endpoint)
 
         return list(dupes.values())
 

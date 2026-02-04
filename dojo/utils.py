@@ -20,6 +20,7 @@ import bleach
 import crum
 import cvss
 import vobject
+from amqp.exceptions import ChannelError
 from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -42,6 +43,7 @@ from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
+from kombu import Connection
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
@@ -53,6 +55,8 @@ from dojo.github import (
     update_external_issue_github,
 )
 from dojo.labels import get_labels
+from dojo.location.models import Location
+from dojo.location.status import ProductLocationStatus
 from dojo.models import (
     NOTIFICATION_CHOICES,
     Benchmark_Type,
@@ -150,7 +154,7 @@ def do_false_positive_history(finding, *args, **kwargs):
             find.false_p = True
             find.active = False
             find.verified = False
-            super(Finding, find).save(*args, **kwargs)
+            super(Finding, find).save(skip_validation=True, *args, **kwargs)
         except Exception as e:
             deduplicationLogger.debug(str(e))
 
@@ -1323,6 +1327,18 @@ def get_celery_worker_status():
         return False
 
 
+def get_celery_queue_length():
+    try:
+        with Connection(settings.CELERY_BROKER_URL) as conn, conn.SimpleQueue("celery") as queue:
+            return queue.qsize()
+    except ChannelError as e:
+        if "NOT_FOUND" in str(e):
+            return 0
+        return None
+    except:
+        return None
+
+
 # Used to display the counts and enabled tabs in the product view
 # Uses @cached_property for lazy loading to avoid expensive queries on every page load
 # See: https://github.com/DefectDojo/django-DefectDojo/issues/10313
@@ -1350,12 +1366,18 @@ class Product_Tab:
 
     @cached_property
     def _active_endpoints(self):
-        return Endpoint.objects.filter(
-            product=self._product,
-            status_endpoint__mitigated=False,
-            status_endpoint__false_positive=False,
-            status_endpoint__out_of_scope=False,
-            status_endpoint__risk_accepted=False,
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return Endpoint.objects.filter(
+                product=self.product,
+                status_endpoint__mitigated=False,
+                status_endpoint__false_positive=False,
+                status_endpoint__out_of_scope=False,
+                status_endpoint__risk_accepted=False,
+            )
+        return Location.objects.filter(
+            products__product=self.product,
+            products__status=ProductLocationStatus.Active,
         )
 
     @cached_property
@@ -1364,7 +1386,10 @@ class Product_Tab:
 
     @cached_property
     def endpoint_hosts_count(self):
-        return self._active_endpoints.values("host").distinct().count()
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return self._active_endpoints.values("host").distinct().count()
+        return self._active_endpoints.values("url__host").distinct().count()
 
     @cached_property
     def benchmark_type(self):

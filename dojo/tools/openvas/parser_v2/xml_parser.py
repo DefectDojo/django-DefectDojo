@@ -9,6 +9,7 @@ from dojo.tools.openvas.parser_v2.common import (
     OpenVASFindingAuxData,
     cleanup_openvas_text,
     deduplicate,
+    get_location,
     is_valid_severity,
     postprocess_finding,
     setup_finding,
@@ -123,17 +124,17 @@ class XMLParserV2:
             # default to hostname else ip
             if hostname_field is not None and hostname_field.text:
                 # strip due to https://github.com/greenbone/gvmd/issues/2378
-                self.finding.unsaved_endpoints[0].host = hostname_field.text.strip()
+                get_location(self.finding).host = hostname_field.text.strip()
             else:
                 # strip due to https://github.com/greenbone/gvmd/issues/2378
-                self.finding.unsaved_endpoints[0].host = field.text.strip()
+                get_location(self.finding).host = field.text.strip()
 
     def _handle_port(self, field):
         if field.text:
             port_str, protocol = field.text.split("/")
-            self.finding.unsaved_endpoints[0].protocol = protocol
+            get_location(self.finding).protocol = protocol
             with contextlib.suppress(ValueError):
-                self.finding.unsaved_endpoints[0].port = int(port_str)
+                get_location(self.finding).port = int(port_str)
 
     def _handle_severity(self, field):
         if field.text:

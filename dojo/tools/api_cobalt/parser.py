@@ -2,7 +2,10 @@ import json
 import textwrap
 from datetime import datetime
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 from .importer import CobaltApiImporter
 
@@ -67,7 +70,7 @@ class ApiCobaltParser:
             )
             mitigation = resource["suggested_fix"]
             steps_to_reproduce = resource["proof_of_concept"]
-            endpoints = resource["affected_targets"]
+            affected_targets = resource["affected_targets"]
             last_status_update = self.get_latest_update_date(cobalt_log)
             unique_id_from_tool = resource["id"]
 
@@ -91,7 +94,11 @@ class ApiCobaltParser:
                 dynamic_finding=True,
                 unique_id_from_tool=unique_id_from_tool,
             )
-            finding.unsaved_endpoints = self.convert_endpoints(endpoints)
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = self.convert_locations(affected_targets)
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = self.convert_endpoints(affected_targets)
 
             findings.append(finding)
 
@@ -128,6 +135,7 @@ class ApiCobaltParser:
 
         return resource["state"] in allowed_states
 
+    # TODO: Delete this after the move to Locations
     def convert_endpoints(self, affected_targets):
         """Convert Cobalt affected_targets into DefectDojo endpoints"""
         endpoints = []
@@ -135,6 +143,14 @@ class ApiCobaltParser:
             endpoint = Endpoint.from_uri(affected_target)
             endpoints.append(endpoint)
         return endpoints
+
+    def convert_locations(self, affected_targets):
+        """Convert Cobalt affected_targets into DefectDojo locations"""
+        locations = []
+        for affected_target in affected_targets:
+            location = URL.from_value(affected_target)
+            locations.append(location)
+        return locations
 
     def convert_log_timestamp(self, timestamp):
         """Convert a log entry's timestamp to a DefectDojo date"""

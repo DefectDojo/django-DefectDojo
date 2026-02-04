@@ -17,6 +17,7 @@ from dojo.models import (
 logger = logging.getLogger(__name__)
 
 
+# TODO: Delete this after the move to Locations
 class EndpointManager:
     @app.task
     def add_endpoints_to_unsaved_finding(

@@ -1500,6 +1500,15 @@
                         }
                     }
                 },
+                "serviceAccount": {
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "description": "Autocreate dedicated service account (as part of the best practice)",
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "tls": {
                     "type": "object",
                     "properties": {

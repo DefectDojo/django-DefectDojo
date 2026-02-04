@@ -22,9 +22,16 @@ from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.queries import get_authorized_endpoints_for_queryset
 from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
 from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
-from dojo.forms import AddEndpointForm, DeleteEndpointForm, DojoMetaDataForm, EditEndpointForm, ImportEndpointMetaForm
+from dojo.forms import (
+    AddEndpointForm,
+    DeleteEndpointForm,
+    DojoMetaFormSet,
+    EditEndpointForm,
+    ImportEndpointMetaForm,
+)
 from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Finding, Product
 from dojo.query_utils import build_count_subquery
+from dojo.reports.views import generate_report
 from dojo.utils import (
     Product_Tab,
     add_breadcrumb,
@@ -53,7 +60,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
         endpoints = Endpoint.objects.all()
 
     endpoints = endpoints.prefetch_related("product", "product__tags", "tags").distinct()
-    endpoints = get_authorized_endpoints_for_queryset(Permissions.Endpoint_View, endpoints, request.user)
+    endpoints = get_authorized_endpoints_for_queryset(Permissions.Location_View, endpoints, request.user)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
     if host_view:
@@ -168,17 +175,17 @@ def process_endpoint_view(request, eid, *, host_view=False):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def view_endpoint(request, eid):
     return process_endpoint_view(request, eid, host_view=False)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def view_endpoint_host(request, eid):
     return process_endpoint_view(request, eid, host_view=True)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_Edit, "eid")
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
@@ -206,7 +213,7 @@ def edit_endpoint(request, eid):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_Delete, "eid")
+@user_is_authorized(Endpoint, Permissions.Location_Delete, "eid")
 def delete_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, pk=eid)
     product = endpoint.product
@@ -241,7 +248,7 @@ def delete_endpoint(request, eid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Endpoint_Add, "pid")
+@user_is_authorized(Product, Permissions.Location_Add, "pid")
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
     template = "dojo/add_endpoint.html"
@@ -274,7 +281,7 @@ def add_product_endpoint(request):
     if request.method == "POST":
         form = AddEndpointForm(request.POST)
         if form.is_valid():
-            user_has_permission_or_403(request.user, form.product, Permissions.Endpoint_Add)
+            user_has_permission_or_403(request.user, form.product, Permissions.Location_Add)
             endpoints = form.save()
             tags = request.POST.get("tags")
             for e in endpoints:
@@ -293,64 +300,29 @@ def add_product_endpoint(request):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, "eid")
-def add_meta_data(request, eid):
+@user_is_authorized(Endpoint, Permissions.Location_Edit, "eid")
+def manage_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
+    meta_data_query = DojoMeta.objects.filter(endpoint=endpoint)
+    form_mapping = {"endpoint": endpoint}
+    formset = DojoMetaFormSet(queryset=meta_data_query, form_kwargs={"fk_map": form_mapping})
+
     if request.method == "POST":
-        form = DojoMetaDataForm(request.POST, instance=DojoMeta(endpoint=endpoint))
-        if form.is_valid():
-            form.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 "Metadata added successfully.",
-                                 extra_tags="alert-success")
-            if "add_another" in request.POST:
-                return HttpResponseRedirect(reverse("add_endpoint_meta_data", args=(eid,)))
+        formset = DojoMetaFormSet(request.POST, queryset=meta_data_query, form_kwargs={"fk_map": form_mapping})
+        if formset.is_valid():
+            formset.save()
+            messages.add_message(
+                request, messages.SUCCESS, "Metadata updated successfully.", extra_tags="alert-success",
+            )
             return HttpResponseRedirect(reverse("view_endpoint", args=(eid,)))
-    else:
-        form = DojoMetaDataForm()
 
-    add_breadcrumb(parent=endpoint, title="Add Metadata", top_level=False, request=request)
-    product_tab = Product_Tab(endpoint.product, "Add Metadata", tab="endpoints")
-    return render(request,
-                  "dojo/add_endpoint_meta_data.html",
-                  {"form": form,
-                   "product_tab": product_tab,
-                   "endpoint": endpoint,
-                   })
-
-
-@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, "eid")
-def edit_meta_data(request, eid):
-    endpoint = Endpoint.objects.get(id=eid)
-
-    if request.method == "POST":
-        for key, orig_value in request.POST.items():
-            if key.startswith("cfv_"):
-                cfv_id = int(key.split("_")[1])
-                cfv = get_object_or_404(DojoMeta, id=cfv_id)
-
-                value = orig_value.strip()
-                if value:
-                    cfv.value = value
-                    cfv.save()
-            if key.startswith("delete_"):
-                cfv_id = int(key.split("_")[2])
-                cfv = get_object_or_404(DojoMeta, id=cfv_id)
-                cfv.delete()
-
-        messages.add_message(request,
-                             messages.SUCCESS,
-                             "Metadata edited successfully.",
-                             extra_tags="alert-success")
-        return HttpResponseRedirect(reverse("view_endpoint", args=(eid,)))
-
+    add_breadcrumb(parent=endpoint, title="Manage Metadata", top_level=False, request=request)
     product_tab = Product_Tab(endpoint.product, "Edit Metadata", tab="endpoints")
-    return render(request,
-                  "dojo/edit_endpoint_meta_data.html",
-                  {"endpoint": endpoint,
-                   "product_tab": product_tab,
-                   })
+    return render(
+        request,
+        "dojo/edit_metadata.html",
+        {"formset": formset, "product_tab": product_tab},
+    )
 
 
 # bulk mitigate and delete are combined, so we can't have the nice user_is_authorized decorator
@@ -364,9 +336,9 @@ def endpoint_bulk_update_all(request, pid=None):
 
             if pid is not None:
                 product = get_object_or_404(Product, id=pid)
-                user_has_permission_or_403(request.user, product, Permissions.Endpoint_Delete)
+                user_has_permission_or_403(request.user, product, Permissions.Location_Delete)
 
-            endpoints = get_authorized_endpoints_for_queryset(Permissions.Endpoint_Delete, endpoints, request.user)
+            endpoints = get_authorized_endpoints_for_queryset(Permissions.Location_Delete, endpoints, request.user)
 
             skipped_endpoint_count = total_endpoint_count - endpoints.count()
             deleted_endpoint_count = endpoints.count()
@@ -390,7 +362,7 @@ def endpoint_bulk_update_all(request, pid=None):
                 product = get_object_or_404(Product, id=pid)
                 user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
-            endpoints = get_authorized_endpoints_for_queryset(Permissions.Endpoint_Edit, endpoints, request.user)
+            endpoints = get_authorized_endpoints_for_queryset(Permissions.Location_Edit, endpoints, request.user)
 
             skipped_endpoint_count = total_endpoint_count - endpoints.count()
             updated_endpoint_count = endpoints.count()
@@ -485,7 +457,7 @@ def migrate_endpoints_view(request):
         })
 
 
-@user_is_authorized(Product, Permissions.Endpoint_Edit, "pid")
+@user_is_authorized(Product, Permissions.Location_Edit, "pid")
 def import_endpoint_meta(request, pid):
     product = get_object_or_404(Product, id=pid)
     form = ImportEndpointMetaForm()
@@ -518,3 +490,15 @@ def import_endpoint_meta(request, pid):
         "product_tab": product_tab,
         "form": form,
     })
+
+
+@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
+def endpoint_report(request, eid):
+    endpoint = get_object_or_404(Endpoint, id=eid)
+    return generate_report(request, endpoint, host_view=False)
+
+
+@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
+def endpoint_host_report(request, eid):
+    endpoint = get_object_or_404(Endpoint, id=eid)
+    return generate_report(request, endpoint, host_view=True)

@@ -3,9 +3,10 @@ import uuid
 from crum import impersonate
 
 from dojo.models import Finding, User
-from unittests.dojo_test_case import DojoTestCase, toggle_system_setting_boolean
+from unittests.dojo_test_case import DojoTestCase, toggle_system_setting_boolean, versioned_fixtures
 
 
+@versioned_fixtures
 class ProductGradeTest(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 

@@ -1090,15 +1090,26 @@ def import_settings_tag(test_import, *, autoescape=True):
     icon = "fa-info-circle"
     color = ""
 
+    if not settings.V3_FEATURE_LOCATIONS:
+        # TODO: Delete this after the move to Locations
+        return mark_safe(html % (icon, color, icon,
+                                    esc(test_import.id),
+                                    esc(test_import.import_settings.get("active", None)),
+                                    esc(test_import.import_settings.get("verified", None)),
+                                    esc(test_import.import_settings.get("minimum_severity", None)),
+                                    esc(test_import.import_settings.get("close_old_findings", None)),
+                                    esc(test_import.import_settings.get("push_to_jira", None)),
+                                    esc(test_import.import_settings.get("tags", None)),
+                                    esc(test_import.import_settings.get("endpoints", test_import.import_settings.get("endpoint", None)))))
     return mark_safe(html % (icon, color, icon,
-                                esc(test_import.id),
-                                esc(test_import.import_settings.get("active", None)),
-                                esc(test_import.import_settings.get("verified", None)),
-                                esc(test_import.import_settings.get("minimum_severity", None)),
-                                esc(test_import.import_settings.get("close_old_findings", None)),
-                                esc(test_import.import_settings.get("push_to_jira", None)),
-                                esc(test_import.import_settings.get("tags", None)),
-                                esc(test_import.import_settings.get("endpoints", test_import.import_settings.get("endpoint", None)))))
+                             esc(test_import.id),
+                             esc(test_import.import_settings.get("active", None)),
+                             esc(test_import.import_settings.get("verified", None)),
+                             esc(test_import.import_settings.get("minimum_severity", None)),
+                             esc(test_import.import_settings.get("close_old_findings", None)),
+                             esc(test_import.import_settings.get("push_to_jira", None)),
+                             esc(test_import.import_settings.get("tags", None)),
+                             esc(test_import.import_settings.get("locations", None))))
 
 
 @register.filter(needs_autoescape=True)

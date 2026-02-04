@@ -4,8 +4,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
 from dojo.models import Global_Role, Role, User, UserContactInfo
+from unittests.dojo_test_case import versioned_fixtures
 
 
+@versioned_fixtures
 class UserTest(APITestCase):
 
     """Test the User APIv2 endpoint."""

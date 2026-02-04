@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load display_tags %}
 {% load authorization_tags %}
-{% load get_endpoint_status %}
+
 {% load static %}
 {% load i18n %}
 {% load humanize %}
@@ -271,7 +271,12 @@
                                         {{ test_import.version|default_if_none:"" }}
                                     </td>
                                     <td>
-                                        {{ test_import.import_settings.endpoint|default_if_none:"" }}
+                                        {% if V3_FEATURE_LOCATIONS %}
+                                            {{ test_import.import_settings.locations|default_if_none:"" }}
+                                        {% else %}
+                                            {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
+                                            {{ test_import.import_settings.endpoint|default_if_none:"" }}
+                                        {% endif %}
                                     </td>
                                     <td>
                                         {% regroup test_import.test_import_finding_action_set.all by get_action_display as finding_action_list %}
@@ -1156,17 +1161,33 @@
                                             data-original-title="Files"
                                             title=""></i>
                                         {% endif %}
-                                        {% if finding.endpoints.all %}
-                                            <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
-                                            {% for endpoint_status in finding.status_finding.all %}
-                                                {% if endpoint_status.mitigated %} &#10003; {{ endpoint_status.endpoint }}
-                                                    <br/>
-                                                {% else %}
-                                                        &#10005; {{ endpoint_status.endpoint }}
+                                        {% if V3_FEATURE_LOCATIONS %}
+                                            {% if finding.locations.exists %}
+                                                <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
+                                                {% for ref in finding.locations.all %}
+                                                    {% if ref.status == "Mitigated" %} &#10003; {{ ref.location }}
                                                         <br/>
-                                                {% endif %}
-                                            {% endfor %}
-                                            " data-placement="right" data-container="body" data-original-title="Endpoints ({{ finding.active_endpoint_count }} Active, {{ finding.mitigated_endpoint_count }} Mitigated)" title=""></i>
+                                                    {% else %}
+                                                            &#10005; {{ ref.location }}
+                                                            <br/>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                " data-placement="right" data-container="body" data-original-title="Endpoints ({{ finding.active_endpoint_count }} Active, {{ finding.mitigated_endpoint_count }} Mitigated)" title=""></i>
+                                            {% endif %}
+                                        {% else %}
+                                            {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
+                                            {% if finding.endpoints.all %}
+                                                <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
+                                                {% for endpoint_status in finding.status_finding.all %}
+                                                    {% if endpoint_status.mitigated %} &#10003; {{ endpoint_status.endpoint }}
+                                                        <br/>
+                                                    {% else %}
+                                                            &#10005; {{ endpoint_status.endpoint }}
+                                                            <br/>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                " data-placement="right" data-container="body" data-original-title="Endpoints ({{ finding.active_endpoint_count }} Active, {{ finding.mitigated_endpoint_count }} Mitigated)" title=""></i>
+                                            {% endif %}
                                         {% endif %}
                                         {% if finding.component_name %}
                                             <i class="fa-solid fa-file has-popover dojo-sup"

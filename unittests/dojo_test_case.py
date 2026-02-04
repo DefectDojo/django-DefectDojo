@@ -5,7 +5,9 @@ from functools import wraps
 from itertools import chain
 from pathlib import Path
 from pprint import pformat
+from unittest import skipIf
 
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -16,6 +18,8 @@ from vcr_unittest import VCRTestCase
 
 from dojo.jira_link import helper as jira_helper
 from dojo.jira_link.views import get_custom_field
+from dojo.location.models import Location, LocationFindingReference
+from dojo.location.status import FindingLocationStatus
 from dojo.middleware import DojoSytemSettingsMiddleware
 from dojo.models import (
     SEVERITIES,
@@ -91,6 +95,28 @@ def with_system_setting(field, value):
         return wrapper
 
     return decorator
+
+
+skip_unless_v3 = skipIf(
+    not settings.V3_FEATURE_LOCATIONS,
+    "Skipping because V3_FEATURE_LOCATIONS is disabled.",
+)
+
+
+skip_unless_v2 = skipIf(
+    settings.V3_FEATURE_LOCATIONS,
+    "Skipping because V3_FEATURE_LOCATIONS is enabled.",
+)
+
+
+def versioned_fixtures(test_class):
+    if settings.V3_FEATURE_LOCATIONS:
+        if hasattr(test_class, "fixtures"):
+            test_class.fixtures = [
+                "dojo_testdata_locations.json" if fixture_name == "dojo_testdata.json" else fixture_name
+                for fixture_name in test_class.fixtures
+            ]
+    return test_class
 
 
 class DojoTestUtilsMixin:
@@ -193,16 +219,40 @@ class DojoTestUtilsMixin:
         return Finding.objects.all().count()
 
     def db_endpoint_count(self):
+        if settings.V3_FEATURE_LOCATIONS:
+            error_message = "endpoints are disabled when v3 locations is enabled"
+            raise Exception(error_message)
         return Endpoint.objects.all().count()
 
     def db_endpoint_status_count(self, mitigated=None):
+        if settings.V3_FEATURE_LOCATIONS:
+            error_message = "endpoint statuses are disabled when v3 locations is enabled"
+            raise Exception(error_message)
         eps = Endpoint_Status.objects.all()
         if mitigated is not None:
             eps = eps.filter(mitigated=mitigated)
         return eps.count()
 
     def db_endpoint_tag_count(self):
+        if settings.V3_FEATURE_LOCATIONS:
+            error_message = "endpoints are disabled when v3 locations is enabled"
+            raise Exception(error_message)
         return Endpoint.tags.tag_model.objects.all().count()
+
+    def db_location_count(self):
+        return Location.objects.all().count()
+
+    def db_location_status_count(self, mitigated=None):
+        refs = LocationFindingReference.objects.all()
+        if mitigated is not None:
+            if mitigated:
+                refs = refs.filter(status=FindingLocationStatus.Mitigated)
+            else:
+                refs = refs.exclude(status=FindingLocationStatus.Mitigated)
+        return refs.count()
+
+    def db_location_tag_count(self):
+        return Location.tags.tag_model.objects.all().count()
 
     def db_notes_count(self):
         return Notes.objects.all().count()
@@ -475,6 +525,19 @@ class DojoTestUtilsMixin:
 
     def get_latest_model(self, model):
         return model.objects.order_by("id").last()
+
+    def get_unsaved_locations(self, finding):
+        if settings.V3_FEATURE_LOCATIONS:
+            return finding.unsaved_locations
+        # TODO: Delete this after the move to Locations
+        return finding.unsaved_endpoints
+
+    def validate_locations(self, findings):
+        for finding in findings:
+            # AND SEVERITY HAHAHAHA
+            self.assertIn(finding.severity, Finding.SEVERITIES)
+            for location in self.get_unsaved_locations(finding):
+                location.clean()
 
 
 class DojoTestCase(TestCase, DojoTestUtilsMixin):
@@ -811,13 +874,23 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                         + ": is_mitigated: " + str(finding["is_mitigated"]) + ": notes: " + str([n["id"] for n in finding["notes"]])
                         + ": endpoints: " + str(finding["endpoints"]))
 
-        logger.debug("endpoints")
-        for ep in Endpoint.objects.all():
-            logger.debug(str(ep.id) + ": " + str(ep))
+        if settings.V3_FEATURE_LOCATIONS:
+            logger.debug("locations")
+            for loc in Location.objects.order_by("id"):
+                logger.debug(str(loc.id) + ": " + str(loc))
 
-        logger.debug("endpoint statuses")
-        for eps in Endpoint_Status.objects.all():
-            logger.debug(str(eps.id) + ": " + str(eps.endpoint) + ": " + str(eps.endpoint.id) + ": " + str(eps.mitigated))
+            logger.debug("location finding refs")
+            for ref in LocationFindingReference.objects.order_by("id"):
+                logger.debug(str(ref.id) + ": " + str(ref.location) + ": " + str(ref.location.id) + ": " + str(ref.status == FindingLocationStatus.Mitigated))
+        else:
+            # TODO: Delete this after the move to Locations
+            logger.debug("endpoints")
+            for ep in Endpoint.objects.all():
+                logger.debug(str(ep.id) + ": " + str(ep))
+
+            logger.debug("endpoint statuses")
+            for eps in Endpoint_Status.objects.all():
+                logger.debug(str(eps.id) + ": " + str(eps.endpoint) + ": " + str(eps.endpoint.id) + ": " + str(eps.mitigated))
 
     def get_product_api(self, product_id):
         response = self.client.get(reverse("product-list") + f"{product_id}/", format="json")

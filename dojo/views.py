@@ -15,12 +15,14 @@ from django.urls import reverse
 from dojo.auditlog import process_events_for_display
 from dojo.authorization.authorization import (
     user_has_configuration_permission_or_403,
+    user_has_global_permission,
     user_has_permission,
     user_has_permission_or_403,
 )
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import LogEntryFilter, PgHistoryFilter
 from dojo.forms import ManageFileFormSet
+from dojo.location.models import Location
 from dojo.models import (
     Endpoint,
     Engagement,
@@ -86,18 +88,30 @@ def action_history(request, cid, oid):
         product_id = object_value.test.engagement.product.id
         active_tab = "findings"
         finding = object_value
+    elif ct.model == "location":
+        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
+        object_value = Location.objects.get(id=obj.id)
+        active_tab = "endpoints"
+    # TODO: Delete this after the move to Locations
     elif ct.model == "endpoint":
-        user_has_permission_or_403(request.user, obj, Permissions.Endpoint_View)
+        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
         object_value = Endpoint.objects.get(id=obj.id)
         product_id = object_value.product.id
         active_tab = "endpoints"
     elif ct.model == "risk_acceptance":
         engagements = Engagement.objects.filter(risk_acceptance=obj)
         authorized = False
-        for engagement in engagements:
-            if user_has_permission(request.user, engagement, Permissions.Engagement_View):
-                authorized = True
-                break
+        fetched_engagements = list(engagements)
+        # Check the case that there are no engagements associated with the risk acceptance
+        if len(fetched_engagements) == 0:
+            # Determine if the user has risk acceptance view permission globally
+            authorized = user_has_global_permission(request.user, Permissions.Risk_Acceptance)
+        else:
+            # Iterate through engagements to see if the user has view permission on any of them
+            for engagement in fetched_engagements:
+                if user_has_permission(request.user, engagement, Permissions.Engagement_View):
+                    authorized = True
+                    break
         if not authorized:
             raise PermissionDenied
     elif ct.model == "user":

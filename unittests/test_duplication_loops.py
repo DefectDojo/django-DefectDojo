@@ -7,11 +7,12 @@ from dojo.finding.deduplication import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Engagement, Finding, Product, User, copy_model_util
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 
 
+@versioned_fixtures
 class TestDuplicationLoops(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -173,7 +174,7 @@ class TestDuplicationLoops(DojoTestCase):
         # B -> B
         self.finding_b.duplicate = True
         self.finding_b.duplicate_finding = self.finding_b
-        super(Finding, self.finding_b).save()
+        super(Finding, self.finding_b).save(skip_validation=True)
         candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
         self.assertEqual(candidates, 1)
         loop_count = fix_loop_duplicates()
@@ -189,8 +190,8 @@ class TestDuplicationLoops(DojoTestCase):
         self.finding_b.duplicate = True
         self.finding_b.duplicate_finding = self.finding_a
 
-        super(Finding, self.finding_a).save()
-        super(Finding, self.finding_b).save()
+        super(Finding, self.finding_a).save(skip_validation=True)
+        super(Finding, self.finding_b).save(skip_validation=True)
 
         loop_count = fix_loop_duplicates()
         self.assertEqual(loop_count, 0)
@@ -227,9 +228,9 @@ class TestDuplicationLoops(DojoTestCase):
         self.finding_c.duplicate = True
         self.finding_c.duplicate_finding = self.finding_a
 
-        super(Finding, self.finding_a).save()
-        super(Finding, self.finding_b).save()
-        super(Finding, self.finding_c).save()
+        super(Finding, self.finding_a).save(skip_validation=True)
+        super(Finding, self.finding_b).save(skip_validation=True)
+        super(Finding, self.finding_c).save(skip_validation=True)
 
         loop_count = fix_loop_duplicates()
         self.assertEqual(loop_count, 0)
@@ -275,10 +276,10 @@ class TestDuplicationLoops(DojoTestCase):
         self.finding_d.duplicate = True
         self.finding_d.duplicate_finding = self.finding_a
 
-        super(Finding, self.finding_a).save()
-        super(Finding, self.finding_b).save()
-        super(Finding, self.finding_c).save()
-        super(Finding, self.finding_d).save()
+        super(Finding, self.finding_a).save(skip_validation=True)
+        super(Finding, self.finding_b).save(skip_validation=True)
+        super(Finding, self.finding_c).save(skip_validation=True)
+        super(Finding, self.finding_d).save(skip_validation=True)
 
         loop_count = fix_loop_duplicates()
         self.assertEqual(loop_count, 0)
@@ -325,9 +326,9 @@ class TestDuplicationLoops(DojoTestCase):
         self.finding_b.duplicate = True
         self.finding_b.duplicate_finding = self.finding_c
 
-        super(Finding, self.finding_a).save()
-        super(Finding, self.finding_b).save()
-        super(Finding, self.finding_c).save()
+        super(Finding, self.finding_a).save(skip_validation=True)
+        super(Finding, self.finding_b).save(skip_validation=True)
+        super(Finding, self.finding_c).save(skip_validation=True)
 
         loop_count = fix_loop_duplicates()
         self.assertEqual(loop_count, 0)
@@ -352,9 +353,9 @@ class TestDuplicationLoops(DojoTestCase):
         self.finding_b.duplicate = True
         self.finding_b.duplicate_finding = self.finding_a
 
-        super(Finding, self.finding_a).save()
-        super(Finding, self.finding_b).save()
-        super(Finding, self.finding_c).save()
+        super(Finding, self.finding_a).save(skip_validation=True)
+        super(Finding, self.finding_b).save(skip_validation=True)
+        super(Finding, self.finding_c).save(skip_validation=True)
 
         loop_count = fix_loop_duplicates()
         self.assertEqual(loop_count, 0)

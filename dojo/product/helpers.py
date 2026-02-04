@@ -1,7 +1,11 @@
 import contextlib
 import logging
 
+from django.conf import settings
+from django.db.models import Q
+
 from dojo.celery import app
+from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 
 logger = logging.getLogger(__name__)
@@ -24,9 +28,22 @@ def propagate_tags_on_product_sync(product):
     # findings
     logger.debug("Propagating tags from %s to all findings", product)
     propagate_tags_on_object_list(Finding.objects.filter(test__engagement__product=product))
-    # endpoints
-    logger.debug("Propagating tags from %s to all endpoints", product)
-    propagate_tags_on_object_list(Endpoint.objects.filter(product=product))
+    if settings.V3_FEATURE_LOCATIONS:
+        # Locations
+        logger.debug("Propagating tags from %s to all locations", product)
+        propagate_tags_on_object_list(
+            Location.objects.filter(
+                # Locations linked directly to a product via LocationProductReference
+                Q(products__product=product)
+                # Locations linked indirectly to a product via LocationFindingReference
+                | Q(findings__finding__test__engagement__product=product),
+            ).distinct(),
+        )
+    else:
+        # TODO: Delete this after the move to Locations
+        # endpoints
+        logger.debug("Propagating tags from %s to all endpoints", product)
+        propagate_tags_on_object_list(Endpoint.objects.filter(product=product))
 
 
 def propagate_tags_on_object_list(object_list):

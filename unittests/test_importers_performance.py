@@ -44,7 +44,7 @@ from dojo.models import (
     UserContactInfo,
 )
 
-from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v2
 
 logger = logging.getLogger(__name__)
 
@@ -104,6 +104,7 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
         product_type, _created = Product_Type.objects.get_or_create(name="test")
         product, _created = Product.objects.get_or_create(
             name=product_name,
+            description="Test",
             prod_type=product_type,
         )
         engagement, _created = Engagement.objects.get_or_create(
@@ -227,6 +228,8 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
                             test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
 
+# TODO: Implement Locations
+@skip_unless_v2
 class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
     """Performance tests using small sample files (StackHawk, ~6 findings)."""

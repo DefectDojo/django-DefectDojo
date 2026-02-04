@@ -4,8 +4,10 @@ import re
 
 import html2text
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +100,11 @@ class BurpParser:
             item = get_item(node, test)
             dupe_key = item.vuln_id_from_tool
             if dupe_key in items:
-                items[dupe_key].unsaved_endpoints += item.unsaved_endpoints
+                if settings.V3_FEATURE_LOCATIONS:
+                    items[dupe_key].unsaved_locations += item.unsaved_locations
+                else:
+                    # TODO: Delete this after the move to Locations
+                    items[dupe_key].unsaved_endpoints += item.unsaved_endpoints
                 items[dupe_key].unsaved_req_resp += item.unsaved_req_resp
 
                 # Description details of the finding are added
@@ -292,8 +298,12 @@ def get_item(item_node, test):
         vuln_id_from_tool=vuln_id_from_tool,
     )
     finding.unsaved_req_resp = unsaved_req_resp
-    # manage endpoint
-    finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
+    # manage endpoint/location
+    if settings.V3_FEATURE_LOCATIONS:
+        finding.unsaved_locations = [URL.from_value(url_host)]
+    else:
+        # TODO: Delete this after the move to Locations
+        finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
     # manage cwes
     cwes = do_clean_cwe(item_node.findall("vulnerabilityClassifications"))
     if len(cwes) > 1:

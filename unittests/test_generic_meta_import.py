@@ -7,9 +7,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.models import Test, User
-from unittests.dojo_test_case import DojoAPITestCase
+from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
 
+@versioned_fixtures
 class TestGenericMetaImports(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 

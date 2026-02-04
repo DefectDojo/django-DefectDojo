@@ -19,6 +19,7 @@ class TestDojoCloseOld(DojoTestCase):
         environment, _ = Development_Environment.objects.get_or_create(name="Development")
         product, _ = Product.objects.get_or_create(
             name="TestDojoCloseOldImporter1",
+            description="Test",
             prod_type=product_type,
         )
         engagement, _ = Engagement.objects.get_or_create(
@@ -64,6 +65,7 @@ class TestDojoCloseOld(DojoTestCase):
         product_type, _ = Product_Type.objects.get_or_create(name="test2")
         product, _ = Product.objects.get_or_create(
             name="TestDojoCloseOldImporter2",
+            description="Test",
             prod_type=product_type,
         )
         engagement1, _ = Engagement.objects.get_or_create(
@@ -122,6 +124,7 @@ class TestDojoCloseOld(DojoTestCase):
         product_type, _ = Product_Type.objects.get_or_create(name="test2")
         product, _ = Product.objects.get_or_create(
             name="TestDojoCloseOldImporter3",
+            description="Test",
             prod_type=product_type,
         )
         engagement1, _ = Engagement.objects.get_or_create(
@@ -180,6 +183,7 @@ class TestDojoCloseOld(DojoTestCase):
         product_type, _ = Product_Type.objects.get_or_create(name="closeold_risk")
         product, _ = Product.objects.get_or_create(
             name="TestCloseOldRiskAccepted",
+            description="Test",
             prod_type=product_type,
         )
         product.enable_simple_risk_acceptance = True

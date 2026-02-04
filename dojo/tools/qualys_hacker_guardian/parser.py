@@ -3,8 +3,10 @@ import io
 import sys
 
 from dateutil import parser as date_parser
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class QualysHackerGuardianParser:
@@ -93,7 +95,6 @@ class QualysHackerGuardianParser:
         reader = csv.DictReader(io.StringIO(content), delimiter=",", quotechar='"')
         dupes = {}
         for row in reader:
-            endpoint = Endpoint.from_uri(self.get_endpoint(row))
             finding = Finding(
                 title=row.get("VULN TITLE"),
                 severity=self.qualys_severity_lookup[row.get("Q_SEVERITY", 1)],
@@ -110,12 +111,22 @@ class QualysHackerGuardianParser:
                 active=True,
                 nb_occurences=1,
             )
-            finding.unsaved_endpoints.append(endpoint)
+            if settings.V3_FEATURE_LOCATIONS:
+                location = URL.from_value(self.get_endpoint(row))
+                finding.unsaved_locations = [location]
+            else:
+                # TODO: Delete this after the move to Locations
+                endpoint = Endpoint.from_uri(self.get_endpoint(row))
+                finding.unsaved_endpoints = [endpoint]
 
             dupe_key = finding.unique_id_from_tool
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
-                if endpoint not in finding.unsaved_endpoints:
+                if settings.V3_FEATURE_LOCATIONS:
+                    if location not in finding.unsaved_locations:
+                        finding.unsaved_locations.append(location)
+                # TODO: Delete this after the move to Locations
+                elif endpoint not in finding.unsaved_endpoints:
                     finding.unsaved_endpoints.append(endpoint)
                 finding.nb_occurences += 1
             else:

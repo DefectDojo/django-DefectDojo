@@ -153,9 +153,9 @@ def set_duplicate(new_finding, existing_finding):
     # existing_finding.found_by.add(new_finding.test.test_type)
 
     logger.debug("saving new finding: %d", new_finding.id)
-    super(Finding, new_finding).save()
+    super(Finding, new_finding).save(skip_validation=True)
     logger.debug("saving existing finding: %d", existing_finding.id)
-    super(Finding, existing_finding).save()
+    super(Finding, existing_finding).save(skip_validation=True)
 
 
 def is_duplicate_reopen(new_finding, existing_finding) -> bool:
@@ -205,12 +205,48 @@ def are_urls_equal(url1, url2, fields):
     return True
 
 
-def are_endpoints_duplicates(new_finding, to_duplicate_finding):
+def finding_locations(finding):
+    return [ref.location.url for ref in finding.locations.all()]
+
+
+def are_location_urls_equal(url1, url2, fields):
+    deduplicationLogger.debug("Check if url %s and url %s are equal in terms of %s.", url1, url2, fields)
+    for field in fields:
+        if (field == "scheme" and url1.protocol != url2.protocol) or (field == "host" and url1.host != url2.host):
+            return False
+        if (field == "port" and url1.port != url2.port) or (field == "path" and url1.path != url2.path) or (
+                field == "query" and url1.query != url2.query) or (
+                field == "fragment" and url1.fragment != url2.fragment) or (
+                field == "userinfo" and url1.user_info != url2.user_info):
+            return False
+    return True
+
+
+def are_locations_duplicates(new_finding, to_duplicate_finding):
     fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
     if len(fields) == 0:
         deduplicationLogger.debug("deduplication by endpoint fields is disabled")
         return True
 
+    if settings.V3_FEATURE_LOCATIONS:
+        list1 = finding_locations(new_finding)
+        list2 = finding_locations(to_duplicate_finding)
+
+        deduplicationLogger.debug(
+            f"Starting deduplication by location fields for finding {new_finding.id} with locations {list1} and finding {to_duplicate_finding.id} with locations {list2}",
+        )
+
+        if list1 == [] and list2 == []:
+            return True
+
+        for l1 in list1:
+            for l2 in list2:
+                if are_location_urls_equal(l1, l2, fields):
+                    return True
+
+        deduplicationLogger.debug(f"locations are not duplicates: {new_finding.id} and {to_duplicate_finding.id}")
+        return False
+    # TODO: Delete this after the move to Locations
     list1 = get_endpoints_as_url(new_finding)
     list2 = get_endpoints_as_url(to_duplicate_finding)
 
@@ -468,7 +504,7 @@ def get_matches_from_hash_candidates(new_finding, candidates_by_hash) -> Iterato
         if is_deduplication_on_engagement_mismatch(new_finding, candidate):
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
             continue
-        if are_endpoints_duplicates(new_finding, candidate):
+        if are_locations_duplicates(new_finding, candidate):
             yield candidate
 
 
@@ -504,11 +540,11 @@ def get_matches_from_uid_or_hash_candidates(new_finding, candidates_by_uid, cand
         if is_deduplication_on_engagement_mismatch(new_finding, candidate):
             deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
             continue
-        if are_endpoints_duplicates(new_finding, candidate):
-            deduplicationLogger.debug("UID_OR_HASH: endpoints match, returning candidate %s with test_type %s unique_id_from_tool %s hash_code %s", candidate.id, candidate.test.test_type, candidate.unique_id_from_tool, candidate.hash_code)
+        if are_locations_duplicates(new_finding, candidate):
+            deduplicationLogger.debug("UID_OR_HASH: locations match, returning candidate %s with test_type %s unique_id_from_tool %s hash_code %s", candidate.id, candidate.test.test_type, candidate.unique_id_from_tool, candidate.hash_code)
             yield candidate
         else:
-            deduplicationLogger.debug("UID_OR_HASH: endpoints mismatch, skipping candidate %s", candidate.id)
+            deduplicationLogger.debug("UID_OR_HASH: locations mismatch, skipping candidate %s", candidate.id)
 
 
 def get_matches_from_legacy_candidates(new_finding, candidates_by_title, candidates_by_cwe) -> Iterator[Finding]:
@@ -529,46 +565,86 @@ def get_matches_from_legacy_candidates(new_finding, candidates_by_title, candida
         if not _is_candidate_older(new_finding, candidate):
             continue
         if is_deduplication_on_engagement_mismatch(new_finding, candidate):
-            deduplicationLogger.debug(
-                "deduplication_on_engagement_mismatch, skipping dedupe.")
+            deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
             continue
 
-        flag_endpoints = False
-        flag_line_path = False
+        if settings.V3_FEATURE_LOCATIONS:
+            flag_locations = False
+            flag_line_path = False
 
-        # ---------------------------------------------------------
-        # 2) If existing and new findings have endpoints: compare them all
-        #    Else look at line+file_path
-        #    (if new finding is not static, do not deduplicate)
-        # ---------------------------------------------------------
+            # ---------------------------------------------------------
+            # 2) If existing and new findings have locations: compare them all
+            #    Else look at line+file_path
+            #    (if new finding is not static, do not deduplicate)
+            # ---------------------------------------------------------
 
-        if candidate.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
-            list1 = [str(e) for e in new_finding.endpoints.all()]
-            list2 = [str(e) for e in candidate.endpoints.all()]
-            if all(x in list1 for x in list2):
-                deduplicationLogger.debug("%s: existing endpoints are present in new finding", candidate.id)
-                flag_endpoints = True
-        elif new_finding.static_finding and new_finding.file_path and len(new_finding.file_path) > 0:
-            if str(candidate.line) == str(new_finding.line) and candidate.file_path == new_finding.file_path:
-                deduplicationLogger.debug("%s: file_path and line match", candidate.id)
-                flag_line_path = True
+            if candidate.locations.count() != 0 and new_finding.locations.count() != 0:
+                list1 = [ref.location.location_value for ref in new_finding.locations.all()]
+                list2 = [ref.location.location_value for ref in candidate.locations.all()]
+                if all(x in list1 for x in list2):
+                    deduplicationLogger.debug("%s: existing locations are present in new finding", candidate.id)
+                    flag_locations = True
+            elif new_finding.static_finding and new_finding.file_path and len(new_finding.file_path) > 0:
+                if str(candidate.line) == str(new_finding.line) and candidate.file_path == new_finding.file_path:
+                    deduplicationLogger.debug("%s: file_path and line match", candidate.id)
+                    flag_line_path = True
+                else:
+                    deduplicationLogger.debug(
+                        "no locations on one of the findings and file_path doesn't match; Deduplication will not occur")
             else:
-                deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
+                deduplicationLogger.debug("find.static/dynamic: %s/%s", candidate.static_finding, candidate.dynamic_finding)
+                deduplicationLogger.debug("new_finding.static/dynamic: %s/%s", new_finding.static_finding, new_finding.dynamic_finding)
+                deduplicationLogger.debug("find.file_path: %s", candidate.file_path)
+                deduplicationLogger.debug("new_finding.file_path: %s", new_finding.file_path)
+                deduplicationLogger.debug(
+                    "no locations on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
+
+            flag_hash = candidate.hash_code == new_finding.hash_code
+
+            deduplicationLogger.debug(
+                "deduplication flags for new finding (" + ("dynamic" if new_finding.dynamic_finding else "static") + ") " + str(new_finding.id) + " and existing finding " + str(candidate.id)
+                + " flag_locations: " + str(flag_locations) + " flag_line_path:" + str(flag_line_path) + " flag_hash:" + str(flag_hash))
+
+            if (flag_locations or flag_line_path) and flag_hash:
+                yield candidate
         else:
-            deduplicationLogger.debug("find.static/dynamic: %s/%s", candidate.static_finding, candidate.dynamic_finding)
-            deduplicationLogger.debug("new_finding.static/dynamic: %s/%s", new_finding.static_finding, new_finding.dynamic_finding)
-            deduplicationLogger.debug("find.file_path: %s", candidate.file_path)
-            deduplicationLogger.debug("new_finding.file_path: %s", new_finding.file_path)
-            deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
+            # TODO: Delete this after the move to Locations
+            flag_endpoints = False
+            flag_line_path = False
 
-        flag_hash = candidate.hash_code == new_finding.hash_code
+            # ---------------------------------------------------------
+            # 2) If existing and new findings have endpoints: compare them all
+            #    Else look at line+file_path
+            #    (if new finding is not static, do not deduplicate)
+            # ---------------------------------------------------------
 
-        deduplicationLogger.debug(
-            "deduplication flags for new finding (" + ("dynamic" if new_finding.dynamic_finding else "static") + ") " + str(new_finding.id) + " and existing finding " + str(candidate.id)
-            + " flag_endpoints: " + str(flag_endpoints) + " flag_line_path:" + str(flag_line_path) + " flag_hash:" + str(flag_hash))
+            if candidate.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
+                list1 = [str(e) for e in new_finding.endpoints.all()]
+                list2 = [str(e) for e in candidate.endpoints.all()]
+                if all(x in list1 for x in list2):
+                    deduplicationLogger.debug("%s: existing endpoints are present in new finding", candidate.id)
+                    flag_endpoints = True
+            elif new_finding.static_finding and new_finding.file_path and len(new_finding.file_path) > 0:
+                if str(candidate.line) == str(new_finding.line) and candidate.file_path == new_finding.file_path:
+                    deduplicationLogger.debug("%s: file_path and line match", candidate.id)
+                    flag_line_path = True
+                else:
+                    deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
+            else:
+                deduplicationLogger.debug("find.static/dynamic: %s/%s", candidate.static_finding, candidate.dynamic_finding)
+                deduplicationLogger.debug("new_finding.static/dynamic: %s/%s", new_finding.static_finding, new_finding.dynamic_finding)
+                deduplicationLogger.debug("find.file_path: %s", candidate.file_path)
+                deduplicationLogger.debug("new_finding.file_path: %s", new_finding.file_path)
+                deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
 
-        if (flag_endpoints or flag_line_path) and flag_hash:
-            yield candidate
+            flag_hash = candidate.hash_code == new_finding.hash_code
+
+            deduplicationLogger.debug(
+                "deduplication flags for new finding (" + ("dynamic" if new_finding.dynamic_finding else "static") + ") " + str(new_finding.id) + " and existing finding " + str(candidate.id)
+                + " flag_endpoints: " + str(flag_endpoints) + " flag_line_path:" + str(flag_line_path) + " flag_hash:" + str(flag_hash))
+
+            if (flag_endpoints or flag_line_path) and flag_hash:
+                yield candidate
 
 
 def _dedupe_batch_hash_code(findings):

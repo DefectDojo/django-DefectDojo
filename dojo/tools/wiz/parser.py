@@ -14,6 +14,18 @@ from dojo.tools.wizcli_common_parsers.parsers import WizcliParsers
 logger = logging.getLogger(__name__)
 
 
+def validate_severities(severity: str) -> str:
+    """Ensure the supplied severity fits what DefectDojo is expecting."""
+    severity = severity.capitalize()
+    if severity == "Informational":
+        severity = "Info"
+    if severity not in SEVERITIES:
+        logger.error("Severity is not supported: %s", severity)
+        # Default to Info severity
+        return "Info"
+    return severity
+
+
 class WizParserByTitle:
 
     """Parser the CSV where the "Title" field is the match for a finding title."""
@@ -91,7 +103,7 @@ class WizParserByTitle:
                     title=title,
                     date=date,
                     description=description,
-                    severity=severity.lower().capitalize(),
+                    severity=validate_severities(severity),
                     static_finding=False,
                     dynamic_finding=True,
                     unique_id_from_tool=issue_id,
@@ -160,7 +172,7 @@ class WizParserByDetailedName:
                 title=f"{package_name}: {vulnerability_id}",
                 description=description,
                 mitigation=mitigation,
-                severity=self._validate_severities(severity),
+                severity=validate_severities(severity),
                 static_finding=True,
                 unique_id_from_tool=finding_id,
                 component_name=package_name,
@@ -191,14 +203,6 @@ class WizParserByDetailedName:
         # Convert the string to a dict
         tag_dict = json.loads(tags)
         return [f"{key}: {value}" for key, value in tag_dict.items()]
-
-    def _validate_severities(self, severity: str) -> str:
-        """Ensure the supplied severity fits what DefectDojo is expecting."""
-        if severity not in SEVERITIES:
-            logger.error("Severity is not supported: %s", severity)
-            # Default to Info severity
-            return "Info"
-        return severity
 
 
 class WizParser(
