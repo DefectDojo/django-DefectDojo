@@ -946,7 +946,7 @@ class BaseImporter(ImporterOptions):
         if settings.V3_FEATURE_LOCATIONS:
             # Mitigate the location statuses
             dojo_dispatch_task(
-                self.location_manager.mitigate_location_status,
+                LocationManager.mitigate_location_status,
                 finding.locations.all(),
                 self.user,
                 kwuser=self.user,
@@ -956,7 +956,7 @@ class BaseImporter(ImporterOptions):
             # TODO: Delete this after the move to Locations
             # Mitigate the endpoint statuses
             dojo_dispatch_task(
-                self.endpoint_manager.mitigate_endpoint_status,
+                EndpointManager.mitigate_endpoint_status,
                 finding.status_finding.all(),
                 self.user,
                 kwuser=self.user,
