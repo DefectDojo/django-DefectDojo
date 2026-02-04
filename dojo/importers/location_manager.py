@@ -6,7 +6,7 @@ from django.db.models import QuerySet
 from django.utils import timezone
 
 from dojo.celery import app
-from dojo.decorators import dojo_async_task
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.location.models import AbstractLocation, LocationFindingReference
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
@@ -24,17 +24,16 @@ EndpointOrURL = TypeVar("EndpointOrURL", Endpoint, URL)
 
 # test_notifications.py: Implement Locations
 class LocationManager:
-    def get_or_create_location(self, unsaved_location: AbstractLocation) -> AbstractLocation | None:
+    @staticmethod
+    def get_or_create_location(unsaved_location: AbstractLocation) -> AbstractLocation | None:
         if isinstance(unsaved_location, URL):
             return URL.get_or_create_from_object(unsaved_location)
         logger.debug(f"IMPORT_SCAN: Unsupported location type: {type(unsaved_location)}")
         return None
 
-    @dojo_async_task
-    @app.task()
+    @app.task
     def add_locations_to_unsaved_finding(
-        self,
-        finding: Finding,
+        finding: Finding,  # noqa: N805
         locations: list[AbstractLocation],
         **kwargs: dict,
     ) -> None:
@@ -42,23 +41,21 @@ class LocationManager:
         locations = list(set(locations))
 
         logger.debug(f"IMPORT_SCAN: Adding {len(locations)} locations to finding: {finding}")
-        self.clean_unsaved_locations(locations)
+        LocationManager.clean_unsaved_locations(locations)
 
         # LOCATION LOCATION LOCATION
         # TODO: bulk create the finding/product refs...
         locations_saved = 0
         for unsaved_location in locations:
-            if saved_location := self.get_or_create_location(unsaved_location):
+            if saved_location := LocationManager.get_or_create_location(unsaved_location):
                 locations_saved += 1
                 saved_location.location.associate_with_finding(finding, status=FindingLocationStatus.Active)
 
         logger.debug(f"IMPORT_SCAN: {locations_saved} locations imported")
 
-    @dojo_async_task
-    @app.task()
+    @app.task
     def mitigate_location_status(
-        self,
-        location_refs: QuerySet[LocationFindingReference],
+        location_refs: QuerySet[LocationFindingReference],  # noqa: N805
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
@@ -69,11 +66,9 @@ class LocationManager:
             status=FindingLocationStatus.Mitigated,
         )
 
-    @dojo_async_task
-    @app.task()
+    @app.task
     def reactivate_location_status(
-        self,
-        location_refs: QuerySet[LocationFindingReference],
+        location_refs: QuerySet[LocationFindingReference],  # noqa: N805
         **kwargs: dict,
     ) -> None:
         """Reactivate all given (mitigated) locations refs"""
@@ -89,10 +84,10 @@ class LocationManager:
         locations: list[AbstractLocation],
         **kwargs: dict,
     ) -> None:
-        self.add_locations_to_unsaved_finding(finding, locations, sync=True)
+        dojo_dispatch_task(self.add_locations_to_unsaved_finding, finding, locations, sync=True)
 
+    @staticmethod
     def clean_unsaved_locations(
-        self,
         locations: list[AbstractLocation],
     ) -> None:
         """
@@ -110,7 +105,7 @@ class LocationManager:
         location_refs: QuerySet[LocationFindingReference],
         **kwargs: dict,
     ) -> None:
-        self.reactivate_location_status(location_refs, sync=True)
+        dojo_dispatch_task(self.reactivate_location_status, location_refs, sync=True)
 
     def chunk_locations_and_mitigate(
         self,
@@ -118,7 +113,7 @@ class LocationManager:
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        self.mitigate_location_status(location_refs, user, sync=True)
+        dojo_dispatch_task(self.mitigate_location_status, location_refs, user, sync=True)
 
     def update_location_status(
         self,
