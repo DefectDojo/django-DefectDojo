@@ -18,9 +18,7 @@ class TestWpscanParser(DojoTestCase):
         with (get_unit_tests_scans_path("wpscan") / "sample.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(4, len(findings))
             finding = findings[0]
             self.assertIsNone(finding.unique_id_from_tool)  # interesting findings are not vlunerability
@@ -32,18 +30,14 @@ class TestWpscanParser(DojoTestCase):
         with (get_unit_tests_scans_path("wpscan") / "wordpress_no_vuln.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(7, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
         with (get_unit_tests_scans_path("wpscan") / "wordpress_one_vuln.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(8, len(findings))
             finding = findings[0]
             self.assertEqual("8873", finding.unique_id_from_tool)
@@ -55,9 +49,7 @@ class TestWpscanParser(DojoTestCase):
         with (get_unit_tests_scans_path("wpscan") / "wordpress_many_vuln.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(8, len(findings))
             finding = findings[0]
             self.assertEqual("8873", finding.unique_id_from_tool)
@@ -69,9 +61,7 @@ class TestWpscanParser(DojoTestCase):
         with (get_unit_tests_scans_path("wpscan") / "wpscan.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(6, len(findings))
 
             with self.subTest(i=0):
@@ -96,9 +86,7 @@ class TestWpscanParser(DojoTestCase):
         with (get_unit_tests_scans_path("wpscan") / "wordpress_vuln_version.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(11, len(findings))
 
             with self.subTest(i=2):
@@ -114,9 +102,7 @@ class TestWpscanParser(DojoTestCase):
         with (get_unit_tests_scans_path("wpscan") / "issue5774.json").open(encoding="utf-8") as testfile:
             parser = WpscanParser()
             findings = parser.get_findings(testfile, Test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(59, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]

@@ -23,14 +23,16 @@ jobs:
 
   test-rest-framework:
     strategy:
-        matrix:
-            platform: ['linux/amd64', 'linux/arm64']
-        fail-fast: false
+      matrix:
+        platform: ['linux/amd64', 'linux/arm64']
+        v3_feature_locations: [ false, true ]
+      fail-fast: false
     needs: build-docker-containers
     uses: ./.github/workflows/rest-framework-tests.yml
     secrets: inherit
     with:
-      platform: ${{ matrix.platform}}
+      platform: ${{ matrix.platform }}
+      v3_feature_locations: ${{ matrix.v3_feature_locations }}
 
   # only run integration tests for linux/amd64 (default)
   test-user-interface:

@@ -4,7 +4,7 @@
       "Duration": "00:00:58.0662477",
       "Initiated": "23/02/2023 02:30 PM",
       "ScanId": "cb10809365d246d0881eafb202e63e55",
-      "Url": "XXXX"
+      "Url": "http://XXXX"
     },
     "Vulnerabilities": [
       {
@@ -38,7 +38,7 @@
         "Severity": "Low",
         "State": "Present",
         "Type": "MissingXFrameOptionsHeader",
-        "Url": "XXXX",
+        "Url": "http://XXXX",
         "Tags": []
       }
     ]

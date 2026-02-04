@@ -1,27 +1,47 @@
 [[main]]
-  name = "Docs Home"
-  url = "/en/about_defectdojo/about_docs/"
+  name = "Get started ⏷"
+  url = "/get_started/about/about_defectdojo"
   weight = 10
 
 [[main]]
-  name = "Supported Tools"
-  url = "/supported_tools/"
-  weight = 11
-
-[[main]]
-  name = "Pro Features"
-  url = "/en/about_defectdojo/pro_features"
+  name = "Import data ⏷"
+  url = "/import_data/import_intro/comparison/"
   weight = 12
 
 [[main]]
-  name = "Changelog"
-  url = "/en/changelog/changelog/"
+  name = "Triage Findings ⏷"
+  url = "/triage_findings/findings_workflows/intro_to_findings/"
+  weight = 12
+
+[[main]]
+  name = "Model your assets ⏷"
+  url = "/asset_modelling/hierarchy/pro__assets_organizations/"
   weight = 13
 
 [[main]]
-  name = "Support"
-  url = "/en/about_defectdojo/contact_defectdojo_support"
+  name = "Metrics & reports ⏷"
+  url = "/metrics_reports/dashboards/introduction_dashboard/"
   weight = 14
+
+[[main]]
+  name = "Admin ⏷"
+  url = "/admin/admin_intro/intro/"
+  weight = 16
+
+[[main]]
+  name = "Issue tracking ⏷"
+  url = "/issue_tracking/intro/intro/"
+  weight = 15
+
+[[main]]
+  name = "Automation ⏷"
+  url = "/automation/api/api-v2-docs/"
+  weight = 15
+
+[[main]]
+  name = "Supported tools ⏷"
+  url = "/supported_tools/"
+  weight = 16
 
 [[social]]
   name = "YouTube"

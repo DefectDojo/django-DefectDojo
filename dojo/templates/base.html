@@ -857,7 +857,7 @@
                                                         {% trans "Endpoint Report" %}
                                                     </a>
                                                 </li>
-                                                {% if product_tab.product|has_object_permission:"Endpoint_Add" %}
+                                                {% if product_tab.product|has_object_permission:"Location_Add" %}
                                                     <li role="separator" class="divider"></li>
                                                     <li>
                                                         <a href="{% url 'add_endpoint' product_tab.product.id %}">
@@ -866,7 +866,7 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if product_tab.product|has_object_permission:"Endpoint_Edit" and system_settings.enable_endpoint_metadata_import %}
+                                                {% if product_tab.product|has_object_permission:"Location_Edit" and system_settings.enable_endpoint_metadata_import %}
                                                     <li>
                                                         <a href="{% url 'import_endpoint_meta' product_tab.product.id %}">
                                                             <i class="fa-solid fa-upload"></i>

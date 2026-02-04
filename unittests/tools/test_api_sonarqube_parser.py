@@ -41,7 +41,7 @@ def empty_list(self, *args, **kwargs):
 class TestApiSonarQubeParser(DojoTestCase):
     def setUp(self):
         product_type, _ = Product_Type.objects.get_or_create(name="Fake unit tests")
-        product, _ = Product.objects.get_or_create(name="product", prod_type=product_type)
+        product, _ = Product.objects.get_or_create(name="product", description="Test Product", prod_type=product_type)
         engagement = Engagement(product=product)
         # build Sonarqube conf (the parser need it)
         tool_type, _ = Tool_Type.objects.get_or_create(name="SonarQube")

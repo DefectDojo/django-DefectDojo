@@ -5,7 +5,7 @@ toc_hide: true
 
 ### File Types
 DefectDojo parser accepts a native `json` file produced by prowler v3 with file extension `.json` or a `ocsf-json` file produced by prowler v4 with file extension `.ocsf.json`. 
-Please note: earlier versions of AWS Prowler create output data in a different format. See our other [prowler parser documentation](https://docs.defectdojo.com/en/connecting_your_tools/parsers/file/aws_prowler/) if you are using an earlier version of AWS Prowler. 
+Please note: earlier versions of AWS Prowler create output data in a different format. See our other [prowler parser documentation](https://docs.defectdojo.com/supported_tools/file/aws_prowler/) if you are using an earlier version of AWS Prowler. 
 
 JSON reports can be created from the [AWS Prowler v3 CLI](https://docs.prowler.com/projects/prowler-open-source/en/v3/tutorials/reporting/#json) using the following command: `prowler <provider> -M json`
 

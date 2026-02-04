@@ -2,7 +2,10 @@ import csv
 import hashlib
 import io
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class TestsslParser:
@@ -70,12 +73,19 @@ class TestsslParser:
                 # manage CWE
                 if "-" in row["cwe"]:
                     finding.cwe = int(row["cwe"].split("-")[1].strip())
-                # manage endpoint
-                finding.unsaved_endpoints = [
-                    Endpoint(host=row["fqdn/ip"].split("/")[0]),
-                ]
-                if row.get("port") and row["port"].isdigit():
-                    finding.unsaved_endpoints[0].port = int(row["port"])
+                # manage endpoint/location
+                if settings.V3_FEATURE_LOCATIONS:
+                    location = URL(host=row["fqdn/ip"].split("/")[0])
+                    if row.get("port") and row["port"].isdigit():
+                        location.port = int(row["port"])
+                    finding.unsaved_locations = [location]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints = [
+                        Endpoint(host=row["fqdn/ip"].split("/")[0]),
+                    ]
+                    if row.get("port") and row["port"].isdigit():
+                        finding.unsaved_endpoints[0].port = int(row["port"])
 
                 # internal de-duplication
                 dupe_key = hashlib.sha256(
@@ -88,9 +98,15 @@ class TestsslParser:
                     ).encode("utf-8"),
                 ).hexdigest()
                 if dupe_key in dupes:
-                    dupes[dupe_key].unsaved_endpoints.extend(
-                        finding.unsaved_endpoints,
-                    )
+                    if settings.V3_FEATURE_LOCATIONS:
+                        dupes[dupe_key].unsaved_locations.extend(
+                            finding.unsaved_locations,
+                        )
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        dupes[dupe_key].unsaved_endpoints.extend(
+                            finding.unsaved_endpoints,
+                        )
                     if dupes[dupe_key].unsaved_vulnerability_ids:
                         dupes[dupe_key].unsaved_vulnerability_ids.extend(
                             finding.unsaved_vulnerability_ids,

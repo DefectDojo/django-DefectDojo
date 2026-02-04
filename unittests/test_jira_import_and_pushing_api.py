@@ -12,12 +12,12 @@ from vcr import VCR
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.jira_link import helper as jira_helper
 from dojo.models import Finding, Finding_Group, JIRA_Instance, Risk_Acceptance, User
-
-from .dojo_test_case import (
+from unittests.dojo_test_case import (
     DojoVCRAPITestCase,
     get_unit_tests_path,
     get_unit_tests_scans_path,
     toggle_system_setting_boolean,
+    versioned_fixtures,
     with_system_setting,
 )
 
@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 # please check the recorded files on sensitive data before committing to git
 
 
+@versioned_fixtures
 class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -1073,7 +1074,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     # we take a shortcut here as creating an engagement with epic mapping via the API is not implemented yet
     def create_engagement_epic(self, engagement):
         with impersonate(self.testuser):
-            return jira_helper.add_epic(engagement)
+            return jira_helper.add_epic(engagement.id)
 
     def assert_epic_issue_count(self, engagement, count):
         jira_issues = self.get_epic_issues(engagement)

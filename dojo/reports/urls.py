@@ -33,16 +33,6 @@ if settings.ENABLE_V3_ORGANIZATION_ASSET_RELABEL:
             name="test_report",
         ),
         re_path(
-            r"^endpoint/(?P<eid>\d+)/report$",
-            views.endpoint_report,
-            name="endpoint_report",
-        ),
-        re_path(
-            r"^endpoint/host/(?P<eid>\d+)/report$",
-            views.endpoint_host_report,
-            name="endpoint_host_report",
-        ),
-        re_path(
             r"^asset/report$",
             views.product_findings_report,
             name="product_findings_report",
@@ -106,10 +96,6 @@ else:
             name="engagement_report"),
         re_path(r"^test/(?P<tid>\d+)/report$", views.test_report,
             name="test_report"),
-        re_path(r"^endpoint/(?P<eid>\d+)/report$", views.endpoint_report,
-            name="endpoint_report"),
-        re_path(r"^endpoint/host/(?P<eid>\d+)/report$", views.endpoint_host_report,
-            name="endpoint_host_report"),
         re_path(r"^product/report$",
             views.product_findings_report, name="product_findings_report"),
         re_path(r"^reports/cover$",

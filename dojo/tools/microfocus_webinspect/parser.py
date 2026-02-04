@@ -3,8 +3,10 @@ import re
 
 import html2text
 from defusedxml.ElementTree import parse
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class MicrofocusWebinspectParser:
@@ -31,7 +33,6 @@ class MicrofocusWebinspectParser:
         dupes = {}
         for session in root:
             url = session.find("URL").text
-            endpoint = Endpoint.from_uri(url)
             issues = session.find("Issues")
             for issue in issues.findall("Issue"):
                 mitigation = None
@@ -77,8 +78,14 @@ class MicrofocusWebinspectParser:
                 )
                 if "id" in issue.attrib:
                     finding.unique_id_from_tool = issue.attrib.get("id")
-                # manage endpoint
-                finding.unsaved_endpoints = [endpoint]
+                # manage endpoint/location
+                if settings.V3_FEATURE_LOCATIONS:
+                    location = URL.from_value(url)
+                    finding.unsaved_locations = [location]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    endpoint = Endpoint.from_uri(url)
+                    finding.unsaved_endpoints = [endpoint]
 
                 # make dupe hash key
                 dupe_key = hashlib.sha256(
@@ -87,7 +94,11 @@ class MicrofocusWebinspectParser:
                 # check if dupes are present.
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
-                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    if settings.V3_FEATURE_LOCATIONS:
+                        find.unsaved_locations.extend(finding.unsaved_locations)
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                     find.nb_occurences += finding.nb_occurences
                 else:
                     dupes[dupe_key] = finding

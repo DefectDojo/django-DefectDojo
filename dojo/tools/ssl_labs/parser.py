@@ -3,7 +3,10 @@ __author__ = "Aaron Weaver"
 import json
 from datetime import datetime
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class SslLabsParser:
@@ -333,22 +336,37 @@ class SslLabsParser:
                         dynamic_finding=True,
                     )
                     dupes[dupe_key] = find
-                    find.unsaved_endpoints = []
 
-                find.unsaved_endpoints.append(
-                    Endpoint(host=hostName, port=port, protocol=protocol),
-                )
+                self.add_location(find, hostName, port, protocol)
                 if ipAddress:
-                    find.unsaved_endpoints.append(
-                        Endpoint(host=ipAddress, port=port, protocol=protocol),
-                    )
+                    self.add_location(find, ipAddress, port, protocol)
                 if endpoints["details"]["httpTransactions"]:
                     for url in endpoints["details"]["httpTransactions"]:
-                        find.unsaved_endpoints.append(
-                            Endpoint.from_uri(url["requestUrl"]),
-                        )
+                        self.add_location_from_request_url(find, url["requestUrl"])
 
         return list(dupes.values())
+
+    def add_location(self, finding, host, port, protocol):
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations.append(
+                URL(host=host, port=port, protocol=protocol),
+            )
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints.append(
+                Endpoint(host=host, port=port, protocol=protocol),
+            )
+
+    def add_location_from_request_url(self, finding, request_url):
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations.append(
+                URL.from_value(request_url),
+            )
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints.append(
+                Endpoint.from_uri(request_url),
+            )
 
     # Criticality rating
     # Grades: https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide

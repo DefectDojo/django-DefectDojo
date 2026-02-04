@@ -30,7 +30,7 @@ class TestHydraParser(DojoTestCase):
         with (get_unit_tests_scans_path("hydra") / "hydra_report_one_finding.json").open(encoding="utf-8") as testfile:
             parser = HydraParser()
             findings = parser.get_findings(testfile, Test())
-            self.__assertAllEndpointsAreClean(findings)
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
 
             finding = findings[0]
@@ -48,7 +48,7 @@ class TestHydraParser(DojoTestCase):
         with (get_unit_tests_scans_path("hydra") / "hydra_report_one_finding_missing_date.json").open(encoding="utf-8") as testfile:
             parser = HydraParser()
             findings = parser.get_findings(testfile, Test())
-            self.__assertAllEndpointsAreClean(findings)
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
 
             finding = findings[0]
@@ -66,7 +66,7 @@ class TestHydraParser(DojoTestCase):
         with (get_unit_tests_scans_path("hydra") / "hydra_report_two_findings_with_one_incomplete.json").open(encoding="utf-8") as testfile:
             parser = HydraParser()
             findings = parser.get_findings(testfile, Test())
-            self.__assertAllEndpointsAreClean(findings)
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
 
             finding = findings[0]
@@ -84,7 +84,7 @@ class TestHydraParser(DojoTestCase):
         with (get_unit_tests_scans_path("hydra") / "hydra_report_many_finding.json").open(encoding="utf-8") as testfile:
             parser = HydraParser()
             findings = parser.get_findings(testfile, Test())
-            self.__assertAllEndpointsAreClean(findings)
+            self.validate_locations(findings)
             self.assertEqual(3, len(findings))
 
             self.__assertFindingEquals(
@@ -130,10 +130,5 @@ class TestHydraParser(DojoTestCase):
         self.assertTrue(actual_finding.dynamic_finding)
         # The following fields should be not be set from this parser.
         self.assertIsNone(actual_finding.unique_id_from_tool)
-        self.assertEqual(actual_finding.unsaved_endpoints[0].host, finding_url)
-        self.assertEqual(str(actual_finding.unsaved_endpoints[0].port), finding_port)
-
-    def __assertAllEndpointsAreClean(self, findings):
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
+        self.assertEqual(self.get_unsaved_locations(actual_finding)[0].host, finding_url)
+        self.assertEqual(str(self.get_unsaved_locations(actual_finding)[0].port), finding_port)

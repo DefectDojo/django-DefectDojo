@@ -39,29 +39,47 @@
     <div class="row">
         <div class="col-md-12">
             {% if filtered %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=endpoints %}
+                </div>
                 <div class="panel panel-default table-responsive">
                     <table id="open_findings"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
-                            <th>Endpoint</th>
-                            <th nowrap="nowrap">Open Findings</th>
+                            {% if V3_FEATURE_LOCATIONS %}
+                                <th>Endpoint</th>
+                                <th nowrap="nowrap">Open Findings</th>
+                                <th nowrap="nowrap">Open Products</th>
+                            {% else %}
+                                <th>Endpoint</th>
+                                <th nowrap="nowrap">Open Findings</th>
+                            {% endif %} 
                         </tr>
 
                         {% for e in endpoints %}
                             <tr>
-                                <td>
-                                    <a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a>
-                                    {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
-                                </td>
-                                <td>
-                                    <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.findings_count }}</a>
-                                </td>
+                                {% if V3_FEATURE_LOCATIONS %}
+                                    <td>
+                                        <a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a>
+                                        {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
+                                    </td>
+                                    <td><a href="{% url 'all_findings' %}?endpoints={{ e.id }}&location_status=Active">{{ e.active_findings }}</a></td>
+                                    <td><a href="{% url 'product' %}?endpoints={{ e.id }}&location_status=Active">{{ e.active_products }}</a></td>
+                                {% else %}
+                                    <td>
+                                        <a href="{% url 'view_endpoint' e.id %}">{{ e|truncatechars_html:70 }}</a>
+                                        {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.findings_count }}</a>
+                                    </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                     </table>
                 </div>
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=paged_endpoints %}
+                    {% include "dojo/paging_snippet.html" with page=endpoints %}
                 </div>
             {% else %}
                 <p class="text-center"> No endpoints found.</p>

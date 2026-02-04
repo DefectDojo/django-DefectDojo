@@ -4,12 +4,12 @@ from django.conf import settings
 
 from dojo.models import Alerts, User
 from dojo.tasks import cleanup_alerts
-
-from .dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 
 
+@versioned_fixtures
 class TestCleanupAlerts(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 

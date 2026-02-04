@@ -2,7 +2,10 @@ import hashlib
 import json
 from datetime import datetime
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 
 class GitlabDastParser:
@@ -38,9 +41,15 @@ class GitlabDastParser:
             ).hexdigest()
 
             if item_key in items:
-                items[item_key].unsaved_endpoints.extend(
-                    item.unsaved_endpoints,
-                )
+                if settings.V3_FEATURE_LOCATIONS:
+                    items[item_key].unsaved_locations.extend(
+                        item.unsaved_locations,
+                    )
+                else:
+                    # TODO: Delete this after the move to Locations
+                    items[item_key].unsaved_endpoints.extend(
+                        item.unsaved_endpoints,
+                    )
                 items[item_key].nb_occurences += 1
             else:
                 items[item_key] = item
@@ -118,11 +127,15 @@ class GitlabDastParser:
         if "severity" in vuln:
             finding.severity = vuln["severity"]
 
-        # endpoint
+        # location
         location = vuln.get("location", {})
         if "hostname" in location and "path" in location:
             url_str = f"{location['hostname']}{location['path']}"
-            finding.unsaved_endpoints = [Endpoint.from_uri(url_str)]
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [URL.from_value(url_str)]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint.from_uri(url_str)]
 
         # mitigation
         if "solution" in vuln:

@@ -9,12 +9,12 @@ from jira.exceptions import JIRAError
 
 import dojo.jira_link.helper as jira_helper
 from dojo.models import JIRA_Instance, Product
-
-from .dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 
 
+@versioned_fixtures
 class JIRAConfigProductTest(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 

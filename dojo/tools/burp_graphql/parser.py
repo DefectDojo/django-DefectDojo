@@ -3,8 +3,10 @@ import logging
 import re
 
 import html2text
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +54,11 @@ class BurpGraphQLParser:
             )
 
             find.unsaved_req_resp = issue.get("Evidence")
-            find.unsaved_endpoints = issue.get("Endpoints")
+            if settings.V3_FEATURE_LOCATIONS:
+                find.unsaved_locations = issue.get("Locations")
+            else:
+                # TODO: Delete this after the move to Locations
+                find.unsaved_endpoints = issue.get("Locations")
 
             items.append(find)
 
@@ -92,9 +98,12 @@ class BurpGraphQLParser:
                 issue.get("evidence"),
             )
 
-        finding["Endpoints"].append(
-            Endpoint.from_uri(issue["origin"] + issue["path"]),
-        )
+        url = issue["origin"] + issue["path"]
+        if settings.V3_FEATURE_LOCATIONS:
+            finding["Locations"].append(URL.from_value(url))
+        else:
+            # TODO: Delete this after the move to Locations
+            finding["Locations"].append(Endpoint.from_uri(url))
 
     def create_finding(self, issue):
         finding = {}
@@ -141,9 +150,12 @@ class BurpGraphQLParser:
         else:
             finding["Severity"] = "Info"
 
-        finding["Endpoints"] = [
-            Endpoint.from_uri(issue["origin"] + issue["path"]),
-        ]
+        url = issue["origin"] + issue["path"]
+        if settings.V3_FEATURE_LOCATIONS:
+            finding["Locations"] = [URL.from_value(url)]
+        else:
+            # TODO: Delete this after the move to Locations
+            finding["Locations"] = [Endpoint.from_uri(url)]
 
         if issue.get("evidence"):
             finding["Evidence"] = self.parse_evidence(issue.get("evidence"))

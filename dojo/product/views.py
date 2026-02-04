@@ -8,13 +8,13 @@ from functools import partial
 from math import ceil
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS, connection
-from django.db.models import Count, DateField, F, OuterRef, Prefetch, Q, Subquery, Sum
-from django.db.models.expressions import Value
+from django.db.models import Count, DateField, F, OuterRef, Prefetch, Q, Subquery, Sum, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.http import Http404, HttpRequest, HttpResponseRedirect, JsonResponse
@@ -55,7 +55,7 @@ from dojo.forms import (
     DeleteEngagementPresetsForm,
     DeleteProduct_API_Scan_ConfigurationForm,
     DeleteProductForm,
-    DojoMetaDataForm,
+    DojoMetaFormSet,
     Edit_Product_Group_Form,
     Edit_Product_MemberForm,
     EngagementPresetsForm,
@@ -150,6 +150,11 @@ def product(request):
             build_count_subquery(base_findings, group_field="test__engagement__product_id"), Value(0),
         ),
     )
+    if settings.V3_FEATURE_LOCATIONS:
+        prods = prods.annotate(
+            location_host_count=Count("locations__location__url__host", distinct=True),
+            location_count=Count("locations", distinct=True),
+        )
 
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
@@ -214,16 +219,18 @@ def prefetch_for_product(prods):
         ),
     )
 
-    active_endpoint_qs = Endpoint.objects.filter(
-        status_endpoint__mitigated=False,
-        status_endpoint__false_positive=False,
-        status_endpoint__out_of_scope=False,
-        status_endpoint__risk_accepted=False,
-    ).distinct()
+    # TODO: Delete this after the move to Locations
+    if not settings.V3_FEATURE_LOCATIONS:
+        active_endpoint_qs = Endpoint.objects.filter(
+            status_endpoint__mitigated=False,
+            status_endpoint__false_positive=False,
+            status_endpoint__out_of_scope=False,
+            status_endpoint__risk_accepted=False,
+        ).distinct()
 
-    prefetched_prods = prefetched_prods.prefetch_related(
-        Prefetch("endpoint_set", queryset=active_endpoint_qs, to_attr="active_endpoints"),
-    )
+        prefetched_prods = prefetched_prods.prefetch_related(
+            Prefetch("endpoint_set", queryset=active_endpoint_qs, to_attr="active_endpoints"),
+        )
 
     if get_system_setting("enable_github"):
         prefetched_prods = prefetched_prods.prefetch_related(
@@ -467,6 +474,7 @@ def finding_queries(request, prod):
     return filters
 
 
+# TODO: Delete this after the move to Locations
 def endpoint_queries(request, prod):
     filters = {}
     endpoints_query = Endpoint_Status.objects.filter(finding__test__engagement__product=prod,
@@ -571,6 +579,7 @@ def view_product_metrics(request, pid):
     filters = {}
     if view == "Finding":
         filters = finding_queries(request, prod)
+    # TODO: Delete this after the move to Locations
     elif view == "Endpoint":
         filters = endpoint_queries(request, prod)
 
@@ -1090,7 +1099,8 @@ def delete_product(request, pid):
                     message = labels.ASSET_DELETE_SUCCESS_ASYNC_MESSAGE
                 else:
                     message = labels.ASSET_DELETE_SUCCESS_MESSAGE
-                    product.delete()
+                    with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+                        product.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      message,
@@ -1105,9 +1115,10 @@ def delete_product(request, pid):
     rels = ["Previewing the relationships has been disabled.", ""]
     display_preview = get_setting("DELETE_PREVIEW")
     if display_preview:
-        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-        collector.collect([product])
-        rels = collector.nested()
+        with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+            collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+            collector.collect([product])
+            rels = collector.nested()
 
     product_tab = Product_Tab(product, title=str(labels.ASSET_LABEL), tab="settings")
 
@@ -1273,59 +1284,28 @@ def new_eng_for_app_cicd(request, pid):
 
 
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
-def add_meta_data(request, pid):
-    prod = Product.objects.get(id=pid)
+def manage_meta_data(request, pid):
+    product = Product.objects.get(id=pid)
+    meta_data_query = DojoMeta.objects.filter(product=product)
+    form_mapping = {"product": product}
+    formset = DojoMetaFormSet(queryset=meta_data_query, form_kwargs={"fk_map": form_mapping})
+
     if request.method == "POST":
-        form = DojoMetaDataForm(request.POST, instance=DojoMeta(product=prod))
-        if form.is_valid():
-            form.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 _("Metadata added successfully."),
-                                 extra_tags="alert-success")
-            if "add_another" in request.POST:
-                return HttpResponseRedirect(reverse("add_meta_data", args=(pid,)))
+        formset = DojoMetaFormSet(request.POST, queryset=meta_data_query, form_kwargs={"fk_map": form_mapping})
+        if formset.is_valid():
+            formset.save()
+            messages.add_message(
+                request, messages.SUCCESS, "Metadata updated successfully.", extra_tags="alert-success",
+            )
             return HttpResponseRedirect(reverse("view_product", args=(pid,)))
-    else:
-        form = DojoMetaDataForm()
 
-    product_tab = Product_Tab(prod, title=_("Add Metadata"), tab="settings")
-
-    return render(request, "dojo/add_product_meta_data.html",
-                  {"form": form,
-                   "product_tab": product_tab,
-                   "product": prod,
-                   })
-
-
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
-def edit_meta_data(request, pid):
-    prod = Product.objects.get(id=pid)
-    if request.method == "POST":
-        for key, orig_value in request.POST.items():
-            if key.startswith("cfv_"):
-                cfv_id = int(key.split("_")[1])
-                cfv = get_object_or_404(DojoMeta, id=cfv_id)
-                value = orig_value.strip()
-                if value:
-                    cfv.value = value
-                    cfv.save()
-            if key.startswith("delete_"):
-                cfv_id = int(key.split("_")[2])
-                cfv = get_object_or_404(DojoMeta, id=cfv_id)
-                cfv.delete()
-
-        messages.add_message(request,
-                             messages.SUCCESS,
-                             _("Metadata edited successfully."),
-                             extra_tags="alert-success")
-        return HttpResponseRedirect(reverse("view_product", args=(pid,)))
-
-    product_tab = Product_Tab(prod, title=_("Edit Metadata"), tab="settings")
-    return render(request, "dojo/edit_product_meta_data.html",
-                  {"product": prod,
-                   "product_tab": product_tab,
-                   })
+    add_breadcrumb(parent=product, title="Manage Metadata", top_level=False, request=request)
+    product_tab = Product_Tab(product, "Edit Metadata", tab="products")
+    return render(
+        request,
+        "dojo/edit_metadata.html",
+        {"formset": formset, "product_tab": product_tab},
+    )
 
 
 class AdHocFindingView(View):
@@ -1462,7 +1442,7 @@ class AdHocFindingView(View):
             finding.unsaved_vulnerability_ids = context["form"].cleaned_data["vulnerability_ids"].split()
             finding.save()
             # Save and add new endpoints
-            finding_helper.add_endpoints(finding, context["form"])
+            finding_helper.add_locations(finding, context["form"])
             # Save the finding at the end and return
             finding.save()
 
@@ -1520,7 +1500,7 @@ class AdHocFindingView(View):
             return request, True
 
         if context["gform"].is_valid():
-            add_external_issue(finding, "github")
+            add_external_issue(finding.id, "github")
 
             return request, True
         add_field_errors_to_response(context["gform"])

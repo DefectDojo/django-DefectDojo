@@ -15,26 +15,22 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln.xml").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(6, len(findings))
             finding = findings[5]
             self.assertEqual("Info", finding.severity)
             self.assertIsNone(finding.cwe)
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual("https", endpoint.protocol)
-            endpoint = finding.unsaved_endpoints[1]
-            self.assertEqual("tcp", endpoint.protocol)
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("https", location.protocol)
+            location = self.get_unsaved_locations(finding)[1]
+            self.assertEqual("tcp", location.protocol)
 
     def test_parse_some_findings_csv_nessus_legacy(self):
         """Test one report provided by a user"""
         with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(4, len(findings))
             for i in [0, 1, 2, 3]:
                 finding = findings[i]
@@ -43,8 +39,8 @@ class TestTenableParser(DojoTestCase):
                 self.assertEqual(0, finding.cwe)
             # check some data
             finding = findings[0]
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            self.assertEqual("10.1.1.1", finding.unsaved_endpoints[0].host)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            self.assertEqual("10.1.1.1", self.get_unsaved_locations(finding)[0].host)
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N/E:P/RL:O/RC:C", finding.cvssv3)
             # TODO: work on component attributes for Nessus CSV parser
             self.assertIsNotNone(finding.component_name)
@@ -62,9 +58,7 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-default.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(29, len(findings))
             finding = findings[0]
             self.assertIn(finding.severity, Finding.SEVERITIES)
@@ -84,9 +78,7 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(29, len(findings))
             finding = findings[0]
             self.assertIn(finding.severity, Finding.SEVERITIES)
@@ -106,9 +98,7 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable/nessus") / "nessus-template.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(5, len(findings))
             finding = findings[0]
             self.assertEqual("SSL Medium Strength Cipher Suites Supported (SWEET32)", finding.title)
@@ -132,30 +122,22 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
         with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
         with (get_unit_tests_scans_path("tenable/nessus") / "nessus_many_vuln2-all.csv").open("rb") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
 
     def test_parse_some_findings_samples_nessus_legacy(self):
         """Test that come from samples repo"""
         with (get_unit_tests_scans_path("tenable/nessus") / "nessus_v_unknown.xml").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(32, len(findings))
 
             finding = findings[0]
@@ -169,10 +151,10 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual("Nessus SYN scanner", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
-            endpoint = finding.unsaved_endpoints[26]
-            self.assertEqual("http", endpoint.protocol)
-            endpoint = finding.unsaved_endpoints[37]
-            self.assertEqual("tcp", endpoint.protocol)
+            location = self.get_unsaved_locations(finding)[26]
+            self.assertEqual("http", location.protocol)
+            location = self.get_unsaved_locations(finding)[37]
+            self.assertEqual("tcp", location.protocol)
 
             finding = findings[9]
             self.assertEqual(7, len(finding.unsaved_vulnerability_ids))
@@ -184,24 +166,20 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable/nessus") / "nessus_with_cvssv3.nessus").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(48, len(findings))
             finding = findings[3]
             self.assertEqual("Medium", finding.severity)
             self.assertIsNone(finding.cwe)
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual("http", endpoint.protocol)
+            location = self.get_unsaved_locations(finding)[0]
+            self.assertEqual("http", location.protocol)
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
 
     def test_parse_some_findings_with_nessus_with_cwe(self):
         with (get_unit_tests_scans_path("tenable/nessus") / "nessus_with_cwe-.nessus").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             finding = findings[0]
             self.assertEqual(94, finding.cwe)
 
@@ -209,13 +187,11 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_many_vuln.xml").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(5, len(findings))
             for i in [0, 1, 2, 3, 4]:
                 finding = findings[i]
-                self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
+                self.assertEqual("http", self.get_unsaved_locations(finding)[0].protocol)
                 self.assertIsNone(finding.cwe)
 
             finding = findings[0]
@@ -228,12 +204,10 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_one_vuln.xml").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
-            self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
+            self.assertEqual("http", self.get_unsaved_locations(finding)[0].protocol)
             self.assertEqual(None, finding.cwe)
             # self.assertEqual(79, finding.cwe)
             self.assertEqual("High", finding.severity)
@@ -243,45 +217,39 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_no_vuln.xml").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(0, len(findings))
 
     def test_parse_many_findings_csv_nessus_was_legacy(self):
         with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_many_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(5, len(findings))
             for i in [0, 1, 2, 3, 4]:
                 finding = findings[i]
                 self.assertIn(finding.severity, Finding.SEVERITIES)
-                self.assertEqual("google.com", finding.unsaved_endpoints[0].host)
+                self.assertEqual("google.com", self.get_unsaved_locations(finding)[0].host)
                 self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
             finding = findings[0]
             self.assertEqual("7.1", finding.cvssv3_score)
             self.assertEqual("High", finding.severity)
-            self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
+            self.assertEqual("http", self.get_unsaved_locations(finding)[0].protocol)
             self.assertEqual(0, finding.cwe)
 
     def test_parse_one_findings_csv_nessus_was_legacy(self):
         with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_one_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual("google.com", finding.unsaved_endpoints[0].host)
+            self.assertEqual("google.com", self.get_unsaved_locations(finding)[0].host)
             self.assertEqual(0, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("7.1", finding.cvssv3_score)
             self.assertEqual("High", finding.severity)
-            self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
+            self.assertEqual("http", self.get_unsaved_locations(finding)[0].protocol)
 
     def test_parse_no_findings_csv_nessus_was_legacy(self):
         with (get_unit_tests_scans_path("tenable/nessus_was") / "nessus_was_no_vuln.csv").open(encoding="utf-8") as testfile:
@@ -293,17 +261,15 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable") / "tenable_many_vuln.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(9, len(findings))
             finding = findings[0]
             self.assertIn(finding.severity, Finding.SEVERITIES)
             self.assertEqual("High", finding.severity)
-            self.assertEqual("ip-127-0-0-1.us-west-2.compute.internal", finding.unsaved_endpoints[0].host)
+            self.assertEqual("ip-127-0-0-1.us-west-2.compute.internal", self.get_unsaved_locations(finding)[0].host)
             self.assertEqual("Amazon Linux 2 : kernel (ALAS-2023-2050)", finding.title)
-            self.assertEqual("tcp", finding.unsaved_endpoints[0].protocol)
-            self.assertEqual(None, finding.unsaved_endpoints[0].port)
+            self.assertEqual("tcp", self.get_unsaved_locations(finding)[0].protocol)
+            self.assertEqual(None, self.get_unsaved_locations(finding)[0].port)
             self.assertIn("https://alas.aws.amazon.com/AL2/ALAS-2023-2050.html", finding.references)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             for vulnerability_id in finding.unsaved_vulnerability_ids:
@@ -313,9 +279,7 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable/nessus") / "issue_6992.nessus").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(1, len(findings))
             self.assertEqual("High", findings[0].severity)
 
@@ -325,7 +289,7 @@ class TestTenableParser(DojoTestCase):
             findings = parser.get_findings(testfile, self.create_test())
             self.assertEqual(99, len(findings))
             finding = findings[0]
-            self.assertEqual("Blah1", finding.unsaved_endpoints[0].host)
+            self.assertEqual("Blah1", self.get_unsaved_locations(finding)[0].host)
             self.assertEqual("Blah1", finding.title)
             self.assertEqual("Low", finding.severity)
             self.assertEqual("3.1", finding.cvssv3_score)
@@ -334,9 +298,7 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable") / "issue_9612.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(2, len(findings))
             self.assertEqual("Critical", findings[0].severity)
 
@@ -344,9 +306,7 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable") / "issue_11102.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             self.assertEqual(2, len(findings))
             self.assertEqual("Reconfigure the affected application if possible to avoid use of medium strength ciphers.", findings[0].mitigation)
 
@@ -354,9 +314,7 @@ class TestTenableParser(DojoTestCase):
         with (get_unit_tests_scans_path("tenable") / "issue_11102.csv").open(encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
-            for finding in findings:
-                for endpoint in finding.unsaved_endpoints:
-                    endpoint.clean()
+            self.validate_locations(findings)
             reference = """https://www.openssl.org/blog/blog/2016/08/24/sweet32/
 https://sweet32.info
 Tenable Plugin ID: 42873

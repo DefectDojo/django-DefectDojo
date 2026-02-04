@@ -3,8 +3,15 @@ import json
 import logging
 import re
 from datetime import datetime
+from typing import TYPE_CHECKING
+
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
+
+if TYPE_CHECKING:
+    from dojo.location.models import AbstractLocation
 
 
 class WhiteHatSentinelParser:
@@ -64,8 +71,8 @@ class WhiteHatSentinelParser:
 
         """
         severities = [
-            "Informational",
-            "Informational",
+            "Info",
+            "Info",
             "Low",
             "Medium",
             "High",
@@ -78,7 +85,7 @@ class WhiteHatSentinelParser:
         except IndexError:
             return None
 
-    def _parse_cwe_from_tags(self, whitehat_sentinel_tags) -> str:
+    def _parse_cwe_from_tags(self, whitehat_sentinel_tags) -> str | None:
         """
         Some Vulns include the CWE ID as a tag. This is used to pull it out of that list and return only the ID.
 
@@ -171,6 +178,7 @@ class WhiteHatSentinelParser:
         """
         return re.sub(r"<p>|</p>", "", html_string)
 
+    # TODO: Delete this after the move to Locations
     def _convert_attack_vectors_to_endpoints(
         self, attack_vectors: list[dict],
     ) -> list["Endpoint"]:
@@ -184,8 +192,20 @@ class WhiteHatSentinelParser:
         # This should be in the Endpoint class should it not?
         return [Endpoint.from_uri(attack_vector["request"]["url"]) for attack_vector in attack_vectors]
 
+    def _convert_attack_vectors_to_locations(
+            self, attack_vectors: list[dict],
+    ) -> list["AbstractLocation"]:
+        """
+        Takes a list of Attack Vectors dictionaries from the WhiteHat vuln API and converts them to Defect Dojo
+        URLs
+        Args:
+            attack_vectors: The list of Attack Vector dictionaries
+        Returns: A list of Defect Dojo URLs
+        """
+        return [URL.from_value(attack_vector["request"]["url"]) for attack_vector in attack_vectors]
+
     def _convert_whitehat_sentinel_vulns_to_dojo_finding(
-        self, whitehat_sentinel_vulns: [dict], test: str,
+        self, whitehat_sentinel_vulns: list[dict], test: str,
     ):
         """
         Converts a WhiteHat Sentinel vuln to a DefectDojo finding
@@ -258,12 +278,22 @@ class WhiteHatSentinelParser:
                     unique_id_from_tool=whitehat_vuln["id"],
                 )
 
-                # Get Endpoints from Attack Vectors
-                endpoints = self._convert_attack_vectors_to_endpoints(
-                    whitehat_vuln["attack_vectors"],
-                )
+                if settings.V3_FEATURE_LOCATIONS:
+                    # TODO: Delete this after the move to Locations
+                    # Get Locations from Attack Vectors
+                    locations = self._convert_attack_vectors_to_locations(
+                        whitehat_vuln["attack_vectors"],
+                    )
 
-                finding.unsaved_endpoints = endpoints
+                    finding.unsaved_locations = locations
+                else:
+                    # TODO: Delete this after the move to Locations
+                    # Get Endpoints from Attack Vectors
+                    endpoints = self._convert_attack_vectors_to_endpoints(
+                        whitehat_vuln["attack_vectors"],
+                    )
+
+                    finding.unsaved_endpoints = endpoints
                 dupes[dupe_key] = finding
 
         return list(dupes.values())

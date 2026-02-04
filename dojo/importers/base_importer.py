@@ -13,9 +13,12 @@ from django.urls import reverse
 from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
+import dojo.risk_acceptance.helper as ra_helper
 from dojo import utils
 from dojo.importers.endpoint_manager import EndpointManager
+from dojo.importers.location_manager import LocationManager
 from dojo.importers.options import ImporterOptions
+from dojo.location.models import AbstractLocation, Location
 from dojo.models import (
     # Import History States
     IMPORT_CLOSED_FINDING,
@@ -79,7 +82,11 @@ class BaseImporter(ImporterOptions):
         and will raise a `NotImplemented` exception
         """
         ImporterOptions.__init__(self, *args, **kwargs)
-        self.endpoint_manager = EndpointManager()
+        if settings.V3_FEATURE_LOCATIONS:
+            self.location_manager = LocationManager()
+        else:
+            # TODO: Delete this after the move to Locations
+            self.endpoint_manager = EndpointManager()
 
     def check_child_implementation_exception(self):
         """
@@ -114,7 +121,7 @@ class BaseImporter(ImporterOptions):
         """
         Make the conversion from unsaved Findings in memory to Findings that are saved in the
         database with and ID associated with them. This processor will also save any associated
-        objects such as endpoints, vulnerability IDs, and request/response pairs
+        objects such as locations, vulnerability IDs, and request/response pairs
         """
         self.check_child_implementation_exception()
 
@@ -410,8 +417,24 @@ class BaseImporter(ImporterOptions):
                     for tag in self.tags:
                         self.add_tags_safe(finding, tag)
 
+        if settings.V3_FEATURE_LOCATIONS:
+            # Add any tags to any locations of the findings imported if necessary
+            if self.apply_tags_to_endpoints and self.tags:
+                # Collect all endpoints linked to the affected findings
+                locations_qs = Location.objects.filter(findings__finding__in=findings_to_tag).distinct()
+                try:
+                    bulk_add_tags_to_instances(
+                        tag_or_tags=self.tags,
+                        instances=locations_qs,
+                        tag_field_name="tags",
+                    )
+                except IntegrityError:
+                    for finding in findings_to_tag:
+                        for location in finding.locations.all():
+                            for tag in self.tags:
+                                self.add_tags_safe(location.location, tag)
         # Add any tags to any endpoints of the findings imported if necessary
-        if self.apply_tags_to_endpoints and self.tags:
+        elif self.apply_tags_to_endpoints and self.tags:
             endpoints_qs = Endpoint.objects.filter(finding__in=findings_to_tag).distinct()
             try:
                 bulk_add_tags_to_instances(
@@ -462,8 +485,13 @@ class BaseImporter(ImporterOptions):
         import_settings["close_old_findings"] = self.close_old_findings_toggle
         import_settings["push_to_jira"] = self.push_to_jira
         import_settings["tags"] = self.tags
+        if settings.V3_FEATURE_LOCATIONS:
+            # Add the list of locations that were added exclusively at import time
+            if len(self.endpoints_to_add) > 0:
+                import_settings["locations"] = [str(location) for location in self.endpoints_to_add]
+        # TODO: Delete this after the move to Locations
         # Add the list of endpoints that were added exclusively at import time
-        if len(self.endpoints_to_add) > 0:
+        elif len(self.endpoints_to_add) > 0:
             import_settings["endpoints"] = [str(endpoint) for endpoint in self.endpoints_to_add]
         # Create the test import object
         test_import = Test_Import.objects.create(
@@ -538,19 +566,25 @@ class BaseImporter(ImporterOptions):
 
     def add_tags_safe(
         self,
-        finding_or_endpoint,
+        finding_or_location: Finding | Location | Endpoint,
         tag,
     ):
-        """Adds tags to a finding or endpoint, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
-        if not isinstance(finding_or_endpoint, Finding) and not isinstance(finding_or_endpoint, Endpoint):
-            msg = "finding_or_endpoint must be a Finding or Endpoint object"
+        """Adds tags to a finding, location, or endpoint, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
+        if isinstance(finding_or_location, Finding):
+            msg = "finding"
+        elif isinstance(finding_or_location, Location):
+            msg = "location"
+            # TODO: Delete this after the move to Locations
+        elif isinstance(finding_or_location, Endpoint):
+            msg = "endpoint"
+        else:
+            msg = f"finding_or_location must be a Finding, Location or Endpoint object not {type(finding_or_location)}"
             raise TypeError(msg)
 
-        msg = "finding" if isinstance(finding_or_endpoint, Finding) else "endpoint" if isinstance(finding_or_endpoint, Endpoint) else "unknown"
-        logger.debug(f" adding tag: {tag} to " + msg + f"{finding_or_endpoint.id}")
+        logger.debug(f"adding tag: {tag} to " + msg + f"{finding_or_location.id}")
 
         try:
-            finding_or_endpoint.tags.add(tag)
+            finding_or_location.tags.add(tag)
         except IntegrityError as e:
             # This try catch makes us look we don't know what we're doing, but in https://github.com/DefectDojo/django-DefectDojo/issues/6217 we decided that for now this is the best solution
             logger.warning("Error adding tag: %s", e)
@@ -604,8 +638,8 @@ class BaseImporter(ImporterOptions):
     ):
         """
         This function is added to the async queue at the end of all finding import tasks
-        and after endpoint task, so this should only run after all the other ones are done.
-        It's purpose is to update the percent completion of the test to 100 percent
+        and after location task, so this should only run after all the other ones are done.
+        Its purpose is to update the percent completion of the test to 100 percent
         """
         self.test.percent_complete = percentage_value
         self.test.save()
@@ -668,7 +702,7 @@ class BaseImporter(ImporterOptions):
             product = self.test.engagement.product
             system_settings = System_Settings.objects.get()
             if system_settings.enable_product_grade:
-                calculate_grade_signature = utils.calculate_grade_signature(product)
+                calculate_grade_signature = utils.calculate_grade.si(product.id)
                 chord(post_processing_task_signatures)(calculate_grade_signature)
             else:
                 group(post_processing_task_signatures).apply_async()
@@ -818,6 +852,26 @@ class BaseImporter(ImporterOptions):
             burp_rr.clean()
             burp_rr.save()
 
+    def process_locations(
+        self,
+        finding: Finding,
+        locations_to_add: list[AbstractLocation],
+    ) -> None:
+        """
+        Process any locations to add to the finding. Locations could come from two places
+        - Directly from the report
+        - Supplied by the user from the import form
+        These locations will be processed in to Location objects and associated with the
+        finding and product
+        """
+        # Save the unsaved locations
+        self.location_manager.chunk_locations_and_disperse(finding, finding.unsaved_locations)
+        # Check for any that were added in the form
+        if len(locations_to_add) > 0:
+            logger.debug("locations_to_add: %s", locations_to_add)
+            self.location_manager.chunk_locations_and_disperse(finding, locations_to_add)
+
+    # TODO: Delete this after the move to Locations
     def process_endpoints(
         self,
         finding: Finding,
@@ -830,6 +884,10 @@ class BaseImporter(ImporterOptions):
         These endpoints will be processed in to endpoints objects and associated with the
         finding and and product
         """
+        if settings.V3_FEATURE_LOCATIONS:
+            msg = "BaseImporter#process_endpoints() method is deprecated when V3_FEATURE_LOCATIONS is enabled"
+            raise NotImplementedError(msg)
+
         # Save the unsaved endpoints
         self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding.unsaved_endpoints)
         # Check for any that were added in the form
@@ -911,7 +969,7 @@ class BaseImporter(ImporterOptions):
         product_grading_option: bool = True,
     ) -> None:
         """
-        Mitigates a finding, all endpoint statuses, leaves a note on the finding
+        Mitigates a finding, all location statuses, leaves a note on the finding
         with a record of what happened, and then saves the finding. Changes to
         this finding will also be synced with some ticket tracking system as well
         as groups
@@ -925,8 +983,16 @@ class BaseImporter(ImporterOptions):
             author=self.user,
             entry=note_message,
         )
-        # Mitigate the endpoint statuses
-        self.endpoint_manager.mitigate_endpoint_status(finding.status_finding.all(), self.user, kwuser=self.user, sync=True)
+        # Remove risk acceptance if present (vulnerability is now fixed)
+        # risk_unaccept will check if finding.risk_accepted is True before proceeding
+        ra_helper.risk_unaccept(self.user, finding, perform_save=False, post_comments=False)
+        if settings.V3_FEATURE_LOCATIONS:
+            # Mitigate the location statuses
+            self.location_manager.mitigate_location_status(finding.locations.all(), self.user, kwuser=self.user, sync=True)
+        else:
+            # TODO: Delete this after the move to Locations
+            # Mitigate the endpoint statuses
+            self.endpoint_manager.mitigate_endpoint_status(finding.status_finding.all(), self.user, kwuser=self.user, sync=True)
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
             # don't try to dedupe findings that we are closing

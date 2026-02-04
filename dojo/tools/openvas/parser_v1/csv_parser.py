@@ -4,8 +4,17 @@ import io
 import re
 
 from dateutil.parser import parse
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
+
+
+def get_location(finding: Finding):
+    # TODO: Delete this after the move to Locations
+    if not settings.V3_FEATURE_LOCATIONS:
+        return finding.unsaved_endpoints[0]
+    return finding.unsaved_locations[0]
 
 
 class ColumnMappingStrategy:
@@ -70,7 +79,7 @@ class PortColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value.isdigit():
-            finding.unsaved_endpoints[0].port = int(column_value)
+            get_location(finding).port = int(column_value)
 
 
 class CveColumnMappingStrategy(ColumnMappingStrategy):
@@ -107,7 +116,7 @@ class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value:  # do not store empty protocol
-            finding.unsaved_endpoints[0].protocol = column_value
+            get_location(finding).protocol = column_value
 
 
 class IpColumnMappingStrategy(ColumnMappingStrategy):
@@ -116,11 +125,9 @@ class IpColumnMappingStrategy(ColumnMappingStrategy):
         super().__init__()
 
     def map_column_value(self, finding, column_value):
-        if not finding.unsaved_endpoints[
-            0
-        ].host and column_value is not None:  # process only if host is not already defined (by field hostname)
+        if not get_location(finding).host and column_value is not None:  # process only if host is not already defined (by field hostname)
             # strip due to https://github.com/greenbone/gvmd/issues/2378
-            finding.unsaved_endpoints[0].host = column_value.strip()
+            get_location(finding).host = column_value.strip()
 
 
 class HostnameColumnMappingStrategy(ColumnMappingStrategy):
@@ -131,7 +138,7 @@ class HostnameColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         if column_value:  # do not override IP if hostname is empty
             # strip due to https://github.com/greenbone/gvmd/issues/2378
-            finding.unsaved_endpoints[0].host = column_value.strip()
+            get_location(finding).host = column_value.strip()
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
@@ -290,7 +297,11 @@ class OpenVASCSVParser:
         for row_number, row in enumerate(reader):
             finding = Finding(test=test)
             finding.unsaved_vulnerability_ids = []
-            finding.unsaved_endpoints = [Endpoint()]
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [URL()]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint()]
             ip = None
             if row_number == 0:
                 column_names = self.read_column_names(row)
@@ -313,7 +324,7 @@ class OpenVASCSVParser:
                     finding.description = ""
                 key = hashlib.sha256(
                     (
-                        str(finding.unsaved_endpoints[0])
+                        str(get_location(finding))
                         + "|"
                         + finding.severity
                         + "|"

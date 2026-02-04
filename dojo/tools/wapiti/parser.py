@@ -3,8 +3,10 @@ import logging
 import re
 
 from defusedxml.ElementTree import parse
+from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +82,12 @@ class WapitiParser:
                 )
                 if cwe:
                     finding.cwe = cwe
-                finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+
+                if settings.V3_FEATURE_LOCATIONS:
+                    finding.unsaved_locations = [URL.from_value(url)]
+                else:
+                    # TODO: Delete this after the move to Locations
+                    finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
                 finding.unsaved_req_resp = [
                     {"req": entry.findtext("http_request"), "resp": ""},
@@ -93,7 +100,11 @@ class WapitiParser:
                 # check if dupes are present.
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
-                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    if settings.V3_FEATURE_LOCATIONS:
+                        find.unsaved_locations.extend(finding.unsaved_locations)
+                    else:
+                        # TODO: Delete this after the move to Locations
+                        find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                     find.unsaved_req_resp.extend(finding.unsaved_req_resp)
                     find.nb_occurences += finding.nb_occurences
                 else:

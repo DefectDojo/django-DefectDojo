@@ -2,10 +2,7 @@ import hashlib
 import json
 from datetime import datetime
 
-from dojo.models import Finding  # , Endpoint
-
-# from logging import critical
-# from urllib.parse import urlparse
+from dojo.models import Finding
 
 
 class CloudsploitParser:
