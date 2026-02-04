@@ -285,9 +285,11 @@ def check_for_and_create_comment(parsed_json):
             finding.notes.add(new_note)
             finding.jira_issue.jira_change = timezone.now()
             finding.jira_issue.save()
-            # Only update the timestamp, not other fields like 'active' to avoid
+            finding.last_reviewed = new_note.date
+            finding.last_reviewed_by = author
+            # Only update the timestamp fields, not other fields like 'active' to avoid
             # race conditions with concurrent webhook events (e.g. issue_updated)
-            finding.save(update_fields=["updated"])
+            finding.save(update_fields=["last_reviewed", "last_reviewed_by", "updated"])
     return None
 
 
@@ -345,11 +347,11 @@ class NewJiraView(View):
             # Get the open and close keys
             msg = "Unable to find Open/Close ID's (invalid issue key specified?). They will need to be found manually"
             try:
+                open_key = close_key = None
                 issue_id = jform.cleaned_data.get("issue_key")
                 key_url = jira_server.strip("/") + "/rest/api/latest/issue/" + issue_id + "/transitions?expand=transitions.fields"
                 response = jira._session.get(key_url).json()
                 logger.debug("Retrieved JIRA issue successfully")
-                open_key = close_key = None
                 for node in response["transitions"]:
                     if node["to"]["statusCategory"]["name"] == "To Do":
                         open_key = open_key or int(node["id"])
