@@ -5,11 +5,11 @@ audience: pro
 weight: 2
 ---
 
-**Risk Acceptances** are a special status that can be applied to Findings using either **Full Risk Acceptance** objects or the **Simple Risk Acceptance** workflow to formally document and operationalize the decision to acknowledge a vulnerable Finding without immediately remediating it.
+**Risk Acceptances** are a special status that can be applied to Findings using either **Full Risk Acceptance** objects or the **Simple Risk Acceptance** workflow.  Risk Acceptances are used to formally document and operationalize the decision to acknowledge a vulnerable Finding without immediately remediating it.
 
 DefectDojo Pro includes enhanced Risk Acceptance capabilities to scale risk management decisions, including: 
 - **Cross-Product Risk Acceptances**: A single Risk Acceptance can be applied across multiple products, allowing you to bundle all instances of the same or similar Findings throughout your entire portfolio of Assets into a single Risk Acceptance object. 
-- **Bulk Management**: Filter and search for specific Findings of vulnerability IDs and apply Risk Acceptance to all results simultaneously regardless of the Asset they belong to.
+- **Bulk Risk Acceptance Management**: Filter and search for specific Findings of vulnerability IDs and apply Risk Acceptance to all results simultaneously regardless of the Asset they belong to.
 
 ### Accessing Risk Accepted Findings
 
@@ -25,8 +25,9 @@ The sidebar features a section for Risk Acceptances that includes three subsecti
 
 ## Creating Risk Acceptances
 
-When a finding is Risk Accepted, the following will occur: 
-- The Finding’s status will no longer be “Active” but it will remain queryable, reportable, and auditable.
+When a Finding is Risk Accepted, the following will occur:
+
+- The Finding’s status will no longer be “Active”.
 - The Finding’s status will be changed to “Risk Accepted.”
 - The Finding will no longer be counted toward Metrics, but will still appear within the Test it originated from.
 
@@ -36,7 +37,7 @@ Findings can be Risk Accepted in one of two ways: They can either be added to Fu
 
 A Full Risk Acceptance allows Users to accept the risk of multiple Findings while bundling them into a single object, regardless of the Asset, Engagement, or Test they originated from. 
 
-If organizational policy requires formal, documented risk acceptances, or Users wish to trigger certain actions once a Risk Acceptance expires, Full Risk Acceptance is the best choice, as they capture the internal decision-making process and can serve as a source of truth.
+If organizational policy requires formal, documented risk acceptances, or Users want to have risk acceptances automatically expire after a certain date, Full Risk Acceptance is the best choice, as they capture the internal decision-making process and can serve as a source of truth.
 
 Each Full Risk Acceptance adds additional context to Risk Acceptance, such as:
 - The name of the Risk Acceptance object.
@@ -68,13 +69,13 @@ Clicking New Risk Acceptance from the sidebar will open a page in which the User
 
 Having opened an individual Finding, click the gear icon in the top right corner of the view and select **Add Risk Acceptance**. From there, you will be able to either add the Finding to an existing Full Risk Acceptance object, or create a new object. 
 
-![Risk Acceptance in Finding Submenue](images/RA_image2.png)
+![Risk Acceptance in Finding Submenu](images/RA_image2.png)
 
 ##### Risk Acceptance Actions (Table)
 
 Having selected a Finding/Findings from within a table, click the **Risk Acceptance Actions** button that appears at the top and select either **Add to New Risk Acceptance Object** or **Add to Existing Risk Acceptance Object** and fill out the required fields. 
 
-If the Risk Acceptance Actions button is unclickable, it’s likely because one of the selected Findings has already been added to a Full Risk Acceptance object, as the same Finding can’t be added to multiple objects.
+Findings can only be added to a single Risk Acceptance at once.  If the Risk Acceptance Actions button is unclickable, it’s likely because one of the selected Findings has already been added to a Full Risk Acceptance object.
 
 ![Risk Acceptance Actions button](images/RA_image5.png)
 
@@ -86,11 +87,11 @@ Findings can also be added and removed from the object using the same menu. Alte
 
 Finally, if you add any Findings to a Full Risk Acceptance object and then subsequently delete that object, the Findings within will have their status automatically reverted to “Active.”
 
-### Simple Risk Acceptances 
+### Simple Risk Acceptances
 
-Simple Risk Acceptances do not have any associated metadata or expiration date. They are most appropriate for when tracking risk-accepted Findings is still required for compliance, but there is no associated need for an object to track or to change the status of the affected Findings. 
+Simple Risk Acceptances do not have any associated metadata or expiration date. They are most appropriate for when tracking risk-accepted Findings is still required for compliance, but there is no associated need for an object to track or to change the status of the affected Findings.
 
-Simple Risk Acceptance is not enabled by default, but it can be toggled in the Optional Fields portion of the Asset’s settings after clicking the gear icon in the top right of the Asset view. 
+Simple Risk Acceptance is not enabled by default, but it can be toggled in the Optional Fields portion of the Asset’s settings after clicking the gear icon in the top right of the Asset view.
 
 ![Enabling simple risk acceptance](images/RA_image3.png)
 
@@ -108,6 +109,6 @@ Conversely, if you wish to unaccept the risk for any Findings that had been prev
 
 ### Risk Acceptance Best Practices 
 
-While it is possible to affect Findings within Full Risk Acceptance objects using Simple Risk Acceptance workflows (and vice versa), it is generally preferable to default to either process exclusively rather than leveraging both. 
+While it is possible to affect Findings within Full Risk Acceptance objects using Simple Risk Acceptance workflows (and vice versa), it is generally preferable to default to either process exclusively rather than having both enabled at once. 
 
 For example, if Full Risk Acceptance objects are the default approach, if a Finding is Simple Risk Accepted, it may cause confusion if there is no associated object that contains the affected Finding. Similarly, if Findings are typically Simple Risk Accepted, it may create similar confusion to then add some Findings to a Full Risk Acceptance object when there are no such objects for most other Findings.
