@@ -313,10 +313,9 @@ def _parse_qualys_nonstandard_row(line):
     """
     Parse a single row in Qualys non-standard CSV format.
 
-    Qualys uses a non-standard CSV format where:
-    - Each row starts with " and ends with "
-    - Fields are separated by ,""
-    - Internal quotes are doubled as ""
+    Qualys wraps each row in outer quotes, with internal quotes doubled.
+    After removing the outer quotes and unescaping, we get a standard CSV line
+    that can be parsed by Python's csv module.
 
     Args:
         line: A single row string from the Qualys CSV
@@ -333,19 +332,15 @@ def _parse_qualys_nonstandard_row(line):
     if line.startswith('"') and line.endswith('"'):
         line = line[1:-1]
 
-    # Split by the field delimiter pattern: ,""
-    parts = line.split(',""')
+    # Unescape row-level quote doubling: "" -> "
+    # This converts the Qualys format to standard CSV format
+    line = line.replace('""', '"')
 
-    # Clean up each part - handle escaped quotes
-    cleaned = []
-    for part in parts:
-        # Remove trailing "" if present (from the split)
-        cleaned_part = part.removesuffix('""')
-        # Replace escaped quotes "" with single "
-        cleaned_part = cleaned_part.replace('""', '"')
-        cleaned.append(cleaned_part)
-
-    return cleaned
+    # Now parse as standard CSV
+    reader = csv.reader(io.StringIO(line))
+    for row in reader:
+        return list(row)
+    return []
 
 
 def _parse_standard_csv_row(line):
