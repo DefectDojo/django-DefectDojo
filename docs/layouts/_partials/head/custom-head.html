@@ -1,6 +1,7 @@
 <!-- Custom head -->
-{{ if site.Params.add_ons.docSearch -}} 
+{{ if site.Params.add_ons.docSearch -}}
     {{ $options := (dict "targetPath" "/css/main.min.css" "outputStyle" "compressed") }}
     {{ $style := resources.Get "scss/app.scss" | css.Sass $options }}
-    <link rel="stylesheet" href="{{ $style.Permalink }}">
+<link rel="stylesheet" href="{{ $style.Permalink }}">
 {{ end -}}
+<meta name="docsearch:audience" content="{{ .Params.audience | default " public" }}">
