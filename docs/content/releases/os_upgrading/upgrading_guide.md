@@ -1,10 +1,10 @@
 ---
-title: "Upgrading"
+title: "Open Source Upgrading"
 description: "Release specific upgrading instructions"
 draft: false
 sidebar:
     collapsed: true
-weight: 2
+weight: -900000000
 ---
 
 ## Docker compose
@@ -67,5 +67,3 @@ Then replace the first step of the above generic upgrade method for docker compo
 ## godojo installations
 
 If you have installed DefectDojo on "iron" and wish to upgrade the installation, please see the [instructions in the repo](https://github.com/DefectDojo/godojo/blob/master/docs-and-scripts/upgrading.md).
-
-## Upgrade notes for each release
