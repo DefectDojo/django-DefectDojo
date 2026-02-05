@@ -87,4 +87,9 @@ class QualysVMDRCVEParser:
         )
         finding.unsaved_tags = parse_tags(row.get("Asset Tags", ""))
 
+        # Add CVE to vulnerability_ids for proper CVE tracking
+        cve = row.get("CVE", "")
+        if cve:
+            finding.unsaved_vulnerability_ids = [cve]
+
         return finding
