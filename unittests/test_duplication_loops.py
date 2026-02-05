@@ -403,7 +403,7 @@ class TestDuplicationLoops(DojoTestCase):
             Finding.objects.filter(id=self.finding_b.id).exists(),
             "The newest duplicate (Finding B) should still exist.",
         )
-        # Finding A should now only have 2 duplicate in its set
+        # Finding A should now only have 1 duplicate in its set
         self.finding_a.refresh_from_db()
         self.assertEqual(self.finding_a.duplicate_finding_set().count(), 1)
 
