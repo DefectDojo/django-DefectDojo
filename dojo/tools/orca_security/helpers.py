@@ -20,10 +20,22 @@ def map_orca_severity(score):
     return "Critical"
 
 
-def build_unique_id(title, source, cloud_account_name):
-    """SHA-256 hash of title|source|cloud_account_name for deduplication."""
-    raw = f"{title}|{source}|{cloud_account_name}"
+def build_unique_id(cloud_account_name, inventory_name, title):
+    """SHA-256 hash of cloud_account_name|inventory_name|title for deduplication."""
+    raw = f"{cloud_account_name}|{inventory_name}|{title}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def build_severity_justification(orca_score):
+    """Build severity justification string from OrcaScore."""
+    if orca_score is None:
+        return None
+    try:
+        score = float(orca_score)
+    except (TypeError, ValueError):
+        return None
+    else:
+        return f"OrcaScore: {score}"
 
 
 def parse_date(date_string):

@@ -25,8 +25,11 @@ class TestOrcaSecurityParser(DojoTestCase):
             self.assertTrue(finding.static_finding)
             self.assertFalse(finding.dynamic_finding)
             self.assertEqual("TestRole_abc123", finding.component_name)
+            self.assertEqual("TestRole_abc123", finding.service)
+            self.assertEqual("OrcaScore: 5.1", finding.severity_justification)
             self.assertIsNotNone(finding.unique_id_from_tool)
             self.assertIn("IAM misconfigurations", finding.description)
+            self.assertEqual(["CSPM", "source: Orca Scan"], finding.unsaved_tags)
 
     def test_parse_csv_many_findings(self):
         with (get_unit_tests_scans_path("orca_security") / "many_vulns.csv").open(encoding="utf-8") as testfile:
@@ -67,8 +70,11 @@ class TestOrcaSecurityParser(DojoTestCase):
             self.assertTrue(finding.static_finding)
             self.assertFalse(finding.dynamic_finding)
             self.assertEqual("TestRole_abc123", finding.component_name)
+            self.assertEqual("TestRole_abc123", finding.service)
+            self.assertEqual("OrcaScore: 5.1", finding.severity_justification)
             self.assertIsNotNone(finding.unique_id_from_tool)
             self.assertIn("IAM misconfigurations", finding.description)
+            self.assertEqual(["CSPM", "source: Orca Scan"], finding.unsaved_tags)
 
     def test_parse_json_many_findings(self):
         with (get_unit_tests_scans_path("orca_security") / "many_vulns.json").open(encoding="utf-8") as testfile:
