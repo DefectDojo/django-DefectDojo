@@ -5,15 +5,13 @@ This module handles the QID-centric CSV export format where the primary
 identifier is the Qualys QID (vulnerability ID).
 """
 
-import csv
-import io
-
 from dojo.models import Finding
 from dojo.tools.qualys_vmdr.helpers import (
     build_description_qid,
     build_severity_justification,
     map_qualys_severity,
     parse_endpoints,
+    parse_qualys_csv_content,
     parse_qualys_date,
     parse_tags,
     truncate_title,
@@ -37,14 +35,9 @@ class QualysVMDRQIDParser:
         """
         findings = []
 
-        lines = content.split("\n")
-        if len(lines) < 4:
-            return findings
+        rows = parse_qualys_csv_content(content, skip_metadata_lines=3)
 
-        csv_content = "\n".join(lines[3:])
-        reader = csv.DictReader(io.StringIO(csv_content))
-
-        for row in reader:
+        for row in rows:
             finding = self._create_finding(row)
             if finding:
                 findings.append(finding)
