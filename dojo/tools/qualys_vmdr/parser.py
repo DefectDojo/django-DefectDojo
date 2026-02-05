@@ -55,6 +55,6 @@ class QualysVMDRParser:
 
         header_line = lines[3]
 
-        if header_line.startswith(('"CVE,', "CVE,")):
+        if header_line.startswith(('"CVE"', '"CVE,', "CVE,")):
             return QualysVMDRCVEParser().parse(content)
         return QualysVMDRQIDParser().parse(content)

@@ -1,4 +1,4 @@
-"Asset Vuln Datalist Report,""04 Feb 2026 10:00AM GMT-0500"",""1"""
-"TestCompany,""123 Test Street"",""Test City"",""None"",""12345"",""USA"""
-"Test User,""testuser"",""IDM - Scanner VMDR"""
-"CVE,""CVE-Description"",""CVSSv2 Base (nvd)"",""CVSSv3.1 Base (nvd)"",""QID"",""Title"",""Severity"",""KB Severity"",""Type Detected"",""Last Detected"",""First Detected"",""Protocol"",""Port"",""Status"",""Asset Id"",""Asset Name"",""Asset IPV4"",""Asset IPV6"",""Solution"",""Asset Tags"",""Disabled"",""Ignored"",""QVS Score"",""Detection AGE"",""Published Date"",""Patch Released"",""Category"",""CVSS Rating Labels"",""RTI"",""Operating System"",""Last Fixed"",""Last Reopened"",""Times Detected"",""Threat"",""Vuln Patchable"",""Asset Critical Score"",""TruRisk Score"",""Vulnerability Tags"",""Results"",""Deep Scan Result"",""Detection Source"""
+"Asset Vuln Datalist Report","04 Feb 2026 10:00AM GMT-0500","1"
+"TestCompany","123 Test Street","Test City","None","12345","USA"
+"Test User","testuser","IDM - Scanner VMDR"
+"CVE","CVE-Description","CVSSv2 Base (nvd)","CVSSv3.1 Base (nvd)","QID","Title","Severity","KB Severity","Type Detected","Last Detected","First Detected","Protocol","Port","Status","Asset Id","Asset Name","Asset IPV4","Asset IPV6","Solution","Asset Tags","Disabled","Ignored","QVS Score","Detection AGE","Published Date","Patch Released","Category","CVSS Rating Labels","RTI","Operating System","Last Fixed","Last Reopened","Times Detected","Threat","Vuln Patchable","Asset Critical Score","TruRisk Score","Vulnerability Tags","Results","Deep Scan Result","Detection Source"
