@@ -385,7 +385,7 @@ def _parse_nonstandard_content(lines, skip_metadata_lines):
         return []
 
     # Parse data rows - need to handle multi-line records
-    # A row starts with " and ends with "
+    # A row starts with " and ends with """ (last field's "" + record's ")
     rows = []
     current_row = ""
     in_record = False
@@ -403,13 +403,8 @@ def _parse_nonstandard_content(lines, skip_metadata_lines):
                 current_row = line
                 in_record = True
                 # Check if this line also ends the record
-                if line.rstrip().endswith('"') and not line.rstrip().endswith('""'):
-                    # Complete single-line record
-                    rows.append(current_row)
-                    current_row = ""
-                    in_record = False
-                elif line.rstrip().endswith('"""'):
-                    # Ends with "" followed by " - this is end of record
+                # Multi-field records end with """ (last field's "" + record's ")
+                if line.rstrip().endswith('"""'):
                     rows.append(current_row)
                     current_row = ""
                     in_record = False
@@ -417,8 +412,7 @@ def _parse_nonstandard_content(lines, skip_metadata_lines):
             # Continuing a multi-line record
             current_row += "\n" + line
             # Check if this line ends the record
-            stripped_line = line.rstrip()
-            if (stripped_line.endswith('"') and not stripped_line.endswith('""')) or stripped_line.endswith('"""'):
+            if line.rstrip().endswith('"""'):
                 rows.append(current_row)
                 current_row = ""
                 in_record = False
