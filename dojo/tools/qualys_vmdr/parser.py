@@ -55,6 +55,9 @@ class QualysVMDRParser:
 
         header_line = lines[3]
 
+        # Check for CVE format - CVE as first column
+        # Standard CSV: '"CVE",' or 'CVE,'
+        # Non-standard Qualys format: '"CVE,""' (no closing quote, double-quote delimiter)
         if header_line.startswith(('"CVE"', '"CVE,', "CVE,")):
             return QualysVMDRCVEParser().parse(content)
         return QualysVMDRQIDParser().parse(content)

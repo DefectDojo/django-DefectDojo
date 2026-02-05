@@ -5,9 +5,6 @@ This module handles the CVE-centric CSV export format where findings
 include CVE identifiers and CVSS scores from NVD.
 """
 
-import csv
-import io
-
 from dojo.models import Finding
 from dojo.tools.qualys_vmdr.helpers import (
     build_description_cve,
@@ -15,6 +12,7 @@ from dojo.tools.qualys_vmdr.helpers import (
     map_qualys_severity,
     parse_cvss_score,
     parse_endpoints,
+    parse_qualys_csv_content,
     parse_qualys_date,
     parse_tags,
     truncate_title,
@@ -38,14 +36,9 @@ class QualysVMDRCVEParser:
         """
         findings = []
 
-        lines = content.split("\n")
-        if len(lines) < 4:
-            return findings
+        rows = parse_qualys_csv_content(content, skip_metadata_lines=3)
 
-        csv_content = "\n".join(lines[3:])
-        reader = csv.DictReader(io.StringIO(csv_content))
-
-        for row in reader:
+        for row in rows:
             finding = self._create_finding(row)
             if finding:
                 findings.append(finding)

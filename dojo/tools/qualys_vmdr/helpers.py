@@ -5,6 +5,9 @@ This module contains utility functions used by both the QID and CVE parsers
 to ensure consistent behavior across input formats.
 """
 
+import csv
+import io
+
 from dateutil import parser as dateutil_parser
 
 from dojo.models import Endpoint
@@ -285,3 +288,204 @@ def parse_cvss_score(cvss_field):
         return float(cvss_field)
     except (ValueError, TypeError):
         return None
+
+
+def _is_qualys_nonstandard_format(header_line):
+    """
+    Detect if the CSV uses Qualys non-standard format.
+
+    Qualys non-standard format uses ,"" as field delimiter (e.g., 'QID,""Title""').
+    Standard CSV format uses "," as delimiter (e.g., '"QID","Title"').
+
+    Args:
+        header_line: The header row from the CSV
+
+    Returns:
+        bool: True if non-standard Qualys format, False for standard CSV
+
+    """
+    # Non-standard format: fields separated by ,""
+    # Example: "QID,""Title"",""Severity"""
+    return ',""' in header_line
+
+
+def _parse_qualys_nonstandard_row(line):
+    """
+    Parse a single row in Qualys non-standard CSV format.
+
+    Qualys uses a non-standard CSV format where:
+    - Each row starts with " and ends with "
+    - Fields are separated by ,""
+    - Internal quotes are doubled as ""
+
+    Args:
+        line: A single row string from the Qualys CSV
+
+    Returns:
+        list[str]: List of field values
+
+    """
+    line = line.strip()
+    if not line:
+        return []
+
+    # Remove outer quotes if present
+    if line.startswith('"') and line.endswith('"'):
+        line = line[1:-1]
+
+    # Split by the field delimiter pattern: ,""
+    parts = line.split(',""')
+
+    # Clean up each part - handle escaped quotes
+    cleaned = []
+    for part in parts:
+        # Remove trailing "" if present (from the split)
+        cleaned_part = part.removesuffix('""')
+        # Replace escaped quotes "" with single "
+        cleaned_part = cleaned_part.replace('""', '"')
+        cleaned.append(cleaned_part)
+
+    return cleaned
+
+
+def _parse_standard_csv_row(line):
+    """
+    Parse a single row in standard CSV format.
+
+    Standard CSV format uses "," as delimiter with quoted fields.
+
+    Args:
+        line: A single row string from standard CSV
+
+    Returns:
+        list[str]: List of field values
+
+    """
+    line = line.strip()
+    if not line:
+        return []
+
+    reader = csv.reader(io.StringIO(line))
+    for row in reader:
+        return list(row)
+    return []
+
+
+def _parse_nonstandard_content(lines, skip_metadata_lines):
+    """
+    Parse Qualys non-standard CSV content with multi-line record handling.
+
+    Args:
+        lines: List of lines from the CSV file
+        skip_metadata_lines: Number of metadata lines to skip
+
+    Returns:
+        list[dict]: List of dictionaries with field names as keys
+
+    """
+    header_line = lines[skip_metadata_lines]
+    fieldnames = _parse_qualys_nonstandard_row(header_line)
+
+    if not fieldnames:
+        return []
+
+    # Parse data rows - need to handle multi-line records
+    # A row starts with " and ends with "
+    rows = []
+    current_row = ""
+    in_record = False
+
+    for line in lines[skip_metadata_lines + 1:]:
+        if not line.strip():
+            if in_record:
+                # Empty line within a record (embedded newline)
+                current_row += "\n"
+            continue
+
+        if not in_record:
+            # Starting a new record
+            if line.startswith('"'):
+                current_row = line
+                in_record = True
+                # Check if this line also ends the record
+                if line.rstrip().endswith('"') and not line.rstrip().endswith('""'):
+                    # Complete single-line record
+                    rows.append(current_row)
+                    current_row = ""
+                    in_record = False
+                elif line.rstrip().endswith('"""'):
+                    # Ends with "" followed by " - this is end of record
+                    rows.append(current_row)
+                    current_row = ""
+                    in_record = False
+        else:
+            # Continuing a multi-line record
+            current_row += "\n" + line
+            # Check if this line ends the record
+            stripped_line = line.rstrip()
+            if (stripped_line.endswith('"') and not stripped_line.endswith('""')) or stripped_line.endswith('"""'):
+                rows.append(current_row)
+                current_row = ""
+                in_record = False
+
+    # Don't forget the last row if still in_record
+    if in_record and current_row:
+        rows.append(current_row)
+
+    # Convert rows to dictionaries
+    result = []
+    for row in rows:
+        values = _parse_qualys_nonstandard_row(row)
+        if values:
+            row_dict = {}
+            for i, fieldname in enumerate(fieldnames):
+                if i < len(values):
+                    row_dict[fieldname] = values[i]
+                else:
+                    row_dict[fieldname] = ""
+            result.append(row_dict)
+
+    return result
+
+
+def _parse_standard_content(lines, skip_metadata_lines):
+    """
+    Parse standard CSV content using Python's csv module.
+
+    Args:
+        lines: List of lines from the CSV file
+        skip_metadata_lines: Number of metadata lines to skip
+
+    Returns:
+        list[dict]: List of dictionaries with field names as keys
+
+    """
+    csv_content = "\n".join(lines[skip_metadata_lines:])
+    reader = csv.DictReader(io.StringIO(csv_content))
+    return list(reader)
+
+
+def parse_qualys_csv_content(content, skip_metadata_lines=3):
+    """
+    Parse Qualys VMDR CSV content into a list of dictionaries.
+
+    Automatically detects and handles both standard CSV format and the
+    non-standard Qualys CSV format with multi-line records.
+
+    Args:
+        content: Full CSV content as string
+        skip_metadata_lines: Number of metadata lines to skip (default 3)
+
+    Returns:
+        list[dict]: List of dictionaries with field names as keys
+
+    """
+    lines = content.split("\n")
+    if len(lines) <= skip_metadata_lines:
+        return []
+
+    header_line = lines[skip_metadata_lines]
+
+    if _is_qualys_nonstandard_format(header_line):
+        return _parse_nonstandard_content(lines, skip_metadata_lines)
+    return _parse_standard_content(lines, skip_metadata_lines)
