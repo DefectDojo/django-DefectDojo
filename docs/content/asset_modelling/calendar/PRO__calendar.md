@@ -17,7 +17,7 @@ The Calendar page includes filters at the top and a monthly calendar below. The 
 - Engagement Type (e.g., Interactive or CI/CD)
 - Test Type (e.g., Pen Test, Acunetix Scan, Tenable Scan, etc.) 
 
-![image](images/calendar_image1.png)
+![image](images/calendar1.png)
  
 Once filtered, results can be exported and shared as an ICS file. 
 
@@ -59,4 +59,4 @@ For example, a Test that was made on the same day on which it’s being viewed w
 
 For example, as the final Engagement in the screenshot below (**In Progress** Example Product A ▶ **Sample Engagement** (Unassigned)) is being viewed on the day it was created, and the Target End Date was set for the following day, no arrows are present on either the left or right side.
 
-![image](images/calendar_image2.png)
+![image](images/calendar2.png)
