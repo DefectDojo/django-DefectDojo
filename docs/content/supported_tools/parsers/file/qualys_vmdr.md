@@ -98,6 +98,7 @@ Sample Qualys VMDR scans can be found in the [sample scan data folder](https://g
 | Source Field | DefectDojo Field | Parser File | Notes |
 | ------------ | ---------------- | ----------- | ----- |
 | CVE | vuln_id_from_tool | cve_parser.py | CVE identifier (e.g., CVE-2021-44228) |
+| CVE | unsaved_vulnerability_ids | cve_parser.py | Also added to Vulnerability IDs for CVE tracking |
 | CVE-Description | description | cve_parser.py | Prepended to description |
 | CVSSv3.1 Base (nvd) | cvssv3_score | cve_parser.py | Numeric CVSS score |
 | Title | title | cve_parser.py | Truncated to 150 characters |
