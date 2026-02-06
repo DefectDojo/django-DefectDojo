@@ -11,7 +11,7 @@ from vcr import VCR
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.jira_link import helper as jira_helper
-from dojo.models import Finding, Finding_Group, JIRA_Instance, Risk_Acceptance, User
+from dojo.models import Finding, Finding_Group, JIRA_Instance, JIRA_Project, Risk_Acceptance, Test, User
 from unittests.dojo_test_case import (
     DojoVCRAPITestCase,
     get_unit_tests_path,
@@ -1079,3 +1079,88 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     def assert_epic_issue_count(self, engagement, count):
         jira_issues = self.get_epic_issues(engagement)
         self.assertEqual(count, len(jira_issues))
+
+    def _test_setup_jira_project_for_engagement(self) -> dict:
+        import_reimport_config = {
+            "active": True,
+            "verified": True,
+            "product_type_name": "Some Product Type",
+            "product_name": "Jira Product (Not Configured)",
+            "engagement_name": "Jira Engagement",
+            "engagement": None,  # This is hardcoded on the test function, so lets just null it out
+            "auto_create_context": True,
+        }
+        # First have a regular import create all the things
+        import0 = self.import_scan_with_params(
+            self.zap_sample5_filename,
+            **import_reimport_config,
+        )
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        engagement = test.engagement
+        # Ensure we have push to jira settings set as false here (.first fetches the most recent object)
+        self.assertFalse(test.test_import_set.first().import_settings["push_to_jira"], "Expected push_to_jira to be False since no Jira project is configured")
+        # Now set up the jira instance and project, and reimport the same report again with the same parameters, which should now fetch the jira project from the engagement and set push_to_jira to True in the import settings
+        JIRA_Project.objects.create(
+            jira_instance=JIRA_Instance.objects.first(),
+            project_key="TEST",
+            engagement=engagement,
+            push_all_issues=True,
+        )
+        # Double check we have no jira findings
+        self.assert_jira_issue_count_in_test(test_id, 0)
+
+        return import_reimport_config
+
+    # Disable deduplication here because it keeps getting in the way of us properly testing that
+    # findings are pushed to jira on reimport, since the same report is being imported twice in
+    # this test and deduplication will prevent the second import from creating any findings at all,
+    # which means no jira issues will be created on the second import, which is what we need to assert
+    # that the jira project is being fetched correctly and push_to_jira is being set to True in the import settings
+    @toggle_system_setting_boolean("enable_deduplication", False)
+    def test_import_auto_create_context_fetches_all_objects_for_push_to_jira(self):
+        """
+        This test is responsible for ensuring that all related objects in auto context are fetched appropriately.
+        To test this, we will first set up a jira instance with a project configured at the engagement level only.
+        It is not really important that we test that findings are pushed to jira here, but we can assert that the
+        import history import settings reflect that the viewset was given a "True" value for push_to_jira,
+        which is only possible if the engagement's jira project was correctly fetched before the serializer was invoked.
+        """
+        import_reimport_config = self._test_setup_jira_project_for_engagement()
+        # Not run the import again
+        import1 = self.import_scan_with_params(
+            self.zap_sample5_filename,
+            **import_reimport_config,
+        )
+        test_id = import1["test"]
+        test = Test.objects.get(id=test_id)
+        # We should now have push_to_jira set to True in the import settings due to the jira project being on the engagement
+        self.assertTrue(test.test_import_set.first().import_settings["push_to_jira"], "Expected push_to_jira to be True since a Jira project is configured on the engagement")
+        # Make sure we actually pushed something to jira
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    def test_reimport_auto_create_context_fetches_all_objects_for_push_to_jira(self):
+        """
+        This test is responsible for ensuring that all related objects in auto context are fetched appropriately.
+        To test this, we will first set up a jira instance with a project configured at the engagement level only.
+        It is not really important that we test that findings are pushed to jira here, but we can assert that the
+        import history import settings reflect that the viewset was given a "True" value for push_to_jira,
+        which is only possible if the engagement's jira project was correctly fetched before the serializer was invoked.
+        """
+        import_reimport_config = self._test_setup_jira_project_for_engagement()
+        # Not run the import again
+        import1 = self.reimport_scan_with_params(
+            import_reimport_config.pop("test_id", None),
+            self.zap_sample5_filename,
+            **import_reimport_config,
+        )
+        test_id = import1["test"]
+        test = Test.objects.get(id=test_id)
+        # We should now have push_to_jira set to True in the import settings due to the jira project being on the engagement
+        self.assertTrue(test.test_import_set.first().import_settings["push_to_jira"], "Expected push_to_jira to be True since a Jira project is configured on the engagement")
+        # Make sure we actually pushed something to jira
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
