@@ -1858,8 +1858,9 @@ class FindingSerializer(serializers.ModelSerializer):
             for location_ref in locations:
                 location_ref.location.associate_with_finding(instance)
 
-        if push_to_jira:
-            jira_helper.push_to_jira(instance)
+        if push_to_jira or finding_helper.is_keep_in_sync_with_jira(instance):
+            # Push synchronously so that we can see jira errors in real time
+            jira_helper.push_to_jira(instance, sync=True)
 
         return instance
 
