@@ -1117,7 +1117,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     # this test and deduplication will prevent the second import from creating any findings at all,
     # which means no jira issues will be created on the second import, which is what we need to assert
     # that the jira project is being fetched correctly and push_to_jira is being set to True in the import settings
-    @toggle_system_setting_boolean("enable_deduplication", False)
+    @toggle_system_setting_boolean("enable_deduplication", False)  # noqa: FBT003
     def test_import_auto_create_context_fetches_all_objects_for_push_to_jira(self):
         """
         This test is responsible for ensuring that all related objects in auto context are fetched appropriately.
