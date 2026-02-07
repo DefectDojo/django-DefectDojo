@@ -11,7 +11,7 @@ from vcr import VCR
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.jira_link import helper as jira_helper
-from dojo.models import Finding, Finding_Group, JIRA_Instance, Risk_Acceptance, User
+from dojo.models import Finding, Finding_Group, JIRA_Instance, Risk_Acceptance, Test, User
 from unittests.dojo_test_case import (
     DojoVCRAPITestCase,
     get_unit_tests_path,
@@ -81,6 +81,9 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.zap_sample5_filename = get_unit_tests_scans_path("zap") / "5_zap_sample_one.xml"
         self.npm_groups_sample_filename = get_unit_tests_scans_path("npm_audit") / "many_vuln_with_groups.json"
         self.npm_groups_sample_filename2 = get_unit_tests_scans_path("npm_audit") / "many_vuln_with_groups_different_titles.json"
+        self.generic_one_finding_with_component_name = get_unit_tests_scans_path("generic") / "generic_one_finding_with_component_name.json"
+        self.generic_two_findings_same_component_name = get_unit_tests_scans_path("generic") / "generic_two_findings_same_component_name.json"
+        self.generic_report_with_findings = get_unit_tests_scans_path("generic") / "generic_report1.json"
         self.clair_few_findings = get_unit_tests_scans_path("clair") / "clair_few_vuln.json"
         self.client.force_login(self.get_test_admin())
 
@@ -1069,6 +1072,157 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # Verify the fix: we should have exactly 2 groups + 2 individual findings pushed
         self.assertEqual(len(group_calls), 2, "Expected 2 finding groups to be pushed")
         self.assertEqual(len(individual_calls), 2, "Expected 2 individual findings to be pushed")
+
+    def test_keep_sync_push_finding_then_update_individual_finding_with_no_push(self):
+        """
+        With keep_sync enabled, import a scan with push_to_jira=True, then update one of the
+        findings with push_to_jira=False, but keep_sync enabled, should update the issue in JIRA
+        """
+        # Set the finding sync setting
+        import0 = self.import_scan_with_params(
+            self.generic_one_finding_with_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=True,
+            verified=True,
+        )
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        self.assert_jira_issue_count_in_test(test_id, 1)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # Enable the finding sync
+        self.toggle_jira_finding_sync(test, value=True)
+        # Get one of the findings
+        finding_id = self.get_test_findings_api(test_id)["results"][0]["id"]
+        # Ensure the status is what we expect before the update
+        pre_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Backlog", pre_jira_status.name)
+        # Make the update to the finding
+        self.patch_finding_api(finding_id, {"push_to_jira": False, "is_mitigated": True})
+        # Verify that the status did in fact change
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Done", post_jira_status.name)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    def test_keep_sync_push_finding_then_reimport_with_no_push(self):
+        """
+        With keep_sync enabled, import a scan with push_to_jira=True, then reimport a second
+        scan with push_to_jira=False that closes one of the findings, should update the issue in JIRA
+        """
+        # Set the finding sync setting
+        import0 = self.import_scan_with_params(
+            self.generic_two_findings_same_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=True,
+            verified=True,
+        )
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # Enable the finding sync
+        self.toggle_jira_finding_sync(test, value=True)
+        # Get the finding that will be closing in the next reimport
+        finding_id = self.get_test_findings_api(test_id, severity="Critical")["results"][0]["id"]
+        # Ensure the status is what we expect before the update
+        pre_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Backlog", pre_jira_status.name)
+        # Reimport with a different file that has one finding closed, but push_to_jira=False
+        import0 = self.reimport_scan_with_params(
+            test_id,
+            self.generic_one_finding_with_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=False,
+            verified=True,
+            close_old_findings=True,
+        )
+        # Verify that the status did in fact change
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Done", post_jira_status.name)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    def test_keep_sync_push_finding_groups_then_reimport_empty_file_with_no_push_change_status(self):
+        """
+        With keep_sync enabled, import a scan with push_to_jira=True that creates a group, then reimport
+        an empty scan with push_to_jira=False that closes the finding in the group, should update the
+        issue in JIRA to closed
+        """
+        # Set the finding sync setting
+        import0 = self.import_scan_with_params(
+            self.generic_two_findings_same_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=True,
+            verified=True,
+            group_by="component_name",
+        )
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 1)
+        # Enable the finding sync
+        self.toggle_jira_finding_sync(test, value=True)
+        # Get the finding that will be closing in the next reimport
+        finding_id = self.get_test_findings_api(test_id, severity="Critical")["results"][0]["id"]
+        # Ensure the status is what we expect before the update
+        pre_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Backlog", pre_jira_status.name)
+        # Reimport with a different file that has one finding closed, but push_to_jira=False
+        import0 = self.reimport_scan_with_params(
+            test_id,
+            self.generic_report_with_findings,
+            scan_type="Generic Findings Import",
+            push_to_jira=False,
+            verified=True,
+            close_old_findings=True,
+            group_by="component_name",
+        )
+        # Verify that the status did in fact change
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Done", post_jira_status.name)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    def test_keep_sync_push_finding_groups_then_reimport_empty_file_with_no_push_change_priority(self):
+        """
+        With keep_sync enabled, import a scan with push_to_jira=True that creates a group, then reimport
+        an empty scan with push_to_jira=False that closes the finding in the group, this should leave the
+        the high severity finding in the group, and reduce the priority from Critical to High
+        """
+        # Set the finding sync setting
+        import0 = self.import_scan_with_params(
+            self.generic_two_findings_same_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=True,
+            verified=True,
+            group_by="component_name",
+        )
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 1)
+        # Enable the finding sync
+        self.toggle_jira_finding_sync(test, value=True)
+        # Get the finding that will stay open in the next reimport
+        finding_id = self.get_test_findings_api(test_id, severity="High")["results"][0]["id"]
+        # Get the priority that we are starting out with
+        pre_jira_priority = self.get_jira_issue_priority(finding_id)
+        self.assertEqual("Highest", pre_jira_priority.name)
+        # Reimport with a different file that has one finding closed, but push_to_jira=False
+        import0 = self.reimport_scan_with_params(
+            test_id,
+            self.generic_one_finding_with_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=False,
+            verified=True,
+            close_old_findings=True,
+            group_by="component_name",
+        )
+        # Verify that the priority did in fact change
+        post_jira_priority = self.get_jira_issue_priority(finding_id)
+        self.assertEqual("High", post_jira_priority.name)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
 
     # creation of epic via the UI is already tested in test_jira_config_engagement_epic, so
     # we take a shortcut here as creating an engagement with epic mapping via the API is not implemented yet

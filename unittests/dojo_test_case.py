@@ -488,11 +488,23 @@ class DojoTestUtilsMixin:
             logger.debug("finding!")
             self.assertNotEqual(jira_helper.get_jira_updated(finding), updated_map[finding.id])
 
+    def assert_jira_status_changed(self, finding_id: int, payload: dict, current_status_name: str, expected_status_name: str, push_to_jira: bool = True):  # noqa: FBT001, FBT002
+        pre_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual(current_status_name, pre_jira_status.name)
+        self.patch_finding_api(finding_id, {"push_to_jira": push_to_jira, **payload})
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual(expected_status_name, post_jira_status.name)
+
     # Toggle epic mapping on jira product
     def toggle_jira_project_epic_mapping(self, obj, value):
         project = jira_helper.get_jira_project(obj)
         project.enable_engagement_epic_mapping = value
         project.save()
+
+    def toggle_jira_finding_sync(self, obj, value):
+        instance = jira_helper.get_jira_instance(obj)
+        instance.finding_jira_sync = value
+        instance.save()
 
     # Return a list of jira issue in json format.
     def get_epic_issues(self, engagement):
