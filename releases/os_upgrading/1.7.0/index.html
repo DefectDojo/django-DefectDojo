@@ -65,8 +65,7 @@ r'^%sapi/v2/' % URL_PREFIX,
 after CELERY_TASK_IGNORE_RESULT line:</p><pre><code>CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
 </code></pre><p>Save your modified settings file. For reference the modified file should
 look like the new 1.5.0
-[settings](
-<a class="link link--text" href=https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py rel=external>https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py</a>)
+[settings](<a href=https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py>https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py</a>)
 file, minus the environmental configurations. As an alternative this
 file can be used and the enviromental configurations from you
 environment can be copied into this file.</p><ol start=3><li>Activate your virtual environment and then upgrade the requirements:</li></ol><p><code>pip install -r requirements.txt --upgrade</code></p><ol start=4><li><p>Upgrade the database:</p><pre><code>./manage.py makemigrations
