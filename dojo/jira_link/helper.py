@@ -146,14 +146,18 @@ def _safely_get_obj_status_for_jira(obj: Finding | Finding_Group, *, isenforced:
 
 
 def is_keep_in_sync_with_jira(obj: Finding | Finding_Group, prefetched_jira_instance: JIRA_Instance = None):
-    keep_in_sync_enabled = False
-    if obj.has_jira_issue:
-        # Determine if any automatic sync should occur
-        jira_instance = prefetched_jira_instance or get_jira_instance(obj)
-        if jira_instance:
-            keep_in_sync_enabled = jira_instance.finding_jira_sync
-
-    return keep_in_sync_enabled
+    """Determine if any automatic sync should occur"""
+    jira_issue_exists = False
+    # Check for a jira issue on each type of object
+    if isinstance(obj, Finding):
+        jira_issue_exists = obj.has_jira_issue or (obj.finding_group and obj.finding_group.has_jira_issue)
+    elif isinstance(obj, Finding_Group):
+        jira_issue_exists = obj.has_jira_issue
+    # Now determine if we need to pull the jira instance to check if sync is enabled
+    # but only if there is a jira issue that would need syncing
+    if jira_issue_exists and (jira_instance := prefetched_jira_instance or get_jira_instance(obj)) is not None:
+        return jira_instance.finding_jira_sync
+    return False
 
 
 # checks if a finding can be pushed to JIRA
