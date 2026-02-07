@@ -384,7 +384,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
-        if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "keep_findings_jira_sync", False)):
+        if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
             for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
                 # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
                 if self.push_to_jira or is_keep_in_sync_with_jira(finding_group, prefetched_jira_instance=self.jira_instance):

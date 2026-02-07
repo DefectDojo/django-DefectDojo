@@ -501,7 +501,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
-        if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "keep_findings_jira_sync", False)):
+        if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
             for finding_group in {finding.finding_group for finding in findings if finding.finding_group is not None}:
                 # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
                 if self.push_to_jira or is_keep_in_sync_with_jira(finding_group, prefetched_jira_instance=self.jira_instance):
@@ -990,14 +990,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             )
             # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
             # but this is a way to at least make it that far
-            if self.push_to_jira or getattr(self.jira_instance, "keep_findings_jira_sync", False):
+            if self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False):
                 object_to_push = findings[0].finding_group if findings[0].finding_group is not None else findings[0]
                 # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
                 if self.push_to_jira or is_keep_in_sync_with_jira(object_to_push, prefetched_jira_instance=self.jira_instance):
                     jira_helper.push_to_jira(object_to_push)
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
-        if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "keep_findings_jira_sync", False)):
+        if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
             for finding_group in {
                     finding.finding_group
                     for finding in self.reactivated_items + self.unchanged_items

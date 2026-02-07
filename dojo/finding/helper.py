@@ -521,7 +521,7 @@ def post_process_findings_batch(
             jira_instance = JIRA_Instance.objects.get(id=jira_instance_id)
     # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
-    if push_to_jira or getattr(jira_instance, "keep_findings_jira_sync", False):
+    if push_to_jira or getattr(jira_instance, "finding_jira_sync", False):
         for finding in findings:
             object_to_push = finding if finding.has_jira_issue or not finding.finding_group else finding.finding_group
             # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
