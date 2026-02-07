@@ -145,13 +145,11 @@ def _safely_get_obj_status_for_jira(obj: Finding | Finding_Group, *, isenforced:
     return status or ["Inactive"]
 
 
-def is_keep_in_sync_with_jira(finding, prefetched_jira_instance: JIRA_Instance = None):
+def is_keep_in_sync_with_jira(obj: Finding | Finding_Group, prefetched_jira_instance: JIRA_Instance = None):
     keep_in_sync_enabled = False
-    # Check if there is a jira issue that needs to be updated
-    jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
-    if jira_issue_exists:
+    if obj.has_jira_issue:
         # Determine if any automatic sync should occur
-        jira_instance = prefetched_jira_instance or get_jira_instance(finding)
+        jira_instance = prefetched_jira_instance or get_jira_instance(obj)
         if jira_instance:
             keep_in_sync_enabled = jira_instance.finding_jira_sync
 
