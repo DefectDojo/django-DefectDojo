@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<QUALYS_REPORT>
+  <GLOSSARY>
+    <VULN_DETAILS_LIST>
+      <VULN_DETAILS id="90001">
+        <TITLE>SSL Certificate Expired</TITLE>
+        <SEVERITY>3</SEVERITY>
+        <THREAT>Threat text</THREAT>
+        <IMPACT>Impact text</IMPACT>
+        <SOLUTION>Solution text</SOLUTION>
+      </VULN_DETAILS>
+    </VULN_DETAILS_LIST>
+  </GLOSSARY>
+  <RESULTS>
+    <HOST_LIST>
+      <HOST>
+        <IP>192.168.1.100</IP>
+        <VULN_INFO_LIST>
+          <VULN_INFO>
+            <QID id="90001"/>
+            <PORT>80</PORT>
+            <FIRST_FOUND>2026-02-08T10:00:00Z</FIRST_FOUND>
+            <LAST_FOUND>2026-02-08T10:00:00Z</LAST_FOUND>
+            <TYPE>Confirmed</TYPE>
+          </VULN_INFO>
+          <VULN_INFO>
+            <QID id="90001"/>
+            <PORT>443</PORT>
+            <FIRST_FOUND>2026-02-08T10:00:00Z</FIRST_FOUND>
+            <LAST_FOUND>2026-02-08T10:00:00Z</LAST_FOUND>
+            <TYPE>Confirmed</TYPE>
+          </VULN_INFO>
+        </VULN_INFO_LIST>
+      </HOST>
+    </HOST_LIST>
+  </RESULTS>
+</QUALYS_REPORT>
