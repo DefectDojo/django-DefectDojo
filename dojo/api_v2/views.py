@@ -1707,10 +1707,12 @@ class DojoMetaViewSet(
         if serialized_data.is_valid(raise_exception=True):
             if request.method == "POST":
                 self.process_post(request.data)
+                status_code = status.HTTP_201_CREATED
             if request.method == "PATCH":
                 self.process_patch(request.data)
+                status_code = status.HTTP_200_OK
 
-        return Response(status=status.HTTP_201_CREATED, data=serialized_data.data)
+        return Response(status=status_code, data=serialized_data.data)
 
     def process_post(self: object, data: dict):
         product = Product.objects.filter(id=data.get("product")).first()
