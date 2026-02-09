@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.celery import app
-from dojo.decorators import dojo_async_task
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.models import (
     Dojo_User,
@@ -19,17 +19,15 @@ logger = logging.getLogger(__name__)
 
 # TODO: Delete this after the move to Locations
 class EndpointManager:
-    @dojo_async_task
-    @app.task()
+    @app.task
     def add_endpoints_to_unsaved_finding(
-        self,
-        finding: Finding,
+        finding: Finding,  # noqa: N805
         endpoints: list[Endpoint],
         **kwargs: dict,
     ) -> None:
         """Creates Endpoint objects for a single finding and creates the link via the endpoint status"""
         logger.debug(f"IMPORT_SCAN: Adding {len(endpoints)} endpoints to finding: {finding}")
-        self.clean_unsaved_endpoints(endpoints)
+        EndpointManager.clean_unsaved_endpoints(endpoints)
         for endpoint in endpoints:
             ep = None
             eps = []
@@ -42,7 +40,8 @@ class EndpointManager:
                     path=endpoint.path,
                     query=endpoint.query,
                     fragment=endpoint.fragment,
-                    product=finding.test.engagement.product)
+                    product=finding.test.engagement.product,
+                )
                 eps.append(ep)
             except (MultipleObjectsReturned):
                 msg = (
@@ -59,11 +58,9 @@ class EndpointManager:
 
         logger.debug(f"IMPORT_SCAN: {len(endpoints)} endpoints imported")
 
-    @dojo_async_task
-    @app.task()
+    @app.task
     def mitigate_endpoint_status(
-        self,
-        endpoint_status_list: list[Endpoint_Status],
+        endpoint_status_list: list[Endpoint_Status],  # noqa: N805
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
@@ -86,11 +83,9 @@ class EndpointManager:
                 batch_size=1000,
             )
 
-    @dojo_async_task
-    @app.task()
+    @app.task
     def reactivate_endpoint_status(
-        self,
-        endpoint_status_list: list[Endpoint_Status],
+        endpoint_status_list: list[Endpoint_Status],  # noqa: N805
         **kwargs: dict,
     ) -> None:
         """Reactivate all endpoint status objects that are supplied"""
@@ -119,10 +114,10 @@ class EndpointManager:
         endpoints: list[Endpoint],
         **kwargs: dict,
     ) -> None:
-        self.add_endpoints_to_unsaved_finding(finding, endpoints, sync=True)
+        dojo_dispatch_task(EndpointManager.add_endpoints_to_unsaved_finding, finding, endpoints, sync=True)
 
+    @staticmethod
     def clean_unsaved_endpoints(
-        self,
         endpoints: list[Endpoint],
     ) -> None:
         """
@@ -140,7 +135,7 @@ class EndpointManager:
         endpoint_status_list: list[Endpoint_Status],
         **kwargs: dict,
     ) -> None:
-        self.reactivate_endpoint_status(endpoint_status_list, sync=True)
+        dojo_dispatch_task(EndpointManager.reactivate_endpoint_status, endpoint_status_list, sync=True)
 
     def chunk_endpoints_and_mitigate(
         self,
@@ -148,7 +143,7 @@ class EndpointManager:
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
+        dojo_dispatch_task(EndpointManager.mitigate_endpoint_status, endpoint_status_list, user, sync=True)
 
     def update_endpoint_status(
         self,

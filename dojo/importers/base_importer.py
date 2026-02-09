@@ -3,7 +3,6 @@ import logging
 import time
 from collections.abc import Iterable
 
-from celery import chord, group
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -14,10 +13,11 @@ from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
-from dojo import utils
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.location_manager import LocationManager
 from dojo.importers.options import ImporterOptions
+from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.location.models import AbstractLocation, Location
 from dojo.models import (
     # Import History States
@@ -31,7 +31,6 @@ from dojo.models import (
     Endpoint,
     FileUpload,
     Finding,
-    System_Settings,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
@@ -676,47 +675,6 @@ class BaseImporter(ImporterOptions):
             self.test.test_type.dynamic_tool = dynamic_tool
         self.test.test_type.save()
 
-    def maybe_launch_post_processing_chord(
-        self,
-        post_processing_task_signatures,
-        current_batch_number: int,
-        max_batch_size: int,
-        *
-        is_final_batch: bool,
-    ) -> tuple[list, int, bool]:
-        """
-        Helper to optionally launch a chord of post-processing tasks with a calculate-grade callback
-        when async is desired. Uses exponential batch sizing up to the configured max batch size.
-
-        Returns a tuple of (post_processing_task_signatures, current_batch_number, launched)
-        where launched indicates whether a chord/group was dispatched and signatures were reset.
-        """
-        launched = False
-        if not post_processing_task_signatures:
-            return post_processing_task_signatures, current_batch_number, launched
-
-        current_batch_size = min(2 ** current_batch_number, max_batch_size)
-        batch_full = len(post_processing_task_signatures) >= current_batch_size
-
-        if batch_full or is_final_batch:
-            product = self.test.engagement.product
-            system_settings = System_Settings.objects.get()
-            if system_settings.enable_product_grade:
-                calculate_grade_signature = utils.calculate_grade.si(product.id)
-                chord(post_processing_task_signatures)(calculate_grade_signature)
-            else:
-                group(post_processing_task_signatures).apply_async()
-
-            logger.debug(
-                f"Launched chord with {len(post_processing_task_signatures)} tasks (batch #{current_batch_number}, size: {len(post_processing_task_signatures)})",
-            )
-            post_processing_task_signatures = []
-            if not is_final_batch:
-                current_batch_number += 1
-            launched = True
-
-        return post_processing_task_signatures, current_batch_number, launched
-
     def verify_tool_configuration_from_test(self):
         """
         Verify that the Tool_Configuration supplied along with the
@@ -988,17 +946,29 @@ class BaseImporter(ImporterOptions):
         ra_helper.risk_unaccept(self.user, finding, perform_save=False, post_comments=False)
         if settings.V3_FEATURE_LOCATIONS:
             # Mitigate the location statuses
-            self.location_manager.mitigate_location_status(finding.locations.all(), self.user, kwuser=self.user, sync=True)
+            dojo_dispatch_task(
+                LocationManager.mitigate_location_status,
+                finding.locations.all(),
+                self.user,
+                kwuser=self.user,
+                sync=True,
+            )
         else:
             # TODO: Delete this after the move to Locations
             # Mitigate the endpoint statuses
-            self.endpoint_manager.mitigate_endpoint_status(finding.status_finding.all(), self.user, kwuser=self.user, sync=True)
+            dojo_dispatch_task(
+                EndpointManager.mitigate_endpoint_status,
+                finding.status_finding.all(),
+                self.user,
+                kwuser=self.user,
+                sync=True,
+            )
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
             # don't try to dedupe findings that we are closing
             finding.save(dedupe_option=False, product_grading_option=product_grading_option)
         else:
-            finding.save(dedupe_option=False, push_to_jira=self.push_to_jira, product_grading_option=product_grading_option)
+            finding.save(dedupe_option=False, push_to_jira=(self.push_to_jira or is_keep_in_sync_with_jira(finding, prefetched_jira_instance=self.jira_instance)), product_grading_option=product_grading_option)
 
     def notify_scan_added(
         self,

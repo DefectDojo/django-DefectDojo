@@ -5,14 +5,12 @@ from django.conf import settings
 from django.db.models import Q
 
 from dojo.celery import app
-from dojo.decorators import dojo_async_task
 from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 
 logger = logging.getLogger(__name__)
 
 
-@dojo_async_task
 @app.task
 def propagate_tags_on_product(product_id, *args, **kwargs):
     with contextlib.suppress(Product.DoesNotExist):

@@ -8,6 +8,7 @@
   "rebaseWhen": "conflicted",
   "separateMinorPatch": true,
   "ignorePaths": [
+    "docs/**",
     "requirements.txt",
     "requirements-lint.txt",
     "components/package.json",
