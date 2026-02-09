@@ -10,12 +10,14 @@ from django.db.models import Model
 from django.utils import timezone
 from django.utils.functional import SimpleLazyObject
 
+from dojo.jira_link.helper import get_jira_instance
 from dojo.models import (
     Development_Environment,
     Dojo_User,
     Endpoint,
     Engagement,
     Finding,
+    JIRA_Instance,
     Product_API_Scan_Configuration,
     Test,
     Test_Import,
@@ -70,7 +72,6 @@ class ImporterOptions:
         self.lead: Dojo_User | None = self.validate_lead(*args, **kwargs)
         self.minimum_severity: str = self.validate_minimum_severity(*args, **kwargs)
         self.parsed_findings: list[Finding] | None = self.validate_parsed_findings(*args, **kwargs)
-        self.push_to_jira: bool = self.validate_push_to_jira(*args, **kwargs)
         self.scan_date: datetime = self.validate_scan_date(*args, **kwargs)
         self.scan_type: str = self.validate_scan_type(*args, **kwargs)
         self.service: str = self.validate_service(*args, **kwargs)
@@ -80,6 +81,8 @@ class ImporterOptions:
         self.test_title: str = self.validate_test_title(*args, **kwargs)
         self.verified: bool = self.validate_verified(*args, **kwargs)
         self.version: str = self.validate_version(*args, **kwargs)
+        # Save this for last to use engagement and test for prefetching related to Jira info
+        self.push_to_jira: bool = self.validate_push_to_jira(*args, **kwargs)
 
     def load_additional_options(
         self,
@@ -478,6 +481,7 @@ class ImporterOptions:
         *args: list,
         **kwargs: dict,
     ) -> bool:
+        self.jira_instance: JIRA_Instance | None = get_jira_instance(self.engagement or self.test)
         return self.validate(
             "push_to_jira",
             expected_types=[bool],
