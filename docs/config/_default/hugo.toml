@@ -1,6 +1,6 @@
 title = "DefectDojo Documentation"
 baseurl = "http://localhost/"
-disableAliases = true
+disableAliases = false
 disableHugoGeneratorInject = true
 disableKinds = ["taxonomy", "term"]
 enableEmoji = true
