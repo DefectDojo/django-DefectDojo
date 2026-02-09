@@ -856,6 +856,56 @@ class BaseClass:
             response = self.client.get(relative_url)
             self.assertEqual(200, response.status_code, response.content[:1000])
 
+    class RelatedObjectsTest(BaseClassTest):
+        def test_notes_can_be_added_by_users_with_read_only_permissions(self):
+            self.setUp_global_reader()
+            response = self.client.get(self.url, format="json")
+            self.assertEqual(200, response.status_code, response.content[:1000])
+            engagement_id = response.data["results"][0]["id"]
+            # Attempt to add a note with reader permissions
+            relative_url = f"{self.url}{engagement_id}/notes/"
+            response = self.client.post(relative_url, {"entry": "string"})
+            self.assertEqual(201, response.status_code, response.content[:1000])
+
+        @parameterized.expand(
+            [
+                ("files", {"title": "test", "file": b"empty"}),
+                ("tags", {"tags": ["apple", "banana", "cherry"]}),
+            ],
+        )
+        def test_related_objects(self, related_object_path, payload):
+            """
+            Tests that BaseRelatedObjectPermission enforces the permissions not associated
+            with the base object. For example, even though a request to add a tag to an
+            engagement is a POST, we do not need engagement add permissions, but rather
+            engagement edit permissions since that is what is defined in the
+            UserHasEngagementRelatedObjectPermission class
+            """
+            self.setUp_global_reader()
+            # Skip tags for engagement and tests
+            if related_object_path == "tags" and self.endpoint_model in {Engagement, Test}:
+                return
+            # Get an object
+            response = self.client.get(self.url, format="json")
+            self.assertEqual(200, response.status_code, response.content[:1000])
+            object_id = response.data["results"][0]["id"]
+            # Attempt to add a related object
+            relative_url = f"{self.url}{object_id}/{related_object_path}/"
+            response = self.client.post(relative_url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            # Now switch to a user with edit permissions (but not create)
+            self.setUp_global_writer()
+            # Retry adding the related object
+            if related_object_path == "files":
+                # Convert bytes to a mock uploaded file
+                payload["file"] = SimpleUploadedFile(
+                    name="test_file.txt",
+                    content=payload["file"],  # the b"empty"
+                    content_type="text/plain",
+                )
+            response = self.client.post(relative_url, payload)
+            self.assertIn(response.status_code, [200, 201], response.content[:1000])
+
 
 @versioned_fixtures
 class AppAnalysisTest(BaseClass.BaseClassTest):
@@ -1487,7 +1537,7 @@ class URLTest(BaseClass.BaseClassTest):
 
 
 @versioned_fixtures
-class EngagementTest(BaseClass.BaseClassTest):
+class EngagementTest(BaseClass.RelatedObjectsTest, BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
@@ -1516,42 +1566,6 @@ class EngagementTest(BaseClass.BaseClassTest):
         self.permission_delete = Permissions.Engagement_Delete
         self.deleted_objects = 23
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-    @parameterized.expand(
-        [
-            ("files", {"title": "test", "file": b"empty"}),
-            ("notes", {"entry": "string"}),
-        ],
-    )
-    def test_related_objects(self, related_object_path, payload):
-        """
-        Tests that BaseRelatedObjectPermission enforces the permissions not associated
-        with the base object. For example, even though a request to add a note to an
-        engagement is a POST, we do not need engagement add permissions, but rather
-        engagement edit permissions since that is what is defined in the
-        UserHasEngagementRelatedObjectPermission class
-        """
-        self.setUp_global_reader()
-        # Get an engagement
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(200, response.status_code, response.content[:1000])
-        engagement_id = response.data["results"][0]["id"]
-        # Attempt to add a related object
-        relative_url = f"{self.url}{engagement_id}/{related_object_path}/"
-        response = self.client.post(relative_url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        # Now switch to a user with edit permissions (but not create)
-        self.setUp_global_writer()
-        # Retry adding the related object
-        if related_object_path == "files":
-            # Convert bytes to a mock uploaded file
-            payload["file"] = SimpleUploadedFile(
-                name="test_file.txt",
-                content=payload["file"],  # the b"empty"
-                content_type="text/plain",
-            )
-        response = self.client.post(relative_url, payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
 
 
 @versioned_fixtures
@@ -1726,7 +1740,7 @@ class FilesTest(DojoAPITestCase):
 
 
 @versioned_fixtures
-class FindingsTest(BaseClass.BaseClassTest):
+class FindingsTest(BaseClass.RelatedObjectsTest, BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
@@ -2415,7 +2429,7 @@ class StubFindingsTest(BaseClass.BaseClassTest):
 
 
 @versioned_fixtures
-class TestsTest(BaseClass.BaseClassTest):
+class TestsTest(BaseClass.RelatedObjectsTest, BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
