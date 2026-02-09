@@ -426,7 +426,7 @@
                                                 <td>
                                                     {{ risk_acceptance.get_decision_display|default_if_none:"" }}
                                                     {% if risk_acceptance.decision_details %}
-                                                        &nbsp;<i style="position:absolute;" class="fa has-popover fa-info-circle" title="Decision Details" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
+                                                        &nbsp;<i style="position:absolute;" class="fa has-popover fa-info-circle" title="Decision Details" data-trigger="hover" data-placement="bottom" data-container="body"
                                                             data-content="{{ risk_acceptance.decision_details }}"></i>
                                                     {% endif %}
                                                 </td>
@@ -441,7 +441,7 @@
                                                 <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.accepted_findings_count }}</a></td>
                                                 {% if risk_acceptance.filename %}
                                                     <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">Yes</a>
-                                                        &nbsp;<i style="position:absolute;" class="fa has-popover fa-info-circle" title="Uploaded proof" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
+                                                        &nbsp;<i style="position:absolute;" class="fa has-popover fa-info-circle" title="Uploaded proof" data-trigger="hover" data-placement="bottom" data-container="body"
                                                             data-content="{{ risk_acceptance.filename }}"></i>
                                                     </td>
                                                 {% else %}
