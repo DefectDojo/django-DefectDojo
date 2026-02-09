@@ -5,6 +5,7 @@ weight: 5
 audience: opensource
 aliases:
   - /en/working_with_findings/finding_deduplication/deduplication_tuning_os
+  - /en/working_with_findings/finding_deduplication/deduplication_algorithms
 ---
 The Open Source edition of DefectDojo uses settings files and environment variables tune deduplication.
 
