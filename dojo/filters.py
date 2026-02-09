@@ -2020,6 +2020,32 @@ class FindingFilterHelper(FilterSet):
         return queryset.filter(mitigated=value)
 
 
+def get_finding_group_queryset_for_context(pid=None, eid=None, tid=None):
+    """
+    Helper function to build finding group queryset based on context hierarchy.
+    Context priority: test > engagement > product > global
+    
+    Args:
+        pid: Product ID (least specific)
+        eid: Engagement ID
+        tid: Test ID (most specific)
+    
+    Returns:
+        QuerySet of Finding_Group filtered by context
+    """
+    if tid is not None:
+        # Most specific: filter by test
+        return Finding_Group.objects.filter(test_id=tid).only("id", "name")
+    if eid is not None:
+        # Filter by engagement's tests
+        return Finding_Group.objects.filter(test__engagement_id=eid).only("id", "name")
+    if pid is not None:
+        # Filter by product's tests
+        return Finding_Group.objects.filter(test__engagement__product_id=pid).only("id", "name")
+    # Global: return all (authorization will be applied separately)
+    return Finding_Group.objects.all().only("id", "name")
+
+
 class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFilter):
     test__engagement__product__prod_type = NumberFilter(widget=HiddenInput())
     test__engagement__product = NumberFilter(widget=HiddenInput())
@@ -2111,20 +2137,45 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
     def __init__(self, *args, **kwargs):
         self.user = None
         self.pid = None
+        self.eid = None
+        self.tid = None
         if "user" in kwargs:
             self.user = kwargs.pop("user")
 
         if "pid" in kwargs:
             self.pid = kwargs.pop("pid")
+        if "eid" in kwargs:
+            self.eid = kwargs.pop("eid")
+        if "tid" in kwargs:
+            self.tid = kwargs.pop("tid")
         super().__init__(*args, **kwargs)
         # Set some date fields
         self.set_date_fields(*args, **kwargs)
-        # Don't show the product filter on the product finding view
-        if self.pid:
-            del self.form.fields["test__engagement__product__name"]
-            del self.form.fields["test__engagement__product__name_contains"]
-            del self.form.fields["test__engagement__product__prod_type__name"]
-            del self.form.fields["test__engagement__product__prod_type__name_contains"]
+        # Don't show the product/engagement/test filter fields when in specific context
+        if self.tid or self.eid or self.pid:
+            if "test__engagement__product__name" in self.form.fields:
+                del self.form.fields["test__engagement__product__name"]
+            if "test__engagement__product__name_contains" in self.form.fields:
+                del self.form.fields["test__engagement__product__name_contains"]
+            if "test__engagement__product__prod_type__name" in self.form.fields:
+                del self.form.fields["test__engagement__product__prod_type__name"]
+            if "test__engagement__product__prod_type__name_contains" in self.form.fields:
+                del self.form.fields["test__engagement__product__prod_type__name_contains"]
+        # Also hide engagement and test fields if in test or engagement  context
+        if self.tid:
+            if "test__engagement__name" in self.form.fields:
+                del self.form.fields["test__engagement__name"]
+            if "test__engagement__name_contains" in self.form.fields:
+                del self.form.fields["test__engagement__name_contains"]
+            if "test__name" in self.form.fields:
+                del self.form.fields["test__name"]
+            if "test__name_contains" in self.form.fields:
+                del self.form.fields["test__name_contains"]
+        elif self.eid:
+            if "test__engagement__name" in self.form.fields:
+                del self.form.fields["test__engagement__name"]
+            if "test__engagement__name_contains" in self.form.fields:
+                del self.form.fields["test__engagement__name_contains"]
 
 
 class FindingFilter(FindingFilterHelper, FindingTagFilter):
@@ -2163,11 +2214,17 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
     def __init__(self, *args, **kwargs):
         self.user = None
         self.pid = None
+        self.eid = None
+        self.tid = None
         if "user" in kwargs:
             self.user = kwargs.pop("user")
 
         if "pid" in kwargs:
             self.pid = kwargs.pop("pid")
+        if "eid" in kwargs:
+            self.eid = kwargs.pop("eid")
+        if "tid" in kwargs:
+            self.tid = kwargs.pop("tid")
         super().__init__(*args, **kwargs)
         # Set some date fields
         self.set_date_fields(*args, **kwargs)
@@ -2175,8 +2232,30 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         self.set_related_object_fields(*args, **kwargs)
 
     def set_related_object_fields(self, *args: list, **kwargs: dict):
-        finding_group_query = Finding_Group.objects.all()
-        if self.pid is not None:
+        # Use helper to get contextual finding group queryset
+        finding_group_query = get_finding_group_queryset_for_context(
+            pid=self.pid,
+            eid=self.eid,
+            tid=self.tid,
+        )
+        
+        # Filter by most specific context: test > engagement > product
+        if self.tid is not None:
+            # Test context: filter finding groups by test
+            del self.form.fields["test__engagement__product"]
+            del self.form.fields["test__engagement__product__prod_type"]
+            del self.form.fields["test__engagement"]
+            del self.form.fields["test"]
+        elif self.eid is not None:
+            # Engagement context: filter finding groups by engagement
+            del self.form.fields["test__engagement__product"]
+            del self.form.fields["test__engagement__product__prod_type"]
+            del self.form.fields["test__engagement"]
+            # Filter tests by engagement - get_authorized_tests doesn't support engagement param
+            engagement = Engagement.objects.get(id=self.eid)
+            self.form.fields["test"].queryset = get_authorized_tests(Permissions.Test_View, product=engagement.product).filter(engagement_id=self.eid).prefetch_related("test_type")
+        elif self.pid is not None:
+            # Product context: filter finding groups by product
             del self.form.fields["test__engagement__product"]
             del self.form.fields["test__engagement__product__prod_type"]
             # TODO: add authorized check to be sure
@@ -2184,8 +2263,8 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
                 product_id=self.pid,
             ).all()
             self.form.fields["test"].queryset = get_authorized_tests(Permissions.Test_View, product=self.pid).prefetch_related("test_type")
-            finding_group_query = Finding_Group.objects.filter(test__engagement__product_id=self.pid)
         else:
+            # Global context: show all authorized finding groups
             self.form.fields[
                 "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
             self.form.fields["test__engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
@@ -2194,7 +2273,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         if self.form.fields.get("test__engagement__product"):
             self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
         if self.form.fields.get("finding_group", None):
-            self.form.fields["finding_group"].queryset = get_authorized_finding_groups_for_queryset(Permissions.Finding_Group_View, finding_group_query)
+            self.form.fields["finding_group"].queryset = get_authorized_finding_groups_for_queryset(Permissions.Finding_Group_View, finding_group_query, user=self.user)
         self.form.fields["reporter"].queryset = get_authorized_users(Permissions.Finding_View)
         self.form.fields["reviewers"].queryset = self.form.fields["reporter"].queryset
 
