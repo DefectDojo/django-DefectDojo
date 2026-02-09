@@ -19,7 +19,7 @@ def get_authorized_groups(permission):
         return Dojo_Group.objects.all().order_by("name")
 
     # Check for the case of the view_group config permission
-    if user_has_configuration_permission(user, "auth.view_group"):
+    if user_has_configuration_permission(user, "auth.view_group") or user_has_configuration_permission(user, "auth.add_group"):
         return Dojo_Group.objects.all().order_by("name")
 
     roles = get_roles_for_permission(permission)
