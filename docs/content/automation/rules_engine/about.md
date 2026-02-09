@@ -3,8 +3,9 @@ title: "Rules Engine Automation"
 description: "Working with Rules Engine Automation"
 weight: 1
 audience: pro
+aliases:
+  - /en/customize_dojo/rules_engine
 ---
-
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Rules Engine is a DefectDojo Pro-only feature.</span>
 
 DefectDojo's Rules Engine allows you to build custom workflows and bulk actions to handle Findings and other objects.  Rules Engine allows you to build automated actions that are triggered when an object matches a Rule.

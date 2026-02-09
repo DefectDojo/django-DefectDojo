@@ -2,8 +2,9 @@
 title: "Import Method Comparison"
 description: "Learn how to import data manually, through the API, or via a connector"
 weight: 1
+aliases:
+  - /en/connecting_your_tools/import_intro
 ---
-
 One of the things we understand at DefectDojo is that every company’s security needs are completely different. There is no one-size-fits-all approach. As your organization changes, having a flexible approach is key, and DefectDojo allows you to connect your security tools in a flexible way to match those changes.
 
 ## Scan Upload Methods

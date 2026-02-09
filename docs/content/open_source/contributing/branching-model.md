@@ -3,8 +3,9 @@ title: "Open-Source Branching & Releases"
 description: "How we create releases"
 draft: false
 weight: 3
+aliases:
+  - /en/open_source/contributing/branching-model
 ---
-
 ## Regular releases
 
 The DefectDojo team aims to maintain the following cadence: 

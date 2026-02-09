@@ -2,8 +2,9 @@
 title: "SSO Configuration (OAuth, SAML)"
 description: "Sign in to DefectDojo using OAuth or SAML login options"
 pro-feature: true
+aliases:
+  - /en/customize_dojo/user_management/configure_sso
 ---
-
 Users can connect to DefectDojo with a Username and Password, but if you prefer, you can allow users to authenticate using a Single Sign\-On or SSO method. You can set up DefectDojo to work with your own SAML Identity Provider, but we also support many OAuth methods for authentication:
 
 * **[Auth0](./#auth0-setup)**

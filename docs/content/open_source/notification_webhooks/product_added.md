@@ -3,8 +3,9 @@ title: "Event: product_added"
 weight: 3
 chapter: true
 exclude_search: true
+aliases:
+  - /en/open_source/notification_webhooks/product_added
 ---
-
 ## Event HTTP header
 ```yaml
 X-DefectDojo-Event: product_added

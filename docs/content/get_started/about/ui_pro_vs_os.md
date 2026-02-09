@@ -4,8 +4,9 @@ description: "Working with different UIs in DefectDojo"
 draft: "false"
 weight: 5
 audience: pro
+aliases:
+  - /en/about_defectdojo/ui_pro_vs_os
 ---
-
 In late 2023, DefectDojo Inc. released a new UI for DefectDojo Pro, which is now the default UI for this edition.
 
 The Pro UI brings the following enhancements to DefectDojo:

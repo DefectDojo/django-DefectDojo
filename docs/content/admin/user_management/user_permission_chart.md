@@ -2,8 +2,9 @@
 title: "Action permission charts"
 description: "All user permissions in detail"
 weight: 4
+aliases:
+  - /en/customize_dojo/user_management/user_permission_chart
 ---
-
 ## Role Permission Chart
 
 This chart is intended to list all permissions related to a Product or Product Type, as well as which permissions are available to each role.
