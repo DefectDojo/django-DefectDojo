@@ -8,7 +8,6 @@ from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
 from dojo.celery import app
-from dojo.decorators import dojo_async_task
 from dojo.models import Finding, System_Settings
 
 logger = logging.getLogger(__name__)
@@ -45,13 +44,11 @@ def get_finding_models_for_deduplication(finding_ids):
     )
 
 
-@dojo_async_task
 @app.task
 def do_dedupe_finding_task(new_finding_id, *args, **kwargs):
     return do_dedupe_finding_task_internal(Finding.objects.get(id=new_finding_id), *args, **kwargs)
 
 
-@dojo_async_task
 @app.task
 def do_dedupe_batch_task(finding_ids, *args, **kwargs):
     """

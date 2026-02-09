@@ -11,7 +11,7 @@ from vcr import VCR
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.jira_link import helper as jira_helper
-from dojo.models import Finding, Finding_Group, JIRA_Instance, Risk_Acceptance, User
+from dojo.models import Finding, Finding_Group, JIRA_Instance, JIRA_Project, Risk_Acceptance, Test, User
 from unittests.dojo_test_case import (
     DojoVCRAPITestCase,
     get_unit_tests_path,
@@ -81,6 +81,9 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.zap_sample5_filename = get_unit_tests_scans_path("zap") / "5_zap_sample_one.xml"
         self.npm_groups_sample_filename = get_unit_tests_scans_path("npm_audit") / "many_vuln_with_groups.json"
         self.npm_groups_sample_filename2 = get_unit_tests_scans_path("npm_audit") / "many_vuln_with_groups_different_titles.json"
+        self.generic_one_finding_with_component_name = get_unit_tests_scans_path("generic") / "generic_one_finding_with_component_name.json"
+        self.generic_two_findings_same_component_name = get_unit_tests_scans_path("generic") / "generic_two_findings_same_component_name.json"
+        self.generic_report_with_findings = get_unit_tests_scans_path("generic") / "generic_report1.json"
         self.clair_few_findings = get_unit_tests_scans_path("clair") / "clair_few_vuln.json"
         self.client.force_login(self.get_test_admin())
 
@@ -981,7 +984,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     @patch("dojo.jira_link.helper.can_be_pushed_to_jira", return_value=(True, None, None))
     @patch("dojo.jira_link.helper.is_push_all_issues", return_value=False)
     @patch("dojo.jira_link.helper.push_to_jira", return_value=None)
-    @patch("dojo.notifications.helper.WebhookNotificationManger.send_webhooks_notification")
+    @patch("dojo.notifications.helper.send_webhooks_notification")
     def test_bulk_edit_mixed_findings_and_groups_jira_push_bug(self, mock_webhooks, mock_push_to_jira, mock_is_push_all_issues, mock_can_be_pushed):
         """
         Test the bug in bulk edit: when bulk editing findings where some are in groups
@@ -1070,6 +1073,256 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assertEqual(len(group_calls), 2, "Expected 2 finding groups to be pushed")
         self.assertEqual(len(individual_calls), 2, "Expected 2 individual findings to be pushed")
 
+    def _bulk_edit_finding_groups_without_checkbox(self):
+        """
+        Helper: sets up a mixed grouped/ungrouped scenario and performs a bulk edit
+        WITHOUT the push_to_jira checkbox. Returns the test_id and finding IDs used.
+        """
+        # Import scan with groups but don't push to JIRA initially
+        import0 = self.import_scan_with_params(
+            self.npm_groups_sample_filename,
+            scan_type="NPM Audit Scan",
+            group_by="component_name+component_version",
+            push_to_jira=False,
+            verified=True,
+        )
+        test_id = import0["test"]
+
+        # Verify no JIRA issues were created during import
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        # Get the finding groups created
+        finding_groups = Finding_Group.objects.filter(test__id=test_id)
+
+        # Create mixed scenario: some findings in groups, some ungrouped
+        if finding_groups.exists():
+            group_to_remove = finding_groups.first()
+            group_to_remove.findings.clear()
+            group_to_remove.delete()
+
+        # Verify we now have both grouped and ungrouped findings
+        all_findings = Finding.objects.filter(test__id=test_id)
+        grouped_findings = [f for f in all_findings if f.finding_group is not None]
+        ungrouped_findings = [f for f in all_findings if f.finding_group is None]
+
+        self.assertGreater(len(grouped_findings), 0, "Should have some grouped findings")
+        self.assertGreater(len(ungrouped_findings), 0, "Should have some ungrouped findings")
+
+        current_findings = Finding.objects.filter(test__id=test_id)
+        all_finding_ids = [str(f.id) for f in current_findings]
+
+        admin_user = get_user_model().objects.get(username="admin")
+        self.client.force_login(admin_user)
+
+        # NOTE: push_to_jira is NOT in the post data -- the checkbox is unchecked
+        post_data = {
+            "finding_to_update": all_finding_ids,
+            "severity": "",
+            "active": "",
+            "verified": "",
+            "false_p": "",
+            "duplicate": "",
+            "out_of_scope": "",
+            "is_mitigated": "",
+            "status": "",
+        }
+
+        self.client.post("/finding/bulk", post_data)
+
+    @patch("dojo.jira_link.helper.can_be_pushed_to_jira", return_value=(True, None, None))
+    @patch("dojo.jira_link.helper.is_push_all_issues", return_value=True)
+    @patch("dojo.jira_link.helper.push_to_jira", return_value=None)
+    @patch("dojo.notifications.helper.WebhookNotificationManger.send_webhooks_notification")
+    def test_bulk_edit_push_all_issues_pushes_finding_groups(self, mock_webhooks, mock_push_to_jira, mock_is_push_all_issues, mock_can_be_pushed):
+        """
+        When push_all_issues is enabled on the JIRA project, bulk editing findings
+        should push finding groups to JIRA even without the push_to_jira checkbox.
+        """
+        self._bulk_edit_finding_groups_without_checkbox()
+
+        group_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding_Group)]
+        individual_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding)]
+
+        self.assertGreater(len(group_calls), 0, "Finding groups should be pushed when push_all_issues is enabled")
+        self.assertGreater(len(individual_calls), 0, "Individual ungrouped findings should be pushed when push_all_issues is enabled")
+
+        self.assertEqual(len(group_calls), 2, "Expected 2 finding groups to be pushed")
+        self.assertEqual(len(individual_calls), 2, "Expected 2 individual findings to be pushed")
+
+    @patch("dojo.jira_link.helper.can_be_pushed_to_jira", return_value=(True, None, None))
+    @patch("dojo.jira_link.helper.is_keep_in_sync_with_jira", return_value=True)
+    @patch("dojo.jira_link.helper.is_push_all_issues", return_value=False)
+    @patch("dojo.jira_link.helper.push_to_jira", return_value=None)
+    @patch("dojo.notifications.helper.WebhookNotificationManger.send_webhooks_notification")
+    def test_bulk_edit_keep_in_sync_pushes_finding_groups(self, mock_webhooks, mock_push_to_jira, mock_is_push_all_issues, mock_is_keep_in_sync, mock_can_be_pushed):
+        """
+        When keep_in_sync_with_jira (finding_jira_sync) is enabled on the JIRA instance,
+        bulk editing findings should push finding groups to JIRA even without the
+        push_to_jira checkbox.
+        """
+        self._bulk_edit_finding_groups_without_checkbox()
+
+        group_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding_Group)]
+        individual_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding)]
+
+        self.assertGreater(len(group_calls), 0, "Finding groups should be pushed when keep_in_sync is enabled")
+        self.assertGreater(len(individual_calls), 0, "Individual ungrouped findings should be pushed when keep_in_sync is enabled")
+
+        self.assertEqual(len(group_calls), 2, "Expected 2 finding groups to be pushed")
+        self.assertEqual(len(individual_calls), 2, "Expected 2 individual findings to be pushed")
+
+    def test_keep_sync_push_finding_then_update_individual_finding_with_no_push(self):
+        """
+        With keep_sync enabled, import a scan with push_to_jira=True, then update one of the
+        findings with push_to_jira=False, but keep_sync enabled, should update the issue in JIRA
+        """
+        # Set the finding sync setting
+        import0 = self.import_scan_with_params(
+            self.generic_one_finding_with_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=True,
+            verified=True,
+        )
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        self.assert_jira_issue_count_in_test(test_id, 1)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # Enable the finding sync
+        self.toggle_jira_finding_sync(test, value=True)
+        # Get one of the findings
+        finding_id = self.get_test_findings_api(test_id)["results"][0]["id"]
+        # Ensure the status is what we expect before the update
+        pre_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Backlog", pre_jira_status.name)
+        # Make the update to the finding
+        self.patch_finding_api(finding_id, {"push_to_jira": False, "is_mitigated": True})
+        # Verify that the status did in fact change
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Done", post_jira_status.name)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    def test_keep_sync_push_finding_then_reimport_with_no_push(self):
+        """
+        With keep_sync enabled, import a scan with push_to_jira=True, then reimport a second
+        scan with push_to_jira=False that closes one of the findings, should update the issue in JIRA
+        """
+        # Set the finding sync setting
+        import0 = self.import_scan_with_params(
+            self.generic_two_findings_same_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=True,
+            verified=True,
+        )
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # Enable the finding sync
+        self.toggle_jira_finding_sync(test, value=True)
+        # Get the finding that will be closing in the next reimport
+        finding_id = self.get_test_findings_api(test_id, severity="Critical")["results"][0]["id"]
+        # Ensure the status is what we expect before the update
+        pre_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Backlog", pre_jira_status.name)
+        # Reimport with a different file that has one finding closed, but push_to_jira=False
+        import0 = self.reimport_scan_with_params(
+            test_id,
+            self.generic_one_finding_with_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=False,
+            verified=True,
+            close_old_findings=True,
+        )
+        # Verify that the status did in fact change
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Done", post_jira_status.name)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    def test_keep_sync_push_finding_groups_then_reimport_empty_file_with_no_push_change_status(self):
+        """
+        With keep_sync enabled, import a scan with push_to_jira=True that creates a group, then reimport
+        an empty scan with push_to_jira=False that closes the finding in the group, should update the
+        issue in JIRA to closed
+        """
+        # Set the finding sync setting
+        import0 = self.import_scan_with_params(
+            self.generic_two_findings_same_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=True,
+            verified=True,
+            group_by="component_name",
+        )
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 1)
+        # Enable the finding sync
+        self.toggle_jira_finding_sync(test, value=True)
+        # Get the finding that will be closing in the next reimport
+        finding_id = self.get_test_findings_api(test_id, severity="Critical")["results"][0]["id"]
+        # Ensure the status is what we expect before the update
+        pre_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Backlog", pre_jira_status.name)
+        # Reimport with a different file that has one finding closed, but push_to_jira=False
+        import0 = self.reimport_scan_with_params(
+            test_id,
+            self.generic_report_with_findings,
+            scan_type="Generic Findings Import",
+            push_to_jira=False,
+            verified=True,
+            close_old_findings=True,
+            group_by="component_name",
+        )
+        # Verify that the status did in fact change
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertEqual("Done", post_jira_status.name)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    def test_keep_sync_push_finding_groups_then_reimport_empty_file_with_no_push_change_priority(self):
+        """
+        With keep_sync enabled, import a scan with push_to_jira=True that creates a group, then reimport
+        an empty scan with push_to_jira=False that closes the finding in the group, this should leave the
+        the high severity finding in the group, and reduce the priority from Critical to High
+        """
+        # Set the finding sync setting
+        import0 = self.import_scan_with_params(
+            self.generic_two_findings_same_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=True,
+            verified=True,
+            group_by="component_name",
+        )
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 1)
+        # Enable the finding sync
+        self.toggle_jira_finding_sync(test, value=True)
+        # Get the finding that will stay open in the next reimport
+        finding_id = self.get_test_findings_api(test_id, severity="High")["results"][0]["id"]
+        # Get the priority that we are starting out with
+        pre_jira_priority = self.get_jira_issue_priority(finding_id)
+        self.assertEqual("Highest", pre_jira_priority.name)
+        # Reimport with a different file that has one finding closed, but push_to_jira=False
+        import0 = self.reimport_scan_with_params(
+            test_id,
+            self.generic_one_finding_with_component_name,
+            scan_type="Generic Findings Import",
+            push_to_jira=False,
+            verified=True,
+            close_old_findings=True,
+            group_by="component_name",
+        )
+        # Verify that the priority did in fact change
+        post_jira_priority = self.get_jira_issue_priority(finding_id)
+        self.assertEqual("High", post_jira_priority.name)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
     # creation of epic via the UI is already tested in test_jira_config_engagement_epic, so
     # we take a shortcut here as creating an engagement with epic mapping via the API is not implemented yet
     def create_engagement_epic(self, engagement):
@@ -1079,3 +1332,88 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     def assert_epic_issue_count(self, engagement, count):
         jira_issues = self.get_epic_issues(engagement)
         self.assertEqual(count, len(jira_issues))
+
+    def _test_setup_jira_project_for_engagement(self) -> dict:
+        import_reimport_config = {
+            "active": True,
+            "verified": True,
+            "product_type_name": "Some Product Type",
+            "product_name": "Jira Product (Not Configured)",
+            "engagement_name": "Jira Engagement",
+            "engagement": None,  # This is hardcoded on the test function, so lets just null it out
+            "auto_create_context": True,
+        }
+        # First have a regular import create all the things
+        import0 = self.import_scan_with_params(
+            self.zap_sample5_filename,
+            **import_reimport_config,
+        )
+        test_id = import0["test"]
+        test = Test.objects.get(id=test_id)
+        engagement = test.engagement
+        # Ensure we have push to jira settings set as false here (.first fetches the most recent object)
+        self.assertFalse(test.test_import_set.first().import_settings["push_to_jira"], "Expected push_to_jira to be False since no Jira project is configured")
+        # Now set up the jira instance and project, and reimport the same report again with the same parameters, which should now fetch the jira project from the engagement and set push_to_jira to True in the import settings
+        JIRA_Project.objects.create(
+            jira_instance=JIRA_Instance.objects.first(),
+            project_key="TEST",
+            engagement=engagement,
+            push_all_issues=True,
+        )
+        # Double check we have no jira findings
+        self.assert_jira_issue_count_in_test(test_id, 0)
+
+        return import_reimport_config
+
+    # Disable deduplication here because it keeps getting in the way of us properly testing that
+    # findings are pushed to jira on reimport, since the same report is being imported twice in
+    # this test and deduplication will prevent the second import from creating any findings at all,
+    # which means no jira issues will be created on the second import, which is what we need to assert
+    # that the jira project is being fetched correctly and push_to_jira is being set to True in the import settings
+    @toggle_system_setting_boolean("enable_deduplication", False)  # noqa: FBT003
+    def test_import_auto_create_context_fetches_all_objects_for_push_to_jira(self):
+        """
+        This test is responsible for ensuring that all related objects in auto context are fetched appropriately.
+        To test this, we will first set up a jira instance with a project configured at the engagement level only.
+        It is not really important that we test that findings are pushed to jira here, but we can assert that the
+        import history import settings reflect that the viewset was given a "True" value for push_to_jira,
+        which is only possible if the engagement's jira project was correctly fetched before the serializer was invoked.
+        """
+        import_reimport_config = self._test_setup_jira_project_for_engagement()
+        # Not run the import again
+        import1 = self.import_scan_with_params(
+            self.zap_sample5_filename,
+            **import_reimport_config,
+        )
+        test_id = import1["test"]
+        test = Test.objects.get(id=test_id)
+        # We should now have push_to_jira set to True in the import settings due to the jira project being on the engagement
+        self.assertTrue(test.test_import_set.first().import_settings["push_to_jira"], "Expected push_to_jira to be True since a Jira project is configured on the engagement")
+        # Make sure we actually pushed something to jira
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+
+    def test_reimport_auto_create_context_fetches_all_objects_for_push_to_jira(self):
+        """
+        This test is responsible for ensuring that all related objects in auto context are fetched appropriately.
+        To test this, we will first set up a jira instance with a project configured at the engagement level only.
+        It is not really important that we test that findings are pushed to jira here, but we can assert that the
+        import history import settings reflect that the viewset was given a "True" value for push_to_jira,
+        which is only possible if the engagement's jira project was correctly fetched before the serializer was invoked.
+        """
+        import_reimport_config = self._test_setup_jira_project_for_engagement()
+        # Not run the import again
+        import1 = self.reimport_scan_with_params(
+            import_reimport_config.pop("test_id", None),
+            self.zap_sample5_filename,
+            **import_reimport_config,
+        )
+        test_id = import1["test"]
+        test = Test.objects.get(id=test_id)
+        # We should now have push_to_jira set to True in the import settings due to the jira project being on the engagement
+        self.assertTrue(test.test_import_set.first().import_settings["push_to_jira"], "Expected push_to_jira to be True since a Jira project is configured on the engagement")
+        # Make sure we actually pushed something to jira
+        self.assert_jira_issue_count_in_test(test_id, 2)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
