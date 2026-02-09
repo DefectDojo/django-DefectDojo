@@ -23,6 +23,7 @@ from dojo.finding.deduplication import (
     do_dedupe_finding_task_internal,
     get_finding_models_for_deduplication,
 )
+from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.location.utils import save_locations_to_add
@@ -32,6 +33,7 @@ from dojo.models import (
     Engagement,
     Finding,
     Finding_Group,
+    JIRA_Instance,
     Notes,
     System_Settings,
     Test,
@@ -458,14 +460,24 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
 
 
 @app.task
-def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_option=True, product_grading_option=True,
-             issue_updater_option=True, push_to_jira=False, user=None, **kwargs):
+def post_process_findings_batch(
+    finding_ids,
+    *args,
+    dedupe_option=True,
+    rules_option=True,
+    product_grading_option=True,
+    issue_updater_option=True,
+    push_to_jira=False,
+    jira_instance_id=None,
+    user=None,
+    **kwargs,
+):
 
     logger.debug(
         f"post_process_findings_batch called: finding_ids_count={len(finding_ids) if finding_ids else 0}, "
         f"args={args}, dedupe_option={dedupe_option}, rules_option={rules_option}, "
         f"product_grading_option={product_grading_option}, issue_updater_option={issue_updater_option}, "
-        f"push_to_jira={push_to_jira}, user={user.id if user else None}, kwargs={kwargs}",
+        f"push_to_jira={push_to_jira}, jira_instance_id={jira_instance_id}, user={user.id if user else None}, kwargs={kwargs}",
     )
     if not finding_ids:
         return
@@ -503,14 +515,21 @@ def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_op
 
         dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id)
 
-    if push_to_jira:
+    # If we received the ID of a jira instance, then we need to determine the keep in sync behavior
+    jira_instance = None
+    if jira_instance_id is not None:
+        with suppress(JIRA_Instance.DoesNotExist):
+            jira_instance = JIRA_Instance.objects.get(id=jira_instance_id)
+    # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
+        # but this is a way to at least make it that far
+    if push_to_jira or getattr(jira_instance, "finding_jira_sync", False):
         for finding in findings:
-            if finding.has_jira_issue or not finding.finding_group:
-                jira_helper.push_to_jira(finding)
-            else:
-                jira_helper.push_to_jira(finding.finding_group)
+            object_to_push = finding if finding.has_jira_issue or not finding.finding_group else finding.finding_group
+            # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
+            if push_to_jira or is_keep_in_sync_with_jira(object_to_push, prefetched_jira_instance=jira_instance):
+                jira_helper.push_to_jira(object_to_push)
     else:
-        logger.debug("push_to_jira is False, not ushing to JIRA")
+        logger.debug("push_to_jira is False, not pushing to JIRA")
 
 
 @receiver(pre_delete, sender=Finding)

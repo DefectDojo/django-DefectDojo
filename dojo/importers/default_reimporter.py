@@ -16,6 +16,7 @@ from dojo.finding.deduplication import (
 )
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
+from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     Development_Environment,
@@ -441,6 +442,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             product_grading_option=True,
                             issue_updater_option=True,
                             push_to_jira=push_to_jira,
+                            jira_instance_id=getattr(self.jira_instance, "id", None),
                         )
 
         # No chord: tasks are dispatched immediately above per batch
@@ -499,10 +501,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 )
                 mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups
-        if self.findings_groups_enabled and self.push_to_jira:
+        # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
+        # but this is a way to at least make it that far
+        if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
             for finding_group in {finding.finding_group for finding in findings if finding.finding_group is not None}:
-                jira_helper.push_to_jira(finding_group)
-
+                # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
+                if self.push_to_jira or is_keep_in_sync_with_jira(finding_group, prefetched_jira_instance=self.jira_instance):
+                    jira_helper.push_to_jira(finding_group)
         # Calculate grade once after all findings have been closed
         if mitigated_findings:
             perform_product_grading(self.test.engagement.product)
@@ -985,19 +990,24 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
                 **kwargs,
             )
-            if self.push_to_jira:
-                if findings[0].finding_group is not None:
-                    jira_helper.push_to_jira(findings[0].finding_group)
-                else:
-                    jira_helper.push_to_jira(findings[0])
-
-        if self.findings_groups_enabled and self.push_to_jira:
+            # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
+            # but this is a way to at least make it that far
+            if self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False):
+                object_to_push = findings[0].finding_group if findings[0].finding_group is not None else findings[0]
+                # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
+                if self.push_to_jira or is_keep_in_sync_with_jira(object_to_push, prefetched_jira_instance=self.jira_instance):
+                    jira_helper.push_to_jira(object_to_push)
+        # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
+        # but this is a way to at least make it that far
+        if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
             for finding_group in {
                     finding.finding_group
                     for finding in self.reactivated_items + self.unchanged_items
                     if finding.finding_group is not None and not finding.is_mitigated
             }:
-                jira_helper.push_to_jira(finding_group)
+                # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
+                if self.push_to_jira or is_keep_in_sync_with_jira(finding_group, prefetched_jira_instance=self.jira_instance):
+                    jira_helper.push_to_jira(finding_group)
 
     def process_results(
         self,

@@ -1,0 +1,11 @@
+{
+  "findings": [
+    {
+      "title": "High",
+      "description": "test",
+      "date": "2025-12-01",
+      "severity": "High",
+      "component_name": "Component A"
+    }
+  ]
+}

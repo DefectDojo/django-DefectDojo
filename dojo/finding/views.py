@@ -2963,7 +2963,11 @@ def _bulk_push_to_jira(finds, form, note):
     )
     logger.debug("finding_groups: %s", finding_groups)
     for group in finding_groups:
-        if form.cleaned_data.get("push_to_jira"):
+        if (
+            form.cleaned_data.get("push_to_jira")
+            or jira_helper.is_push_all_issues(group)
+            or jira_helper.is_keep_in_sync_with_jira(group)
+        ):
             (
                 can_be_pushed_to_jira,
                 error_message,

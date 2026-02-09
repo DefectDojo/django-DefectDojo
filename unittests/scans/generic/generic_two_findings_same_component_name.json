@@ -1,0 +1,18 @@
+{
+  "findings": [
+    {
+      "title": "Critical",
+      "description": "test",
+      "date": "2025-12-01",
+      "severity": "Critical",
+      "component_name": "Component A"
+    },
+    {
+      "title": "High",
+      "description": "test",
+      "date": "2025-12-01",
+      "severity": "High",
+      "component_name": "Component A"
+    }
+  ]
+}
