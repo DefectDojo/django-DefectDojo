@@ -5,8 +5,9 @@ draft: false
 weight: 2
 exclude_search: false
 audience: pro
+aliases:
+  - /en/working_with_findings/organizing_engagements_tests/tagging_objects
 ---
-
 Tags are ideal for grouping objects in a manner that can be filtered out into smaller, more digestible chunks.  They can be used to denote status, or to create custom sets of Product Type, Products, Engagements or Findings across the data model.
 
 In DefectDojo, tags are a first class citizen and are recognized as the facilitators

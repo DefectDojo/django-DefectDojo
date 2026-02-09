@@ -3,8 +3,9 @@ title: "Deduplication Tuning"
 description: "Configure deduplication in DefectDojo Open Source: algorithms, hash fields, endpoints, and service"
 weight: 5
 audience: opensource
+aliases:
+  - /en/working_with_findings/finding_deduplication/deduplication_tuning_os
 ---
-
 The Open Source edition of DefectDojo uses settings files and environment variables tune deduplication.
 
 See also: [Open Source Configuration](/get_started/open_source/configuration/) for details on environment variables and `local_settings.py` overrides.

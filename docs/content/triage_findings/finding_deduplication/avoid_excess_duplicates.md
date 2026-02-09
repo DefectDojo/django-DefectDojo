@@ -2,8 +2,9 @@
 title: "Avoiding Excess Duplicates"
 description: ""
 weight: 4
+aliases:
+  - /en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
 ---
-
 One of DefectDojo’s strengths is that the data model can accommodate many different use\-cases and applications. You’ll likely change your approach as you master the software and discover ways to optimize your workflow.
 
 By default, DefectDojo does not delete any duplicate Findings that are created. Each Finding is considered to be a separate instance of a vulnerability. So in this case, **Duplicate Findings** can be an indicator that a process change is required to your workflow.

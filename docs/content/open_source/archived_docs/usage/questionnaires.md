@@ -3,8 +3,9 @@ title: "Questionnaires"
 description: "Collect information from people internal or external to DefectDojo."
 weight: 3
 draft: false
+aliases:
+  - /en/open_source/archived_docs/usage/questionnaires
 ---
-
 ## Questionnaires
 
 Questionnaires provide a means for collecting information from developers and respective stakeholders. DefectDojo includes functionality to create new questionnaires with custom questions, open questionnaires to receive responses for certain time periods from insiders or outsiders, and connect questionnaires with new or existing engagements.

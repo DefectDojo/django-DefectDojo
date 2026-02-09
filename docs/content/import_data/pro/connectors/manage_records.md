@@ -1,8 +1,9 @@
 ---
 title: "Managing Records"
 description: "Direct the flow of data from your tool into DefectDojo"
+aliases:
+  - /en/connecting_your_tools/connectors/manage_records
 ---
-
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
 
 Once you have run your first Discover operation, you should see a list of Mapped or Unmapped records on the **Manage Records and Operations** page.

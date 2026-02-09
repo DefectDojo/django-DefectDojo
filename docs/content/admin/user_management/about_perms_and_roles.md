@@ -2,8 +2,9 @@
 title: "Permissions in DefectDojo"
 description: "Summary of all DefectDojo permission options, in detail"
 weight: 2
+aliases:
+  - /en/customize_dojo/user_management/about_perms_and_roles
 ---
-
 If you have a team of users working in DefectDojo, it's important to set up Role\-Based Access Control (RBAC) appropriately so that users can only access specific data. Security data is highly sensitive, and DefectDojo's options for access control allow you to be specific about each team member’s access to information.
 
 This article is an overview of how permissions in DefectDojo work.  If you would prefer to see a detailed breakdown of **each action** that can be controlled by Permissions, see our **[Permissions Chart](../user_permission_chart/)** article.

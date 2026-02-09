@@ -5,6 +5,8 @@ draft: false
 sidebar:
     collapsed: true
 weight: -900000000
+aliases:
+  - /en/open_source/upgrading/
 ---
 
 ## Docker compose

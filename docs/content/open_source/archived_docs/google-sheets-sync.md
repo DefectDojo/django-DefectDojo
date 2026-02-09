@@ -4,8 +4,9 @@ description: "Export finding details to Google Sheets and upload changes from Go
 draft: false
 weight: 8
 exclude_search: true
+aliases:
+  - /en/open_source/archived_docs/google-sheets-sync
 ---
-
 **Please note - the Google Sheets feature has been removed in DefectDojo version 2.21.0 - these documents are for reference only.**
 
 With the Google Sheets sync feature, DefectDojo allow the users to

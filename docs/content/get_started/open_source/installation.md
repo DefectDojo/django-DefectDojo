@@ -4,8 +4,9 @@ description: "DefectDojo supports various installation options."
 draft: false
 weight: 1
 audience: opensource
+aliases:
+  - /en/open_source/installation/installation
 ---
-
 ## **Recommended Options**
 ---
 

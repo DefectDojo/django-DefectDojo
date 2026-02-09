@@ -3,8 +3,9 @@ title: "Set a User's permissions"
 description: "How to grant Roles & Permissions to a user, as well as superuser status"
 weight: 2
 audience: opensource
+aliases:
+  - /en/customize_dojo/user_management/set_user_permissions
 ---
-
 ## Introduction to Permission Types
 
 Individual users have four different kinds of permission that they can be assigned:

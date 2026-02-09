@@ -4,8 +4,9 @@ description: "For Pro users: support@defectdojo.com + other options"
 draft: "false"
 pro-feature: true
 weight: 7
+aliases:
+  - /en/about_defectdojo/contact_defectdojo_support
 ---
-
 Need help with DefectDojo? Here are some ways to get assistance.
 
 ## Open-Source Support
