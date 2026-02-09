@@ -121,6 +121,7 @@ from dojo.models import (
     Languages,
     Network_Locations,
     Note_Type,
+    NoteHistory,
     Notes,
     Notification_Webhooks,
     Notifications,
@@ -532,6 +533,10 @@ class EngagementViewSet(
                 note_type=note_type,
             )
             note.save()
+            # Add an entry to the note history
+            history = NoteHistory.objects.create(data=note.entry, time=note.date, current_editor=note.author)
+            note.history.add(history)
+            # Now add the note to the object
             engagement.notes.add(note)
             # Determine if we need to send any notifications for user mentioned
             process_tag_notifications(
@@ -1125,6 +1130,10 @@ class FindingViewSet(
                 note_type=note_type,
             )
             note.save()
+            # Add an entry to the note history
+            history = NoteHistory.objects.create(data=note.entry, time=note.date, current_editor=note.author)
+            note.history.add(history)
+            # Now add the note to the object
             finding.last_reviewed = note.date
             finding.last_reviewed_by = author
             finding.save(update_fields=["last_reviewed", "last_reviewed_by", "updated"])
@@ -2188,6 +2197,10 @@ class TestsViewSet(
                 note_type=note_type,
             )
             note.save()
+            # Add an entry to the note history
+            history = NoteHistory.objects.create(data=note.entry, time=note.date, current_editor=note.author)
+            note.history.add(history)
+            # Now add the note to the object
             test.notes.add(note)
             # Determine if we need to send any notifications for user mentioned
             process_tag_notifications(
