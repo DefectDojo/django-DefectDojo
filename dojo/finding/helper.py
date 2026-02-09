@@ -16,7 +16,6 @@ from fieldsignals import pre_save_changed
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
-from dojo.decorators import dojo_async_task
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.deduplication import (
@@ -24,6 +23,7 @@ from dojo.finding.deduplication import (
     do_dedupe_finding_task_internal,
     get_finding_models_for_deduplication,
 )
+from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.location.utils import save_locations_to_add
@@ -33,6 +33,7 @@ from dojo.models import (
     Engagement,
     Finding,
     Finding_Group,
+    JIRA_Instance,
     Notes,
     System_Settings,
     Test,
@@ -395,7 +396,6 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
                     finding_group.findings.add(*findings)
 
 
-@dojo_async_task
 @app.task
 def post_process_finding_save(finding_id, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
@@ -440,7 +440,9 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
 
     if product_grading_option:
         if system_settings.enable_product_grade:
-            calculate_grade(finding.test.engagement.product.id)
+            from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+            dojo_dispatch_task(calculate_grade, finding.test.engagement.product.id)
         else:
             deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
 
@@ -457,16 +459,25 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
             jira_helper.push_to_jira(finding.finding_group)
 
 
-@dojo_async_task
 @app.task
-def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_option=True, product_grading_option=True,
-             issue_updater_option=True, push_to_jira=False, user=None, **kwargs):
+def post_process_findings_batch(
+    finding_ids,
+    *args,
+    dedupe_option=True,
+    rules_option=True,
+    product_grading_option=True,
+    issue_updater_option=True,
+    push_to_jira=False,
+    jira_instance_id=None,
+    user=None,
+    **kwargs,
+):
 
     logger.debug(
         f"post_process_findings_batch called: finding_ids_count={len(finding_ids) if finding_ids else 0}, "
         f"args={args}, dedupe_option={dedupe_option}, rules_option={rules_option}, "
         f"product_grading_option={product_grading_option}, issue_updater_option={issue_updater_option}, "
-        f"push_to_jira={push_to_jira}, user={user.id if user else None}, kwargs={kwargs}",
+        f"push_to_jira={push_to_jira}, jira_instance_id={jira_instance_id}, user={user.id if user else None}, kwargs={kwargs}",
     )
     if not finding_ids:
         return
@@ -500,16 +511,25 @@ def post_process_findings_batch(finding_ids, *args, dedupe_option=True, rules_op
             tool_issue_updater.async_tool_issue_update(finding)
 
     if product_grading_option and system_settings.enable_product_grade:
-        calculate_grade(findings[0].test.engagement.product.id)
+        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-    if push_to_jira:
+        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id)
+
+    # If we received the ID of a jira instance, then we need to determine the keep in sync behavior
+    jira_instance = None
+    if jira_instance_id is not None:
+        with suppress(JIRA_Instance.DoesNotExist):
+            jira_instance = JIRA_Instance.objects.get(id=jira_instance_id)
+    # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
+        # but this is a way to at least make it that far
+    if push_to_jira or getattr(jira_instance, "finding_jira_sync", False):
         for finding in findings:
-            if finding.has_jira_issue or not finding.finding_group:
-                jira_helper.push_to_jira(finding)
-            else:
-                jira_helper.push_to_jira(finding.finding_group)
+            object_to_push = finding if finding.has_jira_issue or not finding.finding_group else finding.finding_group
+            # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
+            if push_to_jira or is_keep_in_sync_with_jira(object_to_push, prefetched_jira_instance=jira_instance):
+                jira_helper.push_to_jira(object_to_push)
     else:
-        logger.debug("push_to_jira is False, not ushing to JIRA")
+        logger.debug("push_to_jira is False, not pushing to JIRA")
 
 
 @receiver(pre_delete, sender=Finding)

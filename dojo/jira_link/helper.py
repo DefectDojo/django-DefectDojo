@@ -18,7 +18,7 @@ from jira.exceptions import JIRAError
 from requests.auth import HTTPBasicAuth
 
 from dojo.celery import app
-from dojo.decorators import dojo_async_task
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.forms import JIRAEngagementForm, JIRAProjectForm
 from dojo.models import (
     Engagement,
@@ -145,17 +145,19 @@ def _safely_get_obj_status_for_jira(obj: Finding | Finding_Group, *, isenforced:
     return status or ["Inactive"]
 
 
-def is_keep_in_sync_with_jira(finding):
-    keep_in_sync_enabled = False
-    # Check if there is a jira issue that needs to be updated
-    jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
-    if jira_issue_exists:
-        # Determine if any automatic sync should occur
-        jira_instance = get_jira_instance(finding)
-        if jira_instance:
-            keep_in_sync_enabled = jira_instance.finding_jira_sync
-
-    return keep_in_sync_enabled
+def is_keep_in_sync_with_jira(obj: Finding | Finding_Group, prefetched_jira_instance: JIRA_Instance = None):
+    """Determine if any automatic sync should occur"""
+    jira_issue_exists = False
+    # Check for a jira issue on each type of object
+    if isinstance(obj, Finding):
+        jira_issue_exists = obj.has_jira_issue or (obj.finding_group and obj.finding_group.has_jira_issue)
+    elif isinstance(obj, Finding_Group):
+        jira_issue_exists = obj.has_jira_issue
+    # Now determine if we need to pull the jira instance to check if sync is enabled
+    # but only if there is a jira issue that would need syncing
+    if jira_issue_exists and (jira_instance := prefetched_jira_instance or get_jira_instance(obj)) is not None:
+        return jira_instance.finding_jira_sync
+    return False
 
 
 # checks if a finding can be pushed to JIRA
@@ -225,8 +227,8 @@ def can_be_pushed_to_jira(obj, form=None):
 
 
 # use_inheritance=True means get jira_project config from product if engagement itself has none
-def get_jira_project(obj, *, use_inheritance=True):
-    if not is_jira_enabled():
+def get_jira_project(obj, *, use_inheritance=True, jira_enabled: bool = False):
+    if not jira_enabled and not (jira_enabled := is_jira_enabled()):
         return None
 
     if obj is None:
@@ -242,19 +244,19 @@ def get_jira_project(obj, *, use_inheritance=True):
             return obj.jira_project
         # some old jira_issue records don't have a jira_project, so try to go via the finding instead
         if (hasattr(obj, "finding") and obj.finding) or (hasattr(obj, "engagement") and obj.engagement):
-            return get_jira_project(obj.finding, use_inheritance=use_inheritance)
+            return get_jira_project(obj.finding, use_inheritance=use_inheritance, jira_enabled=jira_enabled)
         return None
 
     if isinstance(obj, Finding | Stub_Finding):
         finding = obj
-        return get_jira_project(finding.test)
+        return get_jira_project(finding.test, jira_enabled=jira_enabled)
 
     if isinstance(obj, Finding_Group):
-        return get_jira_project(obj.test)
+        return get_jira_project(obj.test, jira_enabled=jira_enabled)
 
     if isinstance(obj, Test):
         test = obj
-        return get_jira_project(test.engagement)
+        return get_jira_project(test.engagement, jira_enabled=jira_enabled)
 
     if isinstance(obj, Engagement):
         engagement = obj
@@ -269,7 +271,7 @@ def get_jira_project(obj, *, use_inheritance=True):
 
         if use_inheritance:
             logger.debug("delegating to product %s for %s", engagement.product, engagement)
-            return get_jira_project(engagement.product)
+            return get_jira_project(engagement.product, jira_enabled=jira_enabled)
         logger.debug("not delegating to product %s for %s", engagement.product, engagement)
         return None
 
@@ -286,11 +288,11 @@ def get_jira_project(obj, *, use_inheritance=True):
     return None
 
 
-def get_jira_instance(obj):
-    if not is_jira_enabled():
+def get_jira_instance(obj, jira_enabled: bool = False):  # noqa: FBT001, FBT002
+    if not jira_enabled and not (jira_enabled := is_jira_enabled()):
         return None
 
-    jira_project = get_jira_project(obj)
+    jira_project = get_jira_project(obj, jira_enabled=jira_enabled)
     if jira_project:
         logger.debug("found jira_instance %s for %s", jira_project.jira_instance, obj)
         return jira_project.jira_instance
@@ -415,17 +417,17 @@ def get_jira_finding_text(jira_instance):
     return None
 
 
-def has_jira_issue(obj):
+def has_jira_issue(obj: Finding | Engagement | Finding_Group) -> bool:
     return get_jira_issue(obj) is not None
 
 
-def get_jira_issue(obj):
-    if isinstance(obj, Finding | Engagement | Finding_Group):
-        try:
-            return obj.jira_issue
-        except JIRA_Issue.DoesNotExist:
-            return None
-    return None
+def get_jira_issue(obj: Finding | Engagement | Finding_Group) -> JIRA_Issue | None:
+    """
+    This pattern is "cheaper" than the try/catch handling of the DoesNotExist exception
+    that would happen if we try to access obj.jira_issue when there is none, and it also
+    works with prefetch_related where the related object is None instead of a RelatedManager
+    """
+    return getattr(obj, "jira_issue", None)
 
 
 def has_jira_configured(obj):
@@ -763,20 +765,19 @@ def push_to_jira(obj, *args, **kwargs):
     if isinstance(obj, Finding):
         if obj.has_finding_group:
             logger.debug("pushing finding group for %s to JIRA", obj)
-            return push_finding_group_to_jira(obj.finding_group.id, *args, **kwargs)
-        return push_finding_to_jira(obj.id, *args, **kwargs)
+            return dojo_dispatch_task(push_finding_group_to_jira, obj.finding_group.id, *args, **kwargs)
+        return dojo_dispatch_task(push_finding_to_jira, obj.id, *args, **kwargs)
 
     if isinstance(obj, Finding_Group):
-        return push_finding_group_to_jira(obj.id, *args, **kwargs)
+        return dojo_dispatch_task(push_finding_group_to_jira, obj.id, *args, **kwargs)
 
     if isinstance(obj, Engagement):
-        return push_engagement_to_jira(obj.id, *args, **kwargs)
+        return dojo_dispatch_task(push_engagement_to_jira, obj.id, *args, **kwargs)
     logger.error("unsupported object passed to push_to_jira: %s %i %s", obj.__name__, obj.id, obj)
     return None
 
 
 # we need thre separate celery tasks due to the decorators we're using to map to/from ids
-@dojo_async_task
 @app.task
 def push_finding_to_jira(finding_id, *args, **kwargs):
     finding = get_object_or_none(Finding, id=finding_id)
@@ -789,7 +790,6 @@ def push_finding_to_jira(finding_id, *args, **kwargs):
     return add_jira_issue(finding, *args, **kwargs)
 
 
-@dojo_async_task
 @app.task
 def push_finding_group_to_jira(finding_group_id, *args, **kwargs):
     finding_group = get_object_or_none(Finding_Group, id=finding_group_id)
@@ -806,7 +806,6 @@ def push_finding_group_to_jira(finding_group_id, *args, **kwargs):
     return add_jira_issue(finding_group, *args, **kwargs)
 
 
-@dojo_async_task
 @app.task
 def push_engagement_to_jira(engagement_id, *args, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
@@ -815,8 +814,8 @@ def push_engagement_to_jira(engagement_id, *args, **kwargs):
         return None
 
     if engagement.has_jira_issue:
-        return update_epic(engagement.id, *args, **kwargs)
-    return add_epic(engagement.id, *args, **kwargs)
+        return dojo_dispatch_task(update_epic, engagement.id, *args, **kwargs)
+    return dojo_dispatch_task(add_epic, engagement.id, *args, **kwargs)
 
 
 def add_issues_to_epic(jira, obj, epic_id, issue_keys, *, ignore_epics=True):
@@ -1396,7 +1395,6 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-@dojo_async_task
 @app.task
 def close_epic(engagement_id, push_to_jira, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
@@ -1445,7 +1443,6 @@ def close_epic(engagement_id, push_to_jira, **kwargs):
     return False
 
 
-@dojo_async_task
 @app.task
 def update_epic(engagement_id, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
@@ -1492,7 +1489,6 @@ def update_epic(engagement_id, **kwargs):
     return False
 
 
-@dojo_async_task
 @app.task
 def add_epic(engagement_id, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
@@ -1601,10 +1597,9 @@ def add_comment(obj, note, *, force_push=False, **kwargs):
         return False
 
     # Call the internal task with IDs (runs synchronously within this task)
-    return add_comment_internal(jira_issue.id, note.id, force_push=force_push, **kwargs)
+    return dojo_dispatch_task(add_comment_internal, jira_issue.id, note.id, force_push=force_push, **kwargs)
 
 
-@dojo_async_task
 @app.task
 def add_comment_internal(jira_issue_id, note_id, *, force_push=False, **kwargs):
     """Internal Celery task that adds a comment to a JIRA issue."""
