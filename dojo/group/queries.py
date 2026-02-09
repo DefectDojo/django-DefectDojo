@@ -1,7 +1,7 @@
 from crum import get_current_user
 from django.db.models import Subquery
 
-from dojo.authorization.authorization import get_roles_for_permission
+from dojo.authorization.authorization import get_roles_for_permission, user_has_configuration_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Dojo_Group, Dojo_Group_Member, Product_Group, Product_Type_Group, Role
 from dojo.request_cache import cache_for_request
@@ -16,6 +16,10 @@ def get_authorized_groups(permission):
         return Dojo_Group.objects.none()
 
     if user.is_superuser:
+        return Dojo_Group.objects.all().order_by("name")
+
+    # Check for the case of the view_group config permission
+    if user_has_configuration_permission(user, "auth.view_group"):
         return Dojo_Group.objects.all().order_by("name")
 
     roles = get_roles_for_permission(permission)
