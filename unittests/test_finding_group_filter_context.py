@@ -1,4 +1,3 @@
-from django.test import TestCase
 from django.utils.timezone import now
 
 from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
@@ -13,8 +12,11 @@ from dojo.models import (
     Test_Type,
 )
 
+from .dojo_test_case import DojoTestCase
 
-class TestFindingGroupFilterContext(TestCase):
+
+class TestFindingGroupFilterContext(DojoTestCase):
+
     """Test that Finding Group filter respects Test/Engagement/Product context."""
 
     @classmethod
@@ -22,7 +24,7 @@ class TestFindingGroupFilterContext(TestCase):
         """Create test data hierarchy."""
         # Create test type
         cls.test_type = Test_Type.objects.create(name="Test Type")
-        
+
         # Create user
         cls.user = Dojo_User.objects.create(
             username="testuser",
@@ -37,10 +39,12 @@ class TestFindingGroupFilterContext(TestCase):
         cls.product1 = Product.objects.create(
             name="Product 1",
             prod_type=cls.prod_type,
+            description="Test product 1",
         )
         cls.product2 = Product.objects.create(
             name="Product 2",
             prod_type=cls.prod_type,
+            description="Test product 2",
         )
 
         # Create engagements for each product

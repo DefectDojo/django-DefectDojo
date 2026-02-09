@@ -2024,14 +2024,15 @@ def get_finding_group_queryset_for_context(pid=None, eid=None, tid=None):
     """
     Helper function to build finding group queryset based on context hierarchy.
     Context priority: test > engagement > product > global
-    
+
     Args:
         pid: Product ID (least specific)
         eid: Engagement ID
         tid: Test ID (most specific)
-    
+
     Returns:
         QuerySet of Finding_Group filtered by context
+
     """
     if tid is not None:
         # Most specific: filter by test
@@ -2238,37 +2239,50 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
             eid=self.eid,
             tid=self.tid,
         )
-        
+
         # Filter by most specific context: test > engagement > product
         if self.tid is not None:
             # Test context: filter finding groups by test
-            del self.form.fields["test__engagement__product"]
-            del self.form.fields["test__engagement__product__prod_type"]
-            del self.form.fields["test__engagement"]
-            del self.form.fields["test"]
+            if "test__engagement__product" in self.form.fields:
+                del self.form.fields["test__engagement__product"]
+            if "test__engagement__product__prod_type" in self.form.fields:
+                del self.form.fields["test__engagement__product__prod_type"]
+            if "test__engagement" in self.form.fields:
+                del self.form.fields["test__engagement"]
+            if "test" in self.form.fields:
+                del self.form.fields["test"]
         elif self.eid is not None:
             # Engagement context: filter finding groups by engagement
-            del self.form.fields["test__engagement__product"]
-            del self.form.fields["test__engagement__product__prod_type"]
-            del self.form.fields["test__engagement"]
+            if "test__engagement__product" in self.form.fields:
+                del self.form.fields["test__engagement__product"]
+            if "test__engagement__product__prod_type" in self.form.fields:
+                del self.form.fields["test__engagement__product__prod_type"]
+            if "test__engagement" in self.form.fields:
+                del self.form.fields["test__engagement"]
             # Filter tests by engagement - get_authorized_tests doesn't support engagement param
-            engagement = Engagement.objects.get(id=self.eid)
-            self.form.fields["test"].queryset = get_authorized_tests(Permissions.Test_View, product=engagement.product).filter(engagement_id=self.eid).prefetch_related("test_type")
+            engagement = Engagement.objects.filter(id=self.eid).select_related("product").first()
+            if engagement:
+                self.form.fields["test"].queryset = get_authorized_tests(Permissions.Test_View, product=engagement.product).filter(engagement_id=self.eid).prefetch_related("test_type")
         elif self.pid is not None:
             # Product context: filter finding groups by product
-            del self.form.fields["test__engagement__product"]
-            del self.form.fields["test__engagement__product__prod_type"]
+            if "test__engagement__product" in self.form.fields:
+                del self.form.fields["test__engagement__product"]
+            if "test__engagement__product__prod_type" in self.form.fields:
+                del self.form.fields["test__engagement__product__prod_type"]
             # TODO: add authorized check to be sure
-            self.form.fields["test__engagement"].queryset = Engagement.objects.filter(
-                product_id=self.pid,
-            ).all()
-            self.form.fields["test"].queryset = get_authorized_tests(Permissions.Test_View, product=self.pid).prefetch_related("test_type")
+            if "test__engagement" in self.form.fields:
+                self.form.fields["test__engagement"].queryset = Engagement.objects.filter(
+                    product_id=self.pid,
+                ).all()
+            if "test" in self.form.fields:
+                self.form.fields["test"].queryset = get_authorized_tests(Permissions.Test_View, product=self.pid).prefetch_related("test_type")
         else:
             # Global context: show all authorized finding groups
             self.form.fields[
                 "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
             self.form.fields["test__engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
-            del self.form.fields["test"]
+            if "test" in self.form.fields:
+                del self.form.fields["test"]
 
         if self.form.fields.get("test__engagement__product"):
             self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
