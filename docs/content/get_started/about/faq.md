@@ -4,8 +4,9 @@ description: "DefectDojo FAQ"
 draft: "false"
 weight: 2
 chapter: true
+aliases:
+  - /en/about_defectdojo/faq
 ---
-
 Here are some frequently asked questions about working with DefectDojo - both in DefectDojo Pro or DefectDojo OS.
 
 ## General Questions

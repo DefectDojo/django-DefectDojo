@@ -3,8 +3,9 @@ title: "Add Findings form"
 description: ""
 weight: 1
 audience: pro
+aliases:
+  - /en/connecting_your_tools/import_scan_files/import_scan_ui
 ---
-
 If you have a brand new DefectDojo instance, the Import Scan Form is a logical first step to learn the software and set up your environment. From this form, you upload a scan file from a supported tool, which will create Findings to represent those vulnerabilities. While filling out the form, you can decide whether to:
 
 * Store these Findings under an existing Product Type / Product / Engagement **or**

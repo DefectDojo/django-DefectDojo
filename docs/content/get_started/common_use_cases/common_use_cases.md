@@ -4,8 +4,9 @@ description: "Use Cases and examples"
 draft: "false"
 weight: 2
 chapter: true
+aliases:
+  - /en/about_defectdojo/examples_of_use
 ---
-
 This article is based on DefectDojo Inc's February 2025 Office Hours: "Tackling Common Use Cases".
 <iframe width="560" height="315" src="https://www.youtube.com/embed/44vv-KspHBs?si=ilRBlfo-wvX5DPVg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 

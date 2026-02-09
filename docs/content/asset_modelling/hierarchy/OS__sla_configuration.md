@@ -3,8 +3,9 @@ title: "SLA Configuration"
 description: "Configure Service Level Agreements for different Products"
 weight: 2
 audience: opensource
+aliases:
+  - /en/working_with_findings/sla_configuration
 ---
-
 Each Product in DefectDojo can have its own Service Level Agreement (SLA) configuration, which represents the days your organization has to remediate or otherwise manage a Finding.
 
 SLA can be set based on either **[Finding Severity](/asset_modelling/hierarchy/product_hierarchy/#findings)** or **[Finding Risk](/asset_modelling/hierarchy/pro__priority_sla/)** (in DefectDojo Pro).

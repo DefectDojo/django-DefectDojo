@@ -2,8 +2,9 @@
 title: "Audit Logs"
 description: "Access audit logs for DefectDojo objects"
 weight: 1
+aliases:
+  - /en/customize_dojo/user_management/audit_logging
 ---
-
 Audit logs for DefectDojo can be accessed in a few different ways.
 
 ## Individual Object Logs
