@@ -226,103 +226,87 @@ class UserHasDojoGroupMemberPermission(permissions.BasePermission):
 
 
 class UserHasDojoMetaPermission(permissions.BasePermission):
+    permission_map = {
+        "product": {
+            "model": Product,
+            "permissions": {
+                "get_permission": Permissions.Product_View,
+                "put_permission": Permissions.Product_Edit,
+                "delete_permission": Permissions.Product_Edit,
+                "post_permission": Permissions.Product_Edit,
+            },
+        },
+        "finding": {
+            "model": Finding,
+            "permissions": {
+                "get_permission": Permissions.Finding_View,
+                "put_permission": Permissions.Finding_Edit,
+                "delete_permission": Permissions.Finding_Edit,
+                "post_permission": Permissions.Finding_Edit,
+            },
+        },
+        "location": {
+            "model": Location,
+            "permissions": {
+                "get_permission": Permissions.Location_View,
+                "put_permission": Permissions.Location_Edit,
+                "delete_permission": Permissions.Location_Edit,
+                "post_permission": Permissions.Location_Edit,
+            },
+        },
+        # TODO: Delete this after the move to Locations
+        "endpoint": {
+            "model": Endpoint if not settings.V3_FEATURE_LOCATIONS else Location,
+            "permissions": {
+                "get_permission": Permissions.Location_View,
+                "put_permission": Permissions.Location_Edit,
+                "delete_permission": Permissions.Location_Edit,
+                "post_permission": Permissions.Location_Edit,
+            },
+        },
+    }
+
     def has_permission(self, request, view):
-        if request.method == "POST":
-            has_permission_result = True
-            product_id = request.data.get("product", None)
-            if product_id:
-                obj = get_object_or_404(Product, pk=product_id)
-                has_permission_result = (
-                    has_permission_result
-                    and user_has_permission(
-                        request.user, obj, Permissions.Product_Edit,
-                    )
-                )
-            finding_id = request.data.get("finding", None)
-            if finding_id:
-                obj = get_object_or_404(Finding, pk=finding_id)
-                has_permission_result = (
-                    has_permission_result
-                    and user_has_permission(
-                        request.user, obj, Permissions.Finding_Edit,
-                    )
-                )
-            location_id = request.data.get("location", None)
-            if location_id:
-                obj = get_object_or_404(Location, pk=location_id)
-                has_permission_result = (
-                    has_permission_result
-                    and user_has_permission(
-                        request.user, obj, Permissions.Location_Edit,
-                    )
-                )
-            # TODO: Delete this after the move to Locations
-            endpoint_id = request.data.get("endpoint", None)
-            if endpoint_id:
-                if settings.V3_FEATURE_LOCATIONS:
-                    obj = get_object_or_404(Location, pk=endpoint_id)
-                else:
-                    obj = get_object_or_404(Endpoint, pk=endpoint_id)
-                has_permission_result = (
-                    has_permission_result
-                    and user_has_permission(
-                        request.user, obj, Permissions.Location_Edit,
-                    )
-                )
-            return has_permission_result
+        method_to_permission_map = {
+            "GET": "get_permission",
+            "POST": "post_permission",
+            # PATCH is generally not used here, but this endpoint is sorta odd...
+            "PATCH": "put_permission",
+        }
+        for request_method, permission_type in method_to_permission_map.items():
+            if request.method == request_method:
+                has_permission_result = True
+                for model_field, schema in self.permission_map.items():
+                    if (object_id := request.data.get(model_field)) is not None:
+                        obj = get_object_or_404(
+                            schema["model"],
+                            pk=object_id,
+                        )
+                        has_permission_result = (
+                            has_permission_result
+                            and user_has_permission(
+                                request.user,
+                                obj,
+                                schema["permissions"][permission_type],
+                            )
+                        )
+                return has_permission_result
+        # If we exit the loop at some point, we must not checking perms for that request method
         return True
 
     def has_object_permission(self, request, view, obj):
         has_permission_result = True
-        product = obj.product
-        if product:
-            has_permission_result = (
+        for model_field, schema in self.permission_map.items():
+            if (object_model := getattr(obj, model_field, None)) is not None:
+                has_permission_result = (
                 has_permission_result
                 and check_object_permission(
                     request,
-                    product,
-                    Permissions.Product_View,
-                    Permissions.Product_Edit,
-                    Permissions.Product_Edit,
+                    object_model,
+                    **schema["permissions"],
                 )
             )
-        finding = obj.finding
-        if finding:
-            has_permission_result = (
-                has_permission_result
-                and check_object_permission(
-                    request,
-                    finding,
-                    Permissions.Finding_View,
-                    Permissions.Finding_Edit,
-                    Permissions.Finding_Edit,
-                )
-            )
-        location = obj.location
-        if location:
-            has_permission_result = (
-                has_permission_result
-                and check_object_permission(
-                    request,
-                    location,
-                    Permissions.Location_View,
-                    Permissions.Location_Edit,
-                    Permissions.Location_Edit,
-                )
-            )
-        # TODO: Delete this after the move to Locations
-        endpoint = obj.endpoint
-        if endpoint:
-            has_permission_result = (
-                has_permission_result
-                and check_object_permission(
-                    request,
-                    endpoint,
-                    Permissions.Location_View,
-                    Permissions.Location_Edit,
-                    Permissions.Location_Edit,
-                )
-            )
+
         return has_permission_result
 
 
