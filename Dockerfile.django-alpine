@@ -10,6 +10,7 @@ FROM base AS build
 WORKDIR /app
 RUN \
   apk update && \
+  apk upgrade --no-cache && \
   apk add --no-cache \
     gcc \
     build-base \
@@ -40,6 +41,7 @@ ARG appuser=defectdojo
 ENV appuser=${appuser}
 RUN \
   apk update && \
+  apk upgrade --no-cache && \
   apk add --no-cache \
     openjpeg \
     jpeg \

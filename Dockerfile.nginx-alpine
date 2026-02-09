@@ -10,6 +10,7 @@ FROM base AS build
 WORKDIR /app
 RUN \
   apk update && \
+  apk upgrade --no-cache && \
   apk add --no-cache \
     gcc \
     build-base \
@@ -70,12 +71,14 @@ COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
+  apk upgrade --no-cache && \
   apk add --no-cache openssl && \
   chmod -R g=u /var/cache/nginx && \
   mkdir /var/run/defectdojo && \
   chmod -R g=u /var/run/defectdojo && \
   mkdir -p /etc/nginx/ssl && \
   chmod -R g=u /etc/nginx && \
+  rm -rf /var/cache/apk/* && \
   true
 ENV \
   DD_UWSGI_PASS="uwsgi_server" \
