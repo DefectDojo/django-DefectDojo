@@ -17,19 +17,19 @@ class TestQualysParser(DojoTestCase):
         self.parse_file_with_no_vuln_has_no_findings()
 
     def test_parse_file_with_multiple_ports_for_same_qid(self):
-        with (get_unit_tests_scans_path("qualys") / "test_qualys.xml").open(encoding = "utf-8") as testfile:
+        with (get_unit_tests_scans_path("qualys") / "test_qualys.xml").open(encoding="utf-8") as testfile:
             parser = QualysParser()
-            findings = parser.get_findings(testfile,Test())
+            findings = parser.get_findings(testfile, Test())
 
-            self.assertEqual(len(findings),2,"Should have 2 findings for different ports")
+            self.assertEqual(len(findings), 2, "Should have 2 findings for different ports")
             ports = [self.get_unsaved_locations(f)[0].port for f in findings]
-            self.assertIn(80,ports)
-            self.assertIn(443,ports)
+            self.assertIn(80, ports)
+            self.assertIn(443, ports)
 
-            self.assertEqual(findings[0].title,findings[1].title)
+            self.assertEqual(findings[0].title, findings[1].title)
             self.assertNotEqual(
                 self.get_unsaved_locations(findings[0])[0].port,
-                self.get_unsaved_locations(findings[1])[0].port
+                self.get_unsaved_locations(findings[1])[0].port,
             )
 
     def parse_file_with_no_vuln_has_no_findings(self):

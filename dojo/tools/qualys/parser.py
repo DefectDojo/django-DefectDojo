@@ -359,13 +359,13 @@ def parse_finding(host, tree):
             endpoint_port = int(port)
         # manage endpoint/location
         if settings.V3_FEATURE_LOCATIONS:
-            host_val = issue_row["fqdn"] if issue_row["fqdn"] else issue_row["ip_address"]
-            location = URL(host = host_val,port = endpoint_port)
+            host_val = issue_row["fqdn"] or issue_row["ip_address"]
+            location = URL(host=host_val, port=endpoint_port)
             finding.unsaved_locations = [location]
         else:
             # TODO: Delete this after the move to Locations
-            host_val = issue_row["fqdn"] if issue_row["fqdn"] else issue_row["ip_address"]
-            location = Endpoint(host=host_val,port = endpoint_port)
+            host_val = issue_row["fqdn"] or issue_row["ip_address"]
+            location = Endpoint(host=host_val, port=endpoint_port)
             finding.unsaved_endpoints = [location]
         finding.unsaved_vulnerability_ids = temp.get("cve_list", [])
         ret_rows.append(finding)
