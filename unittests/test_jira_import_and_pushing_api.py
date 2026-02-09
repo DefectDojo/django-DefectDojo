@@ -1073,6 +1073,105 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assertEqual(len(group_calls), 2, "Expected 2 finding groups to be pushed")
         self.assertEqual(len(individual_calls), 2, "Expected 2 individual findings to be pushed")
 
+    def _bulk_edit_finding_groups_without_checkbox(self):
+        """
+        Helper: sets up a mixed grouped/ungrouped scenario and performs a bulk edit
+        WITHOUT the push_to_jira checkbox. Returns the test_id and finding IDs used.
+        """
+        # Import scan with groups but don't push to JIRA initially
+        import0 = self.import_scan_with_params(
+            self.npm_groups_sample_filename,
+            scan_type="NPM Audit Scan",
+            group_by="component_name+component_version",
+            push_to_jira=False,
+            verified=True,
+        )
+        test_id = import0["test"]
+
+        # Verify no JIRA issues were created during import
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        # Get the finding groups created
+        finding_groups = Finding_Group.objects.filter(test__id=test_id)
+
+        # Create mixed scenario: some findings in groups, some ungrouped
+        if finding_groups.exists():
+            group_to_remove = finding_groups.first()
+            group_to_remove.findings.clear()
+            group_to_remove.delete()
+
+        # Verify we now have both grouped and ungrouped findings
+        all_findings = Finding.objects.filter(test__id=test_id)
+        grouped_findings = [f for f in all_findings if f.finding_group is not None]
+        ungrouped_findings = [f for f in all_findings if f.finding_group is None]
+
+        self.assertGreater(len(grouped_findings), 0, "Should have some grouped findings")
+        self.assertGreater(len(ungrouped_findings), 0, "Should have some ungrouped findings")
+
+        current_findings = Finding.objects.filter(test__id=test_id)
+        all_finding_ids = [str(f.id) for f in current_findings]
+
+        admin_user = get_user_model().objects.get(username="admin")
+        self.client.force_login(admin_user)
+
+        # NOTE: push_to_jira is NOT in the post data -- the checkbox is unchecked
+        post_data = {
+            "finding_to_update": all_finding_ids,
+            "severity": "",
+            "active": "",
+            "verified": "",
+            "false_p": "",
+            "duplicate": "",
+            "out_of_scope": "",
+            "is_mitigated": "",
+            "status": "",
+        }
+
+        self.client.post("/finding/bulk", post_data)
+
+    @patch("dojo.jira_link.helper.can_be_pushed_to_jira", return_value=(True, None, None))
+    @patch("dojo.jira_link.helper.is_push_all_issues", return_value=True)
+    @patch("dojo.jira_link.helper.push_to_jira", return_value=None)
+    @patch("dojo.notifications.helper.WebhookNotificationManger.send_webhooks_notification")
+    def test_bulk_edit_push_all_issues_pushes_finding_groups(self, mock_webhooks, mock_push_to_jira, mock_is_push_all_issues, mock_can_be_pushed):
+        """
+        When push_all_issues is enabled on the JIRA project, bulk editing findings
+        should push finding groups to JIRA even without the push_to_jira checkbox.
+        """
+        self._bulk_edit_finding_groups_without_checkbox()
+
+        group_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding_Group)]
+        individual_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding)]
+
+        self.assertGreater(len(group_calls), 0, "Finding groups should be pushed when push_all_issues is enabled")
+        self.assertGreater(len(individual_calls), 0, "Individual ungrouped findings should be pushed when push_all_issues is enabled")
+
+        self.assertEqual(len(group_calls), 2, "Expected 2 finding groups to be pushed")
+        self.assertEqual(len(individual_calls), 2, "Expected 2 individual findings to be pushed")
+
+    @patch("dojo.jira_link.helper.can_be_pushed_to_jira", return_value=(True, None, None))
+    @patch("dojo.jira_link.helper.is_keep_in_sync_with_jira", return_value=True)
+    @patch("dojo.jira_link.helper.is_push_all_issues", return_value=False)
+    @patch("dojo.jira_link.helper.push_to_jira", return_value=None)
+    @patch("dojo.notifications.helper.WebhookNotificationManger.send_webhooks_notification")
+    def test_bulk_edit_keep_in_sync_pushes_finding_groups(self, mock_webhooks, mock_push_to_jira, mock_is_push_all_issues, mock_is_keep_in_sync, mock_can_be_pushed):
+        """
+        When keep_in_sync_with_jira (finding_jira_sync) is enabled on the JIRA instance,
+        bulk editing findings should push finding groups to JIRA even without the
+        push_to_jira checkbox.
+        """
+        self._bulk_edit_finding_groups_without_checkbox()
+
+        group_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding_Group)]
+        individual_calls = [call for call in mock_push_to_jira.call_args_list if isinstance(call[0][0], Finding)]
+
+        self.assertGreater(len(group_calls), 0, "Finding groups should be pushed when keep_in_sync is enabled")
+        self.assertGreater(len(individual_calls), 0, "Individual ungrouped findings should be pushed when keep_in_sync is enabled")
+
+        self.assertEqual(len(group_calls), 2, "Expected 2 finding groups to be pushed")
+        self.assertEqual(len(individual_calls), 2, "Expected 2 individual findings to be pushed")
+
     def test_keep_sync_push_finding_then_update_individual_finding_with_no_push(self):
         """
         With keep_sync enabled, import a scan with push_to_jira=True, then update one of the
