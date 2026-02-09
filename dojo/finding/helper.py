@@ -16,7 +16,6 @@ from fieldsignals import pre_save_changed
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
-from dojo.decorators import dojo_async_task
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.deduplication import (
@@ -397,7 +396,6 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
                     finding_group.findings.add(*findings)
 
 
-@dojo_async_task
 @app.task
 def post_process_finding_save(finding_id, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
@@ -442,7 +440,9 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
 
     if product_grading_option:
         if system_settings.enable_product_grade:
-            calculate_grade(finding.test.engagement.product.id)
+            from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+            dojo_dispatch_task(calculate_grade, finding.test.engagement.product.id)
         else:
             deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
 
@@ -459,7 +459,6 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
             jira_helper.push_to_jira(finding.finding_group)
 
 
-@dojo_async_task
 @app.task
 def post_process_findings_batch(
     finding_ids,
@@ -512,7 +511,9 @@ def post_process_findings_batch(
             tool_issue_updater.async_tool_issue_update(finding)
 
     if product_grading_option and system_settings.enable_product_grade:
-        calculate_grade(findings[0].test.engagement.product.id)
+        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+
+        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id)
 
     # If we received the ID of a jira instance, then we need to determine the keep in sync behavior
     jira_instance = None

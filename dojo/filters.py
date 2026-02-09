@@ -518,6 +518,7 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
         if get_system_setting("enable_jira"):
             fields.extend([
                 "has_jira_group_issue",
+                "has_any_jira_issue",
             ])
 
     return fields
@@ -1916,7 +1917,10 @@ class FindingFilterHelper(FilterSet):
                 lookup_expr="isnull",
                 exclude=True,
                 label="Has Group JIRA")
-        has_any_jira = FindingHasJIRAFilter(label="Has Any JIRA")
+        has_any_jira_issue = FindingHasJIRAFilter(
+            label="Has Any JIRA Issue",
+            help_text="Matches JIRA issues linked to the finding itself or to the finding's group.",
+        )
 
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
@@ -2070,12 +2074,12 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
         label="Engagement name Contains",
         help_text="Search for Engagement names that contain a given pattern")
     test__name = CharFilter(
-        field_name="test__name",
+        field_name="test__title",
         lookup_expr="iexact",
         label="Test Name",
         help_text="Search for Test names that are an exact match")
     test__name_contains = CharFilter(
-        field_name="test__name",
+        field_name="test__title",
         lookup_expr="icontains",
         label="Test name Contains",
         help_text="Search for Test names that contain a given pattern")
@@ -3480,12 +3484,12 @@ class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, Finding
         label="Engagement name Contains",
         help_text="Search for Engagement names that contain a given pattern")
     test__name = CharFilter(
-        field_name="test__name",
+        field_name="test__title",
         lookup_expr="iexact",
         label="Test Name",
         help_text="Search for Test names that are an exact match")
     test__name_contains = CharFilter(
-        field_name="test__name",
+        field_name="test__title",
         lookup_expr="icontains",
         label="Test name Contains",
         help_text="Search for Test names that contain a given pattern")

@@ -18,7 +18,7 @@ from jira.exceptions import JIRAError
 from requests.auth import HTTPBasicAuth
 
 from dojo.celery import app
-from dojo.decorators import dojo_async_task
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.forms import JIRAEngagementForm, JIRAProjectForm
 from dojo.models import (
     Engagement,
@@ -765,20 +765,19 @@ def push_to_jira(obj, *args, **kwargs):
     if isinstance(obj, Finding):
         if obj.has_finding_group:
             logger.debug("pushing finding group for %s to JIRA", obj)
-            return push_finding_group_to_jira(obj.finding_group.id, *args, **kwargs)
-        return push_finding_to_jira(obj.id, *args, **kwargs)
+            return dojo_dispatch_task(push_finding_group_to_jira, obj.finding_group.id, *args, **kwargs)
+        return dojo_dispatch_task(push_finding_to_jira, obj.id, *args, **kwargs)
 
     if isinstance(obj, Finding_Group):
-        return push_finding_group_to_jira(obj.id, *args, **kwargs)
+        return dojo_dispatch_task(push_finding_group_to_jira, obj.id, *args, **kwargs)
 
     if isinstance(obj, Engagement):
-        return push_engagement_to_jira(obj.id, *args, **kwargs)
+        return dojo_dispatch_task(push_engagement_to_jira, obj.id, *args, **kwargs)
     logger.error("unsupported object passed to push_to_jira: %s %i %s", obj.__name__, obj.id, obj)
     return None
 
 
 # we need thre separate celery tasks due to the decorators we're using to map to/from ids
-@dojo_async_task
 @app.task
 def push_finding_to_jira(finding_id, *args, **kwargs):
     finding = get_object_or_none(Finding, id=finding_id)
@@ -791,7 +790,6 @@ def push_finding_to_jira(finding_id, *args, **kwargs):
     return add_jira_issue(finding, *args, **kwargs)
 
 
-@dojo_async_task
 @app.task
 def push_finding_group_to_jira(finding_group_id, *args, **kwargs):
     finding_group = get_object_or_none(Finding_Group, id=finding_group_id)
@@ -808,7 +806,6 @@ def push_finding_group_to_jira(finding_group_id, *args, **kwargs):
     return add_jira_issue(finding_group, *args, **kwargs)
 
 
-@dojo_async_task
 @app.task
 def push_engagement_to_jira(engagement_id, *args, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
@@ -817,8 +814,8 @@ def push_engagement_to_jira(engagement_id, *args, **kwargs):
         return None
 
     if engagement.has_jira_issue:
-        return update_epic(engagement.id, *args, **kwargs)
-    return add_epic(engagement.id, *args, **kwargs)
+        return dojo_dispatch_task(update_epic, engagement.id, *args, **kwargs)
+    return dojo_dispatch_task(add_epic, engagement.id, *args, **kwargs)
 
 
 def add_issues_to_epic(jira, obj, epic_id, issue_keys, *, ignore_epics=True):
@@ -1398,7 +1395,6 @@ def jira_check_attachment(issue, source_file_name):
     return file_exists
 
 
-@dojo_async_task
 @app.task
 def close_epic(engagement_id, push_to_jira, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
@@ -1447,7 +1443,6 @@ def close_epic(engagement_id, push_to_jira, **kwargs):
     return False
 
 
-@dojo_async_task
 @app.task
 def update_epic(engagement_id, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
@@ -1494,7 +1489,6 @@ def update_epic(engagement_id, **kwargs):
     return False
 
 
-@dojo_async_task
 @app.task
 def add_epic(engagement_id, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
@@ -1603,10 +1597,9 @@ def add_comment(obj, note, *, force_push=False, **kwargs):
         return False
 
     # Call the internal task with IDs (runs synchronously within this task)
-    return add_comment_internal(jira_issue.id, note.id, force_push=force_push, **kwargs)
+    return dojo_dispatch_task(add_comment_internal, jira_issue.id, note.id, force_push=force_push, **kwargs)
 
 
-@dojo_async_task
 @app.task
 def add_comment_internal(jira_issue_id, note_id, *, force_push=False, **kwargs):
     """Internal Celery task that adds a comment to a JIRA issue."""
