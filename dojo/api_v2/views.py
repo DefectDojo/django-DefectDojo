@@ -504,7 +504,7 @@ class EngagementViewSet(
         request=serializers.AddNewNoteOptionSerializer,
         responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
     )
-    @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission])
+    @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated, permissions.UserHasEngagementNotePermission])
     def notes(self, request, pk=None):
         engagement = self.get_object()
         if request.method == "POST":
@@ -1096,7 +1096,7 @@ class FindingViewSet(
         request=serializers.AddNewNoteOptionSerializer,
         responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
     )
-    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
+    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingNotePermission))
     def notes(self, request, pk=None):
         finding = self.get_object()
         if request.method == "POST":
@@ -1226,7 +1226,7 @@ class FindingViewSet(
         request=serializers.FindingNoteSerializer,
         responses={status.HTTP_204_NO_CONTENT: ""},
     )
-    @action(detail=True, methods=["patch"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
+    @action(detail=True, methods=["patch"], permission_classes=(IsAuthenticated, permissions.UserHasFindingNotePermission))
     def remove_note(self, request, pk=None):
         """Remove Note From Finding Note"""
         finding = self.get_object()
@@ -2160,7 +2160,7 @@ class TestsViewSet(
         request=serializers.AddNewNoteOptionSerializer,
         responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
     )
-    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission))
+    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasTestNotePermission))
     def notes(self, request, pk=None):
         test = self.get_object()
         if request.method == "POST":
