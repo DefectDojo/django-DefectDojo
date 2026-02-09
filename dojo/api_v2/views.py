@@ -2556,7 +2556,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
             product = auto_create.get_target_product_if_exists(**converted_dict)
-            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
+            engagement = auto_create.get_target_engagement_if_exists(product=product, **converted_dict)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
@@ -2713,8 +2713,8 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
             product = auto_create.get_target_product_if_exists(**converted_dict)
-            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
-            test = auto_create.get_target_test_if_exists(**converted_dict)
+            engagement = auto_create.get_target_engagement_if_exists(product=product, **converted_dict)
+            test = auto_create.get_target_test_if_exists(engagement=engagement, **converted_dict)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(str(e))

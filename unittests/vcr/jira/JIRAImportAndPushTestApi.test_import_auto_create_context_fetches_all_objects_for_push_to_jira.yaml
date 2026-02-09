@@ -1,0 +1,1472 @@
+interactions:
+- request:
+    body: '{"description": "Product Type Some Product Type has been created successfully.",
+      "title": "Some Product Type", "user": null, "url_ui": "http://localhost:8080/product/type/5",
+      "url_api": "http://localhost:8080/api/v2/product_types/5/", "product_type":
+      {"name": "Some Product Type", "id": 5, "url_ui": "http://localhost:8080/product/type/5",
+      "url_api": "http://localhost:8080/api/v2/product_types/5/"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Auth:
+      - Token xxx
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '400'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - DefectDojo-2.55.1
+      X-DefectDojo-Event:
+      - product_type_added
+      X-DefectDojo-Instance:
+      - http://localhost:8080
+    method: POST
+    uri: http://webhook.endpoint:8080/post
+  response:
+    body:
+      string: "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept\": [\n      \"application/json\"\n
+        \   ],\n    \"Accept-Encoding\": [\n      \"gzip, deflate\"\n    ],\n    \"Auth\":
+        [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
+        \   ],\n    \"Content-Length\": [\n      \"400\"\n    ],\n    \"Content-Type\":
+        [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.55.1\"\n    ],\n    \"X-Defectdojo-Event\":
+        [\n      \"product_type_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n
+        \     \"http://localhost:8080\"\n    ]\n  },\n  \"method\": \"POST\",\n  \"origin\":
+        \"172.18.0.6\",\n  \"url\": \"http://webhook.endpoint:8080/post\",\n  \"data\":
+        \"{\\\"description\\\": \\\"Product Type Some Product Type has been created
+        successfully.\\\", \\\"title\\\": \\\"Some Product Type\\\", \\\"user\\\":
+        null, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/5\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/product_types/5/\\\", \\\"product_type\\\":
+        {\\\"name\\\": \\\"Some Product Type\\\", \\\"id\\\": 5, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/5\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/5/\\\"}}\",\n
+        \ \"files\": {},\n  \"form\": {},\n  \"json\": {\n    \"description\": \"Product
+        Type Some Product Type has been created successfully.\",\n    \"product_type\":
+        {\n      \"id\": 5,\n      \"name\": \"Some Product Type\",\n      \"url_api\":
+        \"http://localhost:8080/api/v2/product_types/5/\",\n      \"url_ui\": \"http://localhost:8080/product/type/5\"\n
+        \   },\n    \"title\": \"Some Product Type\",\n    \"url_api\": \"http://localhost:8080/api/v2/product_types/5/\",\n
+        \   \"url_ui\": \"http://localhost:8080/product/type/5\",\n    \"user\": null\n
+        \ }\n}\n"
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Origin:
+      - '*'
+      Content-Length:
+      - '1593'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:40 GMT
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"description": "Product Jira Product (Not Configured) has been created
+      successfully.", "title": "Jira Product (Not Configured)", "user": null, "url_ui":
+      "http://localhost:8080/product/5", "url_api": "http://localhost:8080/api/v2/products/5/",
+      "product_type": {"name": "Some Product Type", "id": 5, "url_ui": "http://localhost:8080/product/type/5",
+      "url_api": "http://localhost:8080/api/v2/product_types/5/"}, "product": {"name":
+      "Jira Product (Not Configured)", "id": 5, "url_ui": "http://localhost:8080/product/5",
+      "url_api": "http://localhost:8080/api/v2/products/5/"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Auth:
+      - Token xxx
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '572'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - DefectDojo-2.55.1
+      X-DefectDojo-Event:
+      - product_added
+      X-DefectDojo-Instance:
+      - http://localhost:8080
+    method: POST
+    uri: http://webhook.endpoint:8080/post
+  response:
+    body:
+      string: "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept\": [\n      \"application/json\"\n
+        \   ],\n    \"Accept-Encoding\": [\n      \"gzip, deflate\"\n    ],\n    \"Auth\":
+        [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
+        \   ],\n    \"Content-Length\": [\n      \"572\"\n    ],\n    \"Content-Type\":
+        [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.55.1\"\n    ],\n    \"X-Defectdojo-Event\":
+        [\n      \"product_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n      \"http://localhost:8080\"\n
+        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"172.18.0.6\",\n  \"url\":
+        \"http://webhook.endpoint:8080/post\",\n  \"data\": \"{\\\"description\\\":
+        \\\"Product Jira Product (Not Configured) has been created successfully.\\\",
+        \\\"title\\\": \\\"Jira Product (Not Configured)\\\", \\\"user\\\": null,
+        \\\"url_ui\\\": \\\"http://localhost:8080/product/5\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/products/5/\\\", \\\"product_type\\\": {\\\"name\\\":
+        \\\"Some Product Type\\\", \\\"id\\\": 5, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/5\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/5/\\\"}, \\\"product\\\":
+        {\\\"name\\\": \\\"Jira Product (Not Configured)\\\", \\\"id\\\": 5, \\\"url_ui\\\":
+        \\\"http://localhost:8080/product/5\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/products/5/\\\"}}\",\n
+        \ \"files\": {},\n  \"form\": {},\n  \"json\": {\n    \"description\": \"Product
+        Jira Product (Not Configured) has been created successfully.\",\n    \"product\":
+        {\n      \"id\": 5,\n      \"name\": \"Jira Product (Not Configured)\",\n
+        \     \"url_api\": \"http://localhost:8080/api/v2/products/5/\",\n      \"url_ui\":
+        \"http://localhost:8080/product/5\"\n    },\n    \"product_type\": {\n      \"id\":
+        5,\n      \"name\": \"Some Product Type\",\n      \"url_api\": \"http://localhost:8080/api/v2/product_types/5/\",\n
+        \     \"url_ui\": \"http://localhost:8080/product/type/5\"\n    },\n    \"title\":
+        \"Jira Product (Not Configured)\",\n    \"url_api\": \"http://localhost:8080/api/v2/products/5/\",\n
+        \   \"url_ui\": \"http://localhost:8080/product/5\",\n    \"user\": null\n
+        \ }\n}\n"
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Origin:
+      - '*'
+      Content-Length:
+      - '1982'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:40 GMT
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"description": "Event engagement_added has occurred.", "title": "Engagement
+      created for \"Jira Product (Not Configured)\": Jira Engagement", "user": null,
+      "url_ui": "http://localhost:8080/engagement/8", "url_api": "http://localhost:8080/api/v2/engagements/8/",
+      "product_type": {"name": "Some Product Type", "id": 5, "url_ui": "http://localhost:8080/product/type/5",
+      "url_api": "http://localhost:8080/api/v2/product_types/5/"}, "product": {"name":
+      "Jira Product (Not Configured)", "id": 5, "url_ui": "http://localhost:8080/product/5",
+      "url_api": "http://localhost:8080/api/v2/products/5/"}, "engagement": {"name":
+      "Jira Engagement", "id": 8, "url_ui": "http://localhost:8080/engagement/8",
+      "url_api": "http://localhost:8080/api/v2/engagements/8/"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Auth:
+      - Token xxx
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '748'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - DefectDojo-2.55.1
+      X-DefectDojo-Event:
+      - engagement_added
+      X-DefectDojo-Instance:
+      - http://localhost:8080
+    method: POST
+    uri: http://webhook.endpoint:8080/post
+  response:
+    body:
+      string: "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept\": [\n      \"application/json\"\n
+        \   ],\n    \"Accept-Encoding\": [\n      \"gzip, deflate\"\n    ],\n    \"Auth\":
+        [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
+        \   ],\n    \"Content-Length\": [\n      \"748\"\n    ],\n    \"Content-Type\":
+        [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.55.1\"\n    ],\n    \"X-Defectdojo-Event\":
+        [\n      \"engagement_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n
+        \     \"http://localhost:8080\"\n    ]\n  },\n  \"method\": \"POST\",\n  \"origin\":
+        \"172.18.0.6\",\n  \"url\": \"http://webhook.endpoint:8080/post\",\n  \"data\":
+        \"{\\\"description\\\": \\\"Event engagement_added has occurred.\\\", \\\"title\\\":
+        \\\"Engagement created for \\\\\\\"Jira Product (Not Configured)\\\\\\\":
+        Jira Engagement\\\", \\\"user\\\": null, \\\"url_ui\\\": \\\"http://localhost:8080/engagement/8\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/engagements/8/\\\", \\\"product_type\\\":
+        {\\\"name\\\": \\\"Some Product Type\\\", \\\"id\\\": 5, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/5\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/5/\\\"}, \\\"product\\\":
+        {\\\"name\\\": \\\"Jira Product (Not Configured)\\\", \\\"id\\\": 5, \\\"url_ui\\\":
+        \\\"http://localhost:8080/product/5\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/products/5/\\\"},
+        \\\"engagement\\\": {\\\"name\\\": \\\"Jira Engagement\\\", \\\"id\\\": 8,
+        \\\"url_ui\\\": \\\"http://localhost:8080/engagement/8\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/engagements/8/\\\"}}\",\n  \"files\": {},\n
+        \ \"form\": {},\n  \"json\": {\n    \"description\": \"Event engagement_added
+        has occurred.\",\n    \"engagement\": {\n      \"id\": 8,\n      \"name\":
+        \"Jira Engagement\",\n      \"url_api\": \"http://localhost:8080/api/v2/engagements/8/\",\n
+        \     \"url_ui\": \"http://localhost:8080/engagement/8\"\n    },\n    \"product\":
+        {\n      \"id\": 5,\n      \"name\": \"Jira Product (Not Configured)\",\n
+        \     \"url_api\": \"http://localhost:8080/api/v2/products/5/\",\n      \"url_ui\":
+        \"http://localhost:8080/product/5\"\n    },\n    \"product_type\": {\n      \"id\":
+        5,\n      \"name\": \"Some Product Type\",\n      \"url_api\": \"http://localhost:8080/api/v2/product_types/5/\",\n
+        \     \"url_ui\": \"http://localhost:8080/product/type/5\"\n    },\n    \"title\":
+        \"Engagement created for \\\"Jira Product (Not Configured)\\\": Jira Engagement\",\n
+        \   \"url_api\": \"http://localhost:8080/api/v2/engagements/8/\",\n    \"url_ui\":
+        \"http://localhost:8080/engagement/8\",\n    \"user\": null\n  }\n}\n"
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Origin:
+      - '*'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:40 GMT
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"description": "Event test_added has occurred.", "title": "Test created
+      for Jira Product (Not Configured): Jira Engagement: ZAP Scan", "user": null,
+      "url_ui": "http://localhost:8080/test/93", "url_api": "http://localhost:8080/api/v2/tests/93/",
+      "product_type": {"name": "Some Product Type", "id": 5, "url_ui": "http://localhost:8080/product/type/5",
+      "url_api": "http://localhost:8080/api/v2/product_types/5/"}, "product": {"name":
+      "Jira Product (Not Configured)", "id": 5, "url_ui": "http://localhost:8080/product/5",
+      "url_api": "http://localhost:8080/api/v2/products/5/"}, "engagement": {"name":
+      "Jira Engagement", "id": 8, "url_ui": "http://localhost:8080/engagement/8",
+      "url_api": "http://localhost:8080/api/v2/engagements/8/"}, "test": {"title":
+      null, "id": 93, "url_ui": "http://localhost:8080/test/93", "url_api": "http://localhost:8080/api/v2/tests/93/"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Auth:
+      - Token xxx
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '863'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - DefectDojo-2.55.1
+      X-DefectDojo-Event:
+      - test_added
+      X-DefectDojo-Instance:
+      - http://localhost:8080
+    method: POST
+    uri: http://webhook.endpoint:8080/post
+  response:
+    body:
+      string: "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept\": [\n      \"application/json\"\n
+        \   ],\n    \"Accept-Encoding\": [\n      \"gzip, deflate\"\n    ],\n    \"Auth\":
+        [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
+        \   ],\n    \"Content-Length\": [\n      \"863\"\n    ],\n    \"Content-Type\":
+        [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.55.1\"\n    ],\n    \"X-Defectdojo-Event\":
+        [\n      \"test_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n      \"http://localhost:8080\"\n
+        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"172.18.0.6\",\n  \"url\":
+        \"http://webhook.endpoint:8080/post\",\n  \"data\": \"{\\\"description\\\":
+        \\\"Event test_added has occurred.\\\", \\\"title\\\": \\\"Test created for
+        Jira Product (Not Configured): Jira Engagement: ZAP Scan\\\", \\\"user\\\":
+        null, \\\"url_ui\\\": \\\"http://localhost:8080/test/93\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/tests/93/\\\", \\\"product_type\\\": {\\\"name\\\":
+        \\\"Some Product Type\\\", \\\"id\\\": 5, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/5\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/5/\\\"}, \\\"product\\\":
+        {\\\"name\\\": \\\"Jira Product (Not Configured)\\\", \\\"id\\\": 5, \\\"url_ui\\\":
+        \\\"http://localhost:8080/product/5\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/products/5/\\\"},
+        \\\"engagement\\\": {\\\"name\\\": \\\"Jira Engagement\\\", \\\"id\\\": 8,
+        \\\"url_ui\\\": \\\"http://localhost:8080/engagement/8\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/engagements/8/\\\"}, \\\"test\\\": {\\\"title\\\":
+        null, \\\"id\\\": 93, \\\"url_ui\\\": \\\"http://localhost:8080/test/93\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/93/\\\"}}\",\n  \"files\":
+        {},\n  \"form\": {},\n  \"json\": {\n    \"description\": \"Event test_added
+        has occurred.\",\n    \"engagement\": {\n      \"id\": 8,\n      \"name\":
+        \"Jira Engagement\",\n      \"url_api\": \"http://localhost:8080/api/v2/engagements/8/\",\n
+        \     \"url_ui\": \"http://localhost:8080/engagement/8\"\n    },\n    \"product\":
+        {\n      \"id\": 5,\n      \"name\": \"Jira Product (Not Configured)\",\n
+        \     \"url_api\": \"http://localhost:8080/api/v2/products/5/\",\n      \"url_ui\":
+        \"http://localhost:8080/product/5\"\n    },\n    \"product_type\": {\n      \"id\":
+        5,\n      \"name\": \"Some Product Type\",\n      \"url_api\": \"http://localhost:8080/api/v2/product_types/5/\",\n
+        \     \"url_ui\": \"http://localhost:8080/product/type/5\"\n    },\n    \"test\":
+        {\n      \"id\": 93,\n      \"title\": null,\n      \"url_api\": \"http://localhost:8080/api/v2/tests/93/\",\n
+        \     \"url_ui\": \"http://localhost:8080/test/93\"\n    },\n    \"title\":
+        \"Test created for Jira Product (Not Configured): Jira Engagement: ZAP Scan\",\n
+        \   \"url_api\": \"http://localhost:8080/api/v2/tests/93/\",\n    \"url_ui\":
+        \"http://localhost:8080/test/93\",\n    \"user\": null\n  }\n}\n"
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Origin:
+      - '*'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:40 GMT
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"description": "Event scan_added has occurred.", "title": "Created/Updated
+      2 findings for Jira Product (Not Configured): Jira Engagement: ZAP Scan", "user":
+      null, "url_ui": "http://localhost:8080/test/93", "url_api": "http://localhost:8080/api/v2/tests/93/",
+      "product_type": {"name": "Some Product Type", "id": 5, "url_ui": "http://localhost:8080/product/type/5",
+      "url_api": "http://localhost:8080/api/v2/product_types/5/"}, "product": {"name":
+      "Jira Product (Not Configured)", "id": 5, "url_ui": "http://localhost:8080/product/5",
+      "url_api": "http://localhost:8080/api/v2/products/5/"}, "engagement": {"name":
+      "Jira Engagement", "id": 8, "url_ui": "http://localhost:8080/engagement/8",
+      "url_api": "http://localhost:8080/api/v2/engagements/8/"}, "test": {"title":
+      null, "id": 93, "url_ui": "http://localhost:8080/test/93", "url_api": "http://localhost:8080/api/v2/tests/93/"},
+      "finding_count": 2, "findings": {"new": [{"id": 236, "title": "Zap1: Cookie
+      Without Secure Flag", "severity": "Low", "url_ui": "http://localhost:8080/finding/236",
+      "url_api": "http://localhost:8080/api/v2/findings/236/"}, {"id": 237, "title":
+      "Zap2: Cookie Without Secure Flag", "severity": "Low", "url_ui": "http://localhost:8080/finding/237",
+      "url_api": "http://localhost:8080/api/v2/findings/237/"}], "reactivated": [],
+      "mitigated": [], "untouched": []}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Auth:
+      - Token xxx
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1335'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - DefectDojo-2.55.1
+      X-DefectDojo-Event:
+      - scan_added
+      X-DefectDojo-Instance:
+      - http://localhost:8080
+    method: POST
+    uri: http://webhook.endpoint:8080/post
+  response:
+    body:
+      string: "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept\": [\n      \"application/json\"\n
+        \   ],\n    \"Accept-Encoding\": [\n      \"gzip, deflate\"\n    ],\n    \"Auth\":
+        [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
+        \   ],\n    \"Content-Length\": [\n      \"1335\"\n    ],\n    \"Content-Type\":
+        [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.55.1\"\n    ],\n    \"X-Defectdojo-Event\":
+        [\n      \"scan_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n      \"http://localhost:8080\"\n
+        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"172.18.0.6\",\n  \"url\":
+        \"http://webhook.endpoint:8080/post\",\n  \"data\": \"{\\\"description\\\":
+        \\\"Event scan_added has occurred.\\\", \\\"title\\\": \\\"Created/Updated
+        2 findings for Jira Product (Not Configured): Jira Engagement: ZAP Scan\\\",
+        \\\"user\\\": null, \\\"url_ui\\\": \\\"http://localhost:8080/test/93\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/93/\\\", \\\"product_type\\\":
+        {\\\"name\\\": \\\"Some Product Type\\\", \\\"id\\\": 5, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/5\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/5/\\\"}, \\\"product\\\":
+        {\\\"name\\\": \\\"Jira Product (Not Configured)\\\", \\\"id\\\": 5, \\\"url_ui\\\":
+        \\\"http://localhost:8080/product/5\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/products/5/\\\"},
+        \\\"engagement\\\": {\\\"name\\\": \\\"Jira Engagement\\\", \\\"id\\\": 8,
+        \\\"url_ui\\\": \\\"http://localhost:8080/engagement/8\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/engagements/8/\\\"}, \\\"test\\\": {\\\"title\\\":
+        null, \\\"id\\\": 93, \\\"url_ui\\\": \\\"http://localhost:8080/test/93\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/93/\\\"}, \\\"finding_count\\\":
+        2, \\\"findings\\\": {\\\"new\\\": [{\\\"id\\\": 236, \\\"title\\\": \\\"Zap1:
+        Cookie Without Secure Flag\\\", \\\"severity\\\": \\\"Low\\\", \\\"url_ui\\\":
+        \\\"http://localhost:8080/finding/236\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/236/\\\"},
+        {\\\"id\\\": 237, \\\"title\\\": \\\"Zap2: Cookie Without Secure Flag\\\",
+        \\\"severity\\\": \\\"Low\\\", \\\"url_ui\\\": \\\"http://localhost:8080/finding/237\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/237/\\\"}], \\\"reactivated\\\":
+        [], \\\"mitigated\\\": [], \\\"untouched\\\": []}}\",\n  \"files\": {},\n
+        \ \"form\": {},\n  \"json\": {\n    \"description\": \"Event scan_added has
+        occurred.\",\n    \"engagement\": {\n      \"id\": 8,\n      \"name\": \"Jira
+        Engagement\",\n      \"url_api\": \"http://localhost:8080/api/v2/engagements/8/\",\n
+        \     \"url_ui\": \"http://localhost:8080/engagement/8\"\n    },\n    \"finding_count\":
+        2,\n    \"findings\": {\n      \"mitigated\": [],\n      \"new\": [\n        {\n
+        \         \"id\": 236,\n          \"severity\": \"Low\",\n          \"title\":
+        \"Zap1: Cookie Without Secure Flag\",\n          \"url_api\": \"http://localhost:8080/api/v2/findings/236/\",\n
+        \         \"url_ui\": \"http://localhost:8080/finding/236\"\n        },\n
+        \       {\n          \"id\": 237,\n          \"severity\": \"Low\",\n          \"title\":
+        \"Zap2: Cookie Without Secure Flag\",\n          \"url_api\": \"http://localhost:8080/api/v2/findings/237/\",\n
+        \         \"url_ui\": \"http://localhost:8080/finding/237\"\n        }\n      ],\n
+        \     \"reactivated\": [],\n      \"untouched\": []\n    },\n    \"product\":
+        {\n      \"id\": 5,\n      \"name\": \"Jira Product (Not Configured)\",\n
+        \     \"url_api\": \"http://localhost:8080/api/v2/products/5/\",\n      \"url_ui\":
+        \"http://localhost:8080/product/5\"\n    },\n    \"product_type\": {\n      \"id\":
+        5,\n      \"name\": \"Some Product Type\",\n      \"url_api\": \"http://localhost:8080/api/v2/product_types/5/\",\n
+        \     \"url_ui\": \"http://localhost:8080/product/type/5\"\n    },\n    \"test\":
+        {\n      \"id\": 93,\n      \"title\": null,\n      \"url_api\": \"http://localhost:8080/api/v2/tests/93/\",\n
+        \     \"url_ui\": \"http://localhost:8080/test/93\"\n    },\n    \"title\":
+        \"Created/Updated 2 findings for Jira Product (Not Configured): Jira Engagement:
+        ZAP Scan\",\n    \"url_api\": \"http://localhost:8080/api/v2/tests/93/\",\n
+        \   \"url_ui\": \"http://localhost:8080/test/93\",\n    \"user\": null\n  }\n}\n"
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Origin:
+      - '*'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:40 GMT
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
+  response:
+    body:
+      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlCSMHelpSeeker":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100290,"buildDate":"2026-02-06T12:38:29.000+0100","serverTime":"2026-02-06T19:56:40.443+0100","scmInfo":"9d700605f271b9e38f3e73c4116a686dae8d11d7","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
+    headers:
+      Atl-Request-Id:
+      - 0ddff33f-bafb-42c0-aefb-05deb7117e8d
+      Atl-Traceid:
+      - 0ddff33fbafb42c0aefb05deb7117e8d
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:40 GMT
+      Nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=67,cdn-upstream-fbl;dur=260,atl-edge;dur=168,atl-edge-internal;dur=16,atl-edge-upstream;dur=152,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN53-P1",cdn-rid;desc="Ub1ZEkbKroz1OJ7JRnz0QcXI0EpCwx2MJetu_7xw_YVDVTjU8YUgYg==",cdn-downstream-fbl;dur=263
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 f88732a3c07912cb33374b1e2ce03f84.cloudfront.net (CloudFront)
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - Ub1ZEkbKroz1OJ7JRnz0QcXI0EpCwx2MJetu_7xw_YVDVTjU8YUgYg==
+      X-Amz-Cf-Pop:
+      - DEN53-P1
+      X-Arequestid:
+      - ba3b2fd7e52bf2bdd2933b702982ce3a
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Ratelimit-Limit:
+      - '350'
+      X-Ratelimit-Remaining:
+      - '349'
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=TEST&issuetypeNames=Task&expand=projects.issuetypes.fields
+  response:
+    body:
+      string: '{"expand":"projects","projects":[{"expand":"issuetypes","self":"https://defectdojo.atlassian.net/rest/api/2/project/10223","id":"10223","key":"TEST","name":"test","avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=medium"},"issuetypes":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10213","id":"10213","description":"Tasks
+        track small, distinct pieces of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","untranslatedName":"Task","subtask":false,"hierarchyLevel":0,"scope":{"type":"PROJECT","project":{"id":"10223"}},"expand":"fields","fields":{"summary":{"required":true,"schema":{"type":"string","system":"summary"},"name":"Summary","key":"summary","hasDefaultValue":false,"operations":["set"]},"issuetype":{"required":true,"schema":{"type":"issuetype","system":"issuetype"},"name":"Issue
+        Type","key":"issuetype","hasDefaultValue":false,"operations":[],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10213","id":"10213","description":"Tasks
+        track small, distinct pieces of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"entityId":"2e566caf-2038-46a7-94c3-c0d1cc9479bd","hierarchyLevel":0}]},"issuerestriction":{"required":false,"schema":{"type":"issuerestriction","system":"issuerestriction"},"name":"Restrict
+        to","key":"issuerestriction","hasDefaultValue":false,"operations":["set"],"allowedValues":[]},"parent":{"required":false,"schema":{"type":"issuelink","system":"parent"},"name":"Parent","key":"parent","hasDefaultValue":false,"operations":["set"]},"description":{"required":false,"schema":{"type":"string","system":"description"},"name":"Description","key":"description","hasDefaultValue":false,"operations":["set"]},"project":{"required":true,"schema":{"type":"project","system":"project"},"name":"Project","key":"project","hasDefaultValue":false,"operations":["set"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10223","id":"10223","key":"TEST","name":"test","projectTypeKey":"software","simplified":true,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=medium"}}]},"customfield_10021":{"required":false,"schema":{"type":"array","items":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes","customId":10021},"name":"Flagged","key":"customfield_10021","hasDefaultValue":false,"operations":["add","set","remove"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/customFieldOption/10019","value":"Impediment","id":"10019"}]},"customfield_10000":{"required":false,"schema":{"type":"any","custom":"com.atlassian.jira.plugins.jira-development-integration-plugin:devsummarycf","customId":10000},"name":"Development","key":"customfield_10000","hasDefaultValue":false,"operations":["set"]},"customfield_10001":{"required":false,"schema":{"type":"team","custom":"com.atlassian.jira.plugin.system.customfieldtypes:atlassian-team","customId":10001,"configuration":{"com.atlassian.jira.plugin.system.customfieldtypes:atlassian-team":true}},"name":"Team","key":"customfield_10001","autoCompleteUrl":"https://defectdojo.atlassian.net/gateway/api/v1/recommendations","hasDefaultValue":false,"operations":["set"]},"labels":{"required":false,"schema":{"type":"array","items":"string","system":"labels"},"name":"Labels","key":"labels","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/1.0/labels/suggest?query=","hasDefaultValue":false,"operations":["add","set","remove"]},"customfield_10015":{"required":false,"schema":{"type":"date","custom":"com.atlassian.jira.plugin.system.customfieldtypes:datepicker","customId":10015},"name":"Start
+        date","key":"customfield_10015","hasDefaultValue":false,"operations":["set"]},"customfield_10019":{"required":false,"schema":{"type":"any","custom":"com.pyxis.greenhopper.jira:gh-lexo-rank","customId":10019},"name":"Rank","key":"customfield_10019","hasDefaultValue":false,"operations":["set"]},"attachment":{"required":false,"schema":{"type":"array","items":"attachment","system":"attachment"},"name":"Attachment","key":"attachment","hasDefaultValue":false,"operations":["set","copy"]},"duedate":{"required":false,"schema":{"type":"date","system":"duedate"},"name":"Due
+        date","key":"duedate","hasDefaultValue":false,"operations":["set"]},"issuelinks":{"required":false,"schema":{"type":"array","items":"issuelinks","system":"issuelinks"},"name":"Linked
+        Issues","key":"issuelinks","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=","hasDefaultValue":false,"operations":["add","copy"]},"assignee":{"required":false,"schema":{"type":"user","system":"assignee"},"name":"Assignee","key":"assignee","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/user/assignable/search?project=TEST&query=","hasDefaultValue":false,"operations":["set"]}}}]}]}'
+    headers:
+      Atl-Request-Id:
+      - baa19213-7da2-4241-845b-a1494a13964c
+      Atl-Traceid:
+      - baa192137da24241845ba1494a13964c
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:41 GMT
+      Nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=66,cdn-upstream-fbl;dur=478,atl-edge;dur=388,atl-edge-internal;dur=19,atl-edge-upstream;dur=370,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN53-P3",cdn-rid;desc="0gACBNLvbk3A8EutSuvEiFc0-1u55XhSjQlejfur1mRg2vWbRF2ZXg==",cdn-downstream-fbl;dur=481
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 30deb42cd45095ca57ec57e8117c8d8a.cloudfront.net (CloudFront)
+      Warning:
+      - 'The issue create meta endpoint has been deprecated. (Deprecation start date:
+        June 03, 2024)'
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - 0gACBNLvbk3A8EutSuvEiFc0-1u55XhSjQlejfur1mRg2vWbRF2ZXg==
+      X-Amz-Cf-Pop:
+      - DEN53-P3
+      X-Arequestid:
+      - 5a1346a659aa3c92b2abba52e0ac6fa7
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Ratelimit-Limit:
+      - '350'
+      X-Ratelimit-Remaining:
+      - '349'
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"fields": {"project": {"key": "TEST"}, "issuetype": {"name": "Task"},
+      "summary": "Zap1: Cookie Without Secure Flag", "description": "\n\n\n\n\n\n\n*Title*:
+      [Zap1: Cookie Without Secure Flag|http://localhost:8080/finding/238]\n\n*Defect
+      Dojo link:* http://localhost:8080/finding/238 (238)\n\n*Severity:* Low\n\n\n*Due
+      Date:* June 6, 2026\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+      Unknown\n\n\n\n\n*Product/Engagement/Test:* [Jira Product (Not Configured)|http://localhost:8080/product/5]
+      / [Jira Engagement|http://localhost:8080/engagement/8] / [ZAP Scan|http://localhost:8080/test/94]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n||System/Endpoint||Status||\n|https://mainsite.com/dashboard|Active|\n|https://mainsite.com|Active|\n\n\n\n\n\n\n\n\n*Description*:\nA
+      cookie has been set without the secure flag, which means that the cookie can\nbe
+      accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
+      contains sensitive information or is a session token, then\nit should always
+      be passed using an encrypted channel. Ensure that the secure\nflag is set for
+      cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n\n\n\n*Reporter:*
+      [(admin) ()|mailto:]\n", "duedate": "2026-06-06"}}'
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1374'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: POST
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue
+  response:
+    body:
+      string: '{"id":"25251","key":"TEST-7","self":"https://defectdojo.atlassian.net/rest/api/2/issue/25251"}'
+    headers:
+      Atl-Request-Id:
+      - a9563673-20c5-4323-b957-15d1921e4e57
+      Atl-Traceid:
+      - a956367320c54323b95715d1921e4e57
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:42 GMT
+      Nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=895,atl-edge;dur=872,atl-edge-internal;dur=19,atl-edge-upstream;dur=853,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN53-P2",cdn-rid;desc="DkilZpJnPyQDNYfPVHfPcQvKNsavWJsRrOdFdiKoUineHi4bX71LkA==",cdn-downstream-fbl;dur=901
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 76f2e1e449c547c66904d58101f10ea6.cloudfront.net (CloudFront)
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - DkilZpJnPyQDNYfPVHfPcQvKNsavWJsRrOdFdiKoUineHi4bX71LkA==
+      X-Amz-Cf-Pop:
+      - DEN53-P2
+      X-Arequestid:
+      - cec3f7a852aff867ffd03a18faec0ff3
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Ratelimit-Limit:
+      - '200'
+      X-Ratelimit-Remaining:
+      - '199'
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/TEST-7
+  response:
+    body:
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations","id":"25251","self":"https://defectdojo.atlassian.net/rest/api/2/issue/25251","key":"TEST-7","fields":{"statuscategorychangedate":"2026-02-06T19:56:41.941+0100","issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10213","id":"10213","description":"Tasks
+        track small, distinct pieces of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"entityId":"2e566caf-2038-46a7-94c3-c0d1cc9479bd","hierarchyLevel":0},"components":[],"timespent":null,"timeoriginalestimate":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10223","id":"10223","key":"TEST","name":"test","projectTypeKey":"software","simplified":true,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=medium"}},"description":"\n\n\n\n\n\n\n*Title*:
+        [Zap1: Cookie Without Secure Flag|http://localhost:8080/finding/238]\n\n*Defect
+        Dojo link:* http://localhost:8080/finding/238 (238)\n\n*Severity:* Low\n\n\n*Due
+        Date:* June 6, 2026\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+        Unknown\n\n\n\n\n*Product/Engagement/Test:* [Jira Product (Not Configured)|http://localhost:8080/product/5]
+        / [Jira Engagement|http://localhost:8080/engagement/8] / [ZAP Scan|http://localhost:8080/test/94]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n||System/Endpoint||Status||\n|https://mainsite.com/dashboard|Active|\n|https://mainsite.com|Active|\n\n\n\n\n\n\n\n\n*Description*:\nA
+        cookie has been set without the secure flag, which means that the cookie can\nbe
+        accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
+        contains sensitive information or is a session token, then\nit should always
+        be passed using an encrypted channel. Ensure that the secure\nflag is set
+        for cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n\n\n\n*Reporter:*
+        [(admin) ()|mailto:]\n","fixVersions":[],"aggregatetimespent":null,"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"},"resolution":null,"timetracking":{},"customfield_10015":null,"security":null,"attachment":[],"aggregatetimeestimate":null,"resolutiondate":null,"workratio":-1,"summary":"Zap1:
+        Cookie Without Secure Flag","issuerestriction":{"issuerestrictions":{},"shouldDisplay":true},"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/TEST-7/watchers","watchCount":1,"isWatching":true},"lastViewed":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"created":"2026-02-06T19:56:41.588+0100","customfield_10021":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"aggregateprogress":{"progress":0,"total":0},"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium_new.svg","name":"Medium","id":"3"},"customfield_10001":null,"labels":[],"environment":null,"customfield_10019":"0|i014t3:","timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"duedate":"2026-06-06","progress":{"progress":0,"total":0},"issuelinks":[],"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/TEST-7/votes","votes":0,"hasVoted":false},"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/25251/comment","maxResults":0,"total":0,"startAt":0},"assignee":null,"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"updated":"2026-02-06T19:56:41.682+0100","status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10271","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"To
+        Do","id":"10271","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}}}}'
+    headers:
+      Atl-Request-Id:
+      - 69a8b4b9-5466-45b6-a3fc-15aca6eb4837
+      Atl-Traceid:
+      - 69a8b4b9546645b6a3fc15aca6eb4837
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:42 GMT
+      Nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=65,cdn-upstream-fbl;dur=334,atl-edge;dur=246,atl-edge-internal;dur=18,atl-edge-upstream;dur=228,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN53-P3",cdn-rid;desc="u1kFc6IbfkC5JttEYeRM2T1glV4j7WPy6Wod_f7DfOZuHgtMqblrpQ==",cdn-downstream-fbl;dur=338
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 51185e40453f61916e037fc6db50766c.cloudfront.net (CloudFront)
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - u1kFc6IbfkC5JttEYeRM2T1glV4j7WPy6Wod_f7DfOZuHgtMqblrpQ==
+      X-Amz-Cf-Pop:
+      - DEN53-P3
+      X-Arequestid:
+      - a698afe62adec034296147a397acd4a2
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Ratelimit-Limit:
+      - '400'
+      X-Ratelimit-Remaining:
+      - '399'
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/25251
+  response:
+    body:
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations","id":"25251","self":"https://defectdojo.atlassian.net/rest/api/2/issue/25251","key":"TEST-7","fields":{"statuscategorychangedate":"2026-02-06T19:56:41.941+0100","issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10213","id":"10213","description":"Tasks
+        track small, distinct pieces of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"entityId":"2e566caf-2038-46a7-94c3-c0d1cc9479bd","hierarchyLevel":0},"components":[],"timespent":null,"timeoriginalestimate":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10223","id":"10223","key":"TEST","name":"test","projectTypeKey":"software","simplified":true,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=medium"}},"description":"\n\n\n\n\n\n\n*Title*:
+        [Zap1: Cookie Without Secure Flag|http://localhost:8080/finding/238]\n\n*Defect
+        Dojo link:* http://localhost:8080/finding/238 (238)\n\n*Severity:* Low\n\n\n*Due
+        Date:* June 6, 2026\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+        Unknown\n\n\n\n\n*Product/Engagement/Test:* [Jira Product (Not Configured)|http://localhost:8080/product/5]
+        / [Jira Engagement|http://localhost:8080/engagement/8] / [ZAP Scan|http://localhost:8080/test/94]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n||System/Endpoint||Status||\n|https://mainsite.com/dashboard|Active|\n|https://mainsite.com|Active|\n\n\n\n\n\n\n\n\n*Description*:\nA
+        cookie has been set without the secure flag, which means that the cookie can\nbe
+        accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
+        contains sensitive information or is a session token, then\nit should always
+        be passed using an encrypted channel. Ensure that the secure\nflag is set
+        for cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n\n\n\n*Reporter:*
+        [(admin) ()|mailto:]\n","fixVersions":[],"aggregatetimespent":null,"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"},"resolution":null,"timetracking":{},"customfield_10015":null,"security":null,"attachment":[],"aggregatetimeestimate":null,"resolutiondate":null,"workratio":-1,"summary":"Zap1:
+        Cookie Without Secure Flag","issuerestriction":{"issuerestrictions":{},"shouldDisplay":true},"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/TEST-7/watchers","watchCount":1,"isWatching":true},"lastViewed":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"created":"2026-02-06T19:56:41.588+0100","customfield_10021":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"aggregateprogress":{"progress":0,"total":0},"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium_new.svg","name":"Medium","id":"3"},"customfield_10001":null,"labels":[],"environment":null,"customfield_10019":"0|i014t3:","timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"duedate":"2026-06-06","progress":{"progress":0,"total":0},"issuelinks":[],"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/TEST-7/votes","votes":0,"hasVoted":false},"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/25251/comment","maxResults":0,"total":0,"startAt":0},"assignee":null,"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"updated":"2026-02-06T19:56:41.682+0100","status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10271","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"To
+        Do","id":"10271","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}}}}'
+    headers:
+      Atl-Request-Id:
+      - 131f7a6e-ee36-4037-be16-b22494a33ca2
+      Atl-Traceid:
+      - 131f7a6eee364037be16b22494a33ca2
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:42 GMT
+      Nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=253,atl-edge;dur=229,atl-edge-internal;dur=20,atl-edge-upstream;dur=210,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN52-P3",cdn-rid;desc="OxLF3H2bhaT2RxR9OrK95y9G2x0gvAbcrx27YMWzkdeOHlt-wO518Q==",cdn-downstream-fbl;dur=257
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 ce431f517854de6a993633b3607e3d06.cloudfront.net (CloudFront)
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - OxLF3H2bhaT2RxR9OrK95y9G2x0gvAbcrx27YMWzkdeOHlt-wO518Q==
+      X-Amz-Cf-Pop:
+      - DEN52-P3
+      X-Arequestid:
+      - a64541bc753b0c30ffbbe9b05b123274
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Ratelimit-Limit:
+      - '400'
+      X-Ratelimit-Remaining:
+      - '398'
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
+  response:
+    body:
+      string: '{"baseUrl":"https://defectdojo.atlassian.net","displayUrl":"https://defectdojo.atlassian.net","displayUrlServicedeskHelpCenter":"https://defectdojo.atlassian.net","displayUrlCSMHelpSeeker":"https://defectdojo.atlassian.net","displayUrlConfluence":"https://defectdojo.atlassian.net","version":"1001.0.0-SNAPSHOT","versionNumbers":[1001,0,0],"deploymentType":"Cloud","buildNumber":100290,"buildDate":"2026-02-06T12:38:29.000+0100","serverTime":"2026-02-06T19:56:43.097+0100","scmInfo":"9d700605f271b9e38f3e73c4116a686dae8d11d7","serverTitle":"Jira","defaultLocale":{"locale":"en_US"},"serverTimeZone":"Etc/UTC"}'
+    headers:
+      Atl-Request-Id:
+      - aa475022-2296-4154-858d-3ec8ec5fec18
+      Atl-Traceid:
+      - aa47502222964154858d3ec8ec5fec18
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:43 GMT
+      Nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=65,cdn-upstream-fbl;dur=256,atl-edge;dur=166,atl-edge-internal;dur=18,atl-edge-upstream;dur=148,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN53-P1",cdn-rid;desc="RdI-xyUfy_3PdrBVxDeRvIzQYAmcb6GAnYnq0Us037O1rEBZXaEaGg==",cdn-downstream-fbl;dur=260
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 0e87c7138186d05e35dac8a520dc0682.cloudfront.net (CloudFront)
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - RdI-xyUfy_3PdrBVxDeRvIzQYAmcb6GAnYnq0Us037O1rEBZXaEaGg==
+      X-Amz-Cf-Pop:
+      - DEN53-P1
+      X-Arequestid:
+      - 8141ca85fa1f8ed710b8ddf5222e377e
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Ratelimit-Limit:
+      - '350'
+      X-Ratelimit-Remaining:
+      - '349'
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=TEST&issuetypeNames=Task&expand=projects.issuetypes.fields
+  response:
+    body:
+      string: '{"expand":"projects","projects":[{"expand":"issuetypes","self":"https://defectdojo.atlassian.net/rest/api/2/project/10223","id":"10223","key":"TEST","name":"test","avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=medium"},"issuetypes":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10213","id":"10213","description":"Tasks
+        track small, distinct pieces of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","untranslatedName":"Task","subtask":false,"hierarchyLevel":0,"scope":{"type":"PROJECT","project":{"id":"10223"}},"expand":"fields","fields":{"summary":{"required":true,"schema":{"type":"string","system":"summary"},"name":"Summary","key":"summary","hasDefaultValue":false,"operations":["set"]},"issuetype":{"required":true,"schema":{"type":"issuetype","system":"issuetype"},"name":"Issue
+        Type","key":"issuetype","hasDefaultValue":false,"operations":[],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10213","id":"10213","description":"Tasks
+        track small, distinct pieces of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"entityId":"2e566caf-2038-46a7-94c3-c0d1cc9479bd","hierarchyLevel":0}]},"issuerestriction":{"required":false,"schema":{"type":"issuerestriction","system":"issuerestriction"},"name":"Restrict
+        to","key":"issuerestriction","hasDefaultValue":false,"operations":["set"],"allowedValues":[]},"parent":{"required":false,"schema":{"type":"issuelink","system":"parent"},"name":"Parent","key":"parent","hasDefaultValue":false,"operations":["set"]},"description":{"required":false,"schema":{"type":"string","system":"description"},"name":"Description","key":"description","hasDefaultValue":false,"operations":["set"]},"project":{"required":true,"schema":{"type":"project","system":"project"},"name":"Project","key":"project","hasDefaultValue":false,"operations":["set"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10223","id":"10223","key":"TEST","name":"test","projectTypeKey":"software","simplified":true,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=medium"}}]},"customfield_10021":{"required":false,"schema":{"type":"array","items":"option","custom":"com.atlassian.jira.plugin.system.customfieldtypes:multicheckboxes","customId":10021},"name":"Flagged","key":"customfield_10021","hasDefaultValue":false,"operations":["add","set","remove"],"allowedValues":[{"self":"https://defectdojo.atlassian.net/rest/api/2/customFieldOption/10019","value":"Impediment","id":"10019"}]},"customfield_10000":{"required":false,"schema":{"type":"any","custom":"com.atlassian.jira.plugins.jira-development-integration-plugin:devsummarycf","customId":10000},"name":"Development","key":"customfield_10000","hasDefaultValue":false,"operations":["set"]},"customfield_10001":{"required":false,"schema":{"type":"team","custom":"com.atlassian.jira.plugin.system.customfieldtypes:atlassian-team","customId":10001,"configuration":{"com.atlassian.jira.plugin.system.customfieldtypes:atlassian-team":true}},"name":"Team","key":"customfield_10001","autoCompleteUrl":"https://defectdojo.atlassian.net/gateway/api/v1/recommendations","hasDefaultValue":false,"operations":["set"]},"labels":{"required":false,"schema":{"type":"array","items":"string","system":"labels"},"name":"Labels","key":"labels","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/1.0/labels/suggest?query=","hasDefaultValue":false,"operations":["add","set","remove"]},"customfield_10015":{"required":false,"schema":{"type":"date","custom":"com.atlassian.jira.plugin.system.customfieldtypes:datepicker","customId":10015},"name":"Start
+        date","key":"customfield_10015","hasDefaultValue":false,"operations":["set"]},"customfield_10019":{"required":false,"schema":{"type":"any","custom":"com.pyxis.greenhopper.jira:gh-lexo-rank","customId":10019},"name":"Rank","key":"customfield_10019","hasDefaultValue":false,"operations":["set"]},"attachment":{"required":false,"schema":{"type":"array","items":"attachment","system":"attachment"},"name":"Attachment","key":"attachment","hasDefaultValue":false,"operations":["set","copy"]},"duedate":{"required":false,"schema":{"type":"date","system":"duedate"},"name":"Due
+        date","key":"duedate","hasDefaultValue":false,"operations":["set"]},"issuelinks":{"required":false,"schema":{"type":"array","items":"issuelinks","system":"issuelinks"},"name":"Linked
+        Issues","key":"issuelinks","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/issue/picker?currentProjectId=&showSubTaskParent=true&showSubTasks=true&currentIssueKey=null&query=","hasDefaultValue":false,"operations":["add","copy"]},"assignee":{"required":false,"schema":{"type":"user","system":"assignee"},"name":"Assignee","key":"assignee","autoCompleteUrl":"https://defectdojo.atlassian.net/rest/api/2/user/assignable/search?project=TEST&query=","hasDefaultValue":false,"operations":["set"]}}}]}]}'
+    headers:
+      Atl-Request-Id:
+      - 9f46f075-49ae-4f7b-9795-79709196be70
+      Atl-Traceid:
+      - 9f46f07549ae4f7b979579709196be70
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:43 GMT
+      Nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=65,cdn-upstream-fbl;dur=458,atl-edge;dur=371,atl-edge-internal;dur=20,atl-edge-upstream;dur=350,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN52-P2",cdn-rid;desc="Z9IPfJItEhDyff6AL4tHYM66MJmEBfz2utY4RBKkPnkWUvd3FNZDdA==",cdn-downstream-fbl;dur=462
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 77cfd797d789c3b8bc1b8f2f8a42a9c6.cloudfront.net (CloudFront)
+      Warning:
+      - 'The issue create meta endpoint has been deprecated. (Deprecation start date:
+        June 03, 2024)'
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - Z9IPfJItEhDyff6AL4tHYM66MJmEBfz2utY4RBKkPnkWUvd3FNZDdA==
+      X-Amz-Cf-Pop:
+      - DEN52-P2
+      X-Arequestid:
+      - 1bcf6672f6d947cb60c3c7f539ec7e01
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Ratelimit-Limit:
+      - '350'
+      X-Ratelimit-Remaining:
+      - '349'
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"fields": {"project": {"key": "TEST"}, "issuetype": {"name": "Task"},
+      "summary": "Zap2: Cookie Without Secure Flag", "description": "\n\n\n\n\n\n\n*Title*:
+      [Zap2: Cookie Without Secure Flag|http://localhost:8080/finding/239]\n\n*Defect
+      Dojo link:* http://localhost:8080/finding/239 (239)\n\n*Severity:* Low\n\n\n*Due
+      Date:* June 6, 2026\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+      Unknown\n\n\n\n\n*Product/Engagement/Test:* [Jira Product (Not Configured)|http://localhost:8080/product/5]
+      / [Jira Engagement|http://localhost:8080/engagement/8] / [ZAP Scan|http://localhost:8080/test/94]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n||System/Endpoint||Status||\n|https://mainsite.com/dashboard|Active|\n|https://mainsite.com|Active|\n\n\n\n\n\n\n\n\n*Description*:\nA
+      cookie has been set without the secure flag, which means that the cookie can\nbe
+      accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
+      contains sensitive information or is a session token, then\nit should always
+      be passed using an encrypted channel. Ensure that the secure\nflag is set for
+      cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n\n\n\n*Reporter:*
+      [(admin) ()|mailto:]\n", "duedate": "2026-06-06"}}'
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1374'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: POST
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue
+  response:
+    body:
+      string: '{"id":"25252","key":"TEST-8","self":"https://defectdojo.atlassian.net/rest/api/2/issue/25252"}'
+    headers:
+      Atl-Request-Id:
+      - a7bb1a64-949d-4c3b-ae29-cd826a82ae82
+      Atl-Traceid:
+      - a7bb1a64949d4c3bae29cd826a82ae82
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:44 GMT
+      Nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=67,cdn-upstream-fbl;dur=895,atl-edge;dur=803,atl-edge-internal;dur=23,atl-edge-upstream;dur=780,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN52-P1",cdn-rid;desc="5xdnWx5_J9tgn1Y5kUB_H48gL3DVAsUt28Unsn6MmfZVBC388RNjNQ==",cdn-downstream-fbl;dur=900
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 b8620ad7aedba28451ef92dbe52bd094.cloudfront.net (CloudFront)
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - 5xdnWx5_J9tgn1Y5kUB_H48gL3DVAsUt28Unsn6MmfZVBC388RNjNQ==
+      X-Amz-Cf-Pop:
+      - DEN52-P1
+      X-Arequestid:
+      - f11d64e20e8779ea9f26ed0b38789361
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Ratelimit-Limit:
+      - '200'
+      X-Ratelimit-Remaining:
+      - '199'
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/TEST-8
+  response:
+    body:
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations","id":"25252","self":"https://defectdojo.atlassian.net/rest/api/2/issue/25252","key":"TEST-8","fields":{"statuscategorychangedate":"2026-02-06T19:56:44.566+0100","issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10213","id":"10213","description":"Tasks
+        track small, distinct pieces of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"entityId":"2e566caf-2038-46a7-94c3-c0d1cc9479bd","hierarchyLevel":0},"components":[],"timespent":null,"timeoriginalestimate":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10223","id":"10223","key":"TEST","name":"test","projectTypeKey":"software","simplified":true,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=medium"}},"description":"\n\n\n\n\n\n\n*Title*:
+        [Zap2: Cookie Without Secure Flag|http://localhost:8080/finding/239]\n\n*Defect
+        Dojo link:* http://localhost:8080/finding/239 (239)\n\n*Severity:* Low\n\n\n*Due
+        Date:* June 6, 2026\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+        Unknown\n\n\n\n\n*Product/Engagement/Test:* [Jira Product (Not Configured)|http://localhost:8080/product/5]
+        / [Jira Engagement|http://localhost:8080/engagement/8] / [ZAP Scan|http://localhost:8080/test/94]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n||System/Endpoint||Status||\n|https://mainsite.com/dashboard|Active|\n|https://mainsite.com|Active|\n\n\n\n\n\n\n\n\n*Description*:\nA
+        cookie has been set without the secure flag, which means that the cookie can\nbe
+        accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
+        contains sensitive information or is a session token, then\nit should always
+        be passed using an encrypted channel. Ensure that the secure\nflag is set
+        for cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n\n\n\n*Reporter:*
+        [(admin) ()|mailto:]\n","fixVersions":[],"aggregatetimespent":null,"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"},"resolution":null,"timetracking":{},"customfield_10015":null,"security":null,"attachment":[],"aggregatetimeestimate":null,"resolutiondate":null,"workratio":-1,"summary":"Zap2:
+        Cookie Without Secure Flag","issuerestriction":{"issuerestrictions":{},"shouldDisplay":true},"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/TEST-8/watchers","watchCount":1,"isWatching":true},"lastViewed":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"created":"2026-02-06T19:56:44.320+0100","customfield_10021":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"aggregateprogress":{"progress":0,"total":0},"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium_new.svg","name":"Medium","id":"3"},"customfield_10001":null,"labels":[],"environment":null,"customfield_10019":"0|i014tb:","timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"duedate":"2026-06-06","progress":{"progress":0,"total":0},"issuelinks":[],"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/TEST-8/votes","votes":0,"hasVoted":false},"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/25252/comment","maxResults":0,"total":0,"startAt":0},"assignee":null,"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"updated":"2026-02-06T19:56:44.401+0100","status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10271","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"To
+        Do","id":"10271","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}}}}'
+    headers:
+      Atl-Request-Id:
+      - 5d32e712-6b26-4076-ada2-cfd0a1d7dbbc
+      Atl-Traceid:
+      - 5d32e7126b264076ada2cfd0a1d7dbbc
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:45 GMT
+      Nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=248,atl-edge;dur=224,atl-edge-internal;dur=18,atl-edge-upstream;dur=206,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN52-P2",cdn-rid;desc="WA8Xy769N6kr1KhjudbIZT2iDyfqjeSmA_VAmKWKVLxKtPCJ55Nm5w==",cdn-downstream-fbl;dur=253
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 3fddcbe99f78632bf14e5e80e6c14058.cloudfront.net (CloudFront)
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - WA8Xy769N6kr1KhjudbIZT2iDyfqjeSmA_VAmKWKVLxKtPCJ55Nm5w==
+      X-Amz-Cf-Pop:
+      - DEN52-P2
+      X-Arequestid:
+      - b2f1573a364f9cb503e9579aeae9403c
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Ratelimit-Limit:
+      - '400'
+      X-Ratelimit-Remaining:
+      - '399'
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*/*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/25252
+  response:
+    body:
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations","id":"25252","self":"https://defectdojo.atlassian.net/rest/api/2/issue/25252","key":"TEST-8","fields":{"statuscategorychangedate":"2026-02-06T19:56:44.566+0100","issuetype":{"self":"https://defectdojo.atlassian.net/rest/api/2/issuetype/10213","id":"10213","description":"Tasks
+        track small, distinct pieces of work.","iconUrl":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium","name":"Task","subtask":false,"avatarId":10318,"entityId":"2e566caf-2038-46a7-94c3-c0d1cc9479bd","hierarchyLevel":0},"components":[],"timespent":null,"timeoriginalestimate":null,"project":{"self":"https://defectdojo.atlassian.net/rest/api/2/project/10223","id":"10223","key":"TEST","name":"test","projectTypeKey":"software","simplified":true,"avatarUrls":{"48x48":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425","24x24":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=small","16x16":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=xsmall","32x32":"https://defectdojo.atlassian.net/rest/api/2/universal_avatar/view/type/project/avatar/10425?size=medium"}},"description":"\n\n\n\n\n\n\n*Title*:
+        [Zap2: Cookie Without Secure Flag|http://localhost:8080/finding/239]\n\n*Defect
+        Dojo link:* http://localhost:8080/finding/239 (239)\n\n*Severity:* Low\n\n\n*Due
+        Date:* June 6, 2026\n\n\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+        Unknown\n\n\n\n\n*Product/Engagement/Test:* [Jira Product (Not Configured)|http://localhost:8080/product/5]
+        / [Jira Engagement|http://localhost:8080/engagement/8] / [ZAP Scan|http://localhost:8080/test/94]\n\n\n\n\n\n\n\n\n*Systems/Endpoints*:\n||System/Endpoint||Status||\n|https://mainsite.com/dashboard|Active|\n|https://mainsite.com|Active|\n\n\n\n\n\n\n\n\n*Description*:\nA
+        cookie has been set without the secure flag, which means that the cookie can\nbe
+        accessed via unencrypted connections.\n\n\n\n\n*Mitigation*:\nWhenever a cookie
+        contains sensitive information or is a session token, then\nit should always
+        be passed using an encrypted channel. Ensure that the secure\nflag is set
+        for cookies containing such sensitive information.\n\n\n\n\n\n*Impact*:\nNone\n\n\n\n\n\n*References*:\nhttp://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\n\n\n\n\n\n\n*Reporter:*
+        [(admin) ()|mailto:]\n","fixVersions":[],"aggregatetimespent":null,"statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"},"resolution":null,"timetracking":{},"customfield_10015":null,"security":null,"attachment":[],"aggregatetimeestimate":null,"resolutiondate":null,"workratio":-1,"summary":"Zap2:
+        Cookie Without Secure Flag","issuerestriction":{"issuerestrictions":{},"shouldDisplay":true},"watches":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/TEST-8/watchers","watchCount":1,"isWatching":true},"lastViewed":null,"creator":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"subtasks":[],"created":"2026-02-06T19:56:44.320+0100","customfield_10021":null,"reporter":{"self":"https://defectdojo.atlassian.net/rest/api/2/user?accountId=5d3878b170e3c90c952f91f6","accountId":"5d3878b170e3c90c952f91f6","emailAddress":"cody@defectdojo.com","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","24x24":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","16x16":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png","32x32":"https://secure.gravatar.com/avatar/4e018ad14467c87539bcb7052ffaef8c?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FCM-0.png"},"displayName":"Cody
+        Maffucci","active":true,"timeZone":"Europe/Zurich","accountType":"atlassian"},"aggregateprogress":{"progress":0,"total":0},"priority":{"self":"https://defectdojo.atlassian.net/rest/api/2/priority/3","iconUrl":"https://defectdojo.atlassian.net/images/icons/priorities/medium_new.svg","name":"Medium","id":"3"},"customfield_10001":null,"labels":[],"environment":null,"customfield_10019":"0|i014tb:","timeestimate":null,"aggregatetimeoriginalestimate":null,"versions":[],"duedate":"2026-06-06","progress":{"progress":0,"total":0},"issuelinks":[],"votes":{"self":"https://defectdojo.atlassian.net/rest/api/2/issue/TEST-8/votes","votes":0,"hasVoted":false},"comment":{"comments":[],"self":"https://defectdojo.atlassian.net/rest/api/2/issue/25252/comment","maxResults":0,"total":0,"startAt":0},"assignee":null,"worklog":{"startAt":0,"maxResults":20,"total":0,"worklogs":[]},"updated":"2026-02-06T19:56:44.401+0100","status":{"self":"https://defectdojo.atlassian.net/rest/api/2/status/10271","description":"","iconUrl":"https://defectdojo.atlassian.net/","name":"To
+        Do","id":"10271","statusCategory":{"self":"https://defectdojo.atlassian.net/rest/api/2/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}}}}'
+    headers:
+      Atl-Request-Id:
+      - 21f77e22-6deb-468a-a119-77c08abe74c1
+      Atl-Traceid:
+      - 21f77e226deb468aa11977c08abe74c1
+      Cache-Control:
+      - no-cache, no-store, no-transform
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:45 GMT
+      Nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      Report-To:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      Server:
+      - AtlassianEdge
+      Server-Timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=64,cdn-upstream-fbl;dur=331,atl-edge;dur=243,atl-edge-internal;dur=26,atl-edge-upstream;dur=217,atl-edge-pop;desc="aws-us-west-2",cdn-cache-miss,cdn-pop;desc="DEN52-P1",cdn-rid;desc="NkHd6--z-7Yii87YYRhg2UuRclj9SlRTrswxIhQlqwcTp5-CNEAt_g==",cdn-downstream-fbl;dur=335
+      Strict-Transport-Security:
+      - max-age=63072000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 89771419757f75b08f6c8fd411f8ef54.cloudfront.net (CloudFront)
+      X-Aaccountid:
+      - 5d3878b170e3c90c952f91f6
+      X-Amz-Cf-Id:
+      - NkHd6--z-7Yii87YYRhg2UuRclj9SlRTrswxIhQlqwcTp5-CNEAt_g==
+      X-Amz-Cf-Pop:
+      - DEN52-P1
+      X-Arequestid:
+      - 56a63b1825d52ad9847294ccd10c525c
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Ratelimit-Limit:
+      - '400'
+      X-Ratelimit-Remaining:
+      - '398'
+      X-Xss-Protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"description": "Event test_added has occurred.", "title": "Test created
+      for Jira Product (Not Configured): Jira Engagement: ZAP Scan", "user": null,
+      "url_ui": "http://localhost:8080/test/94", "url_api": "http://localhost:8080/api/v2/tests/94/",
+      "product_type": {"name": "Some Product Type", "id": 5, "url_ui": "http://localhost:8080/product/type/5",
+      "url_api": "http://localhost:8080/api/v2/product_types/5/"}, "product": {"name":
+      "Jira Product (Not Configured)", "id": 5, "url_ui": "http://localhost:8080/product/5",
+      "url_api": "http://localhost:8080/api/v2/products/5/"}, "engagement": {"name":
+      "Jira Engagement", "id": 8, "url_ui": "http://localhost:8080/engagement/8",
+      "url_api": "http://localhost:8080/api/v2/engagements/8/"}, "test": {"title":
+      null, "id": 94, "url_ui": "http://localhost:8080/test/94", "url_api": "http://localhost:8080/api/v2/tests/94/"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Auth:
+      - Token xxx
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '863'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - DefectDojo-2.55.1
+      X-DefectDojo-Event:
+      - test_added
+      X-DefectDojo-Instance:
+      - http://localhost:8080
+    method: POST
+    uri: http://webhook.endpoint:8080/post
+  response:
+    body:
+      string: "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept\": [\n      \"application/json\"\n
+        \   ],\n    \"Accept-Encoding\": [\n      \"gzip, deflate\"\n    ],\n    \"Auth\":
+        [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
+        \   ],\n    \"Content-Length\": [\n      \"863\"\n    ],\n    \"Content-Type\":
+        [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.55.1\"\n    ],\n    \"X-Defectdojo-Event\":
+        [\n      \"test_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n      \"http://localhost:8080\"\n
+        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"172.18.0.6\",\n  \"url\":
+        \"http://webhook.endpoint:8080/post\",\n  \"data\": \"{\\\"description\\\":
+        \\\"Event test_added has occurred.\\\", \\\"title\\\": \\\"Test created for
+        Jira Product (Not Configured): Jira Engagement: ZAP Scan\\\", \\\"user\\\":
+        null, \\\"url_ui\\\": \\\"http://localhost:8080/test/94\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/tests/94/\\\", \\\"product_type\\\": {\\\"name\\\":
+        \\\"Some Product Type\\\", \\\"id\\\": 5, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/5\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/5/\\\"}, \\\"product\\\":
+        {\\\"name\\\": \\\"Jira Product (Not Configured)\\\", \\\"id\\\": 5, \\\"url_ui\\\":
+        \\\"http://localhost:8080/product/5\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/products/5/\\\"},
+        \\\"engagement\\\": {\\\"name\\\": \\\"Jira Engagement\\\", \\\"id\\\": 8,
+        \\\"url_ui\\\": \\\"http://localhost:8080/engagement/8\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/engagements/8/\\\"}, \\\"test\\\": {\\\"title\\\":
+        null, \\\"id\\\": 94, \\\"url_ui\\\": \\\"http://localhost:8080/test/94\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/94/\\\"}}\",\n  \"files\":
+        {},\n  \"form\": {},\n  \"json\": {\n    \"description\": \"Event test_added
+        has occurred.\",\n    \"engagement\": {\n      \"id\": 8,\n      \"name\":
+        \"Jira Engagement\",\n      \"url_api\": \"http://localhost:8080/api/v2/engagements/8/\",\n
+        \     \"url_ui\": \"http://localhost:8080/engagement/8\"\n    },\n    \"product\":
+        {\n      \"id\": 5,\n      \"name\": \"Jira Product (Not Configured)\",\n
+        \     \"url_api\": \"http://localhost:8080/api/v2/products/5/\",\n      \"url_ui\":
+        \"http://localhost:8080/product/5\"\n    },\n    \"product_type\": {\n      \"id\":
+        5,\n      \"name\": \"Some Product Type\",\n      \"url_api\": \"http://localhost:8080/api/v2/product_types/5/\",\n
+        \     \"url_ui\": \"http://localhost:8080/product/type/5\"\n    },\n    \"test\":
+        {\n      \"id\": 94,\n      \"title\": null,\n      \"url_api\": \"http://localhost:8080/api/v2/tests/94/\",\n
+        \     \"url_ui\": \"http://localhost:8080/test/94\"\n    },\n    \"title\":
+        \"Test created for Jira Product (Not Configured): Jira Engagement: ZAP Scan\",\n
+        \   \"url_api\": \"http://localhost:8080/api/v2/tests/94/\",\n    \"url_ui\":
+        \"http://localhost:8080/test/94\",\n    \"user\": null\n  }\n}\n"
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Origin:
+      - '*'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:45 GMT
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"description": "Event scan_added has occurred.", "title": "Created/Updated
+      2 findings for Jira Product (Not Configured): Jira Engagement: ZAP Scan", "user":
+      null, "url_ui": "http://localhost:8080/test/94", "url_api": "http://localhost:8080/api/v2/tests/94/",
+      "product_type": {"name": "Some Product Type", "id": 5, "url_ui": "http://localhost:8080/product/type/5",
+      "url_api": "http://localhost:8080/api/v2/product_types/5/"}, "product": {"name":
+      "Jira Product (Not Configured)", "id": 5, "url_ui": "http://localhost:8080/product/5",
+      "url_api": "http://localhost:8080/api/v2/products/5/"}, "engagement": {"name":
+      "Jira Engagement", "id": 8, "url_ui": "http://localhost:8080/engagement/8",
+      "url_api": "http://localhost:8080/api/v2/engagements/8/"}, "test": {"title":
+      null, "id": 94, "url_ui": "http://localhost:8080/test/94", "url_api": "http://localhost:8080/api/v2/tests/94/"},
+      "finding_count": 2, "findings": {"new": [{"id": 238, "title": "Zap1: Cookie
+      Without Secure Flag", "severity": "Low", "url_ui": "http://localhost:8080/finding/238",
+      "url_api": "http://localhost:8080/api/v2/findings/238/"}, {"id": 239, "title":
+      "Zap2: Cookie Without Secure Flag", "severity": "Low", "url_ui": "http://localhost:8080/finding/239",
+      "url_api": "http://localhost:8080/api/v2/findings/239/"}], "reactivated": [],
+      "mitigated": [], "untouched": []}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Auth:
+      - Token xxx
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1335'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - DefectDojo-2.55.1
+      X-DefectDojo-Event:
+      - scan_added
+      X-DefectDojo-Instance:
+      - http://localhost:8080
+    method: POST
+    uri: http://webhook.endpoint:8080/post
+  response:
+    body:
+      string: "{\n  \"args\": {},\n  \"headers\": {\n    \"Accept\": [\n      \"application/json\"\n
+        \   ],\n    \"Accept-Encoding\": [\n      \"gzip, deflate\"\n    ],\n    \"Auth\":
+        [\n      \"Token xxx\"\n    ],\n    \"Connection\": [\n      \"keep-alive\"\n
+        \   ],\n    \"Content-Length\": [\n      \"1335\"\n    ],\n    \"Content-Type\":
+        [\n      \"application/json\"\n    ],\n    \"Host\": [\n      \"webhook.endpoint:8080\"\n
+        \   ],\n    \"User-Agent\": [\n      \"DefectDojo-2.55.1\"\n    ],\n    \"X-Defectdojo-Event\":
+        [\n      \"scan_added\"\n    ],\n    \"X-Defectdojo-Instance\": [\n      \"http://localhost:8080\"\n
+        \   ]\n  },\n  \"method\": \"POST\",\n  \"origin\": \"172.18.0.6\",\n  \"url\":
+        \"http://webhook.endpoint:8080/post\",\n  \"data\": \"{\\\"description\\\":
+        \\\"Event scan_added has occurred.\\\", \\\"title\\\": \\\"Created/Updated
+        2 findings for Jira Product (Not Configured): Jira Engagement: ZAP Scan\\\",
+        \\\"user\\\": null, \\\"url_ui\\\": \\\"http://localhost:8080/test/94\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/94/\\\", \\\"product_type\\\":
+        {\\\"name\\\": \\\"Some Product Type\\\", \\\"id\\\": 5, \\\"url_ui\\\": \\\"http://localhost:8080/product/type/5\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/product_types/5/\\\"}, \\\"product\\\":
+        {\\\"name\\\": \\\"Jira Product (Not Configured)\\\", \\\"id\\\": 5, \\\"url_ui\\\":
+        \\\"http://localhost:8080/product/5\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/products/5/\\\"},
+        \\\"engagement\\\": {\\\"name\\\": \\\"Jira Engagement\\\", \\\"id\\\": 8,
+        \\\"url_ui\\\": \\\"http://localhost:8080/engagement/8\\\", \\\"url_api\\\":
+        \\\"http://localhost:8080/api/v2/engagements/8/\\\"}, \\\"test\\\": {\\\"title\\\":
+        null, \\\"id\\\": 94, \\\"url_ui\\\": \\\"http://localhost:8080/test/94\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/tests/94/\\\"}, \\\"finding_count\\\":
+        2, \\\"findings\\\": {\\\"new\\\": [{\\\"id\\\": 238, \\\"title\\\": \\\"Zap1:
+        Cookie Without Secure Flag\\\", \\\"severity\\\": \\\"Low\\\", \\\"url_ui\\\":
+        \\\"http://localhost:8080/finding/238\\\", \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/238/\\\"},
+        {\\\"id\\\": 239, \\\"title\\\": \\\"Zap2: Cookie Without Secure Flag\\\",
+        \\\"severity\\\": \\\"Low\\\", \\\"url_ui\\\": \\\"http://localhost:8080/finding/239\\\",
+        \\\"url_api\\\": \\\"http://localhost:8080/api/v2/findings/239/\\\"}], \\\"reactivated\\\":
+        [], \\\"mitigated\\\": [], \\\"untouched\\\": []}}\",\n  \"files\": {},\n
+        \ \"form\": {},\n  \"json\": {\n    \"description\": \"Event scan_added has
+        occurred.\",\n    \"engagement\": {\n      \"id\": 8,\n      \"name\": \"Jira
+        Engagement\",\n      \"url_api\": \"http://localhost:8080/api/v2/engagements/8/\",\n
+        \     \"url_ui\": \"http://localhost:8080/engagement/8\"\n    },\n    \"finding_count\":
+        2,\n    \"findings\": {\n      \"mitigated\": [],\n      \"new\": [\n        {\n
+        \         \"id\": 238,\n          \"severity\": \"Low\",\n          \"title\":
+        \"Zap1: Cookie Without Secure Flag\",\n          \"url_api\": \"http://localhost:8080/api/v2/findings/238/\",\n
+        \         \"url_ui\": \"http://localhost:8080/finding/238\"\n        },\n
+        \       {\n          \"id\": 239,\n          \"severity\": \"Low\",\n          \"title\":
+        \"Zap2: Cookie Without Secure Flag\",\n          \"url_api\": \"http://localhost:8080/api/v2/findings/239/\",\n
+        \         \"url_ui\": \"http://localhost:8080/finding/239\"\n        }\n      ],\n
+        \     \"reactivated\": [],\n      \"untouched\": []\n    },\n    \"product\":
+        {\n      \"id\": 5,\n      \"name\": \"Jira Product (Not Configured)\",\n
+        \     \"url_api\": \"http://localhost:8080/api/v2/products/5/\",\n      \"url_ui\":
+        \"http://localhost:8080/product/5\"\n    },\n    \"product_type\": {\n      \"id\":
+        5,\n      \"name\": \"Some Product Type\",\n      \"url_api\": \"http://localhost:8080/api/v2/product_types/5/\",\n
+        \     \"url_ui\": \"http://localhost:8080/product/type/5\"\n    },\n    \"test\":
+        {\n      \"id\": 94,\n      \"title\": null,\n      \"url_api\": \"http://localhost:8080/api/v2/tests/94/\",\n
+        \     \"url_ui\": \"http://localhost:8080/test/94\"\n    },\n    \"title\":
+        \"Created/Updated 2 findings for Jira Product (Not Configured): Jira Engagement:
+        ZAP Scan\",\n    \"url_api\": \"http://localhost:8080/api/v2/tests/94/\",\n
+        \   \"url_ui\": \"http://localhost:8080/test/94\",\n    \"user\": null\n  }\n}\n"
+    headers:
+      Access-Control-Allow-Credentials:
+      - 'true'
+      Access-Control-Allow-Origin:
+      - '*'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Fri, 06 Feb 2026 18:56:45 GMT
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+version: 1
