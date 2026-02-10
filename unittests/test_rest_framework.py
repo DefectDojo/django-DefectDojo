@@ -869,7 +869,7 @@ class BaseClass:
 
         @parameterized.expand(
             [
-                ("files", {"title": "test", "file": b"empty"}),
+                ("files", {"title": "test"}),
                 ("tags", {"tags": ["apple", "banana", "cherry"]}),
             ],
         )
@@ -898,12 +898,19 @@ class BaseClass:
             # Retry adding the related object
             if related_object_path == "files":
                 # Convert bytes to a mock uploaded file
-                payload["file"] = SimpleUploadedFile(
-                    name="test_file.txt",
-                    content=payload["file"],  # the b"empty"
-                    content_type="text/plain",
+                response = self.client.post(
+                    relative_url,
+                    {
+                        "file": SimpleUploadedFile(
+                            name="test_file.txt",
+                            content=b"empty",
+                            content_type="text/plain",
+                        ),
+                        **payload,
+                    },
                 )
-            response = self.client.post(relative_url, payload)
+            else:
+                response = self.client.post(relative_url, payload)
             self.assertIn(response.status_code, [200, 201], response.content[:1000])
 
 
