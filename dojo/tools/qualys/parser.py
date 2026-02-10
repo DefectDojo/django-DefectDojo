@@ -353,13 +353,18 @@ def parse_finding(host, tree):
         if temp.get("CVSS_value") is not None:
             finding.cvssv3_score = temp.get("CVSS_value")
         finding.verified = True
+        endpoint_port = None
+        if port and str(port).isdigit():
+            endpoint_port = int(port)
         # manage endpoint/location
         if settings.V3_FEATURE_LOCATIONS:
-            location = URL(host=issue_row["fqdn"]) if issue_row["fqdn"] else URL(host=issue_row["ip_address"])
+            host_val = issue_row["fqdn"] or issue_row["ip_address"]
+            location = URL(host=host_val, port=endpoint_port)
             finding.unsaved_locations = [location]
         else:
             # TODO: Delete this after the move to Locations
-            location = Endpoint(host=issue_row["fqdn"]) if issue_row["fqdn"] else Endpoint(host=issue_row["ip_address"])
+            host_val = issue_row["fqdn"] or issue_row["ip_address"]
+            location = Endpoint(host=host_val, port=endpoint_port)
             finding.unsaved_endpoints = [location]
         finding.unsaved_vulnerability_ids = temp.get("cve_list", [])
         ret_rows.append(finding)
@@ -369,7 +374,7 @@ def parse_finding(host, tree):
 def qualys_parser(qualys_xml_file):
     parser = ElementTree.XMLParser()
     tree = ElementTree.parse(qualys_xml_file, parser)
-    host_list = tree.find("HOST_LIST")
+    host_list = tree.find(".//HOST_LIST")
     finding_list = []
     if host_list is not None:
         for host in host_list:
