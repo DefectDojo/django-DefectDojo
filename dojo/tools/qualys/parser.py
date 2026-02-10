@@ -78,7 +78,6 @@ class QualysParser:
         return [
             "title",
             "severity",
-            "endpoints",
         ]
 
     def get_scan_types(self):
