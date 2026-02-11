@@ -1,0 +1,129 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+# Shell scripts
+[*.sh]
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+# Python files
+[*.py]
+end_of_line = lf
+indent_style = space
+indent_size = 4
+max_line_length = 88
+insert_final_newline = true
+
+# YAML files (docker-compose, CI/CD, etc.)
+[*.{yml,yaml}]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+# JSON files
+[*.json]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+# JavaScript/TypeScript
+[*.{js,ts,jsx,tsx}]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+# HTML files
+[*.html]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+# CSS files
+[*.{css,scss,sass}]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+# Markdown files
+[*.md]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = false
+
+# Dockerfile
+[Dockerfile*]
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+# Docker Compose files
+[docker-compose*.yml]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+# Requirements files
+[requirements*.txt]
+end_of_line = lf
+insert_final_newline = true
+
+# Configuration files
+[*.{cfg,conf,ini,toml}]
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+# XML files
+[*.xml]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+# SQL files
+[*.sql]
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+# Makefiles require tabs
+[{Makefile,makefile,*.mk}]
+end_of_line = lf
+indent_style = tab
+insert_final_newline = true
+
+# Package.json and other Node.js config files
+[package*.json]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+# Django template files
+[*.{html,tpl}]
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
