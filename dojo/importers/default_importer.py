@@ -7,9 +7,11 @@ from django.db.models.query_utils import Q
 from django.urls import reverse
 
 import dojo.jira_link.helper as jira_helper
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
+from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.models import (
     Engagement,
     Finding,
@@ -265,7 +267,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 batch_finding_ids.clear()
                 logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
                              push_to_jira, len(finding_ids_batch), is_final_finding)
-                finding_helper.post_process_findings_batch(
+                dojo_dispatch_task(
+                    finding_helper.post_process_findings_batch,
                     finding_ids_batch,
                     dedupe_option=True,
                     rules_option=True,
@@ -381,9 +384,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 product_grading_option=False,
             )
         # push finding groups to jira since we only only want to push whole groups
-        if self.findings_groups_enabled and self.push_to_jira:
+        # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
+        # but this is a way to at least make it that far
+        if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
             for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
-                jira_helper.push_to_jira(finding_group)
+                # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
+                if self.push_to_jira or is_keep_in_sync_with_jira(finding_group, prefetched_jira_instance=self.jira_instance):
+                    jira_helper.push_to_jira(finding_group)
 
         # Calculate grade once after all findings have been closed
         if old_findings:

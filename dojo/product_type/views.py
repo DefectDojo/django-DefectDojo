@@ -4,7 +4,7 @@ from functools import partial
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Count, IntegerField, OuterRef, Subquery, Value
+from django.db.models import OuterRef, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.http import HttpResponseRedirect
@@ -82,13 +82,10 @@ def prefetch_for_product_type(prod_types):
         logger.debug("unable to prefetch because query was already executed")
         return prod_types
 
-    prod_subquery = Subquery(
-        Product.objects.filter(prod_type_id=OuterRef("pk"))
-        .values("prod_type_id")
-        .annotate(c=Count("*"))
-        .values("c")[:1],
-        output_field=IntegerField(),
-        )
+    prod_subquery = build_count_subquery(
+        Product.objects.filter(prod_type_id=OuterRef("pk")),
+        group_field="prod_type_id",
+    )
     base_findings = Finding.objects.filter(test__engagement__product__prod_type_id=OuterRef("pk"))
     count_subquery = partial(build_count_subquery, group_field="test__engagement__product__prod_type_id")
 

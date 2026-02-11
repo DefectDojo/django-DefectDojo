@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta
 
 import pghistory
+from celery import Task
 from celery.utils.log import get_task_logger
 from django.apps import apps
 from django.conf import settings
@@ -12,7 +13,7 @@ from django.utils import timezone
 
 from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
-from dojo.decorators import dojo_async_task
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.helper import fix_loop_duplicates
 from dojo.location.models import Location
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
@@ -30,8 +31,8 @@ def log_generic_alert(source, title, description):
                         icon="bullseye", source=source)
 
 
-@app.task(bind=True, priority=4)
-def add_alerts(self, runinterval):
+@app.task(bind=True, priority=3)
+def add_alerts(self, runinterval, *args, **kwargs):
     now = timezone.now()
 
     upcoming_engagements = Engagement.objects.filter(target_start__gt=now + timedelta(days=3), target_start__lt=now + timedelta(days=3) + runinterval).order_by("target_start")
@@ -73,7 +74,7 @@ def add_alerts(self, runinterval):
     if system_settings.enable_product_grade:
         products = Product.objects.all()
         for product in products:
-            calculate_grade(product.id)
+            dojo_dispatch_task(calculate_grade, product.id)
 
 
 @app.task(bind=True, priority=5)
@@ -170,11 +171,18 @@ def _async_dupe_delete_impl():
             if system_settings.enable_product_grade:
                 logger.info("performing batch product grading for %s products", len(affected_products))
                 for product in affected_products:
-                    calculate_grade(product.id)
+                    dojo_dispatch_task(calculate_grade, product.id)
 
 
-@app.task(ignore_result=False, priority=1, expires=10)  # It is expected to respond in 5 seconds. If it is in a queue more than 10, it is not necessary to respond anymore.
+@app.task(ignore_result=False, base=Task, priority=0)
 def celery_status():
+    """
+    Simple health check task to verify Celery is running.
+
+    Uses base Task class (not PgHistoryTask) since it doesn't need:
+    - User context tracking
+    - Pghistory context (no database modifications)
+    """
     return True
 
 
@@ -242,8 +250,7 @@ def clear_sessions(*args, **kwargs):
     call_command("clearsessions")
 
 
-@dojo_async_task
-@app.task(priority=5)
+@app.task(priority=4)
 def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
     """
     Async task to update watson search indexes for a specific model type.

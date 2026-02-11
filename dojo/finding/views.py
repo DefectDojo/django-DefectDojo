@@ -38,6 +38,7 @@ from dojo.authorization.authorization_decorators import (
     user_is_authorized,
 )
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -1099,7 +1100,7 @@ class DeleteFinding(View):
             product = finding.test.engagement.product
             finding.delete()
             # Update the grade of the product async
-            calculate_grade(product.id)
+            dojo_dispatch_task(calculate_grade, product.id)
             # Add a message to the request that the finding was successfully deleted
             messages.add_message(
                 request,
@@ -1374,7 +1375,7 @@ def copy_finding(request, fid):
             test = form.cleaned_data.get("test")
             product = finding.test.engagement.product
             finding_copy = finding.copy(test=test)
-            calculate_grade(product.id)
+            dojo_dispatch_task(calculate_grade, product.id)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -2962,7 +2963,11 @@ def _bulk_push_to_jira(finds, form, note):
     )
     logger.debug("finding_groups: %s", finding_groups)
     for group in finding_groups:
-        if form.cleaned_data.get("push_to_jira"):
+        if (
+            form.cleaned_data.get("push_to_jira")
+            or jira_helper.is_push_all_issues(group)
+            or jira_helper.is_keep_in_sync_with_jira(group)
+        ):
             (
                 can_be_pushed_to_jira,
                 error_message,

@@ -49,6 +49,7 @@ mainSections = ["docs"]
     "en",
     "supported_tools",
     "get_started",
+    "releases",
     "import_data",
     "triage_findings",
     "metrics_reports",

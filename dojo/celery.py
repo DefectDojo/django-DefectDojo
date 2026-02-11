@@ -12,16 +12,56 @@ logger = logging.getLogger(__name__)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 
 
-class PgHistoryTask(Task):
+class DojoAsyncTask(Task):
+
+    """
+    Base task class that provides dojo_async_task functionality without using a decorator.
+
+    This class:
+    - Injects user context into task kwargs
+    - Tracks task calls for performance testing
+    - Supports all Celery features (signatures, chords, groups, chains)
+    """
+
+    def apply_async(self, args=None, kwargs=None, **options):
+        """Override apply_async to inject user context and track tasks."""
+        from dojo.decorators import dojo_async_task_counter  # noqa: PLC0415 circular import
+        from dojo.utils import get_current_user  # noqa: PLC0415 circular import
+
+        if kwargs is None:
+            kwargs = {}
+
+        # Inject user context if not already present
+        if "async_user" not in kwargs:
+            kwargs["async_user"] = get_current_user()
+
+        # Control flag used for sync/async decision; never pass into the task itself
+        kwargs.pop("sync", None)
+
+        # Track dispatch
+        dojo_async_task_counter.incr(
+            self.name,
+            args=args,
+            kwargs=kwargs,
+        )
+
+        # Call parent to execute async
+        return super().apply_async(args=args, kwargs=kwargs, **options)
+
+
+class PgHistoryTask(DojoAsyncTask):
 
     """
     Custom Celery base task that automatically applies pghistory context.
 
-    When a task is dispatched via dojo_async_task, the current pghistory
-    context is captured and passed in kwargs as "_pgh_context". This base
-    class extracts that context and applies it before running the task,
-    ensuring all database events share the same context as the original
-    request.
+    This class inherits from DojoAsyncTask to provide:
+    - User context injection and task tracking (from DojoAsyncTask)
+    - Automatic pghistory context application (from this class)
+
+    When a task is dispatched via dojo_dispatch_task or dojo_async_task, the current
+    pghistory context is captured and passed in kwargs as "_pgh_context". This base
+    class extracts that context and applies it before running the task, ensuring all
+    database events share the same context as the original request.
     """
 
     def __call__(self, *args, **kwargs):

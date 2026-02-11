@@ -5,11 +5,12 @@
 # Dockerfile.django-alpine to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.13.11-alpine3.22@sha256:2fd93799bfc6381d078a8f656a5f45d6092e5d11d16f55889b3d5cbfdc64f045 AS base
+FROM python:3.13.12-alpine3.22@sha256:41351b07080ccfaa27bf38dde20de79ee6a0ac74a58c00c6d7a7d96ac4e69716 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
   apk update && \
+  apk upgrade --no-cache && \
   apk add --no-cache \
     gcc \
     build-base \
@@ -70,12 +71,14 @@ COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
 RUN \
+  apk upgrade --no-cache && \
   apk add --no-cache openssl && \
   chmod -R g=u /var/cache/nginx && \
   mkdir /var/run/defectdojo && \
   chmod -R g=u /var/run/defectdojo && \
   mkdir -p /etc/nginx/ssl && \
   chmod -R g=u /etc/nginx && \
+  rm -rf /var/cache/apk/* && \
   true
 ENV \
   DD_UWSGI_PASS="uwsgi_server" \

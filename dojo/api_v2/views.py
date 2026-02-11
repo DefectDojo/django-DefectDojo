@@ -46,6 +46,7 @@ from dojo.api_v2 import (
 )
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.endpoint.queries import (
     get_authorized_endpoint_status,
@@ -679,13 +680,13 @@ class EngagementViewSet(
         try:
 
             if engagement.has_jira_issue:
-                jira_helper.update_epic(engagement.id, **request.data)
+                dojo_dispatch_task(jira_helper.update_epic, engagement.id, **request.data)
                 response = Response(
                     {"info": "Jira Epic update query sent"},
                     status=status.HTTP_200_OK,
                 )
             else:
-                jira_helper.add_epic(engagement.id, **request.data)
+                dojo_dispatch_task(jira_helper.add_epic, engagement.id, **request.data)
                 response = Response(
                     {"info": "Jira Epic create query sent"},
                     status=status.HTTP_200_OK,
@@ -1124,6 +1125,9 @@ class FindingViewSet(
                 note_type=note_type,
             )
             note.save()
+            finding.last_reviewed = note.date
+            finding.last_reviewed_by = author
+            finding.save(update_fields=["last_reviewed", "last_reviewed_by", "updated"])
             finding.notes.add(note)
             # Determine if we need to send any notifications for user mentioned
             process_tag_notifications(
@@ -2552,7 +2556,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
             product = auto_create.get_target_product_if_exists(**converted_dict)
-            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
+            engagement = auto_create.get_target_engagement_if_exists(product=product, **converted_dict)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
@@ -2709,8 +2713,8 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
             product = auto_create.get_target_product_if_exists(**converted_dict)
-            engagement = auto_create.get_target_engagement_if_exists(**converted_dict)
-            test = auto_create.get_target_test_if_exists(**converted_dict)
+            engagement = auto_create.get_target_engagement_if_exists(product=product, **converted_dict)
+            test = auto_create.get_target_test_if_exists(engagement=engagement, **converted_dict)
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
