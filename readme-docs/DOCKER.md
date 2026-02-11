@@ -490,26 +490,21 @@ Create or update `.vscode/settings.json` in your project root:
 Create or update `.editorconfig` in your project root:
 
 ```ini
-# top-most EditorConfig file
+# EditorConfig configuration to prevent WSL Docker "exec format error"
 root = true
 
-# Unix-style newlines with a newline ending every file
+# Default: Use LF line endings to prevent WSL Docker issues
 [*]
 end_of_line = lf
-insert_final_newline = true
 charset = utf-8
 
-# Shell scripts
+# Shell scripts - Core fix for WSL Docker "exec format error"
 [*.sh]
 end_of_line = lf
-indent_style = space
-indent_size = 4
-insert_final_newline = true
 
-# Dockerfile
+# Dockerfile - Ensure Docker files use LF
 [Dockerfile*]
 end_of_line = lf
-insert_final_newline = true
 ```
 
 ## WSL-Specific Prerequisites
