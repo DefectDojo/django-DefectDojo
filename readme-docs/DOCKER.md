@@ -387,3 +387,165 @@ In this case, both docker (version 17.09.0-ce) and docker compose (1.18.0) need 
 
 Follow [Docker's documentation](https://docs.docker.com/install/) for your OS to get the latest version of Docker. For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
 
+
+# Windows WSL Docker Troubleshooting
+
+When running DefectDojo with Docker in Windows WSL, you may encounter specific issues related to line endings and file encoding. This section provides solutions for common WSL-related problems.
+
+## Exec Format Error
+
+**Problem:** Containers fail to start with errors like:
+```
+exec /wait-for-it.sh: exec format error
+exec /entrypoint-nginx.sh: exec format error
+exec /entrypoint-initializer.sh: exec format error
+```
+
+**Cause:** This error occurs when shell scripts have Windows-style line endings (CRLF) instead of Unix-style line endings (LF), or when UTF-8 BOM (Byte Order Mark) characters are present in script files.
+
+**Solution:**
+
+### 1. Fix Line Endings and Remove BOM
+
+Run the following PowerShell commands from the root of your DefectDojo directory:
+
+```powershell
+# Fix all shell scripts in docker/ directory
+$files = Get-ChildItem "docker/*.sh" -File
+foreach ($file in $files) {
+    Write-Output "Converting $($file.Name)..."
+    $content = Get-Content $file.FullName -Raw
+    $content = $content -replace "`r`n", "`n"
+    $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($file.FullName, $content, $utf8NoBom)
+}
+
+# Fix root-level shell scripts
+$files = "run-unittest.sh", "run-integration-tests.sh"
+foreach ($file in $files) {
+    if (Test-Path $file) {
+        Write-Output "Converting $(Split-Path $file -Leaf)..."
+        $content = Get-Content $file -Raw
+        $content = $content -replace "`r`n", "`n"
+        $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+        [System.IO.File]::WriteAllText($file, $content, $utf8NoBom)
+    }
+}
+```
+
+### 2. Configure Git for Proper Line Endings
+
+Configure Git to handle line endings properly for future pulls:
+
+```bash
+git config --global core.autocrlf input
+```
+
+### 3. Rebuild Docker Images
+
+After fixing the scripts, rebuild the Docker images:
+
+```bash
+# Stop and remove all containers
+docker-compose down --volumes --remove-orphans
+
+# Remove existing images to force complete rebuild
+docker rmi defectdojo/defectdojo-django:latest defectdojo/defectdojo-nginx:latest
+
+# Rebuild images from scratch
+docker-compose build --no-cache
+
+# Start DefectDojo
+docker-compose up -d
+```
+
+## Prevention for Future Development
+
+To prevent line ending issues in the future, configure your development environment:
+
+### VS Code Settings
+
+Create or update `.vscode/settings.json` in your project root:
+
+```json
+{
+  "files.eol": "\n",
+  "[shellscript]": {
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true
+  },
+  "[dockerfile]": {
+    "files.eol": "\n",
+    "files.insertFinalNewline": true
+  },
+  "files.associations": {
+    "*.sh": "shellscript"
+  }
+}
+```
+
+### EditorConfig
+
+Create or update `.editorconfig` in your project root:
+
+```ini
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+
+# Shell scripts
+[*.sh]
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+
+# Dockerfile
+[Dockerfile*]
+end_of_line = lf
+insert_final_newline = true
+```
+
+## WSL-Specific Prerequisites
+
+When using Windows WSL with Docker:
+
+1. **WSL Version:** Use WSL 2 for better Docker performance
+2. **Docker Desktop:** Ensure WSL 2 integration is enabled in Docker Desktop settings
+3. **File Location:** Keep your DefectDojo repository on the WSL file system (e.g., `/home/user/` rather than `/mnt/c/`) for better performance
+4. **Git Configuration:** Always configure `core.autocrlf input` before cloning
+
+## Common Issues and Solutions
+
+### Permission Issues
+If you encounter permission errors with volumes:
+```bash
+# Check your user ID
+id -u
+
+# If needed, update the Dockerfile.django to match your user ID
+# and rebuild the images
+```
+
+### Container Restart Loops
+If containers restart continuously:
+```bash
+# Check logs for specific errors
+docker-compose logs django-defectdojo-initializer-1
+docker-compose logs django-defectdojo-nginx-1
+
+# Common causes: line ending issues, missing dependencies, configuration errors
+```
+
+### Performance Issues
+For better performance on WSL:
+- Store the project on the WSL file system (not Windows file system)
+- Allocate sufficient memory to WSL 2
+- Use Docker Desktop with WSL 2 backend enabled
+
