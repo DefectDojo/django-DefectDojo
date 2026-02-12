@@ -267,6 +267,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         the finding may be appended to a new or existing group based upon user selection
         at import time
         """
+        # Allow callers to force synchronous dispatch of post-processing sub-tasks
+        sync = kwargs.pop("sync", False)
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         # Only process findings with the same service value (or None)
         # Even though the service values is used in the hash_code calculation,
@@ -443,6 +445,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             issue_updater_option=True,
                             push_to_jira=push_to_jira,
                             jira_instance_id=getattr(self.jira_instance, "id", None),
+                            sync=sync,
                         )
 
         # No chord: tasks are dispatched immediately above per batch

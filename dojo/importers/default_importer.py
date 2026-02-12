@@ -167,6 +167,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Batched post-processing (no chord): dispatch a task per 1000 findings or on final finding
         batch_finding_ids: list[int] = []
         batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
+        # Allow callers to force synchronous dispatch of post-processing sub-tasks
+        sync = kwargs.pop("sync", False)
 
         """
         Saves findings in memory that were parsed from the scan report into the database.
@@ -275,6 +277,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     product_grading_option=True,
                     issue_updater_option=True,
                     push_to_jira=push_to_jira,
+                    sync=sync,
                 )
 
             # No chord: tasks are dispatched immediately above per batch
