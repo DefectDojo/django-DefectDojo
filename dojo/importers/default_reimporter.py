@@ -267,8 +267,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         the finding may be appended to a new or existing group based upon user selection
         at import time
         """
-        # Allow callers to force synchronous dispatch of post-processing sub-tasks
-        sync = kwargs.pop("sync", False)
+        # Allow callers to force synchronous dispatch of post-processing sub-tasks.
+        # Use get (not pop) because process_results also reads sync from kwargs
+        # to decide whether to return Finding objects or serialized JSON strings.
+        sync = kwargs.get("sync", False)
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         # Only process findings with the same service value (or None)
         # Even though the service values is used in the hash_code calculation,
