@@ -13,6 +13,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 
 
 class DojoAsyncTask(Task):
+
     """
     Base task class that provides dojo_async_task functionality without using a decorator.
 
@@ -24,7 +25,8 @@ class DojoAsyncTask(Task):
     """
 
     def __call__(self, *args, **kwargs):
-        """Restore user context in the celery worker via crum.impersonate.
+        """
+        Restore user context in the celery worker via crum.impersonate.
 
         The apply_async method injects ``async_user`` into kwargs when a task
         is dispatched. Here we pop it and set it as the current user in
@@ -73,6 +75,7 @@ class DojoAsyncTask(Task):
 
 
 class PgHistoryTask(DojoAsyncTask):
+
     """
     Custom Celery base task that automatically applies pghistory context.
 
