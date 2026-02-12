@@ -2,7 +2,6 @@ import logging
 
 from django.conf import settings
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
@@ -167,8 +166,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Batched post-processing (no chord): dispatch a task per 1000 findings or on final finding
         batch_finding_ids: list[int] = []
         batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
-        # Allow callers to force synchronous dispatch of post-processing sub-tasks
-        sync = kwargs.pop("sync", False)
 
         """
         Saves findings in memory that were parsed from the scan report into the database.
@@ -277,7 +274,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     product_grading_option=True,
                     issue_updater_option=True,
                     push_to_jira=push_to_jira,
-                    sync=sync,
                 )
 
             # No chord: tasks are dispatched immediately above per batch
@@ -303,9 +299,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Always perform an initial grading, even though it might get overwritten later.
         perform_product_grading(self.test.engagement.product)
 
-        sync = kwargs.get("sync", True)
-        if not sync:
-            return [serialize("json", [finding]) for finding in new_findings]
         return new_findings
 
     def close_old_findings(

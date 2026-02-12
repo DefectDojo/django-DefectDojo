@@ -293,10 +293,7 @@ class BaseImporter(ImporterOptions):
         Processes findings in a synchronous manner such that all findings
         will be processed in a worker/process/thread
         """
-        # Pop sync from kwargs to avoid "multiple values" TypeError when
-        # callers (e.g. async importer) pass sync=True through the kwargs chain
-        kwargs.pop("sync", None)
-        return self.process_findings(parsed_findings, sync=True, **kwargs)
+        return self.process_findings(parsed_findings, **kwargs)
 
     def determine_process_method(
         self,
