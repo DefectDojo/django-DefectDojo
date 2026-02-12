@@ -13,15 +13,38 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 
 
 class DojoAsyncTask(Task):
-
     """
     Base task class that provides dojo_async_task functionality without using a decorator.
 
     This class:
-    - Injects user context into task kwargs
+    - Injects user context into task kwargs (on dispatch via apply_async)
+    - Restores user context in the worker (on execution via __call__)
     - Tracks task calls for performance testing
     - Supports all Celery features (signatures, chords, groups, chains)
     """
+
+    def __call__(self, *args, **kwargs):
+        """Restore user context in the celery worker via crum.impersonate.
+
+        The apply_async method injects ``async_user`` into kwargs when a task
+        is dispatched. Here we pop it and set it as the current user in
+        thread-local storage so that all downstream code — including nested
+        dojo_dispatch_task calls — sees the correct user via
+        get_current_user().
+
+        When a task is called directly (not via apply_async), async_user is
+        not in kwargs. In that case we leave the existing crum context
+        intact so that callers who already set a user (e.g. via
+        crum.impersonate in tests or request middleware) are not disrupted.
+        """
+        if "async_user" not in kwargs:
+            return super().__call__(*args, **kwargs)
+
+        import crum  # noqa: PLC0415
+
+        user = kwargs.pop("async_user")
+        with crum.impersonate(user):
+            return super().__call__(*args, **kwargs)
 
     def apply_async(self, args=None, kwargs=None, **options):
         """Override apply_async to inject user context and track tasks."""
@@ -50,7 +73,6 @@ class DojoAsyncTask(Task):
 
 
 class PgHistoryTask(DojoAsyncTask):
-
     """
     Custom Celery base task that automatically applies pghistory context.
 

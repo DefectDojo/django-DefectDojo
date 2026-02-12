@@ -62,7 +62,7 @@ def we_want_async(*args, func=None, **kwargs):
         logger.debug("dojo_async_task %s: running task in the foreground as sync=True has been found as kwarg", func)
         return False
 
-    user = kwargs.get("async_user", get_current_user())
+    user = get_current_user()
     logger.debug("async user: %s", user)
 
     if not user:

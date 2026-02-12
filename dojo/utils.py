@@ -140,11 +140,6 @@ def do_false_positive_history(finding, *args, **kwargs):
             existing_non_fp_findings = existing_findings.filter(active=True).exclude(false_p=True)
             to_mark_as_fp.update(set(existing_non_fp_findings))
 
-    # Remove the async user kwarg because save() really does not like it
-    # Would rather not add anything to Finding.save()
-    if "async_user" in kwargs:
-        kwargs.pop("async_user")
-
     for find in to_mark_as_fp:
         deduplicationLogger.debug(
             "FALSE_POSITIVE_HISTORY: Marking Finding %i:%s from %s as false positive",
@@ -2065,7 +2060,7 @@ def async_delete_chunk_task(objects, **kwargs):
     """
     Module-level Celery task to delete a chunk of objects.
 
-    Accepts **kwargs for async_user and _pgh_context injected by dojo_dispatch_task.
+    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
     Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
     """
     max_retries = 3
@@ -2119,7 +2114,7 @@ def async_delete_crawl_task(obj, model_list, **kwargs):
     """
     Module-level Celery task to crawl and delete related objects.
 
-    Accepts **kwargs for async_user and _pgh_context injected by dojo_dispatch_task.
+    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
     Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
     """
     from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
@@ -2158,7 +2153,7 @@ def async_delete_task(obj, **kwargs):
     """
     Module-level Celery task to delete an object and its related objects.
 
-    Accepts **kwargs for async_user and _pgh_context injected by dojo_dispatch_task.
+    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
     Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
     """
     from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
@@ -2196,7 +2191,7 @@ class async_delete:
         Entry point to delete an object asynchronously.
 
         Dispatches to async_delete_task via dojo_dispatch_task to ensure proper
-        handling of async_user and _pgh_context.
+        handling of user context and _pgh_context.
         """
         from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
