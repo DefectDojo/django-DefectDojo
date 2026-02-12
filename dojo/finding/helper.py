@@ -468,6 +468,7 @@ def post_process_findings_batch(
     push_to_jira=False,
     jira_instance_id=None,
     user=None,
+    sync=False,
     **kwargs,
 ):
 
@@ -511,7 +512,7 @@ def post_process_findings_batch(
     if product_grading_option and system_settings.enable_product_grade:
         from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id)
+        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id, sync=sync)
 
     # If we received the ID of a jira instance, then we need to determine the keep in sync behavior
     jira_instance = None
