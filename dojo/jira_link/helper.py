@@ -1451,13 +1451,14 @@ def close_epic(engagement_id, push_to_jira, **kwargs):
 def update_epic(engagement_id, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
     if not engagement:
-        logger.warning("Engagement with id %s does not exist, skipping update_epic", engagement_id)
-        return False
+        message = f"Engagement with id {engagement_id} does not exist, skipping update_epic"
+        logger.warning(message)
+        return False, message
 
     logger.debug("trying to update jira EPIC for %d:%s", engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
-        return False
+        return False, "JIRA integration is not properly configured for this engagement."
 
     logger.debug("config found")
 
@@ -1483,35 +1484,40 @@ def update_epic(engagement_id, **kwargs):
                 jira_issue_update_kwargs["priority"] = {"name": epic_priority}
             issue.update(**jira_issue_update_kwargs)
         except JIRAError as e:
-            logger.exception("Jira Engagement/Epic Update Error")
-            log_jira_generic_alert("Jira Engagement/Epic Update Error", str(e))
-            return False
+            message = f"Failed to update the JIRA EPIC for engagement {engagement.id} - {e}"
+            logger.exception(message)
+            log_jira_generic_alert(message)
+            return False, message
 
-        return True
+        return True, "JIRA EPIC updated successfully."
 
-    add_error_message_to_response("Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement")
-    return False
+    message = f"Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for engagement {engagement.id}."
+    add_error_message_to_response(message)
+    return False, message
 
 
 @app.task
 def add_epic(engagement_id, **kwargs):
     engagement = get_object_or_none(Engagement, id=engagement_id)
     if not engagement:
-        logger.warning("Engagement with id %s does not exist, skipping add_epic", engagement_id)
-        return False
+        message = f"Engagement with id {engagement_id} does not exist, skipping add_epic"
+        logger.warning(message)
+        return False, message
 
     logger.debug("trying to create a new jira EPIC for %d:%s", engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
-        return False
+        message = f"JIRA integration is not properly configured for engagement {engagement.id}."
+        return False, message
 
     logger.debug("config found")
 
     jira_project = get_jira_project(engagement)
     jira_instance = get_jira_instance(engagement)
     if not jira_instance:
-        logger.warning("JIRA add epic failed: jira_instance is None")
-        return False
+        message = f"JIRA add epic failed for engagement {engagement.id}: jira_instance is None"
+        logger.warning(message)
+        return False, message
 
     if jira_project and jira_project.enable_engagement_epic_mapping:
         epic_name = kwargs.get("epic_name")
@@ -1559,15 +1565,15 @@ def add_epic(engagement_id, **kwargs):
                 message = "The 'Epic name id' in your DefectDojo Jira Configuration does not appear to be correct. Please visit, " + jira_instance.url + \
                     "/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and place in your DefectDojo settings for Jira and try again. For example, if your results are cf[100001] then copy 100001 and place it in 'Epic name id'. (Your Epic Id will be different.) \n\n"
             logger.exception(message)
+            message = f"JIRA add epic failed for engagement {engagement.id}: {message}"
+            log_jira_generic_alert(message)
+            return False, message
 
-            log_jira_generic_alert("Jira Engagement/Epic Creation Error",
-                                   message + error)
-            return False
+        return True, "JIRA EPIC created successfully."
 
-        return True
-
-    add_error_message_to_response("Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for this engagement")
-    return False
+    message = f"Push to JIRA for Epic skipped because enable_engagement_epic_mapping is not checked for engagement {engagement.id}."
+    add_error_message_to_response(message)
+    return False, message
 
 
 def jira_get_issue(jira_project, issue_key):
