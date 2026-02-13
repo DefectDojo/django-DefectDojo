@@ -1169,7 +1169,7 @@
     </div>
 
     <div class="protip">
-       <i class="fa-solid fa-lightbulb"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding, <kbd>p</kbd> and <kbd>n</kbd> to navigate to the previous or next finding.
+       <i class="fa-solid fa-lightbulb"></i> <strong>ProTip!</strong> Type <kbd>e</kbd> to edit any finding, <kbd>p</kbd> and <kbd>n</kbd> to navigate to the previous or next finding, <kbd>v</kbd> to verify, and <kbd>c</kbd> to close the finding.
     </div>
 </div>
 {% endblock %}
@@ -1182,6 +1182,9 @@
         var firstID = {% if findings_list.0 %}{{findings_list.0}}{% else %}null{% endif %};
         var currentID = {% if finding.id %}{{finding.id}}{% else %}null{% endif %};
         var lastID = {% if findings_list_lastElement %}{{findings_list_lastElement}}{% else %}null{% endif %};
+        var canEditFinding = {% if finding|has_object_permission:"Finding_Edit" %}true{% else %}false{% endif %};
+        var findingIsMitigated = {% if finding.mitigated %}true{% else %}false{% endif %};
+        var findingIsVerified = {% if finding.verified %}true{% else %}false{% endif %};
         if(currentID != firstID)
         {
             $('.PrevAndNext_Buttons').append('<a href="{% url 'view_finding' prev_finding_id %}" class="btn btn-primary">Previous Finding</a> ');
@@ -1259,6 +1262,34 @@
 
         $(document).on('keypress', null, 'n', function () {
             window.location.assign('{% url 'view_finding' next_finding_id %}');
+        });
+
+        $(document).on('keypress', null, 'v', function () {
+            if (!canEditFinding) {
+                alert('You do not have permission to verify this finding.');
+                return;
+            }
+            if (findingIsMitigated) {
+                alert('Finding is already closed and cannot be verified.');
+                return;
+            }
+            if (findingIsVerified) {
+                alert('Finding has already been verified.');
+                return;
+            }
+            window.location.assign('{% url 'verify_finding' finding.id %}');
+        });
+
+        $(document).on('keypress', null, 'c', function () {
+            if (!canEditFinding) {
+                alert('You do not have permission to close this finding.');
+                return;
+            }
+            if (findingIsMitigated) {
+                alert('Finding has already been closed.');
+                return;
+            }
+            window.location.assign('{% url 'close_finding' finding.id %}');
         });
 
         $('a.delete-finding').on('click', function (e) {
