@@ -1254,7 +1254,7 @@ def grade_product(crit, high, med, low):
     return max(health, 5)
 
 
-@app.task
+@app.task(priority=4)
 def calculate_grade(product_id, *args, **kwargs):
     product = get_object_or_none(Product, id=product_id)
     if not product:
