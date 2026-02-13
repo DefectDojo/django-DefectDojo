@@ -126,6 +126,13 @@
                                         </a>
                                     </li>
                                 {% else %}
+                                {% if not finding.verified %}
+                                    <li role="presentation">
+                                        <a href="{% url 'verify_finding' finding.id %}">
+                                            <i class="fa-solid fa-circle-check"></i> Verify Finding
+                                        </a>
+                                    </li>
+                                {% endif %}
                                 <li role="presentation">
                                     <a href="{% url 'close_finding' finding.id %}">
                                         <i class="fa-solid fa-fire-extinguisher"></i> Close Finding
