@@ -1890,7 +1890,9 @@ class FindingSerializer(serializers.ModelSerializer):
 
         if push_to_jira or finding_helper.is_keep_in_sync_with_jira(instance):
             # Push synchronously so that we can see jira errors in real time
-            jira_helper.push_to_jira(instance, sync=True)
+            success, message = jira_helper.push_to_jira(instance, sync=True)
+            if not success:
+                raise serializers.ValidationError(message)
 
         return instance
 
