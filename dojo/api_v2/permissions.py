@@ -404,8 +404,8 @@ class UserHasEngagementRelatedObjectPermission(BaseRelatedObjectPermission):
 class UserHasEngagementNotePermission(BaseRelatedObjectPermission):
     permission_map = {
         "get_permission": Permissions.Engagement_View,
-        "put_permission": Permissions.Engagement_View,
-        "delete_permission": Permissions.Engagement_View,
+        "put_permission": Permissions.Engagement_Edit,
+        "delete_permission": Permissions.Engagement_Edit,
         "post_permission": Permissions.Engagement_View,
     }
 
@@ -465,8 +465,8 @@ class UserHasFindingRelatedObjectPermission(BaseRelatedObjectPermission):
 class UserHasFindingNotePermission(BaseRelatedObjectPermission):
     permission_map = {
         "get_permission": Permissions.Finding_View,
-        "put_permission": Permissions.Finding_View,
-        "delete_permission": Permissions.Finding_View,
+        "put_permission": Permissions.Finding_Edit,
+        "delete_permission": Permissions.Finding_Edit,
         "post_permission": Permissions.Finding_View,
     }
 
@@ -854,8 +854,8 @@ class UserHasTestRelatedObjectPermission(BaseRelatedObjectPermission):
 class UserHasTestNotePermission(BaseRelatedObjectPermission):
     permission_map = {
         "get_permission": Permissions.Test_View,
-        "put_permission": Permissions.Test_View,
-        "delete_permission": Permissions.Test_View,
+        "put_permission": Permissions.Test_Edit,
+        "delete_permission": Permissions.Test_Edit,
         "post_permission": Permissions.Test_View,
     }
 
