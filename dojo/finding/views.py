@@ -1224,6 +1224,72 @@ def close_finding(request, fid):
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
+def verify_finding(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+
+    if finding.verified:
+        messages.add_message(
+            request,
+            messages.INFO,
+            "Finding already verified.",
+            extra_tags="alert-info",
+        )
+        return redirect_to_return_url_or_else(
+            request,
+            reverse("view_finding", args=(finding.id,)),
+        )
+
+    form = NoteForm(data=request.POST or None)
+    form.fields["entry"].required = False
+    form.fields["entry"].label = _("Comment (optional)")
+
+    if request.method == "POST" and form.is_valid():
+        entry = form.cleaned_data.get("entry", "").strip()
+        if entry:
+            note = form.save(commit=False)
+            note.author = request.user
+            note.save()
+            finding.notes.add(note)
+
+        now_time = timezone.now()
+        finding.verified = True
+        finding.last_reviewed = now_time
+        finding.last_reviewed_by = request.user
+        finding.last_status_update = now_time
+        finding.save(push_to_jira=False)
+
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Finding verified.",
+            extra_tags="alert-success",
+        )
+
+        return redirect_to_return_url_or_else(
+            request,
+            reverse("view_finding", args=(finding.id,)),
+        )
+
+    product_tab = Product_Tab(
+        finding.test.engagement.product,
+        title="Verify Finding",
+        tab="findings",
+    )
+
+    return render(
+        request,
+        "dojo/verify_finding.html",
+        {
+            "finding": finding,
+            "product_tab": product_tab,
+            "user": request.user,
+            "form": form,
+            "active_tab": "findings",
+        },
+    )
+
+
+@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def defect_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
