@@ -757,7 +757,7 @@ def jira_environment(obj):
     return ""
 
 
-def push_to_jira(obj, *args, **kwargs):
+def push_to_jira(obj, *args, **kwargs) -> tuple[str, bool]:
     if obj is None:
         msg = "Cannot push None to JIRA"
         raise ValueError(msg)
@@ -773,17 +773,19 @@ def push_to_jira(obj, *args, **kwargs):
 
     if isinstance(obj, Engagement):
         return dojo_dispatch_task(push_engagement_to_jira, obj.id, *args, **kwargs)
-    logger.error("unsupported object passed to push_to_jira: %s %i %s", obj.__name__, obj.id, obj)
-    return None
+    message = f"unsupported object passed to push_to_jira: {obj.__class__.__name__} {obj.id} {obj}"
+    logger.error(message)
+    return False, message
 
 
 # we need thre separate celery tasks due to the decorators we're using to map to/from ids
 @app.task
-def push_finding_to_jira(finding_id, *args, **kwargs):
+def push_finding_to_jira(finding_id, *args, **kwargs) -> tuple[str, bool]:
     finding = get_object_or_none(Finding, id=finding_id)
     if not finding:
-        logger.warning("Finding with id %s does not exist, skipping push_finding_to_jira", finding_id)
-        return None
+        message = f"Finding with id {finding_id} does not exist, skipping push_finding_to_jira"
+        logger.warning(message)
+        return False, message
 
     if finding.has_jira_issue:
         return update_jira_issue(finding, *args, **kwargs)
@@ -791,11 +793,12 @@ def push_finding_to_jira(finding_id, *args, **kwargs):
 
 
 @app.task
-def push_finding_group_to_jira(finding_group_id, *args, **kwargs):
+def push_finding_group_to_jira(finding_group_id, *args, **kwargs) -> tuple[str, bool]:
     finding_group = get_object_or_none(Finding_Group, id=finding_group_id)
     if not finding_group:
-        logger.warning("Finding_Group with id %s does not exist, skipping push_finding_group_to_jira", finding_group_id)
-        return None
+        message = f"Finding_Group with id {finding_group_id} does not exist, skipping push_finding_group_to_jira"
+        logger.warning(message)
+        return False, message
 
     # Look for findings that have single ticket associations separate from the group
     for finding in finding_group.findings.filter(jira_issue__isnull=False):
@@ -807,11 +810,12 @@ def push_finding_group_to_jira(finding_group_id, *args, **kwargs):
 
 
 @app.task
-def push_engagement_to_jira(engagement_id, *args, **kwargs):
+def push_engagement_to_jira(engagement_id, *args, **kwargs) -> tuple[str, bool]:
     engagement = get_object_or_none(Engagement, id=engagement_id)
     if not engagement:
-        logger.warning("Engagement with id %s does not exist, skipping push_engagement_to_jira", engagement_id)
-        return None
+        message = f"Engagement with id {engagement_id} does not exist, skipping push_engagement_to_jira"
+        logger.warning(message)
+        return False, message
 
     if engagement.has_jira_issue:
         return dojo_dispatch_task(update_epic, engagement.id, *args, **kwargs)
@@ -894,18 +898,18 @@ def prepare_jira_issue_fields(
     return fields
 
 
-def add_jira_issue(obj, *args, **kwargs):
-    def failure_to_add_message(message: str, exception: Exception, _: Any) -> bool:
+def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
+    def failure_to_add_message(message: str, exception: Exception, _: Any) -> tuple[str, bool]:
         if exception:
             logger.error("Exception occurred", exc_info=exception)
         logger.error(message)
         log_jira_alert(message, obj)
-        return False
+        return False, message
 
     logger.info("trying to create a new jira issue for %d:%s", obj.id, to_str_typed(obj))
 
     if not is_jira_enabled():
-        return False
+        return False, "JIRA integration is not enabled."
 
     if not is_jira_configured_and_enabled(obj):
         message = f"Object {obj.id} cannot be pushed to JIRA as there is no JIRA configuration for {to_str_typed(obj)}."
@@ -932,20 +936,20 @@ def add_jira_issue(obj, *args, **kwargs):
 
         # not sure why this check is not part of can_be_pushed_to_jira, but afraid to change it
         if isinstance(obj, Finding) and obj.duplicate and not obj.active:
-            logger.info("%s will not be pushed to JIRA as it's a duplicate finding", to_str_typed(obj))
+            message = f"{to_str_typed(obj)} is a duplicate and inactive finding, and will not be pushed to JIRA: {error_message}."
             # Duplicates are expected, don't create alerts
-            logger.info("%s cannot be pushed to JIRA: %s (expected - duplicate finding)",
-                       to_str_typed(obj), error_message)
+            logger.info(message)
         elif error_code in expected_validation_errors:
+            message = f"{to_str_typed(obj)} cannot be pushed to JIRA: {error_message}."
             # These are expected when auto-pushing, only log, don't alert
-            logger.info("%s cannot be pushed to JIRA: %s (expected - finding not ready yet)",
-                       to_str_typed(obj), error_message)
+            logger.info(message)
         else:
             # Unexpected errors (configuration issues, etc.) should still alert
-            log_jira_cannot_be_pushed_reason(error_message, obj)
-            logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
+            message = f"{to_str_typed(obj)} cannot be pushed to JIRA due to an unexpected error: {error_message}."
+            log_jira_cannot_be_pushed_reason(message, obj)
+            logger.warning("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), message)
             logger.warning("The JIRA issue will NOT be created.")
-        return False
+        return False, message
     logger.debug("Trying to create a new JIRA issue for %s...", to_str_typed(obj))
     # Attempt to get the jira connection
     try:
@@ -1056,21 +1060,21 @@ def add_jira_issue(obj, *args, **kwargs):
         message = f"Failed to assign jira issue to existing epic: {e}"
         return failure_to_add_message(message, e, obj)
 
-    return True
+    return True, "JIRA issue created successfully."
 
 
-def update_jira_issue(obj, *args, **kwargs):
-    def failure_to_update_message(message: str, exception: Exception, obj: Any) -> bool:
+def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
+    def failure_to_update_message(message: str, exception: Exception, obj: Any) -> tuple[str, bool]:
         if exception:
             logger.error(exception)
         logger.error(message)
         log_jira_alert(message, obj)
-        return False
+        return False, message
 
     logger.debug("trying to update a linked jira issue for %d:%s", obj.id, to_str_typed(obj))
 
     if not is_jira_enabled():
-        return False
+        return False, "JIRA integration is not enabled."
 
     jira_project = get_jira_project(obj)
     jira_instance = get_jira_instance(obj)
@@ -1181,7 +1185,7 @@ def update_jira_issue(obj, *args, **kwargs):
         message = f"Failed to assign jira issue to existing epic: {e}"
         return failure_to_update_message(message, e, obj)
 
-    return True
+    return True, "JIRA issue updated successfully."
 
 
 def get_jira_issue_from_jira(find):
@@ -1847,7 +1851,8 @@ def process_jira_epic_form(request, engagement=None):
                 epic_priority = None
                 if jira_epic_form.cleaned_data.get("epic_priority"):
                     epic_priority = jira_epic_form.cleaned_data.get("epic_priority")
-                if push_to_jira(engagement, epic_name=epic_name, epic_priority=epic_priority):
+                success, message = push_to_jira(engagement, epic_name=epic_name, epic_priority=epic_priority)
+                if success:
                     logger.debug("Push to JIRA for Epic queued successfully")
                     messages.add_message(
                         request,
@@ -1856,11 +1861,11 @@ def process_jira_epic_form(request, engagement=None):
                         extra_tags="alert-success")
                 else:
                     error = True
-                    logger.debug("Push to JIRA for Epic failey")
+                    logger.debug("Push to JIRA for Epic failed")
                     messages.add_message(
                         request,
                         messages.ERROR,
-                        "Push to JIRA for Epic failed, check alerts on the top right for errors",
+                        message,
                         extra_tags="alert-danger")
         else:
             logger.debug("invalid jira epic form")
