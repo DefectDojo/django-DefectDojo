@@ -65,16 +65,18 @@ class LoginRequiredMiddleware:
                 return HttpResponseRedirect(fullURL)
 
         if request.user.is_authenticated:
+            path = request.path_info.lstrip("/")
+            if Dojo_User.force_password_reset(request.user) and path != "change_password":
+                return HttpResponseRedirect(reverse("change_password"))
+
+        response = self.get_response(request)
+        if request.user.is_authenticated:
             logger.debug("Authenticated user: %s", request.user)
             with suppress(ModuleNotFoundError):  # to avoid unittests to fail
                 uwsgi = __import__("uwsgi", globals(), locals(), ["set_logvar"], 0)
                 # this populates dd_user log var, so can appear in the uwsgi logs
                 uwsgi.set_logvar("dd_user", str(request.user))
-            path = request.path_info.lstrip("/")
-            if Dojo_User.force_password_reset(request.user) and path != "change_password":
-                return HttpResponseRedirect(reverse("change_password"))
-
-        return self.get_response(request)
+        return response
 
 
 class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
