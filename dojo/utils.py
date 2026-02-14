@@ -1971,7 +1971,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
 
 def to_str_typed(obj):
     """For code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
-    return f"{type(obj)}: {obj}"
+    return f"{type(obj).__name__}: {obj}"
 
 
 def get_product(obj):

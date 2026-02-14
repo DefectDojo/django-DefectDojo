@@ -1788,7 +1788,8 @@ class FindingsTest(BaseClass.RelatedObjectsTest, BaseClass.BaseClassTest):
             "files": [],
             "tags": ["tag1", "tag_2"],
         }
-        self.update_fields = {"duplicate": False, "active": True, "push_to_jira": "True", "tags": ["finding_tag_new"]}
+        # Do not push to jira here as it will make the request fail due to jira not being configured
+        self.update_fields = {"duplicate": False, "active": True, "tags": ["finding_tag_new"]}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Finding
         self.permission_create = Permissions.Finding_Add
