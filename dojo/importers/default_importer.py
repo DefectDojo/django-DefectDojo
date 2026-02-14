@@ -2,7 +2,6 @@ import logging
 
 from django.conf import settings
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
@@ -300,9 +299,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Always perform an initial grading, even though it might get overwritten later.
         perform_product_grading(self.test.engagement.product)
 
-        sync = kwargs.get("sync", True)
-        if not sync:
-            return [serialize("json", [finding]) for finding in new_findings]
         return new_findings
 
     def close_old_findings(
