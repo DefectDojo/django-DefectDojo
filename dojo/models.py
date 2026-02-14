@@ -1510,6 +1510,7 @@ ENGAGEMENT_STATUS_CHOICES = (("Not Started", "Not Started"),
                              ("Completed", "Completed"),
                              ("In Progress", "In Progress"),
                              ("On Hold", "On Hold"),
+                             ("Scheduled", "Scheduled"),
                              ("Waiting for Resource", "Waiting for Resource"))
 
 
