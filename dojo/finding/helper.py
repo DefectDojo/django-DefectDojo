@@ -396,7 +396,7 @@ def add_findings_to_auto_group(name, findings, group_by, *, create_finding_group
                     finding_group.findings.add(*findings)
 
 
-@app.task
+@app.task(priority=3)
 def post_process_finding_save(finding_id, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
     finding = get_object_or_none(Finding, id=finding_id)
@@ -459,7 +459,7 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
             jira_helper.push_to_jira(finding.finding_group)
 
 
-@app.task
+@app.task(priority=4)
 def post_process_findings_batch(
     finding_ids,
     *args,

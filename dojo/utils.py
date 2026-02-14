@@ -1254,7 +1254,7 @@ def grade_product(crit, high, med, low):
     return max(health, 5)
 
 
-@app.task
+@app.task(priority=4)
 def calculate_grade(product_id, *args, **kwargs):
     product = get_object_or_none(Product, id=product_id)
     if not product:
@@ -1328,15 +1328,21 @@ def get_celery_worker_status():
 
 
 def get_celery_queue_length():
+    queue_lens = {}
     try:
-        with Connection(settings.CELERY_BROKER_URL) as conn, conn.SimpleQueue("celery") as queue:
-            return queue.qsize()
-    except ChannelError as e:
-        if "NOT_FOUND" in str(e):
-            return 0
-        return None
+        with Connection(settings.CELERY_BROKER_URL) as conn:
+            for queue_name in settings.CELERY_QUEUE_TYPES:
+                try:
+                    with conn.SimpleQueue(queue_name) as queue:
+                        if size := queue.qsize():
+                            queue_lens[queue_name, settings.CELERY_QUEUE_TYPES[queue_name]] = size
+                except ChannelError as e:
+                    if "NOT_FOUND" in str(e):
+                        continue
+                    raise
     except:
         return None
+    return queue_lens
 
 
 # Used to display the counts and enabled tabs in the product view

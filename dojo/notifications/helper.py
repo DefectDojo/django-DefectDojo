@@ -871,36 +871,36 @@ class NotificationManager(NotificationManagerHelpers):
                 )
 
 
-@app.task
+@app.task(priority=3)
 def send_slack_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
     get_manager_class_instance()._get_manager_instance("slack").send_slack_notification(event, user=user, **kwargs)
 
 
-@app.task
+@app.task(priority=3)
 def send_msteams_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
     get_manager_class_instance()._get_manager_instance("msteams").send_msteams_notification(event, user=user, **kwargs)
 
 
-@app.task
+@app.task(priority=3)
 def send_mail_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
     get_manager_class_instance()._get_manager_instance("mail").send_mail_notification(event, user=user, **kwargs)
 
 
-@app.task
+@app.task(priority=3)
 def send_webhooks_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
     user = Dojo_User.objects.get(pk=user_id) if user_id else None
     get_manager_class_instance()._get_manager_instance("webhooks").send_webhooks_notification(event, user=user, **kwargs)
 
 
-@app.task(ignore_result=True)
+@app.task(ignore_result=True, priority=1)
 def webhook_reactivation(endpoint_id: int, **_kwargs: dict) -> None:
     get_manager_class_instance()._get_manager_instance("webhooks")._webhook_reactivation(endpoint_id=endpoint_id)
 
 
-@app.task(ignore_result=True)
+@app.task(ignore_result=True, priority=1)
 def webhook_status_cleanup(*_args: list, **_kwargs: dict):
     # If some endpoint was affected by some outage (5xx, 429, Timeout) but it was clean during last 24 hours,
     # we consider this endpoint as healthy so need to reset it
