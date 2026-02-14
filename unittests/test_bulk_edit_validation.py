@@ -409,8 +409,8 @@ class TestBulkEditValidation(DojoTestCase):
 
     # View-Level Validation Tests (Active + Risk Acceptance)
 
-    def test_bulk_edit_active_finding_cannot_accept_risk(self):
-        """Test that active findings cannot accept risk via bulk edit"""
+    def test_bulk_edit_active_finding_can_accept_risk(self):
+        """Test that active findings can accept risk via bulk edit (matching individual behavior)"""
         # Enable simple risk acceptance on product
         self.product.enable_simple_risk_acceptance = True
         self.product.save()
@@ -427,22 +427,26 @@ class TestBulkEditValidation(DojoTestCase):
             follow=True,
         )
 
-        # Verify finding is NOT risk accepted
+        # Verify finding IS risk accepted and becomes inactive
         self.active_finding.refresh_from_db()
-        self.assertFalse(
+        self.assertTrue(
             self.active_finding.risk_accepted,
-            "Active finding should not be risk accepted",
+            "Active finding should be risk accepted",
+        )
+        self.assertFalse(
+            self.active_finding.active,
+            "Risk accepted finding should become inactive",
         )
 
-        # Verify warning message
+        # Verify no warning message about active findings
         messages = self._get_messages_text(response)
         warning_messages = [
             m for m in messages if "active findings" in m.lower() and "risk" in m.lower()
         ]
-        self.assertGreater(
+        self.assertEqual(
             len(warning_messages),
             0,
-            f"Expected warning about active findings and risk acceptance, got: {messages}",
+            f"Unexpected warning about active findings: {warning_messages}",
         )
 
     def test_bulk_edit_inactive_finding_can_accept_risk(self):
@@ -553,12 +557,15 @@ class TestBulkEditValidation(DojoTestCase):
         self._assert_finding_status(normal2, active=True)
 
     def test_bulk_edit_shows_multiple_warning_messages(self):
-        """Test that multiple warning messages appear for different conflicts"""
+        """
+        Test that warning messages appear for conflicts (duplicate status)
+        and that active findings can now be risk accepted successfully
+        """
         # Enable simple risk acceptance
         self.product.enable_simple_risk_acceptance = True
         self.product.save()
 
-        # First, try to set duplicate finding as active (will be skipped)
+        # First, try to set duplicate finding as active (will be skipped with warning)
         post_data1 = self._bulk_edit_post_data(
             [self.duplicate_finding.id],
             active=True,  # Will conflict with duplicate
@@ -569,11 +576,11 @@ class TestBulkEditValidation(DojoTestCase):
             follow=True,
         )
 
-        # Then, try to risk accept active finding (will be skipped)
+        # Then, risk accept active finding (should succeed - no longer a conflict)
         post_data2 = self._bulk_edit_post_data(
             [self.active_finding.id],
             risk_acceptance=True,
-            risk_accept=True,  # Will conflict with active
+            risk_accept=True,  # Should work now!
         )
         response2 = self.client.post(
             reverse("finding_bulk_update_all"),
@@ -586,25 +593,34 @@ class TestBulkEditValidation(DojoTestCase):
         messages2 = self._get_messages_text(response2)
         all_messages = messages1 + messages2
 
+        # Verify duplicate warning appears
         duplicate_warnings = [
             m for m in all_messages if "duplicate findings" in m.lower()
         ]
+        self.assertGreater(
+            len(duplicate_warnings),
+            0,
+            f"Expected duplicate warning, got: {all_messages}",
+        )
+
+        # Verify NO warning about active findings and risk acceptance
         active_warnings = [
             m
             for m
             in all_messages
             if "active findings" in m.lower() and "risk" in m.lower()
         ]
-
-        self.assertGreater(
-            len(duplicate_warnings),
-            0,
-            f"Expected duplicate warning, got: {all_messages}",
-        )
-        self.assertGreater(
+        self.assertEqual(
             len(active_warnings),
             0,
-            f"Expected active risk acceptance warning, got: {all_messages}",
+            f"Unexpected active risk acceptance warning: {active_warnings}",
+        )
+
+        # Verify active finding was successfully risk accepted
+        self.active_finding.refresh_from_db()
+        self.assertTrue(
+            self.active_finding.risk_accepted,
+            "Active finding should be risk accepted successfully",
         )
 
     def test_bulk_edit_no_warning_when_no_conflicts(self):
