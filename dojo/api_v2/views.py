@@ -243,6 +243,19 @@ class PrefetchDojoModelViewSet(
     pass
 
 
+class DeprecationNoticeMixin:
+
+    deprecated: bool | None = None
+    end_of_life_date: datetime | None = None
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        if self.deprecated is not None:
+            response["X-Deprecated"] = self.deprecated
+        if self.end_of_life_date is not None:
+            response["X-End-Of-Life-Date"] = self.end_of_life_date.isoformat()
+        return super().finalize_response(request, response, *args, **kwargs)
+
+
 # Authorization: authenticated users
 class RoleViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.RoleSerializer
@@ -3186,7 +3199,10 @@ class SLAConfigurationViewset(
 class QuestionnaireQuestionViewSet(
     viewsets.ReadOnlyModelViewSet,
     dojo_mixins.QuestionSubClassFieldsMixin,
+    DeprecationNoticeMixin,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 6, 1)
     serializer_class = serializers.QuestionnaireQuestionSerializer
     queryset = Question.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -3198,11 +3214,28 @@ class QuestionnaireQuestionViewSet(
     def get_queryset(self):
         return Question.objects.all().order_by("id")
 
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
 
 class QuestionnaireAnswerViewSet(
     viewsets.ReadOnlyModelViewSet,
     dojo_mixins.AnswerSubClassFieldsMixin,
+    DeprecationNoticeMixin,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 6, 1)
     serializer_class = serializers.QuestionnaireAnswerSerializer
     queryset = Answer.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -3214,10 +3247,27 @@ class QuestionnaireAnswerViewSet(
     def get_queryset(self):
         return Answer.objects.all().order_by("id")
 
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
 
 class QuestionnaireGeneralSurveyViewSet(
     viewsets.ReadOnlyModelViewSet,
+    DeprecationNoticeMixin,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 6, 1)
     serializer_class = serializers.QuestionnaireGeneralSurveySerializer
     queryset = General_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -3229,10 +3279,27 @@ class QuestionnaireGeneralSurveyViewSet(
     def get_queryset(self):
         return General_Survey.objects.all().order_by("id")
 
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
 
 class QuestionnaireEngagementSurveyViewSet(
     viewsets.ReadOnlyModelViewSet,
+    DeprecationNoticeMixin,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 6, 1)
     serializer_class = serializers.QuestionnaireEngagementSurveySerializer
     queryset = Engagement_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -3245,13 +3312,29 @@ class QuestionnaireEngagementSurveyViewSet(
         return Engagement_Survey.objects.all().order_by("id")
 
     @extend_schema(
-    request=OpenApiTypes.NONE,
-    parameters=[
-        OpenApiParameter(
-            "engagement_id", OpenApiTypes.INT, OpenApiParameter.PATH,
-        ),
-    ],
-    responses={status.HTTP_200_OK: serializers.QuestionnaireAnsweredSurveySerializer},
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+        request=OpenApiTypes.NONE,
+        parameters=[
+            OpenApiParameter(
+                "engagement_id", OpenApiTypes.INT, OpenApiParameter.PATH,
+            ),
+        ],
+        responses={status.HTTP_200_OK: serializers.QuestionnaireAnsweredSurveySerializer},
     )
     @action(
         detail=True, methods=["post"], url_path=r"link_engagement/(?P<engagement_id>\d+)",
@@ -3273,7 +3356,10 @@ class QuestionnaireAnsweredSurveyViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
     viewsets.ReadOnlyModelViewSet,
+    DeprecationNoticeMixin,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 6, 1)
     serializer_class = serializers.QuestionnaireAnsweredSurveySerializer
     queryset = Answered_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -3284,6 +3370,20 @@ class QuestionnaireAnsweredSurveyViewSet(
 
     def get_queryset(self):
         return Answered_Survey.objects.all().order_by("id")
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
 
 # Authorization: configuration
