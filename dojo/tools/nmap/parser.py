@@ -159,7 +159,7 @@ class NmapParser:
         Critical 	9.0-10.0
         """
         val = float(raw_value)
-        if val == 0.0:
+        if val == 0:
             return "Info"
         if val < 4.0:
             return "Low"
