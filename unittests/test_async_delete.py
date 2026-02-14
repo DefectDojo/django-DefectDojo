@@ -2,10 +2,10 @@
 Unit tests for async_delete functionality.
 
 These tests verify that the async_delete class works correctly with dojo_dispatch_task,
-which injects async_user and _pgh_context kwargs into task calls.
+which injects user context and _pgh_context kwargs into task calls.
 
 The original bug was that @app.task decorated instance methods didn't properly handle
-the injected kwargs, causing TypeError: unexpected keyword argument 'async_user'.
+the injected kwargs, causing TypeError for unexpected keyword arguments.
 """
 import logging
 
@@ -120,8 +120,8 @@ class TestAsyncDelete(DojoTestCase):
 
         # Use impersonate to set current user context (required for block_execution to work)
         with impersonate(self.testuser):
-            # This would raise TypeError before the fix:
-            # TypeError: delete() got an unexpected keyword argument 'async_user'
+            # This would raise TypeError before the fix when injected kwargs
+            # were not handled properly by task functions
             async_del = async_delete()
             async_del.delete(finding)
 
