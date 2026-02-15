@@ -1092,9 +1092,7 @@ class SLA_Configuration(models.Model):
                     super(Product, product).save()
                 # launch the async task to update all finding sla expiration dates
                 from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
-                from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-                dojo_dispatch_task(async_update_sla_expiration_dates_sla_config_sync, self, products, severities=severities)
+                async_update_sla_expiration_dates_sla_config_sync(self, products, severities=severities)
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -1254,9 +1252,7 @@ class Product(BaseModel):
                     super(SLA_Configuration, sla_config).save()
                 # launch the async task to update all finding sla expiration dates
                 from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
-                from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-                dojo_dispatch_task(async_update_sla_expiration_dates_sla_config_sync, sla_config, Product.objects.filter(id=self.id))
+                async_update_sla_expiration_dates_sla_config_sync(sla_config, Product.objects.filter(id=self.id))
 
     def get_absolute_url(self):
         return reverse("view_product", args=[str(self.id)])
@@ -4030,6 +4026,13 @@ class BannerConf(models.Model):
 class GITHUB_Conf(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text=_("Enter a name to give to this configuration"), default="")
     api_key = models.CharField(max_length=2000, help_text=_("Enter your Github API Key"), default="")
+    base_url = models.URLField(
+        max_length=2000,
+        null=True,
+        blank=True,
+        help_text="Default is https://api.github.com. For on-prem, use https://{host}/api/v3",
+        default="https://api.github.com",
+    )
 
     def __str__(self):
         return self.configuration_name
@@ -4058,7 +4061,6 @@ class GITHUB_Details_Cache(models.Model):
 
 class GITHUB_PKey(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-
     git_project = models.CharField(max_length=200, blank=True, verbose_name=_("Github project"), help_text=_("Specify your project location. (:user/:repo)"))
     git_conf = models.ForeignKey(GITHUB_Conf, verbose_name=_("Github Configuration"),
                                  null=True, blank=True, on_delete=models.CASCADE)

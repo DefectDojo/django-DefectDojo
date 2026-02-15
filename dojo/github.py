@@ -135,9 +135,12 @@ def add_external_issue_github(find, prod, eng):
         prod = Product.objects.get(engagement=eng)
         github_product_key = GITHUB_PKey.objects.get(product=prod)
         logger.info("Create issue with github profile: " + str(github_product_key.git_conf) + " on product: " + str(github_product_key))
-
+        conf = github_product_key.git_conf
         try:
-            g = Github(auth=Auth.Token(github_product_key.git_conf.api_key))
+            if conf.base_url:
+                g = Github(base_url=conf.base_url, auth=Auth.Token(conf.api_key))
+            else:
+                g = Github(auth=Auth.Token(conf.api_key))
             user = g.get_user()
             logger.debug("logged in with github user: " + user.login)
             logger.debug("Look for project: " + github_product_key.git_project)
