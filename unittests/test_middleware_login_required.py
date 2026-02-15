@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 from dojo.middleware import LoginRequiredMiddleware
 from dojo.models import User
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, versioned_fixtures
 
 
 class TokenAuthenticatedView(APIView):
@@ -24,6 +24,7 @@ class TokenAuthenticatedView(APIView):
         return Response({"username": request.user.username})
 
 
+@versioned_fixtures
 class TestLoginRequiredMiddlewareDdUser(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
