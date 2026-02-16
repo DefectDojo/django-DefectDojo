@@ -3209,6 +3209,19 @@ class SystemSettingsForm(forms.ModelForm):
         self.fields["enable_product_tag_inheritance"].label = labels.SETTINGS_ASSET_TAG_INHERITANCE_ENABLE_LABEL
         self.fields["enable_product_tag_inheritance"].help_text = labels.SETTINGS_ASSET_TAG_INHERITANCE_ENABLE_HELP
 
+        if self.instance and self.instance.slack_token:
+            self.fields["slack_token"].widget.attrs["placeholder"] = "********** (configured)"
+            self.fields["slack_token"].required = False
+            self.fields["slack_token"].help_text = "Leave blank to keep current token, or enter a new one to update it."
+
+    def clean_slack_token(self):
+        """Preserve existing token if field is left empty."""
+        token = self.cleaned_data.get("slack_token")
+        # If the field is empty and a token exists, preserve the existing token
+        if not token and self.instance and self.instance.pk and self.instance.slack_token:
+            return self.instance.slack_token
+        return token
+
     def clean(self):
         cleaned_data = super().clean()
         enable_jira_value = cleaned_data.get("enable_jira")
@@ -3222,6 +3235,9 @@ class SystemSettingsForm(forms.ModelForm):
     class Meta:
         model = System_Settings
         fields = "__all__"
+        widgets = {
+            "slack_token": forms.PasswordInput(attrs={"class": "form-control"}),
+        }
 
 
 class BenchmarkForm(forms.ModelForm):
