@@ -1,12 +1,9 @@
 ---
 services:
   integration-tests:
-    platform: linux/amd64
     build:
       context: ./
       dockerfile: ${INTEGRATION_TESTS_DOCKERFILE:-Dockerfile.integration-tests-debian}
-      platforms:
-        - linux/amd64
     image: "defectdojo/defectdojo-integration-tests:${INTEGRATION_TESTS_VERSION:-latest}"
     depends_on:
       - nginx
