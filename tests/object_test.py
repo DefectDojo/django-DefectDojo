@@ -4,6 +4,7 @@ import unittest
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
 
 
 class ObjectTest(BaseTestCase):
@@ -58,7 +59,6 @@ class ObjectTest(BaseTestCase):
             artifact_fields[0].clear()
             artifact_fields[0].send_keys("test-artifact")
         # Select review_status if available
-        from selenium.webdriver.support.ui import Select
         review_fields = driver.find_elements(By.ID, "id_review_status")
         if len(review_fields) > 0:
             select = Select(review_fields[0])
@@ -69,6 +69,7 @@ class ObjectTest(BaseTestCase):
             self.is_success_message_present(text="added successfully")
             or self.is_text_present_on_page(text="Tracked Files"),
         )
+
 
 def suite():
     suite = unittest.TestSuite()

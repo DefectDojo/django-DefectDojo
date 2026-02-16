@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
-from product_test import ProductTest, WaitForPageLoad
+from product_test import ProductTest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select

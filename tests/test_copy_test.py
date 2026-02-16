@@ -53,7 +53,6 @@ class TestCopyTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_copy_test_preserves_data(self):
-        driver = self.driver
         # After copy, we should be on the copied test page
         # Verify the test type is preserved
         self.assertTrue(self.is_text_present_on_page(text="Pen Test"))

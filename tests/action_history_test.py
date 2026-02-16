@@ -15,9 +15,6 @@ class ActionHistoryTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        current_url = driver.current_url
-        parts = current_url.rstrip("/").split("/")
-        pid = parts[-1]
         # Get the content type ID for Product
         # Use the Django history URL pattern: history/<content_type_id>/<object_id>
         # We can navigate to it via the product page's history link if available

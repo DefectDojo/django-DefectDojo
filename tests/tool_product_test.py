@@ -121,8 +121,6 @@ class ToolProductTest(BaseTestCase):
                 selected = True
                 break
         if not selected:
-            # No tool configurations available — skip gracefully
-            self.assertTrue(True, "No tool configurations available to test with")
             return
         # Fill URL if available
         url_fields = driver.find_elements(By.ID, "id_url")

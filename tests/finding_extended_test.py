@@ -6,7 +6,7 @@ from base_test_class import BaseTestCase, on_exception_html_source_logger, set_s
 from product_test import ProductTest, WaitForPageLoad
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 
@@ -36,7 +36,7 @@ class FindingExtendedTest(BaseTestCase):
         time.sleep(1)
         # Wait for the bulk edit menu to become visible
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.ID, "dropdownMenu2"))
+            expected_conditions.visibility_of_element_located((By.ID, "dropdownMenu2")),
         )
         # Open bulk edit dropdown and set severity via JavaScript
         # (Bootstrap dropdowns can be tricky with Selenium visibility checks)
@@ -51,7 +51,7 @@ class FindingExtendedTest(BaseTestCase):
         time.sleep(1)
         # Submit the bulk edit form via JavaScript
         driver.execute_script(
-            "document.querySelector('#bulk_change_form input[type=submit]').click();"
+            "document.querySelector('#bulk_change_form input[type=submit]').click();",
         )
         time.sleep(1)
 
@@ -83,7 +83,7 @@ class FindingExtendedTest(BaseTestCase):
         time.sleep(1)
         # Submit bulk edit form
         driver.execute_script(
-            "document.querySelector('#bulk_change_form input[type=submit]').click();"
+            "document.querySelector('#bulk_change_form input[type=submit]').click();",
         )
         time.sleep(1)
 
