@@ -296,6 +296,278 @@ else
         fail "$test"
     fi
 
+    test="Note Type integration tests"
+    echo "Running: $test"
+    if python3 tests/note_type_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="SLA Configuration integration tests"
+    echo "Running: $test"
+    if python3 tests/sla_configuration_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Dashboard integration tests"
+    echo "Running: $test"
+    if python3 tests/dashboard_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Login integration tests"
+    echo "Running: $test"
+    if python3 tests/login_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Alerts integration tests"
+    echo "Running: $test"
+    if python3 tests/alerts_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="System Settings integration tests"
+    echo "Running: $test"
+    if python3 tests/system_settings_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Credential integration tests"
+    echo "Running: $test"
+    if python3 tests/credential_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Engagement Extended integration tests"
+    echo "Running: $test"
+    if python3 tests/engagement_extended_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Finding Extended integration tests"
+    echo "Running: $test"
+    if python3 tests/finding_extended_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Test Copy integration tests"
+    echo "Running: $test"
+    if python3 tests/test_copy_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Endpoint Extended integration tests"
+    echo "Running: $test"
+    if python3 tests/endpoint_extended_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Calendar integration tests"
+    echo "Running: $test"
+    if python3 tests/calendar_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Finding Group integration tests"
+    echo "Running: $test"
+    if python3 tests/finding_group_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Engagement Presets integration tests"
+    echo "Running: $test"
+    if python3 tests/engagement_presets_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Questionnaire integration tests"
+    echo "Running: $test"
+    if python3 tests/questionnaire_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Benchmark integration tests"
+    echo "Running: $test"
+    if python3 tests/benchmark_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Notification Webhook integration tests"
+    echo "Running: $test"
+    if python3 tests/notification_webhook_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Threat Model integration tests"
+    echo "Running: $test"
+    if python3 tests/threat_model_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Product Tag Metrics integration tests"
+    echo "Running: $test"
+    if python3 tests/product_tag_metrics_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Object integration tests"
+    echo "Running: $test"
+    if python3 tests/object_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Tool Type integration tests"
+    echo "Running: $test"
+    if python3 tests/tool_type_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Tool Product integration tests"
+    echo "Running: $test"
+    if python3 tests/tool_product_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Risk Acceptance integration tests"
+    echo "Running: $test"
+    if python3 tests/risk_acceptance_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Product Metadata integration tests"
+    echo "Running: $test"
+    if python3 tests/product_metadata_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Product Credential integration tests"
+    echo "Running: $test"
+    if python3 tests/product_credential_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Test Type integration tests"
+    echo "Running: $test"
+    if python3 tests/test_type_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="User Profile integration tests"
+    echo "Running: $test"
+    if python3 tests/user_profile_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Engagement Checklist integration tests"
+    echo "Running: $test"
+    if python3 tests/engagement_checklist_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Questionnaire Advanced integration tests"
+    echo "Running: $test"
+    if python3 tests/questionnaire_advanced_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Engagement Export integration tests"
+    echo "Running: $test"
+    if python3 tests/engagement_export_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Action History integration tests"
+    echo "Running: $test"
+    if python3 tests/action_history_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Reimport Scan integration tests"
+    echo "Running: $test"
+    if python3 tests/reimport_scan_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Banner Configuration integration tests"
+    echo "Running: $test"
+    if python3 tests/banner_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
+    test="Metrics Extended integration tests"
+    echo "Running: $test"
+    if python3 tests/metrics_extended_test.py ; then
+        success "$test"
+    else
+        fail "$test"
+    fi
+
     test="Tool Config integration tests"
     echo "Running: $test"
     if python3 tests/tool_config.py ; then
