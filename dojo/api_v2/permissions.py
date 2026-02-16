@@ -385,6 +385,15 @@ class UserHasEngagementRelatedObjectPermission(BaseRelatedObjectPermission):
     }
 
 
+class UserHasEngagementNotePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Engagement_View,
+        "put_permission": Permissions.Engagement_Edit,
+        "delete_permission": Permissions.Engagement_Edit,
+        "post_permission": Permissions.Engagement_View,
+    }
+
+
 class UserHasRiskAcceptancePermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # The previous implementation only checked for the object permission if the path was
@@ -434,6 +443,15 @@ class UserHasFindingRelatedObjectPermission(BaseRelatedObjectPermission):
         "put_permission": Permissions.Finding_Edit,
         "delete_permission": Permissions.Finding_Edit,
         "post_permission": Permissions.Finding_Edit,
+    }
+
+
+class UserHasFindingNotePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Finding_View,
+        "put_permission": Permissions.Finding_Edit,
+        "delete_permission": Permissions.Finding_Edit,
+        "post_permission": Permissions.Finding_View,
     }
 
 
@@ -814,6 +832,15 @@ class UserHasTestRelatedObjectPermission(BaseRelatedObjectPermission):
         "put_permission": Permissions.Test_Edit,
         "delete_permission": Permissions.Test_Edit,
         "post_permission": Permissions.Test_Edit,
+    }
+
+
+class UserHasTestNotePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Test_View,
+        "put_permission": Permissions.Test_Edit,
+        "delete_permission": Permissions.Test_Edit,
+        "post_permission": Permissions.Test_View,
     }
 
 
