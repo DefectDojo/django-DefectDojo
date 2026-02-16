@@ -1,0 +1,25 @@
+{
+    "findings": [
+        {
+            "title": "test title with fix_version",
+            "description": "Vulnerability with fix version available",
+            "severity": "High",
+            "date": "2025-01-15",
+            "cve": "CVE-2025-12345",
+            "cwe": 502,
+            "fix_available": true,
+            "fix_version": "2.1.3",
+            "component_name": "spring-core",
+            "component_version": "6.1.0"
+        },
+        {
+            "title": "test title without fix_version",
+            "description": "Vulnerability without fix version",
+            "severity": "Medium",
+            "date": "2025-01-15",
+            "cve": "CVE-2025-67890",
+            "cwe": 611,
+            "fix_available": false
+        }
+    ]
+}
