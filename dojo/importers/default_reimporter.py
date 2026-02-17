@@ -2,7 +2,6 @@ import logging
 
 from django.conf import settings
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.core.serializers import serialize
 from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
@@ -1013,29 +1012,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         **kwargs: dict,
     ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
-        """
-        Determine how to to return the results based on whether the process was
-        ran asynchronous or not
-        """
-        if not kwargs.get("sync"):
-            serialized_new_items = [
-                serialize("json", [finding]) for finding in self.new_items
-            ]
-            serialized_reactivated_items = [
-                serialize("json", [finding]) for finding in self.reactivated_items
-            ]
-            serialized_to_mitigate = [
-                serialize("json", [finding]) for finding in self.to_mitigate
-            ]
-            serialized_untouched = [
-                serialize("json", [finding]) for finding in self.untouched
-            ]
-            return (
-                serialized_new_items,
-                serialized_reactivated_items,
-                serialized_to_mitigate,
-                serialized_untouched,
-            )
+        """Return the finding lists collected during process_findings."""
         return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
 
     def calculate_unsaved_finding_hash_code(
