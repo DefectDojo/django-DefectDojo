@@ -339,7 +339,7 @@ class MetricsType(_MetricsTypeEntry, Enum):
     ENDPOINT = ("finding__severity", "mitigated")
 
 
-def query_counts(
+def query_counts[MetricsQuerySet: (QuerySet[Finding], QuerySet[Endpoint_Status])](
     open_qs: MetricsQuerySet,
     active_qs: MetricsQuerySet,
     accepted_qs: MetricsQuerySet,

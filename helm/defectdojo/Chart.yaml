@@ -14,7 +14,7 @@ dependencies:
     repository: "oci://us-docker.pkg.dev/os-public-container-registry/defectdojo"
     condition: postgresql.enabled
   - name: valkey
-    version: 0.15.3
+    version: 0.15.4
     repository: "oci://registry-1.docker.io/cloudpirates"
     condition: valkey.enabled
 # For correct syntax, check https://artifacthub.io/docs/topics/annotations/helm/
@@ -34,4 +34,4 @@ dependencies:
 #     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "true"
-  artifacthub.io/changes: ""
+  artifacthub.io/changes: "- kind: changed\n  description: Update valkey Docker tag from 0.15.3 to v0.15.4 (_/defect_/Chart.yaml)\n"

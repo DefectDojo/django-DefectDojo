@@ -525,7 +525,7 @@ A Helm chart for Kubernetes to install DefectDojo
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://registry-1.docker.io/cloudpirates | valkey | 0.15.3 |
+| oci://registry-1.docker.io/cloudpirates | valkey | 0.15.4 |
 | oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | postgresql | 16.7.27 |
 
 ## Values
@@ -767,9 +767,10 @@ A Helm chart for Kubernetes to install DefectDojo
 | tests.unitTests.resources.requests.cpu | string | `"100m"` |  |
 | tests.unitTests.resources.requests.memory | string | `"128Mi"` |  |
 | trackConfig | string | `"disabled"` | Track configuration (trackConfig): will automatically respin application pods in case of config changes detection can be: 1. disabled (default) 2. enabled, enables tracking configuration changes based on SHA256 |
-| valkey | object | `{"auth":{"existingSecret":"defectdojo-valkey-specific","existingSecretPasswordKey":"valkey-password","password":""},"enabled":true,"sentinel":{"enabled":false},"service":{"port":6379},"tls":{"enabled":false}}` | For more advance options check the bitnami chart documentation: https://artifacthub.io/packages/helm/cloudpirates-valkey/valkey |
+| valkey | object | `{"auth":{"existingSecret":"defectdojo-valkey-specific","existingSecretPasswordKey":"valkey-password","password":""},"enabled":true,"sentinel":{"enabled":false},"service":{"port":6379},"serviceAccount":{"create":true},"tls":{"enabled":false}}` | For more advance options check the bitnami chart documentation: https://artifacthub.io/packages/helm/cloudpirates-valkey/valkey |
 | valkey.enabled | bool | `true` | To use an external instance, switch enabled to `false` and set the address in `redisServer` below |
 | valkey.service | object | `{"port":6379}` | To use a different port for Redis (default: 6379) |
+| valkey.serviceAccount.create | bool | `true` | Autocreate dedicated service account (as part of the best practice) |
 | valkey.tls.enabled | bool | `false` | If TLS is enabled, the Redis broker will use the redis:// and optionally mount the certificates from an existing secret. |
 | valkeyParams | string | `""` | Parameters attached to the valkey connection string, defaults to "ssl_cert_reqs=optional" if `valkey.tls.enabled` |
 

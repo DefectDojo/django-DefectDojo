@@ -103,6 +103,9 @@ class GenericCSVParser:
             if "fix_available" in row:
                 finding.fix_available = bool(row["fix_available"])
 
+            if "fix_version" in row:
+                finding.fix_version = row["fix_version"]
+
             # manage endpoints
             if row.get("Url"):
                 if settings.V3_FEATURE_LOCATIONS:
