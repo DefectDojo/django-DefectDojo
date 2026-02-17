@@ -2,9 +2,11 @@ import json
 import logging
 
 import dateutil
+from django.conf import settings
 
 from dojo.models import Finding
 from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
+from dojo.tools.protocol import LocationData
 
 LOGGER = logging.getLogger(__name__)
 
@@ -127,6 +129,13 @@ class CycloneDXJSONParser:
                             detail = analysis.get("detail")
                             if detail:
                                 finding.mitigation += f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
+                if settings.V3_FEATURE_LOCATIONS:
+                    component_data = components.get(reference, {})
+                    component_purl = component_data.get("purl")
+                    if component_purl:
+                        finding.unsaved_locations.append(
+                            LocationData(type="dependency", value=component_purl),
+                        )
                 findings.append(finding)
         return findings
 

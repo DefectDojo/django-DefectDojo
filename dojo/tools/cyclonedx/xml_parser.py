@@ -3,9 +3,11 @@ import re
 
 import dateutil
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Finding
 from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
+from dojo.tools.protocol import LocationData
 
 LOGGER = logging.getLogger(__name__)
 
@@ -38,11 +40,13 @@ class CycloneDXXMLParser:
         ):
             component_name = component.findtext(f"{namespace}name")
             component_version = component.findtext(f"{namespace}version")
+            component_purl = component.findtext(f"{namespace}purl")
             # save a ref
             if "bom-ref" in component.attrib:
                 bom_refs[component.attrib["bom-ref"]] = {
                     "name": component_name,
                     "version": component_version,
+                    "purl": component_purl,
                 }
             # for each vulnerabilities add a finding
             for vulnerability in component.findall(
@@ -55,6 +59,7 @@ class CycloneDXXMLParser:
                     report_date=report_date,
                     component_name=component_name,
                     component_version=component_version,
+                    component_purl=component_purl,
                 )
                 findings.append(finding_vuln)
         # manage adhoc vulnerabilities
@@ -89,6 +94,7 @@ class CycloneDXXMLParser:
         report_date,
         component_name=None,
         component_version=None,
+        component_purl=None,
     ):
         ref = vulnerability.attrib["ref"]
         vuln_id = vulnerability.findtext("v:id", namespaces=ns)
@@ -111,6 +117,7 @@ class CycloneDXXMLParser:
             bom = bom_refs[ref]
             component_name = bom["name"]
             component_version = bom["version"]
+            component_purl = bom.get("purl")
 
         severity = Cyclonedxhelper().fix_severity(severity)
         references = ""
@@ -166,6 +173,10 @@ class CycloneDXXMLParser:
             vulnerability_ids.append(vuln_id)
         if vulnerability_ids:
             finding.unsaved_vulnerability_ids = vulnerability_ids
+        if settings.V3_FEATURE_LOCATIONS and component_purl:
+            finding.unsaved_locations.append(
+                LocationData(type="dependency", value=component_purl),
+            )
         return finding
 
     def get_cwes(self, node, prefix, namespaces):
@@ -234,6 +245,7 @@ class CycloneDXXMLParser:
             component_name, component_version = Cyclonedxhelper()._get_component(
                 bom_refs, ref.text,
             )
+            component_purl = bom_refs.get(ref.text, {}).get("purl") if ref is not None else None
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
                 description=description,
@@ -296,5 +308,9 @@ class CycloneDXXMLParser:
                         )
                         if detail:
                             finding.mitigation += f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
+            if settings.V3_FEATURE_LOCATIONS and component_purl:
+                finding.unsaved_locations.append(
+                    LocationData(type="dependency", value=component_purl),
+                )
             findings.append(finding)
         return findings
