@@ -4,6 +4,7 @@ import hashlib
 import ipaddress
 from contextlib import suppress
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Self
 from urllib.parse import unquote_plus, urlsplit
 
 import idna
@@ -32,6 +33,9 @@ from dojo.url.validators import (
     validate_query,
     validate_user_info,
 )
+
+if TYPE_CHECKING:
+    from dojo.tools.protocol import LocationData
 
 
 @dataclass(frozen=True)
@@ -356,7 +360,20 @@ class URL(AbstractLocation):
         query=None,
         fragment=None,
     ) -> URL:
-        url = URL(
+        url = URL.from_parts(protocol, user_info, host, port, path, query, fragment)
+        return URL.get_or_create_from_object(url)
+
+    @staticmethod
+    def from_parts(
+        protocol=None,
+        user_info=None,
+        host=None,
+        port=None,
+        path=None,
+        query=None,
+        fragment=None,
+    ) -> URL:
+        return URL(
             protocol=protocol,
             user_info=user_info,
             host=host,
@@ -365,7 +382,6 @@ class URL(AbstractLocation):
             query=query,
             fragment=fragment,
         )
-        return URL.get_or_create_from_object(url)
 
     @staticmethod
     def create_location_from_value(value: str) -> URL:
@@ -396,3 +412,7 @@ class URL(AbstractLocation):
         )
         url.clean()
         return url
+
+    @classmethod
+    def _from_location_data_impl(cls, location_data: LocationData) -> Self:
+        return URL.from_value(location_data.value) if location_data.value else URL.from_parts(**location_data.data)

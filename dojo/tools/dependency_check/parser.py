@@ -6,9 +6,11 @@ import re
 import dateutil
 from cpe import CPE
 from defusedxml import ElementTree
+from django.conf import settings
 from packageurl import PackageURL
 
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
@@ -395,6 +397,21 @@ class DependencyCheckParser:
             component_version=component_version,
             **self.get_severity_and_cvss_meta(vulnerability, namespace),
         )
+
+        if settings.V3_FEATURE_LOCATIONS:
+            # Grab extra metadata to process later
+            finding.unsaved_locations.append(
+                LocationData(
+                    type="dependency",
+                    data={
+                        "file_path": dependency_filepath,
+                        "package_name": component_name,
+                        "package_version": component_version,
+                        "hashes": {
+                        },
+                    },
+                ),
+            )
 
         if vulnerability_id:
             finding.unsaved_vulnerability_ids = [vulnerability_id]

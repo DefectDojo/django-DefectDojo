@@ -36,6 +36,8 @@ from dojo.settings import settings
 if TYPE_CHECKING:
     from datetime import datetime
 
+    from dojo.tools.protocol import LocationData
+
 
 class Location(BaseModel):
 
@@ -264,6 +266,23 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
             self.location.location_type = location_type
             self.location.location_value = location_value
             self.location.save(update_fields=["location_type", "location_value"])
+
+    @classmethod
+    def from_location_data(cls, location_data: LocationData) -> Self:
+        if location_data.type != cls.get_location_type():
+            error_message = f"Cannot create instance of {cls} from LocationData of type {location_data.type}"
+            raise ValueError(error_message)
+        return cls._from_location_data_impl(location_data)
+
+    @classmethod
+    def _from_location_data_impl(cls, location_data) -> Self:
+        msg = "Subclasses must implement _from_location_data_impl"
+        raise NotImplementedError(msg)
+
+    @classmethod
+    def get_or_create_from_object(cls, location):
+        msg = "Subclasses must implement get_or_create_from_object"
+        raise NotImplementedError(msg)
 
 
 class LocationFindingReference(BaseModel):

@@ -50,7 +50,8 @@ from dojo.base_models.base import BaseModel
 from dojo.validators import cvss3_validator, cvss4_validator
 
 if TYPE_CHECKING:
-    from dojo.location.models import AbstractLocation
+    from dojo.importers.location_manager import UnsavedLocation
+
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -2183,6 +2184,10 @@ class Test(models.Model):
             models.Index(fields=["engagement", "test_type"]),
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.unsaved_metadata: list = []
+
     def __str__(self):
         if self.title:
             return f"{self.title} ({self.test_type})"
@@ -2771,8 +2776,10 @@ class Finding(BaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.unsaved_metadata: list = []
+
         if settings.V3_FEATURE_LOCATIONS:
-            self.unsaved_locations: list[AbstractLocation] = []
+            self.unsaved_locations: list[UnsavedLocation] = []
         else:
             # TODO: Delete this after the move to Locations
             self.unsaved_endpoints = []

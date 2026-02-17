@@ -11,43 +11,58 @@ from dojo.location.models import AbstractLocation, LocationFindingReference
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     Dojo_User,
-    Endpoint,
     Finding,
 )
+from dojo.tools.protocol import LocationData
 from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
 
-EndpointOrURL = TypeVar("EndpointOrURL", Endpoint, URL)
+UnsavedLocation = TypeVar("UnsavedLocation", AbstractLocation, LocationData)
 
 
 # test_notifications.py: Implement Locations
 class LocationManager:
-    @staticmethod
-    def get_or_create_location(unsaved_location: AbstractLocation) -> AbstractLocation | None:
+    @classmethod
+    def get_or_create_location(cls, unsaved_location: AbstractLocation) -> AbstractLocation | None:
         if isinstance(unsaved_location, URL):
             return URL.get_or_create_from_object(unsaved_location)
         logger.debug(f"IMPORT_SCAN: Unsupported location type: {type(unsaved_location)}")
         return None
 
+    @classmethod
+    def make_abstract_locations(cls, locations: list[UnsavedLocation]) -> list[AbstractLocation]:
+        abstract_locations = []
+
+        for location in locations:
+            if isinstance(location, AbstractLocation):
+                abstract_locations.append(location)
+            elif isinstance(location, LocationData) and location.type == URL.get_location_type():
+                abstract_locations.append(URL.from_location_data(location))
+            else:
+                logger.debug(f"Could not create AbstractLocation from type: {type(location)}")
+
+        return abstract_locations
+
+    @classmethod
     @app.task
     def add_locations_to_unsaved_finding(
-        finding: Finding,  # noqa: N805
-        locations: list[AbstractLocation],
-        **kwargs: dict,
+        cls,
+        finding: Finding,
+        locations: list[UnsavedLocation],
+        **kwargs: dict,  # noqa: ARG003
     ) -> None:
-        """Creates Endpoint objects for a single finding and creates the link via the endpoint status"""
-        locations = list(set(locations))
+        """Creates AbstractLocation objects for a single finding links them to it."""
+        locations = cls.clean_unsaved_locations(locations)
 
         logger.debug(f"IMPORT_SCAN: Adding {len(locations)} locations to finding: {finding}")
-        LocationManager.clean_unsaved_locations(locations)
 
         # LOCATION LOCATION LOCATION
         # TODO: bulk create the finding/product refs...
         locations_saved = 0
         for unsaved_location in locations:
-            if saved_location := LocationManager.get_or_create_location(unsaved_location):
+            if saved_location := cls.get_or_create_location(unsaved_location):
                 locations_saved += 1
                 saved_location.location.associate_with_finding(finding, status=FindingLocationStatus.Active)
 
@@ -81,26 +96,29 @@ class LocationManager:
     def chunk_locations_and_disperse(
         self,
         finding: Finding,
-        locations: list[AbstractLocation],
+        locations: list[UnsavedLocation],
         **kwargs: dict,
     ) -> None:
         if not locations:
             return
-        dojo_dispatch_task(LocationManager.add_locations_to_unsaved_finding, finding, locations, sync=True)
+        dojo_dispatch_task(self.add_locations_to_unsaved_finding, LocationManager, finding, locations, sync=True)
 
-    @staticmethod
+    @classmethod
     def clean_unsaved_locations(
-        locations: list[AbstractLocation],
-    ) -> None:
+        cls,
+        locations: list[UnsavedLocation],
+    ) -> list[AbstractLocation]:
         """
-        Clean endpoints that are supplied. For any endpoints that fail this validation
-        process, raise a message that broken endpoints are being stored
+        Convert locations represented as LocationData dataclasses to the appropriate AbstractLocation type, then clean
+        them. For any endpoints that fail this validation process, log a message that broken locations are being stored.
         """
+        locations = list(set(cls.make_abstract_locations(locations)))
         for location in locations:
             try:
                 location.clean()
             except ValidationError as e:
                 logger.warning("DefectDojo is storing broken locations because cleaning wasn't successful: %s", e)
+        return locations
 
     def chunk_locations_and_reactivate(
         self,
