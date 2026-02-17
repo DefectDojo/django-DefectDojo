@@ -38,7 +38,7 @@ class NancyParser:
         if raw_value is None:
             return "Info"
         val = float(raw_value)
-        if val == 0.0:
+        if val == 0:
             return "Info"
         if val < 4.0:
             return "Low"
