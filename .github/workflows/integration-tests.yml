@@ -37,7 +37,6 @@ jobs:
           "tests/file_test.py",
           "tests/finding_extended_test.py",
           "tests/finding_group_test.py",
-          "tests/finding_image.png",
           "tests/finding_test.py",
           "tests/group_test.py",
           "tests/login_test.py",
