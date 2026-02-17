@@ -2,8 +2,9 @@
 title: "Finding Status Definitions"
 description: "A quick reference to Finding status: Open, Verified, Accepted.."
 weight: 2
+aliases:
+  - /en/working_with_findings/findings_workflows/finding_status_definitions
 ---
-
 Each Finding created in DefectDojo has a Status which communicates relevant information. Statuses help your team keep track of their progress in resolving issues.
 
 Each Finding status has a context\-specific meaning which will need to be defined by your own team. These are our suggestions, but your team's usage may vary.

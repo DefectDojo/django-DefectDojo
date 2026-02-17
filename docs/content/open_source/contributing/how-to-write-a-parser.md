@@ -3,8 +3,9 @@ title: "Contribute to Parsers"
 description: "How to contribute to parsers"
 draft: false
 weight: 1
+aliases:
+  - /en/open_source/contributing/how-to-write-a-parser
 ---
-
 All commands assume that you're located at the root of the django-DefectDojo cloned repo.
 
 ## Pre-requisites

@@ -4,6 +4,8 @@ description: "Get Started With DefectDojo"
 draft: "false"
 weight: 3
 audience: pro
+aliases:
+ - /en/about_defectdojo/new_user_checklist
 ---
 
 The essence of DefectDojo is to import security data, organize it, and present it to the folks who need to know.  Here's a quick reference you can use to ensure successful implementation, from a blank canvas to a fully functional app.

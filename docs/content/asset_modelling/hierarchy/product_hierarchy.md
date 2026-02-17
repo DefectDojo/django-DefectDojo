@@ -3,8 +3,9 @@ title: "Product Hierarchy: Overview"
 description: "Understand Product Types, Products, Engagements, Tests and Findings"
 weight: 1
 audience: opensource
+aliases:
+  - /en/working_with_findings/organizing_engagements_tests/product_hierarchy
 ---
-
 DefectDojo uses five main data classes to organize your work: **Product Types, Products**, **Engagements**, **Tests**, and **Findings**.
 
 DefectDojo is made to be flexible to conform to your team, rather than making your team conform to the tool. You'll be able to design a robust, adaptable workspace once you understand how these data classes can be used to organize your work.

@@ -2,8 +2,9 @@
 title: "Pro Integrations"
 weight: 1
 audience: pro
+aliases:
+  - /en/share_your_findings/integrations
 ---
-
 DefectDojo Pro's Integrations let you push your Findings and Finding Groups to ticket tracking systems to easily integrate security remediation with your teams existing development workflow.
 
 Supported Integrations:

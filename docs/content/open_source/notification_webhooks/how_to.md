@@ -2,8 +2,9 @@
 title: "Notification Webhooks Setup"
 weight: 1
 chapter: true
+aliases:
+  - /en/open_source/notification_webhooks/how_to
 ---
-
 Webhooks are HTTP requests coming from the DefectDojo instance towards a user-defined webserver which expects this kind of incoming traffic.
 
 ## Transition graph:

@@ -2,8 +2,9 @@
 title: "Share permissions: User Groups"
 description: "Share and maintain permissions for many users"
 weight: 3
+aliases:
+  - /en/customize_dojo/user_management/create_user_group
 ---
-
 If you have a significant number of DefectDojo users, you may want to create one or more **Groups**, in order to set the same Role\-Based Access Control (RBAC) rules for many users simultaneously. Only Superusers can create User Groups.
 
 Groups can work in multiple ways:

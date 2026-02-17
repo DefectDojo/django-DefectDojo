@@ -2,8 +2,9 @@
 title: "Import vs Reimport"
 description: "Learn how to import data manually, through the API, or via a connector"
 weight: 2
+aliases:
+  - /en/connecting_your_tools/import_scan_files/using_reimport
 ---
-
 When a Test is created in DefectDojo (either in advance or by importing a scan file), the Test can be extended with new Finding data.
 
 For example, let’s say you have a CI/CD pipeline, which is designed to send a new report to DefectDojo every day. Rather than create a new Test or Engagement for each ‘run’ of the pipeline, you could have each report flow into the same Test using **Reimport**.

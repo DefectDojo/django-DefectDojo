@@ -3,8 +3,9 @@ title: "Amend Documentation"
 description: "How to amend the documentation"
 draft: false
 weight: 2
+aliases:
+  - /en/open_source/contributing/documentation
 ---
-
 The documentation is built with [Hugo](https://gohugo.io/) and uses the theme [Docsy](https://www.docsy.dev).
 Static files for the webside are build with github actions and are publish in the gh-pages branch.
 
