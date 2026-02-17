@@ -131,7 +131,7 @@ class DependencyCheckParser:
                     if purl_parts["version"] and len(purl_parts["version"]) > 0
                     else ""
                 )
-                return component_name, component_version
+                return component_name, component_version, pck_id
 
             # vulnerabilityIds_node = identifiers_node.find('.//' + namespace + 'vulnerabilityIds')
             # if vulnerabilityIds_node:
@@ -163,7 +163,7 @@ class DependencyCheckParser:
                     if len(cpe.get_version()) > 0
                     else None
                 )
-                return component_name, component_version
+                return component_name, component_version, None
 
             maven_node = identifiers_node.find(
                 ".//" + namespace + 'identifier[@type="maven"]',
@@ -176,7 +176,7 @@ class DependencyCheckParser:
                 if len(maven_parts) == 3:
                     component_name = maven_parts[0] + ":" + maven_parts[1]
                     component_version = maven_parts[2]
-                    return component_name, component_version
+                    return component_name, component_version, None
 
         # TODO: what happens when there multiple evidencecollectednodes with
         # product or version as type?
@@ -211,9 +211,9 @@ class DependencyCheckParser:
                         f"{namespace}value",
                     )
 
-                return component_name, component_version
+                return component_name, component_version, None
 
-        return None, None
+        return None, None, None
 
     def get_severity_and_cvss_meta(self, vulnerability, namespace) -> dict:
         # Get the base severity from the report
@@ -315,6 +315,7 @@ class DependencyCheckParser:
         (
             component_name,
             component_version,
+            component_purl,
         ) = self.get_component_name_and_version_from_dependency(
             dependency, related_dependency, namespace,
         )
@@ -398,19 +399,9 @@ class DependencyCheckParser:
             **self.get_severity_and_cvss_meta(vulnerability, namespace),
         )
 
-        if settings.V3_FEATURE_LOCATIONS:
-            # Grab extra metadata to process later
+        if settings.V3_FEATURE_LOCATIONS and component_purl:
             finding.unsaved_locations.append(
-                LocationData(
-                    type="dependency",
-                    data={
-                        "file_path": dependency_filepath,
-                        "package_name": component_name,
-                        "package_version": component_version,
-                        "hashes": {
-                        },
-                    },
-                ),
+                LocationData(type="dependency", value=component_purl),
             )
 
         if vulnerability_id:
