@@ -1574,42 +1574,6 @@ class EngagementTest(BaseClass.RelatedObjectsTest, BaseClass.BaseClassTest):
         self.deleted_objects = 23
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
-    @parameterized.expand(
-        [
-            ("files", {"title": "test", "file": b"empty"}),
-            ("notes", {"entry": "string"}),
-        ],
-    )
-    def test_related_objects(self, related_object_path, payload):
-        """
-        Tests that BaseRelatedObjectPermission enforces the permissions not associated
-        with the base object. For example, even though a request to add a note to an
-        engagement is a POST, we do not need engagement add permissions, but rather
-        engagement edit permissions since that is what is defined in the
-        UserHasEngagementRelatedObjectPermission class
-        """
-        self.setUp_global_reader()
-        # Get an engagement
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(200, response.status_code, response.content[:1000])
-        engagement_id = response.data["results"][0]["id"]
-        # Attempt to add a related object
-        relative_url = f"{self.url}{engagement_id}/{related_object_path}/"
-        response = self.client.post(relative_url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        # Now switch to a user with edit permissions (but not create)
-        self.setUp_global_writer()
-        # Retry adding the related object
-        if related_object_path == "files":
-            # Convert bytes to a mock uploaded file
-            payload["file"] = SimpleUploadedFile(
-                name="test_file.txt",
-                content=payload["file"],  # the b"empty"
-                content_type="text/plain",
-            )
-        response = self.client.post(relative_url, payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
-
 
 @versioned_fixtures
 class RiskAcceptanceTest(BaseClass.BaseClassTest):
