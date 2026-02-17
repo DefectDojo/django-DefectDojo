@@ -2,8 +2,9 @@
 title: "📋 Jira Integration Guide"
 description: "Work with the Jira integration"
 weight: 1
+aliases:
+  - /en/share_your_findings/jira_guide
 ---
-
 DefectDojo's Jira integration can be used to push Finding data to one or more Jira Spaces.  By doing so, you can integrate DefectDojo into your standard development workflow.  Here are some examples of how this can work:
 
 * The AppSec team can selectively push Findings to a Jira Space used by developers, so that issue remediation can be appropriately prioritized alongside regular development.  Developers on this board don't need to access DefectDojo - they can keep all their work in one place.

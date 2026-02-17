@@ -11,4 +11,4 @@ class URLSerializer(AbstractedLocationSerializer):
         """Meta class for URLSerializer."""
 
         model = URL
-        fields = "__all__"
+        exclude = ("location", "hash")

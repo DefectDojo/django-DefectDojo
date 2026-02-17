@@ -6,8 +6,9 @@ weight: 4
 chapter: true
 exclude_search: true
 audience: pro
+aliases:
+  - /en/about_defectdojo/pro_features
 ---
-
 Here is a list of DefectDojo Pro’s many additional features, along with links to documentation to see them in action:
 
 ## Improved UX

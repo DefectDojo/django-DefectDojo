@@ -3,8 +3,9 @@ title: "Enabling Deduplication"
 description: "How to enable Deduplication at the Product level"
 weight: 2
 audience: pro
+aliases:
+  - /en/working_with_findings/finding_deduplication/enabling_product_deduplication
 ---
-
 Deduplication can be implemented at either a Product level or at a more narrow Engagement level.
 
 ## Deduplication for Products

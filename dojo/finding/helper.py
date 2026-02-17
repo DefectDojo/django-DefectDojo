@@ -358,8 +358,6 @@ def group_findings_by(finds, finding_group_by_option):
 def add_findings_to_auto_group(name, findings, group_by, *, create_finding_groups_for_all_findings=True, **kwargs):
     if name is not None and findings is not None and len(findings) > 0:
         creator = get_current_user()
-        if not creator:
-            creator = kwargs.get("async_user")
         test = findings[0].test
 
         if create_finding_groups_for_all_findings or len(findings) > 1:
@@ -470,6 +468,7 @@ def post_process_findings_batch(
     push_to_jira=False,
     jira_instance_id=None,
     user=None,
+    sync=False,
     **kwargs,
 ):
 
@@ -513,7 +512,7 @@ def post_process_findings_batch(
     if product_grading_option and system_settings.enable_product_grade:
         from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id)
+        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id, sync=sync)
 
     # If we received the ID of a jira instance, then we need to determine the keep in sync behavior
     jira_instance = None

@@ -84,8 +84,6 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
     # Track foreground execution as a "created task" as well (matches historical dojo_async_task behavior)
     dojo_async_task_counter.incr(str(sig.task), args=sig.args, kwargs=sig_kwargs)
 
-    sig_kwargs.pop("sync", None)
-    sig = sig.clone(kwargs=sig_kwargs)
     eager = sig.apply()
     try:
         return eager.get(propagate=True)

@@ -1,8 +1,9 @@
 ---
 title: "Managing Operations"
 description: "Check the status of your Connector's Discover & Sync Operations"
+aliases:
+  - /en/connecting_your_tools/connectors/manage_operations
 ---
-
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
 
 Once an API connector is set up, it will run two Operations on a recurring basis:

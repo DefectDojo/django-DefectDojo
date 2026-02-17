@@ -2,8 +2,10 @@
 title: "DefectDojo Main Dashboard"
 description: "Working with the front page of DefectDojo"
 weight: 1
+aliases:
+  - /en/customize_dojo/dashboards/Introduction_dashboard
+  - /en/customize_dojo/dashboards/pro_dashboards
 ---
-
 The Dashboard is likely the first page you'll see when you open DefectDojo. It summarizes your team’s performance, and provides tracking tools to monitor specific areas of your vulnerability tracking environment.
 
 ![image](images/Introduction_to_Dashboard_Features.png)

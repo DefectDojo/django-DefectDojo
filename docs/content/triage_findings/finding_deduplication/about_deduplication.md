@@ -2,6 +2,10 @@
 title: "About Deduplication"
 description: "Deduplication fundamentals and key concepts"
 weight: 1
+aliases:
+ - /en/working_with_findings/finding_deduplication/about_deduplication
+ - /en/working_with_findings/finding_deduplication/delete_deduplicates
+ - /en/working_with_findings/findings_workflows/manage_duplicate_findings
 ---
 
 DefectDojo is designed to ingest bulk reports from tools, creating one or more Findings based on the content of the report. When using DefectDojo, you’ll most likely be ingesting reports from the same tool on a regular basis, which means that duplicate Findings are highly likely. 

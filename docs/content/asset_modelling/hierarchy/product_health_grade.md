@@ -1,8 +1,9 @@
 ---
 title: "Product Health Grade"
 description: "How DefectDojo calculates a Product Health Grade"
+aliases:
+  - /en/working_with_findings/organizing_engagements_tests/product_health_grade
 ---
-
 DefectDojo can calculate a grade for your Products based on the amount of Findings contained within. Grades are ranked from A \- F.
 
 Note that only Active \& Verified Findings contribute to a Product Grade \- unverified Findings will not have an impact.

@@ -3,8 +3,9 @@ title: "Export Findings"
 description: "DefectDojo has the ability to export findings."
 draft: false
 weight: 12
+aliases:
+  - /en/open_source/exporting
 ---
-
 ## Export Findings
 
 Pages that show a list of findings or a list of engagements have a CSV and Excel Export functionality in the top right dropdown menu.

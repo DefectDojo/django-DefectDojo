@@ -3,8 +3,9 @@ title: "Integrators Tool Reference"
 description: "Detailed setup guides for Integrators"
 weight: 1
 audience: pro
+aliases:
+  - /en/share_your_findings/integrations_toolreference
 ---
-
 Here are specific instructions detailing how to set up a DefectDojo Integration with a third party Issue Tracker.
 
 ## Azure DevOps Boards

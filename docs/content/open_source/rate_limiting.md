@@ -3,8 +3,9 @@ title: "Rate Limiting (Open-Source)"
 description: "Configurable rate limiting on the login page to mitigate brute force attacks"
 draft: false
 weight: 11
+aliases:
+  - /en/open_source/rate_limiting
 ---
-
 DefectDojo has protection against brute force attacks through rate limiting.
 
 ## Configuration

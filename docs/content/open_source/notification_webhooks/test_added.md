@@ -3,8 +3,9 @@ title: "Event: test_added"
 weight: 5
 chapter: true
 exclude_search: true
+aliases:
+  - /en/open_source/notification_webhooks/test_added
 ---
-
 ## Event HTTP header
 ```yaml
 X-DefectDojo-Event: test_added
