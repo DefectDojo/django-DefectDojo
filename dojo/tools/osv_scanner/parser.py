@@ -1,7 +1,6 @@
 import json
 
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -91,7 +90,7 @@ class OSVScannerParser:
                             self.UNSAVED_LOCATIONS.append(
                                 LocationData(
                                     type="dependency",
-                                    value=PackageURL(type=purl_type, name=pkg_name, version=pkg_version).to_string(),
+                                    data={"purl_type": purl_type, "name": pkg_name, "version": pkg_version},
                                 ),
                             )
         findings = []

@@ -3,7 +3,6 @@ import json
 from typing import NamedTuple
 
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -48,14 +47,11 @@ class OrtParser:
                             name = parts[2]
                             version = parts[3]
                             if name:
+                                dep_data = {"purl_type": purl_type, "name": name, "version": version}
+                                if namespace:
+                                    dep_data["namespace"] = namespace
                                 self.UNSAVED_LOCATIONS.append(
-                                    LocationData(
-                                        type="dependency",
-                                        value=PackageURL(
-                                            type=purl_type, name=name,
-                                            namespace=namespace, version=version,
-                                        ).to_string(),
-                                    ),
+                                    LocationData(type="dependency", data=dep_data),
                                 )
             return self.get_items(evaluated_model, test)
         return []

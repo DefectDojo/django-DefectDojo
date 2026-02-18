@@ -3,7 +3,6 @@ import json
 
 from cvss.cvss3 import CVSS3
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -297,7 +296,7 @@ class SnykParser:
                 finding.unsaved_locations.append(
                     LocationData(
                         type="dependency",
-                        value=PackageURL(type=purl_type, name=vulnerability["packageName"], version=vulnerability.get("version", "")).to_string(),
+                        data={"purl_type": purl_type, "name": vulnerability["packageName"], "version": vulnerability.get("version", "")},
                     ),
                 )
 

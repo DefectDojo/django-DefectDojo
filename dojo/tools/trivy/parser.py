@@ -4,7 +4,6 @@ import json
 import logging
 
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -348,14 +347,16 @@ class TrivyParser:
 
                 if settings.V3_FEATURE_LOCATIONS and package_name:
                     purl_value = vuln.get("PkgIdentifier", {}).get("PURL")
-                    if not purl_value:
-                        purl_type = TRIVY_TYPE_TO_PURL.get(vul_type.lower())
-                        if purl_type:
-                            purl_value = PackageURL(type=purl_type, name=package_name, version=package_version).to_string()
                     if purl_value:
                         finding.unsaved_locations.append(
                             LocationData(type="dependency", value=purl_value),
                         )
+                    else:
+                        purl_type = TRIVY_TYPE_TO_PURL.get(vul_type.lower())
+                        if purl_type:
+                            finding.unsaved_locations.append(
+                                LocationData(type="dependency", data={"purl_type": purl_type, "name": package_name, "version": package_version}),
+                            )
 
                 items.append(finding)
 

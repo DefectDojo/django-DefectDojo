@@ -2,7 +2,6 @@ import hashlib
 import json
 
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -146,7 +145,7 @@ class CargoAuditParser:
                         finding.unsaved_locations.append(
                             LocationData(
                                 type="dependency",
-                                value=PackageURL(type="cargo", name=package_name, version=package_version).to_string(),
+                                data={"purl_type": "cargo", "name": package_name, "version": package_version},
                             ),
                         )
                     dupes[dupe_key] = finding

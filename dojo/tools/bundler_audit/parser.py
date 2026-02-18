@@ -4,7 +4,6 @@ import hashlib
 from datetime import datetime
 
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -100,7 +99,7 @@ class BundlerAuditParser:
                     find.unsaved_locations.append(
                         LocationData(
                             type="dependency",
-                            value=PackageURL(type="gem", name=gem_name, version=gem_version).to_string(),
+                            data={"purl_type": "gem", "name": gem_name, "version": gem_version},
                         ),
                     )
 

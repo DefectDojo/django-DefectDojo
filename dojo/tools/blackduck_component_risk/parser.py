@@ -1,6 +1,5 @@
 # Author: apipia, wheelsvt
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -51,7 +50,7 @@ class BlackduckComponentRiskParser:
                         self.UNSAVED_LOCATIONS.append(
                             LocationData(
                                 type="dependency",
-                                value=PackageURL(type=purl_type, name=comp_name, version=comp_version).to_string(),
+                                data={"purl_type": purl_type, "name": comp_name, "version": comp_version},
                             ),
                         )
         return self.ingest_findings(components, securities, sources, test)

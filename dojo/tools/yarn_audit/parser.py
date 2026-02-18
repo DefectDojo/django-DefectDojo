@@ -1,7 +1,6 @@
 import json
 
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -85,7 +84,7 @@ class YarnAuditParser:
                     dojo_finding.unsaved_locations.append(
                         LocationData(
                             type="dependency",
-                            value=PackageURL(type="npm", name=value, version=str(child_tree_versions)).to_string(),
+                            data={"purl_type": "npm", "name": value, "version": str(child_tree_versions)},
                         ),
                     )
         return items
@@ -153,7 +152,7 @@ class YarnAuditParser:
                 dojo_finding.unsaved_locations.append(
                     LocationData(
                         type="dependency",
-                        value=PackageURL(type="npm", name=dojo_finding.component_name, version=dojo_finding.component_version).to_string(),
+                        data={"purl_type": "npm", "name": dojo_finding.component_name, "version": dojo_finding.component_version},
                     ),
                 )
             items.append(dojo_finding)
@@ -232,7 +231,7 @@ class YarnAuditParser:
             dojo_finding.unsaved_locations.append(
                 LocationData(
                     type="dependency",
-                    value=PackageURL(type="npm", name=item_node["module_name"], version=item_node["findings"][0]["version"]).to_string(),
+                    data={"purl_type": "npm", "name": item_node["module_name"], "version": item_node["findings"][0]["version"]},
                 ),
             )
         return dojo_finding

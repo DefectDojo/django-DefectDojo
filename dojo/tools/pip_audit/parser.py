@@ -2,7 +2,6 @@
 import json
 
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -42,7 +41,7 @@ class PipAuditParser:
                     self.UNSAVED_LOCATIONS.append(
                         LocationData(
                             type="dependency",
-                            value=PackageURL(type="pypi", name=name, version=version).to_string(),
+                            data={"purl_type": "pypi", "name": name, "version": version},
                         ),
                     )
         # this parser can handle two distinct formats see sample scan files
@@ -120,7 +119,7 @@ def get_item_findings(item, test):
                 finding.unsaved_locations.append(
                     LocationData(
                         type="dependency",
-                        value=PackageURL(type="pypi", name=component_name, version=component_version).to_string(),
+                        data={"purl_type": "pypi", "name": component_name, "version": component_version},
                     ),
                 )
 

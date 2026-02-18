@@ -2,7 +2,6 @@ import hashlib
 import json
 
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -32,7 +31,7 @@ class RetireJsParser:
                         self.UNSAVED_LOCATIONS.append(
                             LocationData(
                                 type="dependency",
-                                value=PackageURL(type="npm", name=comp_name, version=comp_version).to_string(),
+                                data={"purl_type": "npm", "name": comp_name, "version": comp_version},
                             ),
                         )
         return self.get_items(tree, test)
@@ -66,7 +65,7 @@ class RetireJsParser:
                             item.unsaved_locations.append(
                                 LocationData(
                                     type="dependency",
-                                    value=PackageURL(type="npm", name=result["component"], version=result["version"]).to_string(),
+                                    data={"purl_type": "npm", "name": result["component"], "version": result["version"]},
                                 ),
                             )
 

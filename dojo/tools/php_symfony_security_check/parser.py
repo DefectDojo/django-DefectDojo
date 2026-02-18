@@ -1,7 +1,6 @@
 import json
 
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -94,7 +93,7 @@ def get_item(dependency_name, dependency_version, advisory, test):
         finding.unsaved_locations.append(
             LocationData(
                 type="dependency",
-                value=PackageURL(type="composer", name=dependency_name, version=dependency_version).to_string(),
+                data={"purl_type": "composer", "name": dependency_name, "version": dependency_version},
             ),
         )
 

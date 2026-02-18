@@ -3,7 +3,6 @@ import logging
 from itertools import groupby, islice
 
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -133,7 +132,7 @@ class GovulncheckParser:
                             finding.unsaved_locations.append(
                                 LocationData(
                                     type="dependency",
-                                    value=PackageURL(type="golang", name=d["component_name"], version=d["component_version"]).to_string(),
+                                    data={"purl_type": "golang", "name": d["component_name"], "version": d["component_version"]},
                                 ),
                             )
                         findings.append(finding)
@@ -213,7 +212,7 @@ class GovulncheckParser:
                             finding.unsaved_locations.append(
                                 LocationData(
                                     type="dependency",
-                                    value=PackageURL(type="golang", name=component_name, version=affected_version).to_string(),
+                                    data={"purl_type": "golang", "name": component_name, "version": affected_version},
                                 ),
                             )
                         findings.append(finding)

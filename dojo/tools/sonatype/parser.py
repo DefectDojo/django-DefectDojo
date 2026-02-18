@@ -1,7 +1,6 @@
 import json
 
 from django.conf import settings
-from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
@@ -56,14 +55,11 @@ class SonatypeParser:
                                 purl_namespace = None
                                 purl_version = coords.get("version", "")
                             if purl_name:
+                                dep_data = {"purl_type": purl_type, "name": purl_name, "version": purl_version}
+                                if purl_namespace:
+                                    dep_data["namespace"] = purl_namespace
                                 self.UNSAVED_LOCATIONS.append(
-                                    LocationData(
-                                        type="dependency",
-                                        value=PackageURL(
-                                            type=purl_type, name=purl_name,
-                                            namespace=purl_namespace, version=purl_version,
-                                        ).to_string(),
-                                    ),
+                                    LocationData(type="dependency", data=dep_data),
                                 )
 
             for component in components:
