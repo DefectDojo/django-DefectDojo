@@ -2,7 +2,17 @@ import hashlib
 import json
 from typing import NamedTuple
 
+from django.conf import settings
+from packageurl import PackageURL
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
+
+ORT_TYPE_TO_PURL = {
+    "maven": "maven", "npm": "npm", "pypi": "pypi", "go": "golang",
+    "nuget": "nuget", "gem": "gem", "cargo": "cargo", "cocoapods": "cocoapods",
+    "composer": "composer", "pub": "pub", "bower": "npm",
+}
 
 
 class OrtParser:
@@ -19,11 +29,34 @@ class OrtParser:
         return "Import Outpost24 endpoint vulnerability scan in XML format."
 
     def get_findings(self, json_output, test):
+        self.UNSAVED_LOCATIONS = []
         if json_output is None:
             return []
 
         evaluated_model = self.parse_json(json_output)
         if evaluated_model:
+            # Collect product-level dependency locations for all packages
+            if settings.V3_FEATURE_LOCATIONS and evaluated_model.get("packages"):
+                for package in evaluated_model["packages"]:
+                    pkg_id = package.get("id", "")
+                    parts = pkg_id.split(":")
+                    if len(parts) >= 4:
+                        pkg_type_raw = parts[0].lower()
+                        purl_type = ORT_TYPE_TO_PURL.get(pkg_type_raw)
+                        if purl_type:
+                            namespace = parts[1] if parts[1] else None
+                            name = parts[2]
+                            version = parts[3]
+                            if name:
+                                self.UNSAVED_LOCATIONS.append(
+                                    LocationData(
+                                        type="dependency",
+                                        value=PackageURL(
+                                            type=purl_type, name=name,
+                                            namespace=namespace, version=version,
+                                        ).to_string(),
+                                    ),
+                                )
             return self.get_items(evaluated_model, test)
         return []
 

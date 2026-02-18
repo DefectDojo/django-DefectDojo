@@ -1,8 +1,19 @@
 import json
 
+from django.conf import settings
+from packageurl import PackageURL
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 from dojo.tools.sonatype.identifier import ComponentIdentifier
 from dojo.utils import parse_cvss_data
+
+SONATYPE_FORMAT_TO_PURL = {
+    "pypi": "pypi", "rpm": "rpm", "gem": "gem", "golang": "golang",
+    "conan": "conan", "conda": "conda", "bower": "npm", "composer": "composer",
+    "cran": "cran", "cargo": "cargo", "cocoapods": "cocoapods",
+    "swift": "swift", "maven": "maven", "npm": "npm", "nuget": "nuget",
+}
 
 
 class SonatypeParser:
@@ -18,10 +29,42 @@ class SonatypeParser:
         return "Can be imported in JSON format"
 
     def get_findings(self, json_output, test):
+        self.UNSAVED_LOCATIONS = []
         sonatype_report = json.load(json_output)
         findings = []
         if "components" in sonatype_report:
             components = sonatype_report["components"]
+
+            # Collect product-level dependency locations for all components
+            if settings.V3_FEATURE_LOCATIONS:
+                for component in components:
+                    if "componentIdentifier" in component:
+                        comp_format = component["componentIdentifier"]["format"]
+                        purl_type = SONATYPE_FORMAT_TO_PURL.get(comp_format)
+                        if purl_type:
+                            coords = component["componentIdentifier"]["coordinates"]
+                            if comp_format == "maven":
+                                purl_name = coords.get("artifactId", "")
+                                purl_namespace = coords.get("groupId")
+                                purl_version = coords.get("version", "")
+                            elif comp_format in {"npm", "nuget"}:
+                                purl_name = coords.get("packageId", "")
+                                purl_namespace = None
+                                purl_version = coords.get("version", "")
+                            else:
+                                purl_name = coords.get("name", "")
+                                purl_namespace = None
+                                purl_version = coords.get("version", "")
+                            if purl_name:
+                                self.UNSAVED_LOCATIONS.append(
+                                    LocationData(
+                                        type="dependency",
+                                        value=PackageURL(
+                                            type=purl_type, name=purl_name,
+                                            namespace=purl_namespace, version=purl_version,
+                                        ).to_string(),
+                                    ),
+                                )
 
             for component in components:
                 if component["securityData"] is None or len(component["securityData"]["securityIssues"]) < 1:

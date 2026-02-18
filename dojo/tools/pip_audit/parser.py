@@ -30,7 +30,21 @@ class PipAuditParser:
 
     def get_findings(self, scan_file, test):
         """Return the collection of Findings ingested."""
+        self.UNSAVED_LOCATIONS = []
         data = json.load(scan_file)
+        # Collect product-level dependency locations for all dependencies
+        if settings.V3_FEATURE_LOCATIONS:
+            items = data.get("dependencies", data) if isinstance(data, dict) and "dependencies" in data else data
+            for item in items:
+                name = item.get("name")
+                version = item.get("version")
+                if name:
+                    self.UNSAVED_LOCATIONS.append(
+                        LocationData(
+                            type="dependency",
+                            value=PackageURL(type="pypi", name=name, version=version).to_string(),
+                        ),
+                    )
         # this parser can handle two distinct formats see sample scan files
         return get_file_findings(data, test) if "dependencies" in data else get_legacy_findings(data, test)
 

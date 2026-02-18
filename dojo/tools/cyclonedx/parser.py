@@ -20,6 +20,12 @@ class CycloneDXParser:
         return "Support CycloneDX XML and JSON report formats (compatible with 1.4)."
 
     def get_findings(self, file, test):
+        self.UNSAVED_LOCATIONS = []
         if file.name.strip().lower().endswith(".json"):
-            return CycloneDXJSONParser()._get_findings_json(file, test)
-        return CycloneDXXMLParser()._get_findings_xml(file, test)
+            sub_parser = CycloneDXJSONParser()
+            findings = sub_parser._get_findings_json(file, test)
+        else:
+            sub_parser = CycloneDXXMLParser()
+            findings = sub_parser._get_findings_xml(file, test)
+        self.UNSAVED_LOCATIONS = sub_parser.UNSAVED_LOCATIONS
+        return findings

@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 class CycloneDXXMLParser:
     def _get_findings_xml(self, file, test):
+        self.UNSAVED_LOCATIONS = []
         nscan = ElementTree.parse(file)
         root = nscan.getroot()
         namespace = self.get_namespace(root)
@@ -48,6 +49,11 @@ class CycloneDXXMLParser:
                     "version": component_version,
                     "purl": component_purl,
                 }
+            # Collect product-level dependency locations for all components
+            if settings.V3_FEATURE_LOCATIONS and component_purl:
+                self.UNSAVED_LOCATIONS.append(
+                    LocationData(type="dependency", value=component_purl),
+                )
             # for each vulnerabilities add a finding
             for vulnerability in component.findall(
                 "v:vulnerabilities/v:vulnerability", namespaces=ns,

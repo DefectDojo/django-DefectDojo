@@ -19,7 +19,22 @@ class RetireJsParser:
         return "Retire.js JavaScript scan (--js) output file can be imported in JSON format."
 
     def get_findings(self, json_output, test):
+        self.UNSAVED_LOCATIONS = []
         tree = json.load(json_output)
+        # Collect product-level dependency locations for all components
+        if settings.V3_FEATURE_LOCATIONS:
+            tree_data = tree.get("data", tree) if isinstance(tree, dict) and "data" in tree else tree
+            for node in tree_data:
+                for result in node.get("results", []):
+                    comp_name = result.get("component")
+                    comp_version = result.get("version")
+                    if comp_name and comp_version:
+                        self.UNSAVED_LOCATIONS.append(
+                            LocationData(
+                                type="dependency",
+                                value=PackageURL(type="npm", name=comp_name, version=comp_version).to_string(),
+                            ),
+                        )
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):

@@ -1,9 +1,18 @@
 import json
 
 from django.conf import settings
+from packageurl import PackageURL
 
 from dojo.models import Finding
 from dojo.tools.protocol import LocationData
+
+OSV_ECOSYSTEM_TO_PURL = {
+    "npm": "npm", "pypi": "pypi", "go": "golang", "maven": "maven",
+    "crates.io": "cargo", "rubygems": "gem", "nuget": "nuget",
+    "packagist": "composer", "hex": "hex", "pub": "pub",
+    "cocoapods": "cocoapods", "swifturl": "swift",
+    "alpine": "apk", "debian": "deb",
+}
 
 
 class OSVScannerParser:
@@ -63,10 +72,28 @@ class OSVScannerParser:
         return ("Medium" if severity_input == "MODERATE" else severity_input.lower().capitalize()) if severity_input else "Low"
 
     def get_findings(self, file, test):
+        self.UNSAVED_LOCATIONS = []
         try:
             data = json.load(file)
         except json.decoder.JSONDecodeError:
             return []
+        # Collect product-level dependency locations for all packages
+        if settings.V3_FEATURE_LOCATIONS:
+            for result in data.get("results", []):
+                for package in result.get("packages", []):
+                    pkg_data = package.get("package", {})
+                    pkg_name = pkg_data.get("name")
+                    pkg_version = pkg_data.get("version")
+                    pkg_ecosystem = pkg_data.get("ecosystem", "")
+                    if pkg_name and pkg_ecosystem:
+                        purl_type = OSV_ECOSYSTEM_TO_PURL.get(pkg_ecosystem.lower())
+                        if purl_type:
+                            self.UNSAVED_LOCATIONS.append(
+                                LocationData(
+                                    type="dependency",
+                                    value=PackageURL(type=purl_type, name=pkg_name, version=pkg_version).to_string(),
+                                ),
+                            )
         findings = []
         for result in data.get("results", []):
             # Extract source locations if present

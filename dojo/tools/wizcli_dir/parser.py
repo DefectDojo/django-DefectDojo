@@ -17,6 +17,7 @@ class WizcliDirParser:
         return "Wizcli Dir Scan results in JSON file format."
 
     def get_findings(self, filename, test):
+        self.UNSAVED_LOCATIONS = []
         scan_data = filename.read()
         try:
             data = json.loads(scan_data.decode("utf-8"))

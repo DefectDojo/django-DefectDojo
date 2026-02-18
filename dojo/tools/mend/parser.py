@@ -57,6 +57,7 @@ class MendParser:
         return "Import JSON report"
 
     def get_findings(self, file, test):
+        self.UNSAVED_LOCATIONS = []
         if file is None:
             return []
 
@@ -65,6 +66,37 @@ class MendParser:
             content = json.loads(str(data, "utf-8"))
         except Exception:
             content = json.loads(data)
+
+        # Collect product-level dependency locations for all libraries/components
+        if settings.V3_FEATURE_LOCATIONS:
+            if "libraries" in content:
+                for lib_node in content.get("libraries"):
+                    lib_type = lib_node.get("type", "")
+                    lib_name = lib_node.get("artifactId")
+                    lib_version = lib_node.get("version")
+                    if lib_name and lib_type:
+                        purl_type = MEND_TYPE_TO_PURL.get(lib_type.lower())
+                        if purl_type:
+                            self.UNSAVED_LOCATIONS.append(
+                                LocationData(
+                                    type="dependency",
+                                    value=PackageURL(type=purl_type, name=lib_name, version=lib_version).to_string(),
+                                ),
+                            )
+            elif "components" in content:
+                for comp_node in content.get("components"):
+                    comp_type = comp_node.get("libraryType", "")
+                    comp_name = comp_node.get("artifactId")
+                    comp_version = comp_node.get("version")
+                    if comp_name and comp_type:
+                        purl_type = MEND_TYPE_TO_PURL.get(comp_type.lower())
+                        if purl_type:
+                            self.UNSAVED_LOCATIONS.append(
+                                LocationData(
+                                    type="dependency",
+                                    value=PackageURL(type=purl_type, name=comp_name, version=comp_version).to_string(),
+                                ),
+                            )
 
         def _build_common_output(node, lib_name=None):
             # project only available in manual export

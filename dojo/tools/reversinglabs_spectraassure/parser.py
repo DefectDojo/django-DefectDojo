@@ -3,7 +3,10 @@ import hashlib
 import logging
 from typing import Any
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo import RlJsonInfo
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo.cve_info_node import CveInfoNode
 
@@ -92,9 +95,25 @@ class ReversinglabsSpectraassureParser:
         file: Any,
         test: Any,
     ) -> list[Finding]:
+        self.UNSAVED_LOCATIONS = []
         # ------------------------------------
         rl_json_info_instance = RlJsonInfo(file_handle=file)
         rl_json_info_instance.get_cve_active_all()
+
+        # Collect product-level dependency locations for all components and dependencies
+        if settings.V3_FEATURE_LOCATIONS:
+            for component in rl_json_info_instance.components.values():
+                purl = component.get("identity", {}).get("purl", "")
+                if purl:
+                    self.UNSAVED_LOCATIONS.append(
+                        LocationData(type="dependency", value=purl),
+                    )
+            for dependency in rl_json_info_instance.dependencies.values():
+                purl = dependency.get("purl", "")
+                if purl:
+                    self.UNSAVED_LOCATIONS.append(
+                        LocationData(type="dependency", value=purl),
+                    )
 
         self._findings: list[Finding] = []
         self._duplicates: dict[str, Finding] = {}

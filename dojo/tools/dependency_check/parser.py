@@ -419,6 +419,7 @@ class DependencyCheckParser:
         return "OWASP Dependency Check output can be imported in Xml format."
 
     def get_findings(self, filename, test):
+        self.UNSAVED_LOCATIONS = []
         dupes = {}
         namespace = ""
         content = filename.read()
@@ -441,6 +442,20 @@ class DependencyCheckParser:
                 )
 
         if dependencies is not None:
+            # Collect product-level dependency locations for all dependencies
+            if settings.V3_FEATURE_LOCATIONS:
+                for dependency in dependencies.findall(namespace + "dependency"):
+                    try:
+                        _, _, component_purl = self.get_component_name_and_version_from_dependency(
+                            dependency, None, namespace,
+                        )
+                    except Exception:
+                        continue
+                    if component_purl:
+                        self.UNSAVED_LOCATIONS.append(
+                            LocationData(type="dependency", value=component_purl),
+                        )
+
             for dependency in dependencies.findall(namespace + "dependency"):
                 vulnerabilities = dependency.find(
                     namespace + "vulnerabilities",

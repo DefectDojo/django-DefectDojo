@@ -21,6 +21,7 @@ class CheckmarxOsaParser:
         )
 
     def get_findings(self, filehandle, test):
+        self.UNSAVED_LOCATIONS = []
         tree = json.load(filehandle)
         if len(tree) != 2:
             logger.error(
