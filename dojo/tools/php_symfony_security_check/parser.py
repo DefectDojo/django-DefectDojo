@@ -1,6 +1,10 @@
 import json
 
+from django.conf import settings
+from packageurl import PackageURL
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 
 
 class PhpSymfonySecurityCheckParser:
@@ -85,5 +89,13 @@ def get_item(dependency_name, dependency_version, advisory, test):
 
     if advisory["cve"]:
         finding.unsaved_vulnerability_ids = [advisory["cve"]]
+
+    if settings.V3_FEATURE_LOCATIONS and dependency_name:
+        finding.unsaved_locations.append(
+            LocationData(
+                type="dependency",
+                value=PackageURL(type="composer", name=dependency_name, version=dependency_version).to_string(),
+            ),
+        )
 
     return finding

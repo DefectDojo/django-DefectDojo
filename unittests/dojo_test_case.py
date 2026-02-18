@@ -16,6 +16,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 from vcr_unittest import VCRTestCase
 
+from dojo.importers.location_manager import LocationManager
 from dojo.jira_link import helper as jira_helper
 from dojo.jira_link.views import get_custom_field
 from dojo.location.models import Location, LocationFindingReference
@@ -540,7 +541,7 @@ class DojoTestUtilsMixin:
 
     def get_unsaved_locations(self, finding):
         if settings.V3_FEATURE_LOCATIONS:
-            return finding.unsaved_locations
+            return LocationManager.clean_unsaved_locations(finding.unsaved_locations)
         # TODO: Delete this after the move to Locations
         return finding.unsaved_endpoints
 

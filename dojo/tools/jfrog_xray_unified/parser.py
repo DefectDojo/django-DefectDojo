@@ -1,7 +1,11 @@
 import json
 from datetime import datetime
 
+from django.conf import settings
+from packageurl import PackageURL
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 from dojo.utils import parse_cvss_data
 
 
@@ -154,5 +158,14 @@ def get_item(vulnerability, test):
 
     if vulnerability_id:
         finding.unsaved_vulnerability_ids = [vulnerability_id]
+
+    if settings.V3_FEATURE_LOCATIONS and package_type and component_name:
+        purl_type = package_type.lower()
+        finding.unsaved_locations.append(
+            LocationData(
+                type="dependency",
+                value=PackageURL(type=purl_type, name=component_name, version=component_version).to_string(),
+            ),
+        )
 
     return finding

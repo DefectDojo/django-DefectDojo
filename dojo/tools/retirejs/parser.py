@@ -1,7 +1,11 @@
 import hashlib
 import json
 
+from django.conf import settings
+from packageurl import PackageURL
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 
 
 class RetireJsParser:
@@ -42,6 +46,14 @@ class RetireJsParser:
                         item.component_name = result.get("component")
                         item.component_version = result.get("version")
                         item.file_path = node["file"]
+
+                        if settings.V3_FEATURE_LOCATIONS and result.get("component") and result.get("version"):
+                            item.unsaved_locations.append(
+                                LocationData(
+                                    type="dependency",
+                                    value=PackageURL(type="npm", name=result["component"], version=result["version"]).to_string(),
+                                ),
+                            )
 
                         encrypted_file = node["file"]
                         unique_key = hashlib.md5(

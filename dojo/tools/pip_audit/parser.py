@@ -1,7 +1,11 @@
 """Parser for pip-audit."""
 import json
 
+from django.conf import settings
+from packageurl import PackageURL
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 
 
 class PipAuditParser:
@@ -97,6 +101,14 @@ def get_item_findings(item, test):
                 vulnerability_ids.append(vuln_id)
             if vulnerability_ids:
                 finding.unsaved_vulnerability_ids = vulnerability_ids
+
+            if settings.V3_FEATURE_LOCATIONS and component_name:
+                finding.unsaved_locations.append(
+                    LocationData(
+                        type="dependency",
+                        value=PackageURL(type="pypi", name=component_name, version=component_version).to_string(),
+                    ),
+                )
 
             findings.append(finding)
 

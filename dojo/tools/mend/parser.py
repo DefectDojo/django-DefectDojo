@@ -4,11 +4,46 @@ import logging
 from contextlib import suppress
 from datetime import datetime
 
+from django.conf import settings
+from packageurl import PackageURL
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 
 __author__ = "dr3dd589 + testaccount90009 aka SH"
 
 logger = logging.getLogger(__name__)
+
+MEND_TYPE_TO_PURL = {
+    "maven_artifact": "maven",
+    "npm_package": "npm",
+    "pypi_package": "pypi",
+    "rubygems_package": "gem",
+    "nuget_package": "nuget",
+    "go_package": "golang",
+    "composer_package": "composer",
+    "rust_package": "cargo",
+    "cocoapods_package": "cocoapods",
+    "hex_package": "hex",
+    "pub_package": "pub",
+    "alpine_package": "apk",
+    "debian_package": "deb",
+    "rpm_package": "rpm",
+    "bower_package": "npm",
+    "gradle": "maven",
+    "sbt": "maven",
+    "maven": "maven",
+    "npm": "npm",
+    "nuget": "nuget",
+    "python": "pypi",
+    "ruby": "gem",
+    "go": "golang",
+    "composer": "composer",
+    "cargo": "cargo",
+    "cocoapods": "cocoapods",
+    "hex": "hex",
+    "pub": "pub",
+}
 
 
 class MendParser:
@@ -37,6 +72,7 @@ class MendParser:
             cve = None
             component_name = None
             component_version = None
+            library_type = None
             impact = None
             ransomware_used = None
             known_exploited = None
@@ -64,6 +100,7 @@ class MendParser:
                 lib_name = node["component"].get("name")
                 component_name = node["component"].get("artifactId")
                 component_version = node["component"].get("version")
+                library_type = node["component"].get("libraryType", "")
                 impact = (
                     "**Direct or Transitive Vulnerability**: "
                     + node["component"].get("dependencyType", "")
@@ -117,6 +154,7 @@ class MendParser:
                 lib_name = node["library"].get("filename")
                 component_name = node["library"].get("artifactId")
                 component_version = node["library"].get("version")
+                library_type = node["library"].get("type", "")
                 cvss3_score = node.get("cvss3_score", None)
                 fix_available = False
                 if "topFix" in node:
@@ -222,6 +260,16 @@ class MendParser:
                 new_finding.ransomware_used = ransomware_used
             if cve:
                 new_finding.unsaved_vulnerability_ids = [cve]
+
+            if settings.V3_FEATURE_LOCATIONS and component_name and library_type:
+                purl_type = MEND_TYPE_TO_PURL.get(library_type.lower())
+                if purl_type:
+                    new_finding.unsaved_locations.append(
+                        LocationData(
+                            type="dependency",
+                            value=PackageURL(type=purl_type, name=component_name, version=component_version).to_string(),
+                        ),
+                    )
 
             return new_finding
 

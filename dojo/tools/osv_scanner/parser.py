@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 
 
 class OSVScannerParser:
@@ -146,5 +149,9 @@ class OSVScannerParser:
 
                     if vulnerabilityid:
                         finding.unsaved_vulnerability_ids = [vulnerabilityid]
+                    if settings.V3_FEATURE_LOCATIONS and vulnerabilitypackagepurl:
+                        finding.unsaved_locations.append(
+                            LocationData(type="dependency", value=vulnerabilitypackagepurl),
+                        )
                     findings.append(finding)
         return findings

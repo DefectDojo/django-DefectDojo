@@ -2,9 +2,19 @@ import io
 import json
 
 from cvss.cvss3 import CVSS3
+from django.conf import settings
+from packageurl import PackageURL
 
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 from dojo.tools.snyk_code.parser import SnykCodeParser
+
+SNYK_PM_TO_PURL = {
+    "npm": "npm", "yarn": "npm", "pip": "pypi", "poetry": "pypi",
+    "maven": "maven", "gradle": "maven", "rubygems": "gem",
+    "nuget": "nuget", "composer": "composer", "gomodules": "golang",
+    "cocoapods": "cocoapods", "hex": "hex", "pub": "pub",
+}
 
 
 class SnykParser:
@@ -113,10 +123,11 @@ class SnykParser:
         if "vulnerabilities" in tree:
             target_file = tree.get("displayTargetFile", None)
             upgrades = tree.get("remediation", {}).get("upgrade", None)
+            package_manager = tree.get("packageManager")
             vulnerabilityTree = tree["vulnerabilities"]
             for node in vulnerabilityTree:
                 item = self.get_item(
-                    node, test, target_file=target_file, upgrades=upgrades,
+                    node, test, target_file=target_file, upgrades=upgrades, package_manager=package_manager,
                 )
                 items.append(item)
             return items
@@ -129,7 +140,7 @@ class SnykParser:
             return findings
         return []
 
-    def get_item(self, vulnerability, test, target_file=None, upgrades=None):
+    def get_item(self, vulnerability, test, target_file=None, upgrades=None, package_manager=None):
         # vulnerable and unaffected versions can be in string format for a single vulnerable version,
         # or an array for multiple versions depending on the language.
         if isinstance(vulnerability["semver"]["vulnerable"], list):
@@ -279,4 +290,15 @@ class SnykParser:
                     )
                     finding.mitigation += f"\nUpgrade from {current_pack_version} to {upgraded_pack} to fix this issue, as well as updating the following:\n - "
                     finding.mitigation += "\n - ".join(tertiary_upgrade_list)
+
+        if settings.V3_FEATURE_LOCATIONS and package_manager and vulnerability.get("packageName"):
+            purl_type = SNYK_PM_TO_PURL.get(package_manager.lower())
+            if purl_type:
+                finding.unsaved_locations.append(
+                    LocationData(
+                        type="dependency",
+                        value=PackageURL(type=purl_type, name=vulnerability["packageName"], version=vulnerability.get("version", "")).to_string(),
+                    ),
+                )
+
         return finding

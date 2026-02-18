@@ -1,6 +1,10 @@
 import json
 
+from django.conf import settings
+from packageurl import PackageURL
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 from dojo.tools.utils import get_npm_cwe
 
 
@@ -77,6 +81,13 @@ class YarnAuditParser:
             items.append(dojo_finding)
             if value is not None:
                 dojo_finding.component_name = value
+                if settings.V3_FEATURE_LOCATIONS:
+                    dojo_finding.unsaved_locations.append(
+                        LocationData(
+                            type="dependency",
+                            value=PackageURL(type="npm", name=value, version=str(child_tree_versions)).to_string(),
+                        ),
+                    )
         return items
 
     def get_items_auditci(self, tree, test):  # https://github.com/DefectDojo/django-DefectDojo/issues/6495
@@ -138,6 +149,13 @@ class YarnAuditParser:
                     dojo_finding.unsaved_vulnerability_ids.append(cve)
             if tree.get("advisories").get(element).get("cwe") != []:
                 dojo_finding.cwe = tree.get("advisories").get(element).get("cwe")[0].strip("CWE-")
+            if settings.V3_FEATURE_LOCATIONS and dojo_finding.component_name and dojo_finding.component_version:
+                dojo_finding.unsaved_locations.append(
+                    LocationData(
+                        type="dependency",
+                        value=PackageURL(type="npm", name=dojo_finding.component_name, version=dojo_finding.component_version).to_string(),
+                    ),
+                )
             items.append(dojo_finding)
         return items
 
@@ -210,4 +228,11 @@ class YarnAuditParser:
             dojo_finding.unsaved_vulnerability_ids = []
             for vulnerability_id in item_node["cves"]:
                 dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
+        if settings.V3_FEATURE_LOCATIONS and item_node["module_name"]:
+            dojo_finding.unsaved_locations.append(
+                LocationData(
+                    type="dependency",
+                    value=PackageURL(type="npm", name=item_node["module_name"], version=item_node["findings"][0]["version"]).to_string(),
+                ),
+            )
         return dojo_finding

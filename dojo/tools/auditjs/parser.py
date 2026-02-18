@@ -7,6 +7,7 @@ from json.decoder import JSONDecodeError
 from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
@@ -138,6 +139,10 @@ class AuditJSParser:
                         logger.debug("  %s: %r", field, value)
                     if vulnerability_id:
                         finding.unsaved_vulnerability_ids = [vulnerability_id]
+                    if settings.V3_FEATURE_LOCATIONS and file_path:
+                        finding.unsaved_locations.append(
+                            LocationData(type="dependency", value=file_path),
+                        )
 
                     # internal de-duplication
                     dupe_key = unique_id_from_tool
