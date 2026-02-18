@@ -1,5 +1,20 @@
 from dojo.models import Finding
 
+WIZCLI_MANIFEST_TO_PURL = {
+    "go.mod": "golang", "go.sum": "golang",
+    "package.json": "npm", "package-lock.json": "npm", "yarn.lock": "npm", "pnpm-lock.yaml": "npm",
+    "requirements.txt": "pypi", "Pipfile.lock": "pypi", "poetry.lock": "pypi",
+    "pom.xml": "maven", "build.gradle": "maven", "build.gradle.kts": "maven",
+    "Gemfile": "gem", "Gemfile.lock": "gem",
+    "Cargo.toml": "cargo", "Cargo.lock": "cargo",
+    "composer.json": "composer", "composer.lock": "composer",
+    "packages.config": "nuget",
+    "pubspec.yaml": "pub", "pubspec.lock": "pub",
+    "mix.lock": "hex",
+    "Podfile": "cocoapods", "Podfile.lock": "cocoapods",
+    "Package.swift": "swift",
+}
+
 
 class WizcliParsers:
 

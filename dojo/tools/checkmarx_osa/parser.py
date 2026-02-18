@@ -2,7 +2,10 @@ import json
 import logging
 from datetime import datetime
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +35,20 @@ class CheckmarxOsaParser:
             msg = "Invalid format: bad structure"
             raise ValueError(msg)
         libraries_dict = self.get_libraries(tree)
+
+        if settings.V3_FEATURE_LOCATIONS:
+            for library in tree[1]:
+                lib_name = library.get("name", "")
+                lib_version = library.get("version")
+                if lib_name and ":" in lib_name:
+                    parts = lib_name.split(":", 1)
+                    self.UNSAVED_LOCATIONS.append(
+                        LocationData(
+                            type="dependency",
+                            data={"purl_type": "maven", "namespace": parts[0], "name": parts[1], "version": lib_version},
+                        ),
+                    )
+
         vulnerabilities = self.get_vunlerabilities(tree)
         items = []
         for item in vulnerabilities:

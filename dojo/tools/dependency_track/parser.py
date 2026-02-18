@@ -1,7 +1,10 @@
 import json
 import logging
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -247,6 +250,13 @@ class DependencyTrackParser:
             finding.epss_score = epss_score
         if epss_percentile:
             finding.epss_percentile = epss_percentile
+
+        if settings.V3_FEATURE_LOCATIONS:
+            component_purl = dependency_track_finding["component"].get("purl")
+            if component_purl:
+                finding.unsaved_locations.append(
+                    LocationData(type="dependency", value=component_purl),
+                )
 
         return finding
 

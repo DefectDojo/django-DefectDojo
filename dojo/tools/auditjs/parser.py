@@ -40,11 +40,21 @@ class AuditJSParser:
         return "Info"
 
     def get_findings(self, filename, test):
+        self.UNSAVED_LOCATIONS = []
         try:
             data = json.load(filename)
         except JSONDecodeError:
             msg = "Invalid JSON format. Are you sure you used --json option ?"
             raise ValueError(msg)
+
+        if settings.V3_FEATURE_LOCATIONS:
+            for dependency in data:
+                coordinates = dependency.get("coordinates")
+                if coordinates:
+                    self.UNSAVED_LOCATIONS.append(
+                        LocationData(type="dependency", value=coordinates),
+                    )
+
         dupes = {}
 
         for dependency in data:
