@@ -3,8 +3,9 @@ title: "Assets and Organization structure"
 description: "DefectDojo Pro - Product Hierarchy Overhaul"
 audience: pro
 weight: 1
+aliases:
+  - /en/working_with_findings/organizing_engagements_tests/pro_assets_organizations
 ---
-
 DefectDojo Pro is extending the Product/Product Type object classes to provide greater flexibility with the data model.
 
 Currently, this feature is in Beta. Pro users who are interested in opting in can do so by emailing [support@defectdojo.com](mailto:support@defectdojo.com).

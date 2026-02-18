@@ -4,8 +4,9 @@ description: "Various features help manage vulnerabilities."
 draft: false
 weight: 2
 exclude_search: false
+aliases:
+  - /en/open_source/archived_docs/usage/features
 ---
-
 ## Tags
 
 In DefectDojo, tags are a first class citizen and are recognized as the facilitators

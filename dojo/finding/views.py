@@ -2796,14 +2796,10 @@ def _bulk_update_simple_fields(finds, form):
 def _bulk_update_risk_acceptance(finds, form, request, prods):
     """Helper function to handle risk acceptance updates."""
     skipped_risk_accept_count = 0
-    skipped_active_risk_accept_count = 0
 
     if form.cleaned_data["risk_acceptance"]:
         for finding in finds:
-            if finding.active:
-                skipped_active_risk_accept_count += 1
-            # Allow risk acceptance for inactive findings (whether duplicate or not)
-            elif form.cleaned_data["risk_accept"]:
+            if form.cleaned_data["risk_accept"]:
                 if (
                     not finding.test.engagement.product.enable_simple_risk_acceptance
                 ):
@@ -2825,15 +2821,7 @@ def _bulk_update_risk_acceptance(finds, form, request, prods):
             extra_tags="alert-warning",
         )
 
-    if skipped_active_risk_accept_count > 0:
-        messages.add_message(
-            request,
-            messages.WARNING,
-            f"Skipped risk acceptance of {skipped_active_risk_accept_count} active findings. Active findings cannot be risk accepted.",
-            extra_tags="alert-warning",
-        )
-
-    return skipped_risk_accept_count, skipped_active_risk_accept_count
+    return skipped_risk_accept_count
 
 
 def _bulk_update_finding_groups(finds, form):
@@ -3098,7 +3086,7 @@ def finding_bulk_update_all(request, pid=None):
 
             _bulk_update_simple_fields(finds, form)
 
-            _skipped_risk_accept_count, _skipped_active_risk_accept_count = _bulk_update_risk_acceptance(
+            _skipped_risk_accept_count = _bulk_update_risk_acceptance(
                 finds, form, request, prods,
             )
 

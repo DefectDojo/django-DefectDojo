@@ -2,8 +2,9 @@
 title: "Parser Documentation Template"
 toc_hide: true
 weight: 1
+aliases:
+  - /en/open_source/contributing/parser-documentation-template
 ---
-
 This template is designed to document a new or existing parser. Please feel free to improve with any additional information that might help your fellow security professionals.
 
 * Copy this .md file and add it to `/docs/content/supported_tools/file` in the GitHub repository.

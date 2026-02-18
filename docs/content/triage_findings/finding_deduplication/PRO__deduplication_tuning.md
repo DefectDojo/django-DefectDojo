@@ -3,8 +3,9 @@ title: "Deduplication Tuning"
 description: "Configure how DefectDojo identifies and manages duplicate findings"
 weight: 4
 audience: pro
+aliases:
+  - /en/working_with_findings/finding_deduplication/tune_deduplication
 ---
-
 Deduplication Tuning is a DefectDojo Pro feature that gives you fine-grained control over how findings are deduplicated, allowing you to optimize duplicate detection for your specific security testing workflow.
 
 ## Deduplication Settings

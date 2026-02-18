@@ -2,8 +2,9 @@
 title: "Event: engagement_added"
 weight: 4
 exclude_search: true
+aliases:
+  - /en/open_source/notification_webhooks/engagement_added
 ---
-
 ## Event HTTP header
 ```yaml
 X-DefectDojo-Event: engagement_added

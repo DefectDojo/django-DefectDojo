@@ -2,8 +2,9 @@
 title: "Custom Dashboard Tiles"
 description: "How to make Dashboard Tiles work for you, with examples"
 weight: 2
+aliases:
+  - /en/customize_dojo/dashboards/about_custom_dashboard_tiles
 ---
-
 Dashboard Tiles are customizable sets of filters for your DefectDojo instance, which can be added to your 🏠 **Home** dashboard. Tiles are designed to provide relevant information and speed up navigation within DefectDojo.
 
 ![image](images/About_Custom_Dashboard_Tiles.png)

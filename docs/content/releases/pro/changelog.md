@@ -2,6 +2,8 @@
 title: "DefectDojo Pro Changelog"
 description: "DefectDojo Changelog"
 exclude_search: true
+aliases:
+ - /changelog/pro_changelog/
 ---
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.

@@ -3,8 +3,9 @@ title: "DefectDojo API v2"
 description: "DefectDojo's API lets you automate tasks, e.g. uploading scan reports in CI/CD pipelines."
 draft: false
 weight: 2
+aliases:
+  - /en/api/api-v2-docs
 ---
-
 DefectDojo\'s API is created using [Django Rest
 Framework](http://www.django-rest-framework.org/). The documentation of
 each endpoint is available within each DefectDojo installation at

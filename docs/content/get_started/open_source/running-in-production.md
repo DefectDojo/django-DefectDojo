@@ -4,8 +4,9 @@ description: "For use in Production environments, performance tweaks and backups
 draft: false
 weight: 4
 audience: opensource
+aliases:
+  - /en/open_source/installation/running-in-production
 ---
-
 ## Production Use (with Docker compose)
 
 The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment.

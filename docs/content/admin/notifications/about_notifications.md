@@ -1,8 +1,9 @@
 ---
 title: "About Notifications & 🔔 Alerts"
 description: "Learn about notifications, in-app alerts"
+aliases:
+  - /en/customize_dojo/notifications/about_notifications
 ---
-
 DefectDojo keeps you up to date in a variety of ways. Notifications can be sent for upcoming Engagements, user Mentions, SLA expiry, and other events in the software.
 
 This article contains an overview of notifications at both System\-wide and Personal levels.

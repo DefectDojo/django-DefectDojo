@@ -2,8 +2,9 @@
 title: "Using the Report Builder"
 description: "Build and publish custom reports for external audiences, or your own records"
 weight: 1
+aliases:
+  - /en/share_your_findings/pro_reports/using_the_report_builder
 ---
-
 DefectDojo allows you to create Custom Reports for external audiences, which summarize the Findings or Endpoints that you wish to report on. Custom Reports can include branding and boilerplate text, and can also be used as **[Templates](https://docs.defectdojo.com/en/pro_reports/working-with-generated-reports/)** for future reports.
 
 ## Opening the Report Builder

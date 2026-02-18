@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0259_locations'),
+       ('dojo', '0260_alter_engagement_status_alter_engagementevent_status'),
     ]
 
     operations = [
