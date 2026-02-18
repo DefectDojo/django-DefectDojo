@@ -1,8 +1,10 @@
 import hashlib
 
 from cvss import CVSS2, CVSS3
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 
 from .importer import BlackduckBinaryAnalysisImporter
 
@@ -107,6 +109,12 @@ class BlackduckBinaryAnalysisParser:
                 # Add vulnerability ID for de-duplication
                 if cve:
                     finding.unsaved_vulnerability_ids = [str(cve)]
+
+                if settings.V3_FEATURE_LOCATIONS and i.component and i.version:
+                    finding.unsaved_locations.append(
+                        LocationData(type="dependency", data={"name": i.component, "version": i.version}),
+                    )
+
                 findings[unique_finding_key] = finding
 
         return list(findings.values())

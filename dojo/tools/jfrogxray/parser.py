@@ -2,8 +2,10 @@ import json
 import re
 
 from cvss import CVSS3
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 
 
 class JFrogXrayParser:
@@ -166,4 +168,10 @@ def get_item(vulnerability, test):
     )
     if vulnerability_ids:
         finding.unsaved_vulnerability_ids = vulnerability_ids
+
+    if settings.V3_FEATURE_LOCATIONS and component_name and component_version:
+        finding.unsaved_locations.append(
+            LocationData(type="dependency", data={"name": component_name, "version": component_version}),
+        )
+
     return finding

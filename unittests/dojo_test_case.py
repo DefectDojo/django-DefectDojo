@@ -541,7 +541,7 @@ class DojoTestUtilsMixin:
 
     def get_unsaved_locations(self, finding):
         if settings.V3_FEATURE_LOCATIONS:
-            return LocationManager.clean_unsaved_locations(finding.unsaved_locations)
+            return LocationManager.make_abstract_locations(finding.unsaved_locations)
         # TODO: Delete this after the move to Locations
         return finding.unsaved_endpoints
 

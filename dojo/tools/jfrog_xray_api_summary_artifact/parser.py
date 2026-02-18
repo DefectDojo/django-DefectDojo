@@ -5,8 +5,10 @@ import re
 
 from cvss import CVSS3
 from cvss.exceptions import CVSS3RHMalformedError, CVSS3RHScoreDoesNotMatch
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 
 
 class JFrogXrayApiSummaryArtifactParser:
@@ -141,6 +143,11 @@ def get_item(
         vulnerability_ids.append(vulnerability["issue_id"])
     if vulnerability_ids:
         finding.unsaved_vulnerability_ids = vulnerability_ids
+
+    if settings.V3_FEATURE_LOCATIONS and artifact_name and artifact_version:
+        finding.unsaved_locations.append(
+            LocationData(type="dependency", data={"name": artifact_name, "version": artifact_version}),
+        )
 
     return finding
 

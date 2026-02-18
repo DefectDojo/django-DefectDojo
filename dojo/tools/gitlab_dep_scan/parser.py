@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
 
 
 class GitlabDepScanParser:
@@ -139,5 +142,10 @@ class GitlabDepScanParser:
 
         if vulnerability_id:
             finding.unsaved_vulnerability_ids = [vulnerability_id]
+
+        if settings.V3_FEATURE_LOCATIONS and component_name and component_version:
+            finding.unsaved_locations.append(
+                LocationData(type="dependency", data={"name": component_name, "version": component_version}),
+            )
 
         return finding
