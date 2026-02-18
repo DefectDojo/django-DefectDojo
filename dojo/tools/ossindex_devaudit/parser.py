@@ -1,7 +1,23 @@
 import json
 from json import JSONDecodeError
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
+
+OSSINDEX_PM_TO_PURL = {
+    "npm": "npm",
+    "nuget": "nuget",
+    "maven": "maven",
+    "pypi": "pypi",
+    "gem": "gem",
+    "golang": "golang",
+    "cargo": "cargo",
+    "composer": "composer",
+    "cocoapods": "cocoapods",
+    "swift": "swift",
+}
 
 
 class OssIndexDevauditParser:
@@ -22,6 +38,7 @@ class OssIndexDevauditParser:
         return "Import OssIndex Devaudit SCA Scan in json format."
 
     def get_findings(self, json_file, test):
+        self.UNSAVED_LOCATIONS = []
         tree = self.parse_json(json_file)
 
         if tree:
@@ -43,6 +60,17 @@ class OssIndexDevauditParser:
         items = {}
 
         results = dict(tree.items())
+
+        if settings.V3_FEATURE_LOCATIONS:
+            for package in results.get("Packages", []):
+                package_data = package["Package"]
+                pm = package_data.get("pm", "").lower()
+                purl_type = OSSINDEX_PM_TO_PURL.get(pm)
+                if purl_type:
+                    self.UNSAVED_LOCATIONS.append(
+                        LocationData(type="dependency", data={"purl_type": purl_type, "name": package_data["name"], "version": package_data["version"]}),
+                    )
+
         for package in results.get("Packages", []):
             package_data = package["Package"]
             if len(package.get("Vulnerabilities", [])) > 0:
@@ -54,6 +82,15 @@ class OssIndexDevauditParser:
                         vulnerability=vulnerability,
                         test=test,
                     )
+
+                    if settings.V3_FEATURE_LOCATIONS:
+                        pm = package_data.get("pm", "").lower()
+                        purl_type = OSSINDEX_PM_TO_PURL.get(pm)
+                        if purl_type:
+                            item.unsaved_locations.append(
+                                LocationData(type="dependency", data={"purl_type": purl_type, "name": package_data["name"], "version": package_data["version"]}),
+                            )
+
                     unique_key = vulnerability["id"]
                     items[unique_key] = item
 

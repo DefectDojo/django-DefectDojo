@@ -9,6 +9,20 @@ from django.conf import settings
 from django.utils import timezone
 
 from dojo.models import Finding
+from dojo.tools.protocol import LocationData
+
+VERACODE_TYPE_TO_PURL = {
+    "maven": "maven",
+    "npm": "npm",
+    "pypi": "pypi",
+    "gem": "gem",
+    "nuget": "nuget",
+    "go": "golang",
+    "cargo": "cargo",
+    "composer": "composer",
+    "cocoapods": "cocoapods",
+    "bower": "bower",
+}
 
 
 class VeracodeScaParser:
@@ -101,6 +115,20 @@ class VeracodeScaParser:
 
             if vuln_id:
                 finding.unsaved_vulnerability_ids = [vuln_id]
+
+            if settings.V3_FEATURE_LOCATIONS:
+                lib_id = library.get("id", "")
+                if ":" in lib_id:
+                    lib_type = lib_id.split(":")[0].lower()
+                    purl_type = VERACODE_TYPE_TO_PURL.get(lib_type)
+                    if purl_type and component_name and component_version:
+                        dep_data = {"purl_type": purl_type, "name": component_name, "version": component_version}
+                        id_parts = lib_id.split(":")
+                        if purl_type == "maven" and len(id_parts) >= 3:
+                            dep_data["namespace"] = id_parts[1]
+                        finding.unsaved_locations.append(
+                            LocationData(type="dependency", data=dep_data),
+                        )
 
             if vulnerability.get("cvss3_vector"):
                 cvssv3_vector = vulnerability.get("cvss3_vector")
@@ -210,6 +238,18 @@ class VeracodeScaParser:
             finding.unsaved_vulnerability_ids = [vuln_id]
             if cvss_score:
                 finding.cvssv3_score = cvss_score
+
+            if settings.V3_FEATURE_LOCATIONS:
+                pkg_manager = row.get("Package manager", "").lower()
+                purl_type = VERACODE_TYPE_TO_PURL.get(pkg_manager)
+                if purl_type and library and version:
+                    dep_data = {"purl_type": purl_type, "name": library, "version": version}
+                    coord1 = row.get("Coordinate 1", "")
+                    if purl_type == "maven" and coord1:
+                        dep_data["namespace"] = coord1
+                    finding.unsaved_locations.append(
+                        LocationData(type="dependency", data=dep_data),
+                    )
 
             if (
                 (row.get("Ignored")
