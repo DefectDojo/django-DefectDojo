@@ -194,7 +194,7 @@ class MSDefenderParser:
             # TODO: Delete this after the move to Locations
             if "computerDnsName" in machine and machine["computerDnsName"] is not None:
                 host = str(machine["computerDnsName"]).replace(" ", "").replace("(", "_").replace(")", "_")
-                locations.append(URL(host=host))
+                locations.append(Endpoint(host=host))
             if "lastIpAddress" in machine and machine["lastIpAddress"] is not None:
                 locations.append(Endpoint(host=str(machine["lastIpAddress"])))
             if "lastExternalIpAddress" in machine and machine["lastExternalIpAddress"] is not None:
