@@ -33,6 +33,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
@@ -179,9 +180,12 @@ from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import (
     async_delete,
     generate_file_response,
+    get_celery_queue_length,
+    get_celery_worker_status,
     get_setting,
     get_system_setting,
     process_tag_notifications,
+    purge_celery_queue,
 )
 
 logger = logging.getLogger(__name__)
@@ -3121,6 +3125,49 @@ class SystemSettingsViewSet(
 
     def get_queryset(self):
         return System_Settings.objects.all().order_by("id")
+
+
+@extend_schema(
+    responses=serializers.CeleryStatusSerializer,
+    summary="Get Celery worker and queue status",
+    description=(
+        "Returns Celery worker liveness, pending queue length, and the active task "
+        "timeout/expiry configuration. Uses the Celery control channel (pidbox) for "
+        "worker status so it works correctly even when the task queue is clogged."
+    ),
+)
+class CeleryStatusView(APIView):
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    queryset = System_Settings.objects.none()
+
+    def get(self, request):
+        data = {
+            "worker_status": get_celery_worker_status(),
+            "queue_length": get_celery_queue_length(),
+            "task_time_limit": getattr(settings, "CELERY_TASK_TIME_LIMIT", None),
+            "task_soft_time_limit": getattr(settings, "CELERY_TASK_SOFT_TIME_LIMIT", None),
+            "task_default_expires": getattr(settings, "CELERY_TASK_DEFAULT_EXPIRES", None),
+        }
+        return Response(serializers.CeleryStatusSerializer(data).data)
+
+
+@extend_schema(
+    request=None,
+    responses={200: {"type": "object", "properties": {"purged": {"type": "integer"}}}},
+    summary="Purge all pending Celery tasks from the queue",
+    description=(
+        "Removes all pending tasks from the default Celery queue. Tasks already being "
+        "executed by workers are not affected. Note: if deduplication tasks were queued, "
+        "you may need to re-run deduplication manually via `python manage.py dedupe`."
+    ),
+)
+class CeleryQueuePurgeView(APIView):
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    queryset = System_Settings.objects.none()
+
+    def post(self, request):
+        purged = purge_celery_queue()
+        return Response({"purged": purged})
 
 
 # Authorization: superuser

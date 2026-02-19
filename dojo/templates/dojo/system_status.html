@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <h3>System Status</h3>
+        <br>
+        <div id="celery-status-panel" class="col-md-5">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Celery <span id="celery-status-badge" class="label label-default">Loading...</span></h4>
+                </div>
+                <div class="panel-body text-left" id="celery-status-msg">—</div>
+                <div class="panel-body text-left">
+                    <span id="celery-queue-msg">—</span>
+                    <button id="purge-queue-btn" class="btn btn-danger btn-xs" style="margin-top: 8px; display: block" disabled title="Loading...">
+                        Purge queue
+                    </button>
+                    <p class="text-muted" style="margin-top: 8px; font-size: 0.9em">
+                        <strong>Note:</strong> Purging the queue removes pending tasks that have not yet been executed,
+                        including deduplication tasks. If deduplication tasks were in the queue, you may need to
+                        re-run deduplication manually using the <code>dedupe</code> management command:
+                        <code>python manage.py dedupe</code>
+                    </p>
+                </div>
+                <div class="panel-body text-left">
+                    <table class="table table-condensed" style="margin-bottom: 0">
+                        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+                        <tbody id="celery-config-tbody"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2" class="text-muted" style="font-size: 0.9em; border-top: 1px solid #ddd; padding-top: 6px">
+                                    Read-only. Configured via environment variables:
+                                    <code>DD_CELERY_TASK_TIME_LIMIT</code>,
+                                    <code>DD_CELERY_TASK_SOFT_TIME_LIMIT</code>,
+                                    <code>DD_CELERY_TASK_DEFAULT_EXPIRES</code>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block postscript %}
+    {{ block.super }}
+    <script>
+        (function() {
+            var purgeUrl = "{% url 'celery_queue_purge_api' %}";
+            var statusUrl = "{% url 'celery_status_api' %}";
+
+            function renderCeleryStatus(data) {
+                var badge = $('#celery-status-badge');
+                if (data.worker_status) {
+                    badge.text('Running').removeClass('label-default label-danger').addClass('label-success');
+                    $('#celery-status-msg').text('Celery is processing tasks.');
+                } else {
+                    badge.text('Not Running').removeClass('label-default label-success').addClass('label-danger');
+                    $('#celery-status-msg').text('Celery does not appear to be running.');
+                }
+
+                var qLen = data.queue_length;
+                if (qLen === null) {
+                    $('#celery-queue-msg').text('It is not possible to identify the number of waiting tasks.');
+                    $('#purge-queue-btn').prop('disabled', true).attr('title', 'Broker unreachable');
+                } else {
+                    $('#celery-queue-msg').text(qLen + ' task(s) waiting to be processed.');
+                    $('#purge-queue-btn').prop('disabled', false).removeAttr('title');
+                }
+
+                function humanDuration(seconds) {
+                    if (seconds === null) return '<em>Not set</em>';
+                    var d = Math.floor(seconds / 86400);
+                    var h = Math.floor((seconds % 86400) / 3600);
+                    var m = Math.floor((seconds % 3600) / 60);
+                    var s = seconds % 60;
+                    var parts = [];
+                    if (d) parts.push(d + 'd');
+                    if (h) parts.push(h + 'h');
+                    if (m) parts.push(m + 'm');
+                    if (s || parts.length === 0) parts.push(s + 's');
+                    return parts.join(' ') + ' <span class="text-muted">(' + seconds + 's)</span>';
+                }
+
+                var cfgRows = [
+                    ['Task time limit (hard kill)', data.task_time_limit],
+                    ['Task soft time limit', data.task_soft_time_limit],
+                    ['Default task expiry (queue)', data.task_default_expires],
+                ];
+                var tbody = $('#celery-config-tbody').empty();
+                cfgRows.forEach(function(row) {
+                    tbody.append('<tr><td>' + row[0] + '</td><td>' + humanDuration(row[1]) + '</td></tr>');
+                });
+            }
+
+            function loadCeleryStatus() {
+                $.get(statusUrl).done(renderCeleryStatus).fail(function() {
+                    $('#celery-status-badge').text('Error').removeClass('label-default label-success').addClass('label-danger');
+                    $('#celery-status-msg').text('Failed to load Celery status.');
+                });
+            }
+
+            $(function() {
+                loadCeleryStatus();
+
+                $('#purge-queue-btn').on('click', function() {
+                    if (!confirm('Purge all pending tasks from the queue? This cannot be undone.')) return;
+                    $.ajax({
+                        url: purgeUrl,
+                        method: 'POST',
+                        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                    }).done(function(data) {
+                        location.reload();
+                    }).fail(function() {
+                        alert('Purge failed. Check server logs.');
+                        loadCeleryStatus();
+                    });
+                });
+            });
+        })();
+    </script>
+{% endblock %}
