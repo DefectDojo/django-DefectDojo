@@ -90,6 +90,17 @@ env = environ.FileAwareEnv(
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
+    # Hard ceiling on task runtime. When reached, the worker process is sent SIGKILL — no cleanup
+    # code runs. Always set higher than DD_CELERY_TASK_SOFT_TIME_LIMIT. (0 = disabled, no limit)
+    DD_CELERY_TASK_TIME_LIMIT=(int, 43200),        # default: 12 hours
+    # Raises SoftTimeLimitExceeded inside the task, giving it a chance to clean up before the hard
+    # kill. Set a few seconds below DD_CELERY_TASK_TIME_LIMIT so cleanup has time to finish.
+    # (0 = disabled, no limit)
+    DD_CELERY_TASK_SOFT_TIME_LIMIT=(int, 0),
+    # If a task sits in the broker queue for longer than this without being picked up by a worker,
+    # Celery silently discards it — it is never executed and no exception is raised. Does not
+    # affect tasks that are already running. (0 = disabled, no limit)
+    DD_CELERY_TASK_DEFAULT_EXPIRES=(int, 43200),   # default: 12 hours
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
     DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
@@ -1248,6 +1259,13 @@ CELERY_BEAT_SCHEDULE_FILENAME = env("DD_CELERY_BEAT_SCHEDULE_FILENAME")
 CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
+
+if env("DD_CELERY_TASK_TIME_LIMIT") > 0:
+    CELERY_TASK_TIME_LIMIT = env("DD_CELERY_TASK_TIME_LIMIT")
+if env("DD_CELERY_TASK_SOFT_TIME_LIMIT") > 0:
+    CELERY_TASK_SOFT_TIME_LIMIT = env("DD_CELERY_TASK_SOFT_TIME_LIMIT")
+if env("DD_CELERY_TASK_DEFAULT_EXPIRES") > 0:
+    CELERY_TASK_DEFAULT_EXPIRES = env("DD_CELERY_TASK_DEFAULT_EXPIRES")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
