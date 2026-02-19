@@ -14,9 +14,14 @@
                 <div class="panel-body text-left" id="celery-status-msg">—</div>
                 <div class="panel-body text-left">
                     <span id="celery-queue-msg">—</span>
-                    <button id="purge-queue-btn" class="btn btn-danger btn-xs" style="margin-top: 8px; display: block" disabled title="Loading...">
-                        Purge queue
-                    </button>
+                    <div style="margin-top: 8px;">
+                        <button id="purge-queue-btn" class="btn btn-danger btn-xs" disabled title="Loading...">
+                            Purge queue
+                        </button>
+                        <button id="refresh-status-btn" class="btn btn-default btn-xs" style="margin-left: 6px;">
+                            <span class="glyphicon glyphicon-refresh"></span> Refresh
+                        </button>
+                    </div>
                     <p class="text-muted" style="margin-top: 8px; font-size: 0.9em">
                         <strong>Note:</strong> Purging the queue removes pending tasks that have not yet been executed,
                         including deduplication tasks. If deduplication tasks were in the queue, you may need to
@@ -105,6 +110,8 @@
 
             $(function() {
                 loadCeleryStatus();
+
+                $('#refresh-status-btn').on('click', loadCeleryStatus);
 
                 $('#purge-queue-btn').on('click', function() {
                     if (!confirm('Purge all pending tasks from the queue? This cannot be undone.')) return;
