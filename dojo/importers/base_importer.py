@@ -284,27 +284,6 @@ class BaseImporter(ImporterOptions):
         logger.info(f"Parsing findings took {elapsed_time:.2f} seconds ({len(parsed_findings) if parsed_findings else 0} findings parsed)")
         return parsed_findings
 
-    def sync_process_findings(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
-        """
-        Processes findings in a synchronous manner such that all findings
-        will be processed in a worker/process/thread
-        """
-        return self.process_findings(parsed_findings, **kwargs)
-
-    def determine_process_method(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> list[Finding]:
-        return self.sync_process_findings(
-            parsed_findings,
-            **kwargs,
-        )
-
     def determine_deduplication_algorithm(self) -> str:
         """
         Determines what dedupe algorithm to use for the Test being processed.
