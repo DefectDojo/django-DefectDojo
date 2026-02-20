@@ -9,10 +9,9 @@ from django.conf import settings
 from django.utils import timezone
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
-
 
 class CyberwatchGaleaxParser:
     def get_scan_types(self):
@@ -208,7 +207,7 @@ class CyberwatchGaleaxParser:
             mitigated_date = timezone.now()
             mitigation = f"Fixed At: {mitigated_date}"
             if settings.V3_FEATURE_LOCATIONS:
-                locations = [URL(host=e) for e in c_data["no_product_locations"]]
+                locations = [LocationData.url_from_parts(host=e) for e in c_data["no_product_locations"]]
             else:
                 # TODO: Delete this after the move to Locations
                 locations = [Endpoint(host=e) for e in c_data["no_product_locations"]]
@@ -242,7 +241,7 @@ class CyberwatchGaleaxParser:
                 mitigation = f"Fixed At: {mitigated_date}"
 
             if settings.V3_FEATURE_LOCATIONS:
-                locations = [URL(host=e) for e in p_data["locations"]]
+                locations = [LocationData.url_from_parts(host=e) for e in p_data["locations"]]
             else:
                 # TODO: Delete this after the move to Locations
                 locations = [Endpoint(host=e) for e in p_data["locations"]]
@@ -472,7 +471,7 @@ class CyberwatchGaleaxParser:
 
             computer_name = server.get("computer_name", "Unknown Hostname")
             if settings.V3_FEATURE_LOCATIONS:
-                location = URL(host=computer_name)
+                location = LocationData.url_from_parts(host=computer_name)
                 unsaved_locations.append(location)
             else:
                 # TODO: Delete this after the move to Locations

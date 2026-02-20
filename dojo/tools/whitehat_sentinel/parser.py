@@ -8,11 +8,10 @@ from typing import TYPE_CHECKING
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
 
 if TYPE_CHECKING:
     from dojo.location.models import AbstractLocation
-
+from dojo.tools.protocol import LocationData
 
 class WhiteHatSentinelParser:
 
@@ -202,7 +201,7 @@ class WhiteHatSentinelParser:
             attack_vectors: The list of Attack Vector dictionaries
         Returns: A list of Defect Dojo URLs
         """
-        return [URL.from_value(attack_vector["request"]["url"]) for attack_vector in attack_vectors]
+        return [LocationData.url_from_value(attack_vector["request"]["url"]) for attack_vector in attack_vectors]
 
     def _convert_whitehat_sentinel_vulns_to_dojo_finding(
         self, whitehat_sentinel_vulns: list[dict], test: str,

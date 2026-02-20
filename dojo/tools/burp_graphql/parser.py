@@ -6,10 +6,9 @@ import html2text
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
-
 
 class BurpGraphQLParser:
     def get_scan_types(self):
@@ -100,7 +99,7 @@ class BurpGraphQLParser:
 
         url = issue["origin"] + issue["path"]
         if settings.V3_FEATURE_LOCATIONS:
-            finding["Locations"].append(URL.from_value(url))
+            finding["Locations"].append(LocationData.url_from_value(url))
         else:
             # TODO: Delete this after the move to Locations
             finding["Locations"].append(Endpoint.from_uri(url))
@@ -152,7 +151,7 @@ class BurpGraphQLParser:
 
         url = issue["origin"] + issue["path"]
         if settings.V3_FEATURE_LOCATIONS:
-            finding["Locations"] = [URL.from_value(url)]
+            finding["Locations"] = [LocationData.url_from_value(url)]
         else:
             # TODO: Delete this after the move to Locations
             finding["Locations"] = [Endpoint.from_uri(url)]

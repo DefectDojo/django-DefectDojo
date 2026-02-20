@@ -5,12 +5,11 @@ from datetime import datetime
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
 from .importer import CobaltApiImporter
 
 SCAN_COBALTIO_API = "Cobalt.io API Import"
-
 
 class ApiCobaltParser:
 
@@ -148,7 +147,7 @@ class ApiCobaltParser:
         """Convert Cobalt affected_targets into DefectDojo locations"""
         locations = []
         for affected_target in affected_targets:
-            location = URL.from_value(affected_target)
+            location = LocationData.url_from_value(affected_target)
             locations.append(location)
         return locations
 

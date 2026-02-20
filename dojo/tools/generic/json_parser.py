@@ -6,8 +6,7 @@ from django.core.files.base import ContentFile
 
 from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.parser_test import ParserTest
-from dojo.url.models import URL
-
+from dojo.tools.protocol import LocationData
 
 class GenericJSONParser:
     ID = "Generic Findings Import"
@@ -124,11 +123,11 @@ class GenericJSONParser:
                     for location_item in unsaved_locations:
                         if isinstance(location_item, str):
                             if "://" in location_item:  # is the host full uri?
-                                location = URL.from_value(location_item)
+                                location = LocationData.url_from_value(location_item)
                             else:
-                                location = URL.from_value("//" + location_item)
+                                location = LocationData.url_from_value("//" + location_item)
                         else:
-                            location = URL(**location_item)
+                            location = LocationData.url_from_parts(**location_item)
                         finding.unsaved_locations.append(location)
                 else:
                     # TODO: Delete this after the move to Locations

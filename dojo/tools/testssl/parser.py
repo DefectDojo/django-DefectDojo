@@ -5,8 +5,7 @@ import io
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
-
+from dojo.tools.protocol import LocationData
 
 class TestsslParser:
     def get_scan_types(self):
@@ -75,10 +74,10 @@ class TestsslParser:
                     finding.cwe = int(row["cwe"].split("-")[1].strip())
                 # manage endpoint/location
                 if settings.V3_FEATURE_LOCATIONS:
-                    location = URL(host=row["fqdn/ip"].split("/")[0])
-                    if row.get("port") and row["port"].isdigit():
-                        location.port = int(row["port"])
-                    finding.unsaved_locations = [location]
+                    port = int(row["port"]) if row.get("port") and row["port"].isdigit() else None
+                    finding.unsaved_locations = [LocationData.url_from_parts(
+                        host=row["fqdn/ip"].split("/")[0], port=port,
+                    )]
                 else:
                     # TODO: Delete this after the move to Locations
                     finding.unsaved_endpoints = [

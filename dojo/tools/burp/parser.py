@@ -7,10 +7,9 @@ from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
-
 
 class BurpParser:
 
@@ -122,7 +121,6 @@ class BurpParser:
 
         return list(items.values())
 
-
 def do_clean(value):
     myreturn = ""
     if value is not None:
@@ -131,7 +129,6 @@ def do_clean(value):
                 if x.text is not None:
                     myreturn += x.text
     return myreturn
-
 
 def get_clean_base64(value):
     if value is None:
@@ -150,7 +147,6 @@ def get_clean_base64(value):
             ],
         )
 
-
 def do_clean_cwe(value):
     if value is None:
         return []
@@ -160,7 +156,6 @@ def do_clean_cwe(value):
             if x.text is not None:
                 cwes.extend(int(detected) for detected in re.findall(r"CWE-(\d+)", x.text))
     return cwes
-
 
 def get_item(item_node, test):
     serial_number = item_node.findall("serialNumber")[0].text
@@ -300,7 +295,7 @@ def get_item(item_node, test):
     finding.unsaved_req_resp = unsaved_req_resp
     # manage endpoint/location
     if settings.V3_FEATURE_LOCATIONS:
-        finding.unsaved_locations = [URL.from_value(url_host)]
+        finding.unsaved_locations = [LocationData.url_from_value(url_host)]
     else:
         # TODO: Delete this after the move to Locations
         finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]

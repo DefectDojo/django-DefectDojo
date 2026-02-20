@@ -3,8 +3,7 @@ import json
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
-
+from dojo.tools.protocol import LocationData
 
 class HumbleParser:
 
@@ -36,7 +35,7 @@ class HumbleParser:
                         dynamic_finding=True)
                     items.append(finding)
                     if settings.V3_FEATURE_LOCATIONS:
-                        finding.unsaved_locations = [URL.from_value(url)]
+                        finding.unsaved_locations = [LocationData.url_from_value(url)]
                     else:
                         # TODO: Delete this after the move to Locations
                         finding.unsaved_endpoints = [Endpoint.from_uri(url)]
@@ -49,7 +48,7 @@ class HumbleParser:
                         dynamic_finding=True)
                     items.append(finding)
                     if settings.V3_FEATURE_LOCATIONS:
-                        finding.unsaved_locations = [URL.from_value(url)]
+                        finding.unsaved_locations = [LocationData.url_from_value(url)]
                     else:
                         # TODO: Delete this after the move to Locations
                         finding.unsaved_endpoints = [Endpoint.from_uri(url)]
@@ -62,7 +61,7 @@ class HumbleParser:
                         dynamic_finding=True)
                     items.append(finding)
                     if settings.V3_FEATURE_LOCATIONS:
-                        finding.unsaved_locations = [URL.from_value(url)]
+                        finding.unsaved_locations = [LocationData.url_from_value(url)]
                     else:
                         # TODO: Delete this after the move to Locations
                         finding.unsaved_endpoints = [Endpoint.from_uri(url)]
@@ -75,7 +74,7 @@ class HumbleParser:
                         dynamic_finding=True)
                     items.append(finding)
                     if settings.V3_FEATURE_LOCATIONS:
-                        finding.unsaved_locations = [URL.from_value(url)]
+                        finding.unsaved_locations = [LocationData.url_from_value(url)]
                     else:
                         # TODO: Delete this after the move to Locations
                         finding.unsaved_endpoints = [Endpoint.from_uri(url)]

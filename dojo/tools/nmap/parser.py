@@ -6,8 +6,7 @@ from defusedxml.ElementTree import parse
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
-
+from dojo.tools.protocol import LocationData
 
 class NmapParser:
     def get_scan_types(self):
@@ -64,28 +63,26 @@ class NmapParser:
 
             for port_element in host.findall("ports/port"):
                 protocol = port_element.attrib["protocol"]
+                port = int(port_element.attrib["portid"]) if (
+                    "portid" in port_element.attrib
+                    and port_element.attrib["portid"].isdigit()
+                ) else None
                 if settings.V3_FEATURE_LOCATIONS:
-                    location = URL(
-                        host=fqdn or ip, protocol=protocol,
+                    location = LocationData.url_from_parts(
+                        host=fqdn or ip, protocol=protocol, port=port,
                     )
                 else:
                     # TODO: Delete this after the move to Locations
                     location = Endpoint(
-                        host=fqdn or ip, protocol=protocol,
+                        host=fqdn or ip, protocol=protocol, port=port,
                     )
-
-                if (
-                    "portid" in port_element.attrib
-                    and port_element.attrib["portid"].isdigit()
-                ):
-                    location.port = int(port_element.attrib["portid"])
 
                 # filter on open ports
                 if port_element.find("state").attrib.get("state") != "open":
                     continue
-                title = f"Open port: {location.port}/{location.protocol}"
+                title = f"Open port: {port}/{protocol}"
                 description = host_info
-                description += f"**Port/Protocol:** {location.port}/{location.protocol}\n"
+                description += f"**Port/Protocol:** {port}/{protocol}\n"
 
                 service_info = "\n\n"
                 if port_element.find("service") is not None:
@@ -123,7 +120,7 @@ class NmapParser:
                     )
 
                 severity = "Info"
-                dupe_key = "nmap:" + str(location.port)
+                dupe_key = "nmap:" + str(port)
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
                     if description is not None:

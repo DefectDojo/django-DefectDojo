@@ -5,7 +5,7 @@ from django.conf import settings
 from netaddr import IPAddress
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
 SEVERITY_MAPPING = {
     "INFORMATIONAL": "Info",  # No issue was found.
@@ -15,7 +15,6 @@ SEVERITY_MAPPING = {
     # The issue must be remediated immediately to avoid it escalating.
     "CRITICAL": "Critical",
 }
-
 
 class AsffParser:
     def get_scan_types(self):
@@ -108,7 +107,7 @@ class AsffParser:
                         # Ref: https://netaddr.readthedocs.io/en/latest/api.html#netaddr.IPAddress.is_global
                         if settings.V3_FEATURE_LOCATIONS:
                             finding.unsaved_locations.extend(
-                                URL(host=ip) for ip in details.get("IpV4Addresses", [])
+                                LocationData.url_from_parts(host=ip) for ip in details.get("IpV4Addresses", [])
                                 if not IPAddress(ip).is_global()
                             )
                         else:

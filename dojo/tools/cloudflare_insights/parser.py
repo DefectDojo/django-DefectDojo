@@ -6,8 +6,7 @@ from urllib.parse import urlparse
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
-
+from dojo.tools.protocol import LocationData
 
 class CloudflareInsightsParser:
 
@@ -120,7 +119,7 @@ class CloudflareInsightsParser:
             host = self._extract_host_from_subject(subject)
             if host:
                 if settings.V3_FEATURE_LOCATIONS:
-                    finding.unsaved_locations = [URL(host=host, port=None)]
+                    finding.unsaved_locations = [LocationData.url_from_parts(host=host, port=None)]
                 else:
                     # TODO: Delete this after the move to Locations
                     finding.unsaved_endpoints = [Endpoint(host=host, port=None)]
@@ -165,7 +164,7 @@ class CloudflareInsightsParser:
             host = self._extract_host_from_subject(subject)
             if host:
                 if settings.V3_FEATURE_LOCATIONS:
-                    finding.unsaved_locations = [URL(host=host, port=None)]
+                    finding.unsaved_locations = [LocationData.url_from_parts(host=host, port=None)]
                 else:
                     # TODO: Delete this after the move to Locations
                     finding.unsaved_endpoints = [Endpoint(host=host, port=None)]

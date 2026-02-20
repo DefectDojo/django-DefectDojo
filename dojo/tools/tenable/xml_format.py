@@ -7,10 +7,9 @@ from django.conf import settings
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
 from dojo.models import Endpoint, Finding, Test
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
 LOGGER = logging.getLogger(__name__)
-
 
 class TenableXMLParser:
 
@@ -307,11 +306,11 @@ class TenableXMLParser:
                     if settings.V3_FEATURE_LOCATIONS:
                         # Create a new url object
                         if fqdn is not None and "://" in fqdn:
-                            location = URL.from_value(fqdn)
+                            location = LocationData.url_from_value(fqdn)
                         elif protocol == "general":
-                            location = URL(host=fqdn or ip)
+                            location = LocationData.url_from_parts(host=fqdn or ip)
                         else:
-                            location = URL(
+                            location = LocationData.url_from_parts(
                                 protocol=protocol,
                                 host=fqdn or ip,
                                 port=port,

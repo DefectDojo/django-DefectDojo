@@ -7,10 +7,9 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
-
 
 class NiktoXMLParser:
     def process_xml(self, file, test):
@@ -64,7 +63,7 @@ class NiktoXMLParser:
             try:
                 ip = item.findtext("iplink")
                 if settings.V3_FEATURE_LOCATIONS:
-                    location = URL.from_value(ip)
+                    location = LocationData.url_from_value(ip)
                     finding.unsaved_locations = [location]
                 else:
                     # TODO: Delete this after the move to Locations

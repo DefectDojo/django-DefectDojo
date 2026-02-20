@@ -5,10 +5,9 @@ import logging
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
-
 
 DESCRIPTION_TEMPLATE = """**{title}**
 **Serial Number**: {serial_number}
@@ -16,7 +15,6 @@ DESCRIPTION_TEMPLATE = """**{title}**
 **Confidence**: {confidence}
 **Description**: {description_text}
 """
-
 
 class BurpApiParser:
 
@@ -82,7 +80,7 @@ class BurpApiParser:
                 if "origin" in issue and "path" in issue:
                     url = issue.get("origin") + issue.get("path")
                     if settings.V3_FEATURE_LOCATIONS:
-                        finding.unsaved_locations = [URL.from_value(url)]
+                        finding.unsaved_locations = [LocationData.url_from_value(url)]
                     else:
                         # TODO: Delete this after the move to Locations
                         finding.unsaved_endpoints = [Endpoint.from_uri(url)]
@@ -126,7 +124,6 @@ class BurpApiParser:
                     raise ValueError(msg)
         return output
 
-
 def convert_severity(issue):
     """
     According to OpenAPI definition of the API
@@ -147,7 +144,6 @@ def convert_severity(issue):
     if value in {"high", "medium", "low", "info"}:
         return value.title()
     return "Info"
-
 
 def convert_confidence(issue):
     """

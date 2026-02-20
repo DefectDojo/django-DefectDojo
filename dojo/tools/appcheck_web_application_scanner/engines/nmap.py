@@ -2,8 +2,7 @@ from typing import Any
 
 from dojo.models import Endpoint
 from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser
-from dojo.url.models import URL
-
+from dojo.tools.protocol import LocationData
 
 class NmapScanningEngineParser(BaseEngineParser):
 
@@ -28,7 +27,7 @@ class NmapScanningEngineParser(BaseEngineParser):
         # Want at least one endpoint reported since we have a host -- no ports provided. This shouldn't happen, but...
         return [None]
 
-    def parse_locations(self, item: dict[str, Any]) -> list[URL]:
+    def parse_locations(self, item: dict[str, Any]) -> list[LocationData]:
         host = self.get_host(item)
         ports = self.get_ports(item)
         return [self.construct_location(host, port) for port in ports]

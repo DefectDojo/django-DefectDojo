@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
 # TODO: discuss this list as maintenance subject
 # Recommended cipher suites according to German BSI as of 2020
@@ -69,7 +69,6 @@ TLS13_RECOMMENDED_CIPHERS = [
 
 BSI_LINK = "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.pdf?__blob=publicationFile&v=10"
 REFERENCES = "TLS recommendations of German BSI: " + BSI_LINK
-
 
 class SSLyzeJSONParser:
     def get_findings(self, json_output, test):
@@ -244,7 +243,6 @@ class SSLyzeJSONParser:
 
         return list(items)
 
-
 def get_heartbleed(node, test, location):
     if "heartbleed" in node and node["heartbleed"] is not None:
         heartbleed = node["heartbleed"]
@@ -282,7 +280,6 @@ def get_heartbleed(node, test, location):
                     )
         return None
     return None
-
 
 def get_ccs(node, test, location):
     if "openssl_ccs_injection" in node:
@@ -324,7 +321,6 @@ def get_ccs(node, test, location):
                     )
         return None
     return None
-
 
 def get_renegotiation(node, test, location):
     if "session_renegotiation" in node:
@@ -390,7 +386,6 @@ def get_renegotiation(node, test, location):
         return None
     return None
 
-
 def get_weak_protocol(cipher, text, node, test, location):
     if cipher in node:
         weak_node = node[cipher]
@@ -422,7 +417,6 @@ def get_weak_protocol(cipher, text, node, test, location):
                 )
         return None
     return None
-
 
 def get_strong_protocol(cipher, text, suites, node, test, location):
     if cipher in node:
@@ -481,7 +475,6 @@ def get_strong_protocol(cipher, text, suites, node, test, location):
                     )
         return None
     return None
-
 
 def get_certificate_information(node, test, location):
     if "certificate_info" in node:
@@ -574,7 +567,6 @@ def get_certificate_information(node, test, location):
         return None
     return None
 
-
 def get_finding(
     title, description, vulnerability_id, references, test, location,
 ):
@@ -599,16 +591,20 @@ def get_finding(
             finding.unsaved_endpoints.append(location)
     return finding
 
-
 def get_url(location):
     url = "unknown host"
     if location is not None:
-        if location.host is not None:
-            url = location.host
-        if location.port is not None:
-            url = url + ":" + str(location.port)
+        if settings.V3_FEATURE_LOCATIONS:
+            host = location.data.get("host") if location.data else None
+            port = location.data.get("port") if location.data else None
+        else:
+            host = location.host
+            port = location.port
+        if host is not None:
+            url = host
+        if port is not None:
+            url = url + ":" + str(port)
     return url
-
 
 def get_location(node):
     hostname = None
@@ -633,5 +629,5 @@ def get_location(node):
         # TODO: Delete this after the move to Locations
         if not settings.V3_FEATURE_LOCATIONS:
             return Endpoint(host=hostname, port=port)
-        return URL(host=hostname, port=port)
+        return LocationData.url_from_parts(host=hostname, port=port)
     return None

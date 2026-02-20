@@ -4,10 +4,9 @@ from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
-
 
 class Outpost24Parser:
     def get_scan_types(self):
@@ -84,7 +83,7 @@ class Outpost24Parser:
                 # manage endpoint/location
                 if settings.V3_FEATURE_LOCATIONS:
                     finding.unsaved_locations = [
-                        URL(protocol=protocol, host=host, port=port),
+                        LocationData.url_from_parts(protocol=protocol, host=host, port=port),
                     ]
                 else:
                     # TODO: Delete this after the move to Locations

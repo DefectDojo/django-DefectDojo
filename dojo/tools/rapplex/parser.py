@@ -5,8 +5,7 @@ from django.conf import settings
 from html2text import html2text
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
-
+from dojo.tools.protocol import LocationData
 
 class RapplexParser:
 
@@ -81,7 +80,7 @@ class RapplexParser:
                     finding.unsaved_response = res
 
                     if settings.V3_FEATURE_LOCATIONS:
-                        finding.unsaved_locations = [URL.from_value(url)]
+                        finding.unsaved_locations = [LocationData.url_from_value(url)]
                     else:
                         # TODO: Delete this after the move to Locations
                         endpoint = Endpoint.from_uri(url)

@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
 from .importer import BugcrowdApiImporter
 
@@ -18,7 +18,6 @@ SCAN_BUGCROWD_API = "Bugcrowd API Import"
 pattern_title_authorized = re.compile(r"^[a-zA-Z0-9_\s+-.]*$")
 
 logger = logging.getLogger(__name__)
-
 
 class ApiBugcrowdParser:
 
@@ -131,22 +130,17 @@ class ApiBugcrowdParser:
                 finding.severity = "Info"
 
             if bug_location:
-                try:
-                    bug_location.clean()
+                if settings.V3_FEATURE_LOCATIONS:
+                    finding.unsaved_locations = [bug_location]
+                else:
+                    # TODO: Delete this after the move to Locations
                     try:
-                        if settings.V3_FEATURE_LOCATIONS:
-                            finding.unsaved_locations = [bug_location]
-                        else:
-                            # TODO: Delete this after the move to Locations
-                            finding.unsaved_endpoints = [bug_location]
-                    except Exception as e:
+                        bug_location.clean()
+                        finding.unsaved_endpoints = [bug_location]
+                    except ValidationError:
                         logger.error(
-                            "%s bug url from bugcrowd failed to parse to location, error= %s", bug_location, e,
+                            "Broken Bugcrowd location %s was skipped.", bug_url,
                         )
-                except ValidationError:
-                    logger.error(
-                        f"Broken Bugcrowd location {bug_location.host} was skipped.",
-                    )
 
             findings.append(finding)
 
@@ -174,7 +168,7 @@ class ApiBugcrowdParser:
             # TODO: Delete this after the move to Locations
             if not settings.V3_FEATURE_LOCATIONS:
                 return Endpoint.from_uri(bug_url)
-            return URL.from_value(bug_url)
+            return LocationData.url_from_value(bug_url)
         except ValueError:
             # We don't want to fail the whole import just for 1 error in the bug_url
             logger.error("Error parsing bugcrowd bug_url : %s", bug_url)

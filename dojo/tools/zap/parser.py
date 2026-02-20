@@ -1,10 +1,11 @@
+from urllib.parse import urlparse
+
 from defusedxml import ElementTree
 from django.conf import settings
 from html2text import html2text
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
-
+from dojo.tools.protocol import LocationData
 
 class ZapParser:
 
@@ -102,11 +103,8 @@ class ZapParser:
 
                 finding.unsaved_req_resp = []
                 for instance in item.findall("instances/instance"):
-                    if settings.V3_FEATURE_LOCATIONS:
-                        url = URL.from_value(instance.findtext("uri"))
-                    else:
-                        # TODO: Delete this after the move to Locations
-                        url = Endpoint.from_uri(instance.findtext("uri"))
+                    uri = instance.findtext("uri")
+                    parsed_uri = urlparse(uri or "")
                     # If the requestheader key is set, the report is in the "XML with requests and responses"
                     # format - load requests and responses and add them to the
                     # database
@@ -122,20 +120,20 @@ class ZapParser:
                         # The report is in the regular XML format, without requests and responses.
                         # Use the default settings for constructing the request
                         # and response fields.
-                        request = f"Method:           {instance.findtext('method')} \nParam:            {instance.findtext('param')} \nAttack:           {instance.findtext('attack')} \nEndpointQuery:    {url.query} \nEndpointFragment: {url.fragment}"
+                        request = f"Method:           {instance.findtext('method')} \nParam:            {instance.findtext('param')} \nAttack:           {instance.findtext('attack')} \nEndpointQuery:    {parsed_uri.query} \nEndpointFragment: {parsed_uri.fragment}"
                         response = f"{instance.findtext('evidence')}"
 
                     # we remove query and fragment because with some configuration
                     # the tool generate them on-the-go and it produces a lot of
                     # fake locations
                     if settings.V3_FEATURE_LOCATIONS:
-                        url.query = ""
-                        url.fragment = ""
-                        finding.unsaved_locations.append(url)
+                        clean_uri = parsed_uri._replace(query="", fragment="").geturl()
+                        finding.unsaved_locations.append(LocationData.url_from_value(clean_uri))
                     else:
+                        # TODO: Delete this after the move to Locations
+                        url = Endpoint.from_uri(uri)
                         url.query = None
                         url.fragment = None
-                        # TODO: Delete this after the move to Locations
                         finding.unsaved_endpoints.append(url)
                     finding.unsaved_req_resp.append(
                         {"req": request, "resp": response},

@@ -7,8 +7,7 @@ import sys
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
-
+from dojo.tools.protocol import LocationData
 
 class ContrastParser:
 
@@ -60,7 +59,7 @@ class ContrastParser:
             )
             if uri := row.get("Request URI"):
                 if settings.V3_FEATURE_LOCATIONS:
-                    location = URL(
+                    location = LocationData.url_from_parts(
                         host="0.0.0.0",  # noqa: S104
                         path=uri,
                         protocol=row.get("Request Protocol"),

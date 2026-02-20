@@ -6,8 +6,7 @@ from cpe import CPE
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
-
+from dojo.tools.protocol import LocationData
 
 class TrustwaveFusionAPIParser:
 
@@ -62,39 +61,39 @@ class TrustwaveFusionAPIParser:
             return "High"
         return "Info"
 
-
 def extract_location(finding, location_data):
     if settings.V3_FEATURE_LOCATIONS:
+        # Extract optional protocol and port
+        protocol = ""
+        if (
+            "applicationProtocol" in location_data
+            and location_data["applicationProtocol"]
+            and location_data["applicationProtocol"] != "None"
+        ):
+            protocol = location_data["applicationProtocol"]
+        port = None
+        if (
+            "port" in location_data
+            and location_data["port"]
+            and location_data["port"] != "None"
+        ):
+            port = location_data["port"]
         # Location
         #  using url
         if "url" in location_data and location_data["url"] and location_data["url"] != "None":
-            location = URL.from_value(location_data["url"])
+            location = LocationData.url_from_value(location_data["url"])
         # fallback to using old way of creating endpoints
         elif (
             "domain" in location_data
             and location_data["domain"]
             and location_data["domain"] != "None"
         ):
-            location = URL(host=str(location_data["domain"]))
+            location = LocationData.url_from_parts(host=str(location_data["domain"]), protocol=protocol, port=port)
         elif "ip" in location_data and location_data["ip"] and location_data["ip"] != "None":
-            location = URL(host=str(location_data["ip"]))
+            location = LocationData.url_from_parts(host=str(location_data["ip"]), protocol=protocol, port=port)
         else:
             # No host, which is required for URLs
             return
-        # check for protocol
-        if (
-            "applicationProtocol" in location_data
-            and location_data["applicationProtocol"]
-            and location_data["applicationProtocol"] != "None"
-        ):
-            location.protocol = location_data["applicationProtocol"]
-        # check for port
-        if (
-            "port" in location_data
-            and location_data["port"] in location_data
-            and location_data["port"] != "None"
-        ):
-            location.port = location_data["port"]
         finding.unsaved_locations = [location]
     else:
         # TODO: Delete this after the move to Locations
@@ -126,7 +125,6 @@ def extract_location(finding, location_data):
         ):
             endpoint.port = location_data["port"]
         finding.unsaved_endpoints = [endpoint]  # assigning endpoint
-
 
 def get_item(vuln, test):
     finding = Finding(

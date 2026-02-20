@@ -7,15 +7,11 @@ from dateutil.parser import parse
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
 
-
-def get_location(finding: Finding):
-    # TODO: Delete this after the move to Locations
-    if not settings.V3_FEATURE_LOCATIONS:
-        return finding.unsaved_endpoints[0]
-    return finding.unsaved_locations[0]
-
+def get_endpoint(finding: Finding):
+    """Get the mutable endpoint for non-V3 path."""
+    return finding.unsaved_endpoints[0]
 
 class ColumnMappingStrategy:
     mapped_column = None
@@ -43,7 +39,6 @@ class ColumnMappingStrategy:
         elif self.successor is not None:
             self.successor.process_column(column_name, column_value, finding)
 
-
 class DateColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "timestamp"
@@ -52,7 +47,6 @@ class DateColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         finding.date = parse(column_value).date()
 
-
 class TitleColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "nvt name"
@@ -60,7 +54,6 @@ class TitleColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         finding.title = column_value
-
 
 class CweColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
@@ -71,7 +64,6 @@ class CweColumnMappingStrategy(ColumnMappingStrategy):
         if column_value.isdigit():
             finding.cwe = int(column_value)
 
-
 class PortColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "port"
@@ -79,8 +71,10 @@ class PortColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value.isdigit():
-            get_location(finding).port = int(column_value)
-
+            if settings.V3_FEATURE_LOCATIONS:
+                finding._location_parts["port"] = int(column_value)
+            else:
+                get_endpoint(finding).port = int(column_value)
 
 class CveColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
@@ -96,7 +90,6 @@ class CveColumnMappingStrategy(ColumnMappingStrategy):
             else:
                 finding.unsaved_vulnerability_ids.append(column_value)
 
-
 class NVDCVEColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "nvt oid"
@@ -108,7 +101,6 @@ class NVDCVEColumnMappingStrategy(ColumnMappingStrategy):
         for cve in cves:
             finding.unsaved_vulnerability_ids.append(cve)
 
-
 class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "port protocol"
@@ -116,8 +108,10 @@ class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value:  # do not store empty protocol
-            get_location(finding).protocol = column_value
-
+            if settings.V3_FEATURE_LOCATIONS:
+                finding._location_parts["protocol"] = column_value
+            else:
+                get_endpoint(finding).protocol = column_value
 
 class IpColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
@@ -125,10 +119,14 @@ class IpColumnMappingStrategy(ColumnMappingStrategy):
         super().__init__()
 
     def map_column_value(self, finding, column_value):
-        if not get_location(finding).host and column_value is not None:  # process only if host is not already defined (by field hostname)
-            # strip due to https://github.com/greenbone/gvmd/issues/2378
-            get_location(finding).host = column_value.strip()
-
+        if column_value is not None:
+            if settings.V3_FEATURE_LOCATIONS:
+                if not finding._location_parts.get("host"):  # process only if host is not already defined (by field hostname)
+                    # strip due to https://github.com/greenbone/gvmd/issues/2378
+                    finding._location_parts["host"] = column_value.strip()
+            else:
+                if not get_endpoint(finding).host:
+                    get_endpoint(finding).host = column_value.strip()
 
 class HostnameColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
@@ -137,9 +135,11 @@ class HostnameColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value:  # do not override IP if hostname is empty
-            # strip due to https://github.com/greenbone/gvmd/issues/2378
-            get_location(finding).host = column_value.strip()
-
+            if settings.V3_FEATURE_LOCATIONS:
+                # strip due to https://github.com/greenbone/gvmd/issues/2378
+                finding._location_parts["host"] = column_value.strip()
+            else:
+                get_endpoint(finding).host = column_value.strip()
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
     @staticmethod
@@ -157,7 +157,6 @@ class SeverityColumnMappingStrategy(ColumnMappingStrategy):
         else:
             finding.severity = "Info"
 
-
 class CvssColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "cvss"
@@ -169,7 +168,6 @@ class CvssColumnMappingStrategy(ColumnMappingStrategy):
             return
         finding.cvssv3_score = float(column_value)
 
-
 class DescriptionColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "summary"
@@ -177,7 +175,6 @@ class DescriptionColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         finding.description = column_value
-
 
 class MitigationColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
@@ -187,7 +184,6 @@ class MitigationColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         finding.mitigation = column_value
 
-
 class ImpactColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "vulnerability insight"
@@ -195,7 +191,6 @@ class ImpactColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         finding.impact = column_value
-
 
 class ReferencesColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
@@ -205,7 +200,6 @@ class ReferencesColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         finding.references = column_value
 
-
 class ActiveColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "active"
@@ -213,7 +207,6 @@ class ActiveColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         finding.active = self.evaluate_bool_value(column_value)
-
 
 class VerifiedColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
@@ -223,7 +216,6 @@ class VerifiedColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         finding.verified = self.evaluate_bool_value(column_value)
 
-
 class FalsePositiveColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "falsepositive"
@@ -232,7 +224,6 @@ class FalsePositiveColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         finding.false_p = self.evaluate_bool_value(column_value)
 
-
 class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "duplicate"
@@ -240,7 +231,6 @@ class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         finding.duplicate = self.evaluate_bool_value(column_value)
-
 
 class OpenVASCSVParser:
     def create_chain(self):
@@ -298,7 +288,7 @@ class OpenVASCSVParser:
             finding = Finding(test=test)
             finding.unsaved_vulnerability_ids = []
             if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [URL()]
+                finding._location_parts = {"host": "", "port": None, "protocol": ""}
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint()]
@@ -317,14 +307,24 @@ class OpenVASCSVParser:
             if ip:
                 finding.description += f"\n**IP**: {ip}"
 
+            # Create LocationData from collected parts after all columns are processed
+            if settings.V3_FEATURE_LOCATIONS:
+                location = LocationData.url_from_parts(**finding._location_parts)
+                finding.unsaved_locations = [location]
+                del finding._location_parts
+
             if finding is not None and row_number > 0:
                 if finding.title is None:
                     finding.title = ""
                 if finding.description is None:
                     finding.description = ""
+                if settings.V3_FEATURE_LOCATIONS:
+                    location_str = str(finding.unsaved_locations[0])
+                else:
+                    location_str = str(get_endpoint(finding))
                 key = hashlib.sha256(
                     (
-                        str(get_location(finding))
+                        location_str
                         + "|"
                         + finding.severity
                         + "|"

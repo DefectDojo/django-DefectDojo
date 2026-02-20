@@ -4,7 +4,29 @@ from dataclasses import dataclass
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.protocol import LocationData
+
+
+class _MutableLocationParts:
+    """Mutable container for building location data incrementally before creating a frozen LocationData."""
+
+    def __init__(self):
+        self.host = ""
+        self.port = None
+        self.protocol = ""
+
+    def __str__(self):
+        parts = []
+        if self.protocol:
+            parts.append(f"{self.protocol}://")
+        if self.host:
+            parts.append(self.host)
+        if self.port:
+            parts.append(f":{self.port}")
+        return "".join(parts)
+
+    def to_location_data(self):
+        return LocationData.url_from_parts(host=self.host, port=self.port, protocol=self.protocol)
 
 
 @dataclass
@@ -18,13 +40,12 @@ class OpenVASFindingAuxData:
     openvas_result: str = ""
     fallback_cvss_score: float | None = None
 
-
 def setup_finding(test) -> tuple[Finding, OpenVASFindingAuxData]:
     """Base setup and init for findings and auxiliary data"""
     finding = Finding(test=test, dynamic_finding=True, static_finding=False, severity="Info", nb_occurences=1, cwe=None)
     finding.unsaved_vulnerability_ids = []
     if settings.V3_FEATURE_LOCATIONS:
-        finding.unsaved_locations = [URL()]
+        finding._location_builder = _MutableLocationParts()
     else:
         # TODO: Delete this after the move to Locations
         finding.unsaved_endpoints = [Endpoint()]
@@ -33,22 +54,24 @@ def setup_finding(test) -> tuple[Finding, OpenVASFindingAuxData]:
 
     return finding, aux_info
 
-
 def get_location(finding: Finding):
+    """Get the mutable location object for building up location data incrementally."""
     # TODO: Delete this after the move to Locations
     if not settings.V3_FEATURE_LOCATIONS:
         return finding.unsaved_endpoints[0]
-    return finding.unsaved_locations[0]
+    return finding._location_builder
 
+def finalize_location(finding: Finding):
+    """Convert the mutable location builder to a frozen LocationData and store in unsaved_locations."""
+    if settings.V3_FEATURE_LOCATIONS:
+        finding.unsaved_locations = [finding._location_builder.to_location_data()]
 
 def is_valid_severity(severity: str) -> bool:
     return severity in Finding.SEVERITIES
 
-
 def cleanup_openvas_text(text: str) -> str:
     """Removes unnessesary defectojo newlines"""
     return text.replace("\n  ", " ")
-
 
 def escape_restructured_text(text: str) -> str:
     """Changes text so that restructured text symbols are not interpreted"""
@@ -57,7 +80,6 @@ def escape_restructured_text(text: str) -> str:
     text = text.replace("```", "")
     text = text.replace("```", "")
     return f"```\n{text}\n```"
-
 
 def postprocess_finding(finding: Finding, aux_info: OpenVASFindingAuxData):
     """Update finding with AuxData content"""
@@ -78,7 +100,6 @@ def postprocess_finding(finding: Finding, aux_info: OpenVASFindingAuxData):
         search_terms = ["Update to version", "The vendor has released updates"]
         if any(text in finding.mitigation for text in search_terms):
             finding.fix_available = True
-
 
 def deduplicate(dupes: dict[str, Finding], finding: Finding):
     """Combine multiple openvas findings into one defectdojo finding with potentially multiple locations"""
@@ -108,15 +129,15 @@ def deduplicate(dupes: dict[str, Finding], finding: Finding):
                 org.steps_to_reproduce += tmp
 
         # combine identical findings on different hosts into one with multiple hosts
-        location = get_location(finding)
-
         if settings.V3_FEATURE_LOCATIONS:
+            location = finding.unsaved_locations[0]
             if location not in org.unsaved_locations:
                 org.unsaved_locations += finding.unsaved_locations
-        # TODO: Delete this after the move to Locations
-        elif location not in org.unsaved_endpoints:
-            org.unsaved_endpoints += finding.unsaved_endpoints
-
+        else:
+            # TODO: Delete this after the move to Locations
+            location = get_location(finding)
+            if location not in org.unsaved_endpoints:
+                org.unsaved_endpoints += finding.unsaved_endpoints
 
 def gen_finding_hash(finding: Finding) -> str:
     """Generate a hash for a finding that is used for deduplication of findings inside the current report"""

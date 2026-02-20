@@ -7,8 +7,7 @@ from dateutil import parser as date_parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
-
+from dojo.tools.protocol import LocationData
 
 class NetsparkerParser:
     def get_scan_types(self):
@@ -101,7 +100,7 @@ class NetsparkerParser:
             finding.unsaved_req_resp = [{"req": str(request), "resp": str(response)}]
             # manage endpoint/location
             if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [URL.from_value(url)]
+                finding.unsaved_locations = [LocationData.url_from_value(url)]
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint.from_uri(url)]
