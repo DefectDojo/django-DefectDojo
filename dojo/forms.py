@@ -30,7 +30,6 @@ from django.utils.translation import gettext_lazy as _
 from polymorphic.base import ManagerInheritanceWarning
 from tagulous.forms import TagField
 
-import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_configuration_permission, user_is_superuser_or_global_owner
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
@@ -411,6 +410,8 @@ class EditFindingGroupForm(forms.ModelForm):
                                  help_text="Leave empty and check push to jira to create a new JIRA issue for this finding group.")
 
     def __init__(self, *args, **kwargs):
+        # We import here to break the circular dependency loop
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         super().__init__(*args, **kwargs)
         self.fields["push_to_jira"] = forms.BooleanField()
         self.fields["push_to_jira"].required = False
@@ -2805,6 +2806,12 @@ class GITHUBForm(forms.ModelForm):
     class Meta:
         model = GITHUB_Conf
         exclude = ["product"]
+        labels = {
+            "base_url": "Github Base URL",
+        }
+        help_texts = {
+            "base_url": "Default:https://api.github.com. For On-Prem: https://{your-server}/api/v3",
+        }
 
 
 class DeleteGITHUBConfForm(forms.ModelForm):
@@ -2859,6 +2866,8 @@ class BaseJiraForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True, help_text=JIRA_Instance._meta.get_field("password").help_text, label=JIRA_Instance._meta.get_field("password").verbose_name)
 
     def test_jira_connection(self):
+        # We import here to break the circular dependency loop
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         try:
             # Attempt to validate the credentials before moving forward
             jira_helper.get_jira_connection_raw(self.cleaned_data["url"],
@@ -3328,6 +3337,8 @@ class JIRAProjectForm(forms.ModelForm):
         fields = ["inherit_from_product", "jira_instance", "project_key", "issue_template_dir", "epic_issue_type_name", "component", "custom_fields", "jira_labels", "default_assignee", "enabled", "add_vulnerability_id_to_jira_label", "push_all_issues", "enable_engagement_epic_mapping", "push_notes", "product_jira_sla_notification", "risk_acceptance_expiration_notification"]
 
     def __init__(self, *args, **kwargs):
+        # We import here to break the circular dependency loop
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         # if the form is shown for an engagement, we set a placeholder text around inherited settings from product
         self.target = kwargs.pop("target", "product")
         self.product = kwargs.pop("product", None)
@@ -3504,6 +3515,8 @@ class JIRAFindingForm(forms.Form):
             self.fields["jira_issue"].disabled = True
 
     def clean(self):
+        # We import here to break the circular dependency loop
+        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
         logger.debug("jform clean")
         super().clean()
         jira_issue_key_new = self.cleaned_data.get("jira_issue")
