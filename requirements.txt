@@ -57,7 +57,7 @@ PyJWT==2.11.0
 cvss==3.6
 django-fieldsignals==0.8.0
 hyperlink==21.0.0
-djangosaml2==1.11.1
+djangosaml2==1.12.0
 drf-spectacular==0.29.0
 drf-spectacular-sidecar==2026.1.1
 django-ratelimit==4.1.0
