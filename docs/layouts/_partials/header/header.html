@@ -131,41 +131,8 @@
               <span class="ms-2 text-bs-body fw-bold">| docs</span>
             </a>
 
-            <!-- Search -->
-            <div class="flex-grow-1 d-none d-lg-flex justify-content-center align-items-center">
-
-              <!-- FlexSearch desktop -->
-              {{ partial "main/showFlexSearch" . }}
-              {{ $showFlexSearch := .Scratch.Get "showFlexSearch" -}}
-              {{ if $showFlexSearch -}}
-              <button type="button" id="searchToggleDesktop" class="btn btn-link nav-link p-2 d-none d-lg-block"
-                aria-label="Search website">
-                <span class="fw-bold">Search docs </span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24"
-                  height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <circle cx="10" cy="10" r="7"></circle>
-                  <line x1="21" y1="21" x2="15" y2="15"></line>
-                </svg>
-              </button>
-              {{ end -}}
-
-              <!-- DocSearch desktop -->
-              {{ if site.Params.add_ons.docSearch -}}
-              <button type="button" id="searchToggleDesktop" class="btn btn-link nav-link mx-2 d-none d-lg-block"
-                aria-label="Search website">
-                <span class="fw-bold">Search docs </span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24"
-                  height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <circle cx="10" cy="10" r="7"></circle>
-                  <line x1="21" y1="21" x2="15" y2="15"></line>
-                </svg>
-              </button>
-              {{ end -}}
-            </div>
+            <!-- Spacer -->
+            <div class="flex-grow-1 d-none d-lg-block"></div>
 
             <!-- Language dropdown -->
             {{ if eq site.Params.doks.multilingualMode true -}}
@@ -264,6 +231,41 @@
 
             <!-- Right-aligned items -->
             <div class="d-flex align-items-center ms-lg-auto">
+
+              <!-- FlexSearch desktop -->
+              {{ partial "main/showFlexSearch" . }}
+              {{ $showFlexSearch := .Scratch.Get "showFlexSearch" -}}
+              {{ if $showFlexSearch -}}
+              <button type="button" id="searchToggleDesktop" class="btn btn-link nav-link d-none d-lg-flex align-items-center me-2"
+                aria-label="Search website">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search me-1" width="16"
+                  height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                  <circle cx="10" cy="10" r="7"></circle>
+                  <line x1="21" y1="21" x2="15" y2="15"></line>
+                </svg>
+                <span>Search</span>
+                <kbd class="search-kbd ms-2">/</kbd>
+              </button>
+              {{ end -}}
+
+              <!-- DocSearch desktop -->
+              {{ if site.Params.add_ons.docSearch -}}
+              <button type="button" id="searchToggleDesktop" class="btn btn-link nav-link d-none d-lg-flex align-items-center me-2"
+                aria-label="Search website">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search me-1" width="16"
+                  height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                  <circle cx="10" cy="10" r="7"></circle>
+                  <line x1="21" y1="21" x2="15" y2="15"></line>
+                </svg>
+                <span>Search</span>
+                <kbd class="search-kbd ms-2">/</kbd>
+              </button>
+              {{ end -}}
+
               <!-- Color mode toggler -->
               {{ if and (eq site.Params.doks.colorMode "auto") site.Params.doks.colorModeToggler -}}
               <button id="buttonColorMode" class="btn btn-link mx-auto nav-link p-0 ms-lg-2 me-lg-1" type="button"
@@ -285,10 +287,21 @@
               </button>
               {{ end -}}
 
-              <!-- GitHub link (other social icons moved to footer) -->
-              <a class="nav-link social-link ms-lg-2" href="https://github.com/DefectDojo/django-DefectDojo" aria-label="GitHub">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"></path></svg>
-              </a>
+              <!-- Social links — Tabler stroke icons -->
+              <div class="d-none d-lg-flex align-items-center header-social-links ms-lg-2">
+                <a class="nav-link social-link" href="https://github.com/DefectDojo/django-DefectDojo" aria-label="GitHub" rel="noopener">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"></path></svg>
+                </a>
+                <a class="nav-link social-link" href="https://www.linkedin.com/company/defectdojo/" aria-label="LinkedIn" rel="noopener">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M8 11l0 5"/><path d="M8 8l0 .01"/><path d="M12 16l0 -5"/><path d="M16 16v-3a2 2 0 0 0 -4 0"/></svg>
+                </a>
+                <a class="nav-link social-link" href="https://www.youtube.com/@defectdojo" aria-label="YouTube" rel="noopener">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M2 8a4 4 0 0 1 4 -4h12a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4v-8z"/><path d="M10 9l5 3l-5 3z"/></svg>
+                </a>
+                <a class="nav-link social-link" href="https://x.com/defectdojo" aria-label="X" rel="noopener">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 4l11.733 16h4.267l-11.733 -16z"></path><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path></svg>
+                </a>
+              </div>
             </div>
 
             <!-- Navbar button mobile -->
@@ -299,7 +312,7 @@
               }}</a>
             {{ end -}}
           </div>
-          <div class="w-100 mt-3">
+          <div class="w-100 mt-1">
             <ul class="navbar-nav flex-grow-1">
               {{ $current := index (split .RelPermalink "/") 1 }}
               {{ if eq $current "" }}{{ $current = "en" }}{{ end }}

@@ -142,6 +142,28 @@ h1, h2, h3, h4, h5, h6,
   font-weight: 500; // Medium for buttons
 }
 
+.hero-actions .btn-outline-secondary {
+  --bs-btn-color: #191919;
+  --bs-btn-border-color: #191919;
+  --bs-btn-hover-bg: #191919;
+  --bs-btn-hover-border-color: #191919;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: #333333;
+  --bs-btn-active-border-color: #333333;
+  --bs-btn-active-color: #fff;
+}
+
+[data-bs-theme="dark"] .hero-actions .btn-outline-secondary {
+  --bs-btn-color: #e0e0e0;
+  --bs-btn-border-color: #e0e0e0;
+  --bs-btn-hover-bg: #e0e0e0;
+  --bs-btn-hover-border-color: #e0e0e0;
+  --bs-btn-hover-color: #191919;
+  --bs-btn-active-bg: #cccccc;
+  --bs-btn-active-border-color: #cccccc;
+  --bs-btn-active-color: #191919;
+}
+
 // ============================================================
 // Version Selector
 // ============================================================
@@ -769,8 +791,8 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .navbar-nav.flex-grow-1 .nav-link {
-  font-size: 0.8125rem;
-  padding: 0.375rem 0.625rem;
+  font-size: 0.9rem;
+  padding: 0.375rem 0.75rem;
   border-radius: 0.25rem;
   white-space: nowrap;
 
@@ -795,29 +817,65 @@ h1, h2, h3, h4, h5, h6,
 // --- Search Button Refinement ---
 
 #searchToggleDesktop {
-  border: 1px solid #DCDCDC;
-  border-radius: 2rem;
-  padding: 0.25rem 1rem;
-  font-size: 0.8125rem;
-  color: #666666;
+  border: 1px solid #CDCDCD;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.875rem;
+  font-size: 0.875rem;
+  color: #555555;
+  background: #f5f5f5;
+  gap: 0.25rem;
+  min-width: 13rem;
 
   &:hover {
     border-color: #1779C5;
     color: #1779C5;
+    background: #eef5fb;
   }
 
-  .fw-bold {
-    font-weight: 400 !important;
+  .search-kbd {
+    font-family: inherit;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    border: 1px solid #CDCDCD;
+    border-radius: 0.25rem;
+    padding: 0.05rem 0.4rem;
+    line-height: 1.4;
+    color: #888888;
+    background: #ffffff;
   }
 }
 
 [data-bs-theme="dark"] #searchToggleDesktop {
-  border-color: #333333;
+  border-color: #444444;
   color: #B3B3B3;
+  background: #2a2a2a;
 
   &:hover {
     border-color: #82B0D9;
     color: #82B0D9;
+    background: rgba(#1779C5, 0.15);
+  }
+
+  .search-kbd {
+    border-color: #555555;
+    color: #888888;
+    background: #333333;
+  }
+}
+
+// --- Header Social Links ---
+
+.header-social-links {
+  gap: 0.125rem;
+
+  .social-link {
+    padding: 0.25rem;
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
