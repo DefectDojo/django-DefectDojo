@@ -15,6 +15,8 @@ from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
     BurpRawRequestResponseViewSet,
+    CeleryQueuePurgeView,
+    CeleryStatusView,
     ConfigurationPermissionViewSet,
     CredentialsMappingViewSet,
     CredentialsViewSet,
@@ -242,6 +244,8 @@ api_v2_urls = [
     #  Django Rest Framework API v2
     re_path(r"^{}api/v2/".format(get_system_setting("url_prefix")), include(v2_api.urls)),
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
+    re_path(r"^{}api/v2/celery/status/$".format(get_system_setting("url_prefix")), CeleryStatusView.as_view(), name="celery_status_api"),
+    re_path(r"^{}api/v2/celery/queue/purge/$".format(get_system_setting("url_prefix")), CeleryQueuePurgeView.as_view(), name="celery_queue_purge_api"),
 ]
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):

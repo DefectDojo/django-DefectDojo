@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse
@@ -9,7 +8,7 @@ from django.views import View
 
 from dojo.forms import SystemSettingsForm
 from dojo.models import System_Settings
-from dojo.utils import add_breadcrumb, get_celery_queue_length, get_celery_worker_status
+from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 
@@ -30,15 +29,10 @@ class SystemSettingsView(View):
         request: HttpRequest,
     ) -> dict:
         system_settings_obj = self.get_settings_object()
-        # Set the initial context
-        context = {
+        return {
             "system_settings_obj": system_settings_obj,
             "form": self.get_form(request, system_settings_obj),
         }
-        # Check the status of celery
-        self.get_celery_status(context)
-
-        return context
 
     def get_form(
         self,
@@ -95,35 +89,6 @@ class SystemSettingsView(View):
             return request, True
         return request, False
 
-    def get_celery_status(
-        self,
-        context: dict,
-    ) -> None:
-        # Celery needs to be set with the setting: CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
-        if hasattr(settings, "CELERY_RESULT_BACKEND"):
-            # Check the status of Celery by sending calling a celery task
-            context["celery_bool"] = get_celery_worker_status()
-
-            if context["celery_bool"]:
-                context["celery_msg"] = "Celery is processing tasks."
-                context["celery_status"] = "Running"
-            else:
-                context["celery_msg"] = "Celery does not appear to be up and running. Please ensure celery is running."
-                context["celery_status"] = "Not Running"
-
-            q_len = get_celery_queue_length()
-            if q_len is None:
-                context["celery_q_len"] = " It is not possible to identify number of waiting tasks."
-            elif q_len:
-                context["celery_q_len"] = f"{q_len} tasks are waiting to be proccessed."
-            else:
-                context["celery_q_len"] = "No task is waiting to be proccessed."
-
-        else:
-            context["celery_bool"] = False
-            context["celery_msg"] = "Celery needs to have the setting CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite' set in settings.py."
-            context["celery_status"] = "Unknown"
-
     def get_template(self) -> str:
         return "dojo/system_settings.html"
 
@@ -148,9 +113,19 @@ class SystemSettingsView(View):
         self.permission_check(request)
         # Set up the initial context
         context = self.get_context(request)
-        # Check the status of celery
         request, _ = self.validate_form(request, context)
         # Add some breadcrumbs
         add_breadcrumb(title="System settings", top_level=False, request=request)
         # Render the page
         return render(request, self.get_template(), context)
+
+
+class SystemStatusView(View):
+    def get(
+        self,
+        request: HttpRequest,
+    ) -> HttpResponse:
+        if not request.user.is_superuser:
+            raise PermissionDenied
+        add_breadcrumb(title="System status", top_level=False, request=request)
+        return render(request, "dojo/system_status.html")
