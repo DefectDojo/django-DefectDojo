@@ -261,6 +261,10 @@ h1, h2, h3, h4, h5, h6,
   padding: 0;
 }
 
+.DocSearch-Logo {
+  display: none !important;
+}
+
 @media (max-width: 768px) {
   .DocSearch-Modal {
     position: fixed !important;
