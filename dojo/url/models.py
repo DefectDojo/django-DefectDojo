@@ -373,7 +373,7 @@ class URL(AbstractLocation):
         query=None,
         fragment=None,
     ) -> URL:
-        return URL(
+        url = URL(
             protocol=protocol,
             user_info=user_info,
             host=host,
@@ -382,6 +382,8 @@ class URL(AbstractLocation):
             query=query,
             fragment=fragment,
         )
+        url.clean()
+        return url
 
     @staticmethod
     def create_location_from_value(value: str) -> URL:
@@ -401,7 +403,7 @@ class URL(AbstractLocation):
         fragment = parsed_url.fragment.removeprefix("#")[:2048]
 
         # Create the initial object, assuming no exceptions are thrown
-        url = URL(
+        return URL.from_parts(
             protocol=parsed_url.protocol,
             user_info=parsed_url.user_info,
             host=parsed_url.host,
@@ -410,8 +412,6 @@ class URL(AbstractLocation):
             query=query,
             fragment=fragment,
         )
-        url.clean()
-        return url
 
     @classmethod
     def _from_location_data_impl(cls, location_data: LocationData) -> Self:
