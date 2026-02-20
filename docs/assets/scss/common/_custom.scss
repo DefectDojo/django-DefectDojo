@@ -1,30 +1,224 @@
-/* work-sans-regular - latin */
+// ============================================================
+// Font Face Declarations — Work Sans (Brand Typeface)
+// ============================================================
+
+/* work-sans-300 (Light) - latin */
 @font-face {
   font-display: swap;
-  /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Worksans';
+  font-style: normal;
+  font-weight: 300;
+  src: url('/fonts/worksans/work-sans-v24-latin-300.woff2') format('woff2');
+}
+
+/* work-sans-regular (400) - latin */
+@font-face {
+  font-display: swap;
   font-family: 'Worksans';
   font-style: normal;
   font-weight: 400;
   src: url('/fonts/worksans/work-sans-v19-latin-regular.woff2') format('woff2');
-  /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
-/* work-sans-500 - latin */
+/* work-sans-regular-italic (400i) - latin */
 @font-face {
   font-display: swap;
-  /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Worksans';
+  font-style: italic;
+  font-weight: 400;
+  src: url('/fonts/worksans/work-sans-v24-latin-italic.woff2') format('woff2');
+}
+
+/* work-sans-500 (Medium) - latin */
+@font-face {
+  font-display: swap;
   font-family: 'Worksans';
   font-style: normal;
   font-weight: 500;
   src: url('/fonts/worksans/work-sans-v19-latin-500.woff2') format('woff2');
-  /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
+
+/* work-sans-600 (Semi Bold) - latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Worksans';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/fonts/worksans/work-sans-v24-latin-600.woff2') format('woff2');
+}
+
+/* work-sans-600-italic (Semi Bold Italic) - latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Worksans';
+  font-style: italic;
+  font-weight: 600;
+  src: url('/fonts/worksans/work-sans-v24-latin-600italic.woff2') format('woff2');
+}
+
+// ============================================================
+// Layout
+// ============================================================
 
 .container-lg {
   max-width: 100%;
 }
 
-// DocSearch
+html {
+  font-size: 85%;
+}
+
+// ============================================================
+// Typography — Brand Weight Hierarchy
+// ============================================================
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-weight: 600; // Semi Bold per brand guidelines
+  color: #191919;   // Dojo Black
+}
+
+// ============================================================
+// Navbar
+// ============================================================
+
+.navbar .nav-link {
+  font-weight: 500; // Medium per brand guidelines for nav/buttons
+}
+
+.navbar .nav-link.active {
+  color: #1779C5; // Fuji Blue
+}
+
+// ============================================================
+// Sidebar
+// ============================================================
+
+.docs-sidebar {
+  visibility: hidden; // Hide sidebar until version is resolved
+}
+
+.doks-sidebar .section-nav a {
+  color: #333333; // Dojo Hue 04
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.doks-sidebar .section-nav a:hover {
+  color: #1779C5; // Fuji Blue
+  background-color: rgba(#C6DDF2, 0.3); // Fuji Hue 01, subtle
+}
+
+.doks-sidebar .section-nav a[aria-current="page"] {
+  color: #1779C5; // Fuji Blue
+  font-weight: 600;
+  border-left: 3px solid #1779C5;
+  padding-left: 0.5rem;
+  background-color: rgba(#C6DDF2, 0.15);
+}
+
+// ============================================================
+// Buttons
+// ============================================================
+
+.btn-primary {
+  --bs-btn-bg: #1779C5;
+  --bs-btn-border-color: #1779C5;
+  --bs-btn-hover-bg: #204D87;
+  --bs-btn-hover-border-color: #204D87;
+  --bs-btn-active-bg: #003864;
+  --bs-btn-active-border-color: #003864;
+}
+
+.btn-cta {
+  --bs-btn-bg: #F2561D;
+  --bs-btn-border-color: #F2561D;
+  --bs-btn-hover-bg: #F2762E;
+  --bs-btn-hover-border-color: #F2762E;
+  --bs-btn-active-bg: #C1230D;
+  --bs-btn-active-border-color: #C1230D;
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+  font-weight: 500; // Medium for buttons
+}
+
+// ============================================================
+// Version Selector
+// ============================================================
+
+#version-select[data-version="opensource"] {
+  background-color: rgba(#003864, 0.72);
+  border: 2px solid #003864;
+  color: white;
+}
+
+#version-select[data-version="pro"] {
+  background-color: rgba(#F2561D, 0.72);
+  border: 2px solid #F2561D;
+  color: white;
+}
+
+// ============================================================
+// Cards
+// ============================================================
+
+.card {
+  border-color: #DCDCDC; // Dojo Hue 01
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  border-color: #82B0D9; // Fuji Hue 02
+  box-shadow: 0 2px 8px rgba(#1779C5, 0.1);
+}
+
+.card a.stretched-link {
+  color: #1779C5;
+  font-weight: 500;
+}
+
+// ============================================================
+// Code Blocks
+// ============================================================
+
+:not(pre) > code {
+  background-color: rgba(#C6DDF2, 0.25); // Fuji Hue 01, subtle
+  color: #204D87; // Fuji Hue 03
+  border-radius: 3px;
+  padding: 0.15em 0.35em;
+}
+
+// ============================================================
+// Breadcrumb
+// ============================================================
+
+.breadcrumb-item a {
+  color: #1779C5;
+}
+
+.breadcrumb-item.active {
+  color: #666666; // Dojo Hue 03
+}
+
+// ============================================================
+// Logo — Dark / Light mode switching
+// ============================================================
+
+.logo-darkmode {
+  display: none;
+}
+
+[data-bs-theme="dark"] .logo-lightmode {
+  display: none;
+}
+
+[data-bs-theme="dark"] .logo-darkmode {
+  display: inline-block;
+}
+
+// ============================================================
+// DocSearch Overrides
+// ============================================================
 
 .DocSearch-Container {
   z-index: 2000 !important;
@@ -45,36 +239,161 @@
   }
 }
 
-.logo-darkmode {
-  display: none;
+// ============================================================
+// Selection Color
+// ============================================================
+
+::selection {
+  background-color: rgba(#1779C5, 0.2);
+  color: #191919;
 }
 
-[data-bs-theme="dark"] .logo-lightmode {
-  display: none;
+// ============================================================
+// Homepage Sections
+// ============================================================
+
+.section-features h2 {
+  color: #1779C5; // Fuji Blue
 }
 
-[data-bs-theme="dark"] .logo-darkmode {
-  display: inline-block;
+.section-features a {
+  color: #F2561D; // Torii Orange for call-to-action links
+  font-weight: 500;
 }
 
-html {
-  font-size: 85%; /* scales all rem/em fonts */
+.section-features a:hover {
+  color: #C1230D; // Torii Hue 03
 }
 
-/* Hide sidebar until version is resolved */
-.docs-sidebar {
-  visibility: hidden;
-}
+// ============================================================
+// Dark Mode — Brand Adaptation
+// ============================================================
 
+[data-bs-theme="dark"] {
+  // Headings in dark mode — bright white for strong contrast
+  h1, h2, h3, h4, h5, h6,
+  .h1, .h2, .h3, .h4, .h5, .h6 {
+    color: #f0f0f0;
+  }
 
-#version-select[data-version="opensource"] {
-  background-color: #003964b7;
-  border: 2px solid #003864;
-  color: white;
-}
+  // Links use lighter blue in dark mode
+  a {
+    color: #82B0D9; // Fuji Hue 02
+  }
 
-#version-select[data-version="pro"] {
-  background-color: #a84e32b7;
-  border: 2px solid #a84e32;
-  color: white;
+  a:hover {
+    color: #C6DDF2; // Fuji Hue 01
+  }
+
+  // CTA button — ensure solid fill in dark mode
+  .btn-cta {
+    --bs-btn-bg: #F2561D !important;
+    --bs-btn-border-color: #F2561D !important;
+    --bs-btn-hover-bg: #F2762E !important;
+    --bs-btn-hover-border-color: #F2762E !important;
+    --bs-btn-active-bg: #C1230D !important;
+    --bs-btn-active-border-color: #C1230D !important;
+    --bs-btn-color: #fff !important;
+    --bs-btn-hover-color: #fff !important;
+    --bs-btn-active-color: #fff !important;
+    background-color: #F2561D !important;
+    border-color: #F2561D !important;
+    color: #fff !important;
+  }
+
+  .btn-cta:hover {
+    background-color: #F2762E !important;
+    border-color: #F2762E !important;
+  }
+
+  // Primary button in dark mode
+  .btn-primary {
+    --bs-btn-bg: #1779C5;
+    --bs-btn-border-color: #1779C5;
+    --bs-btn-hover-bg: #82B0D9;
+    --bs-btn-hover-border-color: #82B0D9;
+    --bs-btn-color: #fff;
+    --bs-btn-hover-color: #fff;
+  }
+
+  // Sidebar adjustments for dark mode
+  .doks-sidebar .section-nav a {
+    color: #B3B3B3; // Dojo Hue 02
+  }
+
+  .doks-sidebar .section-nav a:hover {
+    color: #82B0D9;
+    background-color: rgba(#1779C5, 0.1);
+  }
+
+  .doks-sidebar .section-nav a[aria-current="page"] {
+    color: #82B0D9;
+    border-left-color: #82B0D9;
+    background-color: rgba(#1779C5, 0.08);
+  }
+
+  // Inline code in dark mode
+  :not(pre) > code {
+    background-color: rgba(#1779C5, 0.15);
+    color: #C6DDF2;
+  }
+
+  // Cards in dark mode
+  .card {
+    border-color: #333333;
+  }
+
+  .card:hover {
+    border-color: #82B0D9;
+    box-shadow: 0 2px 8px rgba(#1779C5, 0.15);
+  }
+
+  .card a.stretched-link {
+    color: #82B0D9;
+  }
+
+  // Version selector in dark mode
+  #version-select[data-version="opensource"] {
+    background-color: rgba(#003864, 0.85);
+    border-color: #82B0D9;
+  }
+
+  #version-select[data-version="pro"] {
+    background-color: rgba(#F2561D, 0.85);
+    border-color: #F2762E;
+  }
+
+  // Selection color in dark mode
+  ::selection {
+    background-color: rgba(#82B0D9, 0.3);
+    color: #DCDCDC;
+  }
+
+  // Homepage features section — vibrant headings
+  .section-features h2 {
+    color: #C6DDF2; // Fuji Hue 01 — brighter for dark bg
+  }
+
+  .section-features a {
+    color: #F2561D; // Full Torii Orange — vivid on dark
+  }
+
+  .section-features a:hover {
+    color: #F2D49B; // Torii Hue 01
+  }
+
+  // Homepage description text
+  .section .lead,
+  .section .text-center {
+    color: #DCDCDC;
+  }
+
+  // Breadcrumb
+  .breadcrumb-item a {
+    color: #82B0D9;
+  }
+
+  .breadcrumb-item.active {
+    color: #B3B3B3;
+  }
 }

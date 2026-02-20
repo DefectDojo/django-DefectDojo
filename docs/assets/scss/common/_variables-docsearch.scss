@@ -1,61 +1,61 @@
-/* DocSearch Variables */
+/* DocSearch Variables — DefectDojo Brand */
 
 :root {
-    --docsearch-primary-color: rgb(84, 104, 255);
-    --docsearch-text-color: rgb(28, 30, 33);
+    --docsearch-primary-color: #1779C5;
+    --docsearch-text-color: #191919;
     --docsearch-spacing: 12px;
     --docsearch-icon-stroke-width: 1.4;
     --docsearch-highlight-color: var(--docsearch-primary-color);
-    --docsearch-muted-color: rgb(150, 159, 175);
-    --docsearch-container-background: rgba(101, 108, 133, 0.8);
-    --docsearch-logo-color: rgba(84, 104, 255);
-  
+    --docsearch-muted-color: #666666;
+    --docsearch-container-background: rgba(25, 25, 25, 0.7);
+    --docsearch-logo-color: #1779C5;
+
     /* modal */
     --docsearch-modal-width: 560px;
     --docsearch-modal-height: 600px;
     --docsearch-modal-background: rgb(245, 246, 247);
-    --docsearch-modal-shadow: inset 1px 1px 0 0 rgba(255, 255, 255, 0.5), 0 3px 8px 0 rgba(85, 90, 100, 1);
-  
+    --docsearch-modal-shadow: inset 1px 1px 0 0 rgba(255, 255, 255, 0.5), 0 3px 8px 0 rgba(25, 25, 25, 0.6);
+
     /* searchbox */
     --docsearch-searchbox-height: 56px;
     --docsearch-searchbox-background: rgb(235, 237, 240);
     --docsearch-searchbox-focus-background: #fff;
     --docsearch-searchbox-shadow: inset 0 0 0 2px var(--docsearch-primary-color);
-  
+
     /* hit */
     --docsearch-hit-height: 56px;
-    --docsearch-hit-color: rgb(68, 73, 80);
+    --docsearch-hit-color: #333333;
     --docsearch-hit-active-color: #fff;
     --docsearch-hit-background: #fff;
     --docsearch-hit-shadow: 0 1px 3px 0 rgb(212, 217, 225);
-  
+
     /* key */
-    --docsearch-key-gradient: linear-gradient(-225deg, rgb(213, 219, 228) 0%, rgb(248, 248, 248) 100%);
-    --docsearch-key-shadow: inset 0 -2px 0 0 rgb(205, 205, 230), inset 0 0 1px 1px #fff, 0 1px 2px 1px rgba(30, 35, 90, 0.4);
-    --docsearch-key-pressed-shadow: inset 0 -2px 0 0 #cdcde6, inset 0 0 1px 1px #fff, 0 1px 1px 0 rgba(30, 35, 90, 0.4);
+    --docsearch-key-gradient: linear-gradient(-225deg, #DCDCDC 0%, rgb(248, 248, 248) 100%);
+    --docsearch-key-shadow: inset 0 -2px 0 0 #B3B3B3, inset 0 0 1px 1px #fff, 0 1px 2px 1px rgba(25, 25, 25, 0.3);
+    --docsearch-key-pressed-shadow: inset 0 -2px 0 0 #B3B3B3, inset 0 0 1px 1px #fff, 0 1px 1px 0 rgba(25, 25, 25, 0.3);
     /* footer */
     --docsearch-footer-height: 44px;
     --docsearch-footer-background: #fff;
-    --docsearch-footer-shadow: 0 -1px 0 0 rgb(224, 227, 232), 0 -3px 6px 0 rgba(69, 98, 155, 0.12);
+    --docsearch-footer-shadow: 0 -1px 0 0 #DCDCDC, 0 -3px 6px 0 rgba(23, 121, 197, 0.08);
   }
-  
-  /* Darkmode */
-  
+
+  /* Dark mode */
+
   html[data-bs-theme="dark"] {
-    --docsearch-text-color: rgb(245, 246, 247);
-    --docsearch-container-background: rgba(9, 10, 17, 0.8);
-    --docsearch-modal-background: rgb(21, 23, 42);
-    --docsearch-modal-shadow: inset 1px 1px 0 0 rgb(44, 46, 64), 0 3px 8px 0 rgb(0, 3, 9);
-    --docsearch-searchbox-background: rgb(9, 10, 17);
-    --docsearch-searchbox-focus-background: #000;
-    --docsearch-hit-color: rgb(190, 195, 201);
+    --docsearch-text-color: #DCDCDC;
+    --docsearch-container-background: rgba(25, 25, 25, 0.85);
+    --docsearch-modal-background: #191919;
+    --docsearch-modal-shadow: inset 1px 1px 0 0 #333333, 0 3px 8px 0 rgba(0, 0, 0, 0.6);
+    --docsearch-searchbox-background: #333333;
+    --docsearch-searchbox-focus-background: #191919;
+    --docsearch-hit-color: #B3B3B3;
     --docsearch-hit-shadow: none;
-    --docsearch-hit-background: rgb(9, 10, 17);
-    --docsearch-key-gradient: linear-gradient(-26.5deg, rgb(86, 88, 114) 0%, rgb(49, 53, 91) 100%);
-    --docsearch-key-shadow: inset 0 -2px 0 0 rgb(40, 45, 85), inset 0 0 1px 1px rgb(81, 87, 125), 0 2px 2px 0 rgba(3, 4, 9, 0.3);
-    --docsearch-key-pressed-shadow: inset 0 -2px 0 0 #282d55, inset 0 0 1px 1px #51577d, 0 1px 1px 0 #0304094d;
-    --docsearch-footer-background: rgb(30, 33, 54);
-    --docsearch-footer-shadow: inset 0 1px 0 0 rgba(73, 76, 106, 0.5), 0 -4px 8px 0 rgba(0, 0, 0, 0.2);
-    --docsearch-logo-color: rgb(255, 255, 255);
-    --docsearch-muted-color: rgb(127, 132, 151);
+    --docsearch-hit-background: #333333;
+    --docsearch-key-gradient: linear-gradient(-26.5deg, #666666 0%, #333333 100%);
+    --docsearch-key-shadow: inset 0 -2px 0 0 #191919, inset 0 0 1px 1px #666666, 0 2px 2px 0 rgba(0, 0, 0, 0.3);
+    --docsearch-key-pressed-shadow: inset 0 -2px 0 0 #191919, inset 0 0 1px 1px #666666, 0 1px 1px 0 rgba(0, 0, 0, 0.3);
+    --docsearch-footer-background: #333333;
+    --docsearch-footer-shadow: inset 0 1px 0 0 rgba(102, 102, 102, 0.5), 0 -4px 8px 0 rgba(0, 0, 0, 0.2);
+    --docsearch-logo-color: #DCDCDC;
+    --docsearch-muted-color: #B3B3B3;
   }

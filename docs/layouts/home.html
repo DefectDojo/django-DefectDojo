@@ -7,7 +7,7 @@
     <div class="row justify-content-center text-center">Official documentation for DefectDojo Pro and Open-Source editions,<br>maintained by DefectDojo Inc. and the Open-Source community.</div>
     <div class="col-lg-9 col-xl-8 text-center">
       <p class="lead">{{ .Params.lead | safeHTML }}</p>
-      <a class="btn btn-primary btn-cta rounded-pill btn-lg my-3" href="{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}/get_started/about/about_defectdojo/" role="button" style="--bs-btn-bg: #f2561d; --bs-btn-hover-bg: #f28d1d;">Open The Docs</a>
+      <a class="btn btn-cta rounded-pill btn-lg my-3" href="{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}/get_started/about/about_defectdojo/" role="button">Open The Docs</a>
       {{ .Content }}
     </div>
   </div>

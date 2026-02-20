@@ -49,9 +49,7 @@ copyRight = "Copyright (c) 2020-2024 Thulite"
   [caches.getresource]
     dir = ":cacheDir/:project"
     maxAge = "1h"
-  [caches.getjson]
-    dir = ":cacheDir/:project"
-    maxAge = "1h"
+
 
 [taxonomies]
   contributor = "contributors"
