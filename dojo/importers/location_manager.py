@@ -1,5 +1,4 @@
 import logging
-from typing import TypeVar
 
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
@@ -19,9 +18,6 @@ from dojo.url.models import URL
 logger = logging.getLogger(__name__)
 
 
-UnsavedLocation = TypeVar("UnsavedLocation", AbstractLocation, LocationData)
-
-
 # test_notifications.py: Implement Locations
 class LocationManager:
     @classmethod
@@ -32,14 +28,15 @@ class LocationManager:
         return None
 
     @classmethod
-    def make_abstract_locations(cls, locations: list[UnsavedLocation]) -> list[AbstractLocation]:
+    def make_abstract_locations(cls, locations: list[LocationData]) -> list[AbstractLocation]:
         abstract_locations = []
 
         for location in locations:
-            if isinstance(location, AbstractLocation):
-                abstract_locations.append(location)
-            elif isinstance(location, LocationData) and location.type == URL.get_location_type():
-                abstract_locations.append(URL.from_location_data(location))
+            if location.type == URL.get_location_type():
+                try:
+                    abstract_locations.append(URL.from_location_data(location))
+                except (ValidationError, ValueError):
+                    logger.debug("Skipping invalid location data: %s", location)
             else:
                 logger.debug(f"Could not create AbstractLocation from type: {type(location)}")
 
@@ -50,7 +47,7 @@ class LocationManager:
     def add_locations_to_unsaved_finding(
         cls,
         finding: Finding,
-        locations: list[UnsavedLocation],
+        locations: list[LocationData],
         **kwargs: dict,  # noqa: ARG003
     ) -> None:
         """Creates AbstractLocation objects for a single finding links them to it."""
@@ -96,7 +93,7 @@ class LocationManager:
     def chunk_locations_and_disperse(
         self,
         finding: Finding,
-        locations: list[UnsavedLocation],
+        locations: list[LocationData],
         **kwargs: dict,
     ) -> None:
         if not locations:
@@ -106,7 +103,7 @@ class LocationManager:
     @classmethod
     def clean_unsaved_locations(
         cls,
-        locations: list[UnsavedLocation],
+        locations: list[LocationData],
     ) -> list[AbstractLocation]:
         """
         Convert locations represented as LocationData dataclasses to the appropriate AbstractLocation type, then clean

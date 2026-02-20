@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Self, TypeVar
 
 from auditlog.registry import auditlog
 from django.db import transaction
@@ -14,7 +14,7 @@ from django.db.models import (
     OneToOneField,
     Q,
     QuerySet,
-    UniqueConstraint,
+    UniqueConstraint, JSONField, TextChoices, Model,
 )
 from django.utils.translation import gettext_lazy as _
 from tagulous.models import TagField
@@ -220,6 +220,9 @@ class Location(BaseModel):
         ]
 
 
+T = TypeVar("T", bound="AbstractLocation")
+
+
 class AbstractLocation(BaseModelWithoutTimeMeta):
     location = OneToOneField(
         Location,
@@ -268,24 +271,54 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
             self.location.save(update_fields=["location_type", "location_value"])
 
     @classmethod
-    def from_location_data(cls, location_data: LocationData) -> Self:
+    def from_location_data(cls: T, location_data: LocationData) -> T:
         if location_data.type != cls.get_location_type():
             error_message = f"Cannot create instance of {cls} from LocationData of type {location_data.type}"
             raise ValueError(error_message)
         return cls._from_location_data_impl(location_data)
 
     @classmethod
-    def _from_location_data_impl(cls, location_data) -> Self:
+    def _from_location_data_impl(cls: T, location_data: LocationData) -> T:
         msg = "Subclasses must implement _from_location_data_impl"
         raise NotImplementedError(msg)
 
     @classmethod
-    def get_or_create_from_object(cls, location):
+    def get_or_create_from_object(cls: T, location: T):
         msg = "Subclasses must implement get_or_create_from_object"
         raise NotImplementedError(msg)
 
 
-class LocationFindingReference(BaseModel):
+class ReferenceDataMixin(Model):
+    class RelationshipType(TextChoices):
+        OWNED_BY = "owned_by", _("is owned by")
+        USED_BY = "used_by", _("is used by")
+
+    relationship = CharField(
+        null=False,
+        blank=True,
+        choices=RelationshipType.choices,
+        default="",
+        help_text=_("The relationship between two locations"),
+    )
+    license_expression = CharField(
+        max_length=512,
+        null=False,
+        blank=True,
+        default="",
+        help_text=_("The license this relationship is under")
+    )
+    relationship_data = JSONField(
+        null=False,
+        blank=False,
+        default=dict,
+        help_text=_("Any extra data about this relationship"),
+    )
+
+    class Meta:
+        abstract = True
+
+
+class LocationFindingReference(BaseModel, ReferenceDataMixin):
 
     """Manually managed One-2-Many field to represent the relationship of a finding and a location."""
 
@@ -339,7 +372,7 @@ class LocationFindingReference(BaseModel):
         ]
 
 
-class LocationProductReference(BaseModel):
+class LocationProductReference(BaseModel, ReferenceDataMixin):
 
     """Manually managed One-2-Many field to represent the relationship of a product and a location."""
 
