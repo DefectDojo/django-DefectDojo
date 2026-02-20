@@ -7,7 +7,16 @@ weight: 1
 aliases:
   - /en/about_defectdojo/about_docs
 ---
+<div class="version-opensource">
+
 ![image](images/dashboard.png)
+
+</div>
+<div class="version-pro">
+
+![image](images/Introduction_to_Dashboard_Features.png)
+
+</div>
 
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Inc. and open-source contributors maintain this documentation to support both the Community and Pro editions of DefectDojo.</span>

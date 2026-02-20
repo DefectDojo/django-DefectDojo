@@ -8,7 +8,16 @@ aliases:
 ---
 The Dashboard is likely the first page you'll see when you open DefectDojo. It summarizes your team’s performance, and provides tracking tools to monitor specific areas of your vulnerability tracking environment.
 
+<div class="version-opensource">
+
+![image](images/dashboard.png)
+
+</div>
+<div class="version-pro">
+
 ![image](images/Introduction_to_Dashboard_Features.png)
+
+</div>
 
 ## Dashboard Components
 

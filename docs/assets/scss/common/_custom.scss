@@ -180,6 +180,12 @@ h1, h2, h3, h4, h5, h6,
   color: white;
 }
 
+// Hide Pro-versioned content by default (opensource is default).
+// JS sets explicit inline display:block/none when version is toggled.
+.version-pro {
+  display: none;
+}
+
 // ============================================================
 // Cards
 // ============================================================

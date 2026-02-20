@@ -11,7 +11,7 @@
         console.log("[VersionToggle] Setting version to:", version);
 
         document.querySelectorAll(".version-opensource, .version-pro").forEach(el => {
-            el.style.display = el.classList.contains(`version-${version}`) ? "" : "none";
+            el.style.display = el.classList.contains(`version-${version}`) ? "block" : "none";
         });
 
         localStorage.setItem("version", version);
