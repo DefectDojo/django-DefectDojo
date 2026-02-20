@@ -89,3 +89,52 @@ If you have a testing and remediation effort related to a specific aspect of you
 Once you’ve reviewed a Finding, you might discover that the vulnerability reported does not actually exist. The False Positive status will be maintained by reimport and prevent matching findings from being opened or closed, which assists with noise reduction.  
 
 If a different scanning tool finds a similar Finding, it will not be recorded as a False Positive. DefectDojo can only compare Findings within the same tool to determine if a Finding has already been recorded.
+
+## Severity vs Risk
+Severity reflects the technical impact of an issue if exploited. Risk reflects the business urgency and required response, factoring in context such as exposure, exploitability, compensating controls, and operational impact.
+
+
+## Risk Level Definitions
+### Urgent
+A finding that represents an immediate and unacceptable business risk.
+
+High likelihood of exploitation or active exploitation observed
+Direct exposure of critical systems, sensitive data, or customer environments
+Limited or no compensating controls
+Failure to act could result in severe business disruption, regulatory impact, or reputational damage
+
+Expected action: Immediate response Typical SLA: Emergency remediation
+
+
+### Needs Action
+A finding that poses a clear and actionable risk requiring timely remediation or mitigation.
+
+A realistic attack path exists
+The affected asset is exposed, business-critical, or customer-facing
+Compensating controls are weak, missing, or unverified
+Exploitation would result in measurable business, security, or compliance impact
+
+Expected action: Active remediation or mitigation required Typical SLA: Short-term remediation window
+
+
+### Medium Risk
+A finding that presents a moderate level of business risk and should be remediated in a planned timeframe.
+
+Meaningful impact could occur if exploited
+Some exposure exists, but exploitation requires specific conditions or privileges
+May affect production systems or customer data indirectly
+Often aligns with medium or high severity issues without immediate exploitability
+
+Expected action: Prioritized remediation Typical SLA: Planned remediation window
+
+
+### Low Risk
+A finding that presents minimal business impact and does not require immediate action.
+
+No known exploitation in the wild
+Limited or no exposure (e.g., internal systems, non-production, strong compensating controls)
+Remediation can be addressed as part of normal development or maintenance cycles
+Often informational or low-severity findings, but may include higher-severity issues that are well-mitigated
+
+Expected action: Track and address opportunistically Typical SLA: Best effort / backlog
+
