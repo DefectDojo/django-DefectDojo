@@ -2,6 +2,7 @@
 title: "Custom Dashboard Tiles"
 description: "How to make Dashboard Tiles work for you, with examples"
 weight: 2
+audience: pro
 aliases:
   - /en/customize_dojo/dashboards/about_custom_dashboard_tiles
 ---

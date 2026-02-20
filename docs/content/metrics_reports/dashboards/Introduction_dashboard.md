@@ -8,7 +8,54 @@ aliases:
 ---
 The Dashboard is likely the first page you'll see when you open DefectDojo. It summarizes your team’s performance, and provides tracking tools to monitor specific areas of your vulnerability tracking environment.
 
+<div class="version-opensource">
+
+![image](images/dashboard.png)
+
+</div>
+<div class="version-pro">
+
 ![image](images/Introduction_to_Dashboard_Features.png)
+
+</div>
+
+<div class="version-opensource">
+
+## Dashboard Components
+
+The open-source dashboard provides a high-level snapshot of your security posture with the following built-in components:
+
+### Summary Cards
+
+The top row of the dashboard displays four summary cards that give you an at-a-glance view of activity:
+
+* **Active Engagements** — total number of currently open Engagements across all Products.
+* **Findings Last 7 Days** — new Findings created in the past week.
+* **Closed in Last 7 Days** — Findings that were resolved recently.
+* **Accepted in Last 7 Days** — Findings that were risk-accepted recently.
+
+Each card links directly to the relevant filtered list so you can drill in with one click.
+
+### Historical Finding Severity
+
+This pie chart breaks down all Findings ever created in DefectDojo by Severity (Critical, High, Medium, Low, Informational), giving you a quick read on the overall distribution of vulnerabilities in your environment.
+
+### Reported Finding Severity by Month
+
+This line chart plots the volume and severity of incoming Findings month-over-month, helping you spot trends such as spikes after a new scanner integration or sustained improvement from remediation efforts.
+
+### Dashboard Configuration
+
+Superusers can toggle which charts appear on the dashboard. Navigate to the gear menu in the top-right corner and select **Edit Dashboard Configuration** to show or hide:
+
+* **Display Graphs** — controls the Historical Finding Severity and Reported Finding Severity charts.
+* **Display Surveys** — controls the Unassigned Answered Engagement Questionnaires table.
+* **Display Data Tables** — controls the Top 10 / Bottom 10 Graded Products tables.
+
+Select **Reset Dashboard Configuration** from the same menu to restore defaults.
+
+</div>
+<div class="version-pro">
 
 ## Dashboard Components
 
@@ -19,7 +66,7 @@ Each team member shares a single dashboard, but the results of the dashboard are
 
 ### Dashboard Tiles
 
-Tiles are designed to provide relevant information and speed up navigation within DefectDojo. 
+Tiles are designed to provide relevant information and speed up navigation within DefectDojo.
 
 ![image](images/Introduction_to_Dashboard_Features_2.png)
 
@@ -59,7 +106,7 @@ This chart allows you to monitor the volume and severity distribution of incomin
 
 #### Unassigned Answered Engagement Questionnaires
 
-If you have completed Engagement Questionnaires for review, those will be listed in this table. 
+If you have completed Engagement Questionnaires for review, those will be listed in this table.
 
 ![image](images/Introduction_to_Dashboard_Features_5.png)
 
@@ -95,3 +142,5 @@ If you would like to reset your Dashboard to a default state, you can do so by s
 ![image](images/How-To_Edit_Dashboard_Configuration_3.png)
 
 **Note that this will remove any Custom Dashboard Tiles which have been added to your instance.**
+
+</div>

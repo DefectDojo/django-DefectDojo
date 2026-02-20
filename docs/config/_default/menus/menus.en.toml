@@ -1,45 +1,45 @@
 [[main]]
-  name = "Get started ⏷"
+  name = "Get Started"
   url = "/get_started/about/about_defectdojo"
   weight = 10
 
 [[main]]
-  name = "Import data ⏷"
+  name = "Import Data"
   url = "/import_data/import_intro/comparison/"
   weight = 12
 
 [[main]]
-  name = "Triage Findings ⏷"
+  name = "Triage Findings"
   url = "/triage_findings/findings_workflows/intro_to_findings/"
   weight = 12
 
 [[main]]
-  name = "Model your assets ⏷"
+  name = "Model Your Assets"
   url = "/asset_modelling/hierarchy/pro__assets_organizations/"
   weight = 13
 
 [[main]]
-  name = "Metrics & reports ⏷"
+  name = "Metrics & Reports"
   url = "/metrics_reports/dashboards/introduction_dashboard/"
   weight = 14
 
 [[main]]
-  name = "Admin ⏷"
+  name = "Admin"
   url = "/admin/admin_intro/intro/"
   weight = 16
 
 [[main]]
-  name = "Issue tracking ⏷"
+  name = "Issue Tracking"
   url = "/issue_tracking/intro/intro/"
   weight = 15
 
 [[main]]
-  name = "Automation ⏷"
+  name = "Automation"
   url = "/automation/api/api-v2-docs/"
   weight = 15
 
 [[main]]
-  name = "Supported tools ⏷"
+  name = "Supported Tools"
   url = "/supported_tools/"
   weight = 16
 
@@ -69,3 +69,21 @@
   weight = 30
 
 [[footer]]
+  name = "DefectDojo.com"
+  url = "https://defectdojo.com"
+  weight = 10
+
+[[footer]]
+  name = "GitHub"
+  url = "https://github.com/DefectDojo/django-DefectDojo"
+  weight = 20
+
+[[footer]]
+  name = "Community"
+  url = "https://defectdojo.com/open-source"
+  weight = 30
+
+[[footer]]
+  name = "Support"
+  url = "mailto:support@defectdojo.com"
+  weight = 40
