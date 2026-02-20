@@ -1,0 +1,73 @@
+<footer class="site-footer">
+  <div class="container-lg">
+    <div class="row py-4">
+      <!-- Brand -->
+      <div class="col-lg-4 mb-3 mb-lg-0">
+        <a href="/" class="d-inline-block mb-2">
+          <img src="/svgs/logo-lightmode.svg" class="logo-lightmode" alt="DefectDojo" width="150" />
+          <img src="/svgs/logo-darkmode.svg" class="logo-darkmode" alt="DefectDojo" width="150" />
+        </a>
+        <p class="text-muted small">
+          Open-source application security management.<br>
+          Streamline your AppSec workflows.
+        </p>
+      </div>
+
+      <!-- Documentation -->
+      <div class="col-6 col-lg-2 mb-3 mb-lg-0">
+        <h6 class="footer-heading">Documentation</h6>
+        <ul class="list-unstyled footer-links">
+          <li><a href="/get_started/about/about_defectdojo/">Get started</a></li>
+          <li><a href="/import_data/import_intro/comparison/">Import data</a></li>
+          <li><a href="/supported_tools/">Supported tools</a></li>
+          <li><a href="/automation/api/api-v2-docs/">API</a></li>
+        </ul>
+      </div>
+
+      <!-- Community -->
+      <div class="col-6 col-lg-2 mb-3 mb-lg-0">
+        <h6 class="footer-heading">Community</h6>
+        <ul class="list-unstyled footer-links">
+          <li><a href="https://github.com/DefectDojo/django-DefectDojo" rel="noopener">GitHub</a></li>
+          <li><a href="https://defectdojo.com/open-source" rel="noopener">Community</a></li>
+          <li><a href="https://www.youtube.com/@defectdojo" rel="noopener">YouTube</a></li>
+          <li><a href="/releases/pro/changelog/">Release notes</a></li>
+        </ul>
+      </div>
+
+      <!-- Company -->
+      <div class="col-6 col-lg-2 mb-3 mb-lg-0">
+        <h6 class="footer-heading">Company</h6>
+        <ul class="list-unstyled footer-links">
+          <li><a href="https://defectdojo.com" rel="noopener">DefectDojo.com</a></li>
+          <li><a href="https://defectdojo.com/pricing" rel="noopener">Pricing</a></li>
+          <li><a href="mailto:support@defectdojo.com">Support</a></li>
+        </ul>
+      </div>
+
+      <!-- Social -->
+      <div class="col-6 col-lg-2 mb-3 mb-lg-0">
+        <h6 class="footer-heading">Connect</h6>
+        <div class="footer-social">
+          {{ range .Site.Menus.social -}}
+          <a href="{{ .URL | relURL }}" class="footer-social-link" aria-label="{{ .Name }}">
+            {{ .Pre | safeHTML }}
+          </a>
+          {{ end -}}
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="footer-bottom">
+      <div class="row align-items-center">
+        <div class="col-md-6 text-center text-md-start">
+          <small class="text-muted">&copy; {{ now.Year }} DefectDojo Inc. All rights reserved.</small>
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          <small class="text-muted">Built with <a href="https://gethyas.com/themes/doks/">Doks</a> and <a href="https://gohugo.io">Hugo</a></small>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -58,3 +58,35 @@
     observer.observe(document.body, { childList: true, subtree: true });
 
 })();
+
+
+// Scroll progress bar — shows reading progress on doc pages
+(() => {
+    "use strict";
+
+    const init = () => {
+        // Only add on doc pages (pages with .docs-content)
+        if (!document.querySelector('.docs-content')) return;
+
+        const bar = document.createElement('div');
+        bar.className = 'scroll-progress';
+        bar.style.width = '0%';
+        document.body.appendChild(bar);
+
+        const update = () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            bar.style.width = progress + '%';
+        };
+
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();

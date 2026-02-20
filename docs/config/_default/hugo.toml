@@ -16,7 +16,7 @@ defaultContentLanguage = "en"
 disableLanguages = ["de", "nl"]
 defaultContentLanguageInSubdir = false
 
-copyRight = "Copyright (c) 2020-2024 Thulite"
+copyRight = "Copyright (c) 2020-2025 DefectDojo Inc."
 
 [build.buildStats]
   enable = true

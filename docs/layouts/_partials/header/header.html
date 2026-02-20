@@ -1,3 +1,5 @@
+<a class="skip-link" href="#main-content">Skip to content</a>
+
 {{ if site.Params.doks.alert -}}
 {{ partial "header/alert.html" . }}
 {{ end -}}
@@ -121,87 +123,48 @@
               </svg>
             </button>
           </div>
-          <!--
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title fw-bold" id="offcanvasNavMainLabel">{{ .Site.Params.Title }}</h5>
-        <button class="btn btn-link nav-link ms-auto" type="button" data-bs-dismiss="offcanvas" aria-label="Close menu">
-          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <path d="M18 6l-12 12"></path>
-            <path d="M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-      -->
           <div class="offcanvas-body d-flex flex-column flex-lg-row align-items-center">
-            <!-- Site title -->
-            <span id="hs_cos_wrapper_header_logo" class="d-flex align-items-center">
+            <!-- Site title — linked to home -->
+            <a href="/" class="d-flex align-items-center text-decoration-none">
               <img src="/svgs/logo-lightmode.svg" class="logo-lightmode" alt="DefectDojo" width="184" />
               <img src="/svgs/logo-darkmode.svg" class="logo-darkmode" alt="DefectDojo" width="184" />
               <span class="ms-2 text-bs-body fw-bold">| docs</span>
-            </span>
-
-            <!-- Release Notes -->
-            <div class="flex-grow-1 d-none d-lg-flex justify-content-center align-items-center">
-              {{ $url := "https://api.github.com/repos/DefectDojo/django-DefectDojo/releases/latest" }}
-              {{ $resource := resources.GetRemote $url }}
-
-              {{ if $resource }}
-                  {{ $release := $resource | transform.Unmarshal | default dict }}
-                  {{ if $release.name }}
-                      {{ $release.name | htmlEscape }} |
-                  {{ else }}
-                      {{ printf "⚠️ Could not parse release name (not valid JSON or missing field)\n" | warnf }}
-                      {{ printf "Media Type: %s\n" $resource.MediaType | warnf }}
-                      {{ $contentPreview := substr $resource.Content 0 500 }}
-                      {{ printf "Content Preview (first 500 chars):\n%s\n" $contentPreview | warnf }}
-                  {{ end }}
-              {{ else }}
-                  {{ printf "❌ Release Notes Fetch failed from: %s\n" $url | warnf }}
-              {{ end }}
-              <a href="/releases/pro/changelog/">
-                <button type="button" class="btn btn-link nav-link p-2 d-none d-lg-block" aria-label="Release Notes">
-                  <span class="fw-bold">Release Notes</span>
-                </button>
-              </a>
-            </div>
+            </a>
 
             <!-- Search -->
             <div class="flex-grow-1 d-none d-lg-flex justify-content-center align-items-center">
-              <div class="d-flex align-items-center border rounded px-3">
 
-                <!-- FlexSearch desktop -->
-                {{ partial "main/showFlexSearch" . }}
-                {{ $showFlexSearch := .Scratch.Get "showFlexSearch" -}}
-                {{ if $showFlexSearch -}}
-                <button type="button" id="searchToggleDesktop" class="btn btn-link nav-link p-2 d-none d-lg-block"
-                  aria-label="Search website">
-                  <span class="fw-bold">Search docs </span>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24"
-                    height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <circle cx="10" cy="10" r="7"></circle>
-                    <line x1="21" y1="21" x2="15" y2="15"></line>
-                  </svg>
-                </button>
-                {{ end -}}
+              <!-- FlexSearch desktop -->
+              {{ partial "main/showFlexSearch" . }}
+              {{ $showFlexSearch := .Scratch.Get "showFlexSearch" -}}
+              {{ if $showFlexSearch -}}
+              <button type="button" id="searchToggleDesktop" class="btn btn-link nav-link p-2 d-none d-lg-block"
+                aria-label="Search website">
+                <span class="fw-bold">Search docs </span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24"
+                  height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                  <circle cx="10" cy="10" r="7"></circle>
+                  <line x1="21" y1="21" x2="15" y2="15"></line>
+                </svg>
+              </button>
+              {{ end -}}
 
-                <!-- DocSearch desktop -->
-                {{ if site.Params.add_ons.docSearch -}}
-                <button type="button" id="searchToggleDesktop" class="btn btn-link nav-link mx-2 d-none d-lg-block"
-                  aria-label="Search website">
-                  <span class="fw-bold">Search docs </span>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24"
-                    height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <circle cx="10" cy="10" r="7"></circle>
-                    <line x1="21" y1="21" x2="15" y2="15"></line>
-                  </svg>
-                </button>
-                {{ end -}}
-              </div>
+              <!-- DocSearch desktop -->
+              {{ if site.Params.add_ons.docSearch -}}
+              <button type="button" id="searchToggleDesktop" class="btn btn-link nav-link mx-2 d-none d-lg-block"
+                aria-label="Search website">
+                <span class="fw-bold">Search docs </span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24"
+                  height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                  <circle cx="10" cy="10" r="7"></circle>
+                  <line x1="21" y1="21" x2="15" y2="15"></line>
+                </svg>
+              </button>
+              {{ end -}}
             </div>
 
             <!-- Language dropdown -->
@@ -261,10 +224,6 @@
                     lang="{{ .Lang }}">{{ .Language.LanguageName }}</a></li>
                 {{- end }}
                 {{- end }}
-                <!--
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="/docs/contributing/how-to-contribute/">Help Translate</a></li>
-              -->
               </ul>
             </div>
             {{ end -}}
@@ -326,17 +285,10 @@
               </button>
               {{ end -}}
 
-              <!-- Social menu -->
-              {{ if .Site.Menus.social -}}
-              <ul id="socialMenu" class="nav mx-auto flex-row order-lg-4">
-                {{ range .Site.Menus.social -}}
-                <li class="nav-item">
-                  <a class="nav-link social-link" href="{{ .URL | relURL }}">{{ .Pre | safeHTML }}<small
-                      class="ms-2 visually-hidden">{{ .Name | safeHTML }}</small></a>
-                </li>
-                {{ end -}}
-              </ul>
-              {{ end -}}
+              <!-- GitHub link (other social icons moved to footer) -->
+              <a class="nav-link social-link ms-lg-2" href="https://github.com/DefectDojo/django-DefectDojo" aria-label="GitHub">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"></path></svg>
+              </a>
             </div>
 
             <!-- Navbar button mobile -->
