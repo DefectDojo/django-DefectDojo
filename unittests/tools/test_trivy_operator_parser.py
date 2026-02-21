@@ -1,3 +1,4 @@
+from datetime import date
 
 from dojo.models import Test
 from dojo.tools.trivy_operator.parser import TrivyOperatorParser
@@ -130,6 +131,9 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual(5.9, finding.cvssv3_score)
             self.assertEqual("ubuntu:20.04 (ubuntu 20.04)", finding.file_path)
             self.assertEqual(["lbc", "ubuntu", "os-pkgs"], finding.unsaved_tags)
+            self.assertEqual(date(2024, 1, 16), finding.publish_date)
+            # Second vuln has publishedDate "" -> None
+            self.assertIsNone(findings[1].publish_date)
 
     def test_cis_benchmark(self):
         with sample_path("cis_benchmark.json").open(encoding="utf-8") as test_file:
@@ -169,3 +173,14 @@ class TestTrivyOperatorParser(DojoTestCase):
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 2)
+
+    def test_configauditreport_with_remediation(self):
+        with sample_path("configauditreport_with_remediation.json").open(encoding="utf-8") as test_file:
+            parser = TrivyOperatorParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 1)
+            finding = findings[0]
+            self.assertEqual("Low", finding.severity)
+            self.assertEqual("Set 'securityContext.readOnlyRootFilesystem' to true.", finding.mitigation)
+            self.assertIn("**category:** Kubernetes Security Check", finding.description)
+            self.assertIn("**messages:** Container 'nginx' of Deployment 'nginx-app'", finding.description)
