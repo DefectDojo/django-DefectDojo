@@ -8,6 +8,7 @@ from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
 
+
 class Outpost24Parser:
     def get_scan_types(self):
         return ["Outpost24 Scan"]
@@ -83,7 +84,7 @@ class Outpost24Parser:
                 # manage endpoint/location
                 if settings.V3_FEATURE_LOCATIONS:
                     finding.unsaved_locations = [
-                        LocationData.url_from_parts(protocol=protocol, host=host, port=port),
+                        LocationData.url(protocol=protocol, host=host, port=port),
                     ]
                 else:
                     # TODO: Delete this after the move to Locations

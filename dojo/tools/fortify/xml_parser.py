@@ -4,6 +4,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class FortifyXMLParser:
     def parse_xml(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
@@ -48,7 +49,7 @@ class FortifyXMLParser:
                     finding.unsaved_req_resp.append({"req": "", "resp": str(raw_response)})
                 if host:
                     if settings.V3_FEATURE_LOCATIONS:
-                        finding.unsaved_locations = [LocationData.url_from_parts(host=host, port=port)]
+                        finding.unsaved_locations = [LocationData.url(host=host, port=port)]
                     else:
                         # TODO: Delete this after the move to Locations
                         finding.unsaved_endpoints = [Endpoint(host=host, port=port)]

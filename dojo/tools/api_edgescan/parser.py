@@ -11,6 +11,7 @@ from .importer import EdgescanImporter
 ES_SEVERITIES = {1: "Info", 2: "Low", 3: "Medium", 4: "High", 5: "Critical"}
 SCANTYPE_EDGESCAN = "Edgescan Scan"
 
+
 class ApiEdgescanParser:
 
     """Import from Edgescan API or JSON file"""
@@ -68,9 +69,9 @@ class ApiEdgescanParser:
 
         if settings.V3_FEATURE_LOCATIONS:
             finding.unsaved_locations = [
-                LocationData.url_from_value(vulnerability["location"])
+                LocationData.url(url=vulnerability["location"])
                 if "://" in vulnerability["location"]
-                else LocationData.url_from_value("//" + vulnerability["location"]),
+                else LocationData.url(url="//" + vulnerability["location"]),
             ]
         else:
             # TODO: Delete this after the move to Locations

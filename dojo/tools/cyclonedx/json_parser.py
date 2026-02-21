@@ -96,8 +96,8 @@ class CycloneDXJSONParser:
                             finding.unsaved_locations.append(
                                 LocationData(type="dependency", data={
                                     "name": component_name,
-                                    "version": component_version
-                                })
+                                    "version": component_version,
+                                }),
                             )
                 if report_date:
                     finding.date = report_date

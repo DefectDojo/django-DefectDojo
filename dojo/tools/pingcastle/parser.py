@@ -9,6 +9,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class PingCastleParser:
 
     CVE_REGEX = re.compile(r"(CVE-\d{4}-\d{4,7})", re.IGNORECASE)
@@ -82,7 +83,7 @@ class PingCastleParser:
                 if self._is_dc_specific_risk(risk_id, model, rationale):
                     finding.unsaved_locations.extend(dc_locations)
                 elif domain_fqdn:
-                    finding.unsaved_locations.append(LocationData.url_from_parts(host=domain_fqdn))
+                    finding.unsaved_locations.append(LocationData.url(host=domain_fqdn))
             # TODO: Delete this after the move to Locations
             elif self._is_dc_specific_risk(risk_id, model, rationale):
                 finding.unsaved_endpoints.extend(dc_locations)
@@ -165,8 +166,8 @@ class PingCastleParser:
             dc_infos.append(dc_info)
             if settings.V3_FEATURE_LOCATIONS:
                 if name:
-                    locations.append(LocationData.url_from_parts(host=name))
-                locations.extend(LocationData.url_from_parts(host=ip) for ip in ips)
+                    locations.append(LocationData.url(host=name))
+                locations.extend(LocationData.url(host=ip) for ip in ips)
             else:
                 # TODO: Delete this after the move to Locations
                 if name:

@@ -11,6 +11,7 @@ from .importer import CobaltApiImporter
 
 SCAN_COBALTIO_API = "Cobalt.io API Import"
 
+
 class ApiCobaltParser:
 
     """Import from Cobalt.io API /findings"""
@@ -147,7 +148,7 @@ class ApiCobaltParser:
         """Convert Cobalt affected_targets into DefectDojo locations"""
         locations = []
         for affected_target in affected_targets:
-            location = LocationData.url_from_value(affected_target)
+            location = LocationData.url(url=affected_target)
             locations.append(location)
         return locations
 

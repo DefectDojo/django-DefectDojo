@@ -7,6 +7,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class TrustwaveParser:
     def get_scan_types(self):
         return ["Trustwave Scan (CSV)"]
@@ -45,7 +46,7 @@ class TrustwaveParser:
             port = int(row.get("Port", "") or "0") or ""
             protocol = row.get("Protocol", "")
             if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [LocationData.url_from_parts(host=host, port=port, protocol=protocol)]
+                finding.unsaved_locations = [LocationData.url(host=host, port=port, protocol=protocol)]
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint(host=host, port=port, protocol=protocol)]

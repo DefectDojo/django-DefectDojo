@@ -8,10 +8,11 @@ from dateutil import parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.utils import parse_cvss_data
 from dojo.tools.protocol import LocationData
+from dojo.utils import parse_cvss_data
 
 _logger = logging.getLogger(__name__)
+
 
 def get_fields(self) -> list[str]:
     """
@@ -46,6 +47,7 @@ def get_fields(self) -> list[str]:
         "verified",
     ]
 
+
 def get_dedupe_fields(self) -> list[str]:
     """
     Return the list of fields used for deduplication in the Qualys CSV Parser.
@@ -60,6 +62,7 @@ def get_dedupe_fields(self) -> list[str]:
         "title",
         "severity",
     ]
+
 
 def parse_csv(csv_file) -> [Finding]:
     """
@@ -78,6 +81,7 @@ def parse_csv(csv_file) -> [Finding]:
     report_findings = get_report_findings(csv_reader)
     return build_findings_from_dict(report_findings)
 
+
 def get_report_findings(csv_reader) -> [dict]:
     """
     Filters out the unneeded information at the beginning of the Qualys CSV report.
@@ -87,6 +91,7 @@ def get_report_findings(csv_reader) -> [dict]:
 
     """
     return [row for row in csv_reader if (row.get("Title") and row["Title"] != "Title") or row.get("VULN TITLE")]
+
 
 def _extract_cvss_vectors(cvss_base, cvss_temporal):
     """
@@ -131,6 +136,7 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
         return cvss_vector
     return None
 
+
 def _clean_cve_data(cve_string: str) -> list:
     # Determine if a CVE was even provided
     if len(cve_string) == 0:
@@ -145,6 +151,7 @@ def _clean_cve_data(cve_string: str) -> list:
         cve_list = [cve_string.strip()]
 
     return cve_list
+
 
 def get_severity(value: str) -> str:
     legacy_severity_lookup = {
@@ -167,6 +174,7 @@ def get_severity(value: str) -> str:
     if settings.USE_QUALYS_LEGACY_SEVERITY_PARSING:
         return legacy_severity_lookup.get(value, "Info")
     return qualys_severity_lookup.get(value, "Info")
+
 
 def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
     """
@@ -269,11 +277,11 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
         finding.verified = True
         if settings.V3_FEATURE_LOCATIONS:
             if report_finding.get("FQDN"):
-                location = LocationData.url_from_value(report_finding.get("FQDN"))
+                location = LocationData.url(url=report_finding.get("FQDN"))
             elif report_finding.get("DNS"):
-                location = LocationData.url_from_parts(host=report_finding.get("DNS"))
+                location = LocationData.url(host=report_finding.get("DNS"))
             else:
-                location = LocationData.url_from_parts(host=report_finding["IP"])
+                location = LocationData.url(host=report_finding["IP"])
             finding.unsaved_locations.append(location)
         else:
             # TODO: Delete this after the move to Locations

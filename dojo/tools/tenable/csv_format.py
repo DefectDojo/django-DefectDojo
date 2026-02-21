@@ -14,6 +14,7 @@ from dojo.tools.protocol import LocationData
 
 LOGGER = logging.getLogger(__name__)
 
+
 class TenableCSVParser:
 
     def get_fields(self) -> list[str]:
@@ -278,7 +279,7 @@ class TenableCSVParser:
 
             if settings.V3_FEATURE_LOCATIONS:
                 # Update the location
-                location = LocationData.url_from_value(host) if "://" in host else LocationData.url_from_parts(protocol=protocol, host=host, port=port)
+                location = LocationData.url(url=host) if "://" in host else LocationData.url(protocol=protocol, host=host, port=port)
                 # Add the list to be processed later
                 find.unsaved_locations.append(location)
             else:

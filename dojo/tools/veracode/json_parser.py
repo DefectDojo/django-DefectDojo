@@ -8,6 +8,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class VeracodeJSONParser:
 
     """
@@ -193,7 +194,7 @@ class VeracodeJSONParser:
             if url := finding_details.get("url"):
                 # Create the Location object from the url
                 finding.unsaved_locations.append(
-                    LocationData.url_from_value(url),
+                    LocationData.url(url=url),
                 )
             else:
                 # build it from the other attributes
@@ -202,7 +203,7 @@ class VeracodeJSONParser:
                 path = finding_details.get("path")
                 # Create the Location object from all the pieces
                 finding.unsaved_locations.append(
-                    LocationData.url_from_parts(
+                    LocationData.url(
                         host=host,
                         port=port,
                         path=path,

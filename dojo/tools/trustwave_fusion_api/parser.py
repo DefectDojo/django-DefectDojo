@@ -8,6 +8,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class TrustwaveFusionAPIParser:
 
     """Import Trustwave Fusion Report from its API in JSON format"""
@@ -61,6 +62,7 @@ class TrustwaveFusionAPIParser:
             return "High"
         return "Info"
 
+
 def extract_location(finding, location_data):
     if settings.V3_FEATURE_LOCATIONS:
         # Extract optional protocol and port
@@ -81,16 +83,16 @@ def extract_location(finding, location_data):
         # Location
         #  using url
         if "url" in location_data and location_data["url"] and location_data["url"] != "None":
-            location = LocationData.url_from_value(location_data["url"])
+            location = LocationData.url(url=location_data["url"])
         # fallback to using old way of creating endpoints
         elif (
             "domain" in location_data
             and location_data["domain"]
             and location_data["domain"] != "None"
         ):
-            location = LocationData.url_from_parts(host=str(location_data["domain"]), protocol=protocol, port=port)
+            location = LocationData.url(host=str(location_data["domain"]), protocol=protocol, port=port)
         elif "ip" in location_data and location_data["ip"] and location_data["ip"] != "None":
-            location = LocationData.url_from_parts(host=str(location_data["ip"]), protocol=protocol, port=port)
+            location = LocationData.url(host=str(location_data["ip"]), protocol=protocol, port=port)
         else:
             # No host, which is required for URLs
             return
@@ -125,6 +127,7 @@ def extract_location(finding, location_data):
         ):
             endpoint.port = location_data["port"]
         finding.unsaved_endpoints = [endpoint]  # assigning endpoint
+
 
 def get_item(vuln, test):
     finding = Finding(

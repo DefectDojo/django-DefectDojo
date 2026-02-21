@@ -13,6 +13,7 @@ from dojo.tools.protocol import LocationData
 __author__ = "properam"
 logger = logging.getLogger(__name__)
 
+
 class ImmuniwebParser:
     def get_scan_types(self):
         return ["Immuniweb Scan"]
@@ -92,7 +93,7 @@ class ImmuniwebParser:
                     finding.unsaved_vulnerability_ids = [vulnerability_id]
                 # manage endpoint/location
                 if settings.V3_FEATURE_LOCATIONS:
-                    finding.unsaved_locations = [LocationData.url_from_value(url)]
+                    finding.unsaved_locations = [LocationData.url(url=url)]
                 else:
                     # TODO: Delete this after the move to Locations
                     finding.unsaved_endpoints = [Endpoint.from_uri(url)]
@@ -159,10 +160,9 @@ class ImmuniwebParser:
                 if settings.V3_FEATURE_LOCATIONS:
                     locations = []
                     if item.get("link", None):
-                        locations.append(LocationData.url_from_value(item["link"]) if "://" in item["link"] else LocationData.url_from_value(
-                            "https://" + item["link"]))
+                        locations.append(LocationData.url(url=item["link"]) if "://" in item["link"] else LocationData.url(url="https://" + item["link"]))
                     if item.get("ip", None):
-                        locations.append(LocationData.url_from_value(item["ip"]))
+                        locations.append(LocationData.url(url=item["ip"]))
                     finding.unsaved_locations = locations
                 else:
                     # TODO: Delete this after the move to Locations

@@ -5,6 +5,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class SSHAuditParser:
     def get_scan_types(self):
         return ["SSH Audit Importer"]
@@ -37,7 +38,7 @@ class SSHAuditParser:
 
     def add_location(self, finding, host, port):
         if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations.append(LocationData.url_from_parts(host=host, port=port))
+            finding.unsaved_locations.append(LocationData.url(host=host, port=port))
         else:
             # TODO: Delete this after the move to Locations
             finding.unsaved_endpoints.append(Endpoint(host=host, port=port))

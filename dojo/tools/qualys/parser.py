@@ -7,11 +7,12 @@ from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.tools.protocol import LocationData
 from dojo.tools.qualys import csv_parser
 from dojo.utils import parse_cvss_data
-from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
+
 
 class QualysParser:
 
@@ -93,6 +94,7 @@ class QualysParser:
             return csv_parser.parse_csv(file)
         return qualys_parser(file)
 
+
 CUSTOM_HEADERS = {
     "CVSS_score": "CVSS Score",
     "ip_address": "IP Address",
@@ -154,6 +156,7 @@ NON_LEGACY_SEVERITY_LOOKUP = {
     "Critical": "High",
 }
 
+
 def get_severity(severity_value_str: str | None) -> str:
     severity_value: int = int(severity_value_str or -1)
 
@@ -173,10 +176,12 @@ def get_severity(severity_value_str: str | None) -> str:
 
     return sev
 
+
 def htmltext(blob):
     h = html2text.HTML2Text()
     h.ignore_links = False
     return h.handle(blob)
+
 
 def split_cvss(value, _temp):
     # Check if CVSS field contains the CVSS vector
@@ -193,6 +198,7 @@ def split_cvss(value, _temp):
             ).clean_vector()
     elif _temp.get("CVSS_value") is None:
         _temp["CVSS_value"] = float(value)
+
 
 def parse_finding(host, tree):
     ret_rows = []
@@ -349,7 +355,7 @@ def parse_finding(host, tree):
         finding.verified = True
         # manage endpoint/location
         if settings.V3_FEATURE_LOCATIONS:
-            location = LocationData.url_from_parts(host=issue_row["fqdn"]) if issue_row["fqdn"] else LocationData.url_from_parts(host=issue_row["ip_address"])
+            location = LocationData.url(host=issue_row["fqdn"]) if issue_row["fqdn"] else LocationData.url(host=issue_row["ip_address"])
             finding.unsaved_locations = [location]
         else:
             # TODO: Delete this after the move to Locations
@@ -358,6 +364,7 @@ def parse_finding(host, tree):
         finding.unsaved_vulnerability_ids = temp.get("cve_list", [])
         ret_rows.append(finding)
     return ret_rows
+
 
 def qualys_parser(qualys_xml_file):
     parser = ElementTree.XMLParser()

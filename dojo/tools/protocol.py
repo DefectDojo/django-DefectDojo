@@ -15,13 +15,7 @@ class LocationData:
             raise ValueError(error_msg)
 
     @classmethod
-    def url_from_value(cls, value: str) -> LocationData:
-        return cls.url_from_parts(
-            url=value,
-        )
-
-    @classmethod
-    def url_from_parts(
+    def url(
         cls,
         *,
         url: str = "",
@@ -62,7 +56,20 @@ class LocationData:
         hashes: dict[str, list[str]] | None = None,
         license_expression: str = "",
     ) -> LocationData:
-        pass
+        return cls(
+            type="dependency",
+            data={
+                "purl": purl,
+                "purl_type": purl_type,
+                "namespace": namespace,
+                "name": name,
+                "version": version,
+                "qualifiers": qualifiers,
+                "subpath": subpath,
+                "hashes": hashes,
+                "license_expression": license_expression,
+            },
+        )
 
 
 """

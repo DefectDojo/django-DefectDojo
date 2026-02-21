@@ -6,6 +6,7 @@ from django.utils.dateparse import parse_datetime
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class StackHawkScanMetadata:
     def __init__(self, completed_scan):
         self.date = completed_scan["scan"]["startedTimestamp"]
@@ -14,6 +15,7 @@ class StackHawkScanMetadata:
         self.static_finding = False
         self.dynamic_finding = True
         self.service = completed_scan["scan"]["application"]
+
 
 class StackHawkParser:
 
@@ -77,7 +79,7 @@ class StackHawkParser:
                 + "\n"
             )
             if settings.V3_FEATURE_LOCATIONS:
-                location = LocationData.url_from_value(host + path["path"])
+                location = LocationData.url(url=host + path["path"])
             else:
                 # TODO: Delete this after the move to Locations
                 location = Endpoint.from_uri(host + path["path"])

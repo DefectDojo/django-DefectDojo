@@ -8,6 +8,7 @@ from dojo.tools.protocol import LocationData
 
 
 class _MutableLocationParts:
+
     """Mutable container for building location data incrementally before creating a frozen LocationData."""
 
     def __init__(self):
@@ -26,7 +27,7 @@ class _MutableLocationParts:
         return "".join(parts)
 
     def to_location_data(self):
-        return LocationData.url_from_parts(host=self.host, port=self.port, protocol=self.protocol)
+        return LocationData.url(host=self.host, port=self.port, protocol=self.protocol)
 
 
 @dataclass
@@ -39,6 +40,7 @@ class OpenVASFindingAuxData:
     qod: str = ""
     openvas_result: str = ""
     fallback_cvss_score: float | None = None
+
 
 def setup_finding(test) -> tuple[Finding, OpenVASFindingAuxData]:
     """Base setup and init for findings and auxiliary data"""
@@ -54,6 +56,7 @@ def setup_finding(test) -> tuple[Finding, OpenVASFindingAuxData]:
 
     return finding, aux_info
 
+
 def get_location(finding: Finding):
     """Get the mutable location object for building up location data incrementally."""
     # TODO: Delete this after the move to Locations
@@ -61,17 +64,21 @@ def get_location(finding: Finding):
         return finding.unsaved_endpoints[0]
     return finding._location_builder
 
+
 def finalize_location(finding: Finding):
     """Convert the mutable location builder to a frozen LocationData and store in unsaved_locations."""
     if settings.V3_FEATURE_LOCATIONS:
         finding.unsaved_locations = [finding._location_builder.to_location_data()]
 
+
 def is_valid_severity(severity: str) -> bool:
     return severity in Finding.SEVERITIES
+
 
 def cleanup_openvas_text(text: str) -> str:
     """Removes unnessesary defectojo newlines"""
     return text.replace("\n  ", " ")
+
 
 def escape_restructured_text(text: str) -> str:
     """Changes text so that restructured text symbols are not interpreted"""
@@ -80,6 +87,7 @@ def escape_restructured_text(text: str) -> str:
     text = text.replace("```", "")
     text = text.replace("```", "")
     return f"```\n{text}\n```"
+
 
 def postprocess_finding(finding: Finding, aux_info: OpenVASFindingAuxData):
     """Update finding with AuxData content"""
@@ -100,6 +108,7 @@ def postprocess_finding(finding: Finding, aux_info: OpenVASFindingAuxData):
         search_terms = ["Update to version", "The vendor has released updates"]
         if any(text in finding.mitigation for text in search_terms):
             finding.fix_available = True
+
 
 def deduplicate(dupes: dict[str, Finding], finding: Finding):
     """Combine multiple openvas findings into one defectdojo finding with potentially multiple locations"""
@@ -138,6 +147,7 @@ def deduplicate(dupes: dict[str, Finding], finding: Finding):
             location = get_location(finding)
             if location not in org.unsaved_endpoints:
                 org.unsaved_endpoints += finding.unsaved_endpoints
+
 
 def gen_finding_hash(finding: Finding) -> str:
     """Generate a hash for a finding that is used for deduplication of findings inside the current report"""

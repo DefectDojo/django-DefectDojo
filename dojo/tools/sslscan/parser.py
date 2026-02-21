@@ -9,6 +9,7 @@ from dojo.tools.protocol import LocationData
 
 __author__ = "dr3dd589"
 
+
 class SslscanParser:
     def get_scan_types(self):
         return ["Sslscan"]
@@ -89,7 +90,7 @@ class SslscanParser:
 
                         if host:
                             if settings.V3_FEATURE_LOCATIONS:
-                                location = LocationData.url_from_value(host) if "://" in host else LocationData.url_from_parts(host=host, port=port)
+                                location = LocationData.url(url=host) if "://" in host else LocationData.url(host=host, port=port)
                                 finding.unsaved_locations.append(location)
                             else:
                                 # TODO: Delete this after the move to Locations

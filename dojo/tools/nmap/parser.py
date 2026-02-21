@@ -8,6 +8,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class NmapParser:
     def get_scan_types(self):
         return ["Nmap Scan"]
@@ -68,7 +69,7 @@ class NmapParser:
                     and port_element.attrib["portid"].isdigit()
                 ) else None
                 if settings.V3_FEATURE_LOCATIONS:
-                    location = LocationData.url_from_parts(
+                    location = LocationData.url(
                         host=fqdn or ip, protocol=protocol, port=port,
                     )
                 else:

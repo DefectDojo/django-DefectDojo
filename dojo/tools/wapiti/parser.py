@@ -10,6 +10,7 @@ from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
 
+
 class WapitiParser:
 
     """
@@ -83,7 +84,7 @@ class WapitiParser:
                     finding.cwe = cwe
 
                 if settings.V3_FEATURE_LOCATIONS:
-                    finding.unsaved_locations = [LocationData.url_from_value(url)]
+                    finding.unsaved_locations = [LocationData.url(url=url)]
                 else:
                     # TODO: Delete this after the move to Locations
                     finding.unsaved_endpoints = [Endpoint.from_uri(url)]

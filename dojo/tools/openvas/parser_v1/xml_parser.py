@@ -7,6 +7,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class OpenVASXMLParser:
     def get_findings(self, filename, test):
         findings = []
@@ -82,7 +83,7 @@ class OpenVASXMLParser:
                 vuln_id_from_tool=script_id,
             )
             if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [LocationData.url_from_parts(
+                finding.unsaved_locations = [LocationData.url(
                     host=loc_host, port=loc_port, protocol=loc_protocol,
                 )]
             else:

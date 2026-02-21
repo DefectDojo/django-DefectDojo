@@ -19,6 +19,7 @@ vulners_severity_mapping = {
     5: "Critical",
 }
 
+
 class ApiVulnersParser:
 
     """Parser that can load data from Vulners Scanner API"""
@@ -78,7 +79,7 @@ class ApiVulnersParser:
             )
 
             if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [LocationData.url_from_parts(host=agentip)]
+                finding.unsaved_locations = [LocationData.url(host=agentip)]
             else:
                 # TODO: Delete this after the move to Locations
                 endpoint = Endpoint(host=agentip)

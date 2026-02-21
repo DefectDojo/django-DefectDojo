@@ -6,6 +6,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class CycognitoParser:
     def get_scan_types(self):
         return ["Cycognito Scan"]
@@ -168,7 +169,7 @@ class CycognitoParser:
                     finding.unsaved_vulnerability_ids.append(cve_id)
             if host := affected_asset.replace("ip/", "").replace("webapp/", "").replace("cert/", "").replace("domain/", ""):
                 if settings.V3_FEATURE_LOCATIONS:
-                    finding.unsaved_locations.append(LocationData.url_from_parts(host=host))
+                    finding.unsaved_locations.append(LocationData.url(host=host))
                 else:
                     # TODO: Delete this after the move to Locations
                     finding.unsaved_endpoints.append(Endpoint(host=host))

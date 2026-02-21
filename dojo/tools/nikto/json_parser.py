@@ -5,6 +5,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class NiktoJSONParser:
     def process_json(self, file, test):
         data = json.load(file)
@@ -40,7 +41,7 @@ class NiktoJSONParser:
                 finding.severity = "Medium"
             # build the endpoint/location
             if settings.V3_FEATURE_LOCATIONS:
-                location = LocationData.url_from_parts(
+                location = LocationData.url(
                     host=host,
                     port=port,
                     path=vulnerability.get("url"),

@@ -8,6 +8,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class BugCrowdParser:
     def get_scan_types(self):
         return ["BugCrowd Scan"]
@@ -257,4 +258,4 @@ class BugCrowdParser:
         # TODO: Delete this after the move to Locations
         if not settings.V3_FEATURE_LOCATIONS:
             return Endpoint.from_uri(stripped_url) if "://" in stripped_url else Endpoint.from_uri("//" + stripped_url)
-        return LocationData.url_from_value(stripped_url) if "://" in stripped_url else LocationData.url_from_value("//" + stripped_url)
+        return LocationData.url(url=stripped_url) if "://" in stripped_url else LocationData.url(url="//" + stripped_url)

@@ -10,6 +10,7 @@ from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
 
+
 class BurpGraphQLParser:
     def get_scan_types(self):
         return ["Burp GraphQL API"]
@@ -99,7 +100,7 @@ class BurpGraphQLParser:
 
         url = issue["origin"] + issue["path"]
         if settings.V3_FEATURE_LOCATIONS:
-            finding["Locations"].append(LocationData.url_from_value(url))
+            finding["Locations"].append(LocationData.url(url=url))
         else:
             # TODO: Delete this after the move to Locations
             finding["Locations"].append(Endpoint.from_uri(url))
@@ -151,7 +152,7 @@ class BurpGraphQLParser:
 
         url = issue["origin"] + issue["path"]
         if settings.V3_FEATURE_LOCATIONS:
-            finding["Locations"] = [LocationData.url_from_value(url)]
+            finding["Locations"] = [LocationData.url(url=url)]
         else:
             # TODO: Delete this after the move to Locations
             finding["Locations"] = [Endpoint.from_uri(url)]

@@ -7,6 +7,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class GitlabDastParser:
 
     """Import GitLab DAST Report in JSON format"""
@@ -131,7 +132,7 @@ class GitlabDastParser:
         if "hostname" in location and "path" in location:
             url_str = f"{location['hostname']}{location['path']}"
             if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [LocationData.url_from_value(url_str)]
+                finding.unsaved_locations = [LocationData.url(url=url_str)]
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint.from_uri(url_str)]

@@ -12,6 +12,7 @@ from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
 
+
 class NucleiParser:
 
     """A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file"""
@@ -86,7 +87,7 @@ class NucleiParser:
 
             if matched:
                 if settings.V3_FEATURE_LOCATIONS:
-                    location = LocationData.url_from_value(matched) if "://" in matched else LocationData.url_from_value("//" + matched)
+                    location = LocationData.url(url=matched) if "://" in matched else LocationData.url(url="//" + matched)
                     finding.unsaved_locations = [location]
                 else:
                     # TODO: Delete this after the move to Locations

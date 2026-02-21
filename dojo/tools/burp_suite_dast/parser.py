@@ -9,6 +9,7 @@ from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
 
+
 class BurpSuiteDASTParser:
     vulnerability_list_xpath = (
         "/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]"
@@ -248,7 +249,7 @@ class BurpSuiteDASTParser:
             # Add the unsaved versions of the other things
             # Endpoints/Locations
             if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [LocationData.url_from_value(endpoint) for endpoint in endpoints]
+                finding.unsaved_locations = [LocationData.url(url=endpoint) for endpoint in endpoints]
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint.from_uri(endpoint) for endpoint in endpoints]

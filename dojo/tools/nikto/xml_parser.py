@@ -11,6 +11,7 @@ from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
 
+
 class NiktoXMLParser:
     def process_xml(self, file, test):
         dupes = {}
@@ -63,7 +64,7 @@ class NiktoXMLParser:
             try:
                 ip = item.findtext("iplink")
                 if settings.V3_FEATURE_LOCATIONS:
-                    location = LocationData.url_from_value(ip)
+                    location = LocationData.url(url=ip)
                     finding.unsaved_locations = [location]
                 else:
                     # TODO: Delete this after the move to Locations

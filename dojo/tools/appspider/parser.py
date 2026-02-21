@@ -5,6 +5,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class AppSpiderParser:
 
     """Parser for Rapid7 AppSpider reports"""
@@ -72,7 +73,7 @@ class AppSpiderParser:
                 find.unsaved_req_resp.append({"req": req, "resp": resp})
 
             if settings.V3_FEATURE_LOCATIONS:
-                find.unsaved_locations.append(LocationData.url_from_value(vuln_url))
+                find.unsaved_locations.append(LocationData.url(url=vuln_url))
             else:
                 # TODO: Delete this after the move to Locations
                 find.unsaved_endpoints.append(Endpoint.from_uri(vuln_url))

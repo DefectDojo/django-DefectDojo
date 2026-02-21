@@ -4,6 +4,7 @@ from dojo.models import Endpoint
 from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser
 from dojo.tools.protocol import LocationData
 
+
 class NmapScanningEngineParser(BaseEngineParser):
 
     """

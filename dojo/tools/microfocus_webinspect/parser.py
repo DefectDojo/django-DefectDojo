@@ -8,6 +8,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class MicrofocusWebinspectParser:
 
     """Micro Focus Webinspect XML report parser"""
@@ -79,7 +80,7 @@ class MicrofocusWebinspectParser:
                     finding.unique_id_from_tool = issue.attrib.get("id")
                 # manage endpoint/location
                 if settings.V3_FEATURE_LOCATIONS:
-                    location = LocationData.url_from_value(url)
+                    location = LocationData.url(url=url)
                     finding.unsaved_locations = [location]
                 else:
                     # TODO: Delete this after the move to Locations

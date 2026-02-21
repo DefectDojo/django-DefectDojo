@@ -13,11 +13,13 @@ SEVERITY_MAP = {
     "CRITICAL": "Critical",
 }
 
+
 def get_severity(finding):
     return SEVERITY_MAP.get(
         finding.get("Severity", {}).get("Label", "INFORMATIONAL"),
         "Info",
     )
+
 
 class GuardDuty:
     def get_item(self, finding: dict, test):
@@ -61,7 +63,7 @@ class GuardDuty:
             if component_name in {"AwsEcrContainerImage", "AwsEc2Instance"}:
                 host_value = f"{component_name}_{resource.get('Id')}".replace(":", "_").replace("/", "_")
                 if settings.V3_FEATURE_LOCATIONS:
-                    locations.append(LocationData.url_from_parts(host=host_value))
+                    locations.append(LocationData.url(host=host_value))
                 else:
                     # TODO: Delete this after the move to Locations
                     locations.append(Endpoint(host=host_value))

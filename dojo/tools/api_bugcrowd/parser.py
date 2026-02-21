@@ -11,14 +11,15 @@ from django.core.exceptions import ValidationError
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
-from .importer import BugcrowdApiImporter
 from ...url.models import URL
+from .importer import BugcrowdApiImporter
 
 SCAN_BUGCROWD_API = "Bugcrowd API Import"
 
 pattern_title_authorized = re.compile(r"^[a-zA-Z0-9_\s+-.]*$")
 
 logger = logging.getLogger(__name__)
+
 
 class ApiBugcrowdParser:
 
@@ -165,7 +166,7 @@ class ApiBugcrowdParser:
                 endpoint = Endpoint.from_uri(bug_url)
                 endpoint.clean()
                 return endpoint
-            location_data = LocationData.url_from_value(bug_url)
+            location_data = LocationData.url(url=bug_url)
             URL.from_location_data(location_data).clean()
             return location_data
         except (ValidationError, ValueError):

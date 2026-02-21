@@ -11,10 +11,12 @@ from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
 
+
 def htmltext(blob):
     h = html2text.HTML2Text()
     h.ignore_links = False
     return h.handle(blob)
+
 
 def issue_r(raw_row, vuln, scan_date):
     ret_rows = []
@@ -100,7 +102,7 @@ def issue_r(raw_row, vuln, scan_date):
             )
             # Create Endpoint/Location
             if settings.V3_FEATURE_LOCATIONS:
-                location = LocationData.url_from_parts(host=issue_row["fqdn"]) if issue_row["fqdn"] else LocationData.url_from_parts(host=issue_row["ip_address"])
+                location = LocationData.url(host=issue_row["fqdn"]) if issue_row["fqdn"] else LocationData.url(host=issue_row["ip_address"])
                 finding.unsaved_locations = [location]
             else:
                 # TODO: Delete this after the move to Locations
@@ -108,6 +110,7 @@ def issue_r(raw_row, vuln, scan_date):
                 finding.unsaved_endpoints = [ep]
             ret_rows.append(finding)
     return ret_rows
+
 
 def qualys_convert_severity(raw_val):
     val = str(raw_val).strip()
@@ -122,6 +125,7 @@ def qualys_convert_severity(raw_val):
     if val == "5":
         return "Critical"
     return "Info"
+
 
 class QualysInfrascanWebguiParser:
 

@@ -11,6 +11,7 @@ from dojo.tools.protocol import LocationData
 
 LOGGER = logging.getLogger(__name__)
 
+
 class TenableXMLParser:
 
     def get_fields(self) -> list[str]:
@@ -306,11 +307,11 @@ class TenableXMLParser:
                     if settings.V3_FEATURE_LOCATIONS:
                         # Create a new url object
                         if fqdn is not None and "://" in fqdn:
-                            location = LocationData.url_from_value(fqdn)
+                            location = LocationData.url(url=fqdn)
                         elif protocol == "general":
-                            location = LocationData.url_from_parts(host=fqdn or ip)
+                            location = LocationData.url(host=fqdn or ip)
                         else:
-                            location = LocationData.url_from_parts(
+                            location = LocationData.url(
                                 protocol=protocol,
                                 host=fqdn or ip,
                                 port=port,

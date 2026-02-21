@@ -16,6 +16,7 @@ DESCRIPTION_TEMPLATE = """**{title}**
 **Description**: {description_text}
 """
 
+
 class BurpApiParser:
 
     """Parser that can load data from Burp API"""
@@ -80,7 +81,7 @@ class BurpApiParser:
                 if "origin" in issue and "path" in issue:
                     url = issue.get("origin") + issue.get("path")
                     if settings.V3_FEATURE_LOCATIONS:
-                        finding.unsaved_locations = [LocationData.url_from_value(url)]
+                        finding.unsaved_locations = [LocationData.url(url=url)]
                     else:
                         # TODO: Delete this after the move to Locations
                         finding.unsaved_endpoints = [Endpoint.from_uri(url)]
@@ -124,6 +125,7 @@ class BurpApiParser:
                     raise ValueError(msg)
         return output
 
+
 def convert_severity(issue):
     """
     According to OpenAPI definition of the API
@@ -144,6 +146,7 @@ def convert_severity(issue):
     if value in {"high", "medium", "low", "info"}:
         return value.title()
     return "Info"
+
 
 def convert_confidence(issue):
     """

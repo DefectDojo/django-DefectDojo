@@ -8,11 +8,11 @@ from cvss import parser as cvss_parser
 from defusedxml.ElementTree import parse
 from django.conf import settings
 
-from dojo.location.models import Location
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
+
 
 class AcunetixXMLParser:
 
@@ -149,11 +149,11 @@ class AcunetixXMLParser:
                 # manage the endpoint
                 url = hyperlink.parse(start_url)
                 if settings.V3_FEATURE_LOCATIONS:
-                    finding.unsaved_locations.append(LocationData.url_from_parts(
+                    finding.unsaved_locations.append(LocationData.url(
                         host=url.host,
                         port=url.port,
                         path=item.findtext("Affects"),
-                        protocol=url.scheme if url.scheme else "",
+                        protocol=url.scheme or "",
                     ))
                 else:
                     # TODO: Delete this after the move to Locations

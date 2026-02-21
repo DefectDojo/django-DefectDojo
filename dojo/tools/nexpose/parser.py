@@ -9,6 +9,7 @@ from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class NexposeParser:
 
     """
@@ -287,7 +288,7 @@ class NexposeParser:
                 find = self.findings(dupe_key, dupes, vuln)
 
                 if settings.V3_FEATURE_LOCATIONS:
-                    location = LocationData.url_from_parts(host=host["name"])
+                    location = LocationData.url(host=host["name"])
                     find.unsaved_locations.append(location)
                 else:
                     # TODO: Delete this after the move to Locations
@@ -303,7 +304,7 @@ class NexposeParser:
                     find = self.findings(dupe_key, dupes, vuln)
 
                     if settings.V3_FEATURE_LOCATIONS:
-                        location = LocationData.url_from_parts(
+                        location = LocationData.url(
                             host=host["name"],
                             port=service["port"],
                             protocol=service["name"]

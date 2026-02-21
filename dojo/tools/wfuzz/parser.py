@@ -7,6 +7,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class WFuzzParser:
 
     """A class that can be used to parse the WFuzz JSON report files"""
@@ -61,7 +62,7 @@ class WFuzzParser:
                 )
                 if settings.V3_FEATURE_LOCATIONS:
                     finding.unsaved_locations = [
-                        LocationData.url_from_parts(
+                        LocationData.url(
                             path="/".join(url.path),
                             host=url.host,
                             protocol=url.scheme,

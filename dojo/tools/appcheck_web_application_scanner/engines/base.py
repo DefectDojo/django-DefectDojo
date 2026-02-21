@@ -19,11 +19,13 @@ from dojo.tools.protocol import LocationData
 # Pattern for stripping markup from entry values -- removes "[[markup]]" and "[[" and "]]"
 MARKUP_STRIPPING_PATTERN = re.compile(r"\[\[markup\]\]|\[\[|\]\]")
 
+
 def strip_markup(value: str) -> str:
     """Strips out "markup" from value"""
     if value:
         return MARKUP_STRIPPING_PATTERN.sub("", value).strip()
     return value
+
 
 def escape_non_printable(s: str) -> str:
     """
@@ -38,6 +40,7 @@ def escape_non_printable(s: str) -> str:
         # remove the surrounding single quotes
         return repr(x)[1:-1]
     return "".join([escape_if_needed(c) for c in s])
+
 
 def cvss_score_to_severity(score: float, version: int) -> str:
     """
@@ -66,6 +69,7 @@ def cvss_score_to_severity(score: float, version: int) -> str:
 
     return severity
 
+
 #######
 # Field parsing helper classes
 #######
@@ -92,6 +96,7 @@ class FieldType:
     def check(self, engine_parser):
         pass
 
+
 class Attribute(FieldType):
 
     """
@@ -107,12 +112,14 @@ class Attribute(FieldType):
             msg = f"Finding does not have attribute '{self.target_name}.'"
             raise ImproperlyConfigured(msg)
 
+
 class DeMarkupedAttribute(Attribute):
 
     """Class for an Attribute (as above) but whose value is stripped of markup and non-printable chars prior to being set."""
 
     def handle(self, engine_class, finding, value):
         super().handle(engine_class, finding, escape_non_printable(strip_markup(value)))
+
 
 class Method(FieldType):
 
@@ -129,6 +136,7 @@ class Method(FieldType):
         if not callable(getattr(engine_parser, self.target_name, None)):
             msg = f"{type(engine_parser).__name__} does not have method '{self.target_name}().'"
             raise ImproperlyConfigured(msg)
+
 
 class BaseEngineParser:
 
@@ -280,7 +288,7 @@ class BaseEngineParser:
         return self.parse_port(item.get("port"))
 
     def construct_location(self, host: str, port: int | None) -> LocationData:
-        return LocationData.url_from_parts(
+        return LocationData.url(
             host=host,
             port=port,
         )
@@ -288,8 +296,8 @@ class BaseEngineParser:
     def parse_locations(self, item: dict[str, Any]) -> list[LocationData]:
         # Location requires a host
         if url := self.get_url(item):
-            return [LocationData.url_from_value(url)]
-        elif host := self.get_host(item):
+            return [LocationData.url(url=url)]
+        if host := self.get_host(item):
             port = self.get_port(item)
             return [self.construct_location(host, port)]
         return []

@@ -27,10 +27,12 @@ except ImportError:
 # in the portal.
 SEVERITY_MATCH = ["Low", "Low", "Medium", "High", "Critical"]
 
+
 def truncate_str(value: str, maxlen: int):
     if len(value) > maxlen:
         return value[: maxlen - 12] + " (truncated)"
     return value
+
 
 # Parse 'CWE-XXXX' format to strip just the numbers
 def get_cwe(cwe):
@@ -38,6 +40,7 @@ def get_cwe(cwe):
     if cweSearch:
         return cweSearch.group(1)
     return 0
+
 
 def attach_unique_extras(
     locations,
@@ -82,7 +85,7 @@ def attach_unique_extras(
 
         if settings.V3_FEATURE_LOCATIONS:
             finding.unsaved_locations.append(
-                LocationData.url_from_parts(
+                LocationData.url(
                     host=truncate_str(host, 500),
                     port=port,
                     path=truncate_str(path, 500),
@@ -120,6 +123,7 @@ def attach_unique_extras(
 
     return finding
 
+
 # Inputs are a list of locations and request/response pairs and doctors
 # them to fit their respective model structures and the adds them to a
 # newly generated Finding
@@ -137,7 +141,7 @@ def attach_extras(locations, requests, responses, finding, date, qid, test):
 
     for location in locations:
         if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations.append(LocationData.url_from_value(location))
+            finding.unsaved_locations.append(LocationData.url(url=location))
         else:
             # TODO: Delete this after the move to Locations
             finding.unsaved_endpoints.append(Endpoint.from_uri(location))
@@ -149,6 +153,7 @@ def attach_extras(locations, requests, responses, finding, date, qid, test):
             )
 
     return finding
+
 
 # Build a request string by checking for all possible field that could be
 # found in the this section of the report
@@ -167,11 +172,13 @@ def get_request(request):
         return str(header)
     return ""
 
+
 # Build a response string
 def get_response(response):
     if response is not None:
         return decode_tag(response.find("CONTENTS"))
     return ""
+
 
 # Decode an XML tag with base64 if the tag has base64=true set.
 def decode_tag(tag):
@@ -180,6 +187,7 @@ def decode_tag(tag):
             return base64.b64decode(tag.text).decode("utf8", "replace")
         return tag.text
     return ""
+
 
 # Retrieve request and response pairs and return a list of requests
 # and a list of responses from a single vulnerability
@@ -190,6 +198,7 @@ def get_request_response(payloads):
         requests.append(get_request(payload.find("REQUEST")))
         responses.append(get_response(payload.find("RESPONSE")))
     return [requests, responses]
+
 
 def get_unique_vulnerabilities(
     vulnerabilities, test, *, is_info=False, is_app_report=False,
@@ -252,6 +261,7 @@ def get_unique_vulnerabilities(
         )
     return findings
 
+
 # Traverse and retreive any information in the VULNERABILITY_LIST
 # section of the report. This includes all locations and request/response pairs
 def get_vulnerabilities(
@@ -297,6 +307,7 @@ def get_vulnerabilities(
         )
     return findings
 
+
 # Retrieve information from a single glossary entry such as description,
 # severity, title, impact, mitigation, and CWE
 def get_glossary_item(glossary, finding, *, is_info=False, enable_weakness=False):
@@ -325,12 +336,14 @@ def get_glossary_item(glossary, finding, *, is_info=False, enable_weakness=False
         finding.cwe = int(get_cwe(str(cwe)))
     return finding
 
+
 # Retrieve information from a single information gathered entry
 def get_info_item(info_gathered, finding):
     data = info_gathered.find("DATA")
     if data is not None:
         finding.description += "\n\n" + decode_tag(data)
     return finding
+
 
 # Create findings report for all unique vulnerabilities in the report
 def get_unique_items(
@@ -372,6 +385,7 @@ def get_unique_items(
             findings[unique_id] = get_info_item(info_gathered[index], final_finding)
     return findings
 
+
 # Create finding items for all vulnerabilities in the report
 def get_items(
     vulnerabilities,
@@ -411,6 +425,7 @@ def get_items(
             findings[qid] = get_info_item(info_gathered[index], final_finding)
 
     return findings
+
 
 def qualys_webapp_parser(qualys_xml_file, test, unique, *, enable_weakness=False):
     if qualys_xml_file is None:
@@ -461,6 +476,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, *, enable_weakness=False
         )
 
     return list(items)
+
 
 class QualysWebAppParser:
 

@@ -50,6 +50,7 @@ WEAK_CIPHER_LIST = [
 
 PROTOCOLS = ["sslv2", "sslv3", "tlsv1", "tlsv1_1", "tlsv1_2", "tlsv1_3"]
 
+
 class SSLyzeXMLParser:
     def get_findings(self, file, test):
         tree = ElementTree.parse(file)
@@ -155,7 +156,7 @@ class SSLyzeXMLParser:
                         if host is not None:
                             if settings.V3_FEATURE_LOCATIONS:
                                 finding.unsaved_locations.append(
-                                    LocationData.url_from_parts(
+                                    LocationData.url(
                                         host=host, port=port, protocol=protocol,
                                     ),
                                 )

@@ -10,6 +10,7 @@ from dojo.tools.protocol import LocationData
 
 logger = logging.getLogger(__name__)
 
+
 class HydraScanMetadata:
     def __init__(self, generator):
         self.date = generator.get(
@@ -20,6 +21,7 @@ class HydraScanMetadata:
         self.service_type = generator.get("service")
         self.tool_version = generator.get("version")
         self.server = generator.get("server")
+
 
 class HydraParser:
 
@@ -92,7 +94,7 @@ class HydraParser:
             service=metadata.service_type,
         )
         if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations = [LocationData.url_from_parts(host=host, port=port)]
+            finding.unsaved_locations = [LocationData.url(host=host, port=port)]
         else:
             # TODO: Delete this after the move to Locations
             finding.unsaved_endpoints = [Endpoint(host=host, port=port)]

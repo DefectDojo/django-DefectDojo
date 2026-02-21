@@ -9,6 +9,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class GenericCSVParser:
     ID = "Generic Findings Import"
 
@@ -109,7 +110,7 @@ class GenericCSVParser:
             if row.get("Url"):
                 if settings.V3_FEATURE_LOCATIONS:
                     finding.unsaved_locations = [
-                        LocationData.url_from_value(row["Url"]) if "://" in row["Url"] else LocationData.url_from_value("//" + row["Url"]),
+                        LocationData.url(url=row["Url"]) if "://" in row["Url"] else LocationData.url(url="//" + row["Url"]),
                     ]
                 else:
                     # TODO: Delete this after the move to Locations

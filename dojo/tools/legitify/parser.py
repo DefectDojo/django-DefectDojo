@@ -5,6 +5,7 @@ from django.conf import settings
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class LegitifyParser:
 
     def get_scan_types(self):
@@ -53,7 +54,7 @@ class LegitifyParser:
                     if url:
                         references.add(url)
                         if settings.V3_FEATURE_LOCATIONS:
-                            locations.add(LocationData.url_from_value(url))
+                            locations.add(LocationData.url(url=url))
                         else:
                             # TODO: Delete this after the move to Locations
                             locations.add(Endpoint.from_uri(url))

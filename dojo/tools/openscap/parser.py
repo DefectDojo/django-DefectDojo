@@ -9,6 +9,7 @@ from django.core.validators import validate_ipv46_address
 from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
+
 class OpenscapParser:
     def get_scan_types(self):
         return ["Openscap Vulnerability Scan"]
@@ -104,9 +105,9 @@ class OpenscapParser:
                     for ip in ips:
                         try:
                             validate_ipv46_address(ip)
-                            location = LocationData.url_from_parts(host=ip)
+                            location = LocationData.url(host=ip)
                         except ValidationError:
-                            location = LocationData.url_from_value(ip) if "://" in ip else LocationData.url_from_value("//" + ip)
+                            location = LocationData.url(url=ip) if "://" in ip else LocationData.url(url="//" + ip)
                         finding.unsaved_locations.append(location)
                 else:
                     # TODO: Delete this after the move to Locations

@@ -16,6 +16,7 @@ SEVERITY_MAPPING = {
     "CRITICAL": "Critical",
 }
 
+
 class AsffParser:
     def get_scan_types(self):
         return ["AWS Security Finding Format (ASFF) Scan"]
@@ -107,7 +108,7 @@ class AsffParser:
                         # Ref: https://netaddr.readthedocs.io/en/latest/api.html#netaddr.IPAddress.is_global
                         if settings.V3_FEATURE_LOCATIONS:
                             finding.unsaved_locations.extend(
-                                LocationData.url_from_parts(host=ip) for ip in details.get("IpV4Addresses", [])
+                                LocationData.url(host=ip) for ip in details.get("IpV4Addresses", [])
                                 if not IPAddress(ip).is_global()
                             )
                         else:
