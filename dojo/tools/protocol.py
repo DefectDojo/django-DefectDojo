@@ -70,19 +70,3 @@ class LocationData:
                 "license_expression": license_expression,
             },
         )
-
-
-"""
-@dataclass(frozen=True)
-class ParsedData:
-    locations: list[LocationData]
-    findings: list[Finding]
-
-
-class Parser(Protocol):
-    def get_findings(self, filename: str, test: Test) -> list[Finding]:
-        pass
-
-    def parse(self, filename: str, test: Test) -> ParsedData:
-        pass
-"""

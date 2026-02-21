@@ -415,5 +415,5 @@ class URL(AbstractLocation):
 
     @classmethod
     def _from_location_data_impl(cls, location_data: LocationData) -> URL:
-        url_string = location_data.data.pop("url")
+        url_string = location_data.data.pop("url", None)
         return URL.from_value(url_string) if url_string else URL.from_parts(**location_data.data)
