@@ -30,16 +30,24 @@ class TrivyChecksHandler:
                     "https://avd.aquasec.com/misconfig/kubernetes/"
                     + check_id.lower()
                 )
+            check_remediation = check.get("remediation", "")
             check_description = check.get("description", "")
+            check_messages = check.get("messages", [])
+            check_category = check.get("category", "")
             check_description += "\n**container.name:** " + container_name
             check_description += "\n**resource.kind:** " + resource_kind
             check_description += "\n**resource.name:** " + resource_name
             check_description += "\n**resource.namespace:** " + resource_namespace
+            if check_category:
+                check_description += "\n**category:** " + check_category
+            if check_messages:
+                check_description += "\n**messages:** " + "\n".join(check_messages)
             title = f"{check_id} - {check_title}"
             finding = Finding(
                 test=test,
                 title=title,
                 severity=check_severity,
+                mitigation=check_remediation,
                 references=check_references,
                 description=check_description,
                 static_finding=True,
