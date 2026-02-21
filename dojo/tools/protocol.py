@@ -8,39 +8,36 @@ from typing import Any
 class LocationData:
     type: str
     data: dict[str, Any] | None = None
-    value: Any | None = None
-    tags: list[str] | None = None
 
     def __post_init__(self) -> None:
-        if (self.data is None) == (self.value is None):
-            error_msg = "Either 'data' or 'value' must be provided."
+        if not self.data:
+            error_msg = "'data' must be provided."
             raise ValueError(error_msg)
 
     @classmethod
     def url_from_value(cls, value: str) -> LocationData:
-        from dojo.url.models import URL  # noqa: PLC0415
-        return cls(
-            type=URL.get_location_type(),
-            value=value,
+        return cls.url_from_parts(
+            url=value,
         )
 
     @classmethod
     def url_from_parts(
         cls,
-        host: str,
         *,
+        url: str = "",
+        host: str = "",
         port: int | None = None,
         protocol: str = "",
         path: str = "",
         query: str = "",
         fragment: str = "",
         user_info: str = "",
-        tags: tuple[str, ...] | list[str] = (),
     ) -> LocationData:
         from dojo.url.models import URL  # noqa: PLC0415
         return cls(
             type=URL.get_location_type(),
             data={
+                "url": url,
                 "host": host,
                 "port": port,
                 "protocol": protocol,
@@ -49,8 +46,23 @@ class LocationData:
                 "fragment": fragment,
                 "user_info": user_info,
             },
-            tags=list(tags),
         )
+
+    @classmethod
+    def dependency(
+        cls,
+        *,
+        purl: str = "",
+        purl_type: str = "",
+        namespace: str = "",
+        name: str = "",
+        version: str = "",
+        qualifiers: str = "",
+        subpath: str = "",
+        hashes: dict[str, list[str]] | None = None,
+        license_expression: str = "",
+    ) -> LocationData:
+        pass
 
 
 """

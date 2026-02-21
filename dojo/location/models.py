@@ -289,6 +289,10 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
 
 
 class ReferenceDataMixin(Model):
+    """
+    Provides fields for relationship data relevant to a Location and Finding/Product reference.
+    """
+
     class RelationshipType(TextChoices):
         OWNED_BY = "owned_by", _("is owned by")
         USED_BY = "used_by", _("is used by")

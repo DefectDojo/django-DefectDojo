@@ -261,8 +261,11 @@ class BaseEngineParser:
     #####
     # For parsing endpoints
     #####
+    def get_url(self, item: dict[str, Any]) -> str | None:
+        return item.get("url") or None
+
     def get_host(self, item: dict[str, Any]) -> str:
-        return item.get("url") or item.get("host") or item.get("ipv4_address") or None
+        return item.get("host") or item.get("ipv4_address") or None
 
     def parse_port(self, item: Any) -> int | None:
         try:
@@ -277,25 +280,16 @@ class BaseEngineParser:
         return self.parse_port(item.get("port"))
 
     def construct_location(self, host: str, port: int | None) -> LocationData:
-        if "://" in host:
-            if port:
-                # Parse the URL so we can override the port
-                from urllib.parse import urlparse
-                parsed = urlparse(host)
-                return LocationData.url_from_parts(
-                    host=parsed.hostname or "",
-                    port=port,
-                    protocol=parsed.scheme or "",
-                    path=(parsed.path or "").lstrip("/"),
-                    query=parsed.query or "",
-                    fragment=parsed.fragment or "",
-                )
-            return LocationData.url_from_value(host)
-        return LocationData.url_from_parts(host=host, port=port)
+        return LocationData.url_from_parts(
+            host=host,
+            port=port,
+        )
 
     def parse_locations(self, item: dict[str, Any]) -> list[LocationData]:
         # Location requires a host
-        if host := self.get_host(item):
+        if url := self.get_url(item):
+            return [LocationData.url_from_value(url)]
+        elif host := self.get_host(item):
             port = self.get_port(item)
             return [self.construct_location(host, port)]
         return []
@@ -317,7 +311,8 @@ class BaseEngineParser:
     # TODO: Delete this after the move to Locations
     def parse_endpoints(self, item: dict[str, Any]) -> list[Endpoint]:
         # Endpoint requires a host
-        if host := self.get_host(item):
+        host = self.get_url(item) or self.get_host(item)
+        if host:
             port = self.get_port(item)
             return [self.construct_endpoint(host, port)]
         return []

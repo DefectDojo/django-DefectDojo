@@ -86,6 +86,19 @@ class CycloneDXJSONParser:
                     dynamic_finding=False,
                     vuln_id_from_tool=vulnerability.get("id"),
                 )
+                if settings.V3_FEATURE_LOCATIONS:
+                    if component_data := components.get(reference, {}):
+                        if component_purl := component_data.get("purl"):
+                            finding.unsaved_locations.append(
+                                LocationData(type="dependency", value=component_purl),
+                            )
+                        else:
+                            finding.unsaved_locations.append(
+                                LocationData(type="dependency", data={
+                                    "name": component_name,
+                                    "version": component_version
+                                })
+                            )
                 if report_date:
                     finding.date = report_date
                 ratings = vulnerability.get("ratings", [])
@@ -138,13 +151,6 @@ class CycloneDXJSONParser:
                             detail = analysis.get("detail")
                             if detail:
                                 finding.mitigation += f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
-                if settings.V3_FEATURE_LOCATIONS:
-                    component_data = components.get(reference, {})
-                    component_purl = component_data.get("purl")
-                    if component_purl:
-                        finding.unsaved_locations.append(
-                            LocationData(type="dependency", value=component_purl),
-                        )
                 findings.append(finding)
         return findings
 

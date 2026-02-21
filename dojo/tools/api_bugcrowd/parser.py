@@ -12,6 +12,7 @@ from dojo.models import Endpoint, Finding
 from dojo.tools.protocol import LocationData
 
 from .importer import BugcrowdApiImporter
+from ...url.models import URL
 
 SCAN_BUGCROWD_API = "Bugcrowd API Import"
 
@@ -134,13 +135,7 @@ class ApiBugcrowdParser:
                     finding.unsaved_locations = [bug_location]
                 else:
                     # TODO: Delete this after the move to Locations
-                    try:
-                        bug_location.clean()
-                        finding.unsaved_endpoints = [bug_location]
-                    except ValidationError:
-                        logger.error(
-                            "Broken Bugcrowd location %s was skipped.", bug_url,
-                        )
+                    finding.unsaved_endpoints = [bug_location]
 
             findings.append(finding)
 
@@ -167,11 +162,17 @@ class ApiBugcrowdParser:
         try:
             # TODO: Delete this after the move to Locations
             if not settings.V3_FEATURE_LOCATIONS:
-                return Endpoint.from_uri(bug_url)
-            return LocationData.url_from_value(bug_url)
-        except ValueError:
+                endpoint = Endpoint.from_uri(bug_url)
+                endpoint.clean()
+                return endpoint
+            location_data = LocationData.url_from_value(bug_url)
+            URL.from_location_data(location_data).clean()
+            return location_data
+        except (ValidationError, ValueError):
             # We don't want to fail the whole import just for 1 error in the bug_url
             logger.error("Error parsing bugcrowd bug_url : %s", bug_url)
+
+        return None
 
     def include_finding(self, entry):
         """Determine whether this finding should be imported to DefectDojo"""
