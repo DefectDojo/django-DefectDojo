@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='locationfindingreference',
             name='relationship_data',
-            field=models.JSONField(default=dict, help_text='Any extra data about this relationship'),
+            field=models.JSONField(blank=True, default=dict, help_text='Any extra data about this relationship'),
         ),
         migrations.AddField(
             model_name='locationproductreference',
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='locationproductreference',
             name='relationship_data',
-            field=models.JSONField(default=dict, help_text='Any extra data about this relationship'),
+            field=models.JSONField(blank=True, default=dict, help_text='Any extra data about this relationship'),
         ),
         migrations.AddIndex(
             model_name='url',

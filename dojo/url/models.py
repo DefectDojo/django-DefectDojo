@@ -415,5 +415,13 @@ class URL(AbstractLocation):
 
     @classmethod
     def _from_location_data_impl(cls, location_data: LocationData) -> URL:
-        url_string = location_data.data.pop("url", None)
-        return URL.from_value(url_string) if url_string else URL.from_parts(**location_data.data)
+        url_string = location_data.data.get("url")
+        return URL.from_value(url_string) if url_string else URL.from_parts(
+            protocol=location_data.data.get("protocol"),
+            user_info=location_data.data.get("user_info"),
+            host=location_data.data.get("host"),
+            port=location_data.data.get("port"),
+            path=location_data.data.get("path"),
+            query=location_data.data.get("query"),
+            fragment=location_data.data.get("fragment"),
+        )

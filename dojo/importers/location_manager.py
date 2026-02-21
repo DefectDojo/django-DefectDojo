@@ -1,4 +1,5 @@
 import logging
+from typing import TypeVar
 
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
@@ -18,6 +19,9 @@ from dojo.url.models import URL
 logger = logging.getLogger(__name__)
 
 
+UnsavedLocation = TypeVar("UnsavedLocation", LocationData, AbstractLocation)
+
+
 # test_notifications.py: Implement Locations
 class LocationManager:
     @classmethod
@@ -28,11 +32,13 @@ class LocationManager:
         return None
 
     @classmethod
-    def make_abstract_locations(cls, locations: list[LocationData]) -> list[AbstractLocation]:
+    def make_abstract_locations(cls, locations: list[UnsavedLocation]) -> list[AbstractLocation]:
         abstract_locations = []
 
         for location in locations:
-            if location.type == URL.get_location_type():
+            if isinstance(location, AbstractLocation):
+                abstract_locations.append(location)
+            elif location.type == URL.get_location_type():
                 try:
                     abstract_locations.append(URL.from_location_data(location))
                 except (ValidationError, ValueError):
@@ -47,7 +53,7 @@ class LocationManager:
     def add_locations_to_unsaved_finding(
         cls,
         finding: Finding,
-        locations: list[LocationData],
+        locations: list[UnsavedLocation],
         **kwargs: dict,  # noqa: ARG003
     ) -> None:
         """Creates AbstractLocation objects for a single finding links them to it."""
@@ -61,7 +67,11 @@ class LocationManager:
         for unsaved_location in locations:
             if saved_location := cls.get_or_create_location(unsaved_location):
                 locations_saved += 1
-                saved_location.location.associate_with_finding(finding, status=FindingLocationStatus.Active)
+                saved_location.location.associate_with_finding(
+                    finding,
+                    audit_time=timezone.now(),
+                    status=FindingLocationStatus.Active,
+                )
 
         logger.debug(f"IMPORT_SCAN: {locations_saved} locations imported")
 
@@ -93,7 +103,7 @@ class LocationManager:
     def chunk_locations_and_disperse(
         self,
         finding: Finding,
-        locations: list[LocationData],
+        locations: list[UnsavedLocation],
         **kwargs: dict,
     ) -> None:
         if not locations:
@@ -103,7 +113,7 @@ class LocationManager:
     @classmethod
     def clean_unsaved_locations(
         cls,
-        locations: list[LocationData],
+        locations: list[UnsavedLocation],
     ) -> list[AbstractLocation]:
         """
         Convert locations represented as LocationData dataclasses to the appropriate AbstractLocation type, then clean

@@ -11,10 +11,13 @@ from django.db.models import (
     DateTimeField,
     ForeignKey,
     Index,
+    JSONField,
+    Model,
     OneToOneField,
     Q,
     QuerySet,
-    UniqueConstraint, JSONField, TextChoices, Model,
+    TextChoices,
+    UniqueConstraint,
 )
 from django.utils.translation import gettext_lazy as _
 from tagulous.models import TagField
@@ -120,7 +123,7 @@ class Location(BaseModel):
         if status is None:
             status = self.status_from_finding(finding)
         # Setup some context aware updated fields
-        context_fields = {"status": status}
+        context_fields = {"status": status, "relationship_data": {}}
         # Check for an auditor
         if auditor is not None:
             context_fields["auditor"] = auditor
@@ -157,7 +160,7 @@ class Location(BaseModel):
             return LocationProductReference.objects.update_or_create(
                 location=self,
                 product=product,
-                defaults={"status": status},
+                defaults={"status": status, "relationship_data": {}},
             )[0]
 
     def disassociate_from_finding(
@@ -289,9 +292,8 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
 
 
 class ReferenceDataMixin(Model):
-    """
-    Provides fields for relationship data relevant to a Location and Finding/Product reference.
-    """
+
+    """Provides fields for relationship data relevant to a Location and Finding/Product reference."""
 
     class RelationshipType(TextChoices):
         OWNED_BY = "owned_by", _("is owned by")
@@ -309,11 +311,11 @@ class ReferenceDataMixin(Model):
         null=False,
         blank=True,
         default="",
-        help_text=_("The license this relationship is under")
+        help_text=_("The license this relationship is under"),
     )
     relationship_data = JSONField(
         null=False,
-        blank=False,
+        blank=True,
         default=dict,
         help_text=_("Any extra data about this relationship"),
     )
@@ -344,6 +346,20 @@ class LocationFindingReference(BaseModel, ReferenceDataMixin):
 
     objects = LocationFindingReferenceManager().from_queryset(LocationFindingReferenceQueryset)()
 
+    class Meta:
+        verbose_name = "Locations - FindingReference"
+        verbose_name_plural = "Locations - FindingReferences"
+        constraints = [
+            UniqueConstraint(
+                fields=["location", "finding"],
+                name="unique_location_and_finding",
+            ),
+        ]
+        indexes = [
+            Index(fields=["location"]),
+            Index(fields=["finding"]),
+        ]
+
     def __str__(self) -> str:
         """Return the string representation of a LocationProductReference."""
         return f"{self.location} - Finding: {self.finding} ({self.status})"
@@ -360,20 +376,6 @@ class LocationFindingReference(BaseModel, ReferenceDataMixin):
         self.auditor = auditor
         self.audit_time = audit_time
         self.save()
-
-    class Meta:
-        verbose_name = "Locations - FindingReference"
-        verbose_name_plural = "Locations - FindingReferences"
-        constraints = [
-            UniqueConstraint(
-                fields=["location", "finding"],
-                name="unique_location_and_finding",
-            ),
-        ]
-        indexes = [
-            Index(fields=["location"]),
-            Index(fields=["finding"]),
-        ]
 
 
 class LocationProductReference(BaseModel, ReferenceDataMixin):
@@ -396,10 +398,6 @@ class LocationProductReference(BaseModel, ReferenceDataMixin):
 
     objects = LocationProductReferenceManager().from_queryset(LocationProductReferenceQueryset)()
 
-    def __str__(self) -> str:
-        """Return the string representation of a LocationProductReference."""
-        return f"{self.location} - Product: {self.product} ({self.status})"
-
     class Meta:
         verbose_name = "Locations - ProductReference"
         verbose_name_plural = "Locations - ProductReferences"
@@ -413,6 +411,10 @@ class LocationProductReference(BaseModel, ReferenceDataMixin):
             Index(fields=["location"]),
             Index(fields=["product"]),
         ]
+
+    def __str__(self) -> str:
+        """Return the string representation of a LocationProductReference."""
+        return f"{self.location} - Product: {self.product} ({self.status})"
 
 
 if settings.ENABLE_AUDITLOG:

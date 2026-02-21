@@ -392,7 +392,7 @@ class BaseEngineParser:
             finding.severity,
             finding.title,
             tuple(sorted([
-                (location.data.get("host"), location.data.get("port")) if location.data else (location.value, None)
+                (location.data.get("url"), None) if location.data.get("url") else (location.data.get("host"), location.data.get("port"))
                 for location in finding.unsaved_locations
             ])),
             self.SCANNING_ENGINE,
