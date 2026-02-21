@@ -138,7 +138,7 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual(len(findings), 795)
             finding = findings[0]
             self.assertEqual("5.1.2 AVD-KSV-0041 /clusterrole-admin", finding.title)
-            self.assertEqual("High", finding.severity)
+            self.assertEqual("Critical", finding.severity)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("AVD-KSV-0041", finding.unsaved_vulnerability_ids[0])
             finding = findings[40]
@@ -169,3 +169,24 @@ class TestTrivyOperatorParser(DojoTestCase):
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 2)
+
+    def test_compliance_severity_logic(self):
+        with sample_path("compliance_severity.json").open(encoding="utf-8") as test_file:
+            parser = TrivyOperatorParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 2)
+            # First check has severity MEDIUM, result has severity HIGH -> uses check's MEDIUM
+            self.assertEqual("Medium", findings[0].severity)
+            # Second check has empty severity, result has severity HIGH -> falls back to HIGH
+            self.assertEqual("High", findings[1].severity)
+
+    def test_configauditreport_missing_checkid(self):
+        with sample_path("configauditreport_missing_checkid.json").open(encoding="utf-8") as test_file:
+            parser = TrivyOperatorParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 1)
+            finding = findings[0]
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("0 - Missing checkID test", finding.title)
+            # When checkID is "0", references should be empty (not a bogus URL)
+            self.assertEqual("", finding.references)
