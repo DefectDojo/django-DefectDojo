@@ -40,25 +40,14 @@ and reset every day. Do not put sensitive data in the demo. An easy way to test 
 ## Quick Start for Docker Compose
 
 ```sh
-# Clone the project
-git clone https://github.com/DefectDojo/django-DefectDojo
-cd django-DefectDojo
-
-# Check if your installed toolkit is compatible
-./docker/docker-compose-check.sh
-
-# Building Docker images
-docker compose build
-
-# Run the application
-# (see https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md for more info)
-docker compose up -d
-
-# Obtain admin credentials. The initializer can take up to 3 minutes to run.
-# Use docker compose logs -f initializer to track its progress.
-docker compose logs initializer | grep "Admin password:"
+git clone https://github.com/DefectDojo/django-DefectDojo && cd django-DefectDojo && docker compose up
 ```
 
+This quick start guide will do the following
+
+- Clone the repository and change directories
+- Start the application
+- Obtain admin credentials in the initializer logs. The first initialization can take up to 3 minutes to run.
 
 ## Documentation
 
@@ -70,6 +59,7 @@ docker compose logs initializer | grep "Admin password:"
     * [LDAP](https://docs.defectdojo.com/en/open_source/ldap-authentication/)
 * [Supported tools](https://docs.defectdojo.com/en/connecting_your_tools/parsers/)
 * [How to Write Documentation Locally](/docs/README.md)
+* [Development](readme-docs/DOCKER.md#run-with-docker-compose-in-development-mode-with-hot-reloading)
 
 ## Supported Installation Options
 
