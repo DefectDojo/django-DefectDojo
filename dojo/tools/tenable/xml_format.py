@@ -7,7 +7,7 @@ from django.conf import settings
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
 from dojo.models import Endpoint, Finding, Test
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 LOGGER = logging.getLogger(__name__)
 

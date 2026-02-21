@@ -5,7 +5,7 @@ from django.conf import settings
 from html2text import html2text
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 
 class RapplexParser:

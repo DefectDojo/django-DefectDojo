@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint, Finding
 from dojo.tools.api_bugcrowd.importer import BugcrowdApiImporter
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 from dojo.url.models import URL
 
 SCAN_BUGCROWD_API = "Bugcrowd API Import"

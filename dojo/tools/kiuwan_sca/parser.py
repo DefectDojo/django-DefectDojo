@@ -5,7 +5,7 @@ import logging
 from django.conf import settings
 
 from dojo.models import Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 

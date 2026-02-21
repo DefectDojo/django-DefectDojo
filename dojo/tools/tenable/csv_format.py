@@ -10,7 +10,7 @@ from cvss import CVSS3
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding, Test
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 LOGGER = logging.getLogger(__name__)
 

@@ -5,7 +5,7 @@ import io
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 
 class TrustwaveParser:

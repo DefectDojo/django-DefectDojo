@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 
 from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.parser_test import ParserTest
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 
 class GenericJSONParser:

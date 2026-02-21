@@ -11,7 +11,7 @@ from dojo.models import Endpoint, Finding
 
 if TYPE_CHECKING:
     from dojo.location.models import AbstractLocation
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 
 class WhiteHatSentinelParser:

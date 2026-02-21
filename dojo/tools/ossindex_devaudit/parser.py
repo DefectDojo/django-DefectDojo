@@ -4,7 +4,7 @@ from json import JSONDecodeError
 from django.conf import settings
 
 from dojo.models import Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 OSSINDEX_PM_TO_PURL = {
     "npm": "npm",

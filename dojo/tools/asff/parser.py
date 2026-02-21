@@ -5,7 +5,7 @@ from django.conf import settings
 from netaddr import IPAddress
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 SEVERITY_MAPPING = {
     "INFORMATIONAL": "Info",  # No issue was found.

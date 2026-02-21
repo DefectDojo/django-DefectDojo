@@ -5,7 +5,7 @@ from typing import NamedTuple
 from django.conf import settings
 
 from dojo.models import Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 ORT_TYPE_TO_PURL = {
     "maven": "maven", "npm": "npm", "pypi": "pypi", "go": "golang",

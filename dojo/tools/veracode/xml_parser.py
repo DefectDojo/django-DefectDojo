@@ -6,7 +6,7 @@ from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 XML_NAMESPACE = {"x": "https://www.veracode.com/schema/reports/export/1.0"}
 

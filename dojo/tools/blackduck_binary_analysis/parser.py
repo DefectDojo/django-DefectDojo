@@ -4,7 +4,7 @@ from cvss import CVSS2, CVSS3
 from django.conf import settings
 
 from dojo.models import Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 from .importer import BlackduckBinaryAnalysisImporter
 

@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv46_address
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 
 class OpenscapParser:

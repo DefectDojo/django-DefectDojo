@@ -2,7 +2,7 @@ from typing import Any
 
 from dojo.models import Endpoint
 from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 
 class NmapScanningEngineParser(BaseEngineParser):

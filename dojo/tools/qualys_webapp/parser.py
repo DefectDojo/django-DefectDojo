@@ -7,7 +7,7 @@ from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 try:
     from django.conf.settings import QUALYS_WAS_WEAKNESS_IS_VULN

@@ -5,7 +5,7 @@ from cvss.cvss4 import CVSS4
 from django.conf import settings
 
 from dojo.models import Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 
 class NancyParser:

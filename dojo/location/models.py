@@ -36,7 +36,7 @@ from dojo.settings import settings
 if TYPE_CHECKING:
     from datetime import datetime
 
-    from dojo.tools.protocol import LocationData
+    from dojo.tools.locations import LocationData
 
 
 class Location(BaseModel):

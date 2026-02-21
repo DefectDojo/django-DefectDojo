@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 ATTACHMENT_ERROR = "Attachment data not found"
 SCREENSHOT_ERROR = "Screenshot data not found"

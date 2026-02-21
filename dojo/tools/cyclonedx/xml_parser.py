@@ -7,7 +7,7 @@ from django.conf import settings
 
 from dojo.models import Finding
 from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 LOGGER = logging.getLogger(__name__)
 

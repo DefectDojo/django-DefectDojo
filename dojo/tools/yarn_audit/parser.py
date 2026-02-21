@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 
 from dojo.models import Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 from dojo.tools.utils import get_npm_cwe
 
 

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils.dateparse import parse_datetime
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 

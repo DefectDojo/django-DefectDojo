@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 # TODO: discuss this list as maintenance subject
 # Recommended cipher suites according to German BSI as of 2020

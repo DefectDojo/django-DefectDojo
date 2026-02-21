@@ -3,7 +3,7 @@ from pathlib import Path
 
 from django.conf import settings
 
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 from dojo.tools.wizcli_common_parsers.parsers import WIZCLI_MANIFEST_TO_PURL, WizcliParsers
 
 

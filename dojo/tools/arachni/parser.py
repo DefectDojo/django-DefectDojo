@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils.encoding import force_str
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 
 class ArachniParser:

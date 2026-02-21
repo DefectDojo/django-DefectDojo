@@ -7,7 +7,7 @@ from datetime import datetime
 from django.conf import settings
 
 from dojo.models import Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 __author__ = "dr3dd589 + testaccount90009 aka SH"
 

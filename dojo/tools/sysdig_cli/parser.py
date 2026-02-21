@@ -7,7 +7,7 @@ from cvss.cvss3 import CVSS3
 from django.conf import settings
 
 from dojo.models import Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 from dojo.tools.sysdig_common.sysdig_data import SysdigData
 from dojo.validators import clean_tags
 

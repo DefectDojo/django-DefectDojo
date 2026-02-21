@@ -12,7 +12,7 @@ from dojo.models import (
     Dojo_User,
     Finding,
 )
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)

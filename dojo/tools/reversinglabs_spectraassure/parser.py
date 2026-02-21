@@ -6,7 +6,7 @@ from typing import Any
 from django.conf import settings
 
 from dojo.models import Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo import RlJsonInfo
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo.cve_info_node import CveInfoNode
 

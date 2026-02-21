@@ -10,7 +10,7 @@ from django.conf import settings
 from packageurl import PackageURL
 
 from dojo.models import Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)

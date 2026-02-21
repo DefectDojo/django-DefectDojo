@@ -35,7 +35,7 @@ from dojo.url.validators import (
 )
 
 if TYPE_CHECKING:
-    from dojo.tools.protocol import LocationData
+    from dojo.tools.locations import LocationData
 
 
 @dataclass(frozen=True)

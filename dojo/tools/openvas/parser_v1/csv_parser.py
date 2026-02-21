@@ -7,7 +7,7 @@ from dateutil.parser import parse
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.protocol import LocationData
+from dojo.tools.locations import LocationData
 
 
 def get_endpoint(finding: Finding):
