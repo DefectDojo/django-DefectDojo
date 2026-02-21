@@ -69,7 +69,6 @@ class LocationManager:
                 locations_saved += 1
                 saved_location.location.associate_with_finding(
                     finding,
-                    audit_time=timezone.now(),
                     status=FindingLocationStatus.Active,
                 )
 
