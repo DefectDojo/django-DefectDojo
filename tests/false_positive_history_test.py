@@ -173,6 +173,10 @@ def suite():
     suite.addTest(ProductTest("test_create_product"))
     suite.addTest(FalsePositiveHistoryTest("test_retroactive_bulk_edit_finding"))
     suite.addTest(ProductTest("test_delete_product"))
+    # Clean up: disable false positive history settings to avoid interfering
+    # with dedupe tests (dedup and false positive history are mutually exclusive)
+    suite.addTest(BaseTestCase("disable_retroactive_false_positive_history"))
+    suite.addTest(BaseTestCase("disable_false_positive_history"))
     return suite
 
 
