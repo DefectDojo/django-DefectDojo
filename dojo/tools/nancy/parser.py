@@ -97,7 +97,7 @@ class NancyParser:
 
                     if settings.V3_FEATURE_LOCATIONS and vuln.get("Coordinates"):
                         finding.unsaved_locations.append(
-                            LocationData(type="dependency", value=vuln["Coordinates"]),
+                            LocationData.dependency(purl=vuln["Coordinates"]),
                         )
 
                     findings.append(finding)

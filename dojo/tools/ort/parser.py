@@ -43,15 +43,14 @@ class OrtParser:
                         pkg_type_raw = parts[0].lower()
                         purl_type = ORT_TYPE_TO_PURL.get(pkg_type_raw)
                         if purl_type:
-                            namespace = parts[1] if parts[1] else None
+                            namespace = parts[1] or None
                             name = parts[2]
                             version = parts[3]
                             if name:
-                                dep_data = {"purl_type": purl_type, "name": name, "version": version}
-                                if namespace:
-                                    dep_data["namespace"] = namespace
                                 self.UNSAVED_LOCATIONS.append(
-                                    LocationData(type="dependency", data=dep_data),
+                                    LocationData.dependency(
+                                        purl_type=purl_type, namespace=namespace or "", name=name, version=version,
+                                    ),
                                 )
             return self.get_items(evaluated_model, test)
         return []

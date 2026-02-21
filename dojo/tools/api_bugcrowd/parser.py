@@ -9,10 +9,9 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint, Finding
+from dojo.tools.api_bugcrowd.importer import BugcrowdApiImporter
 from dojo.tools.protocol import LocationData
-
-from ...url.models import URL
-from .importer import BugcrowdApiImporter
+from dojo.url.models import URL
 
 SCAN_BUGCROWD_API = "Bugcrowd API Import"
 
@@ -168,10 +167,11 @@ class ApiBugcrowdParser:
                 return endpoint
             location_data = LocationData.url(url=bug_url)
             URL.from_location_data(location_data).clean()
-            return location_data
         except (ValidationError, ValueError):
             # We don't want to fail the whole import just for 1 error in the bug_url
             logger.error("Error parsing bugcrowd bug_url : %s", bug_url)
+        else:
+            return location_data
 
         return None
 

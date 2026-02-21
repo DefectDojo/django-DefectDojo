@@ -88,9 +88,8 @@ class OSVScannerParser:
                         purl_type = OSV_ECOSYSTEM_TO_PURL.get(pkg_ecosystem.lower())
                         if purl_type:
                             self.UNSAVED_LOCATIONS.append(
-                                LocationData(
-                                    type="dependency",
-                                    data={"purl_type": purl_type, "name": pkg_name, "version": pkg_version},
+                                LocationData.dependency(
+                                    purl_type=purl_type, name=pkg_name, version=pkg_version,
                                 ),
                             )
         findings = []
@@ -177,7 +176,7 @@ class OSVScannerParser:
                         finding.unsaved_vulnerability_ids = [vulnerabilityid]
                     if settings.V3_FEATURE_LOCATIONS and vulnerabilitypackagepurl:
                         finding.unsaved_locations.append(
-                            LocationData(type="dependency", value=vulnerabilitypackagepurl),
+                            LocationData.dependency(purl=vulnerabilitypackagepurl),
                         )
                     findings.append(finding)
         return findings

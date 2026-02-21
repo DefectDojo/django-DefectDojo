@@ -106,13 +106,13 @@ class ReversinglabsSpectraassureParser:
                 purl = component.get("identity", {}).get("purl", "")
                 if purl:
                     self.UNSAVED_LOCATIONS.append(
-                        LocationData(type="dependency", value=purl),
+                        LocationData.dependency(purl=purl),
                     )
             for dependency in rl_json_info_instance.dependencies.values():
                 purl = dependency.get("purl", "")
                 if purl:
                     self.UNSAVED_LOCATIONS.append(
-                        LocationData(type="dependency", value=purl),
+                        LocationData.dependency(purl=purl),
                     )
 
         self._findings: list[Finding] = []

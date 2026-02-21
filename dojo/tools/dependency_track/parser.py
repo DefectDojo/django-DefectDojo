@@ -255,7 +255,7 @@ class DependencyTrackParser:
             component_purl = dependency_track_finding["component"].get("purl")
             if component_purl:
                 finding.unsaved_locations.append(
-                    LocationData(type="dependency", value=component_purl),
+                    LocationData.dependency(purl=component_purl),
                 )
 
         return finding

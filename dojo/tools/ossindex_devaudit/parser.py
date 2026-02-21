@@ -68,7 +68,7 @@ class OssIndexDevauditParser:
                 purl_type = OSSINDEX_PM_TO_PURL.get(pm)
                 if purl_type:
                     self.UNSAVED_LOCATIONS.append(
-                        LocationData(type="dependency", data={"purl_type": purl_type, "name": package_data["name"], "version": package_data["version"]}),
+                        LocationData.dependency(purl_type=purl_type, name=package_data["name"], version=package_data["version"]),
                     )
 
         for package in results.get("Packages", []):
@@ -88,7 +88,7 @@ class OssIndexDevauditParser:
                         purl_type = OSSINDEX_PM_TO_PURL.get(pm)
                         if purl_type:
                             item.unsaved_locations.append(
-                                LocationData(type="dependency", data={"purl_type": purl_type, "name": package_data["name"], "version": package_data["version"]}),
+                                LocationData.dependency(purl_type=purl_type, name=package_data["name"], version=package_data["version"]),
                             )
 
                     unique_key = vulnerability["id"]

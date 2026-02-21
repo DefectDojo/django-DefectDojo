@@ -112,7 +112,7 @@ class BlackduckBinaryAnalysisParser:
 
                 if settings.V3_FEATURE_LOCATIONS and i.component and i.version:
                     finding.unsaved_locations.append(
-                        LocationData(type="dependency", data={"name": i.component, "version": i.version}),
+                        LocationData.dependency(name=i.component, version=i.version),
                     )
 
                 findings[unique_finding_key] = finding

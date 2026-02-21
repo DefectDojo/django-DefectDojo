@@ -122,12 +122,12 @@ class VeracodeScaParser:
                     lib_type = lib_id.split(":")[0].lower()
                     purl_type = VERACODE_TYPE_TO_PURL.get(lib_type)
                     if purl_type and component_name and component_version:
-                        dep_data = {"purl_type": purl_type, "name": component_name, "version": component_version}
                         id_parts = lib_id.split(":")
-                        if purl_type == "maven" and len(id_parts) >= 3:
-                            dep_data["namespace"] = id_parts[1]
+                        ns = id_parts[1] if purl_type == "maven" and len(id_parts) >= 3 else ""
                         finding.unsaved_locations.append(
-                            LocationData(type="dependency", data=dep_data),
+                            LocationData.dependency(
+                                purl_type=purl_type, namespace=ns, name=component_name, version=component_version,
+                            ),
                         )
 
             if vulnerability.get("cvss3_vector"):
@@ -243,12 +243,12 @@ class VeracodeScaParser:
                 pkg_manager = row.get("Package manager", "").lower()
                 purl_type = VERACODE_TYPE_TO_PURL.get(pkg_manager)
                 if purl_type and library and version:
-                    dep_data = {"purl_type": purl_type, "name": library, "version": version}
                     coord1 = row.get("Coordinate 1", "")
-                    if purl_type == "maven" and coord1:
-                        dep_data["namespace"] = coord1
+                    ns = coord1 if purl_type == "maven" and coord1 else ""
                     finding.unsaved_locations.append(
-                        LocationData(type="dependency", data=dep_data),
+                        LocationData.dependency(
+                            purl_type=purl_type, namespace=ns, name=library, version=version,
+                        ),
                     )
 
             if (

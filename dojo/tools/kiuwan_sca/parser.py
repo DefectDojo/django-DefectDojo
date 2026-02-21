@@ -97,7 +97,7 @@ class KiuwanSCAParser:
 
                 if settings.V3_FEATURE_LOCATIONS and finding.component_name and finding.component_version:
                     finding.unsaved_locations.append(
-                        LocationData(type="dependency", data={"name": finding.component_name, "version": finding.component_version}),
+                        LocationData.dependency(name=finding.component_name, version=finding.component_version),
                     )
 
                 if key not in dupes:

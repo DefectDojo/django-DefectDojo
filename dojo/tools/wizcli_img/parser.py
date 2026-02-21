@@ -1,5 +1,5 @@
 import json
-import os
+from pathlib import Path
 
 from django.conf import settings
 
@@ -36,11 +36,11 @@ class WizcliImgParser:
                 lib_version = lib.get("version")
                 lib_path = lib.get("path", "")
                 if lib_name and lib_path:
-                    manifest = os.path.basename(lib_path)
+                    manifest = Path(lib_path).name
                     purl_type = WIZCLI_MANIFEST_TO_PURL.get(manifest)
                     if purl_type:
                         self.UNSAVED_LOCATIONS.append(
-                            LocationData(type="dependency", data={"purl_type": purl_type, "name": lib_name, "version": lib_version}),
+                            LocationData.dependency(purl_type=purl_type, name=lib_name, version=lib_version),
                         )
 
         osPackages = results.get("osPackages", None)

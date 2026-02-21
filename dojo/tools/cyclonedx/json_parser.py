@@ -31,7 +31,7 @@ class CycloneDXJSONParser:
                 component_purl = component_data.get("purl")
                 if component_purl:
                     self.UNSAVED_LOCATIONS.append(
-                        LocationData(type="dependency", value=component_purl),
+                        LocationData.dependency(purl=component_purl),
                     )
         # for each vulnerabilities create one finding by component affected
         findings = []
@@ -90,14 +90,14 @@ class CycloneDXJSONParser:
                     if component_data := components.get(reference, {}):
                         if component_purl := component_data.get("purl"):
                             finding.unsaved_locations.append(
-                                LocationData(type="dependency", value=component_purl),
+                                LocationData.dependency(purl=component_purl),
                             )
                         else:
                             finding.unsaved_locations.append(
-                                LocationData(type="dependency", data={
-                                    "name": component_name,
-                                    "version": component_version,
-                                }),
+                                LocationData.dependency(
+                                    name=component_name,
+                                    version=component_version,
+                                ),
                             )
                 if report_date:
                     finding.date = report_date

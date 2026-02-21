@@ -52,7 +52,7 @@ class AuditJSParser:
                 coordinates = dependency.get("coordinates")
                 if coordinates:
                     self.UNSAVED_LOCATIONS.append(
-                        LocationData(type="dependency", value=coordinates),
+                        LocationData.dependency(purl=coordinates),
                     )
 
         dupes = {}
@@ -151,7 +151,7 @@ class AuditJSParser:
                         finding.unsaved_vulnerability_ids = [vulnerability_id]
                     if settings.V3_FEATURE_LOCATIONS and file_path:
                         finding.unsaved_locations.append(
-                            LocationData(type="dependency", value=file_path),
+                            LocationData.dependency(purl=file_path),
                         )
 
                     # internal de-duplication

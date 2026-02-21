@@ -99,7 +99,7 @@ class XeolParser:
             artifact_purl = artifact.get("purl")
             if settings.V3_FEATURE_LOCATIONS and artifact_purl:
                 finding.unsaved_locations.append(
-                    LocationData(type="dependency", value=artifact_purl),
+                    LocationData.dependency(purl=artifact_purl),
                 )
 
             findings.append(finding)

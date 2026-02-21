@@ -401,7 +401,7 @@ class DependencyCheckParser:
 
         if settings.V3_FEATURE_LOCATIONS and component_purl:
             finding.unsaved_locations.append(
-                LocationData(type="dependency", value=component_purl),
+                LocationData.dependency(purl=component_purl),
             )
 
         if vulnerability_id:
@@ -449,12 +449,12 @@ class DependencyCheckParser:
                         _, _, component_purl = self.get_component_name_and_version_from_dependency(
                             dependency, None, namespace,
                         )
+                        if component_purl:
+                            self.UNSAVED_LOCATIONS.append(
+                                LocationData.dependency(purl=component_purl),
+                            )
                     except Exception:
-                        continue
-                    if component_purl:
-                        self.UNSAVED_LOCATIONS.append(
-                            LocationData(type="dependency", value=component_purl),
-                        )
+                        logger.warning("Failed to get component purl for dependency: %s", dependency)
 
             for dependency in dependencies.findall(namespace + "dependency"):
                 vulnerabilities = dependency.find(

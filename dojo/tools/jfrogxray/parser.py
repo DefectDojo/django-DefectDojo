@@ -171,7 +171,7 @@ def get_item(vulnerability, test):
 
     if settings.V3_FEATURE_LOCATIONS and component_name and component_version:
         finding.unsaved_locations.append(
-            LocationData(type="dependency", data={"name": component_name, "version": component_version}),
+            LocationData.dependency(name=component_name, version=component_version),
         )
 
     return finding

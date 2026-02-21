@@ -55,11 +55,10 @@ class SonatypeParser:
                                 purl_namespace = None
                                 purl_version = coords.get("version", "")
                             if purl_name:
-                                dep_data = {"purl_type": purl_type, "name": purl_name, "version": purl_version}
-                                if purl_namespace:
-                                    dep_data["namespace"] = purl_namespace
                                 self.UNSAVED_LOCATIONS.append(
-                                    LocationData(type="dependency", data=dep_data),
+                                    LocationData.dependency(
+                                        purl_type=purl_type, namespace=purl_namespace or "", name=purl_name, version=purl_version,
+                                    ),
                                 )
 
             for component in components:

@@ -52,7 +52,7 @@ class CycloneDXXMLParser:
             # Collect product-level dependency locations for all components
             if settings.V3_FEATURE_LOCATIONS and component_purl:
                 self.UNSAVED_LOCATIONS.append(
-                    LocationData(type="dependency", value=component_purl),
+                    LocationData.dependency(purl=component_purl),
                 )
             # for each vulnerabilities add a finding
             for vulnerability in component.findall(
@@ -181,7 +181,7 @@ class CycloneDXXMLParser:
             finding.unsaved_vulnerability_ids = vulnerability_ids
         if settings.V3_FEATURE_LOCATIONS and component_purl:
             finding.unsaved_locations.append(
-                LocationData(type="dependency", value=component_purl),
+                LocationData.dependency(purl=component_purl),
             )
         return finding
 
@@ -316,7 +316,7 @@ class CycloneDXXMLParser:
                             finding.mitigation += f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
             if settings.V3_FEATURE_LOCATIONS and component_purl:
                 finding.unsaved_locations.append(
-                    LocationData(type="dependency", value=component_purl),
+                    LocationData.dependency(purl=component_purl),
                 )
             findings.append(finding)
         return findings
