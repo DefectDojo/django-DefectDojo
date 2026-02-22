@@ -38,7 +38,7 @@ class LocationManager:
         for location in locations:
             if isinstance(location, AbstractLocation):
                 abstract_locations.append(location)
-            elif location.type == URL.get_location_type():
+            elif isinstance(location, LocationData) and location.type == URL.get_location_type():
                 try:
                     abstract_locations.append(URL.from_location_data(location))
                 except (ValidationError, ValueError):
