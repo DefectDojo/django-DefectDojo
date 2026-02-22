@@ -67,10 +67,7 @@ class LocationManager:
         for unsaved_location in locations:
             if saved_location := cls.get_or_create_location(unsaved_location):
                 locations_saved += 1
-                saved_location.location.associate_with_finding(
-                    finding,
-                    status=FindingLocationStatus.Active,
-                )
+                saved_location.location.associate_with_finding(finding, status=FindingLocationStatus.Active)
 
         logger.debug(f"IMPORT_SCAN: {locations_saved} locations imported")
 
