@@ -35,6 +35,7 @@ from dojo.location.manager import (
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import Dojo_User, Finding, Product, _manage_inherited_tags, copy_model_util
 from dojo.settings import settings
+from dojo.tools.locations import LocationAssociationData
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -301,12 +302,9 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         msg = "Subclasses must implement _from_location_data_impl"
         raise NotImplementedError(msg)
 
-    def get_association_metadata(self) -> tuple[str, dict]:
+    def get_association_data(self) -> LocationAssociationData:
         """Return (relationship, relationship_data) stashed by _from_location_data_impl."""
-        return (
-            getattr(self, "_association_relationship", ""),
-            getattr(self, "_association_relationship_data", {}),
-        )
+        return getattr(self, "_association_data", LocationAssociationData())
 
     @classmethod
     def get_or_create_from_object(cls: T, location: T):

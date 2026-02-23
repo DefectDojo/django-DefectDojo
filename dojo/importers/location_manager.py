@@ -67,12 +67,12 @@ class LocationManager:
         for unsaved_location in locations:
             if saved_location := cls.get_or_create_location(unsaved_location):
                 locations_saved += 1
-                relationship, relationship_data = unsaved_location.get_association_metadata()
+                association_data = unsaved_location.get_association_data()
                 saved_location.location.associate_with_finding(
                     finding,
                     status=FindingLocationStatus.Active,
-                    relationship=relationship,
-                    relationship_data=relationship_data,
+                    relationship=association_data.relationship_type,
+                    relationship_data=association_data.relationship_data,
                 )
 
         logger.debug(f"IMPORT_SCAN: {locations_saved} locations imported")

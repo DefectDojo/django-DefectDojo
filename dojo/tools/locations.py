@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -70,3 +70,12 @@ class LocationData:
                 "license_expression": license_expression,
             },
         )
+
+
+@dataclass(frozen=True)
+class LocationAssociationData:
+    relationship_type: str = ""
+    relationship_data: dict[str, Any] = field(default_factory=dict)
+
+    def __bool__(self) -> bool:
+        return bool(self.relationship_type) or bool(self.relationship_data)
