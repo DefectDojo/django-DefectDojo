@@ -40,13 +40,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='locationfindingreference',
-            name='license_expression',
-            field=models.CharField(blank=True, default='', help_text='The license this relationship is under', max_length=512),
-        ),
-        migrations.AddField(
-            model_name='locationfindingreference',
             name='relationship',
-            field=models.CharField(blank=True, choices=[('owned_by', 'is owned by'), ('used_by', 'is used by')], default='', help_text='The relationship between two locations'),
+            field=models.CharField(blank=True, choices=[('owned_by', 'is owned by'), ('used_by', 'is used by')], default='', help_text='The relationship between two locations', max_length=16),
         ),
         migrations.AddField(
             model_name='locationfindingreference',
@@ -55,13 +50,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='locationproductreference',
-            name='license_expression',
-            field=models.CharField(blank=True, default='', help_text='The license this relationship is under', max_length=512),
-        ),
-        migrations.AddField(
-            model_name='locationproductreference',
             name='relationship',
-            field=models.CharField(blank=True, choices=[('owned_by', 'is owned by'), ('used_by', 'is used by')], default='', help_text='The relationship between two locations'),
+            field=models.CharField(blank=True, choices=[('owned_by', 'is owned by'), ('used_by', 'is used by')], default='', help_text='The relationship between two locations', max_length=16),
         ),
         migrations.AddField(
             model_name='locationproductreference',

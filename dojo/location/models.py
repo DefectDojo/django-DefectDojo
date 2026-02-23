@@ -114,6 +114,8 @@ class Location(BaseModel):
         status: FindingLocationStatus | None = None,
         auditor: Dojo_User | None = None,
         audit_time: datetime | None = None,
+        relationship: str = "",
+        relationship_data: dict | None = None,
     ) -> LocationFindingReference:
         """
         Get or create a LocationFindingReference for this location and finding,
@@ -123,7 +125,11 @@ class Location(BaseModel):
         if status is None:
             status = self.status_from_finding(finding)
         # Setup some context aware updated fields
-        context_fields = {"status": status, "relationship_data": {}}
+        context_fields = {
+            "status": status,
+            "relationship": relationship,
+            "relationship_data": relationship_data if relationship_data is not None else {},
+        }
         # Check for an auditor
         if auditor is not None:
             context_fields["auditor"] = auditor
@@ -140,7 +146,11 @@ class Location(BaseModel):
                 defaults=context_fields,
             )[0]
             # Now associate the product for this finding (already uses update_or_create)
-            self.associate_with_product(finding.test.engagement.product)
+            self.associate_with_product(
+                finding.test.engagement.product,
+                relationship=relationship,
+                relationship_data=relationship_data,
+            )
 
             return reference
 
@@ -148,6 +158,8 @@ class Location(BaseModel):
         self,
         product: Product,
         status: ProductLocationStatus | None = None,
+        relationship: str = "",
+        relationship_data: dict | None = None,
     ) -> LocationProductReference:
         """
         Get or create a LocationProductReference for this location and product,
@@ -160,7 +172,11 @@ class Location(BaseModel):
             return LocationProductReference.objects.update_or_create(
                 location=self,
                 product=product,
-                defaults={"status": status, "relationship_data": {}},
+                defaults={
+                    "status": status,
+                    "relationship": relationship,
+                    "relationship_data": relationship_data if relationship_data is not None else {},
+                },
             )[0]
 
     def disassociate_from_finding(
@@ -285,6 +301,13 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         msg = "Subclasses must implement _from_location_data_impl"
         raise NotImplementedError(msg)
 
+    def get_association_metadata(self) -> tuple[str, dict]:
+        """Return (relationship, relationship_data) stashed by _from_location_data_impl."""
+        return (
+            getattr(self, "_association_relationship", ""),
+            getattr(self, "_association_relationship_data", {}),
+        )
+
     @classmethod
     def get_or_create_from_object(cls: T, location: T):
         msg = "Subclasses must implement get_or_create_from_object"
@@ -300,18 +323,12 @@ class ReferenceDataMixin(Model):
         USED_BY = "used_by", _("is used by")
 
     relationship = CharField(
+        max_length=16,
         null=False,
         blank=True,
         choices=RelationshipType.choices,
         default="",
         help_text=_("The relationship between two locations"),
-    )
-    license_expression = CharField(
-        max_length=512,
-        null=False,
-        blank=True,
-        default="",
-        help_text=_("The license this relationship is under"),
     )
     relationship_data = JSONField(
         null=False,
