@@ -41,17 +41,19 @@ class CycloneDXXMLParser:
             component_name = component.findtext(f"{namespace}name")
             component_version = component.findtext(f"{namespace}version")
             component_purl = component.findtext(f"{namespace}purl")
+            component_hashes = self._parse_component_hashes_xml(component, namespace)
             # save a ref
             if "bom-ref" in component.attrib:
                 bom_refs[component.attrib["bom-ref"]] = {
                     "name": component_name,
                     "version": component_version,
                     "purl": component_purl,
+                    "hashes": component_hashes,
                 }
             # Collect product-level dependency locations for all components
             if settings.V3_FEATURE_LOCATIONS and component_purl:
                 test.unsaved_metadata.append(
-                    LocationData.dependency(purl=component_purl),
+                    LocationData.dependency(purl=component_purl, hashes=component_hashes),
                 )
             # for each vulnerabilities add a finding
             for vulnerability in component.findall(
@@ -65,6 +67,7 @@ class CycloneDXXMLParser:
                     component_name=component_name,
                     component_version=component_version,
                     component_purl=component_purl,
+                    component_hashes=component_hashes,
                 )
                 findings.append(finding_vuln)
         # manage adhoc vulnerabilities
@@ -91,6 +94,21 @@ class CycloneDXXMLParser:
         m = re.match(r"\{.*\}", element.tag)
         return m.group(0) if m else ""
 
+    def _parse_component_hashes_xml(self, component, namespace):
+        """
+        Extract hashes from an XML component element.
+
+        Returns dict mapping lowercase algorithm name to list of hash values,
+        or None if no hashes found.
+        """
+        hashes = {}
+        for hash_elem in component.findall(f"{namespace}hashes/{namespace}hash"):
+            alg = hash_elem.attrib.get("alg", "").lower()
+            content = hash_elem.text or ""
+            if alg and content:
+                hashes.setdefault(alg, []).append(content)
+        return hashes or None
+
     def manage_vulnerability_legacy(
         self,
         vulnerability,
@@ -100,6 +118,7 @@ class CycloneDXXMLParser:
         component_name=None,
         component_version=None,
         component_purl=None,
+        component_hashes=None,
     ):
         ref = vulnerability.attrib["ref"]
         vuln_id = vulnerability.findtext("v:id", namespaces=ns)
@@ -123,6 +142,7 @@ class CycloneDXXMLParser:
             component_name = bom["name"]
             component_version = bom["version"]
             component_purl = bom.get("purl")
+            component_hashes = bom.get("hashes")
 
         severity = Cyclonedxhelper().fix_severity(severity)
         references = ""
@@ -180,7 +200,7 @@ class CycloneDXXMLParser:
             finding.unsaved_vulnerability_ids = vulnerability_ids
         if settings.V3_FEATURE_LOCATIONS and component_purl:
             finding.unsaved_locations.append(
-                LocationData.dependency(purl=component_purl),
+                LocationData.dependency(purl=component_purl, hashes=component_hashes),
             )
         return finding
 
@@ -251,6 +271,7 @@ class CycloneDXXMLParser:
                 bom_refs, ref.text,
             )
             component_purl = bom_refs.get(ref.text, {}).get("purl") if ref is not None else None
+            component_hashes = bom_refs.get(ref.text, {}).get("hashes") if ref is not None else None
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
                 description=description,
@@ -315,7 +336,7 @@ class CycloneDXXMLParser:
                             finding.mitigation += f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
             if settings.V3_FEATURE_LOCATIONS and component_purl:
                 finding.unsaved_locations.append(
-                    LocationData.dependency(purl=component_purl),
+                    LocationData.dependency(purl=component_purl, hashes=component_hashes),
                 )
             findings.append(finding)
         return findings

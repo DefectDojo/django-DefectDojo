@@ -29,8 +29,9 @@ class CycloneDXJSONParser:
             for component_data in components.values():
                 component_purl = component_data.get("purl")
                 if component_purl:
+                    component_hashes = Cyclonedxhelper()._collect_hashes(component_data.get("hashes"))
                     test.unsaved_metadata.append(
-                        LocationData.dependency(purl=component_purl),
+                        LocationData.dependency(purl=component_purl, hashes=component_hashes),
                     )
         # for each vulnerabilities create one finding by component affected
         findings = []
@@ -87,15 +88,17 @@ class CycloneDXJSONParser:
                 )
                 if settings.V3_FEATURE_LOCATIONS:
                     if component_data := components.get(reference, {}):
+                        component_hashes = Cyclonedxhelper()._collect_hashes(component_data.get("hashes"))
                         if component_purl := component_data.get("purl"):
                             finding.unsaved_locations.append(
-                                LocationData.dependency(purl=component_purl),
+                                LocationData.dependency(purl=component_purl, hashes=component_hashes),
                             )
                         else:
                             finding.unsaved_locations.append(
                                 LocationData.dependency(
                                     name=component_name,
                                     version=component_version,
+                                    hashes=component_hashes,
                                 ),
                             )
                 if report_date:
